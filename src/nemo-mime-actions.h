@@ -1,6 +1,6 @@
 /* -*- Mode: C; indent-tabs-mode: t; c-basic-offset: 8; tab-width: 8 -*- */
 
-/* nautilus-mime-actions.h - uri-specific versions of mime action functions
+/* nemo-mime-actions.h - uri-specific versions of mime action functions
 
    Copyright (C) 2000 Eazel, Inc.
 
@@ -22,36 +22,36 @@
    Authors: Maciej Stachowiak <mjs@eazel.com>
 */
 
-#ifndef NAUTILUS_MIME_ACTIONS_H
-#define NAUTILUS_MIME_ACTIONS_H
+#ifndef NEMO_MIME_ACTIONS_H
+#define NEMO_MIME_ACTIONS_H
 
 #include <gio/gio.h>
 
-#include <libnautilus-private/nautilus-file.h>
+#include <libnemo-private/nemo-file.h>
 
-#include "nautilus-window.h"
+#include "nemo-window.h"
 
-NautilusFileAttributes nautilus_mime_actions_get_required_file_attributes (void);
+NemoFileAttributes nemo_mime_actions_get_required_file_attributes (void);
 
-GAppInfo *             nautilus_mime_get_default_application_for_file     (NautilusFile            *file);
-GList *                nautilus_mime_get_applications_for_file            (NautilusFile            *file);
+GAppInfo *             nemo_mime_get_default_application_for_file     (NemoFile            *file);
+GList *                nemo_mime_get_applications_for_file            (NemoFile            *file);
 
-GAppInfo *             nautilus_mime_get_default_application_for_files    (GList                   *files);
-GList *                nautilus_mime_get_applications_for_files           (GList                   *file);
+GAppInfo *             nemo_mime_get_default_application_for_files    (GList                   *files);
+GList *                nemo_mime_get_applications_for_files           (GList                   *file);
 
-gboolean               nautilus_mime_file_opens_in_view                   (NautilusFile            *file);
-gboolean               nautilus_mime_file_opens_in_external_app           (NautilusFile            *file);
-void                   nautilus_mime_activate_files                       (GtkWindow               *parent_window,
-									   NautilusWindowSlot      *slot,
+gboolean               nemo_mime_file_opens_in_view                   (NemoFile            *file);
+gboolean               nemo_mime_file_opens_in_external_app           (NemoFile            *file);
+void                   nemo_mime_activate_files                       (GtkWindow               *parent_window,
+									   NemoWindowSlot      *slot,
 									   GList                   *files,
 									   const char              *launch_directory,
-									   NautilusWindowOpenFlags  flags,
+									   NemoWindowOpenFlags  flags,
 									   gboolean                 user_confirmation);
-void                   nautilus_mime_activate_file                        (GtkWindow               *parent_window,
-									   NautilusWindowSlot      *slot_info,
-									   NautilusFile            *file,
+void                   nemo_mime_activate_file                        (GtkWindow               *parent_window,
+									   NemoWindowSlot      *slot_info,
+									   NemoFile            *file,
 									   const char              *launch_directory,
-									   NautilusWindowOpenFlags  flags);
+									   NemoWindowOpenFlags  flags);
 
 
-#endif /* NAUTILUS_MIME_ACTIONS_H */
+#endif /* NEMO_MIME_ACTIONS_H */

@@ -1,6 +1,6 @@
 /* -*- Mode: C; indent-tabs-mode: t; c-basic-offset: 8; tab-width: 8 -*-
 
-   nautilus-clipboard-monitor.c: catch clipboard changes.
+   nemo-clipboard-monitor.c: catch clipboard changes.
     
    Copyright (C) 2004 Red Hat, Inc.
   
@@ -23,8 +23,8 @@
 */
 
 #include <config.h>
-#include "nautilus-clipboard-monitor.h"
-#include "nautilus-file.h"
+#include "nemo-clipboard-monitor.h"
+#include "nemo-file.h"
 
 #include <eel/eel-debug.h>
 #include <gtk/gtk.h>
@@ -50,16 +50,16 @@ enum {
 	LAST_SIGNAL
 };
 
-struct NautilusClipboardMonitorDetails {
-	NautilusClipboardInfo *info;
+struct NemoClipboardMonitorDetails {
+	NemoClipboardInfo *info;
 };
 
 static guint signals[LAST_SIGNAL];
 static GdkAtom copied_files_atom;
 
-G_DEFINE_TYPE (NautilusClipboardMonitor, nautilus_clipboard_monitor, G_TYPE_OBJECT);
+G_DEFINE_TYPE (NemoClipboardMonitor, nemo_clipboard_monitor, G_TYPE_OBJECT);
 
-static NautilusClipboardMonitor *clipboard_monitor = NULL;
+static NemoClipboardMonitor *clipboard_monitor = NULL;
 
 static void
 destroy_clipboard_monitor (void)
@@ -69,54 +69,54 @@ destroy_clipboard_monitor (void)
 	}
 }
 
-NautilusClipboardMonitor *
-nautilus_clipboard_monitor_get (void)
+NemoClipboardMonitor *
+nemo_clipboard_monitor_get (void)
 {
 	GtkClipboard *clipboard;
 	
 	if (clipboard_monitor == NULL) {
-		clipboard_monitor = NAUTILUS_CLIPBOARD_MONITOR (g_object_new (NAUTILUS_TYPE_CLIPBOARD_MONITOR, NULL));
+		clipboard_monitor = NEMO_CLIPBOARD_MONITOR (g_object_new (NEMO_TYPE_CLIPBOARD_MONITOR, NULL));
 		eel_debug_call_at_shutdown (destroy_clipboard_monitor);
 		
 		clipboard = gtk_clipboard_get (GDK_SELECTION_CLIPBOARD);
 		g_signal_connect (clipboard, "owner_change",
-				  G_CALLBACK (nautilus_clipboard_monitor_emit_changed), NULL);
+				  G_CALLBACK (nemo_clipboard_monitor_emit_changed), NULL);
 	}
 	return clipboard_monitor;
 }
 
 void
-nautilus_clipboard_monitor_emit_changed (void)
+nemo_clipboard_monitor_emit_changed (void)
 {
-	NautilusClipboardMonitor *monitor;
+	NemoClipboardMonitor *monitor;
   
-	monitor = nautilus_clipboard_monitor_get ();
+	monitor = nemo_clipboard_monitor_get ();
 	
 	g_signal_emit (monitor, signals[CLIPBOARD_CHANGED], 0);
 }
 
-static NautilusClipboardInfo *
-nautilus_clipboard_info_new (GList *files,
+static NemoClipboardInfo *
+nemo_clipboard_info_new (GList *files,
                              gboolean cut)
 {
-	NautilusClipboardInfo *info;
+	NemoClipboardInfo *info;
 
-	info = g_slice_new0 (NautilusClipboardInfo);
-	info->files = nautilus_file_list_copy (files);
+	info = g_slice_new0 (NemoClipboardInfo);
+	info->files = nemo_file_list_copy (files);
 	info->cut = cut;
 
 	return info;
 }
 
-static NautilusClipboardInfo *
-nautilus_clipboard_info_copy (NautilusClipboardInfo *info)
+static NemoClipboardInfo *
+nemo_clipboard_info_copy (NemoClipboardInfo *info)
 {
-	NautilusClipboardInfo *new_info;
+	NemoClipboardInfo *new_info;
 
 	new_info = NULL;
 
 	if (info != NULL) {
-		new_info = nautilus_clipboard_info_new (info->files,
+		new_info = nemo_clipboard_info_new (info->files,
 			                                info->cut);
 	}
 
@@ -124,38 +124,38 @@ nautilus_clipboard_info_copy (NautilusClipboardInfo *info)
 }
 
 static void
-nautilus_clipboard_info_free (NautilusClipboardInfo *info)
+nemo_clipboard_info_free (NemoClipboardInfo *info)
 {
-	nautilus_file_list_free (info->files);
+	nemo_file_list_free (info->files);
 
-	g_slice_free (NautilusClipboardInfo, info);
+	g_slice_free (NemoClipboardInfo, info);
 }
 
 static void
-nautilus_clipboard_monitor_init (NautilusClipboardMonitor *monitor)
+nemo_clipboard_monitor_init (NemoClipboardMonitor *monitor)
 {
 	monitor->details = 
-		G_TYPE_INSTANCE_GET_PRIVATE (monitor, NAUTILUS_TYPE_CLIPBOARD_MONITOR,
-		                             NautilusClipboardMonitorDetails);
+		G_TYPE_INSTANCE_GET_PRIVATE (monitor, NEMO_TYPE_CLIPBOARD_MONITOR,
+		                             NemoClipboardMonitorDetails);
 }	
 
 static void
 clipboard_monitor_finalize (GObject *object)
 {
-	NautilusClipboardMonitor *monitor;
+	NemoClipboardMonitor *monitor;
 
-	monitor = NAUTILUS_CLIPBOARD_MONITOR (object);
+	monitor = NEMO_CLIPBOARD_MONITOR (object);
 
 	if (monitor->details->info != NULL) {
-		nautilus_clipboard_info_free (monitor->details->info);
+		nemo_clipboard_info_free (monitor->details->info);
 		monitor->details->info = NULL;
 	}
 
-	G_OBJECT_CLASS (nautilus_clipboard_monitor_parent_class)->finalize (object);
+	G_OBJECT_CLASS (nemo_clipboard_monitor_parent_class)->finalize (object);
 }
 
 static void
-nautilus_clipboard_monitor_class_init (NautilusClipboardMonitorClass *klass)
+nemo_clipboard_monitor_class_init (NemoClipboardMonitorClass *klass)
 {
 	GObjectClass *object_class;
 
@@ -168,7 +168,7 @@ nautilus_clipboard_monitor_class_init (NautilusClipboardMonitorClass *klass)
 		g_signal_new ("clipboard_changed",
 		              G_TYPE_FROM_CLASS (klass),
 		              G_SIGNAL_RUN_LAST,
-		              G_STRUCT_OFFSET (NautilusClipboardMonitorClass, clipboard_changed),
+		              G_STRUCT_OFFSET (NemoClipboardMonitorClass, clipboard_changed),
 		              NULL, NULL,
 		              g_cclosure_marshal_VOID__VOID,
 		              G_TYPE_NONE, 0);
@@ -176,47 +176,47 @@ nautilus_clipboard_monitor_class_init (NautilusClipboardMonitorClass *klass)
 		g_signal_new ("clipboard_info",
 		              G_TYPE_FROM_CLASS (klass),
 		              G_SIGNAL_RUN_LAST,
-		              G_STRUCT_OFFSET (NautilusClipboardMonitorClass, clipboard_info),
+		              G_STRUCT_OFFSET (NemoClipboardMonitorClass, clipboard_info),
 		              NULL, NULL,
 		              g_cclosure_marshal_VOID__POINTER,
 		              G_TYPE_NONE,
 		              1, G_TYPE_POINTER);
 
-	g_type_class_add_private (klass, sizeof (NautilusClipboardMonitorDetails));
+	g_type_class_add_private (klass, sizeof (NemoClipboardMonitorDetails));
 }
 
 void
-nautilus_clipboard_monitor_set_clipboard_info (NautilusClipboardMonitor *monitor,
-                                               NautilusClipboardInfo *info)
+nemo_clipboard_monitor_set_clipboard_info (NemoClipboardMonitor *monitor,
+                                               NemoClipboardInfo *info)
 {
 	if (monitor->details->info != NULL) {
-		nautilus_clipboard_info_free (monitor->details->info);
+		nemo_clipboard_info_free (monitor->details->info);
 		monitor->details->info = NULL;
 	}
 
-	monitor->details->info = nautilus_clipboard_info_copy (info);
+	monitor->details->info = nemo_clipboard_info_copy (info);
 
 	g_signal_emit (monitor, signals[CLIPBOARD_INFO], 0, monitor->details->info);
 	
-	nautilus_clipboard_monitor_emit_changed ();
+	nemo_clipboard_monitor_emit_changed ();
 }
 
-NautilusClipboardInfo *
-nautilus_clipboard_monitor_get_clipboard_info (NautilusClipboardMonitor *monitor)
+NemoClipboardInfo *
+nemo_clipboard_monitor_get_clipboard_info (NemoClipboardMonitor *monitor)
 {
 	return monitor->details->info;
 }
 
 void
-nautilus_clear_clipboard_callback (GtkClipboard *clipboard,
+nemo_clear_clipboard_callback (GtkClipboard *clipboard,
                                    gpointer      user_data)
 {
-	nautilus_clipboard_monitor_set_clipboard_info 
-		(nautilus_clipboard_monitor_get (), NULL);
+	nemo_clipboard_monitor_set_clipboard_info 
+		(nemo_clipboard_monitor_get (), NULL);
 }
 
 static char *
-convert_file_list_to_string (NautilusClipboardInfo *info,
+convert_file_list_to_string (NemoClipboardInfo *info,
 			     gboolean format_for_text,
                              gsize *len)
 {
@@ -233,7 +233,7 @@ convert_file_list_to_string (NautilusClipboardInfo *info,
 	}
 
         for (i = 0, l = info->files; l != NULL; l = l->next, i++) {
-		uri = nautilus_file_get_uri (l->data);
+		uri = nemo_file_get_uri (l->data);
 
 		if (format_for_text) {
 			f = g_file_new_for_uri (uri);
@@ -264,7 +264,7 @@ convert_file_list_to_string (NautilusClipboardInfo *info,
 }
 
 void
-nautilus_get_clipboard_callback (GtkClipboard     *clipboard,
+nemo_get_clipboard_callback (GtkClipboard     *clipboard,
                                  GtkSelectionData *selection_data,
                                  guint             info,
                                  gpointer          user_data)
@@ -272,11 +272,11 @@ nautilus_get_clipboard_callback (GtkClipboard     *clipboard,
 	char **uris;
 	GList *l;
 	int i;
-	NautilusClipboardInfo *clipboard_info;
+	NemoClipboardInfo *clipboard_info;
 	GdkAtom target;
 
 	clipboard_info =
-		nautilus_clipboard_monitor_get_clipboard_info (nautilus_clipboard_monitor_get ());
+		nemo_clipboard_monitor_get_clipboard_info (nemo_clipboard_monitor_get ());
 
 	target = gtk_selection_data_get_target (selection_data);
 
@@ -285,7 +285,7 @@ nautilus_get_clipboard_callback (GtkClipboard     *clipboard,
 		i = 0;
 
 		for (l = clipboard_info->files; l != NULL; l = l->next) {
-			uris[i] = nautilus_file_get_uri (l->data);
+			uris[i] = nemo_file_get_uri (l->data);
 			i++;
 		}
 

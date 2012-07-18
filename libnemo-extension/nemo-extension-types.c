@@ -1,5 +1,5 @@
 /*
- *  nautilus-extension-types.c - Type definitions for Nautilus extensions
+ *  nemo-extension-types.c - Type definitions for Nemo extensions
  * 
  *  Copyright (C) 2003 Novell, Inc.
  *
@@ -22,34 +22,34 @@
  */
 
 #include <config.h>
-#include "nautilus-extension-types.h"
+#include "nemo-extension-types.h"
 
 
 GType
-nautilus_operation_result_get_type (void)
+nemo_operation_result_get_type (void)
 {
 	static GType type = 0;
 	if (type == 0) {
 		static const GEnumValue values[] = {
 			{ 
-				NAUTILUS_OPERATION_COMPLETE, 
-				"NAUTILUS_OPERATION_COMPLETE",
+				NEMO_OPERATION_COMPLETE, 
+				"NEMO_OPERATION_COMPLETE",
 				"complete",
 			}, 
 			{
-				NAUTILUS_OPERATION_FAILED,
-				"NAUTILUS_OPERATION_FAILED",
+				NEMO_OPERATION_FAILED,
+				"NEMO_OPERATION_FAILED",
 				"failed",
 			},
 			{
-				NAUTILUS_OPERATION_IN_PROGRESS,
-				"NAUTILUS_OPERATION_IN_PROGRESS",
+				NEMO_OPERATION_IN_PROGRESS,
+				"NEMO_OPERATION_IN_PROGRESS",
 				"in_progress",
 			},
 			{ 0, NULL, NULL }
 		};
 		
-		type = g_enum_register_static ("NautilusOperationResult", 
+		type = g_enum_register_static ("NemoOperationResult", 
 					       values);
 	}
 

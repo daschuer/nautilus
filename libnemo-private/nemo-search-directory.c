@@ -21,26 +21,26 @@
 */
 
 #include <config.h>
-#include "nautilus-search-directory.h"
-#include "nautilus-search-directory-file.h"
+#include "nemo-search-directory.h"
+#include "nemo-search-directory-file.h"
 
-#include "nautilus-directory-private.h"
-#include "nautilus-file.h"
-#include "nautilus-file-private.h"
-#include "nautilus-file-utilities.h"
-#include "nautilus-search-engine.h"
+#include "nemo-directory-private.h"
+#include "nemo-file.h"
+#include "nemo-file-private.h"
+#include "nemo-file-utilities.h"
+#include "nemo-search-engine.h"
 #include <eel/eel-glib-extensions.h>
 #include <gtk/gtk.h>
 #include <gio/gio.h>
 #include <string.h>
 #include <sys/time.h>
 
-struct NautilusSearchDirectoryDetails {
-	NautilusQuery *query;
+struct NemoSearchDirectoryDetails {
+	NemoQuery *query;
 	char *saved_search_uri;
 	gboolean modified;
 
-	NautilusSearchEngine *engine;
+	NemoSearchEngine *engine;
 
 	gboolean search_running;
 	gboolean search_finished;
@@ -55,38 +55,38 @@ struct NautilusSearchDirectoryDetails {
 
 typedef struct {
 	gboolean monitor_hidden_files;
-	NautilusFileAttributes monitor_attributes;
+	NemoFileAttributes monitor_attributes;
 
 	gconstpointer client;
 } SearchMonitor;
 
 typedef struct {
-	NautilusSearchDirectory *search_directory;
+	NemoSearchDirectory *search_directory;
 
-	NautilusDirectoryCallback callback;
+	NemoDirectoryCallback callback;
 	gpointer callback_data;
 
-	NautilusFileAttributes wait_for_attributes;
+	NemoFileAttributes wait_for_attributes;
 	gboolean wait_for_file_list;
 	GList *file_list;
 	GHashTable *non_ready_hash;
 } SearchCallback;
 
-G_DEFINE_TYPE (NautilusSearchDirectory, nautilus_search_directory,
-	       NAUTILUS_TYPE_DIRECTORY);
+G_DEFINE_TYPE (NemoSearchDirectory, nemo_search_directory,
+	       NEMO_TYPE_DIRECTORY);
 
-static void search_engine_hits_added (NautilusSearchEngine *engine, GList *hits, NautilusSearchDirectory *search);
-static void search_engine_hits_subtracted (NautilusSearchEngine *engine, GList *hits, NautilusSearchDirectory *search);
-static void search_engine_finished (NautilusSearchEngine *engine, NautilusSearchDirectory *search);
-static void search_engine_error (NautilusSearchEngine *engine, const char *error, NautilusSearchDirectory *search);
-static void search_callback_file_ready_callback (NautilusFile *file, gpointer data);
-static void file_changed (NautilusFile *file, NautilusSearchDirectory *search);
+static void search_engine_hits_added (NemoSearchEngine *engine, GList *hits, NemoSearchDirectory *search);
+static void search_engine_hits_subtracted (NemoSearchEngine *engine, GList *hits, NemoSearchDirectory *search);
+static void search_engine_finished (NemoSearchEngine *engine, NemoSearchDirectory *search);
+static void search_engine_error (NemoSearchEngine *engine, const char *error, NemoSearchDirectory *search);
+static void search_callback_file_ready_callback (NemoFile *file, gpointer data);
+static void file_changed (NemoFile *file, NemoSearchDirectory *search);
 
 static void
-ensure_search_engine (NautilusSearchDirectory *search)
+ensure_search_engine (NemoSearchDirectory *search)
 {
 	if (!search->details->engine) {
-		search->details->engine = nautilus_search_engine_new ();
+		search->details->engine = nemo_search_engine_new ();
 		g_signal_connect (search->details->engine, "hits-added",
 				  G_CALLBACK (search_engine_hits_added),
 				  search);
@@ -103,10 +103,10 @@ ensure_search_engine (NautilusSearchDirectory *search)
 }
 
 static void
-reset_file_list (NautilusSearchDirectory *search)
+reset_file_list (NemoSearchDirectory *search)
 {
 	GList *list, *monitor_list;
-	NautilusFile *file;
+	NemoFile *file;
 	SearchMonitor *monitor;
 
 	/* Remove file connections */
@@ -120,16 +120,16 @@ reset_file_list (NautilusSearchDirectory *search)
 		for (monitor_list = search->details->monitor_list; monitor_list; 
 		     monitor_list = monitor_list->next) {
 			monitor = monitor_list->data;
-			nautilus_file_monitor_remove (file, monitor);
+			nemo_file_monitor_remove (file, monitor);
 		}
 	}
 	
-	nautilus_file_list_free (search->details->files);
+	nemo_file_list_free (search->details->files);
 	search->details->files = NULL;
 }
 
 static void
-start_or_stop_search_engine (NautilusSearchDirectory *search, gboolean adding)
+start_or_stop_search_engine (NemoSearchDirectory *search, gboolean adding)
 {
 	if (adding && (search->details->monitor_list ||
 	    search->details->pending_callback_list) &&
@@ -139,17 +139,17 @@ start_or_stop_search_engine (NautilusSearchDirectory *search, gboolean adding)
 		search->details->search_running = TRUE;
 		search->details->search_finished = FALSE;
 		ensure_search_engine (search);
-		nautilus_search_engine_set_query (search->details->engine, search->details->query);
+		nemo_search_engine_set_query (search->details->engine, search->details->query);
 
 		reset_file_list (search);
 
-		nautilus_search_engine_start (search->details->engine);
+		nemo_search_engine_start (search->details->engine);
 	} else if (!adding && (!search->details->monitor_list ||
 		   !search->details->pending_callback_list) &&
 		   search->details->engine &&
 		   search->details->search_running) {
 		search->details->search_running = FALSE;
-		nautilus_search_engine_stop (search->details->engine);
+		nemo_search_engine_stop (search->details->engine);
 
 		reset_file_list (search);
 	}
@@ -157,30 +157,30 @@ start_or_stop_search_engine (NautilusSearchDirectory *search, gboolean adding)
 }
 
 static void
-file_changed (NautilusFile *file, NautilusSearchDirectory *search)
+file_changed (NemoFile *file, NemoSearchDirectory *search)
 {
 	GList list;
 
 	list.data = file;
 	list.next = NULL;
 
-	nautilus_directory_emit_files_changed (NAUTILUS_DIRECTORY (search), &list);
+	nemo_directory_emit_files_changed (NEMO_DIRECTORY (search), &list);
 }
 
 static void
-search_monitor_add (NautilusDirectory *directory,
+search_monitor_add (NemoDirectory *directory,
 		    gconstpointer client,
 		    gboolean monitor_hidden_files,
-		    NautilusFileAttributes file_attributes,
-		    NautilusDirectoryCallback callback,
+		    NemoFileAttributes file_attributes,
+		    NemoDirectoryCallback callback,
 		    gpointer callback_data)
 {
 	GList *list;
 	SearchMonitor *monitor;
-	NautilusSearchDirectory *search;
-	NautilusFile *file;
+	NemoSearchDirectory *search;
+	NemoFile *file;
 
-	search = NAUTILUS_SEARCH_DIRECTORY (directory);
+	search = NEMO_SEARCH_DIRECTORY (directory);
 
 	monitor = g_new0 (SearchMonitor, 1);
 	monitor->monitor_hidden_files = monitor_hidden_files;
@@ -197,27 +197,27 @@ search_monitor_add (NautilusDirectory *directory,
 		file = list->data;
 
 		/* Add monitors */
-		nautilus_file_monitor_add (file, monitor, file_attributes);
+		nemo_file_monitor_add (file, monitor, file_attributes);
 	}
 
 	start_or_stop_search_engine (search, TRUE);
 }
 
 static void
-search_monitor_remove_file_monitors (SearchMonitor *monitor, NautilusSearchDirectory *search)
+search_monitor_remove_file_monitors (SearchMonitor *monitor, NemoSearchDirectory *search)
 {
 	GList *list;
-	NautilusFile *file;
+	NemoFile *file;
 	
 	for (list = search->details->files; list != NULL; list = list->next) {
 		file = list->data;
 
-		nautilus_file_monitor_remove (file, monitor);
+		nemo_file_monitor_remove (file, monitor);
 	}
 }
 
 static void
-search_monitor_destroy (SearchMonitor *monitor, NautilusSearchDirectory *search)
+search_monitor_destroy (SearchMonitor *monitor, NemoSearchDirectory *search)
 {
 	search_monitor_remove_file_monitors (monitor, search);
 
@@ -225,14 +225,14 @@ search_monitor_destroy (SearchMonitor *monitor, NautilusSearchDirectory *search)
 }
 
 static void
-search_monitor_remove (NautilusDirectory *directory,
+search_monitor_remove (NemoDirectory *directory,
 		       gconstpointer client)
 {
-	NautilusSearchDirectory *search;
+	NemoSearchDirectory *search;
 	SearchMonitor *monitor;
 	GList *list;
 
-	search = NAUTILUS_SEARCH_DIRECTORY (directory);
+	search = NEMO_SEARCH_DIRECTORY (directory);
 
 	for (list = search->details->monitor_list; list != NULL; list = list->next) {
 		monitor = list->data;
@@ -253,12 +253,12 @@ static void
 cancel_call_when_ready (gpointer key, gpointer value, gpointer user_data)
 {
 	SearchCallback *search_callback;
-	NautilusFile *file;
+	NemoFile *file;
 
 	file = key;
 	search_callback = user_data;
 
-	nautilus_file_cancel_call_when_ready (file, search_callback_file_ready_callback,
+	nemo_file_cancel_call_when_ready (file, search_callback_file_ready_callback,
 					      search_callback);
 }
 
@@ -270,7 +270,7 @@ search_callback_destroy (SearchCallback *search_callback)
 		g_hash_table_destroy (search_callback->non_ready_hash);
 	}
 
-	nautilus_file_list_free (search_callback->file_list);
+	nemo_file_list_free (search_callback->file_list);
 
 	g_free (search_callback);
 }
@@ -278,7 +278,7 @@ search_callback_destroy (SearchCallback *search_callback)
 static void
 search_callback_invoke_and_destroy (SearchCallback *search_callback)
 {
-	search_callback->callback (NAUTILUS_DIRECTORY (search_callback->search_directory),
+	search_callback->callback (NEMO_DIRECTORY (search_callback->search_directory),
 				   search_callback->file_list,
 				   search_callback->callback_data);
 
@@ -289,7 +289,7 @@ search_callback_invoke_and_destroy (SearchCallback *search_callback)
 }
 
 static void
-search_callback_file_ready_callback (NautilusFile *file, gpointer data)
+search_callback_file_ready_callback (NemoFile *file, gpointer data)
 {
 	SearchCallback *search_callback = data;
 	
@@ -304,14 +304,14 @@ static void
 search_callback_add_file_callbacks (SearchCallback *callback)
 {
 	GList *file_list_copy, *list;
-	NautilusFile *file;
+	NemoFile *file;
 
 	file_list_copy = g_list_copy (callback->file_list);
 
 	for (list = file_list_copy; list != NULL; list = list->next) {
 		file = list->data;
 
-		nautilus_file_call_when_ready (file,
+		nemo_file_call_when_ready (file,
 					       callback->wait_for_attributes,
 					       search_callback_file_ready_callback,
 					       callback);
@@ -320,7 +320,7 @@ search_callback_add_file_callbacks (SearchCallback *callback)
 }
 	 
 static SearchCallback *
-search_callback_find (NautilusSearchDirectory *search, NautilusDirectoryCallback callback, gpointer callback_data)
+search_callback_find (NemoSearchDirectory *search, NemoDirectoryCallback callback, gpointer callback_data)
 {
 	SearchCallback *search_callback;
 	GList *list;
@@ -338,7 +338,7 @@ search_callback_find (NautilusSearchDirectory *search, NautilusDirectoryCallback
 }
 
 static SearchCallback *
-search_callback_find_pending (NautilusSearchDirectory *search, NautilusDirectoryCallback callback, gpointer callback_data)
+search_callback_find_pending (NemoSearchDirectory *search, NemoDirectoryCallback callback, gpointer callback_data)
 {
 	SearchCallback *search_callback;
 	GList *list;
@@ -374,16 +374,16 @@ file_list_to_hash_table (GList *file_list)
 }
 
 static void
-search_call_when_ready (NautilusDirectory *directory,
-			NautilusFileAttributes file_attributes,
+search_call_when_ready (NemoDirectory *directory,
+			NemoFileAttributes file_attributes,
 			gboolean wait_for_file_list,
-			NautilusDirectoryCallback callback,
+			NemoDirectoryCallback callback,
 			gpointer callback_data)
 {
-	NautilusSearchDirectory *search;
+	NemoSearchDirectory *search;
 	SearchCallback *search_callback;
 
-	search = NAUTILUS_SEARCH_DIRECTORY (directory);
+	search = NEMO_SEARCH_DIRECTORY (directory);
 
 	search_callback = search_callback_find (search, callback, callback_data);
 	if (search_callback == NULL) {
@@ -412,7 +412,7 @@ search_call_when_ready (NautilusDirectory *directory,
 		/* We might need to start the search engine */
 		start_or_stop_search_engine (search, TRUE);
 	} else {
-		search_callback->file_list = nautilus_file_list_copy (search->details->files);
+		search_callback->file_list = nemo_file_list_copy (search->details->files);
 		search_callback->non_ready_hash = file_list_to_hash_table (search->details->files);
 
 		if (!search_callback->non_ready_hash) {
@@ -428,14 +428,14 @@ search_call_when_ready (NautilusDirectory *directory,
 }
 
 static void
-search_cancel_callback (NautilusDirectory *directory,
-			NautilusDirectoryCallback callback,
+search_cancel_callback (NemoDirectory *directory,
+			NemoDirectoryCallback callback,
 			gpointer callback_data)
 {
-	NautilusSearchDirectory *search;
+	NemoSearchDirectory *search;
 	SearchCallback *search_callback;
 
-	search = NAUTILUS_SEARCH_DIRECTORY (directory);
+	search = NEMO_SEARCH_DIRECTORY (directory);
 	search_callback = search_callback_find (search, callback, callback_data);
 	
 	if (search_callback) {
@@ -461,12 +461,12 @@ search_cancel_callback (NautilusDirectory *directory,
 
 
 static void
-search_engine_hits_added (NautilusSearchEngine *engine, GList *hits, 
-			  NautilusSearchDirectory *search)
+search_engine_hits_added (NemoSearchEngine *engine, GList *hits, 
+			  NemoSearchDirectory *search)
 {
 	GList *hit_list;
 	GList *file_list;
-	NautilusFile *file;
+	NemoFile *file;
 	char *uri;
 	SearchMonitor *monitor;
 	GList *monitor_list;
@@ -476,18 +476,18 @@ search_engine_hits_added (NautilusSearchEngine *engine, GList *hits,
 	for (hit_list = hits; hit_list != NULL; hit_list = hit_list->next) {
 		uri = hit_list->data;
 
-		if (g_str_has_suffix (uri, NAUTILUS_SAVED_SEARCH_EXTENSION)) {
+		if (g_str_has_suffix (uri, NEMO_SAVED_SEARCH_EXTENSION)) {
 			/* Never return saved searches themselves as hits */
 			continue;
 		}
 		
-		file = nautilus_file_get_by_uri (uri);
+		file = nemo_file_get_by_uri (uri);
 		
 		for (monitor_list = search->details->monitor_list; monitor_list; monitor_list = monitor_list->next) {
 			monitor = monitor_list->data;
 
 			/* Add monitors */
-			nautilus_file_monitor_add (file, monitor, monitor->monitor_attributes);
+			nemo_file_monitor_add (file, monitor, monitor->monitor_attributes);
 		}
 
 		g_signal_connect (file, "changed", G_CALLBACK (file_changed), search),
@@ -497,35 +497,35 @@ search_engine_hits_added (NautilusSearchEngine *engine, GList *hits,
 	
 	search->details->files = g_list_concat (search->details->files, file_list);
 
-	nautilus_directory_emit_files_added (NAUTILUS_DIRECTORY (search), file_list);
+	nemo_directory_emit_files_added (NEMO_DIRECTORY (search), file_list);
 
-	file = nautilus_directory_get_corresponding_file (NAUTILUS_DIRECTORY (search));
-	nautilus_file_emit_changed (file);
-	nautilus_file_unref (file);
+	file = nemo_directory_get_corresponding_file (NEMO_DIRECTORY (search));
+	nemo_file_emit_changed (file);
+	nemo_file_unref (file);
 }
 
 static void
-search_engine_hits_subtracted (NautilusSearchEngine *engine, GList *hits, 
-			       NautilusSearchDirectory *search)
+search_engine_hits_subtracted (NemoSearchEngine *engine, GList *hits, 
+			       NemoSearchDirectory *search)
 {
 	GList *hit_list;
 	GList *monitor_list;
 	SearchMonitor *monitor;
 	GList *file_list;
 	char *uri;
-	NautilusFile *file;
+	NemoFile *file;
 
 	file_list = NULL;
 
 	for (hit_list = hits; hit_list != NULL; hit_list = hit_list->next) {
 		uri = hit_list->data;
-		file = nautilus_file_get_by_uri (uri);
+		file = nemo_file_get_by_uri (uri);
 
 		for (monitor_list = search->details->monitor_list; monitor_list; 
 		     monitor_list = monitor_list->next) {
 			monitor = monitor_list->data;
 			/* Remove monitors */
-			nautilus_file_monitor_remove (file, monitor);
+			nemo_file_monitor_remove (file, monitor);
 		}
 		
 		g_signal_handlers_disconnect_by_func (file, file_changed, search);
@@ -535,42 +535,42 @@ search_engine_hits_subtracted (NautilusSearchEngine *engine, GList *hits,
 		file_list = g_list_prepend (file_list, file);
 	}
 	
-	nautilus_directory_emit_files_changed (NAUTILUS_DIRECTORY (search), file_list);
+	nemo_directory_emit_files_changed (NEMO_DIRECTORY (search), file_list);
 
-	nautilus_file_list_free (file_list);
+	nemo_file_list_free (file_list);
 
-	file = nautilus_directory_get_corresponding_file (NAUTILUS_DIRECTORY (search));
-	nautilus_file_emit_changed (file);
-	nautilus_file_unref (file);
+	file = nemo_directory_get_corresponding_file (NEMO_DIRECTORY (search));
+	nemo_file_emit_changed (file);
+	nemo_file_unref (file);
 }
 
 static void
 search_callback_add_pending_file_callbacks (SearchCallback *callback)
 {
-	callback->file_list = nautilus_file_list_copy (callback->search_directory->details->files);
+	callback->file_list = nemo_file_list_copy (callback->search_directory->details->files);
 	callback->non_ready_hash = file_list_to_hash_table (callback->search_directory->details->files);
 
 	search_callback_add_file_callbacks (callback);
 }
 
 static void
-search_engine_error (NautilusSearchEngine *engine, const char *error_message, NautilusSearchDirectory *search)
+search_engine_error (NemoSearchEngine *engine, const char *error_message, NemoSearchDirectory *search)
 {
 	GError *error;
 
 	error = g_error_new_literal (G_IO_ERROR, G_IO_ERROR_FAILED,
 				     error_message);
-	nautilus_directory_emit_load_error (NAUTILUS_DIRECTORY (search),
+	nemo_directory_emit_load_error (NEMO_DIRECTORY (search),
 					    error);
 	g_error_free (error);
 }
 
 static void
-search_engine_finished (NautilusSearchEngine *engine, NautilusSearchDirectory *search)
+search_engine_finished (NemoSearchEngine *engine, NemoSearchDirectory *search)
 {
 	search->details->search_finished = TRUE;
 
-	nautilus_directory_emit_done_loading (NAUTILUS_DIRECTORY (search));
+	nemo_directory_emit_done_loading (NEMO_DIRECTORY (search));
 
 	/* Add all file callbacks */
 	g_list_foreach (search->details->pending_callback_list, 
@@ -583,11 +583,11 @@ search_engine_finished (NautilusSearchEngine *engine, NautilusSearchDirectory *s
 }
 
 static void
-search_force_reload (NautilusDirectory *directory)
+search_force_reload (NemoDirectory *directory)
 {
-	NautilusSearchDirectory *search;
+	NemoSearchDirectory *search;
 
-	search = NAUTILUS_SEARCH_DIRECTORY (directory);
+	search = NEMO_SEARCH_DIRECTORY (directory);
 
 	if (!search->details->query) {
 		return;
@@ -603,48 +603,48 @@ search_force_reload (NautilusDirectory *directory)
 	reset_file_list (search);
 	
 	if (search->details->search_running) {
-		nautilus_search_engine_stop (search->details->engine);
-		nautilus_search_engine_set_query (search->details->engine, search->details->query);
-		nautilus_search_engine_start (search->details->engine);
+		nemo_search_engine_stop (search->details->engine);
+		nemo_search_engine_set_query (search->details->engine, search->details->query);
+		nemo_search_engine_start (search->details->engine);
 	}
 }
 
 static gboolean
-search_are_all_files_seen (NautilusDirectory *directory)
+search_are_all_files_seen (NemoDirectory *directory)
 {
-	NautilusSearchDirectory *search;
+	NemoSearchDirectory *search;
 
-	search = NAUTILUS_SEARCH_DIRECTORY (directory);
+	search = NEMO_SEARCH_DIRECTORY (directory);
 
 	return (!search->details->query ||
 		search->details->search_finished);
 }
 
 static gboolean
-search_contains_file (NautilusDirectory *directory,
-		      NautilusFile *file)
+search_contains_file (NemoDirectory *directory,
+		      NemoFile *file)
 {
-	NautilusSearchDirectory *search;
+	NemoSearchDirectory *search;
 
-	search = NAUTILUS_SEARCH_DIRECTORY (directory);
+	search = NEMO_SEARCH_DIRECTORY (directory);
 
 	/* FIXME: Maybe put the files in a hash */
 	return (g_list_find (search->details->files, file) != NULL);
 }
 
 static GList *
-search_get_file_list (NautilusDirectory *directory)
+search_get_file_list (NemoDirectory *directory)
 {
-	NautilusSearchDirectory *search;
+	NemoSearchDirectory *search;
 
-	search = NAUTILUS_SEARCH_DIRECTORY (directory);
+	search = NEMO_SEARCH_DIRECTORY (directory);
 
-	return nautilus_file_list_copy (search->details->files);
+	return nemo_file_list_copy (search->details->files);
 }
 
 
 static gboolean
-search_is_editable (NautilusDirectory *directory)
+search_is_editable (NemoDirectory *directory)
 {
 	return FALSE;
 }
@@ -652,10 +652,10 @@ search_is_editable (NautilusDirectory *directory)
 static void
 search_dispose (GObject *object)
 {
-	NautilusSearchDirectory *search;
+	NemoSearchDirectory *search;
 	GList *list;
 
-	search = NAUTILUS_SEARCH_DIRECTORY (object);
+	search = NEMO_SEARCH_DIRECTORY (object);
 	
 	/* Remove search monitors */
 	if (search->details->monitor_list) {
@@ -691,45 +691,45 @@ search_dispose (GObject *object)
 
 	if (search->details->engine) {
 		if (search->details->search_running) {
-			nautilus_search_engine_stop (search->details->engine);
+			nemo_search_engine_stop (search->details->engine);
 		}
 		
 		g_object_unref (search->details->engine);
 		search->details->engine = NULL;
 	}
 	
-	G_OBJECT_CLASS (nautilus_search_directory_parent_class)->dispose (object);
+	G_OBJECT_CLASS (nemo_search_directory_parent_class)->dispose (object);
 }
 
 static void
 search_finalize (GObject *object)
 {
-	NautilusSearchDirectory *search;
+	NemoSearchDirectory *search;
 
-	search = NAUTILUS_SEARCH_DIRECTORY (object);
+	search = NEMO_SEARCH_DIRECTORY (object);
 
 	g_free (search->details->saved_search_uri);
 	
 	g_free (search->details);
 
-	G_OBJECT_CLASS (nautilus_search_directory_parent_class)->finalize (object);
+	G_OBJECT_CLASS (nemo_search_directory_parent_class)->finalize (object);
 }
 
 static void
-nautilus_search_directory_init (NautilusSearchDirectory *search)
+nemo_search_directory_init (NemoSearchDirectory *search)
 {
-	search->details = g_new0 (NautilusSearchDirectoryDetails, 1);
+	search->details = g_new0 (NemoSearchDirectoryDetails, 1);
 }
 
 static void
-nautilus_search_directory_class_init (NautilusSearchDirectoryClass *class)
+nemo_search_directory_class_init (NemoSearchDirectoryClass *class)
 {
-	NautilusDirectoryClass *directory_class;
+	NemoDirectoryClass *directory_class;
 
 	G_OBJECT_CLASS (class)->dispose = search_dispose;
 	G_OBJECT_CLASS (class)->finalize = search_finalize;
 
-	directory_class = NAUTILUS_DIRECTORY_CLASS (class);
+	directory_class = NEMO_DIRECTORY_CLASS (class);
 
  	directory_class->are_all_files_seen = search_are_all_files_seen;
 	directory_class->contains_file = search_contains_file;
@@ -745,7 +745,7 @@ nautilus_search_directory_class_init (NautilusSearchDirectoryClass *class)
 }
 
 char *
-nautilus_search_directory_generate_new_uri (void)
+nemo_search_directory_generate_new_uri (void)
 {
 	static int counter = 0;
 	char *uri;
@@ -757,11 +757,11 @@ nautilus_search_directory_generate_new_uri (void)
 
 
 void
-nautilus_search_directory_set_query (NautilusSearchDirectory *search,
-				     NautilusQuery *query)
+nemo_search_directory_set_query (NemoSearchDirectory *search,
+				     NemoQuery *query)
 {
-	NautilusDirectory *dir;
-	NautilusFile *as_file;
+	NemoDirectory *dir;
+	NemoFile *as_file;
 
 	if (search->details->query != query) {
 		search->details->modified = TRUE;
@@ -777,15 +777,15 @@ nautilus_search_directory_set_query (NautilusSearchDirectory *search,
 
 	search->details->query = query;
 
-	dir = NAUTILUS_DIRECTORY (search);
+	dir = NEMO_DIRECTORY (search);
 	as_file = dir->details->as_file;
 	if (as_file != NULL) {
-		nautilus_search_directory_file_update_display_name (NAUTILUS_SEARCH_DIRECTORY_FILE (as_file));
+		nemo_search_directory_file_update_display_name (NEMO_SEARCH_DIRECTORY_FILE (as_file));
 	}
 }
 
-NautilusQuery *
-nautilus_search_directory_get_query (NautilusSearchDirectory *search)
+NemoQuery *
+nemo_search_directory_get_query (NemoSearchDirectory *search)
 {
 	if (search->details->query != NULL) {
 		return g_object_ref (search->details->query);
@@ -794,22 +794,22 @@ nautilus_search_directory_get_query (NautilusSearchDirectory *search)
 	return NULL;
 }
 
-NautilusSearchDirectory *
-nautilus_search_directory_new_from_saved_search (const char *uri)
+NemoSearchDirectory *
+nemo_search_directory_new_from_saved_search (const char *uri)
 {
-	NautilusSearchDirectory *search;
-	NautilusQuery *query;
+	NemoSearchDirectory *search;
+	NemoQuery *query;
 	char *file;
 	
-	search = NAUTILUS_SEARCH_DIRECTORY (g_object_new (NAUTILUS_TYPE_SEARCH_DIRECTORY, NULL));
+	search = NEMO_SEARCH_DIRECTORY (g_object_new (NEMO_TYPE_SEARCH_DIRECTORY, NULL));
 
 	search->details->saved_search_uri = g_strdup (uri);
 	
 	file = g_filename_from_uri (uri, NULL, NULL);
 	if (file != NULL) {
-		query = nautilus_query_load (file);
+		query = nemo_query_load (file);
 		if (query != NULL) {
-			nautilus_search_directory_set_query (search, query);
+			nemo_search_directory_set_query (search, query);
 			g_object_unref (query);
 		}
 		g_free (file);
@@ -822,19 +822,19 @@ nautilus_search_directory_new_from_saved_search (const char *uri)
 }
 
 gboolean
-nautilus_search_directory_is_saved_search (NautilusSearchDirectory *search)
+nemo_search_directory_is_saved_search (NemoSearchDirectory *search)
 {
 	return search->details->saved_search_uri != NULL;
 }
 
 gboolean
-nautilus_search_directory_is_modified (NautilusSearchDirectory *search)
+nemo_search_directory_is_modified (NemoSearchDirectory *search)
 {
 	return search->details->modified;
 }
 
 void
-nautilus_search_directory_save_to_file (NautilusSearchDirectory *search,
+nemo_search_directory_save_to_file (NemoSearchDirectory *search,
 					const char              *save_file_uri)
 {
 	char *file;
@@ -845,20 +845,20 @@ nautilus_search_directory_save_to_file (NautilusSearchDirectory *search,
 	}
 
 	if (search->details->query != NULL) {
-		nautilus_query_save (search->details->query, file);
+		nemo_query_save (search->details->query, file);
 	}
 	
 	g_free (file);
 }
 
 void
-nautilus_search_directory_save_search (NautilusSearchDirectory *search)
+nemo_search_directory_save_search (NemoSearchDirectory *search)
 {
 	if (search->details->saved_search_uri == NULL) {
 		return;
 	}
 
-	nautilus_search_directory_save_to_file (search,
+	nemo_search_directory_save_to_file (search,
 						search->details->saved_search_uri);
 	search->details->modified = FALSE;
 }

@@ -4,7 +4,7 @@
 AUTOMAKE_OPTIONS = 1.6
 
 # The name of the module, e.g. 'glib'.
-DOC_MODULE=libnautilus-extension
+DOC_MODULE=libnemo-extension
 
 # The top-level SGML file.
 DOC_MAIN_SGML_FILE=$(DOC_MODULE)-docs.xml
@@ -12,8 +12,8 @@ DOC_MAIN_SGML_FILE=$(DOC_MODULE)-docs.xml
 # The directory containing the source code. Relative to $(srcdir).
 # gtk-doc will search all .c & .h files beneath here for inline comments
 # documenting the functions and macros.
-# e.g. DOC_SOURCE_DIR=../../../libnautilus-extension
-DOC_SOURCE_DIR=$(top_srcdir)/libnautilus-extension
+# e.g. DOC_SOURCE_DIR=../../../libnemo-extension
+DOC_SOURCE_DIR=$(top_srcdir)/libnemo-extension
 
 # Extra options to pass to gtkdoc-scangobj. Not normally needed.
 SCANGOBJ_OPTIONS=--type-init-func="g_type_init()"
@@ -34,8 +34,8 @@ MKTMPL_OPTIONS=
 FIXXREF_OPTIONS=
 
 # Used for dependencies. The docs will be rebuilt if any of these change.
-HFILE_GLOB=$(top_srcdir)/libnautilus-extension/*.h
-CFILE_GLOB=$(top_srcdir)/libnautilus-extension/*.c
+HFILE_GLOB=$(top_srcdir)/libnemo-extension/*.h
+CFILE_GLOB=$(top_srcdir)/libnemo-extension/*.c
 
 # Header files to ignore when scanning.
 IGNORE_HFILES = \
@@ -64,14 +64,14 @@ GTKDOC_CFLAGS = \
 	$(GTK_DEBUG_FLAGS)                         \
 	-I$(srcdir)                                \
 	-I$(top_srcdir)                            \
-	-I$(top_srcdir)/libnautilus-extension      \
+	-I$(top_srcdir)/libnemo-extension      \
 	-I$(top_builddir)                          \
-	-I$(top_builddir)/libnautilus-extension    \
+	-I$(top_builddir)/libnemo-extension    \
 	$(BASE_CFLAGS)            \
 	$(NULL)
 
 GTKDOC_LIBS = \
-	$(top_builddir)/libnautilus-extension/libnautilus-extension.la       \
+	$(top_builddir)/libnemo-extension/libnemo-extension.la       \
 	$(BASE_LIBS)                                        \
 	$(NULL)
 

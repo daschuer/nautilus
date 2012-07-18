@@ -1,6 +1,6 @@
 /* -*- Mode: C; indent-tabs-mode: t; c-basic-offset: 8; tab-width: 8 -*-
 
-   nautilus-merged-directory.c: Subclass of NautilusDirectory to implement the
+   nemo-merged-directory.c: Subclass of NemoDirectory to implement the
    virtual merged directory.
  
    Copyright (C) 1999, 2000 Eazel, Inc.
@@ -24,15 +24,15 @@
 */
 
 #include <config.h>
-#include "nautilus-merged-directory.h"
+#include "nemo-merged-directory.h"
 
-#include "nautilus-directory-private.h"
-#include "nautilus-directory-notify.h"
-#include "nautilus-file.h"
+#include "nemo-directory-private.h"
+#include "nemo-directory-notify.h"
+#include "nemo-file.h"
 #include <eel/eel-glib-extensions.h>
 #include <gtk/gtk.h>
 
-struct NautilusMergedDirectoryDetails {
+struct NemoMergedDirectoryDetails {
 	GList *directories;
 	GList *directories_not_done_loading;
 	GHashTable *callbacks;
@@ -40,11 +40,11 @@ struct NautilusMergedDirectoryDetails {
 };
 
 typedef struct {
-	NautilusMergedDirectory *merged;
-	NautilusDirectoryCallback callback;
+	NemoMergedDirectory *merged;
+	NemoDirectoryCallback callback;
 	gpointer callback_data;
 
-	NautilusFileAttributes wait_for_attributes;
+	NemoFileAttributes wait_for_attributes;
 	gboolean wait_for_file_list;
 
 	GList *non_ready_directories;
@@ -52,10 +52,10 @@ typedef struct {
 } MergedCallback;
 
 typedef struct {
-	NautilusMergedDirectory *merged;
+	NemoMergedDirectory *merged;
 
 	gboolean monitor_hidden_files;
-	NautilusFileAttributes monitor_attributes;
+	NemoFileAttributes monitor_attributes;
 } MergedMonitor;
 
 enum {
@@ -66,8 +66,8 @@ enum {
 
 static guint signals[LAST_SIGNAL];
 
-G_DEFINE_TYPE (NautilusMergedDirectory, nautilus_merged_directory,
-	       NAUTILUS_TYPE_DIRECTORY);
+G_DEFINE_TYPE (NemoMergedDirectory, nemo_merged_directory,
+	       NEMO_TYPE_DIRECTORY);
 
 static guint
 merged_callback_hash (gconstpointer merged_callback_as_pointer)
@@ -96,10 +96,10 @@ static void
 merged_callback_destroy (MergedCallback *merged_callback)
 {
 	g_assert (merged_callback != NULL);
-	g_assert (NAUTILUS_IS_MERGED_DIRECTORY (merged_callback->merged));
+	g_assert (NEMO_IS_MERGED_DIRECTORY (merged_callback->merged));
 
 	g_list_free (merged_callback->non_ready_directories);
-	nautilus_file_list_free (merged_callback->merged_file_list);
+	nemo_file_list_free (merged_callback->merged_file_list);
 	g_free (merged_callback);
 }
 
@@ -115,7 +115,7 @@ merged_callback_check_done (MergedCallback *merged_callback)
 	g_hash_table_remove (merged_callback->merged->details->callbacks, merged_callback);
 
 	/* We are ready, so do the real callback. */
-	(* merged_callback->callback) (NAUTILUS_DIRECTORY (merged_callback->merged),
+	(* merged_callback->callback) (NEMO_DIRECTORY (merged_callback->merged),
 				       merged_callback->merged_file_list,
 				       merged_callback->callback_data);
 
@@ -125,7 +125,7 @@ merged_callback_check_done (MergedCallback *merged_callback)
 
 static void
 merged_callback_remove_directory (MergedCallback *merged_callback,
-				  NautilusDirectory *directory)
+				  NemoDirectory *directory)
 {
 	merged_callback->non_ready_directories = g_list_remove
 		(merged_callback->non_ready_directories, directory);
@@ -133,13 +133,13 @@ merged_callback_remove_directory (MergedCallback *merged_callback,
 }
 
 static void
-directory_ready_callback (NautilusDirectory *directory,
+directory_ready_callback (NemoDirectory *directory,
 			  GList *files,
 			  gpointer callback_data)
 {
 	MergedCallback *merged_callback;
 
-	g_assert (NAUTILUS_IS_DIRECTORY (directory));
+	g_assert (NEMO_IS_DIRECTORY (directory));
 	g_assert (callback_data != NULL);
 
 	merged_callback = callback_data;
@@ -148,24 +148,24 @@ directory_ready_callback (NautilusDirectory *directory,
 	/* Update based on this call. */
 	merged_callback->merged_file_list = g_list_concat
 		(merged_callback->merged_file_list,
-		 nautilus_file_list_copy (files));
+		 nemo_file_list_copy (files));
 
 	/* Check if we are ready. */
 	merged_callback_remove_directory (merged_callback, directory);
 }
 
 static void
-merged_call_when_ready (NautilusDirectory *directory,
-			NautilusFileAttributes file_attributes,
+merged_call_when_ready (NemoDirectory *directory,
+			NemoFileAttributes file_attributes,
 			gboolean wait_for_file_list,
-			NautilusDirectoryCallback callback,
+			NemoDirectoryCallback callback,
 			gpointer callback_data)
 {
-	NautilusMergedDirectory *merged;
+	NemoMergedDirectory *merged;
 	MergedCallback search_key, *merged_callback;
 	GList *node;
 
-	merged = NAUTILUS_MERGED_DIRECTORY (directory);
+	merged = NEMO_MERGED_DIRECTORY (directory);
 
 	/* Check to be sure we aren't overwriting. */
 	search_key.callback = callback;
@@ -198,7 +198,7 @@ merged_call_when_ready (NautilusDirectory *directory,
 
 	/* Now tell all the directories about it. */
 	for (node = merged->details->directories; node != NULL; node = node->next) {
-		nautilus_directory_call_when_ready
+		nemo_directory_call_when_ready
 			(node->data,
 			 merged_callback->wait_for_attributes,
 			 merged_callback->wait_for_file_list,
@@ -207,15 +207,15 @@ merged_call_when_ready (NautilusDirectory *directory,
 }
 
 static void
-merged_cancel_callback (NautilusDirectory *directory,
-			NautilusDirectoryCallback callback,
+merged_cancel_callback (NemoDirectory *directory,
+			NemoDirectoryCallback callback,
 			gpointer callback_data)
 {
-	NautilusMergedDirectory *merged;
+	NemoMergedDirectory *merged;
 	MergedCallback search_key, *merged_callback;
 	GList *node;
 
-	merged = NAUTILUS_MERGED_DIRECTORY (directory);
+	merged = NEMO_MERGED_DIRECTORY (directory);
 
 	/* Find the entry in the table. */
 	search_key.callback = callback;
@@ -230,7 +230,7 @@ merged_cancel_callback (NautilusDirectory *directory,
 
 	/* Tell all the directories to cancel the call. */
 	for (node = merged_callback->non_ready_directories; node != NULL; node = node->next) {
-		nautilus_directory_cancel_callback
+		nemo_directory_cancel_callback
 			(node->data,
 			 directory_ready_callback, merged_callback);
 	}
@@ -238,7 +238,7 @@ merged_cancel_callback (NautilusDirectory *directory,
 }
 
 static void
-build_merged_callback_list (NautilusDirectory *directory,
+build_merged_callback_list (NemoDirectory *directory,
 			    GList *file_list,
 			    gpointer callback_data)
 {
@@ -246,24 +246,24 @@ build_merged_callback_list (NautilusDirectory *directory,
 
 	merged_list = callback_data;
 	*merged_list = g_list_concat (*merged_list,
-				      nautilus_file_list_copy (file_list));
+				      nemo_file_list_copy (file_list));
 }
 
 /* Create a monitor on each of the directories in the list. */
 static void
-merged_monitor_add (NautilusDirectory *directory,
+merged_monitor_add (NemoDirectory *directory,
 		    gconstpointer client,
 		    gboolean monitor_hidden_files,
-		    NautilusFileAttributes file_attributes,
-		    NautilusDirectoryCallback callback,
+		    NemoFileAttributes file_attributes,
+		    NemoDirectoryCallback callback,
 		    gpointer callback_data)
 {
-	NautilusMergedDirectory *merged;
+	NemoMergedDirectory *merged;
 	MergedMonitor *monitor;
 	GList *node;
 	GList *merged_callback_list;
 
-	merged = NAUTILUS_MERGED_DIRECTORY (directory);
+	merged = NEMO_MERGED_DIRECTORY (directory);
 
 	/* Map the client to a unique value so this doesn't interfere
 	 * with direct monitoring of the directory by the same client.
@@ -283,7 +283,7 @@ merged_monitor_add (NautilusDirectory *directory,
 	/* Call through to the real directory add calls. */
 	merged_callback_list = NULL;
 	for (node = merged->details->directories; node != NULL; node = node->next) {
-		nautilus_directory_file_monitor_add
+		nemo_directory_file_monitor_add
 			(node->data, monitor,
 			 monitor_hidden_files,
 			 file_attributes,
@@ -292,17 +292,17 @@ merged_monitor_add (NautilusDirectory *directory,
 	if (callback != NULL) {
 		(* callback) (directory, merged_callback_list, callback_data);
 	}
-	nautilus_file_list_free (merged_callback_list);
+	nemo_file_list_free (merged_callback_list);
 }
 
 static void
-merged_monitor_destroy (NautilusMergedDirectory *merged, MergedMonitor *monitor)
+merged_monitor_destroy (NemoMergedDirectory *merged, MergedMonitor *monitor)
 {
 	GList *node;
 
 	/* Call through to the real directory remove calls. */
 	for (node = merged->details->directories; node != NULL; node = node->next) {
-		nautilus_directory_file_monitor_remove (node->data, monitor);
+		nemo_directory_file_monitor_remove (node->data, monitor);
 	}
 
 	g_free (monitor);
@@ -310,13 +310,13 @@ merged_monitor_destroy (NautilusMergedDirectory *merged, MergedMonitor *monitor)
 
 /* Remove the monitor from each of the directories in the list. */
 static void
-merged_monitor_remove (NautilusDirectory *directory,
+merged_monitor_remove (NemoDirectory *directory,
 		       gconstpointer client)
 {
-	NautilusMergedDirectory *merged;
+	NemoMergedDirectory *merged;
 	MergedMonitor *monitor;
 	
-	merged = NAUTILUS_MERGED_DIRECTORY (directory);
+	merged = NEMO_MERGED_DIRECTORY (directory);
 	
 	/* Map the client to the value used by the earlier add call. */
         monitor = g_hash_table_lookup (merged->details->monitors, client);
@@ -329,31 +329,31 @@ merged_monitor_remove (NautilusDirectory *directory,
 }
 
 static void
-merged_force_reload (NautilusDirectory *directory)
+merged_force_reload (NemoDirectory *directory)
 {
-	NautilusMergedDirectory *merged;
+	NemoMergedDirectory *merged;
 	GList *node;
 
-	merged = NAUTILUS_MERGED_DIRECTORY (directory);
+	merged = NEMO_MERGED_DIRECTORY (directory);
 
 	/* Call through to the real force_reload calls. */
 	for (node = merged->details->directories; node != NULL; node = node->next) {
-		nautilus_directory_force_reload (node->data);
+		nemo_directory_force_reload (node->data);
 	}
 }
 
 /* Return true if any directory in the list does. */
 static gboolean
-merged_contains_file (NautilusDirectory *directory,
-		      NautilusFile *file)
+merged_contains_file (NemoDirectory *directory,
+		      NemoFile *file)
 {
-	NautilusMergedDirectory *merged;
+	NemoMergedDirectory *merged;
 	GList *node;
 
-	merged = NAUTILUS_MERGED_DIRECTORY (directory);
+	merged = NEMO_MERGED_DIRECTORY (directory);
 
 	for (node = merged->details->directories; node != NULL; node = node->next) {
-		if (nautilus_directory_contains_file (node->data, file)) {
+		if (nemo_directory_contains_file (node->data, file)) {
 			return TRUE;
 		}
 	}
@@ -362,15 +362,15 @@ merged_contains_file (NautilusDirectory *directory,
 
 /* Return true only if all directories in the list do. */
 static gboolean
-merged_are_all_files_seen (NautilusDirectory *directory)
+merged_are_all_files_seen (NemoDirectory *directory)
 {
-	NautilusMergedDirectory *merged;
+	NemoMergedDirectory *merged;
 	GList *node;
 
-	merged = NAUTILUS_MERGED_DIRECTORY (directory);
+	merged = NEMO_MERGED_DIRECTORY (directory);
 
 	for (node = merged->details->directories; node != NULL; node = node->next) {
-		if (!nautilus_directory_are_all_files_seen (node->data)) {
+		if (!nemo_directory_are_all_files_seen (node->data)) {
 			return FALSE;
 		}
 	}
@@ -379,15 +379,15 @@ merged_are_all_files_seen (NautilusDirectory *directory)
 
 /* Return true if any directory in the list does. */
 static gboolean
-merged_is_not_empty (NautilusDirectory *directory)
+merged_is_not_empty (NemoDirectory *directory)
 {
-	NautilusMergedDirectory *merged;
+	NemoMergedDirectory *merged;
 	GList *node;
 
-	merged = NAUTILUS_MERGED_DIRECTORY (directory);
+	merged = NEMO_MERGED_DIRECTORY (directory);
 
 	for (node = merged->details->directories; node != NULL; node = node->next) {
-		if (nautilus_directory_is_not_empty (node->data)) {
+		if (nemo_directory_is_not_empty (node->data)) {
 			return TRUE;
 		}
 	}
@@ -395,53 +395,53 @@ merged_is_not_empty (NautilusDirectory *directory)
 }
 
 static GList *
-merged_get_file_list (NautilusDirectory *directory)
+merged_get_file_list (NemoDirectory *directory)
 {
 	GList *dirs_file_list, *merged_dir_file_list = NULL;
 	GList *dir_list;
 	GList *cur_node;
 
 	dirs_file_list = NULL;
-	dir_list = NAUTILUS_MERGED_DIRECTORY (directory)->details->directories;
+	dir_list = NEMO_MERGED_DIRECTORY (directory)->details->directories;
 
 	for (cur_node = dir_list; cur_node != NULL; cur_node = cur_node->next) {
-		NautilusDirectory *cur_dir;
+		NemoDirectory *cur_dir;
 
-		cur_dir = NAUTILUS_DIRECTORY (cur_node->data);
+		cur_dir = NEMO_DIRECTORY (cur_node->data);
 		dirs_file_list = g_list_concat (dirs_file_list,
-						 nautilus_directory_get_file_list (cur_dir));
+						 nemo_directory_get_file_list (cur_dir));
 	}
 
-	merged_dir_file_list = NAUTILUS_DIRECTORY_CLASS 
-		(nautilus_merged_directory_parent_class)->get_file_list (directory);
+	merged_dir_file_list = NEMO_DIRECTORY_CLASS 
+		(nemo_merged_directory_parent_class)->get_file_list (directory);
 
 	return g_list_concat (dirs_file_list, merged_dir_file_list);
 }
 
 static void
-forward_files_added_cover (NautilusDirectory *real_directory,
+forward_files_added_cover (NemoDirectory *real_directory,
 			   GList *files,
 			   gpointer callback_data)
 {
-	nautilus_directory_emit_files_added (NAUTILUS_DIRECTORY (callback_data), files);
+	nemo_directory_emit_files_added (NEMO_DIRECTORY (callback_data), files);
 }
 
 static void
-forward_files_changed_cover (NautilusDirectory *real_directory,
+forward_files_changed_cover (NemoDirectory *real_directory,
 			     GList *files,
 			     gpointer callback_data)
 {
-	nautilus_directory_emit_files_changed (NAUTILUS_DIRECTORY (callback_data), files);
+	nemo_directory_emit_files_changed (NEMO_DIRECTORY (callback_data), files);
 }
 
 static void
-done_loading_callback (NautilusDirectory *real_directory,
-		       NautilusMergedDirectory *merged)
+done_loading_callback (NemoDirectory *real_directory,
+		       NemoMergedDirectory *merged)
 {
 	merged->details->directories_not_done_loading = g_list_remove
 		(merged->details->directories_not_done_loading, real_directory);
 	if (merged->details->directories_not_done_loading == NULL) {
-		nautilus_directory_emit_done_loading (NAUTILUS_DIRECTORY (merged));
+		nemo_directory_emit_done_loading (NEMO_DIRECTORY (merged));
 	}
 }
 
@@ -453,24 +453,24 @@ monitor_add_directory (gpointer key,
 	MergedMonitor *monitor;
 	
 	monitor = value;
-	nautilus_directory_file_monitor_add
-		(NAUTILUS_DIRECTORY (callback_data), monitor,
+	nemo_directory_file_monitor_add
+		(NEMO_DIRECTORY (callback_data), monitor,
 		 monitor->monitor_hidden_files,
 		 monitor->monitor_attributes,
 		 forward_files_added_cover, monitor->merged);
 }
 
 static void
-merged_add_real_directory (NautilusMergedDirectory *merged,
-			   NautilusDirectory *real_directory)
+merged_add_real_directory (NemoMergedDirectory *merged,
+			   NemoDirectory *real_directory)
 {
-	g_return_if_fail (NAUTILUS_IS_MERGED_DIRECTORY (merged));
-	g_return_if_fail (NAUTILUS_IS_DIRECTORY (real_directory));
-	g_return_if_fail (!NAUTILUS_IS_MERGED_DIRECTORY (real_directory));
+	g_return_if_fail (NEMO_IS_MERGED_DIRECTORY (merged));
+	g_return_if_fail (NEMO_IS_DIRECTORY (real_directory));
+	g_return_if_fail (!NEMO_IS_MERGED_DIRECTORY (real_directory));
 	g_return_if_fail (g_list_find (merged->details->directories, real_directory) == NULL);
 
 	/* Add to our list of directories. */
-	nautilus_directory_ref (real_directory);
+	nemo_directory_ref (real_directory);
 	merged->details->directories = g_list_prepend
 		(merged->details->directories, real_directory);
 	merged->details->directories_not_done_loading = g_list_prepend
@@ -496,12 +496,12 @@ merged_add_real_directory (NautilusMergedDirectory *merged,
 }
 
 void
-nautilus_merged_directory_add_real_directory (NautilusMergedDirectory *merged,
-					      NautilusDirectory *real_directory)
+nemo_merged_directory_add_real_directory (NemoMergedDirectory *merged,
+					      NemoDirectory *real_directory)
 {
-	g_return_if_fail (NAUTILUS_IS_MERGED_DIRECTORY (merged));
-	g_return_if_fail (NAUTILUS_IS_DIRECTORY (real_directory));
-	g_return_if_fail (!NAUTILUS_IS_MERGED_DIRECTORY (real_directory));
+	g_return_if_fail (NEMO_IS_MERGED_DIRECTORY (merged));
+	g_return_if_fail (NEMO_IS_DIRECTORY (real_directory));
+	g_return_if_fail (!NEMO_IS_MERGED_DIRECTORY (real_directory));
 
 	/* Quietly do nothing if asked to add something that's already there. */
 	if (g_list_find (merged->details->directories, real_directory) != NULL) {
@@ -512,7 +512,7 @@ nautilus_merged_directory_add_real_directory (NautilusMergedDirectory *merged,
 }
 
 GList *
-nautilus_merged_directory_get_real_directories (NautilusMergedDirectory *merged)
+nemo_merged_directory_get_real_directories (NemoMergedDirectory *merged)
 {
 	return g_list_copy (merged->details->directories);
 }
@@ -523,7 +523,7 @@ merged_callback_remove_directory_cover (gpointer key,
 					gpointer callback_data)
 {
 	merged_callback_remove_directory
-		(value, NAUTILUS_DIRECTORY (callback_data));
+		(value, NEMO_DIRECTORY (callback_data));
 }
 
 static void
@@ -531,41 +531,41 @@ monitor_remove_directory (gpointer key,
 			  gpointer value,
 			  gpointer callback_data)
 {
-	nautilus_directory_file_monitor_remove
-		(NAUTILUS_DIRECTORY (callback_data), value);
+	nemo_directory_file_monitor_remove
+		(NEMO_DIRECTORY (callback_data), value);
 }
 
 static void
-real_directory_notify_files_removed (NautilusDirectory *real_directory)
+real_directory_notify_files_removed (NemoDirectory *real_directory)
 {
 	GList *files, *l;
 
-	files = nautilus_directory_get_file_list (real_directory);
+	files = nemo_directory_get_file_list (real_directory);
 
 	for (l = files; l; l = l->next) {
-		NautilusFile *file;
+		NemoFile *file;
 		char *uri;
 
-		file = NAUTILUS_FILE (l->data);
-		uri = nautilus_file_get_uri (file);
-		nautilus_file_unref (file);
+		file = NEMO_FILE (l->data);
+		uri = nemo_file_get_uri (file);
+		nemo_file_unref (file);
 
 		l->data = uri;
 	}
 
 	if (files) {
-		nautilus_directory_notify_files_removed_by_uri (files);
+		nemo_directory_notify_files_removed_by_uri (files);
 	}
 
 	g_list_free_full (files, g_free);
 }
 
 static void
-merged_remove_real_directory (NautilusMergedDirectory *merged,
-			      NautilusDirectory *real_directory)
+merged_remove_real_directory (NemoMergedDirectory *merged,
+			      NemoDirectory *real_directory)
 {
-	g_return_if_fail (NAUTILUS_IS_MERGED_DIRECTORY (merged));
-	g_return_if_fail (NAUTILUS_IS_DIRECTORY (real_directory));
+	g_return_if_fail (NEMO_IS_MERGED_DIRECTORY (merged));
+	g_return_if_fail (NEMO_IS_DIRECTORY (real_directory));
 	g_return_if_fail (g_list_find (merged->details->directories, real_directory) != NULL);
 
 	/* Since the real directory will be going away, act as if files were removed */
@@ -589,14 +589,14 @@ merged_remove_real_directory (NautilusMergedDirectory *merged,
 		(merged->details->directories, real_directory);
 	merged->details->directories_not_done_loading = g_list_remove
 		(merged->details->directories_not_done_loading, real_directory);
-	nautilus_directory_unref (real_directory);
+	nemo_directory_unref (real_directory);
 }
 
 void
-nautilus_merged_directory_remove_real_directory (NautilusMergedDirectory *merged,
-						 NautilusDirectory *real_directory)
+nemo_merged_directory_remove_real_directory (NemoMergedDirectory *merged,
+						 NemoDirectory *real_directory)
 {
-	g_return_if_fail (NAUTILUS_IS_MERGED_DIRECTORY (merged));
+	g_return_if_fail (NEMO_IS_MERGED_DIRECTORY (merged));
 
 	/* Quietly do nothing if asked to remove something that's not there. */
 	if (g_list_find (merged->details->directories, real_directory) == NULL) {
@@ -625,9 +625,9 @@ merged_callback_destroy_cover (gpointer key,
 static void
 merged_finalize (GObject *object)
 {
-	NautilusMergedDirectory *merged;
+	NemoMergedDirectory *merged;
 
-	merged = NAUTILUS_MERGED_DIRECTORY (object);
+	merged = NEMO_MERGED_DIRECTORY (object);
 
 	g_hash_table_foreach (merged->details->monitors,
 			      merged_monitor_destroy_cover, merged);
@@ -636,28 +636,28 @@ merged_finalize (GObject *object)
 
 	g_hash_table_destroy (merged->details->callbacks);
 	g_hash_table_destroy (merged->details->monitors);
-	nautilus_directory_list_free (merged->details->directories);
+	nemo_directory_list_free (merged->details->directories);
 	g_list_free (merged->details->directories_not_done_loading);
 
-	G_OBJECT_CLASS (nautilus_merged_directory_parent_class)->finalize (object);
+	G_OBJECT_CLASS (nemo_merged_directory_parent_class)->finalize (object);
 }
 
 static void
-nautilus_merged_directory_init (NautilusMergedDirectory *merged)
+nemo_merged_directory_init (NemoMergedDirectory *merged)
 {
-	merged->details = G_TYPE_INSTANCE_GET_PRIVATE (merged, NAUTILUS_TYPE_MERGED_DIRECTORY,
-						       NautilusMergedDirectoryDetails);
+	merged->details = G_TYPE_INSTANCE_GET_PRIVATE (merged, NEMO_TYPE_MERGED_DIRECTORY,
+						       NemoMergedDirectoryDetails);
 	merged->details->callbacks = g_hash_table_new
 		(merged_callback_hash, merged_callback_equal);
 	merged->details->monitors = g_hash_table_new (NULL, NULL);
 }
 
 static void
-nautilus_merged_directory_class_init (NautilusMergedDirectoryClass *class)
+nemo_merged_directory_class_init (NemoMergedDirectoryClass *class)
 {
-	NautilusDirectoryClass *directory_class;
+	NemoDirectoryClass *directory_class;
 
-	directory_class = NAUTILUS_DIRECTORY_CLASS (class);
+	directory_class = NEMO_DIRECTORY_CLASS (class);
 	
 	G_OBJECT_CLASS (class)->finalize = merged_finalize;
 
@@ -670,20 +670,20 @@ nautilus_merged_directory_class_init (NautilusMergedDirectoryClass *class)
  	directory_class->are_all_files_seen = merged_are_all_files_seen;
 	directory_class->is_not_empty = merged_is_not_empty;
 	/* Override get_file_list so that we can return a list that includes
-	 * the files from each of the directories in NautilusMergedDirectory->details->directories.
+	 * the files from each of the directories in NemoMergedDirectory->details->directories.
          */
 	directory_class->get_file_list = merged_get_file_list;
 
 	class->add_real_directory = merged_add_real_directory;
 	class->remove_real_directory = merged_remove_real_directory;
 
-	g_type_class_add_private (class, sizeof (NautilusMergedDirectoryDetails));
+	g_type_class_add_private (class, sizeof (NemoMergedDirectoryDetails));
 
 	signals[ADD_REAL_DIRECTORY] 
 		= g_signal_new ("add_real_directory",
 		                G_TYPE_FROM_CLASS (class),
 		                G_SIGNAL_RUN_LAST,
-		                G_STRUCT_OFFSET (NautilusMergedDirectoryClass, 
+		                G_STRUCT_OFFSET (NemoMergedDirectoryClass, 
 						 add_real_directory),
 		                NULL, NULL,
 		                g_cclosure_marshal_VOID__POINTER,
@@ -692,7 +692,7 @@ nautilus_merged_directory_class_init (NautilusMergedDirectoryClass *class)
 		= g_signal_new ("remove_real_directory",
 		                G_TYPE_FROM_CLASS (class),
 		                G_SIGNAL_RUN_LAST,
-		                G_STRUCT_OFFSET (NautilusMergedDirectoryClass, 
+		                G_STRUCT_OFFSET (NemoMergedDirectoryClass, 
 						 remove_real_directory),
 		                NULL, NULL,
 		                g_cclosure_marshal_VOID__POINTER,

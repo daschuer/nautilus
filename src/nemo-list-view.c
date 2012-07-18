@@ -26,12 +26,12 @@
 */
 
 #include <config.h>
-#include "nautilus-list-view.h"
+#include "nemo-list-view.h"
 
-#include "nautilus-list-model.h"
-#include "nautilus-error-reporting.h"
-#include "nautilus-view-dnd.h"
-#include "nautilus-view-factory.h"
+#include "nemo-list-model.h"
+#include "nemo-error-reporting.h"
+#include "nemo-view-dnd.h"
+#include "nemo-view-factory.h"
 
 #include <string.h>
 #include <eel/eel-vfs-extensions.h>
@@ -43,28 +43,28 @@
 #include <libegg/eggtreemultidnd.h>
 #include <glib/gi18n.h>
 #include <glib-object.h>
-#include <libnautilus-extension/nautilus-column-provider.h>
-#include <libnautilus-private/nautilus-clipboard-monitor.h>
-#include <libnautilus-private/nautilus-column-chooser.h>
-#include <libnautilus-private/nautilus-column-utilities.h>
-#include <libnautilus-private/nautilus-dnd.h>
-#include <libnautilus-private/nautilus-file-dnd.h>
-#include <libnautilus-private/nautilus-file-utilities.h>
-#include <libnautilus-private/nautilus-ui-utilities.h>
-#include <libnautilus-private/nautilus-global-preferences.h>
-#include <libnautilus-private/nautilus-icon-dnd.h>
-#include <libnautilus-private/nautilus-metadata.h>
-#include <libnautilus-private/nautilus-module.h>
-#include <libnautilus-private/nautilus-tree-view-drag-dest.h>
-#include <libnautilus-private/nautilus-clipboard.h>
-#include <libnautilus-private/nautilus-cell-renderer-text-ellipsized.h>
+#include <libnemo-extension/nemo-column-provider.h>
+#include <libnemo-private/nemo-clipboard-monitor.h>
+#include <libnemo-private/nemo-column-chooser.h>
+#include <libnemo-private/nemo-column-utilities.h>
+#include <libnemo-private/nemo-dnd.h>
+#include <libnemo-private/nemo-file-dnd.h>
+#include <libnemo-private/nemo-file-utilities.h>
+#include <libnemo-private/nemo-ui-utilities.h>
+#include <libnemo-private/nemo-global-preferences.h>
+#include <libnemo-private/nemo-icon-dnd.h>
+#include <libnemo-private/nemo-metadata.h>
+#include <libnemo-private/nemo-module.h>
+#include <libnemo-private/nemo-tree-view-drag-dest.h>
+#include <libnemo-private/nemo-clipboard.h>
+#include <libnemo-private/nemo-cell-renderer-text-ellipsized.h>
 
-#define DEBUG_FLAG NAUTILUS_DEBUG_LIST_VIEW
-#include <libnautilus-private/nautilus-debug.h>
+#define DEBUG_FLAG NEMO_DEBUG_LIST_VIEW
+#include <libnemo-private/nemo-debug.h>
 
-struct NautilusListViewDetails {
+struct NemoListViewDetails {
 	GtkTreeView *tree_view;
-	NautilusListModel *model;
+	NemoListModel *model;
 	GtkActionGroup *list_action_group;
 	guint list_merge_id;
 
@@ -76,9 +76,9 @@ struct NautilusListViewDetails {
 	GList *cells;
 	GtkCellEditable *editable_widget;
 
-	NautilusZoomLevel zoom_level;
+	NemoZoomLevel zoom_level;
 
-	NautilusTreeViewDragDest *drag_dest;
+	NemoTreeViewDragDest *drag_dest;
 
 	GtkTreePath *double_click_path[2]; /* Both clicks in a double click need to be on the same row */
 
@@ -101,7 +101,7 @@ struct NautilusListViewDetails {
 
 	char *original_name;
 	
-	NautilusFile *renaming_file;
+	NemoFile *renaming_file;
 	gboolean rename_done;
 	guint renaming_file_activate_timeout;
 
@@ -132,22 +132,22 @@ static GdkCursor *              hand_cursor = NULL;
 
 static GtkTargetList *          source_target_list = NULL;
 
-static GList *nautilus_list_view_get_selection                   (NautilusView   *view);
-static GList *nautilus_list_view_get_selection_for_file_transfer (NautilusView   *view);
-static void   nautilus_list_view_set_zoom_level                  (NautilusListView        *view,
-								  NautilusZoomLevel  new_level,
+static GList *nemo_list_view_get_selection                   (NemoView   *view);
+static GList *nemo_list_view_get_selection_for_file_transfer (NemoView   *view);
+static void   nemo_list_view_set_zoom_level                  (NemoListView        *view,
+								  NemoZoomLevel  new_level,
 								  gboolean           always_set_level);
-static void   nautilus_list_view_scale_font_size                 (NautilusListView        *view,
-								  NautilusZoomLevel  new_level);
-static void   nautilus_list_view_scroll_to_file                  (NautilusListView        *view,
-								  NautilusFile      *file);
-static void   nautilus_list_view_rename_callback                 (NautilusFile      *file,
+static void   nemo_list_view_scale_font_size                 (NemoListView        *view,
+								  NemoZoomLevel  new_level);
+static void   nemo_list_view_scroll_to_file                  (NemoListView        *view,
+								  NemoFile      *file);
+static void   nemo_list_view_rename_callback                 (NemoFile      *file,
 								  GFile             *result_location,
 								  GError            *error,
 								  gpointer           callback_data);
 
 
-G_DEFINE_TYPE (NautilusListView, nautilus_list_view, NAUTILUS_TYPE_VIEW);
+G_DEFINE_TYPE (NemoListView, nemo_list_view, NEMO_TYPE_VIEW);
 
 static const char * default_trash_visible_columns[] = {
 	"name", "size", "type", "trashed_on", "trash_orig_path", NULL
@@ -158,9 +158,9 @@ static const char * default_trash_columns_order[] = {
 };
 
 static const gchar*
-get_default_sort_order (NautilusFile *file, gboolean *reversed)
+get_default_sort_order (NemoFile *file, gboolean *reversed)
 {
-	NautilusFileSortType default_sort_order;
+	NemoFileSortType default_sort_order;
 	gboolean default_sort_reversed;
 	const gchar *retval;
 	const char *attributes[] = {
@@ -174,13 +174,13 @@ get_default_sort_order (NautilusFile *file, gboolean *reversed)
 		NULL
 	};
 
-	retval = nautilus_file_get_default_sort_attribute (file, reversed);
+	retval = nemo_file_get_default_sort_attribute (file, reversed);
 
 	if (retval == NULL) {
-		default_sort_order = g_settings_get_enum (nautilus_preferences,
-							  NAUTILUS_PREFERENCES_DEFAULT_SORT_ORDER);
-		default_sort_reversed = g_settings_get_boolean (nautilus_preferences,
-								NAUTILUS_PREFERENCES_DEFAULT_SORT_IN_REVERSE_ORDER);
+		default_sort_order = g_settings_get_enum (nemo_preferences,
+							  NEMO_PREFERENCES_DEFAULT_SORT_ORDER);
+		default_sort_reversed = g_settings_get_boolean (nemo_preferences,
+								NEMO_PREFERENCES_DEFAULT_SORT_IN_REVERSE_ORDER);
 
 		retval = attributes[default_sort_order];
 		*reversed = default_sort_reversed;
@@ -192,11 +192,11 @@ get_default_sort_order (NautilusFile *file, gboolean *reversed)
 static void
 list_selection_changed_callback (GtkTreeSelection *selection, gpointer user_data)
 {
-	NautilusView *view;
+	NemoView *view;
 
-	view = NAUTILUS_VIEW (user_data);
+	view = NEMO_VIEW (user_data);
 
-	nautilus_view_notify_selection_changed (view);
+	nemo_view_notify_selection_changed (view);
 }
 
 /* Move these to eel? */
@@ -229,25 +229,25 @@ tree_view_has_selection (GtkTreeView *view)
 }
 
 static void
-preview_selected_items (NautilusListView *view)
+preview_selected_items (NemoListView *view)
 {
 	GList *file_list;
 	
-	file_list = nautilus_list_view_get_selection (NAUTILUS_VIEW (view));
+	file_list = nemo_list_view_get_selection (NEMO_VIEW (view));
 
 	if (file_list != NULL) {
-		nautilus_view_preview_files (NAUTILUS_VIEW (view),
+		nemo_view_preview_files (NEMO_VIEW (view),
 					     file_list, NULL);
-		nautilus_file_list_free (file_list);
+		nemo_file_list_free (file_list);
 	}
 }
 
 static void
-activate_selected_items (NautilusListView *view)
+activate_selected_items (NemoListView *view)
 {
 	GList *file_list;
 	
-	file_list = nautilus_list_view_get_selection (NAUTILUS_VIEW (view));
+	file_list = nemo_list_view_get_selection (NEMO_VIEW (view));
 
 	
 	if (view->details->renaming_file) {
@@ -265,45 +265,45 @@ activate_selected_items (NautilusListView *view)
 		view->details->renaming_file_activate_timeout = 0;
 	}
 	
-	nautilus_view_activate_files (NAUTILUS_VIEW (view),
+	nemo_view_activate_files (NEMO_VIEW (view),
 				      file_list,
 				      0, TRUE);
-	nautilus_file_list_free (file_list);
+	nemo_file_list_free (file_list);
 
 }
 
 static void
-activate_selected_items_alternate (NautilusListView *view,
-				   NautilusFile *file,
+activate_selected_items_alternate (NemoListView *view,
+				   NemoFile *file,
 				   gboolean open_in_tab)
 {
 	GList *file_list;
-	NautilusWindowOpenFlags flags;
+	NemoWindowOpenFlags flags;
 
 	flags = 0;
 
-	if (g_settings_get_boolean (nautilus_preferences,
-				    NAUTILUS_PREFERENCES_ALWAYS_USE_BROWSER)) {
+	if (g_settings_get_boolean (nemo_preferences,
+				    NEMO_PREFERENCES_ALWAYS_USE_BROWSER)) {
 		if (open_in_tab) {
-			flags |= NAUTILUS_WINDOW_OPEN_FLAG_NEW_TAB;
+			flags |= NEMO_WINDOW_OPEN_FLAG_NEW_TAB;
 		} else {
-			flags |= NAUTILUS_WINDOW_OPEN_FLAG_NEW_WINDOW;
+			flags |= NEMO_WINDOW_OPEN_FLAG_NEW_WINDOW;
 		}
 	} else {
-		flags |= NAUTILUS_WINDOW_OPEN_FLAG_CLOSE_BEHIND;
+		flags |= NEMO_WINDOW_OPEN_FLAG_CLOSE_BEHIND;
 	}
 
 	if (file != NULL) {
-		nautilus_file_ref (file);
+		nemo_file_ref (file);
 		file_list = g_list_prepend (NULL, file);
 	} else {
-		file_list = nautilus_list_view_get_selection (NAUTILUS_VIEW (view));
+		file_list = nemo_list_view_get_selection (NEMO_VIEW (view));
 	}
-	nautilus_view_activate_files (NAUTILUS_VIEW (view),
+	nemo_view_activate_files (NEMO_VIEW (view),
 				      file_list,
 				      flags,
 				      TRUE);
-	nautilus_file_list_free (file_list);
+	nemo_file_list_free (file_list);
 
 }
 
@@ -316,12 +316,12 @@ button_event_modifies_selection (GdkEventButton *event)
 static int
 get_click_policy (void)
 {
-	return g_settings_get_enum (nautilus_preferences,
-				    NAUTILUS_PREFERENCES_CLICK_POLICY);
+	return g_settings_get_enum (nemo_preferences,
+				    NEMO_PREFERENCES_CLICK_POLICY);
 }
 
 static void
-nautilus_list_view_did_not_drag (NautilusListView *view,
+nemo_list_view_did_not_drag (NemoListView *view,
 				 GdkEventButton *event)
 {
 	GtkTreeView *tree_view;
@@ -345,7 +345,7 @@ nautilus_list_view_did_not_drag (NautilusListView *view,
 			}
 		}
 
-		if ((get_click_policy () == NAUTILUS_CLICK_POLICY_SINGLE)
+		if ((get_click_policy () == NEMO_CLICK_POLICY_SINGLE)
 		    && !button_event_modifies_selection(event)) {
 			if (event->button == 1) {
 				activate_selected_items (view);
@@ -441,13 +441,13 @@ ref_list_free (GList *ref_list)
 }
 
 static void
-stop_drag_check (NautilusListView *view)
+stop_drag_check (NemoListView *view)
 {		
 	view->details->drag_button = 0;
 }
 
 static GdkPixbuf *
-get_drag_pixbuf (NautilusListView *view)
+get_drag_pixbuf (NemoListView *view)
 {
 	GtkTreeModel *model;
 	GtkTreePath *path;
@@ -464,7 +464,7 @@ get_drag_pixbuf (NautilusListView *view)
 		model = gtk_tree_view_get_model (view->details->tree_view);
 		gtk_tree_model_get_iter (model, &iter, path);
 		gtk_tree_model_get (model, &iter,
-				    nautilus_list_model_get_column_id_from_zoom_level (view->details->zoom_level),
+				    nemo_list_model_get_column_id_from_zoom_level (view->details->zoom_level),
 				    &ret,
 				    -1);
 
@@ -482,7 +482,7 @@ get_drag_pixbuf (NautilusListView *view)
 static void
 drag_begin_callback (GtkWidget *widget,
 		     GdkDragContext *context,
-		     NautilusListView *view)
+		     NemoListView *view)
 {
 	GList *ref_list;
 	GdkPixbuf *pixbuf;
@@ -512,15 +512,15 @@ motion_notify_callback (GtkWidget *widget,
 			GdkEventMotion *event,
 			gpointer callback_data)
 {
-	NautilusListView *view;
+	NemoListView *view;
 	
-	view = NAUTILUS_LIST_VIEW (callback_data);
+	view = NEMO_LIST_VIEW (callback_data);
 
 	if (event->window != gtk_tree_view_get_bin_window (GTK_TREE_VIEW (widget))) {
 		return FALSE;
 	}
 
-	if (get_click_policy () == NAUTILUS_CLICK_POLICY_SINGLE) {
+	if (get_click_policy () == NEMO_CLICK_POLICY_SINGLE) {
 		GtkTreePath *old_hover_path;
 
 		old_hover_path = view->details->hover_path;
@@ -544,7 +544,7 @@ motion_notify_callback (GtkWidget *widget,
 
 	if (view->details->drag_button != 0) {
 		if (!source_target_list) {
-			source_target_list = nautilus_list_model_get_drag_target_list ();
+			source_target_list = nemo_list_model_get_drag_target_list ();
 		}
 
 		if (gtk_drag_check_threshold (widget,
@@ -570,11 +570,11 @@ leave_notify_callback (GtkWidget *widget,
 		       GdkEventCrossing *event,
 		       gpointer callback_data)
 {
-	NautilusListView *view;
+	NemoListView *view;
 
-	view = NAUTILUS_LIST_VIEW (callback_data);
+	view = NEMO_LIST_VIEW (callback_data);
 
-	if (get_click_policy () == NAUTILUS_CLICK_POLICY_SINGLE &&
+	if (get_click_policy () == NEMO_CLICK_POLICY_SINGLE &&
 	    view->details->hover_path != NULL) {
 		gtk_tree_path_free (view->details->hover_path);
 		view->details->hover_path = NULL;
@@ -588,11 +588,11 @@ enter_notify_callback (GtkWidget *widget,
 		       GdkEventCrossing *event,
 		       gpointer callback_data)
 {
-	NautilusListView *view;
+	NemoListView *view;
 
-	view = NAUTILUS_LIST_VIEW (callback_data);
+	view = NEMO_LIST_VIEW (callback_data);
 
-	if (get_click_policy () == NAUTILUS_CLICK_POLICY_SINGLE) {
+	if (get_click_policy () == NEMO_CLICK_POLICY_SINGLE) {
 		if (view->details->hover_path != NULL) {
 			gtk_tree_path_free (view->details->hover_path);
 		}
@@ -611,18 +611,18 @@ enter_notify_callback (GtkWidget *widget,
 }
 
 static void
-do_popup_menu (GtkWidget *widget, NautilusListView *view, GdkEventButton *event)
+do_popup_menu (GtkWidget *widget, NemoListView *view, GdkEventButton *event)
 {
  	if (tree_view_has_selection (GTK_TREE_VIEW (widget))) {
-		nautilus_view_pop_up_selection_context_menu (NAUTILUS_VIEW (view), event);
+		nemo_view_pop_up_selection_context_menu (NEMO_VIEW (view), event);
 	} else {
-                nautilus_view_pop_up_background_context_menu (NAUTILUS_VIEW (view), event);
+                nemo_view_pop_up_background_context_menu (NEMO_VIEW (view), event);
 	}
 }
 
 static void
 row_activated_callback (GtkTreeView *treeview, GtkTreePath *path, 
-			GtkTreeViewColumn *column, NautilusListView *view)
+			GtkTreeViewColumn *column, NemoListView *view)
 {
 	activate_selected_items (view);
 }
@@ -630,7 +630,7 @@ row_activated_callback (GtkTreeView *treeview, GtkTreePath *path,
 static gboolean
 button_press_callback (GtkWidget *widget, GdkEventButton *event, gpointer callback_data)
 {
-	NautilusListView *view;
+	NemoListView *view;
 	GtkTreeView *tree_view;
 	GtkTreePath *path;
 	gboolean call_parent;
@@ -644,7 +644,7 @@ button_press_callback (GtkWidget *widget, GdkEventButton *event, gpointer callba
 	gboolean on_expander;
 	gboolean blank_click;
 
-	view = NAUTILUS_LIST_VIEW (callback_data);
+	view = NEMO_LIST_VIEW (callback_data);
 	tree_view = GTK_TREE_VIEW (widget);
 	tree_view_class = GTK_WIDGET_GET_CLASS (tree_view);
 	selection = gtk_tree_view_get_selection (tree_view);
@@ -659,8 +659,8 @@ button_press_callback (GtkWidget *widget, GdkEventButton *event, gpointer callba
 		return FALSE;
 	}
 
-	nautilus_list_model_set_drag_view
-		(NAUTILUS_LIST_MODEL (gtk_tree_view_get_model (tree_view)),
+	nemo_list_model_set_drag_view
+		(NEMO_LIST_MODEL (gtk_tree_view_get_model (tree_view)),
 		 tree_view,
 		 event->x, event->y);
 
@@ -680,7 +680,7 @@ button_press_callback (GtkWidget *widget, GdkEventButton *event, gpointer callba
 	last_click_time = current_time;
 
 	/* Ignore double click if we are in single click mode */
-	if (get_click_policy () == NAUTILUS_CLICK_POLICY_SINGLE && click_count >= 2) {
+	if (get_click_policy () == NEMO_CLICK_POLICY_SINGLE && click_count >= 2) {
 		return TRUE;
 	}
 
@@ -725,11 +725,11 @@ button_press_callback (GtkWidget *widget, GdkEventButton *event, gpointer callba
 					}
 				} else if (event->button == 1 &&
 					   (event->state & GDK_SHIFT_MASK) != 0) {
-					NautilusFile *file;
-					file = nautilus_list_model_file_for_path (view->details->model, path);
+					NemoFile *file;
+					file = nemo_list_model_file_for_path (view->details->model, path);
 					if (file != NULL) {
 						activate_selected_items_alternate (view, file, TRUE);
-						nautilus_file_unref (file);
+						nemo_file_unref (file);
 					}
 				}
 			} else {
@@ -856,15 +856,15 @@ button_release_callback (GtkWidget *widget,
 			 GdkEventButton *event, 
 			 gpointer callback_data)
 {
-	NautilusListView *view;
+	NemoListView *view;
 	
-	view = NAUTILUS_LIST_VIEW (callback_data);
+	view = NEMO_LIST_VIEW (callback_data);
 
 	if (event->button == view->details->drag_button) {
 		stop_drag_check (view);
 		if (!view->details->drag_started &&
 		    !view->details->ignore_button_release) {
-			nautilus_list_view_did_not_drag (view, event);
+			nemo_list_view_did_not_drag (view, event);
 		}
 	}
 	return FALSE;
@@ -873,9 +873,9 @@ button_release_callback (GtkWidget *widget,
 static gboolean
 popup_menu_callback (GtkWidget *widget, gpointer callback_data)
 {
- 	NautilusListView *view;
+ 	NemoListView *view;
 
-	view = NAUTILUS_LIST_VIEW (callback_data);
+	view = NEMO_LIST_VIEW (callback_data);
 
 	do_popup_menu (widget, view, NULL);
 
@@ -883,30 +883,30 @@ popup_menu_callback (GtkWidget *widget, gpointer callback_data)
 }
 
 static void
-subdirectory_done_loading_callback (NautilusDirectory *directory, NautilusListView *view)
+subdirectory_done_loading_callback (NemoDirectory *directory, NemoListView *view)
 {
-	nautilus_list_model_subdirectory_done_loading (view->details->model, directory);
+	nemo_list_model_subdirectory_done_loading (view->details->model, directory);
 }
 
 static void
 row_expanded_callback (GtkTreeView *treeview, GtkTreeIter *iter, GtkTreePath *path, gpointer callback_data)
 {
- 	NautilusListView *view;
- 	NautilusDirectory *directory;
+ 	NemoListView *view;
+ 	NemoDirectory *directory;
 
-	view = NAUTILUS_LIST_VIEW (callback_data);
+	view = NEMO_LIST_VIEW (callback_data);
 
-	if (nautilus_list_model_load_subdirectory (view->details->model, path, &directory)) {
+	if (nemo_list_model_load_subdirectory (view->details->model, path, &directory)) {
 		char *uri;
 
-		uri = nautilus_directory_get_uri (directory);
+		uri = nemo_directory_get_uri (directory);
 		DEBUG ("Row expaded callback for uri %s", uri);
 		g_free (uri);
 
-		nautilus_view_add_subdirectory (NAUTILUS_VIEW (view), directory);
+		nemo_view_add_subdirectory (NEMO_VIEW (view), directory);
 		
-		if (nautilus_directory_are_all_files_seen (directory)) {
-			nautilus_list_model_subdirectory_done_loading (view->details->model,
+		if (nemo_directory_are_all_files_seen (directory)) {
+			nemo_list_model_subdirectory_done_loading (view->details->model,
 								 directory);
 		} else {
 			g_signal_connect_object (directory, "done_loading",
@@ -914,14 +914,14 @@ row_expanded_callback (GtkTreeView *treeview, GtkTreeIter *iter, GtkTreePath *pa
 						 view, 0);
 		}
 		
-		nautilus_directory_unref (directory);
+		nemo_directory_unref (directory);
 	}
 }
 
 struct UnloadDelayData {
-	NautilusFile *file;
-	NautilusDirectory *directory;
-	NautilusListView *view;
+	NemoFile *file;
+	NemoDirectory *directory;
+	NemoListView *view;
 };
 
 static gboolean
@@ -929,19 +929,19 @@ unload_file_timeout (gpointer data)
 {
 	struct UnloadDelayData *unload_data = data;
 	GtkTreeIter iter;
-	NautilusListModel *model;
+	NemoListModel *model;
 	GtkTreePath *path;
 
 	if (unload_data->view != NULL) {
 		model = unload_data->view->details->model;
-		if (nautilus_list_model_get_tree_iter_from_file (model,
+		if (nemo_list_model_get_tree_iter_from_file (model,
 							   unload_data->file,
 							   unload_data->directory,
 							   &iter)) {
 			path = gtk_tree_model_get_path (GTK_TREE_MODEL (model), &iter);
 			if (!gtk_tree_view_row_expanded (unload_data->view->details->tree_view,
 							 path)) {
-				nautilus_list_model_unload_subdirectory (model, &iter);
+				nemo_list_model_unload_subdirectory (model, &iter);
 			}
 			gtk_tree_path_free (path);
 		}
@@ -950,9 +950,9 @@ unload_file_timeout (gpointer data)
 	eel_remove_weak_pointer (&unload_data->view);
 	
 	if (unload_data->directory) {
-		nautilus_directory_unref (unload_data->directory);
+		nemo_directory_unref (unload_data->directory);
 	}
-	nautilus_file_unref (unload_data->file);
+	nemo_file_unref (unload_data->file);
 	g_free (unload_data);
 	return FALSE;
 }
@@ -960,30 +960,30 @@ unload_file_timeout (gpointer data)
 static void
 row_collapsed_callback (GtkTreeView *treeview, GtkTreeIter *iter, GtkTreePath *path, gpointer callback_data)
 {
- 	NautilusListView *view;
- 	NautilusFile *file;
-	NautilusDirectory *directory;
+ 	NemoListView *view;
+ 	NemoFile *file;
+	NemoDirectory *directory;
 	GtkTreeIter parent;
 	struct UnloadDelayData *unload_data;
 	GtkTreeModel *model;
 	char *uri;
 	
-	view = NAUTILUS_LIST_VIEW (callback_data);
+	view = NEMO_LIST_VIEW (callback_data);
 	model = GTK_TREE_MODEL (view->details->model);
 		
 	gtk_tree_model_get (model, iter, 
-			    NAUTILUS_LIST_MODEL_FILE_COLUMN, &file,
+			    NEMO_LIST_MODEL_FILE_COLUMN, &file,
 			    -1);
 
 	directory = NULL;
 	if (gtk_tree_model_iter_parent (model, &parent, iter)) {
 		gtk_tree_model_get (model, &parent, 
-				    NAUTILUS_LIST_MODEL_SUBDIRECTORY_COLUMN, &directory,
+				    NEMO_LIST_MODEL_SUBDIRECTORY_COLUMN, &directory,
 				    -1);
 	}
 	
 
-	uri = nautilus_file_get_uri (file);
+	uri = nemo_file_get_uri (file);
 	DEBUG ("Row collapsed callback for uri %s", uri);
 	g_free (uri);
 
@@ -1000,27 +1000,27 @@ row_collapsed_callback (GtkTreeView *treeview, GtkTreeIter *iter, GtkTreePath *p
 }
 
 static void
-subdirectory_unloaded_callback (NautilusListModel *model,
-				NautilusDirectory *directory,
+subdirectory_unloaded_callback (NemoListModel *model,
+				NemoDirectory *directory,
 				gpointer callback_data)
 {
-	NautilusListView *view;
+	NemoListView *view;
 	
-	g_return_if_fail (NAUTILUS_IS_LIST_MODEL (model));
-	g_return_if_fail (NAUTILUS_IS_DIRECTORY (directory));
+	g_return_if_fail (NEMO_IS_LIST_MODEL (model));
+	g_return_if_fail (NEMO_IS_DIRECTORY (directory));
 
-	view = NAUTILUS_LIST_VIEW(callback_data);
+	view = NEMO_LIST_VIEW(callback_data);
 	
 	g_signal_handlers_disconnect_by_func (directory,
 					      G_CALLBACK (subdirectory_done_loading_callback),
 					      view);
-	nautilus_view_remove_subdirectory (NAUTILUS_VIEW (view), directory);
+	nemo_view_remove_subdirectory (NEMO_VIEW (view), directory);
 }
 
 static gboolean
 key_press_callback (GtkWidget *widget, GdkEventKey *event, gpointer callback_data)
 {
-	NautilusView *view;
+	NemoView *view;
 	GdkEventButton button_event = { 0 };
 	gboolean handled;
 	GtkTreeView *tree_view;
@@ -1028,13 +1028,13 @@ key_press_callback (GtkWidget *widget, GdkEventKey *event, gpointer callback_dat
 
 	tree_view = GTK_TREE_VIEW (widget);
 
-	view = NAUTILUS_VIEW (callback_data);
+	view = NEMO_VIEW (callback_data);
 	handled = FALSE;
 
 	switch (event->keyval) {
 	case GDK_KEY_F10:
 		if (event->state & GDK_CONTROL_MASK) {
-			nautilus_view_pop_up_background_context_menu (view, &button_event);
+			nemo_view_pop_up_background_context_menu (view, &button_event);
 			handled = TRUE;
 		}
 		break;
@@ -1067,23 +1067,23 @@ key_press_callback (GtkWidget *widget, GdkEventKey *event, gpointer callback_dat
 			handled = FALSE;
 			break;
 		}
-		if (!gtk_widget_has_focus (GTK_WIDGET (NAUTILUS_LIST_VIEW (view)->details->tree_view))) {
+		if (!gtk_widget_has_focus (GTK_WIDGET (NEMO_LIST_VIEW (view)->details->tree_view))) {
 			handled = FALSE;
 			break;
 		}
 		if ((event->state & GDK_SHIFT_MASK) != 0) {
-			activate_selected_items_alternate (NAUTILUS_LIST_VIEW (view), NULL, TRUE);
+			activate_selected_items_alternate (NEMO_LIST_VIEW (view), NULL, TRUE);
 		} else {
-			preview_selected_items (NAUTILUS_LIST_VIEW (view));
+			preview_selected_items (NEMO_LIST_VIEW (view));
 		}
 		handled = TRUE;
 		break;
 	case GDK_KEY_Return:
 	case GDK_KEY_KP_Enter:
 		if ((event->state & GDK_SHIFT_MASK) != 0) {
-			activate_selected_items_alternate (NAUTILUS_LIST_VIEW (view), NULL, TRUE);
+			activate_selected_items_alternate (NEMO_LIST_VIEW (view), NULL, TRUE);
 		} else {
-			activate_selected_items (NAUTILUS_LIST_VIEW (view));
+			activate_selected_items (NEMO_LIST_VIEW (view));
 		}
 		handled = TRUE;
 		break;
@@ -1102,24 +1102,24 @@ key_press_callback (GtkWidget *widget, GdkEventKey *event, gpointer callback_dat
 }
 
 static void
-nautilus_list_view_reveal_selection (NautilusView *view)
+nemo_list_view_reveal_selection (NemoView *view)
 {
 	GList *selection;
 
-	g_return_if_fail (NAUTILUS_IS_LIST_VIEW (view));
+	g_return_if_fail (NEMO_IS_LIST_VIEW (view));
 
-        selection = nautilus_view_get_selection (view);
+        selection = nemo_view_get_selection (view);
 
 	/* Make sure at least one of the selected items is scrolled into view */
 	if (selection != NULL) {
-		NautilusListView *list_view;
-		NautilusFile *file;
+		NemoListView *list_view;
+		NemoFile *file;
 		GtkTreeIter iter;
 		GtkTreePath *path;
 		
-		list_view = NAUTILUS_LIST_VIEW (view);
+		list_view = NEMO_LIST_VIEW (view);
 		file = selection->data;
-		if (nautilus_list_model_get_first_iter_for_file (list_view->details->model, file, &iter)) {
+		if (nemo_list_model_get_first_iter_for_file (list_view->details->model, file, &iter)) {
 			path = gtk_tree_model_get_path (GTK_TREE_MODEL (list_view->details->model), &iter);
 
 			gtk_tree_view_scroll_to_cell (list_view->details->tree_view, path, NULL, FALSE, 0.0, 0.0);
@@ -1128,7 +1128,7 @@ nautilus_list_view_reveal_selection (NautilusView *view)
 		}
 	}
 
-        nautilus_file_list_free (selection);
+        nemo_file_list_free (selection);
 }
 
 static gboolean
@@ -1157,24 +1157,24 @@ sort_criterion_changes_due_to_user (GtkTreeView *tree_view)
 
 static void
 sort_column_changed_callback (GtkTreeSortable *sortable, 
-			      NautilusListView *view)
+			      NemoListView *view)
 {
-	NautilusFile *file;
+	NemoFile *file;
 	gint sort_column_id, default_sort_column_id;
 	GtkSortType reversed;
 	GQuark sort_attr, default_sort_attr;
 	char *reversed_attr, *default_reversed_attr;
 	gboolean default_sort_reversed;
 
-	file = nautilus_view_get_directory_as_file (NAUTILUS_VIEW (view));
+	file = nemo_view_get_directory_as_file (NEMO_VIEW (view));
 
 	gtk_tree_sortable_get_sort_column_id (sortable, &sort_column_id, &reversed);
-	sort_attr = nautilus_list_model_get_attribute_from_sort_column_id (view->details->model, sort_column_id);
+	sort_attr = nemo_list_model_get_attribute_from_sort_column_id (view->details->model, sort_column_id);
 
-	default_sort_column_id = nautilus_list_model_get_sort_column_id_from_attribute (view->details->model,
+	default_sort_column_id = nemo_list_model_get_sort_column_id_from_attribute (view->details->model,
 										  g_quark_from_string (get_default_sort_order (file, &default_sort_reversed)));
-	default_sort_attr = nautilus_list_model_get_attribute_from_sort_column_id (view->details->model, default_sort_column_id);
-	nautilus_file_set_metadata (file, NAUTILUS_METADATA_KEY_LIST_VIEW_SORT_COLUMN,
+	default_sort_attr = nemo_list_model_get_attribute_from_sort_column_id (view->details->model, default_sort_column_id);
+	nemo_file_set_metadata (file, NEMO_METADATA_KEY_LIST_VIEW_SORT_COLUMN,
 				    g_quark_to_string (default_sort_attr), g_quark_to_string (sort_attr));
 
 	default_reversed_attr = (default_sort_reversed ? "true" : "false");
@@ -1186,10 +1186,10 @@ sort_column_changed_callback (GtkTreeSortable *sortable,
 		 * or if it makes sense for the attribute (i.e. date). */
 		if (sort_attr == default_sort_attr) {
 			/* use value from preferences */
-			reversed = g_settings_get_boolean (nautilus_preferences,
-							   NAUTILUS_PREFERENCES_DEFAULT_SORT_IN_REVERSE_ORDER);
+			reversed = g_settings_get_boolean (nemo_preferences,
+							   NEMO_PREFERENCES_DEFAULT_SORT_IN_REVERSE_ORDER);
 		} else {
-			reversed = nautilus_file_is_date_sort_attribute_q (sort_attr);
+			reversed = nemo_file_is_date_sort_attribute_q (sort_attr);
 		}
 
 		if (reversed) {
@@ -1203,11 +1203,11 @@ sort_column_changed_callback (GtkTreeSortable *sortable,
 
 
 	reversed_attr = (reversed ? "true" : "false");
-	nautilus_file_set_metadata (file, NAUTILUS_METADATA_KEY_LIST_VIEW_SORT_REVERSED,
+	nemo_file_set_metadata (file, NEMO_METADATA_KEY_LIST_VIEW_SORT_REVERSED,
 				    default_reversed_attr, reversed_attr);
 
 	/* Make sure selected item(s) is visible after sort */
-	nautilus_list_view_reveal_selection (NAUTILUS_VIEW (view));
+	nemo_list_view_reveal_selection (NEMO_VIEW (view));
 
 	view->details->last_sort_attr = sort_attr;
 }
@@ -1217,19 +1217,19 @@ editable_focus_out_cb (GtkWidget *widget,
 		       GdkEvent *event,
 		       gpointer user_data)
 {
-	NautilusListView *view = user_data;
+	NemoListView *view = user_data;
 
 	view->details->editable_widget = NULL;
 
-	nautilus_view_set_is_renaming (NAUTILUS_VIEW (view), FALSE);
-	nautilus_view_unfreeze_updates (NAUTILUS_VIEW (view));
+	nemo_view_set_is_renaming (NEMO_VIEW (view), FALSE);
+	nemo_view_unfreeze_updates (NEMO_VIEW (view));
 }
 
 static void
 cell_renderer_editing_started_cb (GtkCellRenderer *renderer,
 				  GtkCellEditable *editable,
 				  const gchar *path_str,
-				  NautilusListView *list_view)
+				  NemoListView *list_view)
 {
 	GtkEntry *entry;
 
@@ -1244,34 +1244,34 @@ cell_renderer_editing_started_cb (GtkCellRenderer *renderer,
 	g_signal_connect (entry, "focus-out-event",
 			  G_CALLBACK (editable_focus_out_cb), list_view);
 
-	nautilus_clipboard_set_up_editable
+	nemo_clipboard_set_up_editable
 		(GTK_EDITABLE (entry),
-		 nautilus_view_get_ui_manager (NAUTILUS_VIEW (list_view)),
+		 nemo_view_get_ui_manager (NEMO_VIEW (list_view)),
 		 FALSE);
 }
 
 static void
 cell_renderer_editing_canceled (GtkCellRendererText *cell,
-				NautilusListView    *view)
+				NemoListView    *view)
 {
 	view->details->editable_widget = NULL;
 
-	nautilus_view_set_is_renaming (NAUTILUS_VIEW (view), FALSE);
-	nautilus_view_unfreeze_updates (NAUTILUS_VIEW (view));
+	nemo_view_set_is_renaming (NEMO_VIEW (view), FALSE);
+	nemo_view_unfreeze_updates (NEMO_VIEW (view));
 }
 
 static void
 cell_renderer_edited (GtkCellRendererText *cell,
 		      const char          *path_str,
 		      const char          *new_text,
-		      NautilusListView    *view)
+		      NemoListView    *view)
 {
 	GtkTreePath *path;
-	NautilusFile *file;
+	NemoFile *file;
 	GtkTreeIter iter;
 
 	view->details->editable_widget = NULL;
-	nautilus_view_set_is_renaming (NAUTILUS_VIEW (view), FALSE);
+	nemo_view_set_is_renaming (NEMO_VIEW (view), FALSE);
 
 	/* Don't allow a rename with an empty string. Revert to original 
 	 * without notifying the user.
@@ -1280,7 +1280,7 @@ cell_renderer_edited (GtkCellRendererText *cell,
 		g_object_set (G_OBJECT (view->details->file_name_cell),
 			      "editable", FALSE,
 			      NULL);
-		nautilus_view_unfreeze_updates (NAUTILUS_VIEW (view));
+		nemo_view_unfreeze_updates (NEMO_VIEW (view));
 		return;
 	}
 	
@@ -1293,90 +1293,90 @@ cell_renderer_edited (GtkCellRendererText *cell,
 	
 	gtk_tree_model_get (GTK_TREE_MODEL (view->details->model),
 			    &iter,
-			    NAUTILUS_LIST_MODEL_FILE_COLUMN, &file,
+			    NEMO_LIST_MODEL_FILE_COLUMN, &file,
 			    -1);
 
 	/* Only rename if name actually changed */
 	if (strcmp (new_text, view->details->original_name) != 0) {
-		view->details->renaming_file = nautilus_file_ref (file);
+		view->details->renaming_file = nemo_file_ref (file);
 		view->details->rename_done = FALSE;
-		nautilus_rename_file (file, new_text, nautilus_list_view_rename_callback, g_object_ref (view));
+		nemo_rename_file (file, new_text, nemo_list_view_rename_callback, g_object_ref (view));
 		g_free (view->details->original_name);
 		view->details->original_name = g_strdup (new_text);
 	}
 	
-	nautilus_file_unref (file);
+	nemo_file_unref (file);
 
 	/*We're done editing - make the filename-cells readonly again.*/
 	g_object_set (G_OBJECT (view->details->file_name_cell),
 		      "editable", FALSE,
 		      NULL);
 
-	nautilus_view_unfreeze_updates (NAUTILUS_VIEW (view));
+	nemo_view_unfreeze_updates (NEMO_VIEW (view));
 }
 
 static char *
-get_root_uri_callback (NautilusTreeViewDragDest *dest,
+get_root_uri_callback (NemoTreeViewDragDest *dest,
 		       gpointer user_data)
 {
-	NautilusListView *view;
+	NemoListView *view;
 	
-	view = NAUTILUS_LIST_VIEW (user_data);
+	view = NEMO_LIST_VIEW (user_data);
 
-	return nautilus_view_get_uri (NAUTILUS_VIEW (view));
+	return nemo_view_get_uri (NEMO_VIEW (view));
 }
 
-static NautilusFile *
-get_file_for_path_callback (NautilusTreeViewDragDest *dest,
+static NemoFile *
+get_file_for_path_callback (NemoTreeViewDragDest *dest,
 			    GtkTreePath *path,
 			    gpointer user_data)
 {
-	NautilusListView *view;
+	NemoListView *view;
 	
-	view = NAUTILUS_LIST_VIEW (user_data);
+	view = NEMO_LIST_VIEW (user_data);
 
-	return nautilus_list_model_file_for_path (view->details->model, path);
+	return nemo_list_model_file_for_path (view->details->model, path);
 }
 
 /* Handles an URL received from Mozilla */
 static void
-list_view_handle_netscape_url (NautilusTreeViewDragDest *dest, const char *encoded_url,
-			       const char *target_uri, GdkDragAction action, int x, int y, NautilusListView *view)
+list_view_handle_netscape_url (NemoTreeViewDragDest *dest, const char *encoded_url,
+			       const char *target_uri, GdkDragAction action, int x, int y, NemoListView *view)
 {
-	nautilus_view_handle_netscape_url_drop (NAUTILUS_VIEW (view),
+	nemo_view_handle_netscape_url_drop (NEMO_VIEW (view),
 						encoded_url, target_uri, action, x, y);
 }
 
 static void
-list_view_handle_uri_list (NautilusTreeViewDragDest *dest, const char *item_uris,
+list_view_handle_uri_list (NemoTreeViewDragDest *dest, const char *item_uris,
 			   const char *target_uri,
-			   GdkDragAction action, int x, int y, NautilusListView *view)
+			   GdkDragAction action, int x, int y, NemoListView *view)
 {
-	nautilus_view_handle_uri_list_drop (NAUTILUS_VIEW (view),
+	nemo_view_handle_uri_list_drop (NEMO_VIEW (view),
 					    item_uris, target_uri, action, x, y);
 }
 
 static void
-list_view_handle_text (NautilusTreeViewDragDest *dest, const char *text,
+list_view_handle_text (NemoTreeViewDragDest *dest, const char *text,
 		       const char *target_uri,
-		       GdkDragAction action, int x, int y, NautilusListView *view)
+		       GdkDragAction action, int x, int y, NemoListView *view)
 {
-	nautilus_view_handle_text_drop (NAUTILUS_VIEW (view),
+	nemo_view_handle_text_drop (NEMO_VIEW (view),
 					text, target_uri, action, x, y);
 }
 
 static void
-list_view_handle_raw (NautilusTreeViewDragDest *dest, const char *raw_data,
+list_view_handle_raw (NemoTreeViewDragDest *dest, const char *raw_data,
 		      int length, const char *target_uri, const char *direct_save_uri,
-		      GdkDragAction action, int x, int y, NautilusListView *view)
+		      GdkDragAction action, int x, int y, NemoListView *view)
 {
-	nautilus_view_handle_raw_drop (NAUTILUS_VIEW (view),
+	nemo_view_handle_raw_drop (NEMO_VIEW (view),
 				       raw_data, length, target_uri, direct_save_uri,
 				       action, x, y);
 }
 
 static void
-move_copy_items_callback (NautilusTreeViewDragDest *dest,
+move_copy_items_callback (NemoTreeViewDragDest *dest,
 			  const GList *item_uris,
 			  const char *target_uri,
 			  guint action,
@@ -1385,12 +1385,12 @@ move_copy_items_callback (NautilusTreeViewDragDest *dest,
 			  gpointer user_data)
 
 {
-	NautilusView *view = user_data;
+	NemoView *view = user_data;
 
-	nautilus_clipboard_clear_if_colliding_uris (GTK_WIDGET (view),
+	nemo_clipboard_clear_if_colliding_uris (GTK_WIDGET (view),
 						    item_uris,
-						    nautilus_view_get_copied_files_atom (view));
-	nautilus_view_move_copy_items (view,
+						    nemo_view_get_copied_files_atom (view));
+	nemo_view_move_copy_items (view,
 				       item_uris,
 				       NULL,
 				       target_uri,
@@ -1399,25 +1399,25 @@ move_copy_items_callback (NautilusTreeViewDragDest *dest,
 }
 
 static void
-apply_columns_settings (NautilusListView *list_view,
+apply_columns_settings (NemoListView *list_view,
 			char **column_order,
 			char **visible_columns)
 {
 	GList *all_columns;
-	NautilusFile *file;
+	NemoFile *file;
 	GList *old_view_columns, *view_columns;
 	GHashTable *visible_columns_hash;
 	GtkTreeViewColumn *prev_view_column;
 	GList *l;
 	int i;
 
-	file = nautilus_view_get_directory_as_file (NAUTILUS_VIEW (list_view));
+	file = nemo_view_get_directory_as_file (NEMO_VIEW (list_view));
 
 	/* prepare ordered list of view columns using column_order and visible_columns */
 	view_columns = NULL;
 
-	all_columns = nautilus_get_columns_for_file (file);
-	all_columns = nautilus_sort_columns (all_columns, column_order);
+	all_columns = nemo_get_columns_for_file (file);
+	all_columns = nemo_sort_columns (all_columns, column_order);
 
 	/* hash table to lookup if a given column should be visible */
 	visible_columns_hash = g_hash_table_new_full (g_str_hash,
@@ -1451,7 +1451,7 @@ apply_columns_settings (NautilusListView *list_view,
 	}
 
 	g_hash_table_destroy (visible_columns_hash);
-	nautilus_column_list_free (all_columns);
+	nemo_column_list_free (all_columns);
 
 	view_columns = g_list_reverse (view_columns);
 
@@ -1487,7 +1487,7 @@ filename_cell_data_func (GtkTreeViewColumn *column,
 			 GtkCellRenderer   *renderer,
 			 GtkTreeModel      *model,
 			 GtkTreeIter       *iter,
-			 NautilusListView        *view)
+			 NemoListView        *view)
 {
 	char *text;
 	GtkTreePath *path;
@@ -1497,7 +1497,7 @@ filename_cell_data_func (GtkTreeViewColumn *column,
 			    view->details->file_name_column_num, &text,
 			    -1);
 
-	if (get_click_policy () == NAUTILUS_CLICK_POLICY_SINGLE) {
+	if (get_click_policy () == NEMO_CLICK_POLICY_SINGLE) {
 		path = gtk_tree_model_get_path (model, iter);
 
 		if (view->details->hover_path == NULL ||
@@ -1522,24 +1522,24 @@ filename_cell_data_func (GtkTreeViewColumn *column,
 static gboolean
 focus_in_event_callback (GtkWidget *widget, GdkEventFocus *event, gpointer user_data)
 {
-	NautilusWindowSlot *slot;
-	NautilusListView *list_view = NAUTILUS_LIST_VIEW (user_data);
+	NemoWindowSlot *slot;
+	NemoListView *list_view = NEMO_LIST_VIEW (user_data);
 
 	/* make the corresponding slot (and the pane that contains it) active */
-	slot = nautilus_view_get_nautilus_window_slot (NAUTILUS_VIEW (list_view));
-	nautilus_window_slot_make_hosting_pane_active (slot);
+	slot = nemo_view_get_nemo_window_slot (NEMO_VIEW (list_view));
+	nemo_window_slot_make_hosting_pane_active (slot);
 
 	return FALSE;
 }
 
 static void
-create_and_set_up_tree_view (NautilusListView *view)
+create_and_set_up_tree_view (NemoListView *view)
 {
 	GtkCellRenderer *cell;
 	GtkTreeViewColumn *column;
 	GtkBindingSet *binding_set;
 	AtkObject *atk_obj;
-	GList *nautilus_columns;
+	GList *nemo_columns;
 	GList *l;
 	gchar **default_column_order, **default_visible_columns;
 	
@@ -1555,7 +1555,7 @@ create_and_set_up_tree_view (NautilusListView *view)
 	gtk_binding_entry_remove (binding_set, GDK_KEY_BackSpace, 0);
 
 	view->details->drag_dest = 
-		nautilus_tree_view_drag_dest_new (view->details->tree_view);
+		nemo_tree_view_drag_dest_new (view->details->tree_view);
 
 	g_signal_connect_object (view->details->drag_dest,
 				 "get_root_uri",
@@ -1610,10 +1610,10 @@ create_and_set_up_tree_view (NautilusListView *view)
     	g_signal_connect_object (view->details->tree_view, "focus_in_event",
 				 G_CALLBACK(focus_in_event_callback), view, 0);
     
-	view->details->model = g_object_new (NAUTILUS_TYPE_LIST_MODEL, NULL);
+	view->details->model = g_object_new (NEMO_TYPE_LIST_MODEL, NULL);
 	gtk_tree_view_set_model (view->details->tree_view, GTK_TREE_MODEL (view->details->model));
 	/* Need the model for the dnd drop icon "accept" change */
-	nautilus_list_model_set_drag_view (NAUTILUS_LIST_MODEL (view->details->model),
+	nemo_list_model_set_drag_view (NEMO_LIST_MODEL (view->details->model),
 				     view->details->tree_view,  0, 0);
 
 	g_signal_connect_object (view->details->model, "sort_column_changed",
@@ -1625,24 +1625,24 @@ create_and_set_up_tree_view (NautilusListView *view)
 	gtk_tree_selection_set_mode (gtk_tree_view_get_selection (view->details->tree_view), GTK_SELECTION_MULTIPLE);
 	gtk_tree_view_set_rules_hint (view->details->tree_view, TRUE);
 
-	nautilus_columns = nautilus_get_all_columns ();
+	nemo_columns = nemo_get_all_columns ();
 
-	for (l = nautilus_columns; l != NULL; l = l->next) {
-		NautilusColumn *nautilus_column;
+	for (l = nemo_columns; l != NULL; l = l->next) {
+		NemoColumn *nemo_column;
 		int column_num;		
 		char *name;
 		char *label;
 		float xalign;
 
-		nautilus_column = NAUTILUS_COLUMN (l->data);
+		nemo_column = NEMO_COLUMN (l->data);
 
-		g_object_get (nautilus_column, 
+		g_object_get (nemo_column, 
 			      "name", &name, 
 			      "label", &label,
 			      "xalign", &xalign, NULL);
 
-		column_num = nautilus_list_model_add_column (view->details->model,
-						       nautilus_column);
+		column_num = nemo_list_model_add_column (view->details->model,
+						       nemo_column);
 
 		/* Created the name column specially, because it
 		 * has the icon in it.*/
@@ -1668,10 +1668,10 @@ create_and_set_up_tree_view (NautilusListView *view)
 			gtk_tree_view_column_pack_start (view->details->file_name_column, cell, FALSE);
 			gtk_tree_view_column_set_attributes (view->details->file_name_column,
 							     cell,
-							     "pixbuf", NAUTILUS_LIST_MODEL_SMALLEST_ICON_COLUMN,
+							     "pixbuf", NEMO_LIST_MODEL_SMALLEST_ICON_COLUMN,
 							     NULL);
 			
-			cell = nautilus_cell_renderer_text_ellipsized_new ();
+			cell = nemo_cell_renderer_text_ellipsized_new ();
 			view->details->file_name_cell = (GtkCellRendererText *)cell;
 			g_signal_connect (cell, "edited", G_CALLBACK (cell_renderer_edited), view);
 			g_signal_connect (cell, "editing-canceled", G_CALLBACK (cell_renderer_editing_canceled), view);
@@ -1702,12 +1702,12 @@ create_and_set_up_tree_view (NautilusListView *view)
 		g_free (name);
 		g_free (label);
 	}
-	nautilus_column_list_free (nautilus_columns);
+	nemo_column_list_free (nemo_columns);
 
-	default_visible_columns = g_settings_get_strv (nautilus_list_view_preferences,
-						       NAUTILUS_PREFERENCES_LIST_VIEW_DEFAULT_VISIBLE_COLUMNS);
-	default_column_order = g_settings_get_strv (nautilus_list_view_preferences,
-						    NAUTILUS_PREFERENCES_LIST_VIEW_DEFAULT_COLUMN_ORDER);
+	default_visible_columns = g_settings_get_strv (nemo_list_view_preferences,
+						       NEMO_PREFERENCES_LIST_VIEW_DEFAULT_VISIBLE_COLUMNS);
+	default_column_order = g_settings_get_strv (nemo_list_view_preferences,
+						    NEMO_PREFERENCES_LIST_VIEW_DEFAULT_COLUMN_ORDER);
 
 	/* Apply the default column order and visible columns, to get it
 	 * right most of the time. The metadata will be checked when a 
@@ -1727,28 +1727,28 @@ create_and_set_up_tree_view (NautilusListView *view)
 }
 
 static void
-nautilus_list_view_add_file (NautilusView *view, NautilusFile *file, NautilusDirectory *directory)
+nemo_list_view_add_file (NemoView *view, NemoFile *file, NemoDirectory *directory)
 {
-	NautilusListModel *model;
+	NemoListModel *model;
 
-	model = NAUTILUS_LIST_VIEW (view)->details->model;
-	nautilus_list_model_add_file (model, file, directory);
+	model = NEMO_LIST_VIEW (view)->details->model;
+	nemo_list_model_add_file (model, file, directory);
 }
 
 static char **
-get_visible_columns (NautilusListView *list_view)
+get_visible_columns (NemoListView *list_view)
 {
-	NautilusFile *file;
+	NemoFile *file;
 	GList *visible_columns;
 	char **ret;
 
 	ret = NULL;
 
-	file = nautilus_view_get_directory_as_file (NAUTILUS_VIEW (list_view));
+	file = nemo_view_get_directory_as_file (NEMO_VIEW (list_view));
 
-	visible_columns = nautilus_file_get_metadata_list 
+	visible_columns = nemo_file_get_metadata_list 
 		(file,
-		 NAUTILUS_METADATA_KEY_LIST_VIEW_VISIBLE_COLUMNS);
+		 NEMO_METADATA_KEY_LIST_VIEW_VISIBLE_COLUMNS);
 
 	if (visible_columns) {
 		GPtrArray *res;
@@ -1768,26 +1768,26 @@ get_visible_columns (NautilusListView *list_view)
 		return ret;
 	}
 
-	return nautilus_file_is_in_trash (file) ?
+	return nemo_file_is_in_trash (file) ?
 		g_strdupv ((gchar **) default_trash_visible_columns) :
-		g_settings_get_strv (nautilus_list_view_preferences,
-				     NAUTILUS_PREFERENCES_LIST_VIEW_DEFAULT_VISIBLE_COLUMNS);
+		g_settings_get_strv (nemo_list_view_preferences,
+				     NEMO_PREFERENCES_LIST_VIEW_DEFAULT_VISIBLE_COLUMNS);
 }
 
 static char **
-get_column_order (NautilusListView *list_view)
+get_column_order (NemoListView *list_view)
 {
-	NautilusFile *file;
+	NemoFile *file;
 	GList *column_order;
 	char **ret;
 
 	ret = NULL;
 
-	file = nautilus_view_get_directory_as_file (NAUTILUS_VIEW (list_view));
+	file = nemo_view_get_directory_as_file (NEMO_VIEW (list_view));
 
-	column_order = nautilus_file_get_metadata_list 
+	column_order = nemo_file_get_metadata_list 
 		(file,
-		 NAUTILUS_METADATA_KEY_LIST_VIEW_COLUMN_ORDER);
+		 NEMO_METADATA_KEY_LIST_VIEW_COLUMN_ORDER);
 
 	if (column_order) {
 		GPtrArray *res;
@@ -1807,14 +1807,14 @@ get_column_order (NautilusListView *list_view)
 		return ret;
 	}
 
-	return nautilus_file_is_in_trash (file) ?
+	return nemo_file_is_in_trash (file) ?
 		g_strdupv ((gchar **) default_trash_columns_order) :
-		g_settings_get_strv (nautilus_list_view_preferences,
-				     NAUTILUS_PREFERENCES_LIST_VIEW_DEFAULT_COLUMN_ORDER);
+		g_settings_get_strv (nemo_list_view_preferences,
+				     NEMO_PREFERENCES_LIST_VIEW_DEFAULT_COLUMN_ORDER);
 }
 
 static void
-set_columns_settings_from_metadata_and_preferences (NautilusListView *list_view)
+set_columns_settings_from_metadata_and_preferences (NemoListView *list_view)
 {
 	char **column_order;
 	char **visible_columns;
@@ -1829,19 +1829,19 @@ set_columns_settings_from_metadata_and_preferences (NautilusListView *list_view)
 }
 
 static void
-set_sort_order_from_metadata_and_preferences (NautilusListView *list_view)
+set_sort_order_from_metadata_and_preferences (NemoListView *list_view)
 {
 	char *sort_attribute;
 	int sort_column_id;
-	NautilusFile *file;
+	NemoFile *file;
 	gboolean sort_reversed, default_sort_reversed;
 	const gchar *default_sort_order;
 	
-	file = nautilus_view_get_directory_as_file (NAUTILUS_VIEW (list_view));
-	sort_attribute = nautilus_file_get_metadata (file,
-						     NAUTILUS_METADATA_KEY_LIST_VIEW_SORT_COLUMN,
+	file = nemo_view_get_directory_as_file (NEMO_VIEW (list_view));
+	sort_attribute = nemo_file_get_metadata (file,
+						     NEMO_METADATA_KEY_LIST_VIEW_SORT_COLUMN,
 						     NULL);
-	sort_column_id = nautilus_list_model_get_sort_column_id_from_attribute (list_view->details->model,
+	sort_column_id = nemo_list_model_get_sort_column_id_from_attribute (list_view->details->model,
 									  g_quark_from_string (sort_attribute));
 	g_free (sort_attribute);
 
@@ -1849,12 +1849,12 @@ set_sort_order_from_metadata_and_preferences (NautilusListView *list_view)
 	
 	if (sort_column_id == -1) {
 		sort_column_id =
-			nautilus_list_model_get_sort_column_id_from_attribute (list_view->details->model,
+			nemo_list_model_get_sort_column_id_from_attribute (list_view->details->model,
 									 g_quark_from_string (default_sort_order));
 	}
 
-	sort_reversed = nautilus_file_get_boolean_metadata (file,
-							    NAUTILUS_METADATA_KEY_LIST_VIEW_SORT_REVERSED,
+	sort_reversed = nemo_file_get_boolean_metadata (file,
+							    NEMO_METADATA_KEY_LIST_VIEW_SORT_REVERSED,
 							    default_sort_reversed);
 
 	gtk_tree_sortable_set_sort_column_id (GTK_TREE_SORTABLE (list_view->details->model),
@@ -1872,33 +1872,33 @@ list_view_changed_foreach (GtkTreeModel *model,
 	return FALSE;
 }
 
-static NautilusZoomLevel
+static NemoZoomLevel
 get_default_zoom_level (void) {
-	NautilusZoomLevel default_zoom_level;
+	NemoZoomLevel default_zoom_level;
 
-	default_zoom_level = g_settings_get_enum (nautilus_list_view_preferences,
-						  NAUTILUS_PREFERENCES_LIST_VIEW_DEFAULT_ZOOM_LEVEL);
+	default_zoom_level = g_settings_get_enum (nemo_list_view_preferences,
+						  NEMO_PREFERENCES_LIST_VIEW_DEFAULT_ZOOM_LEVEL);
 
-	if (default_zoom_level <  NAUTILUS_ZOOM_LEVEL_SMALLEST
-	    || NAUTILUS_ZOOM_LEVEL_LARGEST < default_zoom_level) {
-		default_zoom_level = NAUTILUS_ZOOM_LEVEL_SMALL;
+	if (default_zoom_level <  NEMO_ZOOM_LEVEL_SMALLEST
+	    || NEMO_ZOOM_LEVEL_LARGEST < default_zoom_level) {
+		default_zoom_level = NEMO_ZOOM_LEVEL_SMALL;
 	}
 
 	return default_zoom_level;
 }
 
 static void
-set_zoom_level_from_metadata_and_preferences (NautilusListView *list_view)
+set_zoom_level_from_metadata_and_preferences (NemoListView *list_view)
 {
-	NautilusFile *file;
+	NemoFile *file;
 	int level;
 
-	if (nautilus_view_supports_zooming (NAUTILUS_VIEW (list_view))) {
-		file = nautilus_view_get_directory_as_file (NAUTILUS_VIEW (list_view));
-		level = nautilus_file_get_integer_metadata (file,
-							    NAUTILUS_METADATA_KEY_LIST_VIEW_ZOOM_LEVEL, 
+	if (nemo_view_supports_zooming (NEMO_VIEW (list_view))) {
+		file = nemo_view_get_directory_as_file (NEMO_VIEW (list_view));
+		level = nemo_file_get_integer_metadata (file,
+							    NEMO_METADATA_KEY_LIST_VIEW_ZOOM_LEVEL, 
 							    get_default_zoom_level ());
-		nautilus_list_view_set_zoom_level (list_view, level, TRUE);
+		nemo_list_view_set_zoom_level (list_view, level, TRUE);
 		
 		/* updated the rows after updating the font size */
 		gtk_tree_model_foreach (GTK_TREE_MODEL (list_view->details->model),
@@ -1907,11 +1907,11 @@ set_zoom_level_from_metadata_and_preferences (NautilusListView *list_view)
 }
 
 static void
-nautilus_list_view_begin_loading (NautilusView *view)
+nemo_list_view_begin_loading (NemoView *view)
 {
-	NautilusListView *list_view;
+	NemoListView *list_view;
 
-	list_view = NAUTILUS_LIST_VIEW (view);
+	list_view = NEMO_LIST_VIEW (view);
 
 	set_sort_order_from_metadata_and_preferences (list_view);
 	set_zoom_level_from_metadata_and_preferences (list_view);
@@ -1919,7 +1919,7 @@ nautilus_list_view_begin_loading (NautilusView *view)
 }
 
 static void
-stop_cell_editing (NautilusListView *list_view)
+stop_cell_editing (NemoListView *list_view)
 {
 	GtkTreeViewColumn *column;
 
@@ -1935,27 +1935,27 @@ stop_cell_editing (NautilusListView *list_view)
 }
 
 static void
-nautilus_list_view_clear (NautilusView *view)
+nemo_list_view_clear (NemoView *view)
 {
-	NautilusListView *list_view;
+	NemoListView *list_view;
 
-	list_view = NAUTILUS_LIST_VIEW (view);
+	list_view = NEMO_LIST_VIEW (view);
 
 	if (list_view->details->model != NULL) {
 		stop_cell_editing (list_view);
-		nautilus_list_model_clear (list_view->details->model);
+		nemo_list_model_clear (list_view->details->model);
 	}
 }
 
 static void
-nautilus_list_view_rename_callback (NautilusFile *file,
+nemo_list_view_rename_callback (NemoFile *file,
 				    GFile *result_location,
 				    GError *error,
 				    gpointer callback_data)
 {
-	NautilusListView *view;
+	NemoListView *view;
 	
-	view = NAUTILUS_LIST_VIEW (callback_data);
+	view = NEMO_LIST_VIEW (callback_data);
 
 	if (view->details->renaming_file) {
 		view->details->rename_done = TRUE;
@@ -1965,7 +1965,7 @@ nautilus_list_view_rename_callback (NautilusFile *file,
 			 * We won't get a change event for the rename, so otherwise
 			 * it would stay around forever.
 			 */
-			nautilus_file_unref (view->details->renaming_file);
+			nemo_file_unref (view->details->renaming_file);
 			view->details->renaming_file = NULL;
 		}
 	}
@@ -1975,15 +1975,15 @@ nautilus_list_view_rename_callback (NautilusFile *file,
 
 
 static void
-nautilus_list_view_file_changed (NautilusView *view, NautilusFile *file, NautilusDirectory *directory)
+nemo_list_view_file_changed (NemoView *view, NemoFile *file, NemoDirectory *directory)
 {
-	NautilusListView *listview;
+	NemoListView *listview;
 	GtkTreeIter iter;
 	GtkTreePath *file_path;
 
-	listview = NAUTILUS_LIST_VIEW (view);
+	listview = NEMO_LIST_VIEW (view);
 	
-	nautilus_list_model_file_changed (listview->details->model, file, directory);
+	nemo_list_model_file_changed (listview->details->model, file, directory);
 
 	if (listview->details->renaming_file != NULL &&
 	    file == listview->details->renaming_file &&
@@ -1992,7 +1992,7 @@ nautilus_list_view_file_changed (NautilusView *view, NautilusFile *file, Nautilu
 		 * the tree-view changes above could have resorted the list, so
 		 * scroll to the new position
 		 */
-		if (nautilus_list_model_get_tree_iter_from_file (listview->details->model, file, directory, &iter)) {
+		if (nemo_list_model_get_tree_iter_from_file (listview->details->model, file, directory, &iter)) {
 			file_path = gtk_tree_model_get_path (GTK_TREE_MODEL (listview->details->model), &iter);
 			gtk_tree_view_scroll_to_cell (listview->details->tree_view,
 						      file_path, NULL,
@@ -2000,7 +2000,7 @@ nautilus_list_view_file_changed (NautilusView *view, NautilusFile *file, Nautilu
 			gtk_tree_path_free (file_path);
 		}
 		
-		nautilus_file_unref (listview->details->renaming_file);
+		nemo_file_unref (listview->details->renaming_file);
 		listview->details->renaming_file = NULL;
 	}
 }
@@ -2070,11 +2070,11 @@ tree_selection_has_common_parent (GtkTreeSelection *selection,
 }
 
 static char *
-nautilus_list_view_get_backing_uri (NautilusView *view)
+nemo_list_view_get_backing_uri (NemoView *view)
 {
-	NautilusListView *list_view;
-	NautilusListModel *list_model;
-	NautilusFile *file;
+	NemoListView *list_view;
+	NemoListModel *list_model;
+	NemoFile *file;
 	GtkTreeView *tree_view;
 	GtkTreeSelection *selection;
 	GtkTreePath *path;
@@ -2082,9 +2082,9 @@ nautilus_list_view_get_backing_uri (NautilusView *view)
 	guint length;
 	char *uri;
 
-	g_return_val_if_fail (NAUTILUS_IS_LIST_VIEW (view), NULL);
+	g_return_val_if_fail (NEMO_IS_LIST_VIEW (view), NULL);
 
-	list_view = NAUTILUS_LIST_VIEW (view);
+	list_view = NEMO_LIST_VIEW (view);
 	list_model = list_view->details->model;
 	tree_view = list_view->details->tree_view;
 
@@ -2110,19 +2110,19 @@ nautilus_list_view_get_backing_uri (NautilusView *view)
 		paths = gtk_tree_selection_get_selected_rows (selection, NULL);
 		path = (GtkTreePath *) paths->data;
 
-		file = nautilus_list_model_file_for_path (list_model, path);
+		file = nemo_list_model_file_for_path (list_model, path);
 		if (file == NULL) {
 			/* The selected item is a label, not a file */
 			gtk_tree_path_up (path);
-			file = nautilus_list_model_file_for_path (list_model, path);
+			file = nemo_list_model_file_for_path (list_model, path);
 		}
 
 		if (file != NULL) {
-			if (nautilus_file_is_directory (file) &&
+			if (nemo_file_is_directory (file) &&
 			    gtk_tree_view_row_expanded (tree_view, path)) {
-				uri = nautilus_file_get_uri (file);
+				uri = nemo_file_get_uri (file);
 			}
-			nautilus_file_unref (file);
+			nemo_file_unref (file);
 		}
 
 		gtk_tree_path_free (path);
@@ -2135,7 +2135,7 @@ nautilus_list_view_get_backing_uri (NautilusView *view)
 
 		/* Check that all the selected items belong to the same
 		 * directory and that directory is not the root directory (which
-		 * is handled by NautilusView::get_backing_directory.) */
+		 * is handled by NemoView::get_backing_directory.) */
 
 		tree_selection_has_common_parent (selection, &is_common, &is_root);
 
@@ -2144,10 +2144,10 @@ nautilus_list_view_get_backing_uri (NautilusView *view)
 			paths = gtk_tree_selection_get_selected_rows (selection, NULL);
 			path = (GtkTreePath *) paths->data;
 
-			file = nautilus_list_model_file_for_path (list_model, path);
+			file = nemo_list_model_file_for_path (list_model, path);
 			g_assert (file != NULL);
-			uri = nautilus_file_get_parent_uri (file);
-			nautilus_file_unref (file);
+			uri = nemo_file_get_parent_uri (file);
+			nemo_file_unref (file);
 
 			g_list_foreach (paths, (GFunc) gtk_tree_path_free, NULL);
 			g_list_free (paths);
@@ -2158,19 +2158,19 @@ nautilus_list_view_get_backing_uri (NautilusView *view)
 		return uri;
 	}
 
-	return NAUTILUS_VIEW_CLASS (nautilus_list_view_parent_class)->get_backing_uri (view);
+	return NEMO_VIEW_CLASS (nemo_list_view_parent_class)->get_backing_uri (view);
 }
 
 static void
-nautilus_list_view_get_selection_foreach_func (GtkTreeModel *model, GtkTreePath *path, GtkTreeIter *iter, gpointer data)
+nemo_list_view_get_selection_foreach_func (GtkTreeModel *model, GtkTreePath *path, GtkTreeIter *iter, gpointer data)
 {
 	GList **list;
-	NautilusFile *file;
+	NemoFile *file;
 	
 	list = data;
 
 	gtk_tree_model_get (model, iter,
-			    NAUTILUS_LIST_MODEL_FILE_COLUMN, &file,
+			    NEMO_LIST_MODEL_FILE_COLUMN, &file,
 			    -1);
 
 	if (file != NULL) {
@@ -2179,29 +2179,29 @@ nautilus_list_view_get_selection_foreach_func (GtkTreeModel *model, GtkTreePath 
 }
 
 static GList *
-nautilus_list_view_get_selection (NautilusView *view)
+nemo_list_view_get_selection (NemoView *view)
 {
 	GList *list;
 
 	list = NULL;
 
-	gtk_tree_selection_selected_foreach (gtk_tree_view_get_selection (NAUTILUS_LIST_VIEW (view)->details->tree_view),
-					     nautilus_list_view_get_selection_foreach_func, &list);
+	gtk_tree_selection_selected_foreach (gtk_tree_view_get_selection (NEMO_LIST_VIEW (view)->details->tree_view),
+					     nemo_list_view_get_selection_foreach_func, &list);
 
 	return g_list_reverse (list);
 }
 
 static void
-nautilus_list_view_get_selection_for_file_transfer_foreach_func (GtkTreeModel *model, GtkTreePath *path, GtkTreeIter *iter, gpointer data)
+nemo_list_view_get_selection_for_file_transfer_foreach_func (GtkTreeModel *model, GtkTreePath *path, GtkTreeIter *iter, gpointer data)
 {
-	NautilusFile *file;
+	NemoFile *file;
 	struct SelectionForeachData *selection_data;
 	GtkTreeIter parent, child;
 
 	selection_data = data;
 
 	gtk_tree_model_get (model, iter,
-			    NAUTILUS_LIST_MODEL_FILE_COLUMN, &file,
+			    NEMO_LIST_MODEL_FILE_COLUMN, &file,
 			    -1);
 
 	if (file != NULL) {
@@ -2218,22 +2218,22 @@ nautilus_list_view_get_selection_for_file_transfer_foreach_func (GtkTreeModel *m
 			child = parent;
 		}
 		
-		nautilus_file_ref (file);
+		nemo_file_ref (file);
 		selection_data->list = g_list_prepend (selection_data->list, file);
 	}
 }
 
 
 static GList *
-nautilus_list_view_get_selection_for_file_transfer (NautilusView *view)
+nemo_list_view_get_selection_for_file_transfer (NemoView *view)
 {
 	struct SelectionForeachData selection_data;
 
 	selection_data.list = NULL;
-	selection_data.selection = gtk_tree_view_get_selection (NAUTILUS_LIST_VIEW (view)->details->tree_view);
+	selection_data.selection = gtk_tree_view_get_selection (NEMO_LIST_VIEW (view)->details->tree_view);
 
 	gtk_tree_selection_selected_foreach (selection_data.selection,
-					     nautilus_list_view_get_selection_for_file_transfer_foreach_func, &selection_data);
+					     nemo_list_view_get_selection_for_file_transfer_foreach_func, &selection_data);
 
 	return g_list_reverse (selection_data.list);
 }
@@ -2242,25 +2242,25 @@ nautilus_list_view_get_selection_for_file_transfer (NautilusView *view)
 
 
 static guint
-nautilus_list_view_get_item_count (NautilusView *view)
+nemo_list_view_get_item_count (NemoView *view)
 {
-	g_return_val_if_fail (NAUTILUS_IS_LIST_VIEW (view), 0);
+	g_return_val_if_fail (NEMO_IS_LIST_VIEW (view), 0);
 
-	return nautilus_list_model_get_length (NAUTILUS_LIST_VIEW (view)->details->model);
+	return nemo_list_model_get_length (NEMO_LIST_VIEW (view)->details->model);
 }
 
 static gboolean
-nautilus_list_view_is_empty (NautilusView *view)
+nemo_list_view_is_empty (NemoView *view)
 {
-	return nautilus_list_model_is_empty (NAUTILUS_LIST_VIEW (view)->details->model);
+	return nemo_list_model_is_empty (NEMO_LIST_VIEW (view)->details->model);
 }
 
 static void
-nautilus_list_view_end_file_changes (NautilusView *view)
+nemo_list_view_end_file_changes (NemoView *view)
 {
-	NautilusListView *list_view;
+	NemoListView *list_view;
 
-	list_view = NAUTILUS_LIST_VIEW (view);
+	list_view = NEMO_LIST_VIEW (view);
 
 	if (list_view->details->new_selection_path) {
 		gtk_tree_view_set_cursor (list_view->details->tree_view,
@@ -2272,23 +2272,23 @@ nautilus_list_view_end_file_changes (NautilusView *view)
 }
 
 static void
-nautilus_list_view_remove_file (NautilusView *view, NautilusFile *file, NautilusDirectory *directory)
+nemo_list_view_remove_file (NemoView *view, NemoFile *file, NemoDirectory *directory)
 {
 	GtkTreePath *path;
 	GtkTreePath *file_path;
 	GtkTreeIter iter;
 	GtkTreeIter temp_iter;
 	GtkTreeRowReference* row_reference;
-	NautilusListView *list_view;
+	NemoListView *list_view;
 	GtkTreeModel* tree_model; 
 	GtkTreeSelection *selection;
 
 	path = NULL;
 	row_reference = NULL;
-	list_view = NAUTILUS_LIST_VIEW (view);
+	list_view = NEMO_LIST_VIEW (view);
 	tree_model = GTK_TREE_MODEL(list_view->details->model);
 	
-	if (nautilus_list_model_get_tree_iter_from_file (list_view->details->model, file, directory, &iter)) {
+	if (nemo_list_model_get_tree_iter_from_file (list_view->details->model, file, directory, &iter)) {
 		selection = gtk_tree_view_get_selection (list_view->details->tree_view);
 		file_path = gtk_tree_model_get_path (tree_model, &iter);
 
@@ -2313,7 +2313,7 @@ nautilus_list_view_remove_file (NautilusView *view, NautilusFile *file, Nautilus
        
 		gtk_tree_path_free (file_path);
 		
-		nautilus_list_model_remove_file (list_view->details->model, file, directory);
+		nemo_list_model_remove_file (list_view->details->model, file, directory);
 
 		if (gtk_tree_row_reference_valid (row_reference)) {
 			if (list_view->details->new_selection_path) {
@@ -2331,15 +2331,15 @@ nautilus_list_view_remove_file (NautilusView *view, NautilusFile *file, Nautilus
 }
 
 static void
-nautilus_list_view_set_selection (NautilusView *view, GList *selection)
+nemo_list_view_set_selection (NemoView *view, GList *selection)
 {
-	NautilusListView *list_view;
+	NemoListView *list_view;
 	GtkTreeSelection *tree_selection;
 	GList *node;
 	GList *iters, *l;
-	NautilusFile *file;
+	NemoFile *file;
 	
-	list_view = NAUTILUS_LIST_VIEW (view);
+	list_view = NEMO_LIST_VIEW (view);
 	tree_selection = gtk_tree_view_get_selection (list_view->details->tree_view);
 
 	g_signal_handlers_block_by_func (tree_selection, list_selection_changed_callback, view);
@@ -2347,7 +2347,7 @@ nautilus_list_view_set_selection (NautilusView *view, GList *selection)
 	gtk_tree_selection_unselect_all (tree_selection);
 	for (node = selection; node != NULL; node = node->next) {
 		file = node->data;
-		iters = nautilus_list_model_get_all_iters_for_file (list_view->details->model, file);
+		iters = nemo_list_model_get_all_iters_for_file (list_view->details->model, file);
 
 		for (l = iters; l != NULL; l = l->next) {
 			gtk_tree_selection_select_iter (tree_selection,
@@ -2357,32 +2357,32 @@ nautilus_list_view_set_selection (NautilusView *view, GList *selection)
 	}
 
 	g_signal_handlers_unblock_by_func (tree_selection, list_selection_changed_callback, view);
-	nautilus_view_notify_selection_changed (view);
+	nemo_view_notify_selection_changed (view);
 }
 
 static void
-nautilus_list_view_invert_selection (NautilusView *view)
+nemo_list_view_invert_selection (NemoView *view)
 {
-	NautilusListView *list_view;
+	NemoListView *list_view;
 	GtkTreeSelection *tree_selection;
 	GList *node;
 	GList *iters, *l;
-	NautilusFile *file;
+	NemoFile *file;
 	GList *selection = NULL;
 	
-	list_view = NAUTILUS_LIST_VIEW (view);
+	list_view = NEMO_LIST_VIEW (view);
 	tree_selection = gtk_tree_view_get_selection (list_view->details->tree_view);
 
 	g_signal_handlers_block_by_func (tree_selection, list_selection_changed_callback, view);
 	
 	gtk_tree_selection_selected_foreach (tree_selection,
-					     nautilus_list_view_get_selection_foreach_func, &selection);
+					     nemo_list_view_get_selection_foreach_func, &selection);
 
 	gtk_tree_selection_select_all (tree_selection);
 	
 	for (node = selection; node != NULL; node = node->next) {
 		file = node->data;
-		iters = nautilus_list_model_get_all_iters_for_file (list_view->details->model, file);
+		iters = nemo_list_model_get_all_iters_for_file (list_view->details->model, file);
 
 		for (l = iters; l != NULL; l = l->next) {
 			gtk_tree_selection_unselect_iter (tree_selection,
@@ -2394,13 +2394,13 @@ nautilus_list_view_invert_selection (NautilusView *view)
 	g_list_free (selection);
 
 	g_signal_handlers_unblock_by_func (tree_selection, list_selection_changed_callback, view);
-	nautilus_view_notify_selection_changed (view);
+	nemo_view_notify_selection_changed (view);
 }
 
 static void
-nautilus_list_view_select_all (NautilusView *view)
+nemo_list_view_select_all (NemoView *view)
 {
-	gtk_tree_selection_select_all (gtk_tree_view_get_selection (NAUTILUS_LIST_VIEW (view)->details->tree_view));
+	gtk_tree_selection_select_all (gtk_tree_view_get_selection (NEMO_LIST_VIEW (view)->details->tree_view));
 }
 
 static void
@@ -2412,18 +2412,18 @@ column_editor_response_callback (GtkWidget *dialog,
 }
 
 static void
-column_chooser_changed_callback (NautilusColumnChooser *chooser,
-				 NautilusListView *view)
+column_chooser_changed_callback (NemoColumnChooser *chooser,
+				 NemoListView *view)
 {
-	NautilusFile *file;
+	NemoFile *file;
 	char **visible_columns;
 	char **column_order;
 	GList *list;
 	int i;
 
-	file = nautilus_view_get_directory_as_file (NAUTILUS_VIEW (view));
+	file = nemo_view_get_directory_as_file (NEMO_VIEW (view));
 
-	nautilus_column_chooser_get_settings (chooser,
+	nemo_column_chooser_get_settings (chooser,
 					      &visible_columns,
 					      &column_order);
 
@@ -2432,8 +2432,8 @@ column_chooser_changed_callback (NautilusColumnChooser *chooser,
 		list = g_list_prepend (list, visible_columns[i]);
 	}
 	list = g_list_reverse (list);
-	nautilus_file_set_metadata_list (file,
-					 NAUTILUS_METADATA_KEY_LIST_VIEW_VISIBLE_COLUMNS,
+	nemo_file_set_metadata_list (file,
+					 NEMO_METADATA_KEY_LIST_VIEW_VISIBLE_COLUMNS,
 					 list);
 	g_list_free (list);
 
@@ -2442,8 +2442,8 @@ column_chooser_changed_callback (NautilusColumnChooser *chooser,
 		list = g_list_prepend (list, column_order[i]);
 	}
 	list = g_list_reverse (list);
-	nautilus_file_set_metadata_list (file,
-					 NAUTILUS_METADATA_KEY_LIST_VIEW_COLUMN_ORDER,
+	nemo_file_set_metadata_list (file,
+					 NEMO_METADATA_KEY_LIST_VIEW_COLUMN_ORDER,
 					 list);
 	g_list_free (list);
 
@@ -2454,15 +2454,15 @@ column_chooser_changed_callback (NautilusColumnChooser *chooser,
 }
 
 static void
-column_chooser_set_from_arrays (NautilusColumnChooser *chooser,
-                                NautilusListView *view,
+column_chooser_set_from_arrays (NemoColumnChooser *chooser,
+                                NemoListView *view,
                                 char **visible_columns,
                                 char **column_order)
 {
 	g_signal_handlers_block_by_func 
 		(chooser, G_CALLBACK (column_chooser_changed_callback), view);
 
-	nautilus_column_chooser_set_settings (chooser,
+	nemo_column_chooser_set_settings (chooser,
 					      visible_columns, 
 					      column_order);
 
@@ -2471,8 +2471,8 @@ column_chooser_set_from_arrays (NautilusColumnChooser *chooser,
 }
 
 static void
-column_chooser_set_from_settings (NautilusColumnChooser *chooser,
-				  NautilusListView *view)
+column_chooser_set_from_settings (NemoColumnChooser *chooser,
+				  NemoListView *view)
 {
 	char **visible_columns;
 	char **column_order;
@@ -2488,31 +2488,31 @@ column_chooser_set_from_settings (NautilusColumnChooser *chooser,
 }
 
 static void
-column_chooser_use_default_callback (NautilusColumnChooser *chooser,
-				     NautilusListView *view)
+column_chooser_use_default_callback (NemoColumnChooser *chooser,
+				     NemoListView *view)
 {
-	NautilusFile *file;
+	NemoFile *file;
 	char **default_columns;
 	char **default_order;
 
-	file = nautilus_view_get_directory_as_file 
-		(NAUTILUS_VIEW (view));
+	file = nemo_view_get_directory_as_file 
+		(NEMO_VIEW (view));
 
-	nautilus_file_set_metadata_list (file, NAUTILUS_METADATA_KEY_LIST_VIEW_COLUMN_ORDER, NULL);
-	nautilus_file_set_metadata_list (file, NAUTILUS_METADATA_KEY_LIST_VIEW_VISIBLE_COLUMNS, NULL);
+	nemo_file_set_metadata_list (file, NEMO_METADATA_KEY_LIST_VIEW_COLUMN_ORDER, NULL);
+	nemo_file_set_metadata_list (file, NEMO_METADATA_KEY_LIST_VIEW_VISIBLE_COLUMNS, NULL);
 
 	/* set view values ourselves, as new metadata could not have been
 	 * updated yet.
 	 */
-	default_columns = nautilus_file_is_in_trash (file) ?
+	default_columns = nemo_file_is_in_trash (file) ?
 		g_strdupv ((gchar **) default_trash_visible_columns) :
-		g_settings_get_strv (nautilus_list_view_preferences,
-				     NAUTILUS_PREFERENCES_LIST_VIEW_DEFAULT_VISIBLE_COLUMNS);
+		g_settings_get_strv (nemo_list_view_preferences,
+				     NEMO_PREFERENCES_LIST_VIEW_DEFAULT_VISIBLE_COLUMNS);
 
-	default_order = nautilus_file_is_in_trash (file) ?
+	default_order = nemo_file_is_in_trash (file) ?
 		g_strdupv ((gchar **) default_trash_columns_order) :
-		g_settings_get_strv (nautilus_list_view_preferences,
-				     NAUTILUS_PREFERENCES_LIST_VIEW_DEFAULT_COLUMN_ORDER);
+		g_settings_get_strv (nemo_list_view_preferences,
+				     NEMO_PREFERENCES_LIST_VIEW_DEFAULT_COLUMN_ORDER);
 
 	apply_columns_settings (view, default_order, default_columns);
 	column_chooser_set_from_arrays (chooser, view,
@@ -2523,20 +2523,20 @@ column_chooser_use_default_callback (NautilusColumnChooser *chooser,
 }
 
 static GtkWidget *
-create_column_editor (NautilusListView *view)
+create_column_editor (NemoListView *view)
 {
 	GtkWidget *window;
 	GtkWidget *label;
 	GtkWidget *box;
 	GtkWidget *column_chooser;
 	GtkWidget *alignment;
-	NautilusFile *file;
+	NemoFile *file;
 	char *str;
 	char *name;
 	const char *label_text;
 	
-	file = nautilus_view_get_directory_as_file (NAUTILUS_VIEW (view));
-	name = nautilus_file_get_display_name (file);
+	file = nemo_view_get_directory_as_file (NEMO_VIEW (view));
+	name = nemo_file_get_display_name (file);
 	str = g_strdup_printf (_("%s Visible Columns"), name);
 	g_free (name);
 
@@ -2574,7 +2574,7 @@ create_column_editor (NautilusListView *view)
 	gtk_widget_show (alignment);
 	gtk_box_pack_start (GTK_BOX (box), alignment, TRUE, TRUE, 0);
 
-	column_chooser = nautilus_column_chooser_new (file);
+	column_chooser = nemo_column_chooser_new (file);
 	gtk_widget_show (column_chooser);
 	gtk_container_add (GTK_CONTAINER (alignment), column_chooser);
 
@@ -2586,7 +2586,7 @@ create_column_editor (NautilusListView *view)
 			  view);
 
 	column_chooser_set_from_settings 
-		(NAUTILUS_COLUMN_CHOOSER (column_chooser), view);
+		(NEMO_COLUMN_CHOOSER (column_chooser), view);
 
 	return window;
 }
@@ -2595,9 +2595,9 @@ static void
 action_visible_columns_callback (GtkAction *action,
 				 gpointer callback_data)
 {
-	NautilusListView *list_view;
+	NemoListView *list_view;
 	
-	list_view = NAUTILUS_LIST_VIEW (callback_data);
+	list_view = NEMO_LIST_VIEW (callback_data);
 
 	if (list_view->details->column_editor) {
 		gtk_window_present (GTK_WINDOW (list_view->details->column_editor));
@@ -2617,17 +2617,17 @@ static const GtkActionEntry list_view_entries[] = {
 };
 
 static void
-nautilus_list_view_merge_menus (NautilusView *view)
+nemo_list_view_merge_menus (NemoView *view)
 {
-	NautilusListView *list_view;
+	NemoListView *list_view;
 	GtkUIManager *ui_manager;
 	GtkActionGroup *action_group;
 
-	list_view = NAUTILUS_LIST_VIEW (view);
+	list_view = NEMO_LIST_VIEW (view);
 
-	NAUTILUS_VIEW_CLASS (nautilus_list_view_parent_class)->merge_menus (view);
+	NEMO_VIEW_CLASS (nemo_list_view_parent_class)->merge_menus (view);
 
-	ui_manager = nautilus_view_get_ui_manager (view);
+	ui_manager = nemo_view_get_ui_manager (view);
 
 	action_group = gtk_action_group_new ("ListViewActions");
 	gtk_action_group_set_translation_domain (action_group, GETTEXT_PACKAGE);
@@ -2640,75 +2640,75 @@ nautilus_list_view_merge_menus (NautilusView *view)
 	g_object_unref (action_group); /* owned by ui manager */
 
 	list_view->details->list_merge_id =
-		gtk_ui_manager_add_ui_from_resource (ui_manager, "/org/gnome/nautilus/nautilus-list-view-ui.xml", NULL);
+		gtk_ui_manager_add_ui_from_resource (ui_manager, "/org/gnome/nemo/nemo-list-view-ui.xml", NULL);
 
 	list_view->details->menus_ready = TRUE;
 }
 
 static void
-nautilus_list_view_unmerge_menus (NautilusView *view)
+nemo_list_view_unmerge_menus (NemoView *view)
 {
-	NautilusListView *list_view;
+	NemoListView *list_view;
 	GtkUIManager *ui_manager;
 
-	list_view = NAUTILUS_LIST_VIEW (view);
+	list_view = NEMO_LIST_VIEW (view);
 
-	NAUTILUS_VIEW_CLASS (nautilus_list_view_parent_class)->unmerge_menus (view);
+	NEMO_VIEW_CLASS (nemo_list_view_parent_class)->unmerge_menus (view);
 
-	ui_manager = nautilus_view_get_ui_manager (view);
+	ui_manager = nemo_view_get_ui_manager (view);
 	if (ui_manager != NULL) {
-		nautilus_ui_unmerge_ui (ui_manager,
+		nemo_ui_unmerge_ui (ui_manager,
 					&list_view->details->list_merge_id,
 					&list_view->details->list_action_group);
 	}
 }
 
 static void
-nautilus_list_view_update_menus (NautilusView *view)
+nemo_list_view_update_menus (NemoView *view)
 {
-	NautilusListView *list_view;
+	NemoListView *list_view;
 
-        list_view = NAUTILUS_LIST_VIEW (view);
+        list_view = NEMO_LIST_VIEW (view);
 
 	/* don't update if the menus aren't ready */
 	if (!list_view->details->menus_ready) {
 		return;
 	}
 
-	NAUTILUS_VIEW_CLASS (nautilus_list_view_parent_class)->update_menus (view);
+	NEMO_VIEW_CLASS (nemo_list_view_parent_class)->update_menus (view);
 }
 
 /* Reset sort criteria and zoom level to match defaults */
 static void
-nautilus_list_view_reset_to_defaults (NautilusView *view)
+nemo_list_view_reset_to_defaults (NemoView *view)
 {
-	NautilusFile *file;
+	NemoFile *file;
 	const gchar *default_sort_order;
 	gboolean default_sort_reversed;
 
-	file = nautilus_view_get_directory_as_file (view);
+	file = nemo_view_get_directory_as_file (view);
 
-	nautilus_file_set_metadata (file, NAUTILUS_METADATA_KEY_LIST_VIEW_SORT_COLUMN, NULL, NULL);
-	nautilus_file_set_metadata (file, NAUTILUS_METADATA_KEY_LIST_VIEW_SORT_REVERSED, NULL, NULL);
-	nautilus_file_set_metadata (file, NAUTILUS_METADATA_KEY_LIST_VIEW_ZOOM_LEVEL, NULL, NULL);
-	nautilus_file_set_metadata_list (file, NAUTILUS_METADATA_KEY_LIST_VIEW_COLUMN_ORDER, NULL);
-	nautilus_file_set_metadata_list (file, NAUTILUS_METADATA_KEY_LIST_VIEW_VISIBLE_COLUMNS, NULL);
+	nemo_file_set_metadata (file, NEMO_METADATA_KEY_LIST_VIEW_SORT_COLUMN, NULL, NULL);
+	nemo_file_set_metadata (file, NEMO_METADATA_KEY_LIST_VIEW_SORT_REVERSED, NULL, NULL);
+	nemo_file_set_metadata (file, NEMO_METADATA_KEY_LIST_VIEW_ZOOM_LEVEL, NULL, NULL);
+	nemo_file_set_metadata_list (file, NEMO_METADATA_KEY_LIST_VIEW_COLUMN_ORDER, NULL);
+	nemo_file_set_metadata_list (file, NEMO_METADATA_KEY_LIST_VIEW_VISIBLE_COLUMNS, NULL);
 
 	default_sort_order = get_default_sort_order (file, &default_sort_reversed);
 
 	gtk_tree_sortable_set_sort_column_id
-		(GTK_TREE_SORTABLE (NAUTILUS_LIST_VIEW (view)->details->model),
-		 nautilus_list_model_get_sort_column_id_from_attribute (NAUTILUS_LIST_VIEW (view)->details->model,
+		(GTK_TREE_SORTABLE (NEMO_LIST_VIEW (view)->details->model),
+		 nemo_list_model_get_sort_column_id_from_attribute (NEMO_LIST_VIEW (view)->details->model,
 								  g_quark_from_string (default_sort_order)),
 		 default_sort_reversed ? GTK_SORT_DESCENDING : GTK_SORT_ASCENDING);
 
-	nautilus_list_view_set_zoom_level (NAUTILUS_LIST_VIEW (view), get_default_zoom_level (), FALSE);
-	set_columns_settings_from_metadata_and_preferences (NAUTILUS_LIST_VIEW (view));
+	nemo_list_view_set_zoom_level (NEMO_LIST_VIEW (view), get_default_zoom_level (), FALSE);
+	set_columns_settings_from_metadata_and_preferences (NEMO_LIST_VIEW (view));
 }
 
 static void
-nautilus_list_view_scale_font_size (NautilusListView *view, 
-				    NautilusZoomLevel new_level)
+nemo_list_view_scale_font_size (NemoListView *view, 
+				    NemoZoomLevel new_level)
 {
 	GList *l;
 	static gboolean first_time = TRUE;
@@ -2716,17 +2716,17 @@ nautilus_list_view_scale_font_size (NautilusListView *view,
 	int medium;
 	int i;
 
-	g_return_if_fail (new_level >= NAUTILUS_ZOOM_LEVEL_SMALLEST &&
-			  new_level <= NAUTILUS_ZOOM_LEVEL_LARGEST);
+	g_return_if_fail (new_level >= NEMO_ZOOM_LEVEL_SMALLEST &&
+			  new_level <= NEMO_ZOOM_LEVEL_LARGEST);
 
 	if (first_time) {
 		first_time = FALSE;
-		medium = NAUTILUS_ZOOM_LEVEL_SMALLER;
+		medium = NEMO_ZOOM_LEVEL_SMALLER;
 		pango_scale[medium] = PANGO_SCALE_MEDIUM;
-		for (i = medium; i > NAUTILUS_ZOOM_LEVEL_SMALLEST; i--) {
+		for (i = medium; i > NEMO_ZOOM_LEVEL_SMALLEST; i--) {
 			pango_scale[i - 1] = (1 / 1.2) * pango_scale[i];
 		}
-		for (i = medium; i < NAUTILUS_ZOOM_LEVEL_LARGEST; i++) {
+		for (i = medium; i < NEMO_ZOOM_LEVEL_LARGEST; i++) {
 			pango_scale[i + 1] = 1.2 * pango_scale[i];
 		}
 	}
@@ -2742,135 +2742,135 @@ nautilus_list_view_scale_font_size (NautilusListView *view,
 }
 
 static void
-nautilus_list_view_set_zoom_level (NautilusListView *view,
-				   NautilusZoomLevel new_level,
+nemo_list_view_set_zoom_level (NemoListView *view,
+				   NemoZoomLevel new_level,
 				   gboolean always_emit)
 {
 	int icon_size;
 	int column;
 
-	g_return_if_fail (NAUTILUS_IS_LIST_VIEW (view));
-	g_return_if_fail (new_level >= NAUTILUS_ZOOM_LEVEL_SMALLEST &&
-			  new_level <= NAUTILUS_ZOOM_LEVEL_LARGEST);
+	g_return_if_fail (NEMO_IS_LIST_VIEW (view));
+	g_return_if_fail (new_level >= NEMO_ZOOM_LEVEL_SMALLEST &&
+			  new_level <= NEMO_ZOOM_LEVEL_LARGEST);
 
 	if (view->details->zoom_level == new_level) {
 		if (always_emit) {
-			g_signal_emit_by_name (NAUTILUS_VIEW(view), "zoom_level_changed");
+			g_signal_emit_by_name (NEMO_VIEW(view), "zoom_level_changed");
 		}
 		return;
 	}
 
 	view->details->zoom_level = new_level;
-	g_signal_emit_by_name (NAUTILUS_VIEW(view), "zoom_level_changed");
+	g_signal_emit_by_name (NEMO_VIEW(view), "zoom_level_changed");
 
-	nautilus_file_set_integer_metadata
-		(nautilus_view_get_directory_as_file (NAUTILUS_VIEW (view)), 
-		 NAUTILUS_METADATA_KEY_LIST_VIEW_ZOOM_LEVEL, 
+	nemo_file_set_integer_metadata
+		(nemo_view_get_directory_as_file (NEMO_VIEW (view)), 
+		 NEMO_METADATA_KEY_LIST_VIEW_ZOOM_LEVEL, 
 		 get_default_zoom_level (),
 		 new_level);
 
 	/* Select correctly scaled icons. */
-	column = nautilus_list_model_get_column_id_from_zoom_level (new_level);
+	column = nemo_list_model_get_column_id_from_zoom_level (new_level);
 	gtk_tree_view_column_set_attributes (view->details->file_name_column,
 					     GTK_CELL_RENDERER (view->details->pixbuf_cell),
 					     "pixbuf", column,
 					     NULL);
 
 	/* Scale text. */
-	nautilus_list_view_scale_font_size (view, new_level);
+	nemo_list_view_scale_font_size (view, new_level);
 
 	/* Make all rows the same size. */
-	icon_size = nautilus_get_icon_size_for_zoom_level (new_level);
+	icon_size = nemo_get_icon_size_for_zoom_level (new_level);
 	gtk_cell_renderer_set_fixed_size (GTK_CELL_RENDERER (view->details->pixbuf_cell),
 					  -1, icon_size);
 
-	nautilus_view_update_menus (NAUTILUS_VIEW (view));
+	nemo_view_update_menus (NEMO_VIEW (view));
 
 	/* FIXME: https://bugzilla.gnome.org/show_bug.cgi?id=641518 */
 	gtk_tree_view_columns_autosize (view->details->tree_view);
 }
 
 static void
-nautilus_list_view_bump_zoom_level (NautilusView *view, int zoom_increment)
+nemo_list_view_bump_zoom_level (NemoView *view, int zoom_increment)
 {
-	NautilusListView *list_view;
+	NemoListView *list_view;
 	gint new_level;
 
-	g_return_if_fail (NAUTILUS_IS_LIST_VIEW (view));
+	g_return_if_fail (NEMO_IS_LIST_VIEW (view));
 
-	list_view = NAUTILUS_LIST_VIEW (view);
+	list_view = NEMO_LIST_VIEW (view);
 	new_level = list_view->details->zoom_level + zoom_increment;
 
-	if (new_level >= NAUTILUS_ZOOM_LEVEL_SMALLEST &&
-	    new_level <= NAUTILUS_ZOOM_LEVEL_LARGEST) {
-		nautilus_list_view_set_zoom_level (list_view, new_level, FALSE);
+	if (new_level >= NEMO_ZOOM_LEVEL_SMALLEST &&
+	    new_level <= NEMO_ZOOM_LEVEL_LARGEST) {
+		nemo_list_view_set_zoom_level (list_view, new_level, FALSE);
 	}
 }
 
-static NautilusZoomLevel
-nautilus_list_view_get_zoom_level (NautilusView *view)
+static NemoZoomLevel
+nemo_list_view_get_zoom_level (NemoView *view)
 {
-	NautilusListView *list_view;
+	NemoListView *list_view;
 
-	g_return_val_if_fail (NAUTILUS_IS_LIST_VIEW (view), NAUTILUS_ZOOM_LEVEL_STANDARD);
+	g_return_val_if_fail (NEMO_IS_LIST_VIEW (view), NEMO_ZOOM_LEVEL_STANDARD);
 
-	list_view = NAUTILUS_LIST_VIEW (view);
+	list_view = NEMO_LIST_VIEW (view);
 
 	return list_view->details->zoom_level;
 }
 
 static void
-nautilus_list_view_zoom_to_level (NautilusView *view,
-				  NautilusZoomLevel zoom_level)
+nemo_list_view_zoom_to_level (NemoView *view,
+				  NemoZoomLevel zoom_level)
 {
-	NautilusListView *list_view;
+	NemoListView *list_view;
 
-	g_return_if_fail (NAUTILUS_IS_LIST_VIEW (view));
+	g_return_if_fail (NEMO_IS_LIST_VIEW (view));
 
-	list_view = NAUTILUS_LIST_VIEW (view);
+	list_view = NEMO_LIST_VIEW (view);
 
-	nautilus_list_view_set_zoom_level (list_view, zoom_level, FALSE);
+	nemo_list_view_set_zoom_level (list_view, zoom_level, FALSE);
 }
 
 static void
-nautilus_list_view_restore_default_zoom_level (NautilusView *view)
+nemo_list_view_restore_default_zoom_level (NemoView *view)
 {
-	NautilusListView *list_view;
+	NemoListView *list_view;
 
-	g_return_if_fail (NAUTILUS_IS_LIST_VIEW (view));
+	g_return_if_fail (NEMO_IS_LIST_VIEW (view));
 
-	list_view = NAUTILUS_LIST_VIEW (view);
+	list_view = NEMO_LIST_VIEW (view);
 
-	nautilus_list_view_set_zoom_level (list_view, get_default_zoom_level (), FALSE);
+	nemo_list_view_set_zoom_level (list_view, get_default_zoom_level (), FALSE);
 }
 
 static gboolean 
-nautilus_list_view_can_zoom_in (NautilusView *view) 
+nemo_list_view_can_zoom_in (NemoView *view) 
 {
-	g_return_val_if_fail (NAUTILUS_IS_LIST_VIEW (view), FALSE);
+	g_return_val_if_fail (NEMO_IS_LIST_VIEW (view), FALSE);
 
-	return NAUTILUS_LIST_VIEW (view)->details->zoom_level	< NAUTILUS_ZOOM_LEVEL_LARGEST;
+	return NEMO_LIST_VIEW (view)->details->zoom_level	< NEMO_ZOOM_LEVEL_LARGEST;
 }
 
 static gboolean 
-nautilus_list_view_can_zoom_out (NautilusView *view) 
+nemo_list_view_can_zoom_out (NemoView *view) 
 {
-	g_return_val_if_fail (NAUTILUS_IS_LIST_VIEW (view), FALSE);
+	g_return_val_if_fail (NEMO_IS_LIST_VIEW (view), FALSE);
 
-	return NAUTILUS_LIST_VIEW (view)->details->zoom_level > NAUTILUS_ZOOM_LEVEL_SMALLEST;
+	return NEMO_LIST_VIEW (view)->details->zoom_level > NEMO_ZOOM_LEVEL_SMALLEST;
 }
 
 static void
-nautilus_list_view_start_renaming_file (NautilusView *view,
-					NautilusFile *file,
+nemo_list_view_start_renaming_file (NemoView *view,
+					NemoFile *file,
 					gboolean select_all)
 {
-	NautilusListView *list_view;
+	NemoListView *list_view;
 	GtkTreeIter iter;
 	GtkTreePath *path;
 	gint start_offset, end_offset;
 	
-	list_view = NAUTILUS_LIST_VIEW (view);
+	list_view = NEMO_LIST_VIEW (view);
 	
 	/* Select all if we are in renaming mode already */
 	if (list_view->details->file_name_column && list_view->details->editable_widget) {
@@ -2880,15 +2880,15 @@ nautilus_list_view_start_renaming_file (NautilusView *view,
 		return;
 	}
 
-	if (!nautilus_list_model_get_first_iter_for_file (list_view->details->model, file, &iter)) {
+	if (!nemo_list_model_get_first_iter_for_file (list_view->details->model, file, &iter)) {
 		return;
 	}
 
 	/* call parent class to make sure the right icon is selected */
-	NAUTILUS_VIEW_CLASS (nautilus_list_view_parent_class)->start_renaming_file (view, file, select_all);
+	NEMO_VIEW_CLASS (nemo_list_view_parent_class)->start_renaming_file (view, file, select_all);
 
 	/* Freeze updates to the view to prevent losing rename focus when the tree view updates */
-	nautilus_view_freeze_updates (NAUTILUS_VIEW (view));
+	nemo_view_freeze_updates (NEMO_VIEW (view));
 
 	path = gtk_tree_model_get_path (GTK_TREE_MODEL (list_view->details->model), &iter);
 
@@ -2920,18 +2920,18 @@ nautilus_list_view_start_renaming_file (NautilusView *view,
 }
 
 static void
-nautilus_list_view_click_policy_changed (NautilusView *directory_view)
+nemo_list_view_click_policy_changed (NemoView *directory_view)
 {
 	GdkWindow *win;
 	GdkDisplay *display;
-	NautilusListView *view;
+	NemoListView *view;
 	GtkTreeIter iter;
 	GtkTreeView *tree;
 
-	view = NAUTILUS_LIST_VIEW (directory_view);
+	view = NEMO_LIST_VIEW (directory_view);
 
 	/* ensure that we unset the hand cursor and refresh underlined rows */
-	if (get_click_policy () == NAUTILUS_CLICK_POLICY_DOUBLE) {
+	if (get_click_policy () == NEMO_CLICK_POLICY_DOUBLE) {
 		if (view->details->hover_path != NULL) {
 			if (gtk_tree_model_get_iter (GTK_TREE_MODEL (view->details->model),
 						     &iter, view->details->hover_path)) {
@@ -2955,7 +2955,7 @@ nautilus_list_view_click_policy_changed (NautilusView *directory_view)
 		}
 
 		g_clear_object (&hand_cursor);
-	} else if (get_click_policy () == NAUTILUS_CLICK_POLICY_SINGLE) {
+	} else if (get_click_policy () == NEMO_CLICK_POLICY_SINGLE) {
 		if (hand_cursor == NULL) {
 			hand_cursor = gdk_cursor_new(GDK_HAND2);
 		}
@@ -2965,9 +2965,9 @@ nautilus_list_view_click_policy_changed (NautilusView *directory_view)
 static void
 default_sort_order_changed_callback (gpointer callback_data)
 {
-	NautilusListView *list_view;
+	NemoListView *list_view;
 
-	list_view = NAUTILUS_LIST_VIEW (callback_data);
+	list_view = NEMO_LIST_VIEW (callback_data);
 
 	set_sort_order_from_metadata_and_preferences (list_view);
 }
@@ -2975,9 +2975,9 @@ default_sort_order_changed_callback (gpointer callback_data)
 static void
 default_zoom_level_changed_callback (gpointer callback_data)
 {
-	NautilusListView *list_view;
+	NemoListView *list_view;
 
-	list_view = NAUTILUS_LIST_VIEW (callback_data);
+	list_view = NEMO_LIST_VIEW (callback_data);
 
 	set_zoom_level_from_metadata_and_preferences (list_view);
 }
@@ -2985,9 +2985,9 @@ default_zoom_level_changed_callback (gpointer callback_data)
 static void
 default_visible_columns_changed_callback (gpointer callback_data)
 {
-	NautilusListView *list_view;
+	NemoListView *list_view;
 	
-	list_view = NAUTILUS_LIST_VIEW (callback_data);
+	list_view = NEMO_LIST_VIEW (callback_data);
 
 	set_columns_settings_from_metadata_and_preferences (list_view);	
 }
@@ -2995,47 +2995,47 @@ default_visible_columns_changed_callback (gpointer callback_data)
 static void
 default_column_order_changed_callback (gpointer callback_data)
 {
-	NautilusListView *list_view;
+	NemoListView *list_view;
 	
-	list_view = NAUTILUS_LIST_VIEW (callback_data);
+	list_view = NEMO_LIST_VIEW (callback_data);
 
 	set_columns_settings_from_metadata_and_preferences (list_view);
 }
 
 static void
-nautilus_list_view_sort_directories_first_changed (NautilusView *view)
+nemo_list_view_sort_directories_first_changed (NemoView *view)
 {
-	NautilusListView *list_view;
+	NemoListView *list_view;
 
-	list_view = NAUTILUS_LIST_VIEW (view);
+	list_view = NEMO_LIST_VIEW (view);
 
-	nautilus_list_model_set_should_sort_directories_first (list_view->details->model,
-							 nautilus_view_should_sort_directories_first (view));
+	nemo_list_model_set_should_sort_directories_first (list_view->details->model,
+							 nemo_view_should_sort_directories_first (view));
 }
 
 static int
-nautilus_list_view_compare_files (NautilusView *view, NautilusFile *file1, NautilusFile *file2)
+nemo_list_view_compare_files (NemoView *view, NemoFile *file1, NemoFile *file2)
 {
-	NautilusListView *list_view;
+	NemoListView *list_view;
 
-	list_view = NAUTILUS_LIST_VIEW (view);
-	return nautilus_list_model_compare_func (list_view->details->model, file1, file2);
+	list_view = NEMO_LIST_VIEW (view);
+	return nemo_list_model_compare_func (list_view->details->model, file1, file2);
 }
 
 static gboolean
-nautilus_list_view_using_manual_layout (NautilusView *view)
+nemo_list_view_using_manual_layout (NemoView *view)
 {
-	g_return_val_if_fail (NAUTILUS_IS_LIST_VIEW (view), FALSE);
+	g_return_val_if_fail (NEMO_IS_LIST_VIEW (view), FALSE);
 
 	return FALSE;
 }
 
 static void
-nautilus_list_view_dispose (GObject *object)
+nemo_list_view_dispose (GObject *object)
 {
-	NautilusListView *list_view;
+	NemoListView *list_view;
 
-	list_view = NAUTILUS_LIST_VIEW (object);
+	list_view = NEMO_LIST_VIEW (object);
 
 	if (list_view->details->model) {
 		stop_cell_editing (list_view);
@@ -3054,20 +3054,20 @@ nautilus_list_view_dispose (GObject *object)
 	}
 
 	if (list_view->details->clipboard_handler_id != 0) {
-		g_signal_handler_disconnect (nautilus_clipboard_monitor_get (),
+		g_signal_handler_disconnect (nemo_clipboard_monitor_get (),
 		                             list_view->details->clipboard_handler_id);
 		list_view->details->clipboard_handler_id = 0;
 	}
 
-	G_OBJECT_CLASS (nautilus_list_view_parent_class)->dispose (object);
+	G_OBJECT_CLASS (nemo_list_view_parent_class)->dispose (object);
 }
 
 static void
-nautilus_list_view_finalize (GObject *object)
+nemo_list_view_finalize (GObject *object)
 {
-	NautilusListView *list_view;
+	NemoListView *list_view;
 
-	list_view = NAUTILUS_LIST_VIEW (object);
+	list_view = NEMO_LIST_VIEW (object);
 
 	g_free (list_view->details->original_name);
 	list_view->details->original_name = NULL;
@@ -3095,31 +3095,31 @@ nautilus_list_view_finalize (GObject *object)
 
 	g_free (list_view->details);
 
-	g_signal_handlers_disconnect_by_func (nautilus_preferences,
+	g_signal_handlers_disconnect_by_func (nemo_preferences,
 					      default_sort_order_changed_callback,
 					      list_view);
-	g_signal_handlers_disconnect_by_func (nautilus_list_view_preferences,
+	g_signal_handlers_disconnect_by_func (nemo_list_view_preferences,
 					      default_zoom_level_changed_callback,
 					      list_view);
-	g_signal_handlers_disconnect_by_func (nautilus_list_view_preferences,
+	g_signal_handlers_disconnect_by_func (nemo_list_view_preferences,
 					      default_visible_columns_changed_callback,
 					      list_view);
-	g_signal_handlers_disconnect_by_func (nautilus_list_view_preferences,
+	g_signal_handlers_disconnect_by_func (nemo_list_view_preferences,
 					      default_column_order_changed_callback,
 					      list_view);
 
-	G_OBJECT_CLASS (nautilus_list_view_parent_class)->finalize (object);
+	G_OBJECT_CLASS (nemo_list_view_parent_class)->finalize (object);
 }
 
 static char *
-nautilus_list_view_get_first_visible_file (NautilusView *view)
+nemo_list_view_get_first_visible_file (NemoView *view)
 {
-	NautilusFile *file;
+	NemoFile *file;
 	GtkTreePath *path;
 	GtkTreeIter iter;
-	NautilusListView *list_view;
+	NemoListView *list_view;
 
-	list_view = NAUTILUS_LIST_VIEW (view);
+	list_view = NEMO_LIST_VIEW (view);
 
 	if (gtk_tree_view_get_path_at_pos (list_view->details->tree_view,
 					   0, 0,
@@ -3131,14 +3131,14 @@ nautilus_list_view_get_first_visible_file (NautilusView *view)
 	
 		gtk_tree_model_get (GTK_TREE_MODEL (list_view->details->model),
 				    &iter,
-				    NAUTILUS_LIST_MODEL_FILE_COLUMN, &file,
+				    NEMO_LIST_MODEL_FILE_COLUMN, &file,
 				    -1);
 		if (file) {
 			char *uri;
 			
-			uri = nautilus_file_get_uri (file);
+			uri = nemo_file_get_uri (file);
 			
-			nautilus_file_unref (file);
+			nemo_file_unref (file);
 			
 			return uri;
 		}
@@ -3148,13 +3148,13 @@ nautilus_list_view_get_first_visible_file (NautilusView *view)
 }
 
 static void
-nautilus_list_view_scroll_to_file (NautilusListView *view,
-				   NautilusFile *file)
+nemo_list_view_scroll_to_file (NemoListView *view,
+				   NemoFile *file)
 {
 	GtkTreePath *path;
 	GtkTreeIter iter;
 	
-	if (!nautilus_list_model_get_first_iter_for_file (view->details->model, file, &iter)) {
+	if (!nemo_list_model_get_first_iter_for_file (view->details->model, file, &iter)) {
 		return;
 	}
 		
@@ -3168,26 +3168,26 @@ nautilus_list_view_scroll_to_file (NautilusListView *view,
 }
 
 static void
-list_view_scroll_to_file (NautilusView *view,
+list_view_scroll_to_file (NemoView *view,
 			  const char *uri)
 {
-	NautilusFile *file;
+	NemoFile *file;
 
 	if (uri != NULL) {
 		/* Only if existing, since we don't want to add the file to
 		   the directory if it has been removed since then */
-		file = nautilus_file_get_existing_by_uri (uri);
+		file = nemo_file_get_existing_by_uri (uri);
 		if (file != NULL) {
-			nautilus_list_view_scroll_to_file (NAUTILUS_LIST_VIEW (view), file);
-			nautilus_file_unref (file);
+			nemo_list_view_scroll_to_file (NEMO_LIST_VIEW (view), file);
+			nemo_file_unref (file);
 		}
 	}
 }
 
 static void
-list_view_notify_clipboard_info (NautilusClipboardMonitor *monitor,
-                                 NautilusClipboardInfo *info,
-                                 NautilusListView *view)
+list_view_notify_clipboard_info (NemoClipboardMonitor *monitor,
+                                 NemoClipboardInfo *info,
+                                 NemoListView *view)
 {
 	/* this could be called as a result of _end_loading() being
 	 * called after _dispose(), where the model is cleared.
@@ -3197,139 +3197,139 @@ list_view_notify_clipboard_info (NautilusClipboardMonitor *monitor,
 	}
 
 	if (info != NULL && info->cut) {
-		nautilus_list_model_set_highlight_for_files (view->details->model, info->files);
+		nemo_list_model_set_highlight_for_files (view->details->model, info->files);
 	} else {
-		nautilus_list_model_set_highlight_for_files (view->details->model, NULL);
+		nemo_list_model_set_highlight_for_files (view->details->model, NULL);
 	}
 }
 
 static void
-nautilus_list_view_end_loading (NautilusView *view,
+nemo_list_view_end_loading (NemoView *view,
 				gboolean all_files_seen)
 {
-	NautilusClipboardMonitor *monitor;
-	NautilusClipboardInfo *info;
+	NemoClipboardMonitor *monitor;
+	NemoClipboardInfo *info;
 
-	monitor = nautilus_clipboard_monitor_get ();
-	info = nautilus_clipboard_monitor_get_clipboard_info (monitor);
+	monitor = nemo_clipboard_monitor_get ();
+	info = nemo_clipboard_monitor_get_clipboard_info (monitor);
 
-	list_view_notify_clipboard_info (monitor, info, NAUTILUS_LIST_VIEW (view));
+	list_view_notify_clipboard_info (monitor, info, NEMO_LIST_VIEW (view));
 }
 
 static const char *
-nautilus_list_view_get_id (NautilusView *view)
+nemo_list_view_get_id (NemoView *view)
 {
-	return NAUTILUS_LIST_VIEW_ID;
+	return NEMO_LIST_VIEW_ID;
 }
 
 static void
-nautilus_list_view_class_init (NautilusListViewClass *class)
+nemo_list_view_class_init (NemoListViewClass *class)
 {
-	NautilusViewClass *nautilus_view_class;
+	NemoViewClass *nemo_view_class;
 
-	nautilus_view_class = NAUTILUS_VIEW_CLASS (class);
+	nemo_view_class = NEMO_VIEW_CLASS (class);
 
-	G_OBJECT_CLASS (class)->dispose = nautilus_list_view_dispose;
-	G_OBJECT_CLASS (class)->finalize = nautilus_list_view_finalize;
+	G_OBJECT_CLASS (class)->dispose = nemo_list_view_dispose;
+	G_OBJECT_CLASS (class)->finalize = nemo_list_view_finalize;
 
-	nautilus_view_class->add_file = nautilus_list_view_add_file;
-	nautilus_view_class->begin_loading = nautilus_list_view_begin_loading;
-	nautilus_view_class->end_loading = nautilus_list_view_end_loading;
-	nautilus_view_class->bump_zoom_level = nautilus_list_view_bump_zoom_level;
-	nautilus_view_class->can_zoom_in = nautilus_list_view_can_zoom_in;
-	nautilus_view_class->can_zoom_out = nautilus_list_view_can_zoom_out;
-        nautilus_view_class->click_policy_changed = nautilus_list_view_click_policy_changed;
-	nautilus_view_class->clear = nautilus_list_view_clear;
-	nautilus_view_class->file_changed = nautilus_list_view_file_changed;
-	nautilus_view_class->get_backing_uri = nautilus_list_view_get_backing_uri;
-	nautilus_view_class->get_selection = nautilus_list_view_get_selection;
-	nautilus_view_class->get_selection_for_file_transfer = nautilus_list_view_get_selection_for_file_transfer;
-	nautilus_view_class->get_item_count = nautilus_list_view_get_item_count;
-	nautilus_view_class->is_empty = nautilus_list_view_is_empty;
-	nautilus_view_class->remove_file = nautilus_list_view_remove_file;
-	nautilus_view_class->merge_menus = nautilus_list_view_merge_menus;
-	nautilus_view_class->unmerge_menus = nautilus_list_view_unmerge_menus;
-	nautilus_view_class->update_menus = nautilus_list_view_update_menus;
-	nautilus_view_class->reset_to_defaults = nautilus_list_view_reset_to_defaults;
-	nautilus_view_class->restore_default_zoom_level = nautilus_list_view_restore_default_zoom_level;
-	nautilus_view_class->reveal_selection = nautilus_list_view_reveal_selection;
-	nautilus_view_class->select_all = nautilus_list_view_select_all;
-	nautilus_view_class->set_selection = nautilus_list_view_set_selection;
-	nautilus_view_class->invert_selection = nautilus_list_view_invert_selection;
-	nautilus_view_class->compare_files = nautilus_list_view_compare_files;
-	nautilus_view_class->sort_directories_first_changed = nautilus_list_view_sort_directories_first_changed;
-	nautilus_view_class->start_renaming_file = nautilus_list_view_start_renaming_file;
-	nautilus_view_class->get_zoom_level = nautilus_list_view_get_zoom_level;
-	nautilus_view_class->zoom_to_level = nautilus_list_view_zoom_to_level;
-	nautilus_view_class->end_file_changes = nautilus_list_view_end_file_changes;
-	nautilus_view_class->using_manual_layout = nautilus_list_view_using_manual_layout;
-	nautilus_view_class->get_view_id = nautilus_list_view_get_id;
-	nautilus_view_class->get_first_visible_file = nautilus_list_view_get_first_visible_file;
-	nautilus_view_class->scroll_to_file = list_view_scroll_to_file;
+	nemo_view_class->add_file = nemo_list_view_add_file;
+	nemo_view_class->begin_loading = nemo_list_view_begin_loading;
+	nemo_view_class->end_loading = nemo_list_view_end_loading;
+	nemo_view_class->bump_zoom_level = nemo_list_view_bump_zoom_level;
+	nemo_view_class->can_zoom_in = nemo_list_view_can_zoom_in;
+	nemo_view_class->can_zoom_out = nemo_list_view_can_zoom_out;
+        nemo_view_class->click_policy_changed = nemo_list_view_click_policy_changed;
+	nemo_view_class->clear = nemo_list_view_clear;
+	nemo_view_class->file_changed = nemo_list_view_file_changed;
+	nemo_view_class->get_backing_uri = nemo_list_view_get_backing_uri;
+	nemo_view_class->get_selection = nemo_list_view_get_selection;
+	nemo_view_class->get_selection_for_file_transfer = nemo_list_view_get_selection_for_file_transfer;
+	nemo_view_class->get_item_count = nemo_list_view_get_item_count;
+	nemo_view_class->is_empty = nemo_list_view_is_empty;
+	nemo_view_class->remove_file = nemo_list_view_remove_file;
+	nemo_view_class->merge_menus = nemo_list_view_merge_menus;
+	nemo_view_class->unmerge_menus = nemo_list_view_unmerge_menus;
+	nemo_view_class->update_menus = nemo_list_view_update_menus;
+	nemo_view_class->reset_to_defaults = nemo_list_view_reset_to_defaults;
+	nemo_view_class->restore_default_zoom_level = nemo_list_view_restore_default_zoom_level;
+	nemo_view_class->reveal_selection = nemo_list_view_reveal_selection;
+	nemo_view_class->select_all = nemo_list_view_select_all;
+	nemo_view_class->set_selection = nemo_list_view_set_selection;
+	nemo_view_class->invert_selection = nemo_list_view_invert_selection;
+	nemo_view_class->compare_files = nemo_list_view_compare_files;
+	nemo_view_class->sort_directories_first_changed = nemo_list_view_sort_directories_first_changed;
+	nemo_view_class->start_renaming_file = nemo_list_view_start_renaming_file;
+	nemo_view_class->get_zoom_level = nemo_list_view_get_zoom_level;
+	nemo_view_class->zoom_to_level = nemo_list_view_zoom_to_level;
+	nemo_view_class->end_file_changes = nemo_list_view_end_file_changes;
+	nemo_view_class->using_manual_layout = nemo_list_view_using_manual_layout;
+	nemo_view_class->get_view_id = nemo_list_view_get_id;
+	nemo_view_class->get_first_visible_file = nemo_list_view_get_first_visible_file;
+	nemo_view_class->scroll_to_file = list_view_scroll_to_file;
 }
 
 static void
-nautilus_list_view_init (NautilusListView *list_view)
+nemo_list_view_init (NemoListView *list_view)
 {
-	list_view->details = g_new0 (NautilusListViewDetails, 1);
+	list_view->details = g_new0 (NemoListViewDetails, 1);
 
 	create_and_set_up_tree_view (list_view);
 
-	g_signal_connect_swapped (nautilus_preferences,
-				  "changed::" NAUTILUS_PREFERENCES_DEFAULT_SORT_ORDER,
+	g_signal_connect_swapped (nemo_preferences,
+				  "changed::" NEMO_PREFERENCES_DEFAULT_SORT_ORDER,
 				  G_CALLBACK (default_sort_order_changed_callback),
 				  list_view);
-	g_signal_connect_swapped (nautilus_preferences,
-				  "changed::" NAUTILUS_PREFERENCES_DEFAULT_SORT_IN_REVERSE_ORDER,
+	g_signal_connect_swapped (nemo_preferences,
+				  "changed::" NEMO_PREFERENCES_DEFAULT_SORT_IN_REVERSE_ORDER,
 				  G_CALLBACK (default_sort_order_changed_callback),
 				  list_view);
-	g_signal_connect_swapped (nautilus_list_view_preferences,
-				  "changed::" NAUTILUS_PREFERENCES_LIST_VIEW_DEFAULT_ZOOM_LEVEL,
+	g_signal_connect_swapped (nemo_list_view_preferences,
+				  "changed::" NEMO_PREFERENCES_LIST_VIEW_DEFAULT_ZOOM_LEVEL,
 				  G_CALLBACK (default_zoom_level_changed_callback),
 				  list_view);
-	g_signal_connect_swapped (nautilus_list_view_preferences,
-				  "changed::" NAUTILUS_PREFERENCES_LIST_VIEW_DEFAULT_VISIBLE_COLUMNS,
+	g_signal_connect_swapped (nemo_list_view_preferences,
+				  "changed::" NEMO_PREFERENCES_LIST_VIEW_DEFAULT_VISIBLE_COLUMNS,
 				  G_CALLBACK (default_visible_columns_changed_callback),
 				  list_view);
-	g_signal_connect_swapped (nautilus_list_view_preferences,
-				  "changed::" NAUTILUS_PREFERENCES_LIST_VIEW_DEFAULT_COLUMN_ORDER,
+	g_signal_connect_swapped (nemo_list_view_preferences,
+				  "changed::" NEMO_PREFERENCES_LIST_VIEW_DEFAULT_COLUMN_ORDER,
 				  G_CALLBACK (default_column_order_changed_callback),
 				  list_view);
 
-	nautilus_list_view_click_policy_changed (NAUTILUS_VIEW (list_view));
+	nemo_list_view_click_policy_changed (NEMO_VIEW (list_view));
 
-	nautilus_list_view_sort_directories_first_changed (NAUTILUS_VIEW (list_view));
+	nemo_list_view_sort_directories_first_changed (NEMO_VIEW (list_view));
 
 	/* ensure that the zoom level is always set in begin_loading */
-	list_view->details->zoom_level = NAUTILUS_ZOOM_LEVEL_SMALLEST - 1;
+	list_view->details->zoom_level = NEMO_ZOOM_LEVEL_SMALLEST - 1;
 
 	list_view->details->hover_path = NULL;
 	list_view->details->clipboard_handler_id =
-		g_signal_connect (nautilus_clipboard_monitor_get (),
+		g_signal_connect (nemo_clipboard_monitor_get (),
 		                  "clipboard_info",
 		                  G_CALLBACK (list_view_notify_clipboard_info), list_view);
 }
 
-static NautilusView *
-nautilus_list_view_create (NautilusWindowSlot *slot)
+static NemoView *
+nemo_list_view_create (NemoWindowSlot *slot)
 {
-	NautilusListView *view;
+	NemoListView *view;
 
-	view = g_object_new (NAUTILUS_TYPE_LIST_VIEW,
+	view = g_object_new (NEMO_TYPE_LIST_VIEW,
 			     "window-slot", slot,
 			     NULL);
-	return NAUTILUS_VIEW (view);
+	return NEMO_VIEW (view);
 }
 
 static gboolean
-nautilus_list_view_supports_uri (const char *uri,
+nemo_list_view_supports_uri (const char *uri,
 				 GFileType file_type,
 				 const char *mime_type)
 {
 	if (file_type == G_FILE_TYPE_DIRECTORY) {
 		return TRUE;
 	}
-	if (strcmp (mime_type, NAUTILUS_SAVED_SEARCH_MIMETYPE) == 0){
+	if (strcmp (mime_type, NEMO_SAVED_SEARCH_MIMETYPE) == 0){
 		return TRUE;
 	}
 	if (g_str_has_prefix (uri, "trash:")) {
@@ -3342,8 +3342,8 @@ nautilus_list_view_supports_uri (const char *uri,
 	return FALSE;
 }
 
-static NautilusViewInfo nautilus_list_view = {
-	NAUTILUS_LIST_VIEW_ID,
+static NemoViewInfo nemo_list_view = {
+	NEMO_LIST_VIEW_ID,
 	/* translators: this is used in the view selection dropdown
 	 * of navigation windows and in the preferences dialog */
 	N_("List View"),
@@ -3352,24 +3352,24 @@ static NautilusViewInfo nautilus_list_view = {
 	N_("The list view encountered an error."),
 	N_("The list view encountered an error while starting up."),
 	N_("Display this location with the list view."),
-	nautilus_list_view_create,
-	nautilus_list_view_supports_uri
+	nemo_list_view_create,
+	nemo_list_view_supports_uri
 };
 
 void
-nautilus_list_view_register (void)
+nemo_list_view_register (void)
 {
-	nautilus_list_view.view_combo_label = _(nautilus_list_view.view_combo_label);
-	nautilus_list_view.view_menu_label_with_mnemonic = _(nautilus_list_view.view_menu_label_with_mnemonic);
-	nautilus_list_view.error_label = _(nautilus_list_view.error_label);
-	nautilus_list_view.startup_error_label = _(nautilus_list_view.startup_error_label);
-	nautilus_list_view.display_location_label = _(nautilus_list_view.display_location_label);
+	nemo_list_view.view_combo_label = _(nemo_list_view.view_combo_label);
+	nemo_list_view.view_menu_label_with_mnemonic = _(nemo_list_view.view_menu_label_with_mnemonic);
+	nemo_list_view.error_label = _(nemo_list_view.error_label);
+	nemo_list_view.startup_error_label = _(nemo_list_view.startup_error_label);
+	nemo_list_view.display_location_label = _(nemo_list_view.display_location_label);
 
-	nautilus_view_factory_register (&nautilus_list_view);
+	nemo_view_factory_register (&nemo_list_view);
 }
 
 GtkTreeView*
-nautilus_list_view_get_tree_view (NautilusListView *list_view)
+nemo_list_view_get_tree_view (NemoListView *list_view)
 {
 	return list_view->details->tree_view;
 }

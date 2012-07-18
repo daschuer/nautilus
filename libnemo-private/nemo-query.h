@@ -2,12 +2,12 @@
 /*
  * Copyright (C) 2005 Novell, Inc.
  *
- * Nautilus is free software; you can redistribute it and/or
+ * Nemo is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
  * published by the Free Software Foundation; either version 2 of the
  * License, or (at your option) any later version.
  *
- * Nautilus is distributed in the hope that it will be useful,
+ * Nemo is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
  * General Public License for more details.
@@ -21,46 +21,46 @@
  *
  */
 
-#ifndef NAUTILUS_QUERY_H
-#define NAUTILUS_QUERY_H
+#ifndef NEMO_QUERY_H
+#define NEMO_QUERY_H
 
 #include <glib-object.h>
 
-#define NAUTILUS_TYPE_QUERY		(nautilus_query_get_type ())
-#define NAUTILUS_QUERY(obj)		(G_TYPE_CHECK_INSTANCE_CAST ((obj), NAUTILUS_TYPE_QUERY, NautilusQuery))
-#define NAUTILUS_QUERY_CLASS(klass)	(G_TYPE_CHECK_CLASS_CAST ((klass), NAUTILUS_TYPE_QUERY, NautilusQueryClass))
-#define NAUTILUS_IS_QUERY(obj)		(G_TYPE_CHECK_INSTANCE_TYPE ((obj), NAUTILUS_TYPE_QUERY))
-#define NAUTILUS_IS_QUERY_CLASS(klass)	(G_TYPE_CHECK_CLASS_TYPE ((klass), NAUTILUS_TYPE_QUERY))
-#define NAUTILUS_QUERY_GET_CLASS(obj)    (G_TYPE_INSTANCE_GET_CLASS ((obj), NAUTILUS_TYPE_QUERY, NautilusQueryClass))
+#define NEMO_TYPE_QUERY		(nemo_query_get_type ())
+#define NEMO_QUERY(obj)		(G_TYPE_CHECK_INSTANCE_CAST ((obj), NEMO_TYPE_QUERY, NemoQuery))
+#define NEMO_QUERY_CLASS(klass)	(G_TYPE_CHECK_CLASS_CAST ((klass), NEMO_TYPE_QUERY, NemoQueryClass))
+#define NEMO_IS_QUERY(obj)		(G_TYPE_CHECK_INSTANCE_TYPE ((obj), NEMO_TYPE_QUERY))
+#define NEMO_IS_QUERY_CLASS(klass)	(G_TYPE_CHECK_CLASS_TYPE ((klass), NEMO_TYPE_QUERY))
+#define NEMO_QUERY_GET_CLASS(obj)    (G_TYPE_INSTANCE_GET_CLASS ((obj), NEMO_TYPE_QUERY, NemoQueryClass))
 
-typedef struct NautilusQueryDetails NautilusQueryDetails;
+typedef struct NemoQueryDetails NemoQueryDetails;
 
-typedef struct NautilusQuery {
+typedef struct NemoQuery {
 	GObject parent;
-	NautilusQueryDetails *details;
-} NautilusQuery;
+	NemoQueryDetails *details;
+} NemoQuery;
 
 typedef struct {
 	GObjectClass parent_class;
-} NautilusQueryClass;
+} NemoQueryClass;
 
-GType          nautilus_query_get_type (void);
-gboolean       nautilus_query_enabled  (void);
+GType          nemo_query_get_type (void);
+gboolean       nemo_query_enabled  (void);
 
-NautilusQuery* nautilus_query_new      (void);
+NemoQuery* nemo_query_new      (void);
 
-char *         nautilus_query_get_text           (NautilusQuery *query);
-void           nautilus_query_set_text           (NautilusQuery *query, const char *text);
+char *         nemo_query_get_text           (NemoQuery *query);
+void           nemo_query_set_text           (NemoQuery *query, const char *text);
 
-char *         nautilus_query_get_location       (NautilusQuery *query);
-void           nautilus_query_set_location       (NautilusQuery *query, const char *uri);
+char *         nemo_query_get_location       (NemoQuery *query);
+void           nemo_query_set_location       (NemoQuery *query, const char *uri);
 
-GList *        nautilus_query_get_mime_types     (NautilusQuery *query);
-void           nautilus_query_set_mime_types     (NautilusQuery *query, GList *mime_types);
-void           nautilus_query_add_mime_type      (NautilusQuery *query, const char *mime_type);
+GList *        nemo_query_get_mime_types     (NemoQuery *query);
+void           nemo_query_set_mime_types     (NemoQuery *query, GList *mime_types);
+void           nemo_query_add_mime_type      (NemoQuery *query, const char *mime_type);
 
-char *         nautilus_query_to_readable_string (NautilusQuery *query);
-NautilusQuery *nautilus_query_load               (char *file);
-gboolean       nautilus_query_save               (NautilusQuery *query, char *file);
+char *         nemo_query_to_readable_string (NemoQuery *query);
+NemoQuery *nemo_query_load               (char *file);
+gboolean       nemo_query_save               (NemoQuery *query, char *file);
 
-#endif /* NAUTILUS_QUERY_H */
+#endif /* NEMO_QUERY_H */

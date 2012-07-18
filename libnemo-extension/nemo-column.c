@@ -1,5 +1,5 @@
 /*
- *  nautilus-column.c - Info columns exported by NautilusColumnProvider
+ *  nemo-column.c - Info columns exported by NemoColumnProvider
  *                      objects.
  *
  *  Copyright (C) 2003 Novell, Inc.
@@ -23,8 +23,8 @@
  */
 
 #include <config.h>
-#include "nautilus-column.h"
-#include "nautilus-extension-i18n.h"
+#include "nemo-column.h"
+#include "nemo-extension-i18n.h"
 
 enum {
 	PROP_0,
@@ -37,7 +37,7 @@ enum {
 	LAST_PROP
 };
 
-struct _NautilusColumnDetails {
+struct _NemoColumnDetails {
 	char *name;
 	GQuark attribute;
 	char *label;
@@ -45,10 +45,10 @@ struct _NautilusColumnDetails {
 	float xalign;
 };
 
-G_DEFINE_TYPE (NautilusColumn, nautilus_column, G_TYPE_OBJECT);
+G_DEFINE_TYPE (NemoColumn, nemo_column, G_TYPE_OBJECT);
 
 /**
- * nautilus_column_new:
+ * nemo_column_new:
  * @name: identifier of the column
  * @attribute: the file attribute to be displayed in the column
  * @label: the user-visible label for the column
@@ -56,22 +56,22 @@ G_DEFINE_TYPE (NautilusColumn, nautilus_column, G_TYPE_OBJECT);
  *
  * Creates a new column
  *
- * Returns: a newly created #NautilusColumn
+ * Returns: a newly created #NemoColumn
  */
-NautilusColumn *
-nautilus_column_new (const char *name,
+NemoColumn *
+nemo_column_new (const char *name,
 		     const char *attribute,
 		     const char *label,
 		     const char *description)
 {
-	NautilusColumn *column;
+	NemoColumn *column;
 
 	g_return_val_if_fail (name != NULL, NULL);
 	g_return_val_if_fail (attribute != NULL, NULL);
 	g_return_val_if_fail (label != NULL, NULL);
 	g_return_val_if_fail (description != NULL, NULL);
 	
-	column = g_object_new (NAUTILUS_TYPE_COLUMN, 
+	column = g_object_new (NEMO_TYPE_COLUMN, 
 			       "name", name,
 			       "attribute", attribute,
 			       "label", label,
@@ -82,14 +82,14 @@ nautilus_column_new (const char *name,
 }
 
 static void
-nautilus_column_get_property (GObject *object,
+nemo_column_get_property (GObject *object,
 			      guint param_id,
 			      GValue *value,
 			      GParamSpec *pspec)
 {
-	NautilusColumn *column;
+	NemoColumn *column;
 	
-	column = NAUTILUS_COLUMN (object);
+	column = NEMO_COLUMN (object);
 	
 	switch (param_id) {
 	case PROP_NAME :
@@ -117,14 +117,14 @@ nautilus_column_get_property (GObject *object,
 }
 
 static void
-nautilus_column_set_property (GObject *object,
+nemo_column_set_property (GObject *object,
 				 guint param_id,
 				 const GValue *value,
 				 GParamSpec *pspec)
 {
-	NautilusColumn *column;
+	NemoColumn *column;
 	
-	column = NAUTILUS_COLUMN (object);
+	column = NEMO_COLUMN (object);
 
 	switch (param_id) {
 	case PROP_NAME :
@@ -158,11 +158,11 @@ nautilus_column_set_property (GObject *object,
 }
 
 static void
-nautilus_column_finalize (GObject *object)
+nemo_column_finalize (GObject *object)
 {
-	NautilusColumn *column;
+	NemoColumn *column;
 	
-	column = NAUTILUS_COLUMN (object);
+	column = NEMO_COLUMN (object);
 
 	g_free (column->details->name);
 	g_free (column->details->label);
@@ -170,22 +170,22 @@ nautilus_column_finalize (GObject *object)
 
 	g_free (column->details);
 
-	G_OBJECT_CLASS (nautilus_column_parent_class)->finalize (object);
+	G_OBJECT_CLASS (nemo_column_parent_class)->finalize (object);
 }
 
 static void
-nautilus_column_init (NautilusColumn *column)
+nemo_column_init (NemoColumn *column)
 {
-	column->details = g_new0 (NautilusColumnDetails, 1);
+	column->details = g_new0 (NemoColumnDetails, 1);
 	column->details->xalign = 0.0;
 }
 
 static void
-nautilus_column_class_init (NautilusColumnClass *class)
+nemo_column_class_init (NemoColumnClass *class)
 {
-	G_OBJECT_CLASS (class)->finalize = nautilus_column_finalize;
-	G_OBJECT_CLASS (class)->get_property = nautilus_column_get_property;
-	G_OBJECT_CLASS (class)->set_property = nautilus_column_set_property;
+	G_OBJECT_CLASS (class)->finalize = nemo_column_finalize;
+	G_OBJECT_CLASS (class)->get_property = nemo_column_get_property;
+	G_OBJECT_CLASS (class)->set_property = nemo_column_set_property;
 
 	g_object_class_install_property (G_OBJECT_CLASS (class),
 					 PROP_NAME,

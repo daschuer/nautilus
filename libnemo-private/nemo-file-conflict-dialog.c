@@ -1,6 +1,6 @@
 /* -*- Mode: C; indent-tabs-mode: t; c-basic-offset: 8; tab-width: 8 -*- */
 
-/* nautilus-file-conflict-dialog: dialog that handles file conflicts
+/* nemo-file-conflict-dialog: dialog that handles file conflicts
    during transfer operations.
 
    Copyright (C) 2008-2010 Cosimo Cecchi
@@ -24,7 +24,7 @@
 */
 
 #include <config.h>
-#include "nautilus-file-conflict-dialog.h"
+#include "nemo-file-conflict-dialog.h"
 
 #include <string.h>
 #include <glib-object.h>
@@ -33,18 +33,18 @@
 #include <pango/pango.h>
 #include <eel/eel-vfs-extensions.h>
 
-#include "nautilus-file.h"
-#include "nautilus-icon-info.h"
+#include "nemo-file.h"
+#include "nemo-icon-info.h"
 
-struct _NautilusFileConflictDialogDetails
+struct _NemoFileConflictDialogDetails
 {
 	/* conflicting objects */
-	NautilusFile *source;
-	NautilusFile *destination;
-	NautilusFile *dest_dir;
+	NemoFile *source;
+	NemoFile *destination;
+	NemoFile *dest_dir;
 
 	gchar *conflict_name;
-	NautilusFileListHandle *handle;
+	NemoFileListHandle *handle;
 	gulong src_handler_id;
 	gulong dest_handler_id;
 
@@ -61,32 +61,32 @@ struct _NautilusFileConflictDialogDetails
 	GtkWidget *src_image;
 };
 
-G_DEFINE_TYPE (NautilusFileConflictDialog,
-	       nautilus_file_conflict_dialog,
+G_DEFINE_TYPE (NemoFileConflictDialog,
+	       nemo_file_conflict_dialog,
 	       GTK_TYPE_DIALOG);
 
-#define NAUTILUS_FILE_CONFLICT_DIALOG_GET_PRIVATE(object)		\
-	(G_TYPE_INSTANCE_GET_PRIVATE ((object), NAUTILUS_TYPE_FILE_CONFLICT_DIALOG, \
-				      NautilusFileConflictDialogDetails))
+#define NEMO_FILE_CONFLICT_DIALOG_GET_PRIVATE(object)		\
+	(G_TYPE_INSTANCE_GET_PRIVATE ((object), NEMO_TYPE_FILE_CONFLICT_DIALOG, \
+				      NemoFileConflictDialogDetails))
 
 static void
-file_icons_changed (NautilusFile *file,
-		    NautilusFileConflictDialog *fcd)
+file_icons_changed (NemoFile *file,
+		    NemoFileConflictDialog *fcd)
 {
 	GdkPixbuf *pixbuf;
 
-	pixbuf = nautilus_file_get_icon_pixbuf (fcd->details->destination,
-						NAUTILUS_ICON_SIZE_LARGE,
+	pixbuf = nemo_file_get_icon_pixbuf (fcd->details->destination,
+						NEMO_ICON_SIZE_LARGE,
 						TRUE,
-						NAUTILUS_FILE_ICON_FLAGS_USE_THUMBNAILS);
+						NEMO_FILE_ICON_FLAGS_USE_THUMBNAILS);
 
 	gtk_image_set_from_pixbuf (GTK_IMAGE (fcd->details->dest_image), pixbuf);
 	g_object_unref (pixbuf);
 
-	pixbuf = nautilus_file_get_icon_pixbuf (fcd->details->source,
-						NAUTILUS_ICON_SIZE_LARGE,
+	pixbuf = nemo_file_get_icon_pixbuf (fcd->details->source,
+						NEMO_ICON_SIZE_LARGE,
 						TRUE,
-						NAUTILUS_FILE_ICON_FLAGS_USE_THUMBNAILS);
+						NEMO_FILE_ICON_FLAGS_USE_THUMBNAILS);
 
 	gtk_image_set_from_pixbuf (GTK_IMAGE (fcd->details->src_image), pixbuf);
 	g_object_unref (pixbuf);
@@ -96,11 +96,11 @@ static void
 file_list_ready_cb (GList *files,
 		    gpointer user_data)
 {
-	NautilusFileConflictDialog *fcd = user_data;
-	NautilusFile *src, *dest, *dest_dir;
+	NemoFileConflictDialog *fcd = user_data;
+	NemoFile *src, *dest, *dest_dir;
 	time_t src_mtime, dest_mtime;
 	gboolean source_is_dir,	dest_is_dir, should_show_type;
-	NautilusFileConflictDialogDetails *details;
+	NemoFileConflictDialogDetails *details;
 	char *primary_text, *message, *secondary_text;
 	const gchar *message_extra;
 	char *dest_name, *dest_dir_name, *edit_name;
@@ -119,17 +119,17 @@ file_list_ready_cb (GList *files,
 	dest = g_list_nth_data (files, 1);
 	src = g_list_nth_data (files, 2);
 
-	src_mtime = nautilus_file_get_mtime (src);
-	dest_mtime = nautilus_file_get_mtime (dest);
+	src_mtime = nemo_file_get_mtime (src);
+	dest_mtime = nemo_file_get_mtime (dest);
 
-	dest_name = nautilus_file_get_display_name (dest);
-	dest_dir_name = nautilus_file_get_display_name (dest_dir);
+	dest_name = nemo_file_get_display_name (dest);
+	dest_dir_name = nemo_file_get_display_name (dest_dir);
 
-	source_is_dir = nautilus_file_is_directory (src);
-	dest_is_dir = nautilus_file_is_directory (dest);
+	source_is_dir = nemo_file_is_directory (src);
+	dest_is_dir = nemo_file_is_directory (dest);
 
-	type = nautilus_file_get_mime_type (dest);
-	should_show_type = !nautilus_file_is_mime_type (src, type);
+	type = nemo_file_get_mime_type (dest);
+	should_show_type = !nemo_file_is_mime_type (src, type);
 
 	g_free (type);
 	type = NULL;
@@ -218,20 +218,20 @@ file_list_ready_cb (GList *files,
 	g_free (secondary_text);
 
 	/* Set up file icons */
-	pixbuf = nautilus_file_get_icon_pixbuf (dest,
-						NAUTILUS_ICON_SIZE_LARGE,
+	pixbuf = nemo_file_get_icon_pixbuf (dest,
+						NEMO_ICON_SIZE_LARGE,
 						TRUE,
-						NAUTILUS_FILE_ICON_FLAGS_USE_THUMBNAILS);
+						NEMO_FILE_ICON_FLAGS_USE_THUMBNAILS);
 	details->dest_image = gtk_image_new_from_pixbuf (pixbuf);
 	gtk_box_pack_start (GTK_BOX (details->first_hbox),
 			    details->dest_image, FALSE, FALSE, 0);
 	gtk_widget_show (details->dest_image);
 	g_object_unref (pixbuf);
 
-	pixbuf = nautilus_file_get_icon_pixbuf (src,
-						NAUTILUS_ICON_SIZE_LARGE,
+	pixbuf = nemo_file_get_icon_pixbuf (src,
+						NEMO_ICON_SIZE_LARGE,
 						TRUE,
-						NAUTILUS_FILE_ICON_FLAGS_USE_THUMBNAILS);
+						NEMO_FILE_ICON_FLAGS_USE_THUMBNAILS);
 	details->src_image = gtk_image_new_from_pixbuf (pixbuf);
 	gtk_box_pack_start (GTK_BOX (details->second_hbox),
 			    details->src_image, FALSE, FALSE, 0);
@@ -240,12 +240,12 @@ file_list_ready_cb (GList *files,
 
 	/* Set up labels */
 	label = gtk_label_new (NULL);
-	date = nautilus_file_get_string_attribute (dest,
+	date = nemo_file_get_string_attribute (dest,
 						   "date_modified");
-	size = nautilus_file_get_string_attribute (dest, "size");
+	size = nemo_file_get_string_attribute (dest, "size");
 
 	if (should_show_type) {
-		type = nautilus_file_get_string_attribute (dest, "type");
+		type = nemo_file_get_string_attribute (dest, "type");
 	}
 
 	str = g_string_new (NULL);
@@ -272,12 +272,12 @@ file_list_ready_cb (GList *files,
 
 	/* Second label */
 	label = gtk_label_new (NULL);
-	date = nautilus_file_get_string_attribute (src,
+	date = nemo_file_get_string_attribute (src,
 						   "date_modified");
-	size = nautilus_file_get_string_attribute (src, "size");
+	size = nemo_file_get_string_attribute (src, "size");
 
 	if (should_show_type) {
-		type = nautilus_file_get_string_attribute (src, "type");
+		type = nemo_file_get_string_attribute (src, "type");
 	}
 
 	g_string_append_printf (str, "<b>%s</b>\n", _("Replace with"));
@@ -302,7 +302,7 @@ file_list_ready_cb (GList *files,
 	g_free (label_text);
 
 	/* Populate the entry */
-	edit_name = nautilus_file_get_edit_name (dest);
+	edit_name = nemo_file_get_edit_name (dest);
 	details->conflict_name = edit_name;
 
 	gtk_entry_set_text (GTK_ENTRY (details->entry), edit_name);
@@ -312,8 +312,8 @@ file_list_ready_cb (GList *files,
 				      _("Merge"));
 	}
 
-	nautilus_file_monitor_add (src, fcd, NAUTILUS_FILE_ATTRIBUTES_FOR_ICON);
-	nautilus_file_monitor_add (dest, fcd, NAUTILUS_FILE_ATTRIBUTES_FOR_ICON);
+	nemo_file_monitor_add (src, fcd, NEMO_FILE_ATTRIBUTES_FOR_ICON);
+	nemo_file_monitor_add (dest, fcd, NEMO_FILE_ATTRIBUTES_FOR_ICON);
 
 	details->src_handler_id = g_signal_connect (src, "changed",
 			  G_CALLBACK (file_icons_changed), fcd);
@@ -322,17 +322,17 @@ file_list_ready_cb (GList *files,
 }
 
 static void
-build_dialog_appearance (NautilusFileConflictDialog *fcd)
+build_dialog_appearance (NemoFileConflictDialog *fcd)
 {
 	GList *files = NULL;
-	NautilusFileConflictDialogDetails *details = fcd->details;
+	NemoFileConflictDialogDetails *details = fcd->details;
 
 	files = g_list_prepend (files, details->source);
 	files = g_list_prepend (files, details->destination);
 	files = g_list_prepend (files, details->dest_dir);
 
-	nautilus_file_list_call_when_ready (files,
-					    NAUTILUS_FILE_ATTRIBUTES_FOR_ICON,
+	nemo_file_list_call_when_ready (files,
+					    NEMO_FILE_ATTRIBUTES_FOR_ICON,
 					    &details->handle, file_list_ready_cb, fcd);
 	g_list_free (files);
 }
@@ -343,24 +343,24 @@ set_source_and_destination (GtkWidget *w,
 			    GFile *destination,
 			    GFile *dest_dir)
 {
-	NautilusFileConflictDialog *dialog;
-	NautilusFileConflictDialogDetails *details;
+	NemoFileConflictDialog *dialog;
+	NemoFileConflictDialogDetails *details;
 
-	dialog = NAUTILUS_FILE_CONFLICT_DIALOG (w);
+	dialog = NEMO_FILE_CONFLICT_DIALOG (w);
 	details = dialog->details;
 
-	details->source = nautilus_file_get (source);
-	details->destination = nautilus_file_get (destination);
-	details->dest_dir = nautilus_file_get (dest_dir);
+	details->source = nemo_file_get (source);
+	details->destination = nemo_file_get (destination);
+	details->dest_dir = nemo_file_get (dest_dir);
 
 	build_dialog_appearance (dialog);
 }
 
 static void
 entry_text_changed_cb (GtkEditable *entry,
-		       NautilusFileConflictDialog *dialog)
+		       NemoFileConflictDialog *dialog)
 {
-	NautilusFileConflictDialogDetails *details;
+	NemoFileConflictDialogDetails *details;
 
 	details = dialog->details;
 
@@ -389,9 +389,9 @@ entry_text_changed_cb (GtkEditable *entry,
 
 static void
 expander_activated_cb (GtkExpander *w,
-		       NautilusFileConflictDialog *dialog)
+		       NemoFileConflictDialog *dialog)
 {
-	NautilusFileConflictDialogDetails *details;
+	NemoFileConflictDialogDetails *details;
 	int start_pos, end_pos;
 
 	details = dialog->details;
@@ -411,9 +411,9 @@ expander_activated_cb (GtkExpander *w,
 
 static void
 checkbox_toggled_cb (GtkToggleButton *t,
-		     NautilusFileConflictDialog *dialog)
+		     NemoFileConflictDialog *dialog)
 {
-	NautilusFileConflictDialogDetails *details;
+	NemoFileConflictDialogDetails *details;
 
 	details = dialog->details;
 
@@ -437,9 +437,9 @@ checkbox_toggled_cb (GtkToggleButton *t,
 
 static void
 reset_button_clicked_cb (GtkButton *w,
-			 NautilusFileConflictDialog *dialog)
+			 NemoFileConflictDialog *dialog)
 {
-	NautilusFileConflictDialogDetails *details;
+	NemoFileConflictDialogDetails *details;
 	int start_pos, end_pos;
 
 	details = dialog->details;
@@ -455,14 +455,14 @@ reset_button_clicked_cb (GtkButton *w,
 }
 
 static void
-nautilus_file_conflict_dialog_init (NautilusFileConflictDialog *fcd)
+nemo_file_conflict_dialog_init (NemoFileConflictDialog *fcd)
 {
 	GtkWidget *hbox, *vbox, *vbox2, *alignment;
 	GtkWidget *widget, *dialog_area;
-	NautilusFileConflictDialogDetails *details;
+	NemoFileConflictDialogDetails *details;
 	GtkDialog *dialog;
 
-	details = fcd->details = NAUTILUS_FILE_CONFLICT_DIALOG_GET_PRIVATE (fcd);
+	details = fcd->details = NEMO_FILE_CONFLICT_DIALOG_GET_PRIVATE (fcd);
 	dialog = GTK_DIALOG (fcd);
 
 	/* Setup the main hbox */
@@ -565,63 +565,63 @@ nautilus_file_conflict_dialog_init (NautilusFileConflictDialog *fcd)
 static void
 do_finalize (GObject *self)
 {
-	NautilusFileConflictDialogDetails *details =
-		NAUTILUS_FILE_CONFLICT_DIALOG (self)->details;
+	NemoFileConflictDialogDetails *details =
+		NEMO_FILE_CONFLICT_DIALOG (self)->details;
 
 	g_free (details->conflict_name);
 
 	if (details->handle != NULL) {
-		nautilus_file_list_cancel_call_when_ready (details->handle);
+		nemo_file_list_cancel_call_when_ready (details->handle);
 	}
 
 	if (details->src_handler_id) {
 		g_signal_handler_disconnect (details->source, details->src_handler_id);
-		nautilus_file_monitor_remove (details->source, self);
+		nemo_file_monitor_remove (details->source, self);
 	}
 
 	if (details->dest_handler_id) {
 		g_signal_handler_disconnect (details->destination, details->dest_handler_id);
-		nautilus_file_monitor_remove (details->destination, self);
+		nemo_file_monitor_remove (details->destination, self);
 	}
 
-	nautilus_file_unref (details->source);
-	nautilus_file_unref (details->destination);
-	nautilus_file_unref (details->dest_dir);
+	nemo_file_unref (details->source);
+	nemo_file_unref (details->destination);
+	nemo_file_unref (details->dest_dir);
 
-	G_OBJECT_CLASS (nautilus_file_conflict_dialog_parent_class)->finalize (self);
+	G_OBJECT_CLASS (nemo_file_conflict_dialog_parent_class)->finalize (self);
 }
 
 static void
-nautilus_file_conflict_dialog_class_init (NautilusFileConflictDialogClass *klass)
+nemo_file_conflict_dialog_class_init (NemoFileConflictDialogClass *klass)
 {
 	G_OBJECT_CLASS (klass)->finalize = do_finalize;
 
-	g_type_class_add_private (klass, sizeof (NautilusFileConflictDialogDetails));
+	g_type_class_add_private (klass, sizeof (NemoFileConflictDialogDetails));
 }
 
 char *
-nautilus_file_conflict_dialog_get_new_name (NautilusFileConflictDialog *dialog)
+nemo_file_conflict_dialog_get_new_name (NemoFileConflictDialog *dialog)
 {
 	return g_strdup (gtk_entry_get_text
 			 (GTK_ENTRY (dialog->details->entry)));
 }
 
 gboolean
-nautilus_file_conflict_dialog_get_apply_to_all (NautilusFileConflictDialog *dialog)
+nemo_file_conflict_dialog_get_apply_to_all (NemoFileConflictDialog *dialog)
 {
 	return gtk_toggle_button_get_active 
 		(GTK_TOGGLE_BUTTON (dialog->details->checkbox));
 }
 
 GtkWidget *
-nautilus_file_conflict_dialog_new (GtkWindow *parent,
+nemo_file_conflict_dialog_new (GtkWindow *parent,
 				   GFile *source,
 				   GFile *destination,
 				   GFile *dest_dir)
 {
 	GtkWidget *dialog;
 	
-	dialog = GTK_WIDGET (g_object_new (NAUTILUS_TYPE_FILE_CONFLICT_DIALOG,
+	dialog = GTK_WIDGET (g_object_new (NEMO_TYPE_FILE_CONFLICT_DIALOG,
 					   "title", _("File conflict"),
 					   NULL));
 	set_source_and_destination (dialog,

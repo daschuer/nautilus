@@ -1,6 +1,6 @@
 /* -*- Mode: C; indent-tabs-mode: t; c-basic-offset: 8; tab-width: 8 -*- */
 
-/* Nautilus - Nautilus navigation state
+/* Nemo - Nemo navigation state
  *
  * Copyright (C) 2011 Red Hat Inc.
  *
@@ -23,53 +23,53 @@
  *
  */
 
-#ifndef __NAUTILUS_NAVIGATION_STATE_H__
-#define __NAUTILUS_NAVIGATION_STATE_H__
+#ifndef __NEMO_NAVIGATION_STATE_H__
+#define __NEMO_NAVIGATION_STATE_H__
 
 #include <glib-object.h>
 #include <gtk/gtk.h>
 
-#define NAUTILUS_TYPE_NAVIGATION_STATE nautilus_navigation_state_get_type()
-#define NAUTILUS_NAVIGATION_STATE(obj) \
-  (G_TYPE_CHECK_INSTANCE_CAST ((obj), NAUTILUS_TYPE_NAVIGATION_STATE, NautilusNavigationState))
-#define NAUTILUS_NAVIGATION_STATE_CLASS(klass) \
-  (G_TYPE_CHECK_CLASS_CAST ((klass), NAUTILUS_TYPE_NAVIGATION_STATE, NautilusNavigationStateClass))
-#define NAUTILUS_IS_NAVIGATION_STATE(obj) \
-  (G_TYPE_CHECK_INSTANCE_TYPE ((obj), NAUTILUS_TYPE_NAVIGATION_STATE))
-#define NAUTILUS_IS_NAVIGATION_STATE_CLASS(klass) \
-  (G_TYPE_CHECK_CLASS_TYPE ((klass), NAUTILUS_TYPE_NAVIGATION_STATE))
-#define NAUTILUS_NAVIGATION_STATE_GET_CLASS(obj) \
-  (G_TYPE_INSTANCE_GET_CLASS ((obj), NAUTILUS_TYPE_NAVIGATION_STATE, NautilusNavigationStateClass))
+#define NEMO_TYPE_NAVIGATION_STATE nemo_navigation_state_get_type()
+#define NEMO_NAVIGATION_STATE(obj) \
+  (G_TYPE_CHECK_INSTANCE_CAST ((obj), NEMO_TYPE_NAVIGATION_STATE, NemoNavigationState))
+#define NEMO_NAVIGATION_STATE_CLASS(klass) \
+  (G_TYPE_CHECK_CLASS_CAST ((klass), NEMO_TYPE_NAVIGATION_STATE, NemoNavigationStateClass))
+#define NEMO_IS_NAVIGATION_STATE(obj) \
+  (G_TYPE_CHECK_INSTANCE_TYPE ((obj), NEMO_TYPE_NAVIGATION_STATE))
+#define NEMO_IS_NAVIGATION_STATE_CLASS(klass) \
+  (G_TYPE_CHECK_CLASS_TYPE ((klass), NEMO_TYPE_NAVIGATION_STATE))
+#define NEMO_NAVIGATION_STATE_GET_CLASS(obj) \
+  (G_TYPE_INSTANCE_GET_CLASS ((obj), NEMO_TYPE_NAVIGATION_STATE, NemoNavigationStateClass))
 
-typedef struct _NautilusNavigationState NautilusNavigationState;
-typedef struct _NautilusNavigationStateClass NautilusNavigationStateClass;
-typedef struct _NautilusNavigationStateDetails NautilusNavigationStateDetails;
+typedef struct _NemoNavigationState NemoNavigationState;
+typedef struct _NemoNavigationStateClass NemoNavigationStateClass;
+typedef struct _NemoNavigationStateDetails NemoNavigationStateDetails;
 
-struct _NautilusNavigationState {
+struct _NemoNavigationState {
 	GObject parent;
-	NautilusNavigationStateDetails *priv;
+	NemoNavigationStateDetails *priv;
 };
 
-struct _NautilusNavigationStateClass {
+struct _NemoNavigationStateClass {
 	GObjectClass parent_class;
 };
 
 /* GObject */
-GType       nautilus_navigation_state_get_type  (void);
+GType       nemo_navigation_state_get_type  (void);
 
-NautilusNavigationState * nautilus_navigation_state_new (GtkActionGroup *slave,
+NemoNavigationState * nemo_navigation_state_new (GtkActionGroup *slave,
                                                          const gchar **action_names);
 
-void nautilus_navigation_state_add_group (NautilusNavigationState *state,
+void nemo_navigation_state_add_group (NemoNavigationState *state,
                                           GtkActionGroup *group);
-void nautilus_navigation_state_set_master (NautilusNavigationState *state,
+void nemo_navigation_state_set_master (NemoNavigationState *state,
                                            GtkActionGroup *master);
-GtkActionGroup * nautilus_navigation_state_get_master (NautilusNavigationState *self);
+GtkActionGroup * nemo_navigation_state_get_master (NemoNavigationState *self);
 
-void nautilus_navigation_state_sync_all (NautilusNavigationState *state);
+void nemo_navigation_state_sync_all (NemoNavigationState *state);
 
-void nautilus_navigation_state_set_boolean (NautilusNavigationState *self,
+void nemo_navigation_state_set_boolean (NemoNavigationState *self,
 					    const gchar *action_name,
 					    gboolean value);
 
-#endif /* __NAUTILUS_NAVIGATION_STATE_H__ */
+#endif /* __NEMO_NAVIGATION_STATE_H__ */

@@ -1,5 +1,5 @@
 /*
- *  nautilus-property-page-provider.c - Interface for Nautilus extensions
+ *  nemo-property-page-provider.c - Interface for Nemo extensions
  *                                      that provide property pages for 
  *                                      files.
  *
@@ -24,24 +24,24 @@
  */
 
 #include <config.h>
-#include "nautilus-property-page-provider.h"
+#include "nemo-property-page-provider.h"
 
 #include <glib-object.h>
 
 static void
-nautilus_property_page_provider_base_init (gpointer g_class)
+nemo_property_page_provider_base_init (gpointer g_class)
 {
 }
 
 GType                   
-nautilus_property_page_provider_get_type (void)
+nemo_property_page_provider_get_type (void)
 {
 	static GType type = 0;
 
 	if (!type) {
 		const GTypeInfo info = {
-			sizeof (NautilusPropertyPageProviderIface),
-			nautilus_property_page_provider_base_init,
+			sizeof (NemoPropertyPageProviderIface),
+			nemo_property_page_provider_base_init,
 			NULL,
 			NULL,
 			NULL,
@@ -52,7 +52,7 @@ nautilus_property_page_provider_get_type (void)
 		};
 		
 		type = g_type_register_static (G_TYPE_INTERFACE, 
-					       "NautilusPropertyPageProvider",
+					       "NemoPropertyPageProvider",
 					       &info, 0);
 		g_type_interface_add_prerequisite (type, G_TYPE_OBJECT);
 	}
@@ -61,26 +61,26 @@ nautilus_property_page_provider_get_type (void)
 }
 
 /**
- * nautilus_property_page_provider_get_pages:
- * @provider: a #NautilusPropertyPageProvider
- * @files: (element-type NautilusFileInfo): a #GList of #NautilusFileInfo
+ * nemo_property_page_provider_get_pages:
+ * @provider: a #NemoPropertyPageProvider
+ * @files: (element-type NemoFileInfo): a #GList of #NemoFileInfo
  *
- * This function is called by Nautilus when it wants property page
+ * This function is called by Nemo when it wants property page
  * items from the extension.
  *
  * This function is called in the main thread before a property page
  * is shown, so it should return quickly.
  *
- * Returns: (element-type NautilusPropertyPage) (transfer full): A #GList of allocated #NautilusPropertyPage items.
+ * Returns: (element-type NemoPropertyPage) (transfer full): A #GList of allocated #NemoPropertyPage items.
  */
 GList *
-nautilus_property_page_provider_get_pages (NautilusPropertyPageProvider *provider,
+nemo_property_page_provider_get_pages (NemoPropertyPageProvider *provider,
 					   GList *files)
 {
-	g_return_val_if_fail (NAUTILUS_IS_PROPERTY_PAGE_PROVIDER (provider), NULL);
-	g_return_val_if_fail (NAUTILUS_PROPERTY_PAGE_PROVIDER_GET_IFACE (provider)->get_pages != NULL, NULL);
+	g_return_val_if_fail (NEMO_IS_PROPERTY_PAGE_PROVIDER (provider), NULL);
+	g_return_val_if_fail (NEMO_PROPERTY_PAGE_PROVIDER_GET_IFACE (provider)->get_pages != NULL, NULL);
 
-	return NAUTILUS_PROPERTY_PAGE_PROVIDER_GET_IFACE (provider)->get_pages 
+	return NEMO_PROPERTY_PAGE_PROVIDER_GET_IFACE (provider)->get_pages 
 		(provider, files);	
 }
 

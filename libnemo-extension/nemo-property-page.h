@@ -1,6 +1,6 @@
 /*
- *  nautilus-property-page.h - Property pages exported by 
- *                             NautilusPropertyProvider objects.
+ *  nemo-property-page.h - Property pages exported by 
+ *                             NemoPropertyProvider objects.
  *
  *  Copyright (C) 2003 Novell, Inc.
  *
@@ -22,44 +22,44 @@
  *
  */
 
-#ifndef NAUTILUS_PROPERTY_PAGE_H
-#define NAUTILUS_PROPERTY_PAGE_H
+#ifndef NEMO_PROPERTY_PAGE_H
+#define NEMO_PROPERTY_PAGE_H
 
 #include <glib-object.h>
 #include <gtk/gtk.h>
-#include "nautilus-extension-types.h"
+#include "nemo-extension-types.h"
 
 G_BEGIN_DECLS
 
-#define NAUTILUS_TYPE_PROPERTY_PAGE            (nautilus_property_page_get_type())
-#define NAUTILUS_PROPERTY_PAGE(obj)            (G_TYPE_CHECK_INSTANCE_CAST ((obj), NAUTILUS_TYPE_PROPERTY_PAGE, NautilusPropertyPage))
-#define NAUTILUS_PROPERTY_PAGE_CLASS(klass)    (G_TYPE_CHECK_CLASS_CAST ((klass), NAUTILUS_TYPE_PROPERTY_PAGE, NautilusPropertyPageClass))
-#define NAUTILUS_IS_PROPERTY_PAGE(obj)         (G_TYPE_CHECK_INSTANCE_TYPE ((obj), NAUTILUS_TYPE_PROPERTY_PAGE))
-#define NAUTILUS_IS_PROPERTY_PAGE_CLASS(klass) (G_TYPE_CHECK_CLASS_TYPE ((obj), NAUTILUS_TYPE_PROPERTY_PAGE))
-#define NAUTILUS_PROPERTY_PAGE_GET_CLASS(obj)  (G_TYPE_INSTANCE_GET_CLASS((obj), NAUTILUS_TYPE_PROPERTY_PAGE, NautilusPropertyPageClass))
+#define NEMO_TYPE_PROPERTY_PAGE            (nemo_property_page_get_type())
+#define NEMO_PROPERTY_PAGE(obj)            (G_TYPE_CHECK_INSTANCE_CAST ((obj), NEMO_TYPE_PROPERTY_PAGE, NemoPropertyPage))
+#define NEMO_PROPERTY_PAGE_CLASS(klass)    (G_TYPE_CHECK_CLASS_CAST ((klass), NEMO_TYPE_PROPERTY_PAGE, NemoPropertyPageClass))
+#define NEMO_IS_PROPERTY_PAGE(obj)         (G_TYPE_CHECK_INSTANCE_TYPE ((obj), NEMO_TYPE_PROPERTY_PAGE))
+#define NEMO_IS_PROPERTY_PAGE_CLASS(klass) (G_TYPE_CHECK_CLASS_TYPE ((obj), NEMO_TYPE_PROPERTY_PAGE))
+#define NEMO_PROPERTY_PAGE_GET_CLASS(obj)  (G_TYPE_INSTANCE_GET_CLASS((obj), NEMO_TYPE_PROPERTY_PAGE, NemoPropertyPageClass))
 
-typedef struct _NautilusPropertyPage        NautilusPropertyPage;
-typedef struct _NautilusPropertyPageDetails NautilusPropertyPageDetails;
-typedef struct _NautilusPropertyPageClass   NautilusPropertyPageClass;
+typedef struct _NemoPropertyPage        NemoPropertyPage;
+typedef struct _NemoPropertyPageDetails NemoPropertyPageDetails;
+typedef struct _NemoPropertyPageClass   NemoPropertyPageClass;
 
-struct _NautilusPropertyPage
+struct _NemoPropertyPage
 {
 	GObject parent;
 
-	NautilusPropertyPageDetails *details;
+	NemoPropertyPageDetails *details;
 };
 
-struct _NautilusPropertyPageClass 
+struct _NemoPropertyPageClass 
 {
 	GObjectClass parent;
 };
 
-GType                 nautilus_property_page_get_type  (void);
-NautilusPropertyPage *nautilus_property_page_new       (const char           *name,
+GType                 nemo_property_page_get_type  (void);
+NemoPropertyPage *nemo_property_page_new       (const char           *name,
 							GtkWidget            *label,
 							GtkWidget            *page);
 
-/* NautilusPropertyPage has the following properties:
+/* NemoPropertyPage has the following properties:
  *   name (string)        - the identifier for the property page
  *   label (widget)       - the user-visible label of the property page
  *   page (widget)        - the property page to display

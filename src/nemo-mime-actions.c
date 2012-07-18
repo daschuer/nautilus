@@ -1,6 +1,6 @@
 /* -*- Mode: C; indent-tabs-mode: t; c-basic-offset: 8; tab-width: 8 -*- */
 
-/* nautilus-mime-actions.c - uri-specific versions of mime action functions
+/* nemo-mime-actions.c - uri-specific versions of mime action functions
 
    Copyright (C) 2000, 2001 Eazel, Inc.
 
@@ -24,9 +24,9 @@
 
 #include <config.h>
 
-#include "nautilus-mime-actions.h"
+#include "nemo-mime-actions.h"
 
-#include "nautilus-window-slot.h"
+#include "nemo-window-slot.h"
 
 #include <eel/eel-glib-extensions.h>
 #include <eel/eel-stock-dialogs.h>
@@ -36,17 +36,17 @@
 #include <string.h>
 #include <gdk/gdkx.h>
 
-#include <libnautilus-private/nautilus-file-attributes.h>
-#include <libnautilus-private/nautilus-file.h>
-#include <libnautilus-private/nautilus-file-operations.h>
-#include <libnautilus-private/nautilus-metadata.h>
-#include <libnautilus-private/nautilus-program-choosing.h>
-#include <libnautilus-private/nautilus-desktop-icon-file.h>
-#include <libnautilus-private/nautilus-global-preferences.h>
-#include <libnautilus-private/nautilus-signaller.h>
+#include <libnemo-private/nemo-file-attributes.h>
+#include <libnemo-private/nemo-file.h>
+#include <libnemo-private/nemo-file-operations.h>
+#include <libnemo-private/nemo-metadata.h>
+#include <libnemo-private/nemo-program-choosing.h>
+#include <libnemo-private/nemo-desktop-icon-file.h>
+#include <libnemo-private/nemo-global-preferences.h>
+#include <libnemo-private/nemo-signaller.h>
 
-#define DEBUG_FLAG NAUTILUS_DEBUG_MIME
-#include <libnautilus-private/nautilus-debug.h>
+#define DEBUG_FLAG NEMO_DEBUG_MIME
+#include <libnemo-private/nemo-debug.h>
 
 typedef enum {
 	ACTIVATION_ACTION_LAUNCH_DESKTOP_FILE,
@@ -59,7 +59,7 @@ typedef enum {
 } ActivationAction;
 
 typedef struct {
-	NautilusFile *file;
+	NemoFile *file;
 	char *uri;
 } LaunchLocation;
 
@@ -69,7 +69,7 @@ typedef struct {
 } ApplicationLaunchParameters;
 
 typedef struct {
-	NautilusWindowSlot *slot;
+	NemoWindowSlot *slot;
 	gpointer window;
 	GtkWindow *parent_window;
 	GCancellable *cancellable;
@@ -77,10 +77,10 @@ typedef struct {
 	GList *mountables;
 	GList *start_mountables;
 	GList *not_mounted;
-	NautilusWindowOpenFlags flags;
+	NemoWindowOpenFlags flags;
 	char *timed_wait_prompt;
 	gboolean timed_wait_active;
-	NautilusFileListHandle *files_handle;
+	NemoFileListHandle *files_handle;
 	gboolean tried_mounting;
 	char *activation_directory;
 	gboolean user_confirmation;
@@ -117,7 +117,7 @@ static void activation_mount_not_mounted            (ActivateParameters *paramet
 static void
 launch_location_free (LaunchLocation *location)
 {
-	nautilus_file_unref (location->file);
+	nemo_file_unref (location->file);
 	g_free (location->uri);
 	g_free (location);
 }
@@ -140,46 +140,46 @@ get_file_list_for_launch_locations (GList *locations)
 		location = l->data;
 
 		files = g_list_prepend (files,
-					nautilus_file_ref (location->file));
+					nemo_file_ref (location->file));
 	}
 	return g_list_reverse (files);
 }
 
 
 static LaunchLocation *
-launch_location_from_file (NautilusFile *file)
+launch_location_from_file (NemoFile *file)
 {
 	LaunchLocation *location;
 	location = g_new (LaunchLocation, 1);
-	location->file = nautilus_file_ref (file);
-	location->uri = nautilus_file_get_uri (file);
+	location->file = nemo_file_ref (file);
+	location->uri = nemo_file_get_uri (file);
 	
 	return location;
 }
 
 static void
 launch_location_update_from_file (LaunchLocation *location,
-				  NautilusFile *file)
+				  NemoFile *file)
 {
-	nautilus_file_unref (location->file);
+	nemo_file_unref (location->file);
 	g_free (location->uri);
-	location->file = nautilus_file_ref (file);
-	location->uri = nautilus_file_get_uri (file);
+	location->file = nemo_file_ref (file);
+	location->uri = nemo_file_get_uri (file);
 }
 
 static void
 launch_location_update_from_uri (LaunchLocation *location,
 				 const char *uri)
 {
-	nautilus_file_unref (location->file);
+	nemo_file_unref (location->file);
 	g_free (location->uri);
-	location->file = nautilus_file_get_by_uri (uri);
+	location->file = nemo_file_get_by_uri (uri);
 	location->uri = g_strdup (uri);
 }
 
 static LaunchLocation *
 find_launch_location_for_file (GList *list,
-			       NautilusFile *file)
+			       NemoFile *file)
 {
 	LaunchLocation *location;
 	GList *l;
@@ -232,7 +232,7 @@ application_launch_parameters_free (ApplicationLaunchParameters *parameters)
 }			      
 
 static GList*
-filter_nautilus_handler (GList *apps)
+filter_nemo_handler (GList *apps)
 {
 	GList *l, *next;
 	GAppInfo *application;
@@ -246,7 +246,7 @@ filter_nautilus_handler (GList *apps)
 		id = g_app_info_get_id (application);
 		if (id != NULL &&
 		    strcmp (id,
-			    "nautilus.desktop") == 0) {
+			    "nemo.desktop") == 0) {
 			g_object_unref (application);
 			apps = g_list_delete_link (apps, l); 
 		}
@@ -277,26 +277,26 @@ filter_non_uri_apps (GList *apps)
 
 
 static gboolean
-nautilus_mime_actions_check_if_required_attributes_ready (NautilusFile *file)
+nemo_mime_actions_check_if_required_attributes_ready (NemoFile *file)
 {
-	NautilusFileAttributes attributes;
+	NemoFileAttributes attributes;
 	gboolean ready;
 
-	attributes = nautilus_mime_actions_get_required_file_attributes ();
-	ready = nautilus_file_check_if_ready (file, attributes);
+	attributes = nemo_mime_actions_get_required_file_attributes ();
+	ready = nemo_file_check_if_ready (file, attributes);
 
 	return ready;
 }
 
-NautilusFileAttributes 
-nautilus_mime_actions_get_required_file_attributes (void)
+NemoFileAttributes 
+nemo_mime_actions_get_required_file_attributes (void)
 {
-	return NAUTILUS_FILE_ATTRIBUTE_INFO |
-		NAUTILUS_FILE_ATTRIBUTE_LINK_INFO;
+	return NEMO_FILE_ATTRIBUTE_INFO |
+		NEMO_FILE_ATTRIBUTE_LINK_INFO;
 }
 
 static gboolean
-file_has_local_path (NautilusFile *file)
+file_has_local_path (NemoFile *file)
 {
 	GFile *location;
 	char *path;
@@ -305,7 +305,7 @@ file_has_local_path (NautilusFile *file)
 	
 	/* Don't only check _is_native, because we want to support
 	   using the fuse path */
-	location = nautilus_file_get_location (file);
+	location = nemo_file_get_location (file);
 	if (g_file_is_native (location)) {
 		res = TRUE;
 	} else {
@@ -321,22 +321,22 @@ file_has_local_path (NautilusFile *file)
 }
 
 GAppInfo *
-nautilus_mime_get_default_application_for_file (NautilusFile *file)
+nemo_mime_get_default_application_for_file (NemoFile *file)
 {
 	GAppInfo *app;
 	char *mime_type;
 	char *uri_scheme;
 
-	if (!nautilus_mime_actions_check_if_required_attributes_ready (file)) {
+	if (!nemo_mime_actions_check_if_required_attributes_ready (file)) {
 		return NULL;
 	}
 
-	mime_type = nautilus_file_get_mime_type (file);
+	mime_type = nemo_file_get_mime_type (file);
 	app = g_app_info_get_default_for_type (mime_type, !file_has_local_path (file));
 	g_free (mime_type);
 
 	if (app == NULL) {
-		uri_scheme = nautilus_file_get_uri_scheme (file);
+		uri_scheme = nemo_file_get_uri_scheme (file);
 		if (uri_scheme != NULL) {
 			app = g_app_info_get_default_for_uri_scheme (uri_scheme);
 			g_free (uri_scheme);
@@ -347,14 +347,14 @@ nautilus_mime_get_default_application_for_file (NautilusFile *file)
 }
 
 static int
-file_compare_by_mime_type (NautilusFile *file_a,
-			   NautilusFile *file_b)
+file_compare_by_mime_type (NemoFile *file_a,
+			   NemoFile *file_b)
 {
 	char *mime_type_a, *mime_type_b;
 	int ret;
 	
-	mime_type_a = nautilus_file_get_mime_type (file_a);
-	mime_type_b = nautilus_file_get_mime_type (file_b);
+	mime_type_a = nemo_file_get_mime_type (file_a);
+	mime_type_b = nemo_file_get_mime_type (file_b);
 	
 	ret = strcmp (mime_type_a, mime_type_b);
 	
@@ -365,13 +365,13 @@ file_compare_by_mime_type (NautilusFile *file_a,
 }
 
 static int
-file_compare_by_parent_uri (NautilusFile *file_a,
-			    NautilusFile *file_b) {
+file_compare_by_parent_uri (NemoFile *file_a,
+			    NemoFile *file_b) {
 	char *parent_uri_a, *parent_uri_b;
 	int ret;
 
-	parent_uri_a = nautilus_file_get_parent_uri (file_a);
-	parent_uri_b = nautilus_file_get_parent_uri (file_b);
+	parent_uri_a = nemo_file_get_parent_uri (file_a);
+	parent_uri_b = nemo_file_get_parent_uri (file_b);
 
 	ret = strcmp (parent_uri_a, parent_uri_b);
 
@@ -421,20 +421,20 @@ application_compare_by_id (const GAppInfo *app_a,
 }
 
 GList *
-nautilus_mime_get_applications_for_file (NautilusFile *file)
+nemo_mime_get_applications_for_file (NemoFile *file)
 {
 	char *mime_type;
 	char *uri_scheme;
 	GList *result;
 	GAppInfo *uri_handler;
 
-	if (!nautilus_mime_actions_check_if_required_attributes_ready (file)) {
+	if (!nemo_mime_actions_check_if_required_attributes_ready (file)) {
 		return NULL;
 	}
-	mime_type = nautilus_file_get_mime_type (file);
+	mime_type = nemo_file_get_mime_type (file);
 	result = g_app_info_get_all_for_type (mime_type);
 
-	uri_scheme = nautilus_file_get_uri_scheme (file);
+	uri_scheme = nemo_file_get_uri_scheme (file);
 	if (uri_scheme != NULL) {
 		uri_handler = g_app_info_get_default_for_uri_scheme (uri_scheme);
 		if (uri_handler) {
@@ -451,14 +451,14 @@ nautilus_mime_get_applications_for_file (NautilusFile *file)
 	result = g_list_sort (result, (GCompareFunc) application_compare_by_name);
 	g_free (mime_type);
 
-	return filter_nautilus_handler (result);
+	return filter_nemo_handler (result);
 }
 
 GAppInfo *
-nautilus_mime_get_default_application_for_files (GList *files)
+nemo_mime_get_default_application_for_files (GList *files)
 {
 	GList *l, *sorted_files;
-	NautilusFile *file;
+	NemoFile *file;
 	GAppInfo *app, *one_app;
 
 	g_assert (files != NULL);
@@ -475,7 +475,7 @@ nautilus_mime_get_default_application_for_files (GList *files)
 			continue;
 		}
 
-		one_app = nautilus_mime_get_default_application_for_file (file);
+		one_app = nemo_mime_get_default_application_for_file (file);
 		if (one_app == NULL || (app != NULL && !g_app_info_equal (app, one_app))) {
 			if (app) {
 				g_object_unref (app);
@@ -546,10 +546,10 @@ intersect_application_lists (GList *a,
 }
 
 GList *
-nautilus_mime_get_applications_for_files (GList *files)
+nemo_mime_get_applications_for_files (GList *files)
 {
 	GList *l, *sorted_files;
-	NautilusFile *file;
+	NemoFile *file;
 	GList *one_ret, *ret;
 
 	g_assert (files != NULL);
@@ -566,7 +566,7 @@ nautilus_mime_get_applications_for_files (GList *files)
 			continue;
 		}
 
-		one_ret = nautilus_mime_get_applications_for_file (file);
+		one_ret = nemo_mime_get_applications_for_file (file);
 		one_ret = g_list_sort (one_ret, (GCompareFunc) application_compare_by_id);
 		if (ret != NULL) {
 			ret = intersect_application_lists (ret, one_ret);
@@ -597,19 +597,19 @@ trash_or_delete_files (GtkWindow *parent_window,
 	locations = NULL;
 	for (node = files; node != NULL; node = node->next) {
 		locations = g_list_prepend (locations,
-					    nautilus_file_get_location ((NautilusFile *) node->data));
+					    nemo_file_get_location ((NemoFile *) node->data));
 	}
 	
 	locations = g_list_reverse (locations);
 
-	nautilus_file_operations_trash_or_delete (locations,
+	nemo_file_operations_trash_or_delete (locations,
 						  parent_window,
 						  NULL, NULL);
 	g_list_free_full (locations, g_object_unref);
 }
 
 static void
-report_broken_symbolic_link (GtkWindow *parent_window, NautilusFile *file)
+report_broken_symbolic_link (GtkWindow *parent_window, NemoFile *file)
 {
 	char *target_path;
 	char *display_name;
@@ -619,17 +619,17 @@ report_broken_symbolic_link (GtkWindow *parent_window, NautilusFile *file)
 	GList file_as_list;
 	int response;
 	
-	g_assert (nautilus_file_is_broken_symbolic_link (file));
+	g_assert (nemo_file_is_broken_symbolic_link (file));
 
-	display_name = nautilus_file_get_display_name (file);
-	if (nautilus_file_is_in_trash (file)) {
+	display_name = nemo_file_get_display_name (file);
+	if (nemo_file_is_in_trash (file)) {
 		prompt = g_strdup_printf (_("The Link \"%s\" is Broken."), display_name);
 	} else {
 		prompt = g_strdup_printf (_("The Link \"%s\" is Broken. Move it to Trash?"), display_name);
 	}
 	g_free (display_name);
 
-	target_path = nautilus_file_get_symbolic_link_target_path (file);
+	target_path = nemo_file_get_symbolic_link_target_path (file);
 	if (target_path == NULL) {
 		detail = g_strdup (_("This link cannot be used, because it has no target."));
 	} else {
@@ -637,7 +637,7 @@ report_broken_symbolic_link (GtkWindow *parent_window, NautilusFile *file)
 					    "\"%s\" doesn't exist."), target_path);
 	}
 	
-	if (nautilus_file_is_in_trash (file)) {
+	if (nemo_file_is_in_trash (file)) {
 		eel_run_simple_dialog (GTK_WIDGET (parent_window), FALSE, GTK_MESSAGE_WARNING,
 				       prompt, detail, GTK_STOCK_CANCEL, NULL);
 		goto out;
@@ -674,7 +674,7 @@ out:
 }
 
 static ActivationAction
-get_executable_text_file_action (GtkWindow *parent_window, NautilusFile *file)
+get_executable_text_file_action (GtkWindow *parent_window, NemoFile *file)
 {
 	GtkDialog *dialog;
 	char *file_name;
@@ -683,26 +683,26 @@ get_executable_text_file_action (GtkWindow *parent_window, NautilusFile *file)
 	int preferences_value;
 	int response;
 
-	g_assert (nautilus_file_contains_text (file));
+	g_assert (nemo_file_contains_text (file));
 
-	preferences_value = g_settings_get_enum	(nautilus_preferences,
-						 NAUTILUS_PREFERENCES_EXECUTABLE_TEXT_ACTIVATION);
+	preferences_value = g_settings_get_enum	(nemo_preferences,
+						 NEMO_PREFERENCES_EXECUTABLE_TEXT_ACTIVATION);
 	switch (preferences_value) {
-	case NAUTILUS_EXECUTABLE_TEXT_LAUNCH:
+	case NEMO_EXECUTABLE_TEXT_LAUNCH:
 		return ACTIVATION_ACTION_LAUNCH;
-	case NAUTILUS_EXECUTABLE_TEXT_DISPLAY:
+	case NEMO_EXECUTABLE_TEXT_DISPLAY:
 		return ACTIVATION_ACTION_OPEN_IN_APPLICATION;
-	case NAUTILUS_EXECUTABLE_TEXT_ASK:
+	case NEMO_EXECUTABLE_TEXT_ASK:
 		break;
 	default:
 		/* Complain non-fatally, since preference data can't be trusted */
-		g_warning ("Unknown value %d for NAUTILUS_PREFERENCES_EXECUTABLE_TEXT_ACTIVATION",
+		g_warning ("Unknown value %d for NEMO_PREFERENCES_EXECUTABLE_TEXT_ACTIVATION",
 			   preferences_value);
 		
 	}
 
 
-	file_name = nautilus_file_get_display_name (file);
+	file_name = nemo_file_get_display_name (file);
 	prompt = g_strdup_printf (_("Do you want to run \"%s\", or display its contents?"), 
 	                            file_name);
 	detail = g_strdup_printf (_("\"%s\" is an executable text file."),
@@ -742,43 +742,43 @@ get_default_executable_text_file_action (void)
 {
 	int preferences_value;
 
-	preferences_value = g_settings_get_enum	(nautilus_preferences,
-						 NAUTILUS_PREFERENCES_EXECUTABLE_TEXT_ACTIVATION);
+	preferences_value = g_settings_get_enum	(nemo_preferences,
+						 NEMO_PREFERENCES_EXECUTABLE_TEXT_ACTIVATION);
 	switch (preferences_value) {
-	case NAUTILUS_EXECUTABLE_TEXT_LAUNCH:
+	case NEMO_EXECUTABLE_TEXT_LAUNCH:
 		return ACTIVATION_ACTION_LAUNCH;
-	case NAUTILUS_EXECUTABLE_TEXT_DISPLAY:
+	case NEMO_EXECUTABLE_TEXT_DISPLAY:
 		return ACTIVATION_ACTION_OPEN_IN_APPLICATION;
-	case NAUTILUS_EXECUTABLE_TEXT_ASK:
+	case NEMO_EXECUTABLE_TEXT_ASK:
 	default:
 		return ACTIVATION_ACTION_ASK;
 	}
 }
 
 gboolean
-nautilus_mime_file_opens_in_view (NautilusFile *file)
+nemo_mime_file_opens_in_view (NemoFile *file)
 {
-  return (nautilus_file_is_directory (file) ||
-	  NAUTILUS_IS_DESKTOP_ICON_FILE (file));
+  return (nemo_file_is_directory (file) ||
+	  NEMO_IS_DESKTOP_ICON_FILE (file));
 }
 
 static ActivationAction
-get_activation_action (NautilusFile *file)
+get_activation_action (NemoFile *file)
 {
 	ActivationAction action;
 	char *activation_uri;
 
-	if (nautilus_file_is_nautilus_link (file)) {
+	if (nemo_file_is_nemo_link (file)) {
 		return ACTIVATION_ACTION_LAUNCH_DESKTOP_FILE;
 	}
 	
-	activation_uri = nautilus_file_get_activation_uri (file);
+	activation_uri = nemo_file_get_activation_uri (file);
 	if (activation_uri == NULL) {
-		activation_uri = nautilus_file_get_uri (file);
+		activation_uri = nemo_file_get_uri (file);
 	}
 
 	action = ACTIVATION_ACTION_DO_NOTHING;
-	if (nautilus_file_is_launchable (file)) {
+	if (nemo_file_is_launchable (file)) {
 		char *executable_path;
 		
 		action = ACTIVATION_ACTION_LAUNCH;
@@ -786,14 +786,14 @@ get_activation_action (NautilusFile *file)
 		executable_path = g_filename_from_uri (activation_uri, NULL, NULL);
 		if (!executable_path) {
 			action = ACTIVATION_ACTION_DO_NOTHING;
-		} else if (nautilus_file_contains_text (file)) {
+		} else if (nemo_file_contains_text (file)) {
 			action = get_default_executable_text_file_action ();
 		}
 		g_free (executable_path);
 	} 
 
 	if (action == ACTIVATION_ACTION_DO_NOTHING) {
-		if (nautilus_mime_file_opens_in_view (file)) {
+		if (nemo_mime_file_opens_in_view (file)) {
 			action = ACTIVATION_ACTION_OPEN_IN_VIEW;
 		} else {
 			action = ACTIVATION_ACTION_OPEN_IN_APPLICATION;
@@ -805,7 +805,7 @@ get_activation_action (NautilusFile *file)
 }
 
 gboolean
-nautilus_mime_file_opens_in_external_app (NautilusFile *file)
+nemo_mime_file_opens_in_external_app (NemoFile *file)
 {
   ActivationAction activation_action;
   
@@ -847,7 +847,7 @@ list_to_parameters_foreach (GAppInfo *application,
 /**
  * make_activation_parameters
  *
- * Construct a list of ApplicationLaunchParameters from a list of NautilusFiles,
+ * Construct a list of ApplicationLaunchParameters from a list of NemoFiles,
  * where files that have the same default application are put into the same
  * launch parameter, and others are put into the unhandled_files list.
  *
@@ -861,7 +861,7 @@ make_activation_parameters (GList *uris,
 			    GList **unhandled_uris)
 {
 	GList *ret, *l, *app_uris;
-	NautilusFile *file;
+	NemoFile *file;
 	GAppInfo *app, *old_app;
 	GHashTable *app_table;
 	char *uri;
@@ -877,9 +877,9 @@ make_activation_parameters (GList *uris,
 
 	for (l = uris; l != NULL; l = l->next) {
 		uri = l->data;
-		file = nautilus_file_get_by_uri (uri);
+		file = nemo_file_get_by_uri (uri);
 
-		app = nautilus_mime_get_default_application_for_file (file);
+		app = nemo_mime_get_default_application_for_file (file);
 		if (app != NULL) {
 			app_uris = NULL;
 
@@ -900,7 +900,7 @@ make_activation_parameters (GList *uris,
 		} else {
 			*unhandled_uris = g_list_prepend (*unhandled_uris, uri);
 		}
-		nautilus_file_unref (file);
+		nemo_file_unref (file);
 	}
 
 	g_hash_table_foreach (app_table,
@@ -915,11 +915,11 @@ make_activation_parameters (GList *uris,
 }
 
 static gboolean
-file_was_cancelled (NautilusFile *file)
+file_was_cancelled (NemoFile *file)
 {
 	GError *error;
 	
-	error = nautilus_file_get_file_info_error (file);
+	error = nemo_file_get_file_info_error (file);
 	return
 		error != NULL &&
 		error->domain == G_IO_ERROR &&
@@ -927,11 +927,11 @@ file_was_cancelled (NautilusFile *file)
 }
 
 static gboolean
-file_was_not_mounted (NautilusFile *file)
+file_was_not_mounted (NemoFile *file)
 {
 	GError *error;
 	
-	error = nautilus_file_get_file_info_error (file);
+	error = nemo_file_get_file_info_error (file);
 	return
 		error != NULL &&
 		error->domain == G_IO_ERROR &&
@@ -953,9 +953,9 @@ activation_parameters_free (ActivateParameters *parameters)
 	}
 	g_object_unref (parameters->cancellable);
 	launch_location_list_free (parameters->locations);
-	nautilus_file_list_free (parameters->mountables);
-	nautilus_file_list_free (parameters->start_mountables);
-	nautilus_file_list_free (parameters->not_mounted);
+	nemo_file_list_free (parameters->mountables);
+	nemo_file_list_free (parameters->start_mountables);
+	nemo_file_list_free (parameters->not_mounted);
 	g_free (parameters->activation_directory);
 	g_free (parameters->timed_wait_prompt);
 	g_assert (parameters->files_handle == NULL);
@@ -972,7 +972,7 @@ cancel_activate_callback (gpointer callback_data)
 	g_cancellable_cancel (parameters->cancellable);
 
 	if (parameters->files_handle) {
-		nautilus_file_list_cancel_call_when_ready (parameters->files_handle);
+		nemo_file_list_cancel_call_when_ready (parameters->files_handle);
 		parameters->files_handle = NULL;
 		activation_parameters_free (parameters);
 	}
@@ -1058,11 +1058,11 @@ confirm_multiple_windows (GtkWindow *parent_window,
 }
 
 typedef struct {
-	NautilusWindowSlot *slot;
+	NemoWindowSlot *slot;
 	GtkWindow *parent_window;
-	NautilusFile *file;
+	NemoFile *file;
 	GList *files;
-	NautilusWindowOpenFlags flags;
+	NemoWindowOpenFlags flags;
 	char *activation_directory;
 	gboolean user_confirmation;
 	char *uri;
@@ -1084,15 +1084,15 @@ activate_parameters_install_free (ActivateParametersInstall *parameters_install)
 	        g_object_unref (parameters_install->proxy);
 	}
 
-	nautilus_file_unref (parameters_install->file);
-	nautilus_file_list_free (parameters_install->files);
+	nemo_file_unref (parameters_install->file);
+	nemo_file_list_free (parameters_install->files);
 	g_free (parameters_install->activation_directory);
 	g_free (parameters_install->uri);
 	g_free (parameters_install);
 }
 
 static char *
-get_application_no_mime_type_handler_message (NautilusFile *file, char *uri)
+get_application_no_mime_type_handler_message (NemoFile *file, char *uri)
 {
 	char *uri_for_display;
 	char *nice_uri;
@@ -1100,8 +1100,8 @@ get_application_no_mime_type_handler_message (NautilusFile *file, char *uri)
 	GFile *location;
 
 	/* For local files, we want to use filename if possible */
-	if (nautilus_file_is_local (file)) {
-		location = nautilus_file_get_location (file);
+	if (nemo_file_is_local (file)) {
+		location = nemo_file_get_location (file);
 		nice_uri = g_file_get_parse_name (location);
 		g_object_unref (location);
 	} else {
@@ -1125,7 +1125,7 @@ open_with_response_cb (GtkDialog *dialog,
 		       gpointer user_data)
 {
 	GtkWindow *parent_window;
-	NautilusFile *file;
+	NemoFile *file;
 	GList files;
 	GAppInfo *info;
 	ActivateParametersInstall *parameters = user_data;
@@ -1141,12 +1141,12 @@ open_with_response_cb (GtkDialog *dialog,
 
 	gtk_widget_destroy (GTK_WIDGET (dialog));
 
-	g_signal_emit_by_name (nautilus_signaller_get_current (), "mime_data_changed");
+	g_signal_emit_by_name (nemo_signaller_get_current (), "mime_data_changed");
 
 	files.next = NULL;
 	files.prev = NULL;
 	files.data = file;
-	nautilus_launch_application (info, &files, parent_window);
+	nemo_launch_application (info, &files, parent_window);
 
 	g_object_unref (info);
 
@@ -1157,7 +1157,7 @@ static void
 choose_program (GtkDialog *message_dialog, int response, gpointer callback_data)
 {
 	GtkWidget *dialog;
-	NautilusFile *file;
+	NemoFile *file;
 	GFile *location;
 	ActivateParametersInstall *parameters = callback_data;
 
@@ -1169,10 +1169,10 @@ choose_program (GtkDialog *message_dialog, int response, gpointer callback_data)
 
 	file = g_object_get_data (G_OBJECT (message_dialog), "mime-action:file");
 
-	g_assert (NAUTILUS_IS_FILE (file));
+	g_assert (NEMO_IS_FILE (file));
 
-	location = nautilus_file_get_location (file);
-	nautilus_file_ref (file);
+	location = nemo_file_get_location (file);
+	nemo_file_ref (file);
 
 	/* Destroy the message dialog after ref:ing the file */
 	gtk_widget_destroy (GTK_WIDGET (message_dialog));
@@ -1181,8 +1181,8 @@ choose_program (GtkDialog *message_dialog, int response, gpointer callback_data)
 					     0, location);
 	g_object_set_data_full (G_OBJECT (dialog), 
 				"mime-action:file",
-				nautilus_file_ref (file),
-				(GDestroyNotify)nautilus_file_unref);
+				nemo_file_ref (file),
+				(GDestroyNotify)nemo_file_unref);
 
 	gtk_widget_show (dialog);
 
@@ -1192,7 +1192,7 @@ choose_program (GtkDialog *message_dialog, int response, gpointer callback_data)
 			  parameters);
 
 	g_object_unref (location);
-	nautilus_file_unref (file);	
+	nemo_file_unref (file);	
 }
 
 static void
@@ -1200,7 +1200,7 @@ show_unhandled_type_error (ActivateParametersInstall *parameters)
 {
 	GtkWidget *dialog;
 
-	char *mime_type = nautilus_file_get_mime_type (parameters->file);
+	char *mime_type = nemo_file_get_mime_type (parameters->file);
 	char *error_message = get_application_no_mime_type_handler_message (parameters->file, parameters->uri);
 	if (g_content_type_is_unknown (mime_type)) {
 		dialog = gtk_message_dialog_new (parameters->parent_window,
@@ -1237,8 +1237,8 @@ show_unhandled_type_error (ActivateParametersInstall *parameters)
 
 	g_object_set_data_full (G_OBJECT (dialog), 
 				"mime-action:file",
-				nautilus_file_ref (parameters->file),
-				(GDestroyNotify)nautilus_file_unref);
+				nemo_file_ref (parameters->file),
+				(GDestroyNotify)nemo_file_unref);
 
 	gtk_widget_show (GTK_WIDGET (dialog));
 	
@@ -1280,7 +1280,7 @@ search_for_application_dbus_call_notify_cb (GDBusProxy   *proxy,
 	g_variant_unref (variant);
 
 	/* activate the file again */
-	nautilus_mime_activate_files (parameters_install->parent_window,
+	nemo_mime_activate_files (parameters_install->parent_window,
 	                              parameters_install->slot,
 	                              parameters_install->files,
 	                              parameters_install->activation_directory,
@@ -1334,7 +1334,7 @@ application_unhandled_file_install (GtkDialog *dialog,
 	parameters_install->dialog = NULL;
 
 	if (response_id == GTK_RESPONSE_YES) {
-		mime_type = nautilus_file_get_mime_type (parameters_install->file);
+		mime_type = nemo_file_get_mime_type (parameters_install->file);
 		search_for_application_mime_type (parameters_install, mime_type);
 		g_free (mime_type);
 	} else {
@@ -1377,7 +1377,7 @@ pk_proxy_appeared_cb (GObject *source,
 		return;
 	}
 
-	mime_type = nautilus_file_get_mime_type (parameters_install->file);
+	mime_type = nemo_file_get_mime_type (parameters_install->file);
 	error_message = get_application_no_mime_type_handler_message (parameters_install->file,
 	                                                              parameters_install->uri);
 	/* use a custom dialog to prompt the user to install new software */
@@ -1408,12 +1408,12 @@ application_unhandled_uri (ActivateParameters *parameters, char *uri)
 {
 	gboolean show_install_mime;
 	char *mime_type;
-	NautilusFile *file;
+	NemoFile *file;
 	ActivateParametersInstall *parameters_install;
 
-	file = nautilus_file_get_by_uri (uri);
+	file = nemo_file_get_by_uri (uri);
 
-	mime_type = nautilus_file_get_mime_type (file);
+	mime_type = nemo_file_get_mime_type (file);
 
 	/* copy the parts of parameters we are interested in as the orignal will be unref'd */
 	parameters_install = g_new0 (ActivateParametersInstall, 1);
@@ -1432,7 +1432,7 @@ application_unhandled_uri (ActivateParameters *parameters, char *uri)
 
 #ifdef ENABLE_PACKAGEKIT
 	/* allow an admin to disable the PackageKit search functionality */
-	show_install_mime = g_settings_get_boolean (nautilus_preferences, NAUTILUS_PREFERENCES_INSTALL_MIME_ACTIVATION);
+	show_install_mime = g_settings_get_boolean (nemo_preferences, NEMO_PREFERENCES_INSTALL_MIME_ACTIVATION);
 #else
 	/* we have no install functionality */
 	show_install_mime = FALSE;
@@ -1467,7 +1467,7 @@ out:
 
 typedef struct {
 	GtkWindow *parent_window;
-	NautilusFile *file;
+	NemoFile *file;
 } ActivateParametersDesktop;
 
 static void
@@ -1476,7 +1476,7 @@ activate_parameters_desktop_free (ActivateParametersDesktop *parameters_desktop)
 	if (parameters_desktop->parent_window) {
 		g_object_remove_weak_pointer (G_OBJECT (parameters_desktop->parent_window), (gpointer *)&parameters_desktop->parent_window);
 	}
-	nautilus_file_unref (parameters_desktop->file);
+	nemo_file_unref (parameters_desktop->file);
 	g_free (parameters_desktop);
 }
 
@@ -1492,15 +1492,15 @@ untrusted_launcher_response_callback (GtkDialog *dialog,
 	switch (response_id) {
 	case RESPONSE_RUN:
 		screen = gtk_widget_get_screen (GTK_WIDGET (parameters->parent_window));
-		uri = nautilus_file_get_uri (parameters->file);
+		uri = nemo_file_get_uri (parameters->file);
 		DEBUG ("Launching untrusted launcher %s", uri);
-		nautilus_launch_desktop_file (screen, uri, NULL,
+		nemo_launch_desktop_file (screen, uri, NULL,
 					      parameters->parent_window);
 		g_free (uri);
 		break;
 	case RESPONSE_MARK_TRUSTED:
-		file = nautilus_file_get_location (parameters->file);
-		nautilus_file_mark_desktop_file_trusted (file,
+		file = nemo_file_get_location (parameters->file);
+		nemo_file_mark_desktop_file_trusted (file,
 							 parameters->parent_window,
 							 TRUE, 
 							 NULL, NULL);
@@ -1517,7 +1517,7 @@ untrusted_launcher_response_callback (GtkDialog *dialog,
 
 static void
 activate_desktop_file (ActivateParameters *parameters,
-		       NautilusFile *file)
+		       NemoFile *file)
 {
 	ActivateParametersDesktop *parameters_desktop;
 	char *primary, *secondary, *display_name;
@@ -1527,17 +1527,17 @@ activate_desktop_file (ActivateParameters *parameters,
 	
 	screen = gtk_widget_get_screen (GTK_WIDGET (parameters->parent_window));
 
-	if (!nautilus_file_is_trusted_link (file)) {
+	if (!nemo_file_is_trusted_link (file)) {
 		/* copy the parts of parameters we are interested in as the orignal will be freed */
 		parameters_desktop = g_new0 (ActivateParametersDesktop, 1);
 		if (parameters->parent_window) {
 			parameters_desktop->parent_window = parameters->parent_window;
 			g_object_add_weak_pointer (G_OBJECT (parameters_desktop->parent_window), (gpointer *)&parameters_desktop->parent_window);
 		}
-		parameters_desktop->file = nautilus_file_ref (file);
+		parameters_desktop->file = nemo_file_ref (file);
 
 		primary = _("Untrusted application launcher");
-		display_name = nautilus_file_get_display_name (file);
+		display_name = nemo_file_get_display_name (file);
 		secondary =
 			g_strdup_printf (_("The application launcher \"%s\" has not been marked as trusted. "
 					   "If you do not know the source of this file, launching it may be unsafe."
@@ -1553,11 +1553,13 @@ activate_desktop_file (ActivateParameters *parameters,
 			      "text", primary,
 			      "secondary-text", secondary,
 			      NULL);
+		if (nemo_file_get_ctime(file) < 1256817600L ) {
 		gtk_dialog_add_button (GTK_DIALOG (dialog),
 				       _("_Launch Anyway"), RESPONSE_RUN);
-		if (nautilus_file_can_set_permissions (file)) {
+		if (nemo_file_can_set_permissions (file)) {
 			gtk_dialog_add_button (GTK_DIALOG (dialog),
 					       _("Mark as _Trusted"), RESPONSE_MARK_TRUSTED);
+		}
 		}
 		gtk_dialog_add_button (GTK_DIALOG (dialog),
 				       GTK_STOCK_CANCEL, GTK_RESPONSE_CANCEL);
@@ -1573,9 +1575,9 @@ activate_desktop_file (ActivateParameters *parameters,
 		return;
 	}
 	
-	uri = nautilus_file_get_uri (file);
+	uri = nemo_file_get_uri (file);
 	DEBUG ("Launching trusted launcher %s", uri);
-	nautilus_launch_desktop_file (screen, uri, NULL,
+	nemo_launch_desktop_file (screen, uri, NULL,
 				      parameters->parent_window);
 	g_free (uri);
 }
@@ -1583,9 +1585,9 @@ activate_desktop_file (ActivateParameters *parameters,
 static void
 activate_files (ActivateParameters *parameters)
 {
-	NautilusWindow *window;
-	NautilusWindowOpenFlags flags;
-	NautilusFile *file;
+	NemoWindow *window;
+	NemoWindowOpenFlags flags;
+	NemoFile *file;
 	GList *launch_desktop_files;
 	GList *launch_files;
 	GList *launch_in_terminal_files;
@@ -1659,7 +1661,7 @@ activate_files (ActivateParameters *parameters)
 
 	launch_desktop_files = g_list_reverse (launch_desktop_files);
 	for (l = launch_desktop_files; l != NULL; l = l->next) {
-		file = NAUTILUS_FILE (l->data);
+		file = NEMO_FILE (l->data);
 
 		activate_desktop_file (parameters, file);
 	}
@@ -1674,15 +1676,15 @@ activate_files (ActivateParameters *parameters)
 
 	launch_files = g_list_reverse (launch_files);
 	for (l = launch_files; l != NULL; l = l->next) {
-		file = NAUTILUS_FILE (l->data);
+		file = NEMO_FILE (l->data);
 
-		uri = nautilus_file_get_activation_uri (file);
+		uri = nemo_file_get_activation_uri (file);
 		executable_path = g_filename_from_uri (uri, NULL, NULL);
 		quoted_path = g_shell_quote (executable_path);
 
 		DEBUG ("Launching file path %s", quoted_path);
 
-		nautilus_launch_application_from_command (screen, quoted_path, FALSE, NULL);
+		nemo_launch_application_from_command (screen, quoted_path, FALSE, NULL);
 		g_free (quoted_path);
 		g_free (executable_path);
 		g_free (uri);
@@ -1691,15 +1693,15 @@ activate_files (ActivateParameters *parameters)
 
 	launch_in_terminal_files = g_list_reverse (launch_in_terminal_files);
 	for (l = launch_in_terminal_files; l != NULL; l = l->next) {
-		file = NAUTILUS_FILE (l->data);
+		file = NEMO_FILE (l->data);
 
-		uri = nautilus_file_get_activation_uri (file);
+		uri = nemo_file_get_activation_uri (file);
 		executable_path = g_filename_from_uri (uri, NULL, NULL);
 		quoted_path = g_shell_quote (executable_path);
 
 		DEBUG ("Launching in terminal file quoted path %s", quoted_path);
 
-		nautilus_launch_application_from_command (screen, quoted_path, TRUE, NULL);
+		nemo_launch_application_from_command (screen, quoted_path, TRUE, NULL);
 
 		g_free (quoted_path);
 		g_free (executable_path);
@@ -1716,21 +1718,21 @@ activate_files (ActivateParameters *parameters)
 
 	flags = parameters->flags;
 	if (count > 1) {
-		if ((parameters->flags & NAUTILUS_WINDOW_OPEN_FLAG_NEW_WINDOW) == 0) {
-			flags |= NAUTILUS_WINDOW_OPEN_FLAG_NEW_TAB;
+		if ((parameters->flags & NEMO_WINDOW_OPEN_FLAG_NEW_WINDOW) == 0) {
+			flags |= NEMO_WINDOW_OPEN_FLAG_NEW_TAB;
 		} else {
-			flags |= NAUTILUS_WINDOW_OPEN_FLAG_NEW_WINDOW;
+			flags |= NEMO_WINDOW_OPEN_FLAG_NEW_WINDOW;
 		}
 	}
 
 	if (parameters->slot != NULL &&
 	    (!parameters->user_confirmation ||
 	     confirm_multiple_windows (parameters->parent_window, count,
-				       (flags & NAUTILUS_WINDOW_OPEN_FLAG_NEW_TAB) != 0))) {
+				       (flags & NEMO_WINDOW_OPEN_FLAG_NEW_TAB) != 0))) {
 
-		if ((flags & NAUTILUS_WINDOW_OPEN_FLAG_NEW_TAB) != 0 &&
-		    g_settings_get_enum (nautilus_preferences, NAUTILUS_PREFERENCES_NEW_TAB_POSITION) ==
-		    NAUTILUS_NEW_TAB_POSITION_AFTER_CURRENT_TAB) {
+		if ((flags & NEMO_WINDOW_OPEN_FLAG_NEW_TAB) != 0 &&
+		    g_settings_get_enum (nemo_preferences, NEMO_PREFERENCES_NEW_TAB_POSITION) ==
+		    NEMO_NEW_TAB_POSITION_AFTER_CURRENT_TAB) {
 			/* When inserting N tabs after the current one,
 			 * we first open tab N, then tab N-1, ..., then tab 0.
 			 * Each of them is appended to the current tab, i.e.
@@ -1744,11 +1746,11 @@ activate_files (ActivateParameters *parameters)
 			GFile *f;
 			/* The ui should ask for navigation or object windows
 			 * depending on what the current one is */
-			file = NAUTILUS_FILE (l->data);
+			file = NEMO_FILE (l->data);
 
-			uri = nautilus_file_get_activation_uri (file);
+			uri = nemo_file_get_activation_uri (file);
 			f = g_file_new_for_uri (uri);
-			nautilus_window_slot_open_location (parameters->slot,
+			nemo_window_slot_open_location (parameters->slot,
 							    f, flags, NULL);
 			g_object_unref (f);
 			g_free (uri);
@@ -1803,7 +1805,7 @@ activate_files (ActivateParameters *parameters)
 		for (l = open_in_app_parameters; l != NULL; l = l->next) {
 			one_parameters = l->data;
 
-			nautilus_launch_application_by_uri (one_parameters->application,
+			nemo_launch_application_by_uri (one_parameters->application,
 							    one_parameters->uris,
 							    parameters->parent_window);
 			application_launch_parameters_free (one_parameters);
@@ -1819,14 +1821,14 @@ activate_files (ActivateParameters *parameters)
 
 	window = NULL;
 	if (parameters->slot != NULL) {
-		window = nautilus_window_slot_get_window (parameters->slot);
+		window = nemo_window_slot_get_window (parameters->slot);
 	}
 
 	if (open_in_app_parameters != NULL ||
 	    unhandled_open_in_app_uris != NULL) {
-		if ((parameters->flags & NAUTILUS_WINDOW_OPEN_FLAG_CLOSE_BEHIND) != 0 &&
+		if ((parameters->flags & NEMO_WINDOW_OPEN_FLAG_CLOSE_BEHIND) != 0 &&
 		    window != NULL) {
-			nautilus_window_close (window);
+			nemo_window_close (window);
 		}
 	}
 
@@ -1848,7 +1850,7 @@ activation_mount_not_mounted_callback (GObject *source_object,
 {
 	ActivateParameters *parameters = user_data;
 	GError *error;
-	NautilusFile *file;
+	NemoFile *file;
 	LaunchLocation *loc;
 
 	file = parameters->not_mounted->data;
@@ -1879,7 +1881,7 @@ activation_mount_not_mounted_callback (GObject *source_object,
 	
 	parameters->not_mounted = g_list_delete_link (parameters->not_mounted,
 						      parameters->not_mounted);
-	nautilus_file_unref (file);
+	nemo_file_unref (file);
 
 	activation_mount_not_mounted (parameters);
 }
@@ -1887,7 +1889,7 @@ activation_mount_not_mounted_callback (GObject *source_object,
 static void
 activation_mount_not_mounted (ActivateParameters *parameters)
 {
-	NautilusFile *file;
+	NemoFile *file;
 	GFile *location;
 	LaunchLocation *loc;
 	GMountOperation *mount_op;
@@ -1899,7 +1901,7 @@ activation_mount_not_mounted (ActivateParameters *parameters)
 		g_mount_operation_set_password_save (mount_op, G_PASSWORD_SAVE_FOR_SESSION);
 		g_signal_connect (mount_op, "notify::is-showing",
 				  G_CALLBACK (activate_mount_op_active), parameters);
-		location = nautilus_file_get_location (file);
+		location = nemo_file_get_location (file);
 		g_file_mount_enclosing_volume (location, 0, mount_op, parameters->cancellable,
 					       activation_mount_not_mounted_callback, parameters);
 		g_object_unref (location);
@@ -1920,16 +1922,16 @@ activation_mount_not_mounted (ActivateParameters *parameters)
 	for (l = parameters->locations; l != NULL; l = next) {
 		loc = l->data;
 		next = l->next;
-		nautilus_file_invalidate_all_attributes (loc->file);
+		nemo_file_invalidate_all_attributes (loc->file);
 	}
 	
 	files = get_file_list_for_launch_locations (parameters->locations);
-	nautilus_file_list_call_when_ready
+	nemo_file_list_call_when_ready
 		(files,
-		 nautilus_mime_actions_get_required_file_attributes () | NAUTILUS_FILE_ATTRIBUTE_LINK_INFO,
+		 nemo_mime_actions_get_required_file_attributes () | NEMO_FILE_ATTRIBUTE_LINK_INFO,
 		 &parameters->files_handle,
 		 activate_callback, parameters);
-	nautilus_file_list_free (files);
+	nemo_file_list_free (files);
 }
 
 
@@ -1938,7 +1940,7 @@ activate_callback (GList *files, gpointer callback_data)
 {
 	ActivateParameters *parameters = callback_data;
 	GList *l, *next;
-	NautilusFile *file;
+	NemoFile *file;
 	LaunchLocation *location;
 
 	parameters->files_handle = NULL;
@@ -1960,7 +1962,7 @@ activate_callback (GList *files, gpointer callback_data)
 				parameters->locations = g_list_delete_link (parameters->locations, l);
 			} else {
 				parameters->not_mounted = g_list_prepend (parameters->not_mounted,
-									  nautilus_file_ref (file));
+									  nemo_file_ref (file));
 			}
 			continue;
 		}
@@ -1980,7 +1982,7 @@ activate_activation_uris_ready_callback (GList *files_ignore,
 {
 	ActivateParameters *parameters = callback_data;
 	GList *l, *next, *files;
-	NautilusFile *file;
+	NemoFile *file;
 	LaunchLocation *location;
 
 	parameters->files_handle = NULL;
@@ -1996,7 +1998,7 @@ activate_activation_uris_ready_callback (GList *files_ignore,
 			continue;
 		}
 
-		if (nautilus_file_is_broken_symbolic_link (file)) {
+		if (nemo_file_is_broken_symbolic_link (file)) {
 			launch_location_free (location);
 			parameters->locations = g_list_delete_link (parameters->locations, l);
 			pause_activation_timed_cancel (parameters);
@@ -2005,8 +2007,8 @@ activate_activation_uris_ready_callback (GList *files_ignore,
 			continue;
 		}
 
-		if (nautilus_file_get_file_type (file) == G_FILE_TYPE_MOUNTABLE &&
-		    !nautilus_file_has_activation_uri (file)) {
+		if (nemo_file_get_file_type (file) == G_FILE_TYPE_MOUNTABLE &&
+		    !nemo_file_has_activation_uri (file)) {
 			/* Don't launch these... There is nothing we
 			   can do */
 			launch_location_free (location);
@@ -2029,7 +2031,7 @@ activate_activation_uris_ready_callback (GList *files_ignore,
 		/* We want the file for the activation URI since we care
 		 * about the attributes for that, not for the original file.
 		 */
-		uri = nautilus_file_get_activation_uri (location->file);
+		uri = nemo_file_get_activation_uri (location->file);
 		if (uri != NULL) {
 			launch_location_update_from_uri (location, uri);
 		}
@@ -2039,19 +2041,19 @@ activate_activation_uris_ready_callback (GList *files_ignore,
 
 	/* get the parameters for the actual files */	
 	files = get_file_list_for_launch_locations (parameters->locations);
-	nautilus_file_list_call_when_ready
+	nemo_file_list_call_when_ready
 		(files,
-		 nautilus_mime_actions_get_required_file_attributes () | NAUTILUS_FILE_ATTRIBUTE_LINK_INFO,
+		 nemo_mime_actions_get_required_file_attributes () | NEMO_FILE_ATTRIBUTE_LINK_INFO,
 		 &parameters->files_handle,
 		 activate_callback, parameters);
-	nautilus_file_list_free (files);
+	nemo_file_list_free (files);
 }
 
 static void
 activation_get_activation_uris (ActivateParameters *parameters)
 {
 	GList *l, *files;
-	NautilusFile *file;
+	NemoFile *file;
 	LaunchLocation *location;
 
 	/* link target info might be stale, re-read it */
@@ -2065,11 +2067,11 @@ activation_get_activation_uris (ActivateParameters *parameters)
 			continue;
 		}
 		
-		if (nautilus_file_is_symbolic_link (file)) {
-			nautilus_file_invalidate_attributes 
+		if (nemo_file_is_symbolic_link (file)) {
+			nemo_file_invalidate_attributes 
 				(file,
-				 NAUTILUS_FILE_ATTRIBUTE_INFO |
-				 NAUTILUS_FILE_ATTRIBUTE_LINK_INFO);
+				 NEMO_FILE_ATTRIBUTE_INFO |
+				 NEMO_FILE_ATTRIBUTE_LINK_INFO);
 		}
 	}
 
@@ -2079,40 +2081,40 @@ activation_get_activation_uris (ActivateParameters *parameters)
 	}
 
 	files = get_file_list_for_launch_locations (parameters->locations);
-	nautilus_file_list_call_when_ready
+	nemo_file_list_call_when_ready
 		(files,
-		 NAUTILUS_FILE_ATTRIBUTE_INFO |
-		 NAUTILUS_FILE_ATTRIBUTE_LINK_INFO,
+		 NEMO_FILE_ATTRIBUTE_INFO |
+		 NEMO_FILE_ATTRIBUTE_LINK_INFO,
 		 &parameters->files_handle,
 		 activate_activation_uris_ready_callback, parameters);
-	nautilus_file_list_free (files);
+	nemo_file_list_free (files);
 }
 
 static void
-activation_mountable_mounted (NautilusFile  *file,
+activation_mountable_mounted (NemoFile  *file,
 			      GFile         *result_location,
 			      GError        *error,
 			      gpointer       callback_data)
 {
 	ActivateParameters *parameters = callback_data;
-	NautilusFile *target_file;
+	NemoFile *target_file;
 	LaunchLocation *location;
 
 	/* Remove from list of files that have to be mounted */
 	parameters->mountables = g_list_remove (parameters->mountables, file); 
-	nautilus_file_unref (file);
+	nemo_file_unref (file);
 
 	
 	if (error == NULL) {
 		/* Replace file with the result of the mount */
-		target_file = nautilus_file_get (result_location);
+		target_file = nemo_file_get (result_location);
 
 		location = find_launch_location_for_file (parameters->locations,
 							  file);
 		if (location) {
 			launch_location_update_from_file (location, target_file);
 		}
-		nautilus_file_unref (target_file);
+		nemo_file_unref (target_file);
 	} else {
 		/* Remove failed file */
 		
@@ -2151,7 +2153,7 @@ activation_mountable_mounted (NautilusFile  *file,
 static void
 activation_mount_mountables (ActivateParameters *parameters)
 {
-	NautilusFile *file;
+	NemoFile *file;
 	GMountOperation *mount_op;
 
 	if (parameters->mountables != NULL) {
@@ -2160,7 +2162,7 @@ activation_mount_mountables (ActivateParameters *parameters)
 		g_mount_operation_set_password_save (mount_op, G_PASSWORD_SAVE_FOR_SESSION);
 		g_signal_connect (mount_op, "notify::is-showing",
 				  G_CALLBACK (activate_mount_op_active), parameters);
-		nautilus_file_mount (file,
+		nemo_file_mount (file,
 				     mount_op,
 				     parameters->cancellable,
 				     activation_mountable_mounted,
@@ -2175,7 +2177,7 @@ activation_mount_mountables (ActivateParameters *parameters)
 
 
 static void
-activation_mountable_started (NautilusFile  *file,
+activation_mountable_started (NemoFile  *file,
 			      GFile         *gfile_of_file,
 			      GError        *error,
 			      gpointer       callback_data)
@@ -2185,7 +2187,7 @@ activation_mountable_started (NautilusFile  *file,
 
 	/* Remove from list of files that have to be mounted */
 	parameters->start_mountables = g_list_remove (parameters->start_mountables, file);
-	nautilus_file_unref (file);
+	nemo_file_unref (file);
 
 	if (error == NULL) {
 		/* Remove file */
@@ -2229,7 +2231,7 @@ activation_mountable_started (NautilusFile  *file,
 static void
 activation_start_mountables (ActivateParameters *parameters)
 {
-	NautilusFile *file;
+	NemoFile *file;
 	GMountOperation *start_op;
 
 	if (parameters->start_mountables != NULL) {
@@ -2237,7 +2239,7 @@ activation_start_mountables (ActivateParameters *parameters)
 		start_op = gtk_mount_operation_new (parameters->parent_window);
 		g_signal_connect (start_op, "notify::is-showing",
 				  G_CALLBACK (activate_mount_op_active), parameters);
-		nautilus_file_start (file,
+		nemo_file_start (file,
 				     start_op,
 				     parameters->cancellable,
 				     activation_mountable_started,
@@ -2251,27 +2253,27 @@ activation_start_mountables (ActivateParameters *parameters)
 }
 
 /**
- * nautilus_mime_activate_files:
+ * nemo_mime_activate_files:
  * 
  * Activate a list of files. Each one might launch with an application or
  * with a component. This is normally called only by subclasses.
  * @view: FMDirectoryView in question.
- * @files: A GList of NautilusFiles to activate.
+ * @files: A GList of NemoFiles to activate.
  * 
  **/
 void
-nautilus_mime_activate_files (GtkWindow *parent_window,
-			      NautilusWindowSlot *slot,
+nemo_mime_activate_files (GtkWindow *parent_window,
+			      NemoWindowSlot *slot,
 			      GList *files,
 			      const char *launch_directory,
-			      NautilusWindowOpenFlags flags,
+			      NemoWindowOpenFlags flags,
 			      gboolean user_confirmation)
 {
 	ActivateParameters *parameters;
 	char *file_name;
 	int file_count;
 	GList *l, *next;
-	NautilusFile *file;
+	NemoFile *file;
 	LaunchLocation *location;
 
 	if (files == NULL) {
@@ -2295,7 +2297,7 @@ nautilus_mime_activate_files (GtkWindow *parent_window,
 
 	file_count = g_list_length (files);
 	if (file_count == 1) {
-		file_name = nautilus_file_get_display_name (files->data);
+		file_name = nemo_file_get_display_name (files->data);
 		parameters->timed_wait_prompt = g_strdup_printf (_("Opening \"%s\"."), file_name);
 		g_free (file_name);
 	} else {
@@ -2311,14 +2313,14 @@ nautilus_mime_activate_files (GtkWindow *parent_window,
 		file = location->file;
 		next = l->next;
 		
-		if (nautilus_file_can_mount (file)) {
+		if (nemo_file_can_mount (file)) {
 			parameters->mountables = g_list_prepend (parameters->mountables,
-								 nautilus_file_ref (file));
+								 nemo_file_ref (file));
 		}
 
-		if (nautilus_file_can_start (file)) {
+		if (nemo_file_can_start (file)) {
 			parameters->start_mountables = g_list_prepend (parameters->start_mountables,
-								       nautilus_file_ref (file));
+								       nemo_file_ref (file));
 		}
 	}
 	
@@ -2332,28 +2334,28 @@ nautilus_mime_activate_files (GtkWindow *parent_window,
 }
 
 /**
- * nautilus_mime_activate_file:
+ * nemo_mime_activate_file:
  * 
  * Activate a file in this view. This might involve switching the displayed
  * location for the current window, or launching an application.
  * @view: FMDirectoryView in question.
- * @file: A NautilusFile representing the file in this view to activate.
+ * @file: A NemoFile representing the file in this view to activate.
  * @use_new_window: Should this item be opened in a new window?
  * 
  **/
 
 void
-nautilus_mime_activate_file (GtkWindow *parent_window,
-			     NautilusWindowSlot *slot,
-			     NautilusFile *file,
+nemo_mime_activate_file (GtkWindow *parent_window,
+			     NemoWindowSlot *slot,
+			     NemoFile *file,
 			     const char *launch_directory,
-			     NautilusWindowOpenFlags flags)
+			     NemoWindowOpenFlags flags)
 {
 	GList *files;
 
-	g_return_if_fail (NAUTILUS_IS_FILE (file));
+	g_return_if_fail (NEMO_IS_FILE (file));
 
 	files = g_list_prepend (NULL, file);
-	nautilus_mime_activate_files (parent_window, slot, files, launch_directory, flags, FALSE);
+	nemo_mime_activate_files (parent_window, slot, files, launch_directory, flags, FALSE);
 	g_list_free (files);
 }

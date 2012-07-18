@@ -1,6 +1,6 @@
 /* -*- Mode: C; indent-tabs-mode: t; c-basic-offset: 8; tab-width: 8 -*-
 
-   nautilus-vfs-file.c: Subclass of NautilusFile to help implement the
+   nemo-vfs-file.c: Subclass of NemoFile to help implement the
    virtual trash directory.
  
    Copyright (C) 1999, 2000, 2001 Eazel, Inc.
@@ -24,60 +24,60 @@
 */
 
 #include <config.h>
-#include "nautilus-vfs-file.h"
+#include "nemo-vfs-file.h"
 
-#include "nautilus-directory-notify.h"
-#include "nautilus-directory-private.h"
-#include "nautilus-file-private.h"
+#include "nemo-directory-notify.h"
+#include "nemo-directory-private.h"
+#include "nemo-file-private.h"
 #include <glib/gi18n.h>
 
-G_DEFINE_TYPE (NautilusVFSFile, nautilus_vfs_file, NAUTILUS_TYPE_FILE);
+G_DEFINE_TYPE (NemoVFSFile, nemo_vfs_file, NEMO_TYPE_FILE);
 
 static void             
-vfs_file_monitor_add (NautilusFile *file,
+vfs_file_monitor_add (NemoFile *file,
 		      gconstpointer client,
-		      NautilusFileAttributes attributes)
+		      NemoFileAttributes attributes)
 {
-	nautilus_directory_monitor_add_internal
+	nemo_directory_monitor_add_internal
 		(file->details->directory, file,
 		 client, TRUE, attributes, NULL, NULL);
 }   
 			   
 static void
-vfs_file_monitor_remove (NautilusFile *file,
+vfs_file_monitor_remove (NemoFile *file,
 			 gconstpointer client)
 {
-	nautilus_directory_monitor_remove_internal
+	nemo_directory_monitor_remove_internal
 		(file->details->directory, file, client);
 }			      
 
 static void
-vfs_file_call_when_ready (NautilusFile *file,
-			  NautilusFileAttributes file_attributes,
-			  NautilusFileCallback callback,
+vfs_file_call_when_ready (NemoFile *file,
+			  NemoFileAttributes file_attributes,
+			  NemoFileCallback callback,
 			  gpointer callback_data)
 
 {
-	nautilus_directory_call_when_ready_internal
+	nemo_directory_call_when_ready_internal
 		(file->details->directory, file,
 		 file_attributes, FALSE, NULL, callback, callback_data);
 }
 
 static void
-vfs_file_cancel_call_when_ready (NautilusFile *file,
-				 NautilusFileCallback callback,
+vfs_file_cancel_call_when_ready (NemoFile *file,
+				 NemoFileCallback callback,
 				 gpointer callback_data)
 {
-	nautilus_directory_cancel_callback_internal
+	nemo_directory_cancel_callback_internal
 		(file->details->directory, file,
 		 NULL, callback, callback_data);
 }
 
 static gboolean
-vfs_file_check_if_ready (NautilusFile *file,
-			 NautilusFileAttributes file_attributes)
+vfs_file_check_if_ready (NemoFile *file,
+			 NemoFileAttributes file_attributes)
 {
-	return nautilus_directory_check_if_ready_internal
+	return nemo_directory_check_if_ready_internal
 		(file->details->directory, file,
 		 file_attributes);
 }
@@ -87,7 +87,7 @@ set_metadata_get_info_callback (GObject *source_object,
 				GAsyncResult *res,
 				gpointer callback_data)
 {
-	NautilusFile *file;
+	NemoFile *file;
 	GFileInfo *new_info;
 	GError *error;
 
@@ -96,12 +96,12 @@ set_metadata_get_info_callback (GObject *source_object,
 	error = NULL;
 	new_info = g_file_query_info_finish (G_FILE (source_object), res, &error);
 	if (new_info != NULL) {
-		if (nautilus_file_update_info (file, new_info)) {
-			nautilus_file_changed (file);
+		if (nemo_file_update_info (file, new_info)) {
+			nemo_file_changed (file);
 		}
 		g_object_unref (new_info);
 	}
-	nautilus_file_unref (file);
+	nemo_file_unref (file);
 	if (error) {
 		g_error_free (error);
 	}
@@ -112,7 +112,7 @@ set_metadata_callback (GObject *source_object,
 		       GAsyncResult *result,
 		       gpointer callback_data)
 {
-	NautilusFile *file;
+	NemoFile *file;
 	GError *error;
 	gboolean res;
 
@@ -126,19 +126,19 @@ set_metadata_callback (GObject *source_object,
 
 	if (res) {
 		g_file_query_info_async (G_FILE (source_object),
-					 NAUTILUS_FILE_DEFAULT_ATTRIBUTES,
+					 NEMO_FILE_DEFAULT_ATTRIBUTES,
 					 0,
 					 G_PRIORITY_DEFAULT,
 					 NULL,
 					 set_metadata_get_info_callback, file);
 	} else {
-		nautilus_file_unref (file);
+		nemo_file_unref (file);
 		g_error_free (error);
 	}
 }
 
 static void
-vfs_file_set_metadata (NautilusFile           *file,
+vfs_file_set_metadata (NemoFile           *file,
 		       const char             *key,
 		       const char             *value)
 {
@@ -159,20 +159,20 @@ vfs_file_set_metadata (NautilusFile           *file,
 	}
 	g_free (gio_key);
 
-	location = nautilus_file_get_location (file);
+	location = nemo_file_get_location (file);
 	g_file_set_attributes_async (location,
 				     info,
 				     0,
 				     G_PRIORITY_DEFAULT,
 				     NULL,
 				     set_metadata_callback,
-				     nautilus_file_ref (file));
+				     nemo_file_ref (file));
 	g_object_unref (location);
 	g_object_unref (info);
 }
 
 static void
-vfs_file_set_metadata_as_list (NautilusFile           *file,
+vfs_file_set_metadata_as_list (NemoFile           *file,
 			       const char             *key,
 			       char                  **value)
 {
@@ -186,20 +186,20 @@ vfs_file_set_metadata_as_list (NautilusFile           *file,
 	g_file_info_set_attribute_stringv (info, gio_key, value);
 	g_free (gio_key);
 
-	location = nautilus_file_get_location (file);
+	location = nemo_file_get_location (file);
 	g_file_set_attributes_async (location,
 				     info,
 				     0,
 				     G_PRIORITY_DEFAULT,
 				     NULL,
 				     set_metadata_callback,
-				     nautilus_file_ref (file));
+				     nemo_file_ref (file));
 	g_object_unref (info);
 	g_object_unref (location);
 }
 
 static gboolean
-vfs_file_get_item_count (NautilusFile *file, 
+vfs_file_get_item_count (NemoFile *file, 
 			 guint *count,
 			 gboolean *count_unreadable)
 {
@@ -218,8 +218,8 @@ vfs_file_get_item_count (NautilusFile *file,
 	return TRUE;
 }
 
-static NautilusRequestStatus
-vfs_file_get_deep_counts (NautilusFile *file,
+static NemoRequestStatus
+vfs_file_get_deep_counts (NemoFile *file,
 			  guint *directory_count,
 			  guint *file_count,
 			  guint *unreadable_directory_count,
@@ -240,11 +240,11 @@ vfs_file_get_deep_counts (NautilusFile *file,
 		*total_size = 0;
 	}
 
-	if (!nautilus_file_is_directory (file)) {
-		return NAUTILUS_REQUEST_DONE;
+	if (!nemo_file_is_directory (file)) {
+		return NEMO_REQUEST_DONE;
 	}
 
-	if (file->details->deep_counts_status != NAUTILUS_REQUEST_NOT_STARTED) {
+	if (file->details->deep_counts_status != NEMO_REQUEST_NOT_STARTED) {
 		if (directory_count != NULL) {
 			*directory_count = file->details->deep_directory_count;
 		}
@@ -261,23 +261,23 @@ vfs_file_get_deep_counts (NautilusFile *file,
 	}
 
 	/* For directories, or before we know the type, we haven't started. */
-	type = nautilus_file_get_file_type (file);
+	type = nemo_file_get_file_type (file);
 	if (type == G_FILE_TYPE_UNKNOWN
 	    || type == G_FILE_TYPE_DIRECTORY) {
-		return NAUTILUS_REQUEST_NOT_STARTED;
+		return NEMO_REQUEST_NOT_STARTED;
 	}
 
 	/* For other types, we are done, and the zeros are permanent. */
-	return NAUTILUS_REQUEST_DONE;
+	return NEMO_REQUEST_DONE;
 }
 
 static gboolean
-vfs_file_get_date (NautilusFile *file,
-		   NautilusDateType date_type,
+vfs_file_get_date (NemoFile *file,
+		   NemoDateType date_type,
 		   time_t *date)
 {
 	switch (date_type) {
-	case NAUTILUS_DATE_TYPE_CHANGED:
+	case NEMO_DATE_TYPE_CHANGED:
 		/* Before we have info on a file, the date is unknown. */
 		if (file->details->ctime == 0) {
 			return FALSE;
@@ -286,7 +286,7 @@ vfs_file_get_date (NautilusFile *file,
 			*date = file->details->ctime;
 		}
 		return TRUE;
-	case NAUTILUS_DATE_TYPE_ACCESSED:
+	case NEMO_DATE_TYPE_ACCESSED:
 		/* Before we have info on a file, the date is unknown. */
 		if (file->details->atime == 0) {
 			return FALSE;
@@ -295,7 +295,7 @@ vfs_file_get_date (NautilusFile *file,
 			*date = file->details->atime;
 		}
 		return TRUE;
-	case NAUTILUS_DATE_TYPE_MODIFIED:
+	case NEMO_DATE_TYPE_MODIFIED:
 		/* Before we have info on a file, the date is unknown. */
 		if (file->details->mtime == 0) {
 			return FALSE;
@@ -304,7 +304,7 @@ vfs_file_get_date (NautilusFile *file,
 			*date = file->details->mtime;
 		}
 		return TRUE;
-	case NAUTILUS_DATE_TYPE_TRASHED:
+	case NEMO_DATE_TYPE_TRASHED:
 		/* Before we have info on a file, the date is unknown. */
 		if (file->details->trash_time == 0) {
 			return FALSE;
@@ -313,7 +313,7 @@ vfs_file_get_date (NautilusFile *file,
 			*date = file->details->trash_time;
 		}
 		return TRUE;
-	case NAUTILUS_DATE_TYPE_PERMISSIONS_CHANGED:
+	case NEMO_DATE_TYPE_PERMISSIONS_CHANGED:
 		/* Before we have info on a file, the date is unknown. */
 		if (file->details->mtime == 0 || file->details->ctime == 0) {
 			return FALSE;
@@ -335,9 +335,9 @@ vfs_file_get_date (NautilusFile *file,
 }
 
 static char *
-vfs_file_get_where_string (NautilusFile *file)
+vfs_file_get_where_string (NemoFile *file)
 {
-	return nautilus_file_get_parent_uri_for_display (file);
+	return nemo_file_get_parent_uri_for_display (file);
 }
 
 static void
@@ -345,7 +345,7 @@ vfs_file_mount_callback (GObject *source_object,
 			 GAsyncResult *res,
 			 gpointer callback_data)
 {
-	NautilusFileOperation *op;
+	NemoFileOperation *op;
 	GFile *mounted_on;
 	GError *error;
 
@@ -354,7 +354,7 @@ vfs_file_mount_callback (GObject *source_object,
 	error = NULL;
 	mounted_on = g_file_mount_mountable_finish (G_FILE (source_object),
 						    res, &error);
-	nautilus_file_operation_complete (op, mounted_on, error);
+	nemo_file_operation_complete (op, mounted_on, error);
 	if (mounted_on) {
 		g_object_unref (mounted_on);
 	}
@@ -365,13 +365,13 @@ vfs_file_mount_callback (GObject *source_object,
 
 
 static void
-vfs_file_mount (NautilusFile                   *file,
+vfs_file_mount (NemoFile                   *file,
 		GMountOperation                *mount_op,
 		GCancellable                   *cancellable,
-		NautilusFileOperationCallback   callback,
+		NemoFileOperationCallback   callback,
 		gpointer                        callback_data)
 {
-	NautilusFileOperation *op;
+	NemoFileOperation *op;
 	GError *error;
 	GFile *location;
 	
@@ -386,13 +386,13 @@ vfs_file_mount (NautilusFile                   *file,
 		return;
 	}
 
-	op = nautilus_file_operation_new (file, callback, callback_data);
+	op = nemo_file_operation_new (file, callback, callback_data);
 	if (cancellable) {
 		g_object_unref (op->cancellable);
 		op->cancellable = g_object_ref (cancellable);
 	}
 
-	location = nautilus_file_get_location (file);
+	location = nemo_file_get_location (file);
 	g_file_mount_mountable (location,
 				0,
 				mount_op,
@@ -407,7 +407,7 @@ vfs_file_unmount_callback (GObject *source_object,
 			 GAsyncResult *res,
 			 gpointer callback_data)
 {
-	NautilusFileOperation *op;
+	NemoFileOperation *op;
 	gboolean unmounted;
 	GError *error;
 
@@ -425,29 +425,29 @@ vfs_file_unmount_callback (GObject *source_object,
 	    error = NULL;
     }
 
-    nautilus_file_operation_complete (op, G_FILE (source_object), error);
+    nemo_file_operation_complete (op, G_FILE (source_object), error);
 	if (error) {
 		g_error_free (error);
 	}
 }
 
 static void
-vfs_file_unmount (NautilusFile                   *file,
+vfs_file_unmount (NemoFile                   *file,
 		  GMountOperation                *mount_op,
 		  GCancellable                   *cancellable,
-		  NautilusFileOperationCallback   callback,
+		  NemoFileOperationCallback   callback,
 		  gpointer                        callback_data)
 {
-	NautilusFileOperation *op;
+	NemoFileOperation *op;
 	GFile *location;
 	
-	op = nautilus_file_operation_new (file, callback, callback_data);
+	op = nemo_file_operation_new (file, callback, callback_data);
 	if (cancellable) {
 		g_object_unref (op->cancellable);
 		op->cancellable = g_object_ref (cancellable);
 	}
 
-	location = nautilus_file_get_location (file);
+	location = nemo_file_get_location (file);
 	g_file_unmount_mountable_with_operation (location,
 						 G_MOUNT_UNMOUNT_NONE,
 						 mount_op,
@@ -462,7 +462,7 @@ vfs_file_eject_callback (GObject *source_object,
 			 GAsyncResult *res,
 			 gpointer callback_data)
 {
-	NautilusFileOperation *op;
+	NemoFileOperation *op;
 	gboolean ejected;
 	GError *error;
 
@@ -480,29 +480,29 @@ vfs_file_eject_callback (GObject *source_object,
 		error = NULL;
 	}
 	
-	nautilus_file_operation_complete (op, G_FILE (source_object), error);
+	nemo_file_operation_complete (op, G_FILE (source_object), error);
 	if (error) {
 		g_error_free (error);
 	}
 }
 
 static void
-vfs_file_eject (NautilusFile                   *file,
+vfs_file_eject (NemoFile                   *file,
 		GMountOperation                *mount_op,
 		GCancellable                   *cancellable,
-		NautilusFileOperationCallback   callback,
+		NemoFileOperationCallback   callback,
 		gpointer                        callback_data)
 {
-	NautilusFileOperation *op;
+	NemoFileOperation *op;
 	GFile *location;
 	
-	op = nautilus_file_operation_new (file, callback, callback_data);
+	op = nemo_file_operation_new (file, callback, callback_data);
 	if (cancellable) {
 		g_object_unref (op->cancellable);
 		op->cancellable = g_object_ref (cancellable);
 	}
 
-	location = nautilus_file_get_location (file);
+	location = nemo_file_get_location (file);
 	g_file_eject_mountable_with_operation (location,
 					       G_MOUNT_UNMOUNT_NONE,
 					       mount_op,
@@ -517,7 +517,7 @@ vfs_file_start_callback (GObject *source_object,
 			 GAsyncResult *res,
 			 gpointer callback_data)
 {
-	NautilusFileOperation *op;
+	NemoFileOperation *op;
 	gboolean started;
 	GError *error;
 
@@ -535,7 +535,7 @@ vfs_file_start_callback (GObject *source_object,
 		error = NULL;
 	}
 
-	nautilus_file_operation_complete (op, G_FILE (source_object), error);
+	nemo_file_operation_complete (op, G_FILE (source_object), error);
 	if (error) {
 		g_error_free (error);
 	}
@@ -543,13 +543,13 @@ vfs_file_start_callback (GObject *source_object,
 
 
 static void
-vfs_file_start (NautilusFile                   *file,
+vfs_file_start (NemoFile                   *file,
 		GMountOperation                *mount_op,
 		GCancellable                   *cancellable,
-		NautilusFileOperationCallback   callback,
+		NemoFileOperationCallback   callback,
 		gpointer                        callback_data)
 {
-	NautilusFileOperation *op;
+	NemoFileOperation *op;
 	GError *error;
 	GFile *location;
 
@@ -564,13 +564,13 @@ vfs_file_start (NautilusFile                   *file,
 		return;
 	}
 
-	op = nautilus_file_operation_new (file, callback, callback_data);
+	op = nemo_file_operation_new (file, callback, callback_data);
 	if (cancellable) {
 		g_object_unref (op->cancellable);
 		op->cancellable = g_object_ref (cancellable);
 	}
 
-	location = nautilus_file_get_location (file);
+	location = nemo_file_get_location (file);
 	g_file_start_mountable (location,
 				0,
 				mount_op,
@@ -585,7 +585,7 @@ vfs_file_stop_callback (GObject *source_object,
 			GAsyncResult *res,
 			gpointer callback_data)
 {
-	NautilusFileOperation *op;
+	NemoFileOperation *op;
 	gboolean stopped;
 	GError *error;
 
@@ -603,29 +603,29 @@ vfs_file_stop_callback (GObject *source_object,
 		error = NULL;
 	}
 
-	nautilus_file_operation_complete (op, G_FILE (source_object), error);
+	nemo_file_operation_complete (op, G_FILE (source_object), error);
 	if (error) {
 		g_error_free (error);
 	}
 }
 
 static void
-vfs_file_stop (NautilusFile                   *file,
+vfs_file_stop (NemoFile                   *file,
 	       GMountOperation                *mount_op,
 	       GCancellable                   *cancellable,
-	       NautilusFileOperationCallback   callback,
+	       NemoFileOperationCallback   callback,
 	       gpointer                        callback_data)
 {
-	NautilusFileOperation *op;
+	NemoFileOperation *op;
 	GFile *location;
 
-	op = nautilus_file_operation_new (file, callback, callback_data);
+	op = nemo_file_operation_new (file, callback, callback_data);
 	if (cancellable) {
 		g_object_unref (op->cancellable);
 		op->cancellable = g_object_ref (cancellable);
 	}
 
-	location = nautilus_file_get_location (file);
+	location = nemo_file_get_location (file);
 	g_file_stop_mountable (location,
 			       G_MOUNT_UNMOUNT_NONE,
 			       mount_op,
@@ -640,7 +640,7 @@ vfs_file_poll_callback (GObject *source_object,
 			GAsyncResult *res,
 			gpointer callback_data)
 {
-	NautilusFileOperation *op;
+	NemoFileOperation *op;
 	gboolean stopped;
 	GError *error;
 
@@ -658,21 +658,21 @@ vfs_file_poll_callback (GObject *source_object,
 		error = NULL;
 	}
 
-	nautilus_file_operation_complete (op, G_FILE (source_object), error);
+	nemo_file_operation_complete (op, G_FILE (source_object), error);
 	if (error) {
 		g_error_free (error);
 	}
 }
 
 static void
-vfs_file_poll_for_media (NautilusFile *file)
+vfs_file_poll_for_media (NemoFile *file)
 {
-	NautilusFileOperation *op;
+	NemoFileOperation *op;
 	GFile *location;
 
-	op = nautilus_file_operation_new (file, NULL, NULL);
+	op = nemo_file_operation_new (file, NULL, NULL);
 
-	location = nautilus_file_get_location (file);
+	location = nemo_file_get_location (file);
 	g_file_poll_mountable (location,
 			       op->cancellable,
 			       vfs_file_poll_callback,
@@ -681,14 +681,14 @@ vfs_file_poll_for_media (NautilusFile *file)
 }
 
 static void
-nautilus_vfs_file_init (NautilusVFSFile *file)
+nemo_vfs_file_init (NemoVFSFile *file)
 {
 }
 
 static void
-nautilus_vfs_file_class_init (NautilusVFSFileClass *klass)
+nemo_vfs_file_class_init (NemoVFSFileClass *klass)
 {
-	NautilusFileClass *file_class = NAUTILUS_FILE_CLASS (klass);
+	NemoFileClass *file_class = NEMO_FILE_CLASS (klass);
 
 	file_class->monitor_add = vfs_file_monitor_add;
 	file_class->monitor_remove = vfs_file_monitor_remove;

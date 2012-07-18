@@ -15,9 +15,9 @@
    sodipodi:version="0.32"
    inkscape:version="0.44.1"
    version="1.0"
-   sodipodi:docbase="/home/ulisse/icone/Nautilus/16x16"
-   sodipodi:docname="nautilus.svg"
-   inkscape:export-filename="/home/ulisse/Desktop/nautilus-actions/16x16/nautilus-actions_16.png"
+   sodipodi:docbase="/home/ulisse/icone/Nemo/16x16"
+   sodipodi:docname="nemo.svg"
+   inkscape:export-filename="/home/ulisse/Desktop/nemo-actions/16x16/nemo-actions_16.png"
    inkscape:export-xdpi="90"
    inkscape:export-ydpi="90">
   <defs
@@ -190,10 +190,10 @@
             <dc:title>Ulisse Perusin</dc:title>
           </cc:Agent>
         </dc:creator>
-        <dc:title>Nautilus</dc:title>
+        <dc:title>Nemo</dc:title>
         <dc:subject>
           <rdf:Bag>
-            <rdf:li>Nautilus</rdf:li>
+            <rdf:li>Nemo</rdf:li>
             <rdf:li>file manager</rdf:li>
           </rdf:Bag>
         </dc:subject>

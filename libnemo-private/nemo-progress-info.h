@@ -1,6 +1,6 @@
 /* -*- Mode: C; indent-tabs-mode: t; c-basic-offset: 8; tab-width: 8 -*-
 
-   nautilus-progress-info.h: file operation progress info.
+   nemo-progress-info.h: file operation progress info.
  
    Copyright (C) 2007 Red Hat, Inc.
   
@@ -22,23 +22,23 @@
    Author: Alexander Larsson <alexl@redhat.com>
 */
 
-#ifndef NAUTILUS_PROGRESS_INFO_H
-#define NAUTILUS_PROGRESS_INFO_H
+#ifndef NEMO_PROGRESS_INFO_H
+#define NEMO_PROGRESS_INFO_H
 
 #include <glib-object.h>
 #include <gio/gio.h>
 
-#define NAUTILUS_TYPE_PROGRESS_INFO         (nautilus_progress_info_get_type ())
-#define NAUTILUS_PROGRESS_INFO(o)           (G_TYPE_CHECK_INSTANCE_CAST ((o), NAUTILUS_TYPE_PROGRESS_INFO, NautilusProgressInfo))
-#define NAUTILUS_PROGRESS_INFO_CLASS(k)     (G_TYPE_CHECK_CLASS_CAST((k), NAUTILUS_TYPE_PROGRESS_INFO, NautilusProgressInfoClass))
-#define NAUTILUS_IS_PROGRESS_INFO(o)        (G_TYPE_CHECK_INSTANCE_TYPE ((o), NAUTILUS_TYPE_PROGRESS_INFO))
-#define NAUTILUS_IS_PROGRESS_INFO_CLASS(k)  (G_TYPE_CHECK_CLASS_TYPE ((k), NAUTILUS_TYPE_PROGRESS_INFO))
-#define NAUTILUS_PROGRESS_INFO_GET_CLASS(o) (G_TYPE_INSTANCE_GET_CLASS ((o), NAUTILUS_TYPE_PROGRESS_INFO, NautilusProgressInfoClass))
+#define NEMO_TYPE_PROGRESS_INFO         (nemo_progress_info_get_type ())
+#define NEMO_PROGRESS_INFO(o)           (G_TYPE_CHECK_INSTANCE_CAST ((o), NEMO_TYPE_PROGRESS_INFO, NemoProgressInfo))
+#define NEMO_PROGRESS_INFO_CLASS(k)     (G_TYPE_CHECK_CLASS_CAST((k), NEMO_TYPE_PROGRESS_INFO, NemoProgressInfoClass))
+#define NEMO_IS_PROGRESS_INFO(o)        (G_TYPE_CHECK_INSTANCE_TYPE ((o), NEMO_TYPE_PROGRESS_INFO))
+#define NEMO_IS_PROGRESS_INFO_CLASS(k)  (G_TYPE_CHECK_CLASS_TYPE ((k), NEMO_TYPE_PROGRESS_INFO))
+#define NEMO_PROGRESS_INFO_GET_CLASS(o) (G_TYPE_INSTANCE_GET_CLASS ((o), NEMO_TYPE_PROGRESS_INFO, NemoProgressInfoClass))
 
-typedef struct _NautilusProgressInfo      NautilusProgressInfo;
-typedef struct _NautilusProgressInfoClass NautilusProgressInfoClass;
+typedef struct _NemoProgressInfo      NemoProgressInfo;
+typedef struct _NemoProgressInfoClass NemoProgressInfoClass;
 
-GType nautilus_progress_info_get_type (void) G_GNUC_CONST;
+GType nemo_progress_info_get_type (void) G_GNUC_CONST;
 
 /* Signals:
    "changed" - status or details changed
@@ -50,36 +50,38 @@ GType nautilus_progress_info_get_type (void) G_GNUC_CONST;
    All methods are threadsafe.
  */
 
-NautilusProgressInfo *nautilus_progress_info_new (void);
+NemoProgressInfo *nemo_progress_info_new (void);
 
-GList *       nautilus_get_all_progress_info (void);
+GList *       nemo_get_all_progress_info (void);
 
-char *        nautilus_progress_info_get_status      (NautilusProgressInfo *info);
-char *        nautilus_progress_info_get_details     (NautilusProgressInfo *info);
-double        nautilus_progress_info_get_progress    (NautilusProgressInfo *info);
-GCancellable *nautilus_progress_info_get_cancellable (NautilusProgressInfo *info);
-void          nautilus_progress_info_cancel          (NautilusProgressInfo *info);
-gboolean      nautilus_progress_info_get_is_started  (NautilusProgressInfo *info);
-gboolean      nautilus_progress_info_get_is_finished (NautilusProgressInfo *info);
-gboolean      nautilus_progress_info_get_is_paused   (NautilusProgressInfo *info);
+char *        nemo_progress_info_get_status      (NemoProgressInfo *info);
+char *        nemo_progress_info_get_details     (NemoProgressInfo *info);
+double        nemo_progress_info_get_progress    (NemoProgressInfo *info);
+GCancellable *nemo_progress_info_get_cancellable (NemoProgressInfo *info);
+void          nemo_progress_info_cancel          (NemoProgressInfo *info);
+gboolean      nemo_progress_info_get_is_started  (NemoProgressInfo *info);
+gboolean      nemo_progress_info_get_is_finished (NemoProgressInfo *info);
+gboolean      nemo_progress_info_get_is_paused   (NemoProgressInfo *info);
+double        nemo_progress_info_get_current     (NemoProgressInfo *info);
+double        nemo_progress_info_get_total       (NemoProgressInfo *info);
 
-void          nautilus_progress_info_start           (NautilusProgressInfo *info);
-void          nautilus_progress_info_finish          (NautilusProgressInfo *info);
-void          nautilus_progress_info_pause           (NautilusProgressInfo *info);
-void          nautilus_progress_info_resume          (NautilusProgressInfo *info);
-void          nautilus_progress_info_set_status      (NautilusProgressInfo *info,
+void          nemo_progress_info_start           (NemoProgressInfo *info);
+void          nemo_progress_info_finish          (NemoProgressInfo *info);
+void          nemo_progress_info_pause           (NemoProgressInfo *info);
+void          nemo_progress_info_resume          (NemoProgressInfo *info);
+void          nemo_progress_info_set_status      (NemoProgressInfo *info,
 						      const char           *status);
-void          nautilus_progress_info_take_status     (NautilusProgressInfo *info,
+void          nemo_progress_info_take_status     (NemoProgressInfo *info,
 						      char                 *status);
-void          nautilus_progress_info_set_details     (NautilusProgressInfo *info,
+void          nemo_progress_info_set_details     (NemoProgressInfo *info,
 						      const char           *details);
-void          nautilus_progress_info_take_details    (NautilusProgressInfo *info,
+void          nemo_progress_info_take_details    (NemoProgressInfo *info,
 						      char                 *details);
-void          nautilus_progress_info_set_progress    (NautilusProgressInfo *info,
+void          nemo_progress_info_set_progress    (NemoProgressInfo *info,
 						      double                current,
 						      double                total);
-void          nautilus_progress_info_pulse_progress  (NautilusProgressInfo *info);
+void          nemo_progress_info_pulse_progress  (NemoProgressInfo *info);
 
 
 
-#endif /* NAUTILUS_PROGRESS_INFO_H */
+#endif /* NEMO_PROGRESS_INFO_H */

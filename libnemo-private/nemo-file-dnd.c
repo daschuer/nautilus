@@ -1,7 +1,7 @@
 /* -*- Mode: C; indent-tabs-mode: t; c-basic-offset: 8; tab-width: 8 -*- */
 
-/* nautilus-file-drag.c - Drag & drop handling code that operated on 
-   NautilusFile objects.
+/* nemo-file-drag.c - Drag & drop handling code that operated on 
+   NemoFile objects.
 
    Copyright (C) 2000 Eazel, Inc.
 
@@ -24,40 +24,40 @@
 */
 
 #include <config.h>
-#include "nautilus-file-dnd.h"
-#include "nautilus-desktop-icon-file.h"
+#include "nemo-file-dnd.h"
+#include "nemo-desktop-icon-file.h"
 
-#include "nautilus-dnd.h"
-#include "nautilus-directory.h"
-#include "nautilus-file-utilities.h"
+#include "nemo-dnd.h"
+#include "nemo-directory.h"
+#include "nemo-file-utilities.h"
 #include <string.h>
 
 static gboolean
-nautilus_drag_can_accept_files (NautilusFile *drop_target_item)
+nemo_drag_can_accept_files (NemoFile *drop_target_item)
 {
-	NautilusDirectory *directory;
+	NemoDirectory *directory;
 
-	if (nautilus_file_is_directory (drop_target_item)) {
+	if (nemo_file_is_directory (drop_target_item)) {
 		gboolean res;
 
 		/* target is a directory, accept if editable */
-		directory = nautilus_directory_get_for_file (drop_target_item);
-		res = nautilus_directory_is_editable (directory);
-		nautilus_directory_unref (directory);
+		directory = nemo_directory_get_for_file (drop_target_item);
+		res = nemo_directory_is_editable (directory);
+		nemo_directory_unref (directory);
 		return res;
 	}
 	
-	if (NAUTILUS_IS_DESKTOP_ICON_FILE (drop_target_item)) {
+	if (NEMO_IS_DESKTOP_ICON_FILE (drop_target_item)) {
 		return TRUE;
 	}
 	
 	/* Launchers are an acceptable drop target */
-	if (nautilus_file_is_launcher (drop_target_item)) {
+	if (nemo_file_is_launcher (drop_target_item)) {
 		return TRUE;
 	}
 
-	if (nautilus_is_file_roller_installed () &&
-	    nautilus_file_is_archive (drop_target_item)) {
+	if (nemo_is_file_roller_installed () &&
+	    nemo_file_is_archive (drop_target_item)) {
 		return TRUE;
 	}
 	
@@ -65,19 +65,19 @@ nautilus_drag_can_accept_files (NautilusFile *drop_target_item)
 }
 
 gboolean
-nautilus_drag_can_accept_item (NautilusFile *drop_target_item,
+nemo_drag_can_accept_item (NemoFile *drop_target_item,
 			       const char *item_uri)
 {
-	if (nautilus_file_matches_uri (drop_target_item, item_uri)) {
+	if (nemo_file_matches_uri (drop_target_item, item_uri)) {
 		/* can't accept itself */
 		return FALSE;
 	}
 
-	return nautilus_drag_can_accept_files (drop_target_item);
+	return nemo_drag_can_accept_files (drop_target_item);
 }
 				       
 gboolean
-nautilus_drag_can_accept_items (NautilusFile *drop_target_item,
+nemo_drag_can_accept_items (NemoFile *drop_target_item,
 				const GList *items)
 {
 	int max;
@@ -85,15 +85,15 @@ nautilus_drag_can_accept_items (NautilusFile *drop_target_item,
 	if (drop_target_item == NULL)
 		return FALSE;
 
-	g_assert (NAUTILUS_IS_FILE (drop_target_item));
+	g_assert (NEMO_IS_FILE (drop_target_item));
 
 	/* Iterate through selection checking if item will get accepted by the
 	 * drop target. If more than 100 items selected, return an over-optimisic
 	 * result
 	 */
 	for (max = 100; items != NULL && max >= 0; items = items->next, max--) {
-		if (!nautilus_drag_can_accept_item (drop_target_item, 
-			((NautilusDragSelectionItem *)items->data)->uri)) {
+		if (!nemo_drag_can_accept_item (drop_target_item, 
+			((NemoDragSelectionItem *)items->data)->uri)) {
 			return FALSE;
 		}
 	}
@@ -102,24 +102,24 @@ nautilus_drag_can_accept_items (NautilusFile *drop_target_item,
 }
 
 gboolean
-nautilus_drag_can_accept_info (NautilusFile *drop_target_item,
-			       NautilusIconDndTargetType drag_type,
+nemo_drag_can_accept_info (NemoFile *drop_target_item,
+			       NemoIconDndTargetType drag_type,
 			       const GList *items)
 {
 	switch (drag_type) {
-		case NAUTILUS_ICON_DND_GNOME_ICON_LIST:
-			return nautilus_drag_can_accept_items (drop_target_item, items);
+		case NEMO_ICON_DND_GNOME_ICON_LIST:
+			return nemo_drag_can_accept_items (drop_target_item, items);
 
-		case NAUTILUS_ICON_DND_URI_LIST:
-		case NAUTILUS_ICON_DND_NETSCAPE_URL:
-		case NAUTILUS_ICON_DND_TEXT:
-			return nautilus_drag_can_accept_files (drop_target_item);
+		case NEMO_ICON_DND_URI_LIST:
+		case NEMO_ICON_DND_NETSCAPE_URL:
+		case NEMO_ICON_DND_TEXT:
+			return nemo_drag_can_accept_files (drop_target_item);
 
-		case NAUTILUS_ICON_DND_XDNDDIRECTSAVE:
-		case NAUTILUS_ICON_DND_RAW:
-			return nautilus_drag_can_accept_files (drop_target_item); /* Check if we can accept files at this location */
+		case NEMO_ICON_DND_XDNDDIRECTSAVE:
+		case NEMO_ICON_DND_RAW:
+			return nemo_drag_can_accept_files (drop_target_item); /* Check if we can accept files at this location */
 
-		case NAUTILUS_ICON_DND_ROOTWINDOW_DROP:
+		case NEMO_ICON_DND_ROOTWINDOW_DROP:
 			return FALSE;
 
 		default:

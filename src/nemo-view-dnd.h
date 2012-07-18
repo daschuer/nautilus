@@ -1,7 +1,7 @@
 /* -*- Mode: C; indent-tabs-mode: t; c-basic-offset: 8; tab-width: 8 -*- */
 
 /*
- * nautilus-view-dnd.h: DnD helpers for NautilusView
+ * nemo-view-dnd.h: DnD helpers for NemoView
  *
  * Copyright (C) 1999, 2000  Free Software Foundaton
  * Copyright (C) 2000, 2001  Eazel, Inc.
@@ -27,30 +27,30 @@
  *          Pavel Cisler <pavel@eazel.com>
  */
 
-#ifndef __NAUTILUS_VIEW_DND_H__
-#define __NAUTILUS_VIEW_DND_H__
+#ifndef __NEMO_VIEW_DND_H__
+#define __NEMO_VIEW_DND_H__
 
-#include "nautilus-view.h"
+#include "nemo-view.h"
 
-void nautilus_view_handle_netscape_url_drop (NautilusView  *view,
+void nemo_view_handle_netscape_url_drop (NemoView  *view,
 					     const char    *encoded_url,
 					     const char    *target_uri,
 					     GdkDragAction  action,
 					     int            x,
 					     int            y);
-void nautilus_view_handle_uri_list_drop     (NautilusView  *view,
+void nemo_view_handle_uri_list_drop     (NemoView  *view,
 					     const char    *item_uris,
 					     const char    *target_uri,
 					     GdkDragAction  action,
 					     int            x,
 					     int            y);
-void nautilus_view_handle_text_drop         (NautilusView  *view,
+void nemo_view_handle_text_drop         (NemoView  *view,
 					     const char    *text,
 					     const char    *target_uri,
 					     GdkDragAction  action,
 					     int            x,
 					     int            y);
-void nautilus_view_handle_raw_drop          (NautilusView  *view,
+void nemo_view_handle_raw_drop          (NemoView  *view,
 					     const char    *raw_data,
 					     int            length,
 					     const char    *target_uri,
@@ -59,10 +59,10 @@ void nautilus_view_handle_raw_drop          (NautilusView  *view,
 					     int            x,
 					     int            y);
 
-void nautilus_view_drop_proxy_received_uris (NautilusView  *view,
+void nemo_view_drop_proxy_received_uris (NemoView  *view,
 					     const GList   *uris,
 					     const char    *target_location,
 					     GdkDragAction  action);
 
 
-#endif /* __NAUTILUS_VIEW_DND_H__ */
+#endif /* __NEMO_VIEW_DND_H__ */

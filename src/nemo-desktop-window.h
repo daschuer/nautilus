@@ -1,16 +1,16 @@
 /* -*- Mode: C; indent-tabs-mode: t; c-basic-offset: 8; tab-width: 8 -*- */
 
 /*
- * Nautilus
+ * Nemo
  *
  * Copyright (C) 2000 Eazel, Inc.
  *
- * Nautilus is free software; you can redistribute it and/or
+ * Nemo is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
  * published by the Free Software Foundation; either version 2 of the
  * License, or (at your option) any later version.
  *
- * Nautilus is distributed in the hope that it will be useful,
+ * Nemo is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
  * General Public License for more details.
@@ -22,41 +22,41 @@
  * Authors: Darin Adler <darin@bentspoon.com>
  */
 
-/* nautilus-desktop-window.h
+/* nemo-desktop-window.h
  */
 
-#ifndef NAUTILUS_DESKTOP_WINDOW_H
-#define NAUTILUS_DESKTOP_WINDOW_H
+#ifndef NEMO_DESKTOP_WINDOW_H
+#define NEMO_DESKTOP_WINDOW_H
 
-#include "nautilus-window.h"
+#include "nemo-window.h"
 
-#define NAUTILUS_TYPE_DESKTOP_WINDOW nautilus_desktop_window_get_type()
-#define NAUTILUS_DESKTOP_WINDOW(obj) \
-  (G_TYPE_CHECK_INSTANCE_CAST ((obj), NAUTILUS_TYPE_DESKTOP_WINDOW, NautilusDesktopWindow))
-#define NAUTILUS_DESKTOP_WINDOW_CLASS(klass) \
-  (G_TYPE_CHECK_CLASS_CAST ((klass), NAUTILUS_TYPE_DESKTOP_WINDOW, NautilusDesktopWindowClass))
-#define NAUTILUS_IS_DESKTOP_WINDOW(obj) \
-  (G_TYPE_CHECK_INSTANCE_TYPE ((obj), NAUTILUS_TYPE_DESKTOP_WINDOW))
-#define NAUTILUS_IS_DESKTOP_WINDOW_CLASS(klass) \
-  (G_TYPE_CHECK_CLASS_TYPE ((klass), NAUTILUS_TYPE_DESKTOP_WINDOW))
-#define NAUTILUS_DESKTOP_WINDOW_GET_CLASS(obj) \
-  (G_TYPE_INSTANCE_GET_CLASS ((obj), NAUTILUS_TYPE_DESKTOP_WINDOW, NautilusDesktopWindowClass))
+#define NEMO_TYPE_DESKTOP_WINDOW nemo_desktop_window_get_type()
+#define NEMO_DESKTOP_WINDOW(obj) \
+  (G_TYPE_CHECK_INSTANCE_CAST ((obj), NEMO_TYPE_DESKTOP_WINDOW, NemoDesktopWindow))
+#define NEMO_DESKTOP_WINDOW_CLASS(klass) \
+  (G_TYPE_CHECK_CLASS_CAST ((klass), NEMO_TYPE_DESKTOP_WINDOW, NemoDesktopWindowClass))
+#define NEMO_IS_DESKTOP_WINDOW(obj) \
+  (G_TYPE_CHECK_INSTANCE_TYPE ((obj), NEMO_TYPE_DESKTOP_WINDOW))
+#define NEMO_IS_DESKTOP_WINDOW_CLASS(klass) \
+  (G_TYPE_CHECK_CLASS_TYPE ((klass), NEMO_TYPE_DESKTOP_WINDOW))
+#define NEMO_DESKTOP_WINDOW_GET_CLASS(obj) \
+  (G_TYPE_INSTANCE_GET_CLASS ((obj), NEMO_TYPE_DESKTOP_WINDOW, NemoDesktopWindowClass))
 
-typedef struct NautilusDesktopWindowDetails NautilusDesktopWindowDetails;
+typedef struct NemoDesktopWindowDetails NemoDesktopWindowDetails;
 
 typedef struct {
-	NautilusWindow parent_spot;
-	NautilusDesktopWindowDetails *details;
+	NemoWindow parent_spot;
+	NemoDesktopWindowDetails *details;
         gboolean affect_desktop_on_next_location_change;
-} NautilusDesktopWindow;
+} NemoDesktopWindow;
 
 typedef struct {
-	NautilusWindowClass parent_spot;
-} NautilusDesktopWindowClass;
+	NemoWindowClass parent_spot;
+} NemoDesktopWindowClass;
 
-GType                  nautilus_desktop_window_get_type            (void);
-NautilusDesktopWindow *nautilus_desktop_window_new                 (GdkScreen *screen);
-void                   nautilus_desktop_window_update_directory    (NautilusDesktopWindow *window);
-gboolean               nautilus_desktop_window_loaded              (NautilusDesktopWindow *window);
+GType                  nemo_desktop_window_get_type            (void);
+NemoDesktopWindow *nemo_desktop_window_new                 (GdkScreen *screen);
+void                   nemo_desktop_window_update_directory    (NemoDesktopWindow *window);
+gboolean               nemo_desktop_window_loaded              (NemoDesktopWindow *window);
 
-#endif /* NAUTILUS_DESKTOP_WINDOW_H */
+#endif /* NEMO_DESKTOP_WINDOW_H */

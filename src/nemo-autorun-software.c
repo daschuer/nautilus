@@ -1,6 +1,6 @@
 /* -*- Mode: C; indent-tabs-mode: t; c-basic-offset: 8; tab-width: 8 -*- */
 
-/* Nautilus
+/* Nemo
 
    Copyright (C) 2008 Red Hat, Inc.
 
@@ -34,8 +34,8 @@
 
 #include <glib/gi18n.h>
 
-#include <libnautilus-private/nautilus-module.h>
-#include <libnautilus-private/nautilus-icon-info.h>
+#include <libnemo-private/nemo-module.h>
+#include <libnemo-private/nemo-icon-info.h>
 
 typedef struct
 {
@@ -181,7 +181,7 @@ present_autorun_for_software_dialog (GMount *mount)
 {
 	GIcon *icon;
 	int icon_size;
-	NautilusIconInfo *icon_info;
+	NemoIconInfo *icon_info;
 	GdkPixbuf *pixbuf;
 	GtkWidget *image;
 	char *mount_name;
@@ -209,9 +209,9 @@ present_autorun_for_software_dialog (GMount *mount)
 
 
 	icon = g_mount_get_icon (mount);
-	icon_size = nautilus_get_icon_size_for_stock_size (GTK_ICON_SIZE_DIALOG);
-	icon_info = nautilus_icon_info_lookup (icon, icon_size);
-	pixbuf = nautilus_icon_info_get_pixbuf_at_size (icon_info, icon_size);
+	icon_size = nemo_get_icon_size_for_stock_size (GTK_ICON_SIZE_DIALOG);
+	icon_info = nemo_icon_info_lookup (icon, icon_size);
+	pixbuf = nemo_icon_info_get_pixbuf_at_size (icon_info, icon_size);
 	image = gtk_image_new_from_pixbuf (pixbuf);
 	gtk_misc_set_alignment (GTK_MISC (image), 0.5, 0.0);
 

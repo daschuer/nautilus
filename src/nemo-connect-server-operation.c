@@ -1,15 +1,15 @@
 /* -*- Mode: C; indent-tabs-mode: t; c-basic-offset: 8; tab-width: 8 -*- */
 /*
- * Nautilus
+ * Nemo
  *
  * Copyright (C) 2010 Cosimo Cecchi <cosimoc@gnome.org>
  *
- * Nautilus is free software; you can redistribute it and/or
+ * Nemo is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
  * published by the Free Software Foundation; either version 2 of the
  * License, or (at your option) any later version.
  *
- * Nautilus is distributed in the hope that it will be useful,
+ * Nemo is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
  * General Public License for more details.
@@ -24,20 +24,20 @@
 
 #include <config.h>
 
-#include "nautilus-connect-server-operation.h"
+#include "nemo-connect-server-operation.h"
 
-#include "nautilus-connect-server-dialog.h"
+#include "nemo-connect-server-dialog.h"
 
-G_DEFINE_TYPE (NautilusConnectServerOperation,
-	       nautilus_connect_server_operation, GTK_TYPE_MOUNT_OPERATION);
+G_DEFINE_TYPE (NemoConnectServerOperation,
+	       nemo_connect_server_operation, GTK_TYPE_MOUNT_OPERATION);
 
 enum {
 	PROP_DIALOG = 1,
 	NUM_PROPERTIES
 };
 
-struct _NautilusConnectServerOperationDetails {
-	NautilusConnectServerDialog *dialog;
+struct _NemoConnectServerOperationDetails {
+	NemoConnectServerDialog *dialog;
 };
 
 static void
@@ -45,14 +45,14 @@ fill_details_async_cb (GObject *source,
 		       GAsyncResult *result,
 		       gpointer user_data)
 {
-	NautilusConnectServerDialog *dialog;
-	NautilusConnectServerOperation *self;
+	NemoConnectServerDialog *dialog;
+	NemoConnectServerOperation *self;
 	gboolean res;
 
 	self = user_data;
-	dialog = NAUTILUS_CONNECT_SERVER_DIALOG (source);
+	dialog = NEMO_CONNECT_SERVER_DIALOG (source);
 
-	res = nautilus_connect_server_dialog_fill_details_finish (dialog, result);
+	res = nemo_connect_server_dialog_fill_details_finish (dialog, result);
 
 	if (!res) {
 		g_mount_operation_reply (G_MOUNT_OPERATION (self), G_MOUNT_OPERATION_ABORTED);
@@ -62,17 +62,17 @@ fill_details_async_cb (GObject *source,
 }
 
 static void
-nautilus_connect_server_operation_ask_password (GMountOperation *op,
+nemo_connect_server_operation_ask_password (GMountOperation *op,
 						const gchar *message,
 						const gchar *default_user,
 						const gchar *default_domain,
 						GAskPasswordFlags flags)
 {
-	NautilusConnectServerOperation *self;
+	NemoConnectServerOperation *self;
 
-	self = NAUTILUS_CONNECT_SERVER_OPERATION (op);
+	self = NEMO_CONNECT_SERVER_OPERATION (op);
 
-	nautilus_connect_server_dialog_fill_details_async (self->details->dialog,
+	nemo_connect_server_dialog_fill_details_async (self->details->dialog,
 							   G_MOUNT_OPERATION (self),
 							   default_user,
 							   default_domain,
@@ -82,14 +82,14 @@ nautilus_connect_server_operation_ask_password (GMountOperation *op,
 }
 
 static void
-nautilus_connect_server_operation_set_property (GObject *object,
+nemo_connect_server_operation_set_property (GObject *object,
 						guint property_id,
 						const GValue *value,
 						GParamSpec *pspec)
 {
-	NautilusConnectServerOperation *self;
+	NemoConnectServerOperation *self;
 
-	self = NAUTILUS_CONNECT_SERVER_OPERATION (object);
+	self = NEMO_CONNECT_SERVER_OPERATION (object);
 
 	switch (property_id) {
 	case PROP_DIALOG:
@@ -102,50 +102,50 @@ nautilus_connect_server_operation_set_property (GObject *object,
 }
 
 static void
-nautilus_connect_server_operation_dispose (GObject *object)
+nemo_connect_server_operation_dispose (GObject *object)
 {
-	NautilusConnectServerOperation *self = NAUTILUS_CONNECT_SERVER_OPERATION (object);
+	NemoConnectServerOperation *self = NEMO_CONNECT_SERVER_OPERATION (object);
 
 	g_clear_object (&self->details->dialog);
 
-	G_OBJECT_CLASS (nautilus_connect_server_operation_parent_class)->dispose (object);
+	G_OBJECT_CLASS (nemo_connect_server_operation_parent_class)->dispose (object);
 }
 
 static void
-nautilus_connect_server_operation_class_init (NautilusConnectServerOperationClass *klass)
+nemo_connect_server_operation_class_init (NemoConnectServerOperationClass *klass)
 {
 	GMountOperationClass *mount_op_class;
 	GObjectClass *object_class;
 	GParamSpec *pspec;
 
 	object_class = G_OBJECT_CLASS (klass);
-	object_class->set_property = nautilus_connect_server_operation_set_property;
-	object_class->dispose = nautilus_connect_server_operation_dispose;
+	object_class->set_property = nemo_connect_server_operation_set_property;
+	object_class->dispose = nemo_connect_server_operation_dispose;
 
 	mount_op_class = G_MOUNT_OPERATION_CLASS (klass);
-	mount_op_class->ask_password = nautilus_connect_server_operation_ask_password;
+	mount_op_class->ask_password = nemo_connect_server_operation_ask_password;
 
 	pspec = g_param_spec_object ("dialog", "The connect dialog",
 				     "The connect to server dialog",
-				     NAUTILUS_TYPE_CONNECT_SERVER_DIALOG,
+				     NEMO_TYPE_CONNECT_SERVER_DIALOG,
 				     G_PARAM_CONSTRUCT_ONLY | G_PARAM_WRITABLE | G_PARAM_STATIC_STRINGS);
 	g_object_class_install_property (object_class, PROP_DIALOG, pspec);
 
-	g_type_class_add_private (klass, sizeof (NautilusConnectServerOperationDetails));
+	g_type_class_add_private (klass, sizeof (NemoConnectServerOperationDetails));
 }
 
 static void
-nautilus_connect_server_operation_init (NautilusConnectServerOperation *self)
+nemo_connect_server_operation_init (NemoConnectServerOperation *self)
 {
 	self->details = G_TYPE_INSTANCE_GET_PRIVATE (self,
-						     NAUTILUS_TYPE_CONNECT_SERVER_OPERATION,
-						     NautilusConnectServerOperationDetails);
+						     NEMO_TYPE_CONNECT_SERVER_OPERATION,
+						     NemoConnectServerOperationDetails);
 }
 
 GMountOperation *
-nautilus_connect_server_operation_new (NautilusConnectServerDialog *dialog)
+nemo_connect_server_operation_new (NemoConnectServerDialog *dialog)
 {
-	return g_object_new (NAUTILUS_TYPE_CONNECT_SERVER_OPERATION,
+	return g_object_new (NEMO_TYPE_CONNECT_SERVER_OPERATION,
 			     "dialog", dialog,
 			     NULL);
 }

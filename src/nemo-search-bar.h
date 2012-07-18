@@ -2,12 +2,12 @@
 /*
  * Copyright (C) 2005 Novell, Inc.
  *
- * Nautilus is free software; you can redistribute it and/or
+ * Nemo is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
  * published by the Free Software Foundation; either version 2 of the
  * License, or (at your option) any later version.
  *
- * Nautilus is distributed in the hope that it will be useful,
+ * Nemo is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
  * General Public License for more details.
@@ -21,46 +21,46 @@
  *
  */
 
-#ifndef NAUTILUS_SEARCH_BAR_H
-#define NAUTILUS_SEARCH_BAR_H
+#ifndef NEMO_SEARCH_BAR_H
+#define NEMO_SEARCH_BAR_H
 
 #include <gtk/gtk.h>
-#include <libnautilus-private/nautilus-query.h>
+#include <libnemo-private/nemo-query.h>
 
-#define NAUTILUS_TYPE_SEARCH_BAR nautilus_search_bar_get_type()
-#define NAUTILUS_SEARCH_BAR(obj) \
-  (G_TYPE_CHECK_INSTANCE_CAST ((obj), NAUTILUS_TYPE_SEARCH_BAR, NautilusSearchBar))
-#define NAUTILUS_SEARCH_BAR_CLASS(klass) \
-  (G_TYPE_CHECK_CLASS_CAST ((klass), NAUTILUS_TYPE_SEARCH_BAR, NautilusSearchBarClass))
-#define NAUTILUS_IS_SEARCH_BAR(obj) \
-  (G_TYPE_CHECK_INSTANCE_TYPE ((obj), NAUTILUS_TYPE_SEARCH_BAR))
-#define NAUTILUS_IS_SEARCH_BAR_CLASS(klass) \
-  (G_TYPE_CHECK_CLASS_TYPE ((klass), NAUTILUS_TYPE_SEARCH_BAR))
-#define NAUTILUS_SEARCH_BAR_GET_CLASS(obj) \
-  (G_TYPE_INSTANCE_GET_CLASS ((obj), NAUTILUS_TYPE_SEARCH_BAR, NautilusSearchBarClass))
+#define NEMO_TYPE_SEARCH_BAR nemo_search_bar_get_type()
+#define NEMO_SEARCH_BAR(obj) \
+  (G_TYPE_CHECK_INSTANCE_CAST ((obj), NEMO_TYPE_SEARCH_BAR, NemoSearchBar))
+#define NEMO_SEARCH_BAR_CLASS(klass) \
+  (G_TYPE_CHECK_CLASS_CAST ((klass), NEMO_TYPE_SEARCH_BAR, NemoSearchBarClass))
+#define NEMO_IS_SEARCH_BAR(obj) \
+  (G_TYPE_CHECK_INSTANCE_TYPE ((obj), NEMO_TYPE_SEARCH_BAR))
+#define NEMO_IS_SEARCH_BAR_CLASS(klass) \
+  (G_TYPE_CHECK_CLASS_TYPE ((klass), NEMO_TYPE_SEARCH_BAR))
+#define NEMO_SEARCH_BAR_GET_CLASS(obj) \
+  (G_TYPE_INSTANCE_GET_CLASS ((obj), NEMO_TYPE_SEARCH_BAR, NemoSearchBarClass))
 
-typedef struct NautilusSearchBarDetails NautilusSearchBarDetails;
+typedef struct NemoSearchBarDetails NemoSearchBarDetails;
 
-typedef struct NautilusSearchBar {
+typedef struct NemoSearchBar {
 	GtkBox parent;
-	NautilusSearchBarDetails *details;
-} NautilusSearchBar;
+	NemoSearchBarDetails *details;
+} NemoSearchBar;
 
 typedef struct {
 	GtkBoxClass parent_class;
 
-	void (* activate) (NautilusSearchBar *bar);
-	void (* cancel)   (NautilusSearchBar *bar);
-} NautilusSearchBarClass;
+	void (* activate) (NemoSearchBar *bar);
+	void (* cancel)   (NemoSearchBar *bar);
+} NemoSearchBarClass;
 
-GType      nautilus_search_bar_get_type     	(void);
-GtkWidget* nautilus_search_bar_new          	(void);
+GType      nemo_search_bar_get_type     	(void);
+GtkWidget* nemo_search_bar_new          	(void);
 
-GtkWidget *    nautilus_search_bar_get_entry     (NautilusSearchBar *bar);
-GtkWidget *    nautilus_search_bar_borrow_entry  (NautilusSearchBar *bar);
-void           nautilus_search_bar_return_entry  (NautilusSearchBar *bar);
-void           nautilus_search_bar_grab_focus    (NautilusSearchBar *bar);
-NautilusQuery *nautilus_search_bar_get_query     (NautilusSearchBar *bar);
-void           nautilus_search_bar_clear         (NautilusSearchBar *bar);
+GtkWidget *    nemo_search_bar_get_entry     (NemoSearchBar *bar);
+GtkWidget *    nemo_search_bar_borrow_entry  (NemoSearchBar *bar);
+void           nemo_search_bar_return_entry  (NemoSearchBar *bar);
+void           nemo_search_bar_grab_focus    (NemoSearchBar *bar);
+NemoQuery *nemo_search_bar_get_query     (NemoSearchBar *bar);
+void           nemo_search_bar_clear         (NemoSearchBar *bar);
 
-#endif /* NAUTILUS_SEARCH_BAR_H */
+#endif /* NEMO_SEARCH_BAR_H */

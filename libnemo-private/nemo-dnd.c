@@ -1,6 +1,6 @@
 /* -*- Mode: C; indent-tabs-mode: t; c-basic-offset: 8; tab-width: 8 -*- */
 
-/* nautilus-dnd.c - Common Drag & drop handling code shared by the icon container
+/* nemo-dnd.c - Common Drag & drop handling code shared by the icon container
    and the list view.
 
    Copyright (C) 2000, 2001 Eazel, Inc.
@@ -25,17 +25,17 @@
 */
 
 #include <config.h>
-#include "nautilus-dnd.h"
+#include "nemo-dnd.h"
 
-#include "nautilus-program-choosing.h"
-#include "nautilus-link.h"
+#include "nemo-program-choosing.h"
+#include "nemo-link.h"
 #include <eel/eel-glib-extensions.h>
 #include <eel/eel-gtk-extensions.h>
 #include <eel/eel-string.h>
 #include <eel/eel-vfs-extensions.h>
 #include <gtk/gtk.h>
 #include <glib/gi18n.h>
-#include <libnautilus-private/nautilus-file-utilities.h>
+#include <libnemo-private/nemo-file-utilities.h>
 #include <stdio.h>
 #include <string.h>
 
@@ -59,7 +59,7 @@
 #define MAX_AUTOSCROLL_DELTA 50
 
 void
-nautilus_drag_init (NautilusDragInfo     *drag_info,
+nemo_drag_init (NemoDragInfo     *drag_info,
 		    const GtkTargetEntry *drag_types,
 		    int                   drag_type_count,
 		    gboolean              add_text_targets)
@@ -69,7 +69,7 @@ nautilus_drag_init (NautilusDragInfo     *drag_info,
 
 	if (add_text_targets) {
 		gtk_target_list_add_text_targets (drag_info->target_list,
-						  NAUTILUS_ICON_DND_TEXT);
+						  NEMO_ICON_DND_TEXT);
 	}
 
 	drag_info->drop_occured = FALSE;
@@ -77,32 +77,32 @@ nautilus_drag_init (NautilusDragInfo     *drag_info,
 }
 
 void
-nautilus_drag_finalize (NautilusDragInfo *drag_info)
+nemo_drag_finalize (NemoDragInfo *drag_info)
 {
 	gtk_target_list_unref (drag_info->target_list);
-	nautilus_drag_destroy_selection_list (drag_info->selection_list);
+	nemo_drag_destroy_selection_list (drag_info->selection_list);
 
 	g_free (drag_info);
 }
 
 
-/* Functions to deal with NautilusDragSelectionItems.  */
+/* Functions to deal with NemoDragSelectionItems.  */
 
-NautilusDragSelectionItem *
-nautilus_drag_selection_item_new (void)
+NemoDragSelectionItem *
+nemo_drag_selection_item_new (void)
 {
-	return g_new0 (NautilusDragSelectionItem, 1);
+	return g_new0 (NemoDragSelectionItem, 1);
 }
 
 static void
-drag_selection_item_destroy (NautilusDragSelectionItem *item)
+drag_selection_item_destroy (NemoDragSelectionItem *item)
 {
 	g_free (item->uri);
 	g_free (item);
 }
 
 void
-nautilus_drag_destroy_selection_list (GList *list)
+nemo_drag_destroy_selection_list (GList *list)
 {
 	GList *p;
 
@@ -116,28 +116,28 @@ nautilus_drag_destroy_selection_list (GList *list)
 }
 
 char **
-nautilus_drag_uri_array_from_selection_list (const GList *selection_list)
+nemo_drag_uri_array_from_selection_list (const GList *selection_list)
 {
 	GList *uri_list;
 	char **uris;
 
-	uri_list = nautilus_drag_uri_list_from_selection_list (selection_list);
-	uris = nautilus_drag_uri_array_from_list (uri_list);
+	uri_list = nemo_drag_uri_list_from_selection_list (selection_list);
+	uris = nemo_drag_uri_array_from_list (uri_list);
 	g_list_free_full (uri_list, g_free);
 
 	return uris;
 }
 
 GList *
-nautilus_drag_uri_list_from_selection_list (const GList *selection_list)
+nemo_drag_uri_list_from_selection_list (const GList *selection_list)
 {
-	NautilusDragSelectionItem *selection_item;
+	NemoDragSelectionItem *selection_item;
 	GList *uri_list;
 	const GList *l;
 
 	uri_list = NULL;
 	for (l = selection_list; l != NULL; l = l->next) {
-		selection_item = (NautilusDragSelectionItem *) l->data;
+		selection_item = (NemoDragSelectionItem *) l->data;
 		if (selection_item->uri != NULL) {
 			uri_list = g_list_prepend (uri_list, g_strdup (selection_item->uri));
 		}
@@ -147,7 +147,7 @@ nautilus_drag_uri_list_from_selection_list (const GList *selection_list)
 }
 
 char **
-nautilus_drag_uri_array_from_list (const GList *uri_list)
+nemo_drag_uri_array_from_list (const GList *uri_list)
 {
 	const GList *l;
 	char **uris;
@@ -167,7 +167,7 @@ nautilus_drag_uri_array_from_list (const GList *uri_list)
 }
 
 GList *
-nautilus_drag_uri_list_from_array (const char **uris)
+nemo_drag_uri_list_from_array (const char **uris)
 {
 	GList *uri_list;
 	int i;
@@ -186,7 +186,7 @@ nautilus_drag_uri_list_from_array (const char **uris)
 }
 
 GList *
-nautilus_drag_build_selection_list (GtkSelectionData *data)
+nemo_drag_build_selection_list (GtkSelectionData *data)
 {
 	GList *result;
 	const guchar *p, *oldp;
@@ -197,7 +197,7 @@ nautilus_drag_build_selection_list (GtkSelectionData *data)
 	size = gtk_selection_data_get_length (data);
 
 	while (size > 0) {
-		NautilusDragSelectionItem *item;
+		NemoDragSelectionItem *item;
 		guint len;
 
 		/* The list is in the form:
@@ -213,7 +213,7 @@ nautilus_drag_build_selection_list (GtkSelectionData *data)
 			break;
 		}
 
-		item = nautilus_drag_selection_item_new ();
+		item = nemo_drag_selection_item_new ();
 
 		len = p - oldp;
 
@@ -268,7 +268,7 @@ nautilus_drag_build_selection_list (GtkSelectionData *data)
 }
 
 static gboolean
-nautilus_drag_file_local_internal (const char *target_uri_string,
+nemo_drag_file_local_internal (const char *target_uri_string,
 				   const char *first_source_uri)
 {
 	/* check if the first item on the list has target_uri_string as a parent
@@ -299,39 +299,39 @@ nautilus_drag_file_local_internal (const char *target_uri_string,
 }	
 
 gboolean
-nautilus_drag_uris_local (const char *target_uri,
+nemo_drag_uris_local (const char *target_uri,
 			  const GList *source_uri_list)
 {
 	/* must have at least one item */
 	g_assert (source_uri_list);
 	
-	return nautilus_drag_file_local_internal (target_uri, source_uri_list->data);
+	return nemo_drag_file_local_internal (target_uri, source_uri_list->data);
 }
 
 gboolean
-nautilus_drag_items_local (const char *target_uri_string,
+nemo_drag_items_local (const char *target_uri_string,
 			   const GList *selection_list)
 {
 	/* must have at least one item */
 	g_assert (selection_list);
 
-	return nautilus_drag_file_local_internal (target_uri_string,
-						  ((NautilusDragSelectionItem *)selection_list->data)->uri);
+	return nemo_drag_file_local_internal (target_uri_string,
+						  ((NemoDragSelectionItem *)selection_list->data)->uri);
 }
 
 gboolean
-nautilus_drag_items_in_trash (const GList *selection_list)
+nemo_drag_items_in_trash (const GList *selection_list)
 {
 	/* check if the first item on the list is in trash.
 	 * FIXME:
 	 * we should really test each item but that would be slow for large selections
 	 * and currently dropped items can only be from the same container
 	 */
-	return eel_uri_is_trash (((NautilusDragSelectionItem *)selection_list->data)->uri);
+	return eel_uri_is_trash (((NemoDragSelectionItem *)selection_list->data)->uri);
 }
 
 gboolean
-nautilus_drag_items_on_desktop (const GList *selection_list)
+nemo_drag_items_on_desktop (const GList *selection_list)
 {
 	char *uri;
 	GFile *desktop, *item, *parent;
@@ -342,12 +342,12 @@ nautilus_drag_items_on_desktop (const GList *selection_list)
 	 * we should really test each item but that would be slow for large selections
 	 * and currently dropped items can only be from the same container
 	 */
-	uri = ((NautilusDragSelectionItem *)selection_list->data)->uri;
+	uri = ((NemoDragSelectionItem *)selection_list->data)->uri;
 	if (eel_uri_is_desktop (uri)) {
 		return TRUE;
 	}
 	
-	desktop = nautilus_get_desktop_location ();
+	desktop = nemo_get_desktop_location ();
 	
 	item = g_file_new_for_uri (uri);
 	parent = g_file_get_parent (item);
@@ -366,7 +366,7 @@ nautilus_drag_items_on_desktop (const GList *selection_list)
 }
 
 GdkDragAction
-nautilus_drag_default_drop_action_for_netscape_url (GdkDragContext *context)
+nemo_drag_default_drop_action_for_netscape_url (GdkDragContext *context)
 {
 	/* Mozilla defaults to copy, but unless thats the
 	   only allowed thing (enforced by ctrl) we want to LINK */
@@ -382,8 +382,8 @@ nautilus_drag_default_drop_action_for_netscape_url (GdkDragContext *context)
 }
 
 static gboolean
-check_same_fs (NautilusFile *file1,
-	       NautilusFile *file2)
+check_same_fs (NemoFile *file1,
+	       NemoFile *file2)
 {
 	char *id1, *id2;
 	gboolean result;
@@ -391,8 +391,8 @@ check_same_fs (NautilusFile *file1,
 	result = FALSE;
 
 	if (file1 != NULL && file2 != NULL) {
-		id1 = nautilus_file_get_filesystem_id (file1);
-		id2 = nautilus_file_get_filesystem_id (file2);
+		id1 = nemo_file_get_filesystem_id (file1);
+		id2 = nemo_file_get_filesystem_id (file2);
 
 		if (id1 != NULL && id2 != NULL) {
 			result = (strcmp (id1, id2) == 0);
@@ -408,23 +408,23 @@ check_same_fs (NautilusFile *file1,
 static gboolean
 source_is_deletable (GFile *file)
 {
-	NautilusFile *naut_file;
+	NemoFile *naut_file;
 	gboolean ret;
 
-	/* if there's no a cached NautilusFile, it returns NULL */
-	naut_file = nautilus_file_get_existing (file);
+	/* if there's no a cached NemoFile, it returns NULL */
+	naut_file = nemo_file_get_existing (file);
 	if (naut_file == NULL) {
 		return FALSE;
 	}
 	
-	ret = nautilus_file_can_delete (naut_file);
-	nautilus_file_unref (naut_file);
+	ret = nemo_file_can_delete (naut_file);
+	nemo_file_unref (naut_file);
 
 	return ret;
 }
 
 void
-nautilus_drag_default_drop_action_for_icons (GdkDragContext *context,
+nemo_drag_default_drop_action_for_icons (GdkDragContext *context,
 					     const char *target_uri_string, const GList *items,
 					     int *action)
 {
@@ -434,7 +434,7 @@ nautilus_drag_default_drop_action_for_icons (GdkDragContext *context,
 	const char *dropped_uri;
 	GFile *target, *dropped, *dropped_directory;
 	GdkDragAction actions;
-	NautilusFile *dropped_file, *target_file;
+	NemoFile *dropped_file, *target_file;
 
 	if (target_uri_string == NULL) {
 		*action = 0;
@@ -454,9 +454,9 @@ nautilus_drag_default_drop_action_for_icons (GdkDragContext *context,
 		return;
 	}
 	
-	dropped_uri = ((NautilusDragSelectionItem *)items->data)->uri;
-	dropped_file = nautilus_file_get_existing_by_uri (dropped_uri);
-	target_file = nautilus_file_get_existing_by_uri (target_uri_string);
+	dropped_uri = ((NemoDragSelectionItem *)items->data)->uri;
+	dropped_file = nemo_file_get_existing_by_uri (dropped_uri);
+	target_file = nemo_file_get_existing_by_uri (target_uri_string);
 	
 	/*
 	 * Check for trash URI.  We do a find_directory for any Trash directory.
@@ -469,22 +469,22 @@ nautilus_drag_default_drop_action_for_icons (GdkDragContext *context,
 			*action = GDK_ACTION_MOVE;
 		}
 
-		nautilus_file_unref (dropped_file);
-		nautilus_file_unref (target_file);
+		nemo_file_unref (dropped_file);
+		nemo_file_unref (target_file);
 		return;
 
-	} else if (dropped_file != NULL && nautilus_file_is_launcher (dropped_file)) {
+	} else if (dropped_file != NULL && nemo_file_is_launcher (dropped_file)) {
 		if (actions & GDK_ACTION_MOVE) {
 			*action = GDK_ACTION_MOVE;
 		}
-		nautilus_file_unref (dropped_file);
-		nautilus_file_unref (target_file);
+		nemo_file_unref (dropped_file);
+		nemo_file_unref (target_file);
 		return;
 	} else if (eel_uri_is_desktop (target_uri_string)) {
-		target = nautilus_get_desktop_location ();
+		target = nemo_get_desktop_location ();
 
-		nautilus_file_unref (target_file);
-		target_file = nautilus_file_get (target);
+		nemo_file_unref (target_file);
+		target_file = nemo_file_get (target);
 
 		if (eel_uri_is_desktop (dropped_uri)) {
 			/* Only move to Desktop icons */
@@ -493,15 +493,15 @@ nautilus_drag_default_drop_action_for_icons (GdkDragContext *context,
 			}
 			
 			g_object_unref (target);
-			nautilus_file_unref (dropped_file);
-			nautilus_file_unref (target_file);
+			nemo_file_unref (dropped_file);
+			nemo_file_unref (target_file);
 			return;
 		}
-	} else if (target_file != NULL && nautilus_file_is_archive (target_file)) {
+	} else if (target_file != NULL && nemo_file_is_archive (target_file)) {
 		*action = GDK_ACTION_COPY;
 
-		nautilus_file_unref (dropped_file);
-		nautilus_file_unref (target_file);
+		nemo_file_unref (dropped_file);
+		nemo_file_unref (target_file);
 		return;
 	} else {
 		target = g_file_new_for_uri (target_uri_string);
@@ -509,8 +509,8 @@ nautilus_drag_default_drop_action_for_icons (GdkDragContext *context,
 
 	same_fs = check_same_fs (target_file, dropped_file);
 
-	nautilus_file_unref (dropped_file);
-	nautilus_file_unref (target_file);
+	nemo_file_unref (dropped_file);
+	nemo_file_unref (target_file);
 	
 	/* Compare the first dropped uri with the target uri for same fs match. */
 	dropped = g_file_new_for_uri (dropped_uri);
@@ -547,7 +547,7 @@ nautilus_drag_default_drop_action_for_icons (GdkDragContext *context,
 }
 
 GdkDragAction
-nautilus_drag_default_drop_action_for_uri_list (GdkDragContext *context,
+nemo_drag_default_drop_action_for_uri_list (GdkDragContext *context,
 						const char *target_uri_string)
 {
 	if (eel_uri_is_trash (target_uri_string) && (gdk_drag_context_get_actions (context) & GDK_ACTION_MOVE)) {
@@ -662,24 +662,24 @@ add_one_uri (const char *uri, int x, int y, int w, int h, gpointer data)
 /* Common function for drag_data_get_callback calls.
  * Returns FALSE if it doesn't handle drag data */
 gboolean
-nautilus_drag_drag_data_get (GtkWidget *widget,
+nemo_drag_drag_data_get (GtkWidget *widget,
 			GdkDragContext *context,
 			GtkSelectionData *selection_data,
 			guint info,
 			guint32 time,
 			gpointer container_context,
-			NautilusDragEachSelectedItemIterator each_selected_item_iterator)
+			NemoDragEachSelectedItemIterator each_selected_item_iterator)
 {
 	GString *result;
 		
 	switch (info) {
-	case NAUTILUS_ICON_DND_GNOME_ICON_LIST:
+	case NEMO_ICON_DND_GNOME_ICON_LIST:
 		result = g_string_new (NULL);
 		(* each_selected_item_iterator) (add_one_gnome_icon, container_context, result);
 		break;
 		
-	case NAUTILUS_ICON_DND_URI_LIST:
-	case NAUTILUS_ICON_DND_TEXT:
+	case NEMO_ICON_DND_URI_LIST:
+	case NEMO_ICON_DND_TEXT:
 		result = g_string_new (NULL);
 		(* each_selected_item_iterator) (add_one_uri, container_context, result);
 		break;
@@ -755,7 +755,7 @@ append_drop_action_menu_item (GtkWidget          *menu,
 
 /* Pops up a menu of actions to perform on dropped files */
 GdkDragAction
-nautilus_drag_drop_action_ask (GtkWidget *widget,
+nemo_drag_drop_action_ask (GtkWidget *widget,
 			       GdkDragAction actions)
 {
 	GtkWidget *menu;
@@ -784,8 +784,8 @@ nautilus_drag_drop_action_ask (GtkWidget *widget,
 				      &damd);
 
 	append_drop_action_menu_item (menu, _("Set as _Background"),
-				      NAUTILUS_DND_ACTION_SET_AS_BACKGROUND,
-				      (actions & NAUTILUS_DND_ACTION_SET_AS_BACKGROUND) != 0,
+				      NEMO_DND_ACTION_SET_AS_BACKGROUND,
+				      (actions & NEMO_DND_ACTION_SET_AS_BACKGROUND) != 0,
 				      &damd);
 
 	eel_gtk_menu_append_separator (GTK_MENU (menu));
@@ -819,18 +819,18 @@ nautilus_drag_drop_action_ask (GtkWidget *widget,
 }
 
 gboolean
-nautilus_drag_autoscroll_in_scroll_region (GtkWidget *widget)
+nemo_drag_autoscroll_in_scroll_region (GtkWidget *widget)
 {
 	float x_scroll_delta, y_scroll_delta;
 
-	nautilus_drag_autoscroll_calculate_delta (widget, &x_scroll_delta, &y_scroll_delta);
+	nemo_drag_autoscroll_calculate_delta (widget, &x_scroll_delta, &y_scroll_delta);
 
 	return x_scroll_delta != 0 || y_scroll_delta != 0;
 }
 
 
 void
-nautilus_drag_autoscroll_calculate_delta (GtkWidget *widget, float *x_scroll_delta, float *y_scroll_delta)
+nemo_drag_autoscroll_calculate_delta (GtkWidget *widget, float *x_scroll_delta, float *y_scroll_delta)
 {
 	GtkAllocation allocation;
 	GdkDeviceManager *manager;
@@ -908,12 +908,12 @@ nautilus_drag_autoscroll_calculate_delta (GtkWidget *widget, float *x_scroll_del
 
 
 void
-nautilus_drag_autoscroll_start (NautilusDragInfo *drag_info,
+nemo_drag_autoscroll_start (NemoDragInfo *drag_info,
 				GtkWidget        *widget,
 				GSourceFunc       callback,
 				gpointer          user_data)
 {
-	if (nautilus_drag_autoscroll_in_scroll_region (widget)) {
+	if (nemo_drag_autoscroll_in_scroll_region (widget)) {
 		if (drag_info->auto_scroll_timeout_id == 0) {
 			drag_info->waiting_to_autoscroll = TRUE;
 			drag_info->start_auto_scroll_in = eel_get_system_time() 
@@ -933,7 +933,7 @@ nautilus_drag_autoscroll_start (NautilusDragInfo *drag_info,
 }
 
 void
-nautilus_drag_autoscroll_stop (NautilusDragInfo *drag_info)
+nemo_drag_autoscroll_stop (NemoDragInfo *drag_info)
 {
 	if (drag_info->auto_scroll_timeout_id != 0) {
 		g_source_remove (drag_info->auto_scroll_timeout_id);
@@ -942,13 +942,13 @@ nautilus_drag_autoscroll_stop (NautilusDragInfo *drag_info)
 }
 
 gboolean
-nautilus_drag_selection_includes_special_link (GList *selection_list)
+nemo_drag_selection_includes_special_link (GList *selection_list)
 {
 	GList *node;
 	char *uri;
 
 	for (node = selection_list; node != NULL; node = node->next) {
-		uri = ((NautilusDragSelectionItem *) node->data)->uri;
+		uri = ((NemoDragSelectionItem *) node->data)->uri;
 
 		if (eel_uri_is_desktop (uri)) {
 			return TRUE;

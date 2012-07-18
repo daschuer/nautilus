@@ -1,7 +1,7 @@
 /* -*- Mode: C; indent-tabs-mode: t; c-basic-offset: 8; tab-width: 8 -*- */
 
 /*
- * nautilus-view-dnd.c: DnD helpers for NautilusView
+ * nemo-view-dnd.c: DnD helpers for NemoView
  *
  * Copyright (C) 1999, 2000  Free Software Foundaton
  * Copyright (C) 2000, 2001  Eazel, Inc.
@@ -29,27 +29,27 @@
 
 #include <config.h>
 
-#include "nautilus-view-dnd.h"
+#include "nemo-view-dnd.h"
 
-#include "nautilus-desktop-icon-view.h"
-#include "nautilus-view.h"
+#include "nemo-desktop-icon-view.h"
+#include "nemo-view.h"
 
 #include <eel/eel-stock-dialogs.h>
 #include <eel/eel-string.h>
 
 #include <glib/gi18n.h>
 
-#include <libnautilus-private/nautilus-clipboard.h>
-#include <libnautilus-private/nautilus-dnd.h>
+#include <libnemo-private/nemo-clipboard.h>
+#include <libnemo-private/nemo-dnd.h>
 
 #define GET_ANCESTOR(obj) \
 	GTK_WINDOW (gtk_widget_get_ancestor (GTK_WIDGET (obj), GTK_TYPE_WINDOW))
 
 static inline void
-view_widget_to_file_operation_position (NautilusView *view,
+view_widget_to_file_operation_position (NemoView *view,
                                         GdkPoint *position)
 {
-	NautilusViewClass *class = NAUTILUS_VIEW_GET_CLASS (view);
+	NemoViewClass *class = NEMO_VIEW_GET_CLASS (view);
 
 	if (class->widget_to_file_operation_position != NULL) {
 		class->widget_to_file_operation_position (view, position);
@@ -57,7 +57,7 @@ view_widget_to_file_operation_position (NautilusView *view,
 }
 
 static void
-view_widget_to_file_operation_position_xy (NautilusView *view,
+view_widget_to_file_operation_position_xy (NemoView *view,
                                            int *x, int *y)
 {
 	GdkPoint position;
@@ -70,7 +70,7 @@ view_widget_to_file_operation_position_xy (NautilusView *view,
 }
 
 typedef struct {
-	NautilusView *view;
+	NemoView *view;
 	char *link_name;
 	char *target_uri;
 	char *url;
@@ -131,7 +131,7 @@ handle_netscape_url_drop_link_cb (GObject *source_object,
 	screen = gtk_widget_get_screen (GTK_WIDGET (data->view));
 	screen_num = gdk_screen_get_number (screen);
 
-	nautilus_link_local_create (data->target_uri,
+	nemo_link_local_create (data->target_uri,
 				    link_name,
 				    link_display_name,
 				    icon_name,
@@ -152,7 +152,7 @@ handle_netscape_url_drop_link_cb (GObject *source_object,
 }
 
 void
-nautilus_view_handle_netscape_url_drop (NautilusView  *view,
+nemo_view_handle_netscape_url_drop (NemoView  *view,
                                         const char    *encoded_url,
                                         const char    *target_uri,
                                         GdkDragAction  action,
@@ -242,7 +242,7 @@ nautilus_view_handle_netscape_url_drop (NautilusView  *view,
 
 		uri_list = g_list_append (uri_list, url);
 
-		nautilus_view_move_copy_items (view, uri_list, points,
+		nemo_view_move_copy_items (view, uri_list, points,
                                                target_uri,
                                                action, x, y);
 
@@ -255,7 +255,7 @@ nautilus_view_handle_netscape_url_drop (NautilusView  *view,
 }
 
 void
-nautilus_view_handle_uri_list_drop (NautilusView  *view,
+nemo_view_handle_uri_list_drop (NemoView  *view,
                                     const char    *item_uris,
                                     const char    *target_uri,
                                     GdkDragAction  action,
@@ -274,12 +274,12 @@ nautilus_view_handle_uri_list_drop (NautilusView  *view,
 
 	container_uri = NULL;
 	if (target_uri == NULL) {
-		container_uri = nautilus_view_get_backing_uri (view);
+		container_uri = nemo_view_get_backing_uri (view);
 		g_assert (container_uri != NULL);
 	}
 
 	if (action == GDK_ACTION_ASK) {
-		action = nautilus_drag_drop_action_ask
+		action = nemo_drag_drop_action_ask
 			(GTK_WIDGET (view),
 			 GDK_ACTION_MOVE | GDK_ACTION_COPY | GDK_ACTION_LINK);
 		if (action == 0) {
@@ -327,7 +327,7 @@ nautilus_view_handle_uri_list_drop (NautilusView  *view,
 
 	view_widget_to_file_operation_position_xy (view, &x, &y);
 
-	nautilus_view_move_copy_items (view, real_uri_list, points,
+	nemo_view_move_copy_items (view, real_uri_list, points,
 				       target_uri != NULL ? target_uri : container_uri,
 				       action, x, y);
 
@@ -340,7 +340,7 @@ nautilus_view_handle_uri_list_drop (NautilusView  *view,
 }
 
 void
-nautilus_view_handle_text_drop (NautilusView  *view,
+nemo_view_handle_text_drop (NemoView  *view,
                                 const char    *text,
                                 const char    *target_uri,
                                 GdkDragAction  action,
@@ -359,7 +359,7 @@ nautilus_view_handle_text_drop (NautilusView  *view,
 
 	container_uri = NULL;
 	if (target_uri == NULL) {
-		container_uri = nautilus_view_get_backing_uri (view);
+		container_uri = nemo_view_get_backing_uri (view);
 		g_assert (container_uri != NULL);
 	}
 
@@ -369,7 +369,7 @@ nautilus_view_handle_text_drop (NautilusView  *view,
 	pos.y = y;
 	view_widget_to_file_operation_position (view, &pos);
 
-	nautilus_view_new_file_with_initial_contents (
+	nemo_view_new_file_with_initial_contents (
 		view, target_uri != NULL ? target_uri : container_uri,
 		/* Translator: This is the filename used for when you dnd text to a directory */
 		_("dropped text.txt"),
@@ -379,7 +379,7 @@ nautilus_view_handle_text_drop (NautilusView  *view,
 }
 
 void
-nautilus_view_handle_raw_drop (NautilusView *view,
+nemo_view_handle_raw_drop (NemoView *view,
                                const char   *raw_data,
                                int           length,
                                const char   *target_uri,
@@ -400,7 +400,7 @@ nautilus_view_handle_raw_drop (NautilusView *view,
 
 	container_uri = NULL;
 	if (target_uri == NULL) {
-		container_uri = nautilus_view_get_backing_uri (view);
+		container_uri = nemo_view_get_backing_uri (view);
 		g_assert (container_uri != NULL);
 	}
 
@@ -420,7 +420,7 @@ nautilus_view_handle_raw_drop (NautilusView *view,
 		filename = g_strdup (_("dropped data"));
 	}
 
-	nautilus_view_new_file_with_initial_contents (
+	nemo_view_new_file_with_initial_contents (
 		view, target_uri != NULL ? target_uri : container_uri,
 		filename, raw_data, length, &pos);
 
@@ -429,7 +429,7 @@ nautilus_view_handle_raw_drop (NautilusView *view,
 }
 
 void 
-nautilus_view_drop_proxy_received_uris (NautilusView *view,
+nemo_view_drop_proxy_received_uris (NemoView *view,
 					const GList *source_uri_list,
 					const char *target_uri,
 					GdkDragAction action)
@@ -438,12 +438,12 @@ nautilus_view_drop_proxy_received_uris (NautilusView *view,
 
 	container_uri = NULL;
 	if (target_uri == NULL) {
-		container_uri = nautilus_view_get_backing_uri (view);
+		container_uri = nemo_view_get_backing_uri (view);
 		g_assert (container_uri != NULL);
 	}
 
 	if (action == GDK_ACTION_ASK) {
-		action = nautilus_drag_drop_action_ask
+		action = nemo_drag_drop_action_ask
 			(GTK_WIDGET (view),
 			 GDK_ACTION_MOVE | GDK_ACTION_COPY | GDK_ACTION_LINK);
 		if (action == 0) {
@@ -451,11 +451,11 @@ nautilus_view_drop_proxy_received_uris (NautilusView *view,
 		}
 	}
 
-	nautilus_clipboard_clear_if_colliding_uris (GTK_WIDGET (view),
+	nemo_clipboard_clear_if_colliding_uris (GTK_WIDGET (view),
 						    source_uri_list,
-						    nautilus_view_get_copied_files_atom (view));
+						    nemo_view_get_copied_files_atom (view));
 
-	nautilus_view_move_copy_items (view, source_uri_list, NULL,
+	nemo_view_move_copy_items (view, source_uri_list, NULL,
 				       target_uri != NULL ? target_uri : container_uri,
 				       action, 0, 0);
 

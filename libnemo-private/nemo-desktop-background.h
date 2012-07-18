@@ -1,7 +1,7 @@
 /* -*- Mode: C; indent-tabs-mode: t; c-basic-offset: 8; tab-width: 8 -*- */
 
 /*
- * nautilus-desktop-background.c: Helper object to handle desktop background
+ * nemo-desktop-background.c: Helper object to handle desktop background
  *                                changes.
  *
  * Copyright (C) 2000 Eazel, Inc.
@@ -31,37 +31,37 @@
 
 #include <gtk/gtk.h>
 
-#include "nautilus-icon-container.h"
+#include "nemo-icon-container.h"
 
-typedef struct NautilusDesktopBackground NautilusDesktopBackground;
-typedef struct NautilusDesktopBackgroundClass NautilusDesktopBackgroundClass;
+typedef struct NemoDesktopBackground NemoDesktopBackground;
+typedef struct NemoDesktopBackgroundClass NemoDesktopBackgroundClass;
 
-#define NAUTILUS_TYPE_DESKTOP_BACKGROUND nautilus_desktop_background_get_type()
-#define NAUTILUS_DESKTOP_BACKGROUND(obj) \
-  (G_TYPE_CHECK_INSTANCE_CAST ((obj), NAUTILUS_TYPE_DESKTOP_BACKGROUND, NautilusDesktopBackground))
-#define NAUTILUS_DESKTOP_BACKGROUND_CLASS(klass) \
-  (G_TYPE_CHECK_CLASS_CAST ((klass), NAUTILUS_TYPE_DESKTOP_BACKGROUND, NautilusDesktopBackgroundClass))
-#define NAUTILUS_IS_DESKTOP_BACKGROUND(obj) \
-  (G_TYPE_CHECK_INSTANCE_TYPE ((obj), NAUTILUS_TYPE_DESKTOP_BACKGROUND))
-#define NAUTILUS_IS_DESKTOP_BACKGROUND_CLASS(klass) \
-  (G_TYPE_CHECK_CLASS_TYPE ((klass), NAUTILUS_TYPE_DESKTOP_BACKGROUND))
-#define NAUTILUS_DESKTOP_BACKGROUND_GET_CLASS(obj) \
-  (G_TYPE_INSTANCE_GET_CLASS ((obj), NAUTILUS_TYPE_DESKTOP_BACKGROUND, NautilusDesktopBackgroundClass))
+#define NEMO_TYPE_DESKTOP_BACKGROUND nemo_desktop_background_get_type()
+#define NEMO_DESKTOP_BACKGROUND(obj) \
+  (G_TYPE_CHECK_INSTANCE_CAST ((obj), NEMO_TYPE_DESKTOP_BACKGROUND, NemoDesktopBackground))
+#define NEMO_DESKTOP_BACKGROUND_CLASS(klass) \
+  (G_TYPE_CHECK_CLASS_CAST ((klass), NEMO_TYPE_DESKTOP_BACKGROUND, NemoDesktopBackgroundClass))
+#define NEMO_IS_DESKTOP_BACKGROUND(obj) \
+  (G_TYPE_CHECK_INSTANCE_TYPE ((obj), NEMO_TYPE_DESKTOP_BACKGROUND))
+#define NEMO_IS_DESKTOP_BACKGROUND_CLASS(klass) \
+  (G_TYPE_CHECK_CLASS_TYPE ((klass), NEMO_TYPE_DESKTOP_BACKGROUND))
+#define NEMO_DESKTOP_BACKGROUND_GET_CLASS(obj) \
+  (G_TYPE_INSTANCE_GET_CLASS ((obj), NEMO_TYPE_DESKTOP_BACKGROUND, NemoDesktopBackgroundClass))
 
-GType nautilus_desktop_background_get_type (void);
-NautilusDesktopBackground * nautilus_desktop_background_new (NautilusIconContainer *container);
+GType nemo_desktop_background_get_type (void);
+NemoDesktopBackground * nemo_desktop_background_new (NemoIconContainer *container);
 
-void nautilus_desktop_background_receive_dropped_background_image (NautilusDesktopBackground *self,
+void nemo_desktop_background_receive_dropped_background_image (NemoDesktopBackground *self,
 								   const gchar *image_uri);
 
-typedef struct NautilusDesktopBackgroundDetails NautilusDesktopBackgroundDetails;
+typedef struct NemoDesktopBackgroundDetails NemoDesktopBackgroundDetails;
 
-struct NautilusDesktopBackground {
+struct NemoDesktopBackground {
 	GObject parent;
-	NautilusDesktopBackgroundDetails *details;
+	NemoDesktopBackgroundDetails *details;
 };
 
-struct NautilusDesktopBackgroundClass {
+struct NemoDesktopBackgroundClass {
 	GObjectClass parent_class;
 };
 

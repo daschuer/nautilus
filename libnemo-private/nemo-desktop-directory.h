@@ -1,6 +1,6 @@
 /* -*- Mode: C; indent-tabs-mode: t; c-basic-offset: 8; tab-width: 8 -*-
 
-   nautilus-desktop-directory.h: Subclass of NautilusDirectory to implement
+   nemo-desktop-directory.h: Subclass of NemoDirectory to implement
    a virtual directory consisting of the desktop directory and the desktop
    icons
  
@@ -24,36 +24,36 @@
    Author: Alexander Larsson <alexl@redhat.com>
 */
 
-#ifndef NAUTILUS_DESKTOP_DIRECTORY_H
-#define NAUTILUS_DESKTOP_DIRECTORY_H
+#ifndef NEMO_DESKTOP_DIRECTORY_H
+#define NEMO_DESKTOP_DIRECTORY_H
 
-#include <libnautilus-private/nautilus-directory.h>
+#include <libnemo-private/nemo-directory.h>
 
-#define NAUTILUS_TYPE_DESKTOP_DIRECTORY nautilus_desktop_directory_get_type()
-#define NAUTILUS_DESKTOP_DIRECTORY(obj) \
-  (G_TYPE_CHECK_INSTANCE_CAST ((obj), NAUTILUS_TYPE_DESKTOP_DIRECTORY, NautilusDesktopDirectory))
-#define NAUTILUS_DESKTOP_DIRECTORY_CLASS(klass) \
-  (G_TYPE_CHECK_CLASS_CAST ((klass), NAUTILUS_TYPE_DESKTOP_DIRECTORY, NautilusDesktopDirectoryClass))
-#define NAUTILUS_IS_DESKTOP_DIRECTORY(obj) \
-  (G_TYPE_CHECK_INSTANCE_TYPE ((obj), NAUTILUS_TYPE_DESKTOP_DIRECTORY))
-#define NAUTILUS_IS_DESKTOP_DIRECTORY_CLASS(klass) \
-  (G_TYPE_CHECK_CLASS_TYPE ((klass), NAUTILUS_TYPE_DESKTOP_DIRECTORY))
-#define NAUTILUS_DESKTOP_DIRECTORY_GET_CLASS(obj) \
-  (G_TYPE_INSTANCE_GET_CLASS ((obj), NAUTILUS_TYPE_DESKTOP_DIRECTORY, NautilusDesktopDirectoryClass))
+#define NEMO_TYPE_DESKTOP_DIRECTORY nemo_desktop_directory_get_type()
+#define NEMO_DESKTOP_DIRECTORY(obj) \
+  (G_TYPE_CHECK_INSTANCE_CAST ((obj), NEMO_TYPE_DESKTOP_DIRECTORY, NemoDesktopDirectory))
+#define NEMO_DESKTOP_DIRECTORY_CLASS(klass) \
+  (G_TYPE_CHECK_CLASS_CAST ((klass), NEMO_TYPE_DESKTOP_DIRECTORY, NemoDesktopDirectoryClass))
+#define NEMO_IS_DESKTOP_DIRECTORY(obj) \
+  (G_TYPE_CHECK_INSTANCE_TYPE ((obj), NEMO_TYPE_DESKTOP_DIRECTORY))
+#define NEMO_IS_DESKTOP_DIRECTORY_CLASS(klass) \
+  (G_TYPE_CHECK_CLASS_TYPE ((klass), NEMO_TYPE_DESKTOP_DIRECTORY))
+#define NEMO_DESKTOP_DIRECTORY_GET_CLASS(obj) \
+  (G_TYPE_INSTANCE_GET_CLASS ((obj), NEMO_TYPE_DESKTOP_DIRECTORY, NemoDesktopDirectoryClass))
 
-typedef struct NautilusDesktopDirectoryDetails NautilusDesktopDirectoryDetails;
-
-typedef struct {
-	NautilusDirectory parent_slot;
-	NautilusDesktopDirectoryDetails *details;
-} NautilusDesktopDirectory;
+typedef struct NemoDesktopDirectoryDetails NemoDesktopDirectoryDetails;
 
 typedef struct {
-	NautilusDirectoryClass parent_slot;
+	NemoDirectory parent_slot;
+	NemoDesktopDirectoryDetails *details;
+} NemoDesktopDirectory;
 
-} NautilusDesktopDirectoryClass;
+typedef struct {
+	NemoDirectoryClass parent_slot;
 
-GType   nautilus_desktop_directory_get_type             (void);
-NautilusDirectory * nautilus_desktop_directory_get_real_directory   (NautilusDesktopDirectory *desktop_directory);
+} NemoDesktopDirectoryClass;
 
-#endif /* NAUTILUS_DESKTOP_DIRECTORY_H */
+GType   nemo_desktop_directory_get_type             (void);
+NemoDirectory * nemo_desktop_directory_get_real_directory   (NemoDesktopDirectory *desktop_directory);
+
+#endif /* NEMO_DESKTOP_DIRECTORY_H */

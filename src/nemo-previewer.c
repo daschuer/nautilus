@@ -1,14 +1,14 @@
 /*
- * nautilus-previewer: nautilus previewer DBus wrapper
+ * nemo-previewer: nemo previewer DBus wrapper
  *
  * Copyright (C) 2011, Red Hat, Inc.
  *
- * Nautilus is free software; you can redistribute it and/or
+ * Nemo is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
  * published by the Free Software Foundation; either version 2 of the
  * License, or (at your option) any later version.
  *
- * Nautilus is distributed in the hope that it will be useful,
+ * Nemo is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
  * General Public License for more details.
@@ -21,39 +21,39 @@
  *
  */
 
-#include "nautilus-previewer.h"
+#include "nemo-previewer.h"
 
-#define DEBUG_FLAG NAUTILUS_DEBUG_PREVIEWER
-#include <libnautilus-private/nautilus-debug.h>
+#define DEBUG_FLAG NEMO_DEBUG_PREVIEWER
+#include <libnemo-private/nemo-debug.h>
 
 #include <gio/gio.h>
 
-G_DEFINE_TYPE (NautilusPreviewer, nautilus_previewer, G_TYPE_OBJECT);
+G_DEFINE_TYPE (NemoPreviewer, nemo_previewer, G_TYPE_OBJECT);
 
-#define PREVIEWER_DBUS_NAME "org.gnome.NautilusPreviewer"
-#define PREVIEWER_DBUS_IFACE "org.gnome.NautilusPreviewer"
-#define PREVIEWER_DBUS_PATH "/org/gnome/NautilusPreviewer"
+#define PREVIEWER_DBUS_NAME "org.gnome.NemoPreviewer"
+#define PREVIEWER_DBUS_IFACE "org.gnome.NemoPreviewer"
+#define PREVIEWER_DBUS_PATH "/org/gnome/NemoPreviewer"
 
-static NautilusPreviewer *singleton = NULL;
+static NemoPreviewer *singleton = NULL;
 
-struct _NautilusPreviewerPriv {
+struct _NemoPreviewerPriv {
   GDBusConnection *connection;
 };
 
 static void
-nautilus_previewer_dispose (GObject *object)
+nemo_previewer_dispose (GObject *object)
 {
-  NautilusPreviewer *self = NAUTILUS_PREVIEWER (object);
+  NemoPreviewer *self = NEMO_PREVIEWER (object);
 
   DEBUG ("%p", self);
 
   g_clear_object (&self->priv->connection);
 
-  G_OBJECT_CLASS (nautilus_previewer_parent_class)->dispose (object);
+  G_OBJECT_CLASS (nemo_previewer_parent_class)->dispose (object);
 }
 
 static GObject *
-nautilus_previewer_constructor (GType type,
+nemo_previewer_constructor (GType type,
                                 guint n_construct_params,
                                 GObjectConstructParam *construct_params)
 {
@@ -62,22 +62,22 @@ nautilus_previewer_constructor (GType type,
   if (singleton != NULL)
     return G_OBJECT (singleton);
 
-  retval = G_OBJECT_CLASS (nautilus_previewer_parent_class)->constructor
+  retval = G_OBJECT_CLASS (nemo_previewer_parent_class)->constructor
     (type, n_construct_params, construct_params);
 
-  singleton = NAUTILUS_PREVIEWER (retval);
+  singleton = NEMO_PREVIEWER (retval);
   g_object_add_weak_pointer (retval, (gpointer) &singleton);
 
   return retval;
 }
 
 static void
-nautilus_previewer_init (NautilusPreviewer *self)
+nemo_previewer_init (NemoPreviewer *self)
 {
   GError *error = NULL;
 
-  self->priv = G_TYPE_INSTANCE_GET_PRIVATE (self, NAUTILUS_TYPE_PREVIEWER,
-                                            NautilusPreviewerPriv);
+  self->priv = G_TYPE_INSTANCE_GET_PRIVATE (self, NEMO_TYPE_PREVIEWER,
+                                            NemoPreviewerPriv);
 
   self->priv->connection = g_bus_get_sync (G_BUS_TYPE_SESSION,
                                            NULL, &error);
@@ -90,15 +90,15 @@ nautilus_previewer_init (NautilusPreviewer *self)
 }
 
 static void
-nautilus_previewer_class_init (NautilusPreviewerClass *klass)
+nemo_previewer_class_init (NemoPreviewerClass *klass)
 {
   GObjectClass *oclass;
 
   oclass = G_OBJECT_CLASS (klass);
-  oclass->constructor = nautilus_previewer_constructor;
-  oclass->dispose = nautilus_previewer_dispose;
+  oclass->constructor = nemo_previewer_constructor;
+  oclass->dispose = nemo_previewer_dispose;
 
-  g_type_class_add_private (klass, sizeof (NautilusPreviewerPriv));
+  g_type_class_add_private (klass, sizeof (NemoPreviewerPriv));
 }
 
 static void
@@ -106,14 +106,14 @@ previewer_show_file_ready_cb (GObject *source,
                               GAsyncResult *res,
                               gpointer user_data)
 {
-  NautilusPreviewer *self = user_data;
+  NemoPreviewer *self = user_data;
   GError *error = NULL;
 
   g_dbus_connection_call_finish (self->priv->connection,
                                  res, &error);
 
   if (error != NULL) {
-    DEBUG ("Unable to call ShowFile on NautilusPreviewer: %s",
+    DEBUG ("Unable to call ShowFile on NemoPreviewer: %s",
            error->message);
     g_error_free (error);
   }
@@ -126,14 +126,14 @@ previewer_close_ready_cb (GObject *source,
                           GAsyncResult *res,
                           gpointer user_data)
 {
-  NautilusPreviewer *self = user_data;
+  NemoPreviewer *self = user_data;
   GError *error = NULL;
 
   g_dbus_connection_call_finish (self->priv->connection,
                                  res, &error);
 
   if (error != NULL) {
-    DEBUG ("Unable to call Close on NautilusPreviewer: %s",
+    DEBUG ("Unable to call Close on NemoPreviewer: %s",
            error->message);
     g_error_free (error);
   }
@@ -141,14 +141,14 @@ previewer_close_ready_cb (GObject *source,
   g_object_unref (self);
 }
 
-NautilusPreviewer *
-nautilus_previewer_get_singleton (void)
+NemoPreviewer *
+nemo_previewer_get_singleton (void)
 {
-  return g_object_new (NAUTILUS_TYPE_PREVIEWER, NULL);
+  return g_object_new (NEMO_TYPE_PREVIEWER, NULL);
 }
 
 void
-nautilus_previewer_call_show_file (NautilusPreviewer *self,
+nemo_previewer_call_show_file (NemoPreviewer *self,
                                    const gchar *uri,
                                    guint xid,
 				   gboolean close_if_already_visible)
@@ -178,7 +178,7 @@ nautilus_previewer_call_show_file (NautilusPreviewer *self,
 }
 
 void
-nautilus_previewer_call_close (NautilusPreviewer *self)
+nemo_previewer_call_close (NemoPreviewer *self)
 {
   if (self->priv->connection == NULL) {
     g_printerr ("No DBus connection available");

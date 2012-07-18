@@ -1,22 +1,22 @@
-Nautilus is part of the GNOME git repository. At the current time, any
+Nemo is part of the GNOME git repository. At the current time, any
 person with write access to the GNOME repository, can make changes to
-Nautilus. This is a good thing, in that it encourages many people to work
-on Nautilus, and progress can be made quickly. However, we'd like to ask
-people committing to Nautilus to follow a few rules:
+Nemo. This is a good thing, in that it encourages many people to work
+on Nemo, and progress can be made quickly. However, we'd like to ask
+people committing to Nemo to follow a few rules:
 
 0) Ask first. If your changes are major, or could possibly break existing
    code, you should always ask. If your change is minor and you've
-   been working on Nautilus for a while it probably isn't necessary
+   been working on Nemo for a while it probably isn't necessary
    to ask. But when in doubt, ask. Even if your change is correct,
    somebody may know a better way to do things.
 
-   If you are making changes to Nautilus, you should be subscribed
-   to nautilus-list@gnome.org. (Subscription address:
-   nautilus-list-request@gnome.org.) This is a good place to ask
+   If you are making changes to Nemo, you should be subscribed
+   to nemo-list@gnome.org. (Subscription address:
+   nemo-list-request@gnome.org.) This is a good place to ask
    about intended changes.
 
-   #nautilus on GIMPNet (irc.gimp.org, irc.us.gimp.org, irc.eu.gimp.org, ...)
-   is also a good place to find Nautilus developers to discuss changes with.
+   #nemo on GIMPNet (irc.gimp.org, irc.us.gimp.org, irc.eu.gimp.org, ...)
+   is also a good place to find Nemo developers to discuss changes with.
 
 1) Ask _first_.
 
@@ -33,7 +33,7 @@ people committing to Nautilus to follow a few rules:
 Notes:
 
 * When developing larger features or complicated bug fixes, it is
-  advisable to work in a branch in your own cloned Nautilus repository.
+  advisable to work in a branch in your own cloned Nemo repository.
   You may even consider making your repository publically available
   so that others can easily test and review your changes.
 

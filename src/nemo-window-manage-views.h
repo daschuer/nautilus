@@ -1,17 +1,17 @@
 /* -*- Mode: C; tab-width: 8; indent-tabs-mode: nil; c-basic-offset: 2 -*- */
 
 /*
- *  Nautilus
+ *  Nemo
  *
  *  Copyright (C) 1999, 2000 Red Hat, Inc.
  *  Copyright (C) 1999, 2000, 2001 Eazel, Inc.
  *
- *  Nautilus is free software; you can redistribute it and/or
+ *  Nemo is free software; you can redistribute it and/or
  *  modify it under the terms of the GNU General Public
  *  License as published by the Free Software Foundation; either
  *  version 2 of the License, or (at your option) any later version.
  *
- *  Nautilus is distributed in the hope that it will be useful,
+ *  Nemo is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
  *  General Public License for more details.
@@ -24,16 +24,16 @@
  *
  */
 
-#ifndef NAUTILUS_WINDOW_MANAGE_VIEWS_H
-#define NAUTILUS_WINDOW_MANAGE_VIEWS_H
+#ifndef NEMO_WINDOW_MANAGE_VIEWS_H
+#define NEMO_WINDOW_MANAGE_VIEWS_H
 
-#include "nautilus-window.h"
-#include "nautilus-window-pane.h"
+#include "nemo-window.h"
+#include "nemo-window-pane.h"
 
-void nautilus_window_manage_views_close_slot (NautilusWindowSlot *slot);
+void nemo_window_manage_views_close_slot (NemoWindowSlot *slot);
 
 
-/* NautilusWindowInfo implementation: */
-void nautilus_window_report_location_change   (NautilusWindow     *window);
+/* NemoWindowInfo implementation: */
+void nemo_window_report_location_change   (NemoWindow     *window);
 
-#endif /* NAUTILUS_WINDOW_MANAGE_VIEWS_H */
+#endif /* NEMO_WINDOW_MANAGE_VIEWS_H */

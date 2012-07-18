@@ -24,14 +24,14 @@
  */
 
 #include <config.h>
-#include "nautilus-image-properties-page.h"
+#include "nemo-image-properties-page.h"
 
 #include <gtk/gtk.h>
 #include <glib/gi18n.h>
 #include <gio/gio.h>
 #include <eel/eel-vfs-extensions.h>
-#include <libnautilus-extension/nautilus-property-page-provider.h>
-#include <libnautilus-private/nautilus-module.h>
+#include <libnemo-extension/nemo-property-page-provider.h>
+#include <libnemo-private/nemo-module.h>
 #include <string.h>
 
 #ifdef HAVE_EXIF
@@ -46,7 +46,7 @@
 
 #define LOAD_BUFFER_SIZE 8192
 
-struct NautilusImagePropertiesPageDetails {
+struct NemoImagePropertiesPageDetails {
 	GCancellable *cancellable;
 	GtkWidget *vbox;
 	GtkWidget *loading_label;
@@ -78,29 +78,29 @@ enum {
 
 typedef struct {
         GObject parent;
-} NautilusImagePropertiesPageProvider;
+} NemoImagePropertiesPageProvider;
 
 typedef struct {
         GObjectClass parent;
-} NautilusImagePropertiesPageProviderClass;
+} NemoImagePropertiesPageProviderClass;
 
 
-static GType nautilus_image_properties_page_provider_get_type (void);
-static void  property_page_provider_iface_init                (NautilusPropertyPageProviderIface *iface);
+static GType nemo_image_properties_page_provider_get_type (void);
+static void  property_page_provider_iface_init                (NemoPropertyPageProviderIface *iface);
 
 
-G_DEFINE_TYPE (NautilusImagePropertiesPage, nautilus_image_properties_page, GTK_TYPE_BOX);
+G_DEFINE_TYPE (NemoImagePropertiesPage, nemo_image_properties_page, GTK_TYPE_BOX);
 
-G_DEFINE_TYPE_WITH_CODE (NautilusImagePropertiesPageProvider, nautilus_image_properties_page_provider, G_TYPE_OBJECT,
-			 G_IMPLEMENT_INTERFACE (NAUTILUS_TYPE_PROPERTY_PAGE_PROVIDER,
+G_DEFINE_TYPE_WITH_CODE (NemoImagePropertiesPageProvider, nemo_image_properties_page_provider, G_TYPE_OBJECT,
+			 G_IMPLEMENT_INTERFACE (NEMO_TYPE_PROPERTY_PAGE_PROVIDER,
 						property_page_provider_iface_init));
 
 static void
-nautilus_image_properties_page_finalize (GObject *object)
+nemo_image_properties_page_finalize (GObject *object)
 {
-	NautilusImagePropertiesPage *page;
+	NemoImagePropertiesPage *page;
 
-	page = NAUTILUS_IMAGE_PROPERTIES_PAGE (object);
+	page = NEMO_IMAGE_PROPERTIES_PAGE (object);
 
 	if (page->details->cancellable) {
 		g_cancellable_cancel (page->details->cancellable);
@@ -108,7 +108,7 @@ nautilus_image_properties_page_finalize (GObject *object)
 		page->details->cancellable = NULL;
 	}
 
-	G_OBJECT_CLASS (nautilus_image_properties_page_parent_class)->finalize (object);
+	G_OBJECT_CLASS (nemo_image_properties_page_parent_class)->finalize (object);
 }
 
 static void
@@ -116,10 +116,10 @@ file_close_callback (GObject      *object,
 		     GAsyncResult *res,
 		     gpointer      data)
 {
-	NautilusImagePropertiesPage *page;
+	NemoImagePropertiesPage *page;
 	GInputStream *stream;
 
-	page = NAUTILUS_IMAGE_PROPERTIES_PAGE (data);
+	page = NEMO_IMAGE_PROPERTIES_PAGE (data);
 	stream = G_INPUT_STREAM (object);
 
 	g_input_stream_close_finish (stream, res, NULL);
@@ -228,7 +228,7 @@ exifdata_get_tag_value_utf8 (ExifData *data, ExifTag tag)
 }
 
 static gboolean
-append_tag_value_pair (NautilusImagePropertiesPage *page,
+append_tag_value_pair (NemoImagePropertiesPage *page,
 		       ExifData *data,
 		       ExifTag   tag,
 		       char     *description) 
@@ -257,7 +257,7 @@ append_tag_value_pair (NautilusImagePropertiesPage *page,
 }
 
 static void
-append_exifdata_string (ExifData *exifdata, NautilusImagePropertiesPage *page)
+append_exifdata_string (ExifData *exifdata, NemoImagePropertiesPage *page)
 {
 	if (exifdata && exifdata->ifd[0] && exifdata->ifd[0]->count) {
                 append_tag_value_pair (page, exifdata, EXIF_TAG_MAKE, _("Camera Brand"));
@@ -286,7 +286,7 @@ append_exifdata_string (ExifData *exifdata, NautilusImagePropertiesPage *page)
 
 #ifdef HAVE_EXEMPI
 static void
-append_xmp_value_pair (NautilusImagePropertiesPage *page,
+append_xmp_value_pair (NemoImagePropertiesPage *page,
 		       XmpPtr      xmp,
 		       const char *ns,
 		       const char *propname,
@@ -337,7 +337,7 @@ append_xmp_value_pair (NautilusImagePropertiesPage *page,
 }
 
 static void
-append_xmpdata_string (XmpPtr xmp, NautilusImagePropertiesPage *page)
+append_xmpdata_string (XmpPtr xmp, NemoImagePropertiesPage *page)
 {
 	if (xmp != NULL) {
 		append_xmp_value_pair (page, xmp, NS_IPTC4XMP, "Location", _("Location"));
@@ -352,7 +352,7 @@ append_xmpdata_string (XmpPtr xmp, NautilusImagePropertiesPage *page)
 #endif
 
 static void
-load_finished (NautilusImagePropertiesPage *page)
+load_finished (NemoImagePropertiesPage *page)
 {
 	GdkPixbufFormat *format;
 	char *name, *desc;
@@ -427,14 +427,14 @@ file_read_callback (GObject      *object,
 		    GAsyncResult *res,
 		    gpointer      data)
 {
-	NautilusImagePropertiesPage *page;
+	NemoImagePropertiesPage *page;
 	GInputStream *stream;
 	gssize count_read;
 	GError *error;
 	int exif_still_loading;
 	gboolean done_reading;
 
-	page = NAUTILUS_IMAGE_PROPERTIES_PAGE (data);
+	page = NEMO_IMAGE_PROPERTIES_PAGE (data);
 	stream = G_INPUT_STREAM (object);
 
 	error = NULL;
@@ -497,9 +497,9 @@ size_prepared_callback (GdkPixbufLoader *loader,
 			int              height,
 			gpointer         callback_data)
 {
-	NautilusImagePropertiesPage *page;
+	NemoImagePropertiesPage *page;
 
-	page = NAUTILUS_IMAGE_PROPERTIES_PAGE (callback_data);
+	page = NEMO_IMAGE_PROPERTIES_PAGE (callback_data);
 
 	page->details->height = height;
 	page->details->width = width;
@@ -512,12 +512,12 @@ file_open_callback (GObject      *object,
 		    GAsyncResult *res,
 		    gpointer      data)
 {
-	NautilusImagePropertiesPage *page;
+	NemoImagePropertiesPage *page;
 	GFile *file;
 	GFileInputStream *stream;
 	GError *error;
 
-	page = NAUTILUS_IMAGE_PROPERTIES_PAGE (data);
+	page = NEMO_IMAGE_PROPERTIES_PAGE (data);
 	file = G_FILE (object);
 
 	error = NULL;
@@ -549,12 +549,12 @@ file_open_callback (GObject      *object,
 }
 
 static void
-load_location (NautilusImagePropertiesPage *page,
+load_location (NemoImagePropertiesPage *page,
 	       const char                  *location)
 {
 	GFile *file;
 
-	g_assert (NAUTILUS_IS_IMAGE_PROPERTIES_PAGE (page));
+	g_assert (NEMO_IS_IMAGE_PROPERTIES_PAGE (page));
 	g_assert (location != NULL);
 
 	page->details->cancellable = g_cancellable_new ();
@@ -590,23 +590,23 @@ load_location (NautilusImagePropertiesPage *page,
 }
 
 static void
-nautilus_image_properties_page_class_init (NautilusImagePropertiesPageClass *class)
+nemo_image_properties_page_class_init (NemoImagePropertiesPageClass *class)
 {
 	GObjectClass *object_class;
 
 	object_class = G_OBJECT_CLASS (class);
 
-	object_class->finalize = nautilus_image_properties_page_finalize;
+	object_class->finalize = nemo_image_properties_page_finalize;
 
-	g_type_class_add_private (object_class, sizeof(NautilusImagePropertiesPageDetails));
+	g_type_class_add_private (object_class, sizeof(NemoImagePropertiesPageDetails));
 }
 
 static void
-nautilus_image_properties_page_init (NautilusImagePropertiesPage *page)
+nemo_image_properties_page_init (NemoImagePropertiesPage *page)
 {
 	page->details = G_TYPE_INSTANCE_GET_PRIVATE (page,
-						     NAUTILUS_TYPE_IMAGE_PROPERTIES_PAGE,
-						     NautilusImagePropertiesPageDetails);
+						     NEMO_TYPE_IMAGE_PROPERTIES_PAGE,
+						     NemoImagePropertiesPageDetails);
 
 	gtk_orientable_set_orientation (GTK_ORIENTABLE (page), GTK_ORIENTATION_VERTICAL);
 	gtk_box_set_homogeneous (GTK_BOX (page), FALSE);
@@ -624,49 +624,49 @@ nautilus_image_properties_page_init (NautilusImagePropertiesPage *page)
 }
 
 static GList *
-get_property_pages (NautilusPropertyPageProvider *provider,
+get_property_pages (NemoPropertyPageProvider *provider,
                     GList *files)
 {
 	GList *pages;
-	NautilusPropertyPage *real_page;
-	NautilusFileInfo *file;
+	NemoPropertyPage *real_page;
+	NemoFileInfo *file;
         char *uri;
-	NautilusImagePropertiesPage *page;
+	NemoImagePropertiesPage *page;
 	
 	/* Only show the property page if 1 file is selected */
 	if (!files || files->next != NULL) {
 		return NULL;
 	}
 
-	file = NAUTILUS_FILE_INFO (files->data);
+	file = NEMO_FILE_INFO (files->data);
 	
 	if (!
-	    (nautilus_file_info_is_mime_type (file, "image/x-bmp") ||
-	     nautilus_file_info_is_mime_type (file, "image/x-ico") ||
-	     nautilus_file_info_is_mime_type (file, "image/jpeg") ||
-	     nautilus_file_info_is_mime_type (file, "image/gif") ||
-	     nautilus_file_info_is_mime_type (file, "image/png") ||
-	     nautilus_file_info_is_mime_type (file, "image/pnm") ||
-	     nautilus_file_info_is_mime_type (file, "image/ras") ||
-	     nautilus_file_info_is_mime_type (file, "image/tga") ||
-	     nautilus_file_info_is_mime_type (file, "image/tiff") ||
-	     nautilus_file_info_is_mime_type (file, "image/wbmp") ||
-	     nautilus_file_info_is_mime_type (file, "image/x-xbitmap") ||
-	     nautilus_file_info_is_mime_type (file, "image/x-xpixmap"))) {
+	    (nemo_file_info_is_mime_type (file, "image/x-bmp") ||
+	     nemo_file_info_is_mime_type (file, "image/x-ico") ||
+	     nemo_file_info_is_mime_type (file, "image/jpeg") ||
+	     nemo_file_info_is_mime_type (file, "image/gif") ||
+	     nemo_file_info_is_mime_type (file, "image/png") ||
+	     nemo_file_info_is_mime_type (file, "image/pnm") ||
+	     nemo_file_info_is_mime_type (file, "image/ras") ||
+	     nemo_file_info_is_mime_type (file, "image/tga") ||
+	     nemo_file_info_is_mime_type (file, "image/tiff") ||
+	     nemo_file_info_is_mime_type (file, "image/wbmp") ||
+	     nemo_file_info_is_mime_type (file, "image/x-xbitmap") ||
+	     nemo_file_info_is_mime_type (file, "image/x-xpixmap"))) {
 		return NULL;
 	}
 	
 	pages = NULL;
 	
-        uri = nautilus_file_info_get_uri (file);
+        uri = nemo_file_info_get_uri (file);
 
-	page = g_object_new (nautilus_image_properties_page_get_type (), NULL);
+	page = g_object_new (nemo_image_properties_page_get_type (), NULL);
 	load_location (page, uri);
 
 	g_free (uri);
 
-        real_page = nautilus_property_page_new
-                ("NautilusImagePropertiesPage::property_page", 
+        real_page = nemo_property_page_new
+                ("NemoImagePropertiesPage::property_page", 
                  gtk_label_new (_("Image")),
                  GTK_WIDGET (page));
         pages = g_list_append (pages, real_page);
@@ -675,25 +675,25 @@ get_property_pages (NautilusPropertyPageProvider *provider,
 }
 
 static void 
-property_page_provider_iface_init (NautilusPropertyPageProviderIface *iface)
+property_page_provider_iface_init (NemoPropertyPageProviderIface *iface)
 {
 	iface->get_pages = get_property_pages;
 }
 
 
 static void
-nautilus_image_properties_page_provider_init (NautilusImagePropertiesPageProvider *sidebar)
+nemo_image_properties_page_provider_init (NemoImagePropertiesPageProvider *sidebar)
 {
 }
 
 static void
-nautilus_image_properties_page_provider_class_init (NautilusImagePropertiesPageProviderClass *class)
+nemo_image_properties_page_provider_class_init (NemoImagePropertiesPageProviderClass *class)
 {
 }
 
 void
-nautilus_image_properties_page_register (void)
+nemo_image_properties_page_register (void)
 {
-        nautilus_module_add_type (nautilus_image_properties_page_provider_get_type ());
+        nemo_module_add_type (nemo_image_properties_page_provider_get_type ());
 }
 

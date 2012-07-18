@@ -1,6 +1,6 @@
 /* -*- Mode: C; indent-tabs-mode: t; c-basic-offset: 8; tab-width: 8 -*- */
 
-/* NautilusEntry: one-line text editing widget. This consists of bug fixes
+/* NemoEntry: one-line text editing widget. This consists of bug fixes
  * and other improvements to GtkEntry, and all the changes could be rolled
  * into GtkEntry some day.
  *
@@ -24,49 +24,49 @@
  * Boston, MA 02111-1307, USA.
  */
 
-#ifndef NAUTILUS_ENTRY_H
-#define NAUTILUS_ENTRY_H
+#ifndef NEMO_ENTRY_H
+#define NEMO_ENTRY_H
 
 #include <gtk/gtk.h>
 
 G_BEGIN_DECLS
 
-#define NAUTILUS_TYPE_ENTRY nautilus_entry_get_type()
-#define NAUTILUS_ENTRY(obj) \
-  (G_TYPE_CHECK_INSTANCE_CAST ((obj), NAUTILUS_TYPE_ENTRY, NautilusEntry))
-#define NAUTILUS_ENTRY_CLASS(klass) \
-  (G_TYPE_CHECK_CLASS_CAST ((klass), NAUTILUS_TYPE_ENTRY, NautilusEntryClass))
-#define NAUTILUS_IS_ENTRY(obj) \
-  (G_TYPE_CHECK_INSTANCE_TYPE ((obj), NAUTILUS_TYPE_ENTRY))
-#define NAUTILUS_IS_ENTRY_CLASS(klass) \
-  (G_TYPE_CHECK_CLASS_TYPE ((klass), NAUTILUS_TYPE_ENTRY))
-#define NAUTILUS_ENTRY_GET_CLASS(obj) \
-  (G_TYPE_INSTANCE_GET_CLASS ((obj), NAUTILUS_TYPE_ENTRY, NautilusEntryClass))
+#define NEMO_TYPE_ENTRY nemo_entry_get_type()
+#define NEMO_ENTRY(obj) \
+  (G_TYPE_CHECK_INSTANCE_CAST ((obj), NEMO_TYPE_ENTRY, NemoEntry))
+#define NEMO_ENTRY_CLASS(klass) \
+  (G_TYPE_CHECK_CLASS_CAST ((klass), NEMO_TYPE_ENTRY, NemoEntryClass))
+#define NEMO_IS_ENTRY(obj) \
+  (G_TYPE_CHECK_INSTANCE_TYPE ((obj), NEMO_TYPE_ENTRY))
+#define NEMO_IS_ENTRY_CLASS(klass) \
+  (G_TYPE_CHECK_CLASS_TYPE ((klass), NEMO_TYPE_ENTRY))
+#define NEMO_ENTRY_GET_CLASS(obj) \
+  (G_TYPE_INSTANCE_GET_CLASS ((obj), NEMO_TYPE_ENTRY, NemoEntryClass))
 
-typedef struct NautilusEntryDetails NautilusEntryDetails;
+typedef struct NemoEntryDetails NemoEntryDetails;
 
 typedef struct {
 	GtkEntry parent;
-	NautilusEntryDetails *details;
-} NautilusEntry;
+	NemoEntryDetails *details;
+} NemoEntry;
 
 typedef struct {
 	GtkEntryClass parent_class;
 
-	void (*user_changed)      (NautilusEntry *entry);
-	void (*selection_changed) (NautilusEntry *entry);
-} NautilusEntryClass;
+	void (*user_changed)      (NemoEntry *entry);
+	void (*selection_changed) (NemoEntry *entry);
+} NemoEntryClass;
 
-GType       nautilus_entry_get_type                 (void);
-GtkWidget  *nautilus_entry_new                      (void);
-GtkWidget  *nautilus_entry_new_with_max_length      (guint16        max);
-void        nautilus_entry_set_text                 (NautilusEntry *entry,
+GType       nemo_entry_get_type                 (void);
+GtkWidget  *nemo_entry_new                      (void);
+GtkWidget  *nemo_entry_new_with_max_length      (guint16        max);
+void        nemo_entry_set_text                 (NemoEntry *entry,
 						     const char    *text);
-void        nautilus_entry_select_all               (NautilusEntry *entry);
-void        nautilus_entry_select_all_at_idle       (NautilusEntry *entry);
-void        nautilus_entry_set_special_tab_handling (NautilusEntry *entry,
+void        nemo_entry_select_all               (NemoEntry *entry);
+void        nemo_entry_select_all_at_idle       (NemoEntry *entry);
+void        nemo_entry_set_special_tab_handling (NemoEntry *entry,
 						     gboolean       special_tab_handling);
 
 G_END_DECLS
 
-#endif /* NAUTILUS_ENTRY_H */
+#endif /* NEMO_ENTRY_H */

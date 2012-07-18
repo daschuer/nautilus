@@ -1,7 +1,7 @@
 #include <gtk/gtk.h>
-#include <libnautilus-private/nautilus-directory.h>
-#include <libnautilus-private/nautilus-search-directory.h>
-#include <libnautilus-private/nautilus-file.h>
+#include <libnemo-private/nemo-directory.h>
+#include <libnemo-private/nemo-search-directory.h>
+#include <libnemo-private/nemo-file.h>
 #include <unistd.h>
 
 void *client1, *client2;
@@ -17,16 +17,16 @@ quit_cb (gpointer data)
 #endif
 
 static void
-files_added (NautilusDirectory *directory,
+files_added (NemoDirectory *directory,
 	     GList *added_files)
 {
 #if 0
 	GList *list;
 
 	for (list = added_files; list != NULL; list = list->next) {
-		NautilusFile *file = list->data;
+		NemoFile *file = list->data;
 
-		g_print (" - %s\n", nautilus_file_get_uri (file));
+		g_print (" - %s\n", nemo_file_get_uri (file));
 	}
 #endif
 
@@ -35,16 +35,16 @@ files_added (NautilusDirectory *directory,
 }
 
 static void
-files_changed (NautilusDirectory *directory,
+files_changed (NemoDirectory *directory,
 	       GList *changed_files)
 {
 #if 0
 	GList *list;
 
 	for (list = changed_files; list != NULL; list = list->next) {
-		NautilusFile *file = list->data;
+		NemoFile *file = list->data;
 
-		g_print (" - %s\n", nautilus_file_get_uri (file));
+		g_print (" - %s\n", nemo_file_get_uri (file));
 	}
 #endif
 	g_print ("files changed: %d\n",
@@ -52,17 +52,17 @@ files_changed (NautilusDirectory *directory,
 }
 
 static gboolean
-force_reload (NautilusDirectory *directory)
+force_reload (NemoDirectory *directory)
 {
 	g_print ("forcing reload!\n");
 
-	nautilus_directory_force_reload (directory);
+	nemo_directory_force_reload (directory);
 
 	return FALSE;
 }
 
 static void
-done_loading (NautilusDirectory *directory)
+done_loading (NemoDirectory *directory)
 {
 	static int i = 0;
 
@@ -78,24 +78,24 @@ done_loading (NautilusDirectory *directory)
 int
 main (int argc, char **argv)
 {
-	NautilusDirectory *directory;
-	NautilusQuery *query;
+	NemoDirectory *directory;
+	NemoQuery *query;
 	client1 = g_new0 (int, 1);
 	client2 = g_new0 (int, 1);
 
 	gtk_init (&argc, &argv);
 
-	query = nautilus_query_new ();
-	nautilus_query_set_text (query, "richard hult");
-	directory = nautilus_directory_get_by_uri ("x-nautilus-search://0/");
-	nautilus_search_directory_set_query (NAUTILUS_SEARCH_DIRECTORY (directory), query);
+	query = nemo_query_new ();
+	nemo_query_set_text (query, "richard hult");
+	directory = nemo_directory_get_by_uri ("x-nemo-search://0/");
+	nemo_search_directory_set_query (NEMO_SEARCH_DIRECTORY (directory), query);
 	g_object_unref (query);
 
 	g_signal_connect (directory, "files-added", G_CALLBACK (files_added), NULL);
 	g_signal_connect (directory, "files-changed", G_CALLBACK (files_changed), NULL);
 	g_signal_connect (directory, "done-loading", G_CALLBACK (done_loading), NULL);
-	nautilus_directory_file_monitor_add (directory, client1, TRUE,
-					     NAUTILUS_FILE_ATTRIBUTE_INFO,
+	nemo_directory_file_monitor_add (directory, client1, TRUE,
+					     NEMO_FILE_ATTRIBUTE_INFO,
 					     NULL, NULL);
 
 

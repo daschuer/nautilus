@@ -1,215 +1,222 @@
 include $(top_srcdir)/Makefile.shared
 
 bin_PROGRAMS=					\
-	nautilus				\
-	nautilus-autorun-software		\
-	nautilus-connect-server			\
+	nemo				\
+	nemo-autorun-software		\
+	nemo-connect-server			\
 	$(NULL)
 
 libexec_PROGRAMS=				\
-	nautilus-convert-metadata		\
+	nemo-convert-metadata		\
 	$(NULL)
 
 INCLUDES =							\
 	-I$(top_srcdir) 					\
 	-I$(top_srcdir)/cut-n-paste-code			\
-	-I$(top_builddir)/libnautilus-private 			\
+	-I$(top_builddir)/libnemo-private 			\
 	$(BASE_CFLAGS) 						\
 	$(COMMON_CFLAGS)					\
-	$(NAUTILUS_CFLAGS)					\
+	$(NEMO_CFLAGS)					\
 	$(WARNING_CFLAGS)					\
 	$(EXIF_CFLAGS)						\
 	$(EXEMPI_CFLAGS)                                        \
 	-DDATADIR=\""$(datadir)"\" 				\
 	-DLIBDIR=\""$(libdir)"\" 				\
 	-DLIBEXECDIR=\""$(libexecdir)"\" 			\
-	-DNAUTILUS_DATADIR=\""$(datadir)/nautilus"\" 		\
-	-DUIDIR=\""$(datadir)/nautilus/ui"\" 		\
-	-DNAUTILUS_PIXMAPDIR=\""$(datadir)/pixmaps/nautilus"\" 	\
+	-DNEMO_DATADIR=\""$(datadir)/nemo"\" 		\
+	-DUIDIR=\""$(datadir)/nemo/ui"\" 		\
+	-DNEMO_PIXMAPDIR=\""$(datadir)/pixmaps/nemo"\" 	\
 	-DPREFIX=\""$(prefix)"\" 				\
 	-DSYSCONFDIR=\""$(sysconfdir)"\" 			\
 	-DVERSION="\"$(VERSION)\"" 				\
 	$(DISABLE_DEPRECATED_CFLAGS)                            \
+	$(UNITY_CFLAGS)                                         \
 	$(NULL)
 
 LDADD =\
-	$(top_builddir)/libnautilus-private/libnautilus-private.la  \
+	$(top_builddir)/libnemo-private/libnemo-private.la  \
 	$(BASE_LIBS) \
 	$(COMMON_LIBS) \
-	$(NAUTILUS_LIBS) \
+	$(NEMO_LIBS) \
 	$(CORE_LIBS) \
 	$(EXIF_LIBS) \
 	$(EXEMPI_LIBS) \
 	$(POPT_LIBS) \
+	$(UNITY_LIBS) \
 	$(NULL)
 
-dbus_built_sources = nautilus-freedesktop-generated.c nautilus-freedesktop-generated.h
+dbus_built_sources = nemo-freedesktop-generated.c nemo-freedesktop-generated.h
 $(dbus_built_sources) : Makefile.am $(top_srcdir)/data/freedesktop-dbus-interfaces.xml
 	gdbus-codegen									\
 		--interface-prefix org.freedesktop.					\
-		--c-namespace NautilusFreedesktop					\
+		--c-namespace NemoFreedesktop					\
 		--c-generate-object-manager						\
-		--generate-c-code nautilus-freedesktop-generated			\
+		--generate-c-code nemo-freedesktop-generated			\
 		$(top_srcdir)/data/freedesktop-dbus-interfaces.xml			\
 		$(NULL)
 
 UI_FILES = \
-	nautilus-bookmarks-window.ui		\
-	nautilus-file-management-properties.ui	\
-	nautilus-icon-view-ui.xml		\
-	nautilus-toolbar-ui.xml			\
-	nautilus-directory-view-ui.xml		\
-	nautilus-desktop-icon-view-ui.xml	\
-	nautilus-list-view-ui.xml		\
-	nautilus-shell-ui.xml			\
+	nemo-bookmarks-window.ui		\
+	nemo-file-management-properties.ui	\
+	nemo-icon-view-ui.xml		\
+	nemo-toolbar-ui.xml			\
+	nemo-directory-view-ui.xml		\
+	nemo-desktop-icon-view-ui.xml	\
+	nemo-desktop-window-ui.xml  	\
+	nemo-list-view-ui.xml		\
+	nemo-shell-ui.xml			\
 	$(NULL)
 
-nautilus-resources.c: nautilus.gresource.xml $(UI_FILES)
-	glib-compile-resources --target=$@ --sourcedir=$(srcdir) --generate-source --c-name nautilus $(srcdir)/nautilus.gresource.xml
+nemo-resources.c: nemo.gresource.xml $(UI_FILES)
+	glib-compile-resources --target=$@ --sourcedir=$(srcdir) --generate-source --c-name nemo $(srcdir)/nemo.gresource.xml
 
-nautilus-resources.h: nautilus.gresource.xml
-	glib-compile-resources --target=$@ --sourcedir=$(srcdir) --generate-header --c-name nautilus $(srcdir)/nautilus.gresource.xml
+nemo-resources.h: nemo.gresource.xml
+	glib-compile-resources --target=$@ --sourcedir=$(srcdir) --generate-header --c-name nemo $(srcdir)/nemo.gresource.xml
 
 
 BUILT_SOURCES = \
 	$(dbus_built_sources) \
-	nautilus-resources.c \
-	nautilus-resources.h \
+	nemo-resources.c \
+	nemo-resources.h \
 	$(NULL)
 
-nautilus_SOURCES = \
-	nautilus-actions.h			\
-	nautilus-application.c			\
-	nautilus-application.h			\
-	nautilus-bookmark-list.c		\
-	nautilus-bookmark-list.h		\
-	nautilus-bookmarks-window.c		\
-	nautilus-bookmarks-window.h		\
-	nautilus-connect-server-dialog.c	\
-	nautilus-connect-server-dialog.h	\
-	nautilus-connect-server-dialog-nonmain.c \
-	nautilus-connect-server-operation.c	\
-	nautilus-connect-server-operation.h	\
-	nautilus-desktop-icon-view.c		\
-	nautilus-desktop-icon-view.h		\
-	nautilus-desktop-item-properties.c	\
-	nautilus-desktop-item-properties.h	\
-	nautilus-desktop-window.c		\
-	nautilus-desktop-window.h		\
-	nautilus-error-reporting.c		\
-	nautilus-error-reporting.h		\
-	nautilus-file-management-properties.c	\
-	nautilus-file-management-properties.h	\
-	nautilus-floating-bar.c			\
-	nautilus-floating-bar.h			\
-	nautilus-freedesktop-dbus.c		\
-	nautilus-freedesktop-dbus.h		\
-	nautilus-icon-view.c			\
-	nautilus-icon-view.h			\
-	nautilus-icon-view-container.c		\
-	nautilus-icon-view-container.h		\
-	nautilus-image-properties-page.c	\
-	nautilus-image-properties-page.h	\
-	nautilus-list-model.c			\
-	nautilus-list-model.h			\
-	nautilus-list-view-private.h 		\
-	nautilus-list-view.c			\
-	nautilus-list-view.h 			\
-	nautilus-location-bar.c         	\
-	nautilus-location-bar.h			\
-	nautilus-location-entry.c               \
-	nautilus-location-entry.h               \
-	nautilus-main.c 			\
-	nautilus-mime-actions.c 		\
-	nautilus-mime-actions.h 		\
-	nautilus-navigation-action.c		\
-	nautilus-navigation-action.h		\
-	nautilus-navigation-state.c		\
-	nautilus-navigation-state.h		\
-	nautilus-notebook.c			\
-	nautilus-notebook.h			\
-	nautilus-pathbar.c			\
-	nautilus-pathbar.h			\
-	nautilus-places-sidebar.c		\
-	nautilus-places-sidebar.h		\
-	nautilus-previewer.c			\
-	nautilus-previewer.h			\
-	nautilus-progress-info-widget.c		\
-	nautilus-progress-info-widget.h		\
-	nautilus-progress-ui-handler.c		\
-	nautilus-progress-ui-handler.h		\
-	nautilus-properties-window.c		\
-	nautilus-properties-window.h		\
-	nautilus-query-editor.c			\
-	nautilus-query-editor.h			\
-	nautilus-search-bar.c			\
-	nautilus-search-bar.h			\
-	nautilus-self-check-functions.c 	\
-	nautilus-self-check-functions.h 	\
-	nautilus-toolbar.c			\
-	nautilus-toolbar.h			\
-	nautilus-tree-sidebar.c			\
-	nautilus-tree-sidebar.h			\
-	nautilus-tree-sidebar-model.c		\
-	nautilus-tree-sidebar-model.h		\
-	nautilus-trash-bar.c			\
-	nautilus-trash-bar.h			\
-	nautilus-view.c				\
-	nautilus-view.h				\
-	nautilus-view-dnd.c			\
-	nautilus-view-dnd.h			\
-	nautilus-view-factory.c 		\
-	nautilus-view-factory.h 		\
-	nautilus-window-bookmarks.c		\
-	nautilus-window-bookmarks.h		\
-	nautilus-window-manage-views.c		\
-	nautilus-window-manage-views.h		\
-	nautilus-window-menus.c         	\
-	nautilus-window-pane.c	\
-	nautilus-window-pane.h	\
-	nautilus-window-private.h		\
-	nautilus-window-slot.c			\
-	nautilus-window-slot.h			\
-	nautilus-window-slot-dnd.c		\
-	nautilus-window-slot-dnd.h		\
-	nautilus-window.c			\
-	nautilus-window.h			\
-	nautilus-window-types.h			\
-	nautilus-x-content-bar.c		\
-	nautilus-x-content-bar.h		\
+nemo_SOURCES = \
+	nemo-actions.h			\
+	nemo-application.c			\
+	nemo-application.h			\
+	nemo-bookmark-list.c		\
+	nemo-bookmark-list.h		\
+	nemo-bookmarks-window.c		\
+	nemo-bookmarks-window.h		\
+	nemo-connect-server-dialog.c	\
+	nemo-connect-server-dialog.h	\
+	nemo-connect-server-dialog-nonmain.c \
+	nemo-connect-server-operation.c	\
+	nemo-connect-server-operation.h	\
+	nemo-desktop-icon-view.c		\
+	nemo-desktop-icon-view.h		\
+	nemo-desktop-item-properties.c	\
+	nemo-desktop-item-properties.h	\
+	nemo-desktop-window.c		\
+	nemo-desktop-window.h		\
+	nemo-error-reporting.c		\
+	nemo-error-reporting.h		\
+	nemo-file-management-properties.c	\
+	nemo-file-management-properties.h	\
+	nemo-floating-bar.c			\
+	nemo-floating-bar.h			\
+	nemo-freedesktop-dbus.c		\
+	nemo-freedesktop-dbus.h		\
+	nemo-icon-view.c			\
+	nemo-icon-view.h			\
+	nemo-icon-view-container.c		\
+	nemo-icon-view-container.h		\
+	nemo-image-properties-page.c	\
+	nemo-image-properties-page.h	\
+	nemo-list-model.c			\
+	nemo-list-model.h			\
+	nemo-list-view-private.h 		\
+	nemo-list-view.c			\
+	nemo-list-view.h 			\
+	nemo-location-bar.c         	\
+	nemo-location-bar.h			\
+	nemo-location-entry.c               \
+	nemo-location-entry.h               \
+	nemo-main.c 			\
+	nemo-mime-actions.c 		\
+	nemo-mime-actions.h 		\
+	nemo-navigation-action.c		\
+	nemo-navigation-action.h		\
+	nemo-navigation-state.c		\
+	nemo-navigation-state.h		\
+	nemo-notebook.c			\
+	nemo-notebook.h			\
+	nemo-pathbar.c			\
+	nemo-pathbar.h			\
+	nemo-places-sidebar.c		\
+	nemo-places-sidebar.h		\
+	nemo-previewer.c			\
+	nemo-previewer.h			\
+	nemo-progress-info-widget.c		\
+	nemo-progress-info-widget.h		\
+	nemo-progress-ui-handler.c		\
+	nemo-progress-ui-handler.h		\
+	nemo-properties-window.c		\
+	nemo-properties-window.h		\
+	nemo-query-editor.c			\
+	nemo-query-editor.h			\
+	nemo-search-bar.c			\
+	nemo-search-bar.h			\
+	nemo-self-check-functions.c 	\
+	nemo-self-check-functions.h 	\
+	nemo-toolbar.c			\
+	nemo-toolbar.h			\
+	nemo-tree-sidebar.c			\
+	nemo-tree-sidebar.h			\
+	nemo-tree-sidebar-model.c		\
+	nemo-tree-sidebar-model.h		\
+	nemo-trash-bar.c			\
+	nemo-trash-bar.h			\
+	nemo-view.c				\
+	nemo-view.h				\
+	nemo-view-dnd.c			\
+	nemo-view-dnd.h			\
+	nemo-view-factory.c 		\
+	nemo-view-factory.h 		\
+	nemo-window-bookmarks.c		\
+	nemo-window-bookmarks.h		\
+	nemo-window-manage-views.c		\
+	nemo-window-manage-views.h		\
+	nemo-window-menus.c         	\
+	nemo-window-pane.c	\
+	nemo-window-pane.h	\
+	nemo-window-private.h		\
+	nemo-window-slot.c			\
+	nemo-window-slot.h			\
+	nemo-window-slot-dnd.c		\
+	nemo-window-slot-dnd.h		\
+	nemo-window.c			\
+	nemo-window.h			\
+	nemo-window-types.h			\
+	nemo-x-content-bar.c		\
+	nemo-x-content-bar.h		\
+	unity-quicklist-handler.c		\
+	unity-quicklist-handler.h		\
+	unity-bookmarks-handler.c		\
+	unity-bookmarks-handler.h		\
 	$(NULL)
 
-nodist_nautilus_SOURCES = \
+nodist_nemo_SOURCES = \
 	$(BUILT_SOURCES) \
 	$(NULL)
 
 EMPTY_VIEW_SOURCES = \
-	nautilus-empty-view.c 			\
-	nautilus-empty-view.h
+	nemo-empty-view.c 			\
+	nemo-empty-view.h
 
 if ENABLE_EMPTY_VIEW
-nautilus_SOURCES += $(EMPTY_VIEW_SOURCES)
+nemo_SOURCES += $(EMPTY_VIEW_SOURCES)
 endif
 
-nautilus_autorun_software_SOURCES= 			\
-	nautilus-autorun-software.c			\
+nemo_autorun_software_SOURCES= 			\
+	nemo-autorun-software.c			\
 	$(NULL)
 
-nautilus_connect_server_SOURCES= \
-	nautilus-bookmark-list.c		\
-	nautilus-bookmark-list.h		\
-	nautilus-connect-server-dialog.c	\
-	nautilus-connect-server-dialog.h	\
-	nautilus-connect-server-dialog-main.c	\
-	nautilus-connect-server-operation.c     \
-	nautilus-connect-server-operation.h     \
+nemo_connect_server_SOURCES= \
+	nemo-bookmark-list.c		\
+	nemo-bookmark-list.h		\
+	nemo-connect-server-dialog.c	\
+	nemo-connect-server-dialog.h	\
+	nemo-connect-server-dialog-main.c	\
+	nemo-connect-server-operation.c     \
+	nemo-connect-server-operation.h     \
 	$(NULL)
 
-nautilus_convert_metadata_SOURCES= \
-	nautilus-convert-metadata.c	\
+nemo_convert_metadata_SOURCES= \
+	nemo-convert-metadata.c	\
 	$(NULL)
 
-TESTS=check-nautilus
+TESTS=check-nemo
 
 @INTLTOOL_SERVER_RULE@
 
@@ -221,8 +228,8 @@ CLEANFILES = \
 EXTRA_DIST =					\
 	$(server_in_files)			\
 	$(UI_FILES)				\
-	nautilus.gresource.xml			\
-	check-nautilus				\
+	nemo.gresource.xml			\
+	check-nemo				\
 	$(NULL)
 
 dist-hook:

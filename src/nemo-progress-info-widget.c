@@ -1,6 +1,6 @@
 /* -*- Mode: C; indent-tabs-mode: t; c-basic-offset: 8; tab-width: 8 -*- */
 /*
- * nautilus-progress-info-widget.h: file operation progress user interface.
+ * nemo-progress-info-widget.h: file operation progress user interface.
  *
  * Copyright (C) 2007, 2011 Red Hat, Inc.
  *
@@ -26,10 +26,10 @@
 
 #include <config.h>
 
-#include "nautilus-progress-info-widget.h"
+#include "nemo-progress-info-widget.h"
 
-struct _NautilusProgressInfoWidgetPriv {
-	NautilusProgressInfo *info;
+struct _NemoProgressInfoWidgetPriv {
+	NemoProgressInfo *info;
 
 	GtkWidget *status; /* GtkLabel */
 	GtkWidget *details; /* GtkLabel */
@@ -43,26 +43,26 @@ enum {
 
 static GParamSpec *properties[NUM_PROPERTIES] = { NULL };
 
-G_DEFINE_TYPE (NautilusProgressInfoWidget, nautilus_progress_info_widget,
+G_DEFINE_TYPE (NemoProgressInfoWidget, nemo_progress_info_widget,
                GTK_TYPE_BOX);
 
 static void
-info_finished (NautilusProgressInfoWidget *self)
+info_finished (NemoProgressInfoWidget *self)
 {
 	gtk_widget_destroy (GTK_WIDGET (self));
 }
 
 static void
-update_data (NautilusProgressInfoWidget *self)
+update_data (NemoProgressInfoWidget *self)
 {
 	char *status, *details;
 	char *markup;
 
-	status = nautilus_progress_info_get_status (self->priv->info);
+	status = nemo_progress_info_get_status (self->priv->info);
 	gtk_label_set_text (GTK_LABEL (self->priv->status), status);
 	g_free (status);
 
-	details = nautilus_progress_info_get_details (self->priv->info);
+	details = nemo_progress_info_get_details (self->priv->info);
 	markup = g_markup_printf_escaped ("<span size='small'>%s</span>", details);
 	gtk_label_set_markup (GTK_LABEL (self->priv->details), markup);
 	g_free (details);
@@ -70,11 +70,11 @@ update_data (NautilusProgressInfoWidget *self)
 }
 
 static void
-update_progress (NautilusProgressInfoWidget *self)
+update_progress (NemoProgressInfoWidget *self)
 {
 	double progress;
 
-	progress = nautilus_progress_info_get_progress (self->priv->info);
+	progress = nemo_progress_info_get_progress (self->priv->info);
 	if (progress < 0) {
 		gtk_progress_bar_pulse (GTK_PROGRESS_BAR (self->priv->progress_bar));
 	} else {
@@ -84,19 +84,19 @@ update_progress (NautilusProgressInfoWidget *self)
 
 static void
 cancel_clicked (GtkWidget *button,
-		NautilusProgressInfoWidget *self)
+		NemoProgressInfoWidget *self)
 {
-	nautilus_progress_info_cancel (self->priv->info);
+	nemo_progress_info_cancel (self->priv->info);
 	gtk_widget_set_sensitive (button, FALSE);
 }
 
 static void
-nautilus_progress_info_widget_constructed (GObject *obj)
+nemo_progress_info_widget_constructed (GObject *obj)
 {
 	GtkWidget *label, *progress_bar, *hbox, *box, *button, *image;
-	NautilusProgressInfoWidget *self = NAUTILUS_PROGRESS_INFO_WIDGET (obj);
+	NemoProgressInfoWidget *self = NEMO_PROGRESS_INFO_WIDGET (obj);
 
-	G_OBJECT_CLASS (nautilus_progress_info_widget_parent_class)->constructed (obj);
+	G_OBJECT_CLASS (nemo_progress_info_widget_parent_class)->constructed (obj);
 
 	label = gtk_label_new ("status");
 	gtk_widget_set_size_request (label, 500, -1);
@@ -166,22 +166,22 @@ nautilus_progress_info_widget_constructed (GObject *obj)
 }
 
 static void
-nautilus_progress_info_widget_dispose (GObject *obj)
+nemo_progress_info_widget_dispose (GObject *obj)
 {
-	NautilusProgressInfoWidget *self = NAUTILUS_PROGRESS_INFO_WIDGET (obj);
+	NemoProgressInfoWidget *self = NEMO_PROGRESS_INFO_WIDGET (obj);
 
 	g_clear_object (&self->priv->info);
 
-	G_OBJECT_CLASS (nautilus_progress_info_widget_parent_class)->dispose (obj);
+	G_OBJECT_CLASS (nemo_progress_info_widget_parent_class)->dispose (obj);
 }
 
 static void
-nautilus_progress_info_widget_set_property (GObject *object,
+nemo_progress_info_widget_set_property (GObject *object,
 					    guint property_id,
 					    const GValue *value,
 					    GParamSpec *pspec)
 {
-	NautilusProgressInfoWidget *self = NAUTILUS_PROGRESS_INFO_WIDGET (object);
+	NemoProgressInfoWidget *self = NEMO_PROGRESS_INFO_WIDGET (object);
 
 	switch (property_id) {
 	case PROP_INFO:
@@ -194,41 +194,41 @@ nautilus_progress_info_widget_set_property (GObject *object,
 }
 
 static void
-nautilus_progress_info_widget_init (NautilusProgressInfoWidget *self)
+nemo_progress_info_widget_init (NemoProgressInfoWidget *self)
 {
-	self->priv = G_TYPE_INSTANCE_GET_PRIVATE (self, NAUTILUS_TYPE_PROGRESS_INFO_WIDGET,
-						  NautilusProgressInfoWidgetPriv);
+	self->priv = G_TYPE_INSTANCE_GET_PRIVATE (self, NEMO_TYPE_PROGRESS_INFO_WIDGET,
+						  NemoProgressInfoWidgetPriv);
 
 	
 }
 
 static void
-nautilus_progress_info_widget_class_init (NautilusProgressInfoWidgetClass *klass)
+nemo_progress_info_widget_class_init (NemoProgressInfoWidgetClass *klass)
 {
 	GObjectClass *oclass;
 
 	oclass = G_OBJECT_CLASS (klass);
-	oclass->set_property = nautilus_progress_info_widget_set_property;
-	oclass->constructed = nautilus_progress_info_widget_constructed;
-	oclass->dispose = nautilus_progress_info_widget_dispose;
+	oclass->set_property = nemo_progress_info_widget_set_property;
+	oclass->constructed = nemo_progress_info_widget_constructed;
+	oclass->dispose = nemo_progress_info_widget_dispose;
 
 	properties[PROP_INFO] =
 		g_param_spec_object ("info",
-				     "NautilusProgressInfo",
-				     "The NautilusProgressInfo associated with this widget",
-				     NAUTILUS_TYPE_PROGRESS_INFO,
+				     "NemoProgressInfo",
+				     "The NemoProgressInfo associated with this widget",
+				     NEMO_TYPE_PROGRESS_INFO,
 				     G_PARAM_WRITABLE | G_PARAM_CONSTRUCT_ONLY |
 				     G_PARAM_STATIC_STRINGS);
 
 	g_object_class_install_properties (oclass, NUM_PROPERTIES, properties);
 
-	g_type_class_add_private (klass, sizeof (NautilusProgressInfoWidgetPriv));
+	g_type_class_add_private (klass, sizeof (NemoProgressInfoWidgetPriv));
 }
 
 GtkWidget *
-nautilus_progress_info_widget_new (NautilusProgressInfo *info)
+nemo_progress_info_widget_new (NemoProgressInfo *info)
 {
-	return g_object_new (NAUTILUS_TYPE_PROGRESS_INFO_WIDGET,
+	return g_object_new (NEMO_TYPE_PROGRESS_INFO_WIDGET,
 			     "info", info,
 			     "orientation", GTK_ORIENTATION_VERTICAL,
 			     "homogeneous", FALSE,

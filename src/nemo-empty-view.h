@@ -1,6 +1,6 @@
 /* -*- Mode: C; indent-tabs-mode: t; c-basic-offset: 8; tab-width: 8 -*- */
 
-/* nautilus-empty-view.h - interface for empty view of directory.
+/* nemo-empty-view.h - interface for empty view of directory.
 
    Copyright (C) 2006 Free Software Foundation, Inc.
    
@@ -22,37 +22,37 @@
    Authors: Christian Neumair <chris@gnome-de.org>
 */
 
-#ifndef NAUTILUS_EMPTY_VIEW_H
-#define NAUTILUS_EMPTY_VIEW_H
+#ifndef NEMO_EMPTY_VIEW_H
+#define NEMO_EMPTY_VIEW_H
 
-#include "nautilus-view.h"
+#include "nemo-view.h"
 
-#define NAUTILUS_TYPE_EMPTY_VIEW nautilus_empty_view_get_type()
-#define NAUTILUS_EMPTY_VIEW(obj) \
-  (G_TYPE_CHECK_INSTANCE_CAST ((obj), NAUTILUS_TYPE_EMPTY_VIEW, NautilusEmptyView))
-#define NAUTILUS_EMPTY_VIEW_CLASS(klass) \
-  (G_TYPE_CHECK_CLASS_CAST ((klass), NAUTILUS_TYPE_EMPTY_VIEW, NautilusEmptyViewClass))
-#define NAUTILUS_IS_EMPTY_VIEW(obj) \
-  (G_TYPE_CHECK_INSTANCE_TYPE ((obj), NAUTILUS_TYPE_EMPTY_VIEW))
-#define NAUTILUS_IS_EMPTY_VIEW_CLASS(klass) \
-  (G_TYPE_CHECK_CLASS_TYPE ((klass), NAUTILUS_TYPE_EMPTY_VIEW))
-#define NAUTILUS_EMPTY_VIEW_GET_CLASS(obj) \
-  (G_TYPE_INSTANCE_GET_CLASS ((obj), NAUTILUS_TYPE_EMPTY_VIEW, NautilusEmptyViewClass))
+#define NEMO_TYPE_EMPTY_VIEW nemo_empty_view_get_type()
+#define NEMO_EMPTY_VIEW(obj) \
+  (G_TYPE_CHECK_INSTANCE_CAST ((obj), NEMO_TYPE_EMPTY_VIEW, NemoEmptyView))
+#define NEMO_EMPTY_VIEW_CLASS(klass) \
+  (G_TYPE_CHECK_CLASS_CAST ((klass), NEMO_TYPE_EMPTY_VIEW, NemoEmptyViewClass))
+#define NEMO_IS_EMPTY_VIEW(obj) \
+  (G_TYPE_CHECK_INSTANCE_TYPE ((obj), NEMO_TYPE_EMPTY_VIEW))
+#define NEMO_IS_EMPTY_VIEW_CLASS(klass) \
+  (G_TYPE_CHECK_CLASS_TYPE ((klass), NEMO_TYPE_EMPTY_VIEW))
+#define NEMO_EMPTY_VIEW_GET_CLASS(obj) \
+  (G_TYPE_INSTANCE_GET_CLASS ((obj), NEMO_TYPE_EMPTY_VIEW, NemoEmptyViewClass))
 
-#define NAUTILUS_EMPTY_VIEW_ID "OAFIID:Nautilus_File_Manager_Empty_View"
+#define NEMO_EMPTY_VIEW_ID "OAFIID:Nemo_File_Manager_Empty_View"
 
-typedef struct NautilusEmptyViewDetails NautilusEmptyViewDetails;
-
-typedef struct {
-	NautilusView parent_instance;
-	NautilusEmptyViewDetails *details;
-} NautilusEmptyView;
+typedef struct NemoEmptyViewDetails NemoEmptyViewDetails;
 
 typedef struct {
-	NautilusViewClass parent_class;
-} NautilusEmptyViewClass;
+	NemoView parent_instance;
+	NemoEmptyViewDetails *details;
+} NemoEmptyView;
 
-GType nautilus_empty_view_get_type (void);
-void  nautilus_empty_view_register (void);
+typedef struct {
+	NemoViewClass parent_class;
+} NemoEmptyViewClass;
 
-#endif /* NAUTILUS_EMPTY_VIEW_H */
+GType nemo_empty_view_get_type (void);
+void  nemo_empty_view_register (void);
+
+#endif /* NEMO_EMPTY_VIEW_H */

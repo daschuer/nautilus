@@ -1,12 +1,12 @@
 /*
- * nautilus-freedesktop-dbus: Implementation for the org.freedesktop DBus file-management interfaces
+ * nemo-freedesktop-dbus: Implementation for the org.freedesktop DBus file-management interfaces
  *
- * Nautilus is free software; you can redistribute it and/or
+ * Nemo is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
  * published by the Free Software Foundation; either version 2 of the
  * License, or (at your option) any later version.
  *
- * Nautilus is distributed in the hope that it will be useful,
+ * Nemo is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
  * General Public License for more details.
@@ -21,26 +21,26 @@
 
 #include <config.h>
 
-#include "nautilus-freedesktop-dbus.h"
-#include "nautilus-freedesktop-generated.h"
+#include "nemo-freedesktop-dbus.h"
+#include "nemo-freedesktop-generated.h"
 
-/* We share the same debug domain as nautilus-dbus-manager */
-#define DEBUG_FLAG NAUTILUS_DEBUG_DBUS
-#include <libnautilus-private/nautilus-debug.h>
+/* We share the same debug domain as nemo-dbus-manager */
+#define DEBUG_FLAG NEMO_DEBUG_DBUS
+#include <libnemo-private/nemo-debug.h>
 
-#include "nautilus-properties-window.h"
+#include "nemo-properties-window.h"
 
 #include <gio/gio.h>
 
 
-typedef struct _NautilusFreedesktopDBus NautilusFreedesktopDBus;
-typedef struct _NautilusFreedesktopDBusClass NautilusFreedesktopDBusClass;
+typedef struct _NemoFreedesktopDBus NemoFreedesktopDBus;
+typedef struct _NemoFreedesktopDBusClass NemoFreedesktopDBusClass;
 
-struct _NautilusFreedesktopDBus {
+struct _NemoFreedesktopDBus {
 	GObject parent;
 
 	/* Parent application */
-	NautilusApplication *application;
+	NemoApplication *application;
 
 	/* Id from g_dbus_own_name() */
 	guint owner_id;
@@ -50,10 +50,10 @@ struct _NautilusFreedesktopDBus {
 	GDBusObjectManagerServer *object_manager;
 
 	/* Our DBus implementation skeleton */
-	NautilusFreedesktopFileManager1 *skeleton;
+	NemoFreedesktopNemoFileManager1 *skeleton;
 };
 
-struct _NautilusFreedesktopDBusClass {
+struct _NemoFreedesktopDBusClass {
 	GObjectClass parent_class;
 };
 
@@ -63,19 +63,19 @@ enum {
 
 #define SERVICE_TIMEOUT 5
 
-static GType nautilus_freedesktop_dbus_get_type (void) G_GNUC_CONST;
-G_DEFINE_TYPE (NautilusFreedesktopDBus, nautilus_freedesktop_dbus, G_TYPE_OBJECT);
+static GType nemo_freedesktop_dbus_get_type (void) G_GNUC_CONST;
+G_DEFINE_TYPE (NemoFreedesktopDBus, nemo_freedesktop_dbus, G_TYPE_OBJECT);
 
-static NautilusFreedesktopDBus *singleton = NULL;
+static NemoFreedesktopDBus *singleton = NULL;
 
 static gboolean
-skeleton_handle_show_items_cb (NautilusFreedesktopFileManager1 *object,
+skeleton_handle_show_items_cb (NemoFreedesktopNemoFileManager1 *object,
 			       GDBusMethodInvocation *invocation,
 			       const gchar *const *uris,
 			       const gchar *startup_id,
 			       gpointer data)
 {
-	NautilusFreedesktopDBus *fdb = data;
+	NemoFreedesktopDBus *fdb = data;
 	int i;
 
 	for (i = 0; uris[i] != NULL; i++) {
@@ -86,27 +86,27 @@ skeleton_handle_show_items_cb (NautilusFreedesktopFileManager1 *object,
 		parent = g_file_get_parent (file);
 
 		if (parent != NULL) {
-			nautilus_application_open_location (fdb->application, parent, file, startup_id);
+			nemo_application_open_location (fdb->application, parent, file, startup_id);
 			g_object_unref (parent);
 		} else {
-			nautilus_application_open_location (fdb->application, file, NULL, startup_id);
+			nemo_application_open_location (fdb->application, file, NULL, startup_id);
 		}
 
 		g_object_unref (file);
 	}
 
-	nautilus_freedesktop_file_manager1_complete_show_items (object, invocation);
+	nemo_freedesktop_nemo_file_manager1_complete_show_items (object, invocation);
 	return TRUE;
 }
 
 static gboolean
-skeleton_handle_show_folders_cb (NautilusFreedesktopFileManager1 *object,
+skeleton_handle_show_folders_cb (NemoFreedesktopNemoFileManager1 *object,
 				 GDBusMethodInvocation *invocation,
 				 const gchar *const *uris,
 				 const gchar *startup_id,
 				 gpointer data)
 {
-	NautilusFreedesktopDBus *fdb = data;
+	NemoFreedesktopDBus *fdb = data;
 	int i;
 
 	for (i = 0; uris[i] != NULL; i++) {
@@ -114,17 +114,17 @@ skeleton_handle_show_folders_cb (NautilusFreedesktopFileManager1 *object,
 
 		file = g_file_new_for_uri (uris[i]);
 
-		nautilus_application_open_location (fdb->application, file, NULL, startup_id);
+		nemo_application_open_location (fdb->application, file, NULL, startup_id);
 
 		g_object_unref (file);
 	}
 
-	nautilus_freedesktop_file_manager1_complete_show_folders (object, invocation);
+	nemo_freedesktop_nemo_file_manager1_complete_show_folders (object, invocation);
 	return TRUE;
 }
 
 static gboolean
-skeleton_handle_show_item_properties_cb (NautilusFreedesktopFileManager1 *object,
+skeleton_handle_show_item_properties_cb (NemoFreedesktopNemoFileManager1 *object,
 					 GDBusMethodInvocation *invocation,
 					 const gchar *const *uris,
 					 const gchar *startup_id,
@@ -136,23 +136,23 @@ skeleton_handle_show_item_properties_cb (NautilusFreedesktopFileManager1 *object
 	files = NULL;
 
 	for (i = 0; uris[i] != NULL; i++) {
-		files = g_list_prepend (files, nautilus_file_get_by_uri (uris[i]));
+		files = g_list_prepend (files, nemo_file_get_by_uri (uris[i]));
         }
 
 	files = g_list_reverse (files);
 
-	nautilus_properties_window_present (files, NULL, startup_id);
+	nemo_properties_window_present (files, NULL, startup_id);
 
-	nautilus_file_list_free (files);
+	nemo_file_list_free (files);
 
-	nautilus_freedesktop_file_manager1_complete_show_item_properties (object, invocation);
+	nemo_freedesktop_nemo_file_manager1_complete_show_item_properties (object, invocation);
 	return TRUE;
 }
 
 static gboolean
 service_timeout_cb (gpointer data)
 {
-	NautilusFreedesktopDBus *fdb = data;
+	NemoFreedesktopDBus *fdb = data;
 
 	DEBUG ("Reached the DBus service timeout");
 
@@ -169,14 +169,14 @@ bus_acquired_cb (GDBusConnection *conn,
 		 const gchar     *name,
 		 gpointer         user_data)
 {
-	NautilusFreedesktopDBus *fdb = user_data;
+	NemoFreedesktopDBus *fdb = user_data;
 
 	DEBUG ("Bus acquired at %s", name);
 
 	fdb->connection = g_object_ref (conn);
-	fdb->object_manager = g_dbus_object_manager_server_new ("/org/freedesktop/FileManager1");
+	fdb->object_manager = g_dbus_object_manager_server_new ("/org/freedesktop/NemoFileManager1");
 
-	fdb->skeleton = nautilus_freedesktop_file_manager1_skeleton_new ();
+	fdb->skeleton = nemo_freedesktop_nemo_file_manager1_skeleton_new ();
 
 	g_signal_connect (fdb->skeleton, "handle-show-items",
 			  G_CALLBACK (skeleton_handle_show_items_cb), fdb);
@@ -185,7 +185,7 @@ bus_acquired_cb (GDBusConnection *conn,
 	g_signal_connect (fdb->skeleton, "handle-show-item-properties",
 			  G_CALLBACK (skeleton_handle_show_item_properties_cb), fdb);
 
-	g_dbus_interface_skeleton_export (G_DBUS_INTERFACE_SKELETON (fdb->skeleton), fdb->connection, "/org/freedesktop/FileManager1", NULL);
+	g_dbus_interface_skeleton_export (G_DBUS_INTERFACE_SKELETON (fdb->skeleton), fdb->connection, "/org/freedesktop/NemoFileManager1", NULL);
 
 	g_dbus_object_manager_server_set_connection (fdb->object_manager, fdb->connection);
 
@@ -209,9 +209,9 @@ name_lost_cb (GDBusConnection *connection,
 }
 
 static void
-nautilus_freedesktop_dbus_dispose (GObject *object)
+nemo_freedesktop_dbus_dispose (GObject *object)
 {
-	NautilusFreedesktopDBus *fdb = (NautilusFreedesktopDBus *) object;
+	NemoFreedesktopDBus *fdb = (NemoFreedesktopDBus *) object;
 
 	if (fdb->owner_id != 0) {
 		g_bus_unown_name (fdb->owner_id);
@@ -228,20 +228,20 @@ nautilus_freedesktop_dbus_dispose (GObject *object)
 	g_clear_object (&fdb->connection);
 	fdb->application = NULL;
 
-	G_OBJECT_CLASS (nautilus_freedesktop_dbus_parent_class)->dispose (object);
+	G_OBJECT_CLASS (nemo_freedesktop_dbus_parent_class)->dispose (object);
 }
 
 static void
-nautilus_freedesktop_dbus_constructed (GObject *object)
+nemo_freedesktop_dbus_constructed (GObject *object)
 {
-	NautilusFreedesktopDBus *fdb = (NautilusFreedesktopDBus *) object;
+	NemoFreedesktopDBus *fdb = (NemoFreedesktopDBus *) object;
 
-	G_OBJECT_CLASS (nautilus_freedesktop_dbus_parent_class)->constructed (object);
+	G_OBJECT_CLASS (nemo_freedesktop_dbus_parent_class)->constructed (object);
 
 	g_application_hold (G_APPLICATION (fdb->application));
 
 	fdb->owner_id = g_bus_own_name (G_BUS_TYPE_SESSION,
-					"org.freedesktop.FileManager1",
+					"org.freedesktop.NemoFileManager1",
 					G_BUS_NAME_OWNER_FLAGS_NONE,
 					bus_acquired_cb,
 					name_acquired_cb,
@@ -251,12 +251,12 @@ nautilus_freedesktop_dbus_constructed (GObject *object)
 }
 
 static void
-nautilus_freedesktop_dbus_set_property (GObject *object,
+nemo_freedesktop_dbus_set_property (GObject *object,
 					guint property_id,
 					const GValue *value,
 					GParamSpec *pspec)
 {
-	NautilusFreedesktopDBus *fdb = (NautilusFreedesktopDBus *) object;
+	NemoFreedesktopDBus *fdb = (NemoFreedesktopDBus *) object;
 
 	switch (property_id) {
 	case PROP_APPLICATION:
@@ -271,46 +271,46 @@ nautilus_freedesktop_dbus_set_property (GObject *object,
 
 
 static void
-nautilus_freedesktop_dbus_class_init (NautilusFreedesktopDBusClass *klass)
+nemo_freedesktop_dbus_class_init (NemoFreedesktopDBusClass *klass)
 {
 	GObjectClass *object_class = G_OBJECT_CLASS (klass);
 
-	object_class->dispose		= nautilus_freedesktop_dbus_dispose;
-	object_class->constructed	= nautilus_freedesktop_dbus_constructed;
-	object_class->set_property	= nautilus_freedesktop_dbus_set_property;
+	object_class->dispose		= nemo_freedesktop_dbus_dispose;
+	object_class->constructed	= nemo_freedesktop_dbus_constructed;
+	object_class->set_property	= nemo_freedesktop_dbus_set_property;
 
 	g_object_class_install_property (object_class,
 					 PROP_APPLICATION,
 					 g_param_spec_object ("application",
-							      "NautilusApplication instance",
-							      "The owning NautilusApplication instance",
-							      NAUTILUS_TYPE_APPLICATION,
+							      "NemoApplication instance",
+							      "The owning NemoApplication instance",
+							      NEMO_TYPE_APPLICATION,
 							      G_PARAM_WRITABLE | G_PARAM_CONSTRUCT_ONLY | G_PARAM_STATIC_STRINGS));
 
 }
 
 static void
-nautilus_freedesktop_dbus_init (NautilusFreedesktopDBus *fdb)
+nemo_freedesktop_dbus_init (NemoFreedesktopDBus *fdb)
 {
 	/* nothing */
 }
 
-/* Tries to own the org.freedesktop.FileManager1 service name */
+/* Tries to own the org.freedesktop.NemoFileManager1 service name */
 void
-nautilus_freedesktop_dbus_start (NautilusApplication *app)
+nemo_freedesktop_dbus_start (NemoApplication *app)
 {	
 	if (singleton != NULL) {
 		return;
 	}
 
-	singleton = g_object_new (nautilus_freedesktop_dbus_get_type (),
+	singleton = g_object_new (nemo_freedesktop_dbus_get_type (),
 				  "application", app,
 				  NULL);
 }
 
-/* Releases the org.freedesktop.FileManager1 service name */
+/* Releases the org.freedesktop.NemoFileManager1 service name */
 void
-nautilus_freedesktop_dbus_stop (void)
+nemo_freedesktop_dbus_stop (void)
 {
 	g_clear_object (&singleton);
 }

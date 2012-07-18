@@ -28,13 +28,13 @@
 
 #include <config.h>
 
-#include "nautilus-tree-sidebar-model.h"
+#include "nemo-tree-sidebar-model.h"
 
 #include <eel/eel-graphic-effects.h>
 
-#include <libnautilus-private/nautilus-directory.h>
-#include <libnautilus-private/nautilus-file-attributes.h>
-#include <libnautilus-private/nautilus-file.h>
+#include <libnemo-private/nemo-directory.h>
+#include <libnemo-private/nemo-file-attributes.h>
+#include <libnemo-private/nemo-file.h>
 
 #include <glib/gi18n.h>
 #include <gtk/gtk.h>
@@ -47,7 +47,7 @@ enum {
 
 static guint tree_model_signals[LAST_SIGNAL] = { 0 };
 
-typedef gboolean (* FilePredicate) (NautilusFile *);
+typedef gboolean (* FilePredicate) (NemoFile *);
 
 /* The user_data of the GtkTreeIter is the TreeNode pointer.
  * It's NULL for the dummy node. If it's NULL, then user_data2
@@ -61,7 +61,7 @@ struct TreeNode {
 	/* part of this node for the file itself */
 	int ref_count;
 
-	NautilusFile *file;
+	NemoFile *file;
 	char *display_name;
 	GIcon *icon;
 	GMount *mount;
@@ -78,7 +78,7 @@ struct TreeNode {
 	int dummy_child_ref_count;
 	int all_children_ref_count;
 	
-	NautilusDirectory *directory;
+	NemoDirectory *directory;
 	guint done_loading_id;
 	guint files_added_id;
 	guint files_changed_id;
@@ -114,7 +114,7 @@ struct FMTreeModelRoot {
 };
 
 typedef struct {
-	NautilusDirectory *directory;
+	NemoDirectory *directory;
 	FMTreeModel *model;
 } DoneLoadingParameters;
 
@@ -157,12 +157,12 @@ tree_model_root_new (FMTreeModel *model)
 }
 
 static TreeNode *
-tree_node_new (NautilusFile *file, FMTreeModelRoot *root)
+tree_node_new (NemoFile *file, FMTreeModelRoot *root)
 {
 	TreeNode *node;
 
 	node = g_new0 (TreeNode, 1);
-	node->file = nautilus_file_ref (file);
+	node->file = nemo_file_ref (file);
 	node->root = root;
 	return node;
 }
@@ -215,7 +215,7 @@ tree_node_destroy (FMTreeModel *model, TreeNode *node)
 	g_assert (node->done_loading_id == 0);
 	g_assert (node->files_added_id == 0);
 	g_assert (node->files_changed_id == 0);
-	nautilus_directory_unref (node->directory);
+	nemo_directory_unref (node->directory);
 
 	g_free (node);
 }
@@ -247,14 +247,14 @@ tree_node_parent (TreeNode *node, TreeNode *parent)
 static GdkPixbuf *
 get_menu_icon (GIcon *icon)
 {
-	NautilusIconInfo *info;
+	NemoIconInfo *info;
 	GdkPixbuf *pixbuf;
 	int size;
 
-	size = nautilus_get_icon_size_for_stock_size (GTK_ICON_SIZE_MENU);
+	size = nemo_get_icon_size_for_stock_size (GTK_ICON_SIZE_MENU);
 	
-	info = nautilus_icon_info_lookup (icon, size);
-	pixbuf = nautilus_icon_info_get_pixbuf_nodefault_at_size (info, size);
+	info = nemo_icon_info_lookup (icon, size);
+	pixbuf = nemo_icon_info_get_pixbuf_nodefault_at_size (info, size);
 	g_object_unref (info);
 	
 	return pixbuf;
@@ -262,10 +262,10 @@ get_menu_icon (GIcon *icon)
 
 static GdkPixbuf *
 get_menu_icon_for_file (TreeNode *node,
-                        NautilusFile *file,
-			NautilusFileIconFlags flags)
+                        NemoFile *file,
+			NemoFileIconFlags flags)
 {
-	NautilusIconInfo *info;
+	NemoIconInfo *info;
 	GIcon *gicon, *emblem_icon, *emblemed_icon;
 	GEmblem *emblem;
 	GdkPixbuf *pixbuf, *retval;
@@ -276,28 +276,28 @@ get_menu_icon_for_file (TreeNode *node,
 	char *emblems_to_ignore[3];
 	int i;
 
-	size = nautilus_get_icon_size_for_stock_size (GTK_ICON_SIZE_MENU);
-	gicon = G_ICON (nautilus_file_get_icon_pixbuf (file, size, TRUE, flags));
+	size = nemo_get_icon_size_for_stock_size (GTK_ICON_SIZE_MENU);
+	gicon = G_ICON (nemo_file_get_icon_pixbuf (file, size, TRUE, flags));
 
 	i = 0;
-	emblems_to_ignore[i++] = NAUTILUS_FILE_EMBLEM_NAME_TRASH;
+	emblems_to_ignore[i++] = NEMO_FILE_EMBLEM_NAME_TRASH;
 
 	if (node->parent && node->parent->file) {
-		if (!nautilus_file_can_write (node->parent->file)) {
-			emblems_to_ignore[i++] = NAUTILUS_FILE_EMBLEM_NAME_CANT_WRITE;
+		if (!nemo_file_can_write (node->parent->file)) {
+			emblems_to_ignore[i++] = NEMO_FILE_EMBLEM_NAME_CANT_WRITE;
 		}
 	}
 	
 	emblems_to_ignore[i++] = NULL;
 
 	emblem = NULL;
-	emblem_icons = nautilus_file_get_emblem_icons (node->file,
+	emblem_icons = nemo_file_get_emblem_icons (node->file,
 						       emblems_to_ignore);
 
 	/* pick only the first emblem we can render for the tree view */
 	for (l = emblem_icons; l != NULL; l = l->next) {
 		emblem_icon = l->data;
-		if (nautilus_icon_theme_can_render (G_THEMED_ICON (emblem_icon))) {
+		if (nemo_icon_theme_can_render (G_THEMED_ICON (emblem_icon))) {
 			emblem = g_emblem_new (emblem_icon);
 			emblemed_icon = g_emblemed_icon_new (gicon, emblem);
 
@@ -311,14 +311,14 @@ get_menu_icon_for_file (TreeNode *node,
 
 	g_list_free_full (emblem_icons, g_object_unref);
 
-	info = nautilus_icon_info_lookup (gicon, size);
-	retval = nautilus_icon_info_get_pixbuf_nodefault_at_size (info, size);
+	info = nemo_icon_info_lookup (gicon, size);
+	retval = nemo_icon_info_get_pixbuf_nodefault_at_size (info, size);
 	model = node->root->model;
 
 	g_object_unref (gicon);
 
 	highlight = (g_list_find_custom (model->details->highlighted_files,
-	                                 file, (GCompareFunc) nautilus_file_compare_location) != NULL);
+	                                 file, (GCompareFunc) nemo_file_compare_location) != NULL);
 
 	if (highlight) {
 		pixbuf = eel_create_spotlight_pixbuf (retval);
@@ -336,7 +336,7 @@ get_menu_icon_for_file (TreeNode *node,
 
 static GdkPixbuf *
 tree_node_get_pixbuf (TreeNode *node,
-		      NautilusFileIconFlags flags)
+		      NemoFileIconFlags flags)
 {
 	if (node->parent == NULL) {
 		return get_menu_icon (node->icon);
@@ -347,7 +347,7 @@ tree_node_get_pixbuf (TreeNode *node,
 static gboolean
 tree_node_update_pixbuf (TreeNode *node,
 			 GdkPixbuf **pixbuf_storage,
-			 NautilusFileIconFlags flags)
+			 NemoFileIconFlags flags)
 {
 	GdkPixbuf *pixbuf;
 
@@ -373,7 +373,7 @@ tree_node_update_closed_pixbuf (TreeNode *node)
 static gboolean
 tree_node_update_open_pixbuf (TreeNode *node)
 {
-	return tree_node_update_pixbuf (node, &node->open_pixbuf, NAUTILUS_FILE_ICON_FLAGS_FOR_OPEN_FOLDER);
+	return tree_node_update_pixbuf (node, &node->open_pixbuf, NEMO_FILE_ICON_FLAGS_FOR_OPEN_FOLDER);
 }
 
 static gboolean
@@ -388,7 +388,7 @@ tree_node_update_display_name (TreeNode *node)
 	if (node->parent == NULL) {
 		return FALSE;
 	} 
-	display_name = nautilus_file_get_display_name (node->file);
+	display_name = nemo_file_get_display_name (node->file);
 	if (strcmp (display_name, node->display_name) == 0) {
 		g_free (display_name);
 		return FALSE;
@@ -411,7 +411,7 @@ static GdkPixbuf *
 tree_node_get_open_pixbuf (TreeNode *node)
 {
 	if (node->open_pixbuf == NULL) {
-		node->open_pixbuf = tree_node_get_pixbuf (node, NAUTILUS_FILE_ICON_FLAGS_FOR_OPEN_FOLDER);
+		node->open_pixbuf = tree_node_get_pixbuf (node, NEMO_FILE_ICON_FLAGS_FOR_OPEN_FOLDER);
 	}
 	return node->open_pixbuf;
 }
@@ -420,7 +420,7 @@ static const char *
 tree_node_get_display_name (TreeNode *node)
 {
 	if (node->display_name == NULL) {
-		node->display_name = nautilus_file_get_display_name (node->file);
+		node->display_name = nemo_file_get_display_name (node->file);
 	}
 	return node->display_name;
 }
@@ -494,25 +494,25 @@ make_iter_for_dummy_row (TreeNode *parent, GtkTreeIter *iter, int stamp)
 }
 
 static TreeNode *
-get_node_from_file (FMTreeModelRoot *root, NautilusFile *file)
+get_node_from_file (FMTreeModelRoot *root, NemoFile *file)
 {
 	return g_hash_table_lookup (root->file_to_node_map, file);
 }
 
 static TreeNode *
-get_parent_node_from_file (FMTreeModelRoot *root, NautilusFile *file)
+get_parent_node_from_file (FMTreeModelRoot *root, NemoFile *file)
 {
-	NautilusFile *parent_file;
+	NemoFile *parent_file;
 	TreeNode *parent_node;
 	
-	parent_file = nautilus_file_get_parent (file);
+	parent_file = nemo_file_get_parent (file);
 	parent_node = get_node_from_file (root, parent_file);
-	nautilus_file_unref (parent_file);
+	nemo_file_unref (parent_file);
 	return parent_node;
 }
 
 static TreeNode *
-create_node_for_file (FMTreeModelRoot *root, NautilusFile *file)
+create_node_for_file (FMTreeModelRoot *root, NemoFile *file)
 {
 	TreeNode *node;
 
@@ -532,11 +532,11 @@ get_node_uri (GtkTreeIter *iter)
 
 	node = iter->user_data;
 	if (node != NULL) {
-		return nautilus_file_get_uri (node->file);
+		return nemo_file_get_uri (node->file);
 	}
 
 	parent = iter->user_data2;
-	parent_uri = nautilus_file_get_uri (parent->file);
+	parent_uri = nemo_file_get_uri (parent->file);
 	node_uri = g_strconcat (parent_uri, " -- DUMMY", NULL);
 	g_free (parent_uri);
 	return node_uri;
@@ -562,7 +562,7 @@ abandon_node_ref_count (FMTreeModel *model, TreeNode *node)
 		if (node->ref_count != 0) {
 			char *uri;
 
-			uri = nautilus_file_get_uri (node->file);
+			uri = nemo_file_get_uri (node->file);
 			g_message ("abandoning %d ref of %s, count is now %d",
 				   node->ref_count, uri, node->parent->all_children_ref_count);
 			g_free (uri);
@@ -580,7 +580,7 @@ abandon_dummy_row_ref_count (FMTreeModel *model, TreeNode *node)
 #ifdef LOG_REF_COUNTS
 		char *uri;
 
-		uri = nautilus_file_get_uri (node->file);
+		uri = nemo_file_get_uri (node->file);
 		g_message ("abandoning %d ref of %s -- DUMMY, count is now %d",
 			   node->dummy_child_ref_count, uri, node->all_children_ref_count);
 		g_free (uri);
@@ -728,7 +728,7 @@ stop_monitoring_directory (FMTreeModel *model, TreeNode *node)
 	node->files_added_id = 0;
 	node->files_changed_id = 0;
 
-	nautilus_directory_file_monitor_remove (node->directory, model);
+	nemo_directory_file_monitor_remove (node->directory, model);
 }
 
 static void
@@ -817,13 +817,13 @@ update_node_without_reporting (FMTreeModel *model, TreeNode *node)
 	changed = FALSE;
 	
 	if (node->directory == NULL &&
-	    (nautilus_file_is_directory (node->file) || node->parent == NULL)) {
-		node->directory = nautilus_directory_get_for_file (node->file);
+	    (nemo_file_is_directory (node->file) || node->parent == NULL)) {
+		node->directory = nemo_directory_get_for_file (node->file);
 	} else if (node->directory != NULL &&
-		   !(nautilus_file_is_directory (node->file) || node->parent == NULL)) {
+		   !(nemo_file_is_directory (node->file) || node->parent == NULL)) {
 		stop_monitoring_directory (model, node);
 		destroy_children (model, node);
-		nautilus_directory_unref (node->directory);
+		nemo_directory_unref (node->directory);
 		node->directory = NULL;
 	}
 
@@ -887,22 +887,22 @@ reparent_node (FMTreeModel *model, TreeNode *node)
 }
 
 static gboolean
-should_show_file (FMTreeModel *model, NautilusFile *file)
+should_show_file (FMTreeModel *model, NemoFile *file)
 {
 	gboolean should;
 	TreeNode *node;
 
-	should = nautilus_file_should_show (file,
+	should = nemo_file_should_show (file,
 					    model->details->show_hidden_files,
 					    TRUE);
 
 	if (should
 	    && model->details->show_only_directories
-	    &&! nautilus_file_is_directory (file)) {
+	    &&! nemo_file_is_directory (file)) {
 		should = FALSE;
 	}
 
-	if (should && nautilus_file_is_gone (file)) {
+	if (should && nemo_file_is_gone (file)) {
 		should = FALSE;
 	}
 
@@ -928,7 +928,7 @@ update_node (FMTreeModel *model, TreeNode *node)
 	}
 
 	if (node->parent != NULL && node->parent->directory != NULL
-	    && !nautilus_directory_contains_file (node->parent->directory, node->file)) {
+	    && !nemo_directory_contains_file (node->parent->directory, node->file)) {
 		reparent_node (model, node);
 		return;
 	}
@@ -963,7 +963,7 @@ update_node (FMTreeModel *model, TreeNode *node)
 
 static void
 process_file_change (FMTreeModelRoot *root,
-		     NautilusFile *file)
+		     NemoFile *file)
 {
 	TreeNode *node, *parent;
 
@@ -986,7 +986,7 @@ process_file_change (FMTreeModelRoot *root,
 }
 
 static void
-files_changed_callback (NautilusDirectory *directory,
+files_changed_callback (NemoDirectory *directory,
 			GList *changed_files,
 			gpointer callback_data)
 {
@@ -996,7 +996,7 @@ files_changed_callback (NautilusDirectory *directory,
 	root = (FMTreeModelRoot *) (callback_data);
 
 	for (node = changed_files; node != NULL; node = node->next) {
-		process_file_change (root, NAUTILUS_FILE (node->data));
+		process_file_change (root, NEMO_FILE (node->data));
 	}
 }
 
@@ -1033,25 +1033,25 @@ set_done_loading (FMTreeModel *model, TreeNode *node, gboolean done_loading)
 }
 
 static void
-done_loading_callback (NautilusDirectory *directory,
+done_loading_callback (NemoDirectory *directory,
 		       FMTreeModelRoot *root)
 {
-	NautilusFile *file;
+	NemoFile *file;
 	TreeNode *node;
 	GtkTreeIter iter;
 
-	file = nautilus_directory_get_corresponding_file (directory);
+	file = nemo_directory_get_corresponding_file (directory);
 	node = get_node_from_file (root, file);
 	if (node == NULL) {
 		/* This can happen for non-existing files as tree roots,
 		 * since the directory <-> file object relation gets
-		 * broken due to nautilus_directory_remove_file()
+		 * broken due to nemo_directory_remove_file()
 		 * getting called when i/o fails.
 		 */
 		return;
 	}
 	set_done_loading (root->model, node, TRUE);
-	nautilus_file_unref (file);
+	nemo_file_unref (file);
 
 	make_iter_for_node (node, &iter, root->model->details->stamp);
 	g_signal_emit (root->model,
@@ -1059,15 +1059,15 @@ done_loading_callback (NautilusDirectory *directory,
 		       &iter);
 }
 
-static NautilusFileAttributes
+static NemoFileAttributes
 get_tree_monitor_attributes (void)
 {
-	NautilusFileAttributes attributes;
+	NemoFileAttributes attributes;
 
 	attributes =
-		NAUTILUS_FILE_ATTRIBUTES_FOR_ICON |
-		NAUTILUS_FILE_ATTRIBUTE_INFO |
-		NAUTILUS_FILE_ATTRIBUTE_LINK_INFO;
+		NEMO_FILE_ATTRIBUTES_FOR_ICON |
+		NEMO_FILE_ATTRIBUTE_INFO |
+		NEMO_FILE_ATTRIBUTE_LINK_INFO;
 	
 	return attributes;
 }
@@ -1075,8 +1075,8 @@ get_tree_monitor_attributes (void)
 static void
 start_monitoring_directory (FMTreeModel *model, TreeNode *node)
 {
-	NautilusDirectory *directory;
-	NautilusFileAttributes attributes;
+	NemoDirectory *directory;
+	NemoFileAttributes attributes;
 
 	if (node->done_loading_id != 0) {
 		return;
@@ -1097,10 +1097,10 @@ start_monitoring_directory (FMTreeModel *model, TreeNode *node)
 		(directory, "files_changed",
 		 G_CALLBACK (files_changed_callback), node->root);
 
-	set_done_loading (model, node, nautilus_directory_are_all_files_seen (directory));
+	set_done_loading (model, node, nemo_directory_are_all_files_seen (directory));
 
 	attributes = get_tree_monitor_attributes ();
-	nautilus_directory_file_monitor_add (directory, model,
+	nemo_directory_file_monitor_add (directory, model,
 					     model->details->show_hidden_files,
 					     attributes, files_changed_callback, node->root);
 }
@@ -1143,7 +1143,7 @@ iter_is_valid (FMTreeModel *model, const GtkTreeIter *iter)
 	parent = iter->user_data2;
 	if (node == NULL) {
 		if (parent != NULL) {
-			if (!NAUTILUS_IS_FILE (parent->file)) {
+			if (!NEMO_IS_FILE (parent->file)) {
 				return FALSE;
 			}
 			if (!tree_node_has_dummy_child (parent)) {
@@ -1151,7 +1151,7 @@ iter_is_valid (FMTreeModel *model, const GtkTreeIter *iter)
 			}
 		}
 	} else {
-		if (!NAUTILUS_IS_FILE (node->file)) {
+		if (!NEMO_IS_FILE (node->file)) {
 			return FALSE;
 		}
 		if (parent != NULL) {
@@ -1347,7 +1347,7 @@ fm_tree_model_iter_has_child (GtkTreeModel *model, GtkTreeIter *iter)
 
 #if 0
 	g_warning ("Node '%s' %s",
-		   node && node->file ? nautilus_file_get_uri (node->file) : "no name",
+		   node && node->file ? nemo_file_get_uri (node->file) : "no name",
 		   has_child ? "has child" : "no child");
 #endif
 		   
@@ -1557,11 +1557,11 @@ fm_tree_model_unref_node (GtkTreeModel *model, GtkTreeIter *iter)
 void
 fm_tree_model_add_root_uri (FMTreeModel *model, const char *root_uri, const char *display_name, GIcon *icon, GMount *mount)
 {
-	NautilusFile *file;
+	NemoFile *file;
 	TreeNode *node, *cnode;
 	FMTreeModelRoot *newroot;
 	
-	file = nautilus_file_get_by_uri (root_uri);
+	file = nemo_file_get_by_uri (root_uri);
 
 	newroot = tree_model_root_new (model);
 	node = create_node_for_file (newroot, file);
@@ -1581,14 +1581,14 @@ fm_tree_model_add_root_uri (FMTreeModel *model, const char *root_uri, const char
 		node->prev = cnode;
 	}
 
-	nautilus_file_unref (file);
+	nemo_file_unref (file);
 
 	update_node_without_reporting (model, node);
 	report_node_inserted (model, node);
 }
 
 GMount *
-fm_tree_model_get_mount_for_root_node_file (FMTreeModel *model, NautilusFile *file)
+fm_tree_model_get_mount_for_root_node_file (FMTreeModel *model, NemoFile *file)
 {
 	TreeNode *node;
 
@@ -1611,15 +1611,15 @@ fm_tree_model_remove_root_uri (FMTreeModel *model, const char *uri)
 	TreeNode *node;
 	GtkTreePath *path;
 	FMTreeModelRoot *root;
-	NautilusFile *file;
+	NemoFile *file;
 
-	file = nautilus_file_get_by_uri (uri);
+	file = nemo_file_get_by_uri (uri);
 	for (node = model->details->root_node; node != NULL; node = node->next) {
 		if (file == node->file) {
 			break;
 		}
 	}
-	nautilus_file_unref (file);
+	nemo_file_unref (file);
 
 	if (node) {
 		/* remove the node */
@@ -1629,7 +1629,7 @@ fm_tree_model_remove_root_uri (FMTreeModel *model, const char *uri)
 			node->mount = NULL;
 		}
 
-		nautilus_file_monitor_remove (node->file, model);
+		nemo_file_monitor_remove (node->file, model);
 		path = get_node_path (model, node);
 
 		/* Report row_deleted before actually deleting */
@@ -1678,15 +1678,15 @@ fm_tree_model_set_show_hidden_files (FMTreeModel *model,
 	model->details->show_hidden_files = show_hidden_files;
 	stop_monitoring (model);
 	if (!show_hidden_files) {
-		destroy_by_function (model, nautilus_file_is_hidden_file);
+		destroy_by_function (model, nemo_file_is_hidden_file);
 	}
 	schedule_monitoring_update (model);
 }
 
 static gboolean
-file_is_not_directory (NautilusFile *file)
+file_is_not_directory (NemoFile *file)
 {
-	return !nautilus_file_is_directory (file);
+	return !nemo_file_is_directory (file);
 }
 
 void
@@ -1708,7 +1708,7 @@ fm_tree_model_set_show_only_directories (FMTreeModel *model,
 	schedule_monitoring_update (model);
 }
 
-NautilusFile *
+NemoFile *
 fm_tree_model_iter_get_file (FMTreeModel *model, GtkTreeIter *iter)
 {
 	TreeNode *node;
@@ -1717,7 +1717,7 @@ fm_tree_model_iter_get_file (FMTreeModel *model, GtkTreeIter *iter)
 	g_return_val_if_fail (iter_is_valid (FM_TREE_MODEL (model), iter), NULL);
 
 	node = iter->user_data;
-	return node == NULL ? NULL : nautilus_file_ref (node->file);
+	return node == NULL ? NULL : nemo_file_ref (node->file);
 }
 
 /* This is used to work around some sort order stability problems
@@ -1772,7 +1772,7 @@ fm_tree_model_iter_is_root (FMTreeModel *model, GtkTreeIter *iter)
 gboolean
 fm_tree_model_file_get_iter (FMTreeModel *model,
 				   GtkTreeIter *iter,
-				   NautilusFile *file,
+				   NemoFile *file,
 				   GtkTreeIter *current_iter)
 {
 	TreeNode *node, *root_node;
@@ -1792,7 +1792,7 @@ fm_tree_model_file_get_iter (FMTreeModel *model,
 }
 
 static void
-do_update_node (NautilusFile *file,
+do_update_node (NemoFile *file,
                   FMTreeModel *model)
 {
 	TreeNode *root, *node = NULL;
@@ -1825,12 +1825,12 @@ fm_tree_model_set_highlight_for_files (FMTreeModel *model,
 		g_list_foreach (old_files,
 		                (GFunc) do_update_node, model);
 
-		nautilus_file_list_free (old_files);
+		nemo_file_list_free (old_files);
 	}
 
 	if (files != NULL) {
 		model->details->highlighted_files = 
-			nautilus_file_list_copy (files);
+			nemo_file_list_copy (files);
 		g_list_foreach (model->details->highlighted_files,
 		                (GFunc) do_update_node, model);
 	}
@@ -1868,7 +1868,7 @@ fm_tree_model_finalize (GObject *object)
 	}
 
 	if (model->details->highlighted_files != NULL) {
-		nautilus_file_list_free (model->details->highlighted_files);
+		nemo_file_list_free (model->details->highlighted_files);
 	}
 
 	g_free (model->details);

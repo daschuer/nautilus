@@ -1,6 +1,6 @@
 /* -*- Mode: C; indent-tabs-mode: t; c-basic-offset: 8; tab-width: 8 -*-
 
-   nautilus-directory-notify.h: Nautilus directory notify calls.
+   nemo-directory-notify.h: Nemo directory notify calls.
  
    Copyright (C) 2000, 2001 Eazel, Inc.
   
@@ -23,7 +23,7 @@
 */
 
 #include <gdk/gdk.h>
-#include <libnautilus-private/nautilus-file.h>
+#include <libnemo-private/nemo-file.h>
 
 typedef struct {
 	char *from_uri;
@@ -40,32 +40,32 @@ typedef struct {
 	gboolean set;
 	GdkPoint point;
 	int screen;
-} NautilusFileChangesQueuePosition;
+} NemoFileChangesQueuePosition;
 
 /* Almost-public change notification calls */
-void nautilus_directory_notify_files_added   (GList *files);
-void nautilus_directory_notify_files_moved   (GList *file_pairs);
-void nautilus_directory_notify_files_changed (GList *files);
-void nautilus_directory_notify_files_removed (GList *files);
+void nemo_directory_notify_files_added   (GList *files);
+void nemo_directory_notify_files_moved   (GList *file_pairs);
+void nemo_directory_notify_files_changed (GList *files);
+void nemo_directory_notify_files_removed (GList *files);
 
-void nautilus_directory_schedule_metadata_copy   (GList        *file_pairs);
-void nautilus_directory_schedule_metadata_move   (GList        *file_pairs);
-void nautilus_directory_schedule_metadata_remove (GList        *files);
+void nemo_directory_schedule_metadata_copy   (GList        *file_pairs);
+void nemo_directory_schedule_metadata_move   (GList        *file_pairs);
+void nemo_directory_schedule_metadata_remove (GList        *files);
 
 /* Deprecated URI versions: to be converted */
-void nautilus_directory_notify_files_added_by_uri      (GList        *uris);
-void nautilus_directory_notify_files_changed_by_uri    (GList        *uris);
-void nautilus_directory_notify_files_moved_by_uri      (GList        *uri_pairs);
-void nautilus_directory_notify_files_removed_by_uri    (GList        *uris);
+void nemo_directory_notify_files_added_by_uri      (GList        *uris);
+void nemo_directory_notify_files_changed_by_uri    (GList        *uris);
+void nemo_directory_notify_files_moved_by_uri      (GList        *uri_pairs);
+void nemo_directory_notify_files_removed_by_uri    (GList        *uris);
 
-void nautilus_directory_schedule_metadata_copy_by_uri   (GList        *uri_pairs);
-void nautilus_directory_schedule_metadata_move_by_uri   (GList        *uri_pairs);
-void nautilus_directory_schedule_metadata_remove_by_uri (GList        *uris);
-void nautilus_directory_schedule_position_set    (GList        *position_setting_list);
+void nemo_directory_schedule_metadata_copy_by_uri   (GList        *uri_pairs);
+void nemo_directory_schedule_metadata_move_by_uri   (GList        *uri_pairs);
+void nemo_directory_schedule_metadata_remove_by_uri (GList        *uris);
+void nemo_directory_schedule_position_set    (GList        *position_setting_list);
 
 /* Change notification hack.
  * This is called when code modifies the file and it needs to trigger
  * a notification. Eventually this should become private, but for now
  * it needs to be used for code like the thumbnail generation.
  */
-void nautilus_file_changed                       (NautilusFile *file);
+void nemo_file_changed                       (NemoFile *file);

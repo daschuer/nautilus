@@ -6,7 +6,7 @@
 
 	* hi.po: Committed Hindi Translation on behalf of Rajesh Ranjan.
 
-=== nautilus 2.26.2 ===
+=== nemo 2.26.2 ===
 
 2009-04-13  Reşat SABIQ <tilde.birlik@gmail.com>
 
@@ -29,7 +29,7 @@
 
 	* el.po: Updated Greek translation (Thanos Lefteris).
 
-=== nautilus 2.26.1 ===
+=== nemo 2.26.1 ===
 
 2009-03-30  Baris Cicek  <baris@teamforce.name.tr>
 
@@ -80,7 +80,7 @@
 
 	* gu.po: Updated Gujarati Translations.
 
-=== nautilus 2.26.0 ===
+=== nemo 2.26.0 ===
 
 2009-03-16  Theppitak Karoonboonyanan  <thep@linux.thai.net>
 
@@ -150,7 +150,7 @@
 
 	* te.po: Updated Telugu Translation.
 
-=== nautilus 2.25.93 ===
+=== nemo 2.25.93 ===
 
 2009-03-11  Gintautas Miliauskas  <gintas@akl.lt>
 
@@ -244,7 +244,7 @@
 
 	* de.po: Updated German translation.
 
-=== nautilus 2.25.92 ===
+=== nemo 2.25.92 ===
 
 2009-03-02  I. Felix <ifelix@redhat.com>
 
@@ -426,7 +426,7 @@
 
 	* fi.po: Updated Finnish translation.
 
-=== nautilus 2.25.91 ===
+=== nemo 2.25.91 ===
 
 2009-02-16  Sweta Kothari  <swkothar@redhat.com>
 
@@ -538,7 +538,7 @@
 
 	* es.po: Updated Spanish translation.
 
-=== nautilus 2.25.4 ===
+=== nemo 2.25.4 ===
 
 2009-01-31  Daniel Nylander <po@danielnylander.se>
 
@@ -609,7 +609,7 @@
 	Bug 568503 – Misspelled word "progam"->"program"
 	Fixing message ids.
 
-=== nautilus 2.25.3 ===
+=== nemo 2.25.3 ===
 
 2009-01-17  Thomas Thurman  <tthurman@gnome.org>
 
@@ -676,7 +676,7 @@
 
 	* fr.po: Updated French translation.
 
-=== nautilus 2.25.2 ===
+=== nemo 2.25.2 ===
 
 2008-12-15  Alexander Larsson  <alexl@redhat.com>
 
@@ -696,7 +696,7 @@
 
 	* sr.po, sr@latin.po: Fixed Ubuntu bug lp#197224.
 
-=== nautilus 2.25.1 ===
+=== nemo 2.25.1 ===
 
 2008-12-01  Alexander Larsson  <alexl@redhat.com>
 
@@ -1468,7 +1468,7 @@
 
 	* nb.po: Updated Norwegian bokmål translation.
 
-=== nautilus 2.23.2 ===
+=== nemo 2.23.2 ===
 
 2008-05-10  Jorge Gonzalez  <jorgegonz@svn.gnome.org>
 
@@ -1577,7 +1577,7 @@
 
 	* es.po: Updated Spanish translation
 
-=== nautilus 2.22.1 ===
+=== nemo 2.22.1 ===
 
 2008-03-23  Nguyễn Thái Ngọc Duy <pclouds@gmail.com>
 
@@ -1615,7 +1615,7 @@
 
 	* ml.po: Updated Malayalam Translation
 
-=== nautilus 2.22.0 ===
+=== nemo 2.22.0 ===
 
 2008-03-10  Luca Ferretti  <elle.uca@libero.it>
 
@@ -1864,7 +1864,7 @@
 
 	* sv.po: Updated Swedish translation.
 
-=== nautilus 2.21.92 ===
+=== nemo 2.21.92 ===
 
 2008-02-25  Gil Forcada  <gforcada@gnome.org>
 
@@ -1951,7 +1951,7 @@
 2008-02-19  Alexander Larsson  <alexl@redhat.com>
 
 	* POTFILES.in:
-	Removed nautilus-file-operations-progress.c
+	Removed nemo-file-operations-progress.c
 
 2008-02-18  Hendrik Richter  <hendrikr@gnome.org>
 
@@ -2022,7 +2022,7 @@
 
 	* oc.po: Updated Occitan translation.
 
-=== nautilus 2.21.91 ===
+=== nemo 2.21.91 ===
 
 2008-02-11  Ignacio Casal Quinteiro  <nacho.resa@gmail.com>
 
@@ -2129,7 +2129,7 @@
 
 	* sv.po: Updated Swedish translation.
 
-=== nautilus 2.21.90 ===
+=== nemo 2.21.90 ===
 
 2008-01-28  Luca Ferretti  <elle.uca@libero.it>
 
@@ -2179,7 +2179,7 @@
 
 	* he.po: Updated Hebrew translation.
 
-=== nautilus 2.21.6 ===
+=== nemo 2.21.6 ===
 
 2008-01-21  Alexander Larsson  <alexl@redhat.com>
 
@@ -2228,12 +2228,12 @@
 
 	* es.po: Updated Spanish translation
 
-=== nautilus 2.21.5 ===
+=== nemo 2.21.5 ===
 
 2008-01-14  Alexander Larsson  <alexl@redhat.com>
 
 	* POTFILES.in:
-	Add nautilus-autorun.c
+	Add nemo-autorun.c
 
 2008-01-14  Kjartan Maraas  <kmaraas@gnome.org>
 
@@ -2265,7 +2265,7 @@
 	Add the removed connect to server files
 	to skip instead
 
-=== nautilus 2.21.2 ===
+=== nemo 2.21.2 ===
 
 2008-01-07  Funda Wang  <fundawang@linux.net.cn>
 
@@ -2308,7 +2308,7 @@
 
 	* ga.po: Updated Irish translation.
 
-=== nautilus 2.20.1 ===
+=== nemo 2.20.1 ===
 
 2007-12-20  Alexander Larsson  <alexl@redhat.com>
 
@@ -2468,7 +2468,7 @@
 
 	* sr.po, sr@Latn.po: Minor updates.
 
-=== nautilus 2.20.0 ===
+=== nemo 2.20.0 ===
 
 2007-09-17  Wouter Bolsterlee  <wbolster@svn.gnome.org>
 
@@ -2574,7 +2574,7 @@
 
 	* ta.po:  Tamil Translation updated by Tirumurthi Vasudevan
 
-=== nautilus 2.19.91 ===
+=== nemo 2.19.91 ===
 
 2007-08-26 Gabor Kelemen  <kelemeng@gnome.hu>
 
@@ -2960,7 +2960,7 @@
 
 	* sv.po: Updated Swedish translation.
 
-=== nautilus 2.19.2 ===
+=== nemo 2.19.2 ===
 
 2007-05-12  Alexander Shopov  <ash@contact.bg>
 
@@ -3083,7 +3083,7 @@
 
 	* gu.po: Updated Gujarati Translation.
 
-=== nautilus 2.18.0 ===
+=== nemo 2.18.0 ===
 2007-03-14  Runa Bhattacharjee <runabh@gmail.com>
 
 	* bn_IN.po: Updated Bengali India Translation.
@@ -3155,7 +3155,7 @@
 	* fr.po: Fixed French translation by Christophe Bliard and
 	Stéphane Raimbault.
 
-=== nautilus 2.17.92 ===
+=== nemo 2.17.92 ===
 
 2007-02-25  Josep Puigdemont i Casamajó  <josep.puigdemont@gmail.com>
 
@@ -3219,7 +3219,7 @@
 
 	* fi.po: Updated Finnish translation.
 
-=== nautilus 2.17.91 ===
+=== nemo 2.17.91 ===
 
 2007-02-11  Alexander Shopov  <ash@contact.bg>
 
@@ -3412,7 +3412,7 @@
 
 	* es.po: Updated Spanish translation.
 
-=== nautilus 2.17.1 ===
+=== nemo 2.17.1 ===
 
 2006-12-18  Djihed Afifi <djihed@gmail.com>
 
@@ -3483,7 +3483,7 @@
 
 	* he.po: Updated Hebrew translation.
 
-=== nautilus 2.16.3 ===
+=== nemo 2.16.3 ===
 
 2006-11-19  Wouter Bolsterlee  <wbolster@cvs.gnome.org>
 
@@ -3517,7 +3517,7 @@
 
 	* et.po: Translation updated by Ivar Smolin.
 
-=== nautilus 2.16.2 ===
+=== nemo 2.16.2 ===
 
 2006-11-07  Alexander Larsson  <alexl@redhat.com>
 
@@ -3620,7 +3620,7 @@
 
 	* et.po: Translation updated by Ivar Smolin.
 
-=== nautilus 2.16.1 ===
+=== nemo 2.16.1 ===
 
 2006-10-02  Priit Laes  <plaes@cvs.gnome.org>
 
@@ -3788,7 +3788,7 @@
 
 	* ca.po: Updates Catalan translation
 
-=== nautilus 2.15.92 ===
+=== nemo 2.15.92 ===
 
 2006-08-20  Wouter Bolsterlee  <uws+gnome@xs4all.nl>
 
@@ -3859,7 +3859,7 @@
 
 	* tr.po: Updated Turkish Translation
 
-=== nautilus 2.15.91 ===
+=== nemo 2.15.91 ===
 
 2006-08-07  Inaki Larranaga  <dooteo@euskalgnu.org>
 
@@ -4080,7 +4080,7 @@
 
 	* de.po: Updated German translation.
 
-=== nautilus 2.15.2 ===
+=== nemo 2.15.2 ===
 
 2006-06-11  Francisco Javier F. Serrador  <serrador@openshine.com>
 
@@ -4407,7 +4407,7 @@
 
 	* fr.po: Updated French translation.
 
-=== nautilus 2.14.0 ===
+=== nemo 2.14.0 ===
 
 2006-03-13  Runa Bhattacharjee <runa@bengalinux.org>
 
@@ -4482,7 +4482,7 @@
 
 	* da.po: Updated Danish translation.
 
-=== nautilus 2.13.92 ===
+=== nemo 2.13.92 ===
 
 2006-02-27  Inaki Larranaga  <dooteo@euskalgnu.org>
 
@@ -4549,7 +4549,7 @@
 
 	* cs.po: Updated Czech translation
 
-=== nautilus 2.13.91 ===
+=== nemo 2.13.91 ===
 
 2006-02-11  Luca Ferretti  <elle.uca@libero.it>
 
@@ -4717,7 +4717,7 @@
 
 	* en_CA.po: Updated Canadian English translation.
 
-=== nautilus 2.13.4 ===
+=== nemo 2.13.4 ===
 
 2006-01-15  Francisco Javier F. Serrador  <serrador@cvs.gnome.org>
 
@@ -4879,7 +4879,7 @@
 
 	* th.po: Updated Thai translation.
 
-=== nautilus 2.13.3 ===
+=== nemo 2.13.3 ===
 
 2005-12-12  Alexander Shopov  <ash@contact.bg>
 
@@ -5013,7 +5013,7 @@
 
 	* es.po: Updated Spanish translation
 
-=== nautilus 2.13.2 ===
+=== nemo 2.13.2 ===
 
 2005-11-14  Alexander Shopov  <ash@contact.bg>
 
@@ -5052,7 +5052,7 @@
 
 	* sk.po: Updated Slovak translation.
 
-=== nautilus 2.13.1 ===
+=== nemo 2.13.1 ===
 
 2005-10-23  Adam Weinberger  <adamw@gnome.org>
 
@@ -5084,7 +5084,7 @@
 
 	* et.po: Translation updated by Ivar Smolin.
 
-=== nautilus 2.12.1 ===
+=== nemo 2.12.1 ===
 
 2005-09-29  Alexander Shopov  <ash@contact.bg>
 
@@ -5121,7 +5121,7 @@
 
 	* eu.po: Updated Basque translation.
 
-=== nautilus 2.12.0 ===
+=== nemo 2.12.0 ===
 
 2005-09-04  Hendrik Richter  <hendi@gnome-de.org>
 
@@ -5461,7 +5461,7 @@
 
 	* th.po: Updated Thai translation.
 
-=== nautilus 2.11.4 ===
+=== nemo 2.11.4 ===
 
 2005-07-10  Adam Weinberger  <adamw@gnome.org>
 
@@ -5494,7 +5494,7 @@
 2005-07-08  Alexander Larsson  <alexl@redhat.com>
 
 	* POTFILES.in:
-	Added src/nautilus-pathbar.c
+	Added src/nemo-pathbar.c
 
 2005-07-08  Priit Laes  <plaes@cvs.gnome.org>
 
@@ -5542,7 +5542,7 @@
 
 	* ja.po: Updated Japanese translation.
 
-=== nautilus 2.11.3 ===
+=== nemo 2.11.3 ===
 
 2005-07-01  Alexander Larsson  <alexl@redhat.com>
 
@@ -5635,7 +5635,7 @@
 
 	* en_CA.po: Updated Canadian English translation.
 
-=== nautilus 2.11.2 ===
+=== nemo 2.11.2 ===
 
 2005-06-07  Martin Willemoes Hansen  <mwh@sysrq.dk>
 
@@ -5735,7 +5735,7 @@
 
 	* ja.po: Updated Japanese translation.
 
-=== nautilus 2.11.1 ===
+=== nemo 2.11.1 ===
 
 2005-05-15  Alexander Shopov  <ash@contact.bg>
 
@@ -5905,7 +5905,7 @@
 
 	* da.po: Updated Danish translation.
 
-=== nautilus 2.10.0 ===
+=== nemo 2.10.0 ===
 
 2005-03-07  Mugurel Tudor  <mugurelu@go.ro>
 
@@ -5939,7 +5939,7 @@
 	* POTFILES.in:
 	Move some old unused files to .skip for now
 
-=== nautilus 2.9.92 ===
+=== nemo 2.9.92 ===
 
 2005-03-01  Alexander Larsson  <alexl@redhat.com>
 
@@ -6063,7 +6063,7 @@
 
 	* et.po: Translation updated by Ivar Smolin.
 
-=== nautilus 2.9.91 ===
+=== nemo 2.9.91 ===
 
 2005-02-10  Žygimantas Beručka  <uid0@akl.lt>
 
@@ -6219,7 +6219,7 @@
 
 	* en_CA.po: Updated Canadian English translation.
 
-=== nautilus 2.9.90 ===
+=== nemo 2.9.90 ===
 
 2005-01-25  Hendrik Richter  <hendrik@gnome-de.org>
 
@@ -6327,7 +6327,7 @@
 
 2005-01-15  Kjartan Maraas  <kmaraas@gnome.org>
 
-	* POTFILES.in: Add nautilus-connect-to-server-dialog-main.c
+	* POTFILES.in: Add nemo-connect-to-server-dialog-main.c
 	* nb.po: Update
 	* no.po: Update
 
@@ -6367,7 +6367,7 @@
 
 	* en_CA.po: Updated Canadian English translation.
 
-=== nautilus 2.9.2 ===
+=== nemo 2.9.2 ===
 
 2005-01-07  Kjartan Maraas  <kmaraas@gnome.org>
 
@@ -6408,7 +6408,7 @@
 2004-12-08  Christian Rose  <menthos@menthos.com>
 
 	* tr.po: Reverted broken tr.po update that broke
-	the nautilus build.
+	the nemo build.
 
 2004-12-05  Baris Cicek <baris@teamforce.name.tr>
 
@@ -6439,7 +6439,7 @@
 
 	* en_CA.po: Updated Canadian English translation.
 
-=== nautilus 2.9.1 ===
+=== nemo 2.9.1 ===
 
 2004-11-24  Miloslav Trmac  <mitr@volny.cz>
 
@@ -6491,7 +6491,7 @@
 	should not (fix up-ported from gnome-2-8 branch)
 	- Fixes http://bugzilla.gnome.org/show_bug.cgi?id=157252
 
-=== nautilus 2.8.2 ===
+=== nemo 2.8.2 ===
 
 2004-10-25  Mohammad DAMT  <mdamt@bisnisweb.com>
 
@@ -6545,7 +6545,7 @@
 
 	* pl.po: Updated Polish translation by GNOME PL Team.
 
-=== nautilus 2.8.1 ===
+=== nemo 2.8.1 ===
 
 2004-10-05  Leonid Kanter <leon@asplinux.ru>
 
@@ -6595,7 +6595,7 @@
 	Sigurd Gartmann.
 	* no.po: Same.
 
-=== nautilus 2.8.0 ===
+=== nemo 2.8.0 ===
 
 2004-09-12  Paisa Seeluangsawat  <paisa@users.sf.net>
 
@@ -6722,7 +6722,7 @@
 
 2004-08-26  Gediminas Paulauskas <menesis@chatsubo.lt>
 
-	* POTFILES.in: remove libnautilus-private/nautilus-program-chooser.c
+	* POTFILES.in: remove libnemo-private/nemo-program-chooser.c
 	* lt.po: Updated Lithuanian translation.
 
 2004-08-25  Maxim Dziumanenko <mvd@mylinux.com.ua>
@@ -6825,7 +6825,7 @@
 
 	* es.po: Updated Spanish translation.
 
-=== nautilus 2.7.4 ===
+=== nemo 2.7.4 ===
 
 2004-08-16  Artur Flinta  <aflinta@cvs.gnome.org>
 
@@ -7036,7 +7036,7 @@
 
 	* ja.po: Updated Japanese translation.
 
-=== nautilus 2.7.2 ===
+=== nemo 2.7.2 ===
 
 2004-07-21  Guntupalli Karunakar  <karunakar@freedomink.org>
 
@@ -7229,7 +7229,7 @@
 
 	* es.po: Updated Spanish translation.
 
-=== nautilus 2.7.1 ===
+=== nemo 2.7.1 ===
 
 2004-05-31  Alexander Shopov  <ash@contact.bg>
 	* bg.po: Updated Bulgarian translation by
@@ -7302,7 +7302,7 @@
 
 	* hu.po: Updated Hungarian translation.
 
-=== nautilus 2.6.2 ===
+=== nemo 2.6.2 ===
 
 2004-05-13  Funda Wang  <fundawang@linux.net.cn>
 
@@ -7345,7 +7345,7 @@
 	* ko.po: Replaced %-d with %e and %-I with %l. `-' modifier is a
 	GNU extension.
 
-=== nautilus 2.6.1 ===
+=== nemo 2.6.1 ===
 
 2004-04-19  ?ygimantas Beru?ka  <uid0@akl.lt>
 
@@ -7464,7 +7464,7 @@
 	* pa.po: Updated Punjabi translation by
 	Amanpreet Singh Alam <amanlinux@netscape.net>.
 
-=== nautilus 2.6.0 ===
+=== nemo 2.6.0 ===
 
 2004-03-22  Abel Cheung  <maddog@linux.org.hk>
 
@@ -7531,7 +7531,7 @@
 
 	* cy.po: Updated Welsh translation.
 
-=== nautilus 2.5.91 ===
+=== nemo 2.5.91 ===
 
 2004-03-14  Maxim Dziumanenko <mvd@mylinux.com.ua>
 
@@ -7544,7 +7544,7 @@
 2004-03-13  Christian Neumair  <chris@gnome-de.org>
 
 	* POTFILES.in: Removed medusa/search-related files as discussed on
-	nautilus-list.
+	nemo-list.
 	* POTFILES.skip: Added them here.
 
 2004-03-13  Christophe Merlet  <redfox@redfoxcenter.org>
@@ -7604,7 +7604,7 @@
 	* sr@ije.po: Added Serbian Jekavian translation by Bojan Suzi??
 	<bojans@teol.net>.
 
-=== nautilus 2.5.90 ===
+=== nemo 2.5.90 ===
 
 2004-03-08  Ales Nyakhaychyk  <nab@mail.by>
 
@@ -7772,7 +7772,7 @@
 
 	* ja.po: Updated Japanese translation.
 
-=== nautilus 2.5.8 ===
+=== nemo 2.5.8 ===
 
 2004-02-24  Miloslav Trmac  <mitr@volny.cz>
 
@@ -7804,7 +7804,7 @@
 
 2004-02-23  Dave Camp  <dave@ximian.com>
 
-	* POTFILES.in: Added nautilus-column-chooser.c
+	* POTFILES.in: Added nemo-column-chooser.c
 
 2004-02-23  Ole Laursen  <olau@hardworking.dk>
 
@@ -7882,7 +7882,7 @@
 2004-02-18  Alexander Larsson  <alexl@redhat.com>
 
 	* POTFILES.in:
-	Remove nautilus-connect-server
+	Remove nemo-connect-server
 
 2004-02-18  Alexander Larsson  <alexl@redhat.com>
 
@@ -7944,7 +7944,7 @@
 
 	* zh_CN.po: Updated Simplified Chinese translation.
 
-=== nautilus 2.5.7 ===
+=== nemo 2.5.7 ===
 
 2004-02-10  Pauli Virtanen  <pauli.virtanen@hut.fi>
 
@@ -8048,7 +8048,7 @@
 
 	* no.po: Updated Norwegian translation.
 
-=== nautilus 2.5.6 ===
+=== nemo 2.5.6 ===
 
 2004-01-30  Miloslav Trmac  <mitr@volny.cz>
 
@@ -8201,7 +8201,7 @@
 
 	* sr.po, sr@Latn.po: Updated Serbian translation.
 
-=== nautilus 2.5.5 ===
+=== nemo 2.5.5 ===
 
 2004-01-13  Danilo ?egan  <dsegan@gmx.net>
 
@@ -8241,7 +8241,7 @@
 
 	* sr.po, sr@Latn.po: Updated Serbian translation.
 
-	* POTFILES.in: Added libnautilus-private/nautilus-file-utilities.c.
+	* POTFILES.in: Added libnemo-private/nemo-file-utilities.c.
 
 2004-01-09  Ole Laursen  <olau@hardworking.dk>
 
@@ -8300,7 +8300,7 @@
 
 	* nn.po: Updated Norwegian Nynorsk translation.
 
-=== nautilus 2.5.4 ===
+=== nemo 2.5.4 ===
 
 2003-12-29  ?smund Skj?veland  <aasmunds@fys.uio.no>
 
@@ -8392,7 +8392,7 @@
 
 	* nl.po: Dutch translation updated by Reinout van Schouwen.
 
-=== nautilus 2.5.3 ===
+=== nemo 2.5.3 ===
 
 2003-12-05  Paisa Seeluangsawat  <paisa@users.sf.net>
 
@@ -8427,7 +8427,7 @@
 	* ko.po: Updated Korean translation by
 	Young-Ho Cha <ganadist at mizi.com>.
 
-=== nautilus 2.5.2 ===
+=== nemo 2.5.2 ===
 
 2003-11-24  Alexander Larsson  <alexl@redhat.com>
 
@@ -8437,7 +8437,7 @@
 
 	* sr.po, sr@Latn.po: Updated Serbian translation.
 
-=== nautilus 2.5.1.1 ===
+=== nemo 2.5.1.1 ===
 
 2003-11-12 Hasbullah Bin Pit <sebol@ikhlas.com>
 
@@ -8456,7 +8456,7 @@
 	* es.po: Updated Spanish translation by
 	Francisco Javier F. Serrador <serrador@arrakis.es>.
 
-=== nautilus 2.5.1 ===
+=== nemo 2.5.1 ===
 
 2003-11-09  Abel Cheung  <maddog@linux.org.hk>
 
@@ -8488,7 +8488,7 @@
 
 	* cs.po: Typo fix.
 
-=== nautilus 2.5.0 ===
+=== nemo 2.5.0 ===
 
 2003-10-20  Andras Timar  <timar@gnome.hu>
 
@@ -8563,7 +8563,7 @@
 
 	* hu.po: Fixed a mistranslation.
 
-=== nautilus 2.4.0 ===
+=== nemo 2.4.0 ===
 
 2003-09-08  Pablo Saratxaga  <pablo@mandrakesoft.com>
 
@@ -8606,7 +8606,7 @@
 
 	* sv.po: Fix #121250.
 
-=== nautilus 2.3.90 ===
+=== nemo 2.3.90 ===
 
 2003-09-01 Paul Duffy <dubhthach@frink.nuigalway.ie>
 
@@ -8652,7 +8652,7 @@
 	* ko.po: Updated Korean translation by
 	Young-Ho Cha <ganadist at mizi.com>.
 
-=== nautilus 2.3.9 ===
+=== nemo 2.3.9 ===
 
 2003-08-24  Kang Jeong-Hee  <Keizi@mail.co.kr>
 
@@ -8787,7 +8787,7 @@
 
 	* sv.po: Updated Swedish translation.
 
-=== nautilus 2.3.8 ===
+=== nemo 2.3.8 ===
 
 2003-08-08  Dmitry G. Mastrukov  <dmitry@taurussoft.org>
 
@@ -9026,13 +9026,13 @@
 
 	* cs.po: Updated Czech translation.
 
-=== nautilus 2.3.6 ===
+=== nemo 2.3.6 ===
 
 2003-06-26  Mohammad DAMT  <mdamt@bisnisweb.com>
 
 	* id.po: Added Indonesian translation by Yohanes Nugroho <yohanes@opensource.or.id>
 
-=== nautilus 2.3.5 ===
+=== nemo 2.3.5 ===
 
 2003-06-23  Vincent van Adrighem  <V.vanAdrighem@dirck.mine.nu>
 
@@ -9097,7 +9097,7 @@
 
 	* de.po: Updated German translation.
 
-=== nautilus 2.3.4 ===
+=== nemo 2.3.4 ===
 
 2003-06-10  Vincent van Adrighem  <V.vanAdrighem@dirck.mine.nu>
 
@@ -9150,7 +9150,7 @@
 2003-05-27  Abel Cheung  <maddog@linux.org.hk>
 
 	* POTFILES.in: Remove non-existant file(s), add missing files from
-	libnautilus-private/.
+	libnemo-private/.
 	* POTFILES.skip: Remove non-existant file(s).
 
 2003-05-26  Pablo Saratxaga  <pablo@mandrakesoft.com>
@@ -9182,7 +9182,7 @@
 	* da.po: Ported Danish translation from gnome-2-2 branch, not
 	updated yet.
 
-=== nautilus 2.3.2 ===
+=== nemo 2.3.2 ===
 
 2003-05-19  Duarte Loreto <happyguy_pt@hotmail.com>
 
@@ -9234,7 +9234,7 @@
 	* ga.po:Updated the Irish Translation
 
 
-=== nautilus 2.3.1 ===
+=== nemo 2.3.1 ===
 
 
 2003-05-05  Dmitry G. Mastrukov  <dmitry@taurussoft.org>
@@ -9271,7 +9271,7 @@
 
 	* zh_TW.po: Updated traditional Chinese translation.
 
-=== nautilus 2.2.3 ===
+=== nemo 2.2.3 ===
 
 2003-03-31  Laurent Dhima  <laurenti@alblinux.net>
 
@@ -9487,7 +9487,7 @@
 
 	* az.po: Updated Azerbaijani translation.
 
-=== nautilus 2.2.2 ===
+=== nemo 2.2.2 ===
 
 2003-03-10  Vincent van Adrighem  <V.vanAdrighem@dirck.mine.nu>
 
@@ -9669,7 +9669,7 @@
 
 	* nl.po: Dutch translation updated.
 
-=== nautilus 2.2.1 ===
+=== nemo 2.2.1 ===
 
 2003-02-11  Fatih Demir <kabalak@gtranslator.org>
 
@@ -9752,7 +9752,7 @@
 
 	* el.po: Updated Greek translation.
 
-=== nautilus 2.2.0.2 ===
+=== nemo 2.2.0.2 ===
 
 2003-01-26  Kang Jeong-Hee <Keizi@mail.co.kr>
 
@@ -9790,7 +9790,7 @@
 
 	* vi.po: Updated Vietnamese file
 
-=== nautilus 2.2.0.1 ===
+=== nemo 2.2.0.1 ===
 
 2003-01-22  Christian Rose  <menthos@menthos.com>
 
@@ -9806,7 +9806,7 @@
 	* ru.po: updated Russian translation
 	from Russian team <gnome-cyr@gnome.org>.
 
-=== nautilus 2.2.0 ===
+=== nemo 2.2.0 ===
 
 2003-01-20  Christian Neumair  <chris@gnome-de.org>
 
@@ -9911,7 +9911,7 @@
 
 	* am.po: Updated Amharic translation.
 
-=== nautilus 2.1.91 ===
+=== nemo 2.1.91 ===
 
 2003-01-13  He Qiangqiang  <carton@linux.net.cn>
 
@@ -10012,7 +10012,7 @@
 	Bhopal team <anuragseetha@yahoo.com>
 	Guntupalli Karunakar <karunakar@freedomink.org>
 
-=== nautilus 2.1.6 ===
+=== nemo 2.1.6 ===
 
 2003-01-06  Christian Rose  <menthos@menthos.com>
 
@@ -10142,7 +10142,7 @@
 	* POTFILE.(in/skip): Updated.
 	* de.po: Updated German translation.
 
-=== nautilus 2.1.5 ===
+=== nemo 2.1.5 ===
 
 2002-12-15  Pablo Saratxaga  <pablo@mandrakesoft.com>
 
@@ -10170,7 +10170,7 @@
 
 	* am.po: Updated Amharic translation.
 
-=== nautilus 2.1.4 ===
+=== nemo 2.1.4 ===
 
 2002-12-07  Kjartan Maraas  <kmaraas@gnome.org>
 
@@ -10230,7 +10230,7 @@
 
 	* da.po: Updated Danish translation.
 
-=== nautilus 2.1.3 ===
+=== nemo 2.1.3 ===
 
 2002-11-25 Vincent van Adrighem <V.vanAdrighem@dirck.mine.nu>
 
@@ -10278,7 +10278,7 @@
 
 	* ms.po: Updated Malay Translation (twice).
 
-=== nautilus 2.1.2 ===
+=== nemo 2.1.2 ===
 
 2002-10-31  Dave Camp  <dave@ximian.com>
 
@@ -10300,7 +10300,7 @@
 
 	* ms.po: Updated Malay Translation.
 
-=== nautilus 2.1.1 ===
+=== nemo 2.1.1 ===
 
 2002-10-12  Andras Timar  <timar@gnome.hu>
 
@@ -10310,7 +10310,7 @@
 
 	* hu.po: Fixed a typo.
 
-=== nautilus-2.1.0 ===
+=== nemo-2.1.0 ===
 
 2002-09-23  Marius Andreiana <mandreiana@yahoo.com>
 
@@ -10406,7 +10406,7 @@
 
 	* nl.po: Dutch translation updated by Reinout van Schouwen.
 
-=== nautilus 2.0.6 ===
+=== nemo 2.0.6 ===
 
 2002-08-27  Emese Kovacs  <emese@gnome.hu>
 
@@ -10416,7 +10416,7 @@
 
 	* fi.po: Updated Finnish translation.
 
-=== nautilus 2.0.5 ===
+=== nemo 2.0.5 ===
 
 2002-08-23  Akira TAGOH  <tagoh@gnome.gr.jp>
 
@@ -10501,7 +10501,7 @@
 
 	* de.po: Fixed some mnemonics.
 
-=== nautilus 2.0.4 ===
+=== nemo 2.0.4 ===
 
 2002-08-13  Andras Timar  <timar@gnome.hu>
 
@@ -10560,7 +10560,7 @@
 
 	* vi.po: Updated Vietnamese file
 
-=== nautilus 2.0.3 ===
+=== nemo 2.0.3 ===
 
 2002-08-03  Matthias Warkus  <mawarkus@gnome.org>
 
@@ -10591,7 +10591,7 @@
 
 	* da.po: Updated Danish translation.
 
-=== nautilus 2.0.2 ===
+=== nemo 2.0.2 ===
 
 2002-07-23 Pablo Gonzalo del Campo <pablodc@bigfoot.com>
 
@@ -10610,7 +10610,7 @@
 
 	* no.po: Updated Norwegian (bokmal) translation.
 
-=== nautilus 2.0.1 ===
+=== nemo 2.0.1 ===
 
 2002-07-23  Gustavo Noronha Silva <kov@debian.org>
 
@@ -10897,7 +10897,7 @@
 
 	* es.po: Updated Spanish translation.
 
-=== nautilus 1.1.19 ===
+=== nemo 1.1.19 ===
 
 Mon Jun 03 14:18:51 2002  George Lebl <jirka@5z.com>
 
@@ -10987,7 +10987,7 @@ Mon Jun 03 14:18:51 2002  George Lebl <jirka@5z.com>
 
 	* pt.po: Updated Portuguese translation.
 
-=== nautilus 1.1.18 ===
+=== nemo 1.1.18 ===
 
 2002-05-27  Kjartan Maraas  <kmaraas@gnome.org>
 
@@ -11045,7 +11045,7 @@ Mon Jun 03 14:18:51 2002  George Lebl <jirka@5z.com>
 	* ru.po: updated russian translation from Dmitry G. Mastrukov
 	<dmitry@taurussoft.org>.
 
-=== nautilus 1.1.17 ===
+=== nemo 1.1.17 ===
 
 2002-05-16  Stanislav Visnovsky <visnovsky@nenya.ms.mff.cuni.cz>
 
@@ -11076,7 +11076,7 @@ Mon Jun 03 14:18:51 2002  George Lebl <jirka@5z.com>
 
 	* da.po: Updated Danish translation, fixed a few long-standing bugs.
 
-=== nautilus 1.1.16 ===
+=== nemo 1.1.16 ===
 
 2002-05-13  Abel Cheung  <maddog@linux.org.hk>
 
@@ -11117,7 +11117,7 @@ Mon Jun 03 14:18:51 2002  George Lebl <jirka@5z.com>
 
 	* es.po: Updated Spanish Translation.
 
-=== nautilus 1.1.15 ===
+=== nemo 1.1.15 ===
 
 2002-05-05  Zbigniew Chyla  <cyba@gnome.pl>
 
@@ -11149,7 +11149,7 @@ Mon Jun 03 14:18:51 2002  George Lebl <jirka@5z.com>
 
 	* no.po: Updated Norwegian (bokmal) translation.
 
-=== nautilus 1.1.14 ===
+=== nemo 1.1.14 ===
 
 2002-04-28  Fatih Demir <kabalak@gtranslator.org>
 
@@ -11167,7 +11167,7 @@ Mon Jun 03 14:18:51 2002  George Lebl <jirka@5z.com>
 
 	* no.po: Updated Norwegian (bokmal) translation.
 
-=== nautilus 1.1.13 ===
+=== nemo 1.1.13 ===
 
 2002-04-20  Simos Xenitellis  <simos@hellug.gr>
 
@@ -11198,7 +11198,7 @@ Mon Jun 03 14:18:51 2002  George Lebl <jirka@5z.com>
 
 	* da.po: Updated Danish translation.
 
-=== nautilus 1.1.12 ===
+=== nemo 1.1.12 ===
 
 2002-04-11  Abel Cheung  <maddog@linux.org.hk>
 
@@ -11272,7 +11272,7 @@ Mon Jun 03 14:18:51 2002  George Lebl <jirka@5z.com>
 
 	* sk.po: Updated Slovak translation.
 
-=== nautilus 1.1.11 ===
+=== nemo 1.1.11 ===
 
 2002-03-24  Alexander Larsson  <alla@lysator.liu.se>
 
@@ -11305,7 +11305,7 @@ Mon Jun 03 14:18:51 2002  George Lebl <jirka@5z.com>
 
 	* ms.po: Updated Malay Translation.
 
-=== nautilus 1.1.10 ===
+=== nemo 1.1.10 ===
 
 2002-03-17  Kjartan Maraas  <kmaraas@gnome.org>
 
@@ -11343,7 +11343,7 @@ Mon Jun 03 14:18:51 2002  George Lebl <jirka@5z.com>
 
 	* no.po: Updated Norwegian (bokmal) translation.
 
-=== nautilus 1.1.9 ===
+=== nemo 1.1.9 ===
 
 2002-03-10  Zbigniew Chyla  <cyba@gnome.pl>
 
@@ -11377,14 +11377,14 @@ Mon Jun 03 14:18:51 2002  George Lebl <jirka@5z.com>
 
 	* no.po: Updated Norwegian (bokmal) translation.
 
-=== nautilus 1.1.8 ===
+=== nemo 1.1.8 ===
 
 2002-03-05  Carlos Perello Marin <carlos@gnome-db.org>
 
 	* es.po: Updated by Pablo del Campo <pablodc@bigfoot.com>, welcome
 	Pablo. Also recoded as UTF-8
 
-=== nautilus 1.1.7 ===
+=== nemo 1.1.7 ===
 
 2002-03-03  Kjartan Maraas  <kmaraas@gnome.org>
 
@@ -11422,9 +11422,9 @@ Mon Jun 03 14:18:51 2002  George Lebl <jirka@5z.com>
 
 2002-02-27  Darin Adler  <darin@bentspoon.com>
 
-	* POTFILES.in: Remove nautilus-about.c.
+	* POTFILES.in: Remove nemo-about.c.
 
-=== nautilus 1.1.6 ===
+=== nemo 1.1.6 ===
 
 2002-02-26  Stanislav Visnovsky <visnovsky@nenya.ms.mff.cuni.cz>
 
@@ -11439,7 +11439,7 @@ Mon Jun 03 14:18:51 2002  George Lebl <jirka@5z.com>
 
 	* POTFILES.in: Remove libbackground/applier.c, because it's
 	not in the tarball, just in cvs, so it breaks tarball builds.
-	Remove nautilus-icon-text-item.c.
+	Remove nemo-icon-text-item.c.
 	* POTFILES.skip: Remove image-viewer.
 
 2002-02-22  Christian Rose  <menthos@menthos.com>
@@ -11463,13 +11463,13 @@ Mon Jun 03 14:18:51 2002  George Lebl <jirka@5z.com>
 
 	* no.po: Updated Norwegian (bokmal) translation.
 	* POTFILES.in: Added data/*directory.in,
-	components/tree/nautilus-tree-model.c, libbackground/applier.c
+	components/tree/nemo-tree-model.c, libbackground/applier.c
 
-=== nautilus 1.1.5 ===
+=== nemo 1.1.5 ===
 
 2002-02-09  Darin Adler  <darin@bentspoon.com>
 
-	* POTFILES.in: Add nautilus-dnd.c
+	* POTFILES.in: Add nemo-dnd.c
 
 2002-02-10  Ole Laursen  <olau@hardworking.dk>
 
@@ -11491,7 +11491,7 @@ Mon Jun 03 14:18:51 2002  George Lebl <jirka@5z.com>
 
 	* ko.po: Updated Korean translation.
 
-=== nautilus 1.1.4 ===
+=== nemo 1.1.4 ===
 
 2002-02-04  Stanislav Visnovsky <visnovsky@nenya.ms.mff.cuni.cz>
 
@@ -11518,7 +11518,7 @@ Mon Jun 03 14:18:51 2002  George Lebl <jirka@5z.com>
 	* pl.po: Updated Polish translation by
 	GNOME PL Team <translators@gnome.pl>.
 
-=== nautilus 1.1.3 ===
+=== nemo 1.1.3 ===
 
 2002-01-27  Kjartan Maraas  <kmaraas@gnome.org>
 
@@ -11538,7 +11538,7 @@ Mon Jun 03 14:18:51 2002  George Lebl <jirka@5z.com>
 
 2002-01-23  Roy-Magne Mo  <rmo@sunnmore.net>
 
-	* nn.po: Using translation from nautilus 1.0
+	* nn.po: Using translation from nemo 1.0
 	and converted it to UTF-8
 
 2002-01-22  Christian Rose  <menthos@menthos.com>
@@ -11559,7 +11559,7 @@ Mon Jun 03 14:18:51 2002  George Lebl <jirka@5z.com>
 
 	* sv.po: Updated Swedish translation.
 
-=== nautilus 1.1.2 ===
+=== nemo 1.1.2 ===
 
 2002-01-16  Darin Adler  <darin@bentspoon.com>
 
@@ -11579,7 +11579,7 @@ Mon Jun 03 14:18:51 2002  George Lebl <jirka@5z.com>
 
 	* no.po: Updated Norwegian (bokmal) translation.
 
-=== nautilus 1.1.1 ===
+=== nemo 1.1.1 ===
 
 2002-01-15  Darin Adler  <darin@bentspoon.com>
 
@@ -11600,11 +11600,11 @@ Mon Jun 03 14:18:51 2002  George Lebl <jirka@5z.com>
 
 2002-01-08  Darin Adler  <darin@bentspoon.com>
 
-	* POTFILES.in: So long nautilus-help.desktop.in
+	* POTFILES.in: So long nemo-help.desktop.in
 
 2002-01-07  Darin Adler  <darin@bentspoon.com>
 
-	* POTFILES.in: Adios nautilus-font-factory.c
+	* POTFILES.in: Adios nemo-font-factory.c
 
 2002-01-05  Christian Rose  <menthos@menthos.com>
 
@@ -11694,7 +11694,7 @@ Mon Jun 03 14:18:51 2002  George Lebl <jirka@5z.com>
 
 2001-11-08  Darin Adler  <darin@bentspoon.com>
 
-	* POTFILES.in: Add nautilus-hyperbola-ui.xml
+	* POTFILES.in: Add nemo-hyperbola-ui.xml
 
 2001-11-07  Darin Adler  <darin@bentspoon.com>
 
@@ -11737,11 +11737,11 @@ Mon Jun 03 14:18:51 2002  George Lebl <jirka@5z.com>
 	* sv.po: Fixed a problem with the Swedish translation. Thanks to
 	Anders Carlsson <andersca@gnu.org> for reporting this.
 
-=== nautilus 1.0.5 ===
+=== nemo 1.0.5 ===
 
 2001-10-19  Darin Adler  <darin@bentspoon.com>
 
-	* *.po: Nautilus 1.0.5 release.
+	* *.po: Nemo 1.0.5 release.
 
 2001-10-13  Carlos Perell?? Mar??n <carlos@gnome-db.org>
 
@@ -11804,7 +11804,7 @@ Mon Jun 03 14:18:51 2002  George Lebl <jirka@5z.com>
 
 	* fr.po: Add missing '
 ' in which was oversizing
-	Nautilus Preference Dialog
+	Nemo Preference Dialog
 
 2001-09-29  Christian Rose  <menthos@menthos.com>
 
@@ -11922,7 +11922,7 @@ Mon Jun 03 14:18:51 2002  George Lebl <jirka@5z.com>
 2001-08-22  Christian Meyer  <chrisime@gnome.org>
 
 	* de.po: Update hence my recent changes.
-	* POTFILE.in: Removed nautilus-services-ui.xml.
+	* POTFILE.in: Removed nemo-services-ui.xml.
 
 2001-08-20  Christian Meyer  <chrisime@gnome.org>
 
@@ -11974,7 +11974,7 @@ Mon Jun 03 14:18:51 2002  George Lebl <jirka@5z.com>
 2001-07-21  Christian Rose  <menthos@menthos.com>
 
 	* POTFILES.in: Added
-	libnautilus-private/nautilus-customization-data.c.
+	libnemo-private/nemo-customization-data.c.
 	* sv.po: Updated Swedish translation.
 
 2001-07-20  Ole Laursen  <olau@hardworking.dk>
@@ -12034,7 +12034,7 @@ Mon Jun 03 14:18:51 2002  George Lebl <jirka@5z.com>
 
 	* no.po: Updated Norwegian translation.
 
-=== Nautilus 1.0.4 ===
+=== Nemo 1.0.4 ===
 
 2001-07-05  Darin Adler  <darin@bentspoon.com>
 
@@ -12285,7 +12285,7 @@ Sat May 19 14:47:34 2001  George Lebl <jirka@5z.com>
 	* tr.po:
 	* uk.po:
 	* zh_TW.Big5.po:
-	Update for libnautilus-extensions -> libnautilus-private renaming.
+	Update for libnemo-extensions -> libnemo-private renaming.
 
 2001-05-03  Matthias Warkus  <mawarkus@gnome.org>
 
@@ -12314,8 +12314,8 @@ Sat May 19 14:47:34 2001  George Lebl <jirka@5z.com>
 
 2001-05-01  Zbigniew Chyla  <cyba@gnome.pl>
 
-	* POTFILES.in: Added components/news/nautilus-news.c,
-	components/news/Nautilus_View_news.oaf.in
+	* POTFILES.in: Added components/news/nemo-news.c,
+	components/news/Nemo_View_news.oaf.in
 
 2001-04-30  Fatih Demir <kabalak@gtranslator.org>
 
@@ -12446,7 +12446,7 @@ Mon Apr 16 08:06:45 2001  George Lebl <jirka@5z.com>
 	* cs.po:  I'm too tired to code and have a couple of ours to
 	kill instead of going to sleep, so here's another bunch of
 	translations, now up to like 28% translated.  Damn there is
-	a lot of strings in nautilus.
+	a lot of strings in nemo.
 
 2001-04-16  Zbigniew Chyla  <cyba@gnome.pl>
 
@@ -12567,7 +12567,7 @@ Mon Apr 16 08:06:45 2001  George Lebl <jirka@5z.com>
 2001-03-12  Szabolcs Ban  <shooby@gnome.hu>
 
 	* hu.po: Update of Hungarian translation by
-	Emese Kovacs <emese@gnome.hu>, QA in running Nautilus :-)
+	Emese Kovacs <emese@gnome.hu>, QA in running Nemo :-)
 
 2001-03-11  Jesus Bravo Alvarez  <jba@pobox.com>
 
@@ -12580,7 +12580,7 @@ Mon Apr 16 08:06:45 2001  George Lebl <jirka@5z.com>
 2001-03-10  Szabolcs Ban  <shooby@gnome.hu>
 
 	* hu.po: Update of Hungarian translation by
-	Emese Kovacs <emese@gnome.hu>, QA in running Nautilus :-)
+	Emese Kovacs <emese@gnome.hu>, QA in running Nemo :-)
 
 2001-03-10  Szabolcs Ban  <shooby@gnome.hu>
 
@@ -12683,7 +12683,7 @@ Mon Apr 16 08:06:45 2001  George Lebl <jirka@5z.com>
 
 	* ja.po: Updated Japanese translation.  The only
 	thing I updated was the localized fonts strings to
-	make my latest round of localization fixes in nautilus
+	make my latest round of localization fixes in nemo
 	work in the ja locale.
 
 2001-03-03  Christian Rose  <menthos@menthos.com>
@@ -12760,7 +12760,7 @@ Mon Apr 16 08:06:45 2001  George Lebl <jirka@5z.com>
 
 2001-02-28  Darin Adler  <darin@eazel.com>
 
-	* POTFILES.in: Added nautilus-password-dialog.c
+	* POTFILES.in: Added nemo-password-dialog.c
 
 2001-03-01  Kjartan Maraas  <kmaraas@gnome.org>
 
@@ -12851,7 +12851,7 @@ Mon Apr 16 08:06:45 2001  George Lebl <jirka@5z.com>
 2001-02-24  Gene Z. Ragan  <gzr@eazel.com>
 
 	* POTFILES.in:
-	Added libnautilus-extensions/nautulus-drag.c
+	Added libnemo-extensions/nautulus-drag.c
 
 2001-02-24  Pauli Virtanen  <pauli.virtanen@saunalahti.fi>
 
@@ -13308,7 +13308,7 @@ Mon Apr 16 08:06:45 2001  George Lebl <jirka@5z.com>
 
 2001-01-17  Ramiro Estrugo  <ramiro@eazel.com>
 	* POTFILES.in:
-	Remove nautilus-user-level-manager.[ch] which was just retired.
+	Remove nemo-user-level-manager.[ch] which was just retired.
 
 2001-01-17  Christian Rose  <menthos@menthos.com>
 
@@ -13940,7 +13940,7 @@ Mon Apr 16 08:06:45 2001  George Lebl <jirka@5z.com>
 2000-09-19  Christian Rose  <menthos@menthos.com>
 
 	* sv.po: Updated Swedish translation.
-	* POTFILES.in: Added the nautilus-user-level-manager.c file.
+	* POTFILES.in: Added the nemo-user-level-manager.c file.
 
 2000-09-18  Christian Rose  <menthos@menthos.com>
 
@@ -14282,7 +14282,7 @@ Mon Apr 16 08:06:45 2001  George Lebl <jirka@5z.com>
 
 2000-06-09  Ramiro Estrugo  <ramiro@eazel.com>
 	* po/POTFILES.in:
-	Move the nautilus-widgets classes to libnautilus-extensions.
+	Move the nemo-widgets classes to libnemo-extensions.
 
 2000-06-09  Fatih Demir  <kabalak@gmx.net>
 
@@ -14532,7 +14532,7 @@ Mon Apr 16 08:06:45 2001  George Lebl <jirka@5z.com>
 
 2000-04-14  Ramiro Estrugo  <ramiro@eazel.com>
 
-	* POTFILES.in: Updated for libnautilus -> libnautilus-extensions
+	* POTFILES.in: Updated for libnemo -> libnemo-extensions
 	changes.
 
 2000-04-14  Fatih Demir	<kabalak@gmx.net>

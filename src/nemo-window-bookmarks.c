@@ -1,17 +1,17 @@
 /* -*- Mode: C; indent-tabs-mode: t; c-basic-offset: 8; tab-width: 8 -*- */
 
 /*
- * Nautilus
+ * Nemo
  *
  * Copyright (C) 2000, 2001 Eazel, Inc.
  * Copyright (C) 2005 Red Hat, Inc.
  *
- * Nautilus is free software; you can redistribute it and/or
+ * Nemo is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
  * published by the Free Software Foundation; either version 2 of the
  * License, or (at your option) any later version.
  *
- * Nautilus is distributed in the hope that it will be useful,
+ * Nemo is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
  * General Public License for more details.
@@ -28,13 +28,13 @@
 
 #include <locale.h> 
 
-#include "nautilus-actions.h"
-#include "nautilus-bookmark-list.h"
-#include "nautilus-bookmarks-window.h"
-#include "nautilus-window-bookmarks.h"
-#include "nautilus-window-private.h"
-#include <libnautilus-private/nautilus-undo-manager.h>
-#include <libnautilus-private/nautilus-ui-utilities.h>
+#include "nemo-actions.h"
+#include "nemo-bookmark-list.h"
+#include "nemo-bookmarks-window.h"
+#include "nemo-window-bookmarks.h"
+#include "nemo-window-private.h"
+#include <libnemo-private/nemo-undo-manager.h>
+#include <libnemo-private/nemo-ui-utilities.h>
 #include <eel/eel-debug.h>
 #include <eel/eel-stock-dialogs.h>
 #include <eel/eel-vfs-extensions.h>
@@ -46,13 +46,13 @@
 
 static GtkWindow *bookmarks_window = NULL;
 
-static void refresh_bookmarks_menu (NautilusWindow *window);
+static void refresh_bookmarks_menu (NemoWindow *window);
 
 static void
 remove_bookmarks_for_uri_if_yes (GtkDialog *dialog, int response, gpointer callback_data)
 {
 	const char *uri;
-	NautilusWindow *window;
+	NemoWindow *window;
 
 	g_assert (GTK_IS_DIALOG (dialog));
 	g_assert (callback_data != NULL);
@@ -61,15 +61,15 @@ remove_bookmarks_for_uri_if_yes (GtkDialog *dialog, int response, gpointer callb
 
 	if (response == GTK_RESPONSE_YES) {
 		uri = g_object_get_data (G_OBJECT (dialog), "uri");
-		nautilus_bookmark_list_delete_items_with_uri (window->details->bookmark_list, uri);
+		nemo_bookmark_list_delete_items_with_uri (window->details->bookmark_list, uri);
 	}
 
 	gtk_widget_destroy (GTK_WIDGET (dialog));
 }
 
 static void
-show_bogus_bookmark_window (NautilusWindow *window,
-			    NautilusBookmark *bookmark)
+show_bogus_bookmark_window (NemoWindow *window,
+			    NemoBookmark *bookmark)
 {
 	GtkDialog *dialog;
 	GFile *location;
@@ -77,7 +77,7 @@ show_bogus_bookmark_window (NautilusWindow *window,
 	char *prompt;
 	char *detail;
 
-	location = nautilus_bookmark_get_location (bookmark);
+	location = nemo_bookmark_get_location (bookmark);
 	uri_for_display = g_file_get_parse_name (location);
 	
 	prompt = _("Do you want to remove any bookmarks with the "
@@ -101,7 +101,7 @@ show_bogus_bookmark_window (NautilusWindow *window,
 }
 
 static GtkWindow *
-get_or_create_bookmarks_window (NautilusWindow *window)
+get_or_create_bookmarks_window (NemoWindow *window)
 {
 	GObject *undo_manager_source;
 
@@ -118,16 +118,16 @@ get_or_create_bookmarks_window (NautilusWindow *window)
 }
 
 /**
- * nautilus_bookmarks_exiting:
+ * nemo_bookmarks_exiting:
  * 
  * Last chance to save state before app exits.
  * Called when application exits; don't call from anywhere else.
  **/
 void
-nautilus_bookmarks_exiting (void)
+nemo_bookmarks_exiting (void)
 {
 	if (bookmarks_window != NULL) {
-		nautilus_bookmarks_window_save_geometry (bookmarks_window);
+		nemo_bookmarks_window_save_geometry (bookmarks_window);
 		gtk_widget_destroy (GTK_WIDGET (bookmarks_window));
 	}
 }
@@ -139,23 +139,23 @@ nautilus_bookmarks_exiting (void)
  * Does nothing if there's already a bookmark for the displayed location.
  */
 void
-nautilus_window_add_bookmark_for_current_location (NautilusWindow *window)
+nemo_window_add_bookmark_for_current_location (NemoWindow *window)
 {
-	NautilusBookmark *bookmark;
-	NautilusWindowSlot *slot;
-	NautilusBookmarkList *list;
+	NemoBookmark *bookmark;
+	NemoWindowSlot *slot;
+	NemoBookmarkList *list;
 
-	slot = nautilus_window_get_active_slot (window);
+	slot = nemo_window_get_active_slot (window);
 	bookmark = slot->current_location_bookmark;
 	list = window->details->bookmark_list;
 
-	if (!nautilus_bookmark_list_contains (list, bookmark)) {
-		nautilus_bookmark_list_append (list, bookmark); 
+	if (!nemo_bookmark_list_contains (list, bookmark)) {
+		nemo_bookmark_list_append (list, bookmark); 
 	}
 }
 
 void
-nautilus_window_edit_bookmarks (NautilusWindow *window)
+nemo_window_edit_bookmarks (NemoWindow *window)
 {
 	GtkWindow *dialog;
 
@@ -167,11 +167,11 @@ nautilus_window_edit_bookmarks (NautilusWindow *window)
 }
 
 static void
-remove_bookmarks_menu_items (NautilusWindow *window)
+remove_bookmarks_menu_items (NemoWindow *window)
 {
 	GtkUIManager *ui_manager;
 	
-	ui_manager = nautilus_window_get_ui_manager (window);
+	ui_manager = nemo_window_get_ui_manager (window);
 	if (window->details->bookmarks_merge_id != 0) {
 		gtk_ui_manager_remove_ui (ui_manager,
 					  window->details->bookmarks_merge_id);
@@ -212,17 +212,17 @@ connect_proxy_cb (GtkActionGroup *action_group,
 
 /* Struct that stores all the info necessary to activate a bookmark. */
 typedef struct {
-        NautilusBookmark *bookmark;
-        NautilusWindow *window;
+        NemoBookmark *bookmark;
+        NemoWindow *window;
 	GCallback refresh_callback;
-	NautilusBookmarkFailedCallback failed_callback;
+	NemoBookmarkFailedCallback failed_callback;
 } BookmarkHolder;
 
 static BookmarkHolder *
-bookmark_holder_new (NautilusBookmark *bookmark, 
-		     NautilusWindow *window,
+bookmark_holder_new (NemoBookmark *bookmark, 
+		     NemoWindow *window,
 		     GCallback refresh_callback,
-		     NautilusBookmarkFailedCallback failed_callback)
+		     NemoBookmarkFailedCallback failed_callback)
 {
 	BookmarkHolder *new_bookmark_holder;
 
@@ -263,34 +263,34 @@ bookmark_holder_free_cover (gpointer callback_data, GClosure *closure)
 static void
 activate_bookmark_in_menu_item (GtkAction *action, gpointer user_data)
 {
-	NautilusWindowSlot *slot;
+	NemoWindowSlot *slot;
         BookmarkHolder *holder;
         GFile *location;
 
         holder = (BookmarkHolder *)user_data;
 
-	if (nautilus_bookmark_uri_known_not_to_exist (holder->bookmark)) {
+	if (nemo_bookmark_uri_known_not_to_exist (holder->bookmark)) {
 		holder->failed_callback (holder->window, holder->bookmark);
 	} else {
-	        location = nautilus_bookmark_get_location (holder->bookmark);
-		slot = nautilus_window_get_active_slot (holder->window);
-	        nautilus_window_slot_go_to (slot, 
+	        location = nemo_bookmark_get_location (holder->bookmark);
+		slot = nemo_window_get_active_slot (holder->window);
+	        nemo_window_slot_go_to (slot, 
 					    location, 
-					    nautilus_event_should_open_in_new_tab ());
+					    nemo_event_should_open_in_new_tab ());
 	        g_object_unref (location);
         }
 }
 
 void
-nautilus_menus_append_bookmark_to_menu (NautilusWindow *window, 
-					NautilusBookmark *bookmark, 
+nemo_menus_append_bookmark_to_menu (NemoWindow *window, 
+					NemoBookmark *bookmark, 
 					const char *parent_path,
 					const char *parent_id,
 					guint index_in_parent,
 					GtkActionGroup *action_group,
 					guint merge_id,
 					GCallback refresh_callback,
-					NautilusBookmarkFailedCallback failed_callback)
+					NemoBookmarkFailedCallback failed_callback)
 {
 	BookmarkHolder *bookmark_holder;
 	char action_name[128];
@@ -300,14 +300,14 @@ nautilus_menus_append_bookmark_to_menu (NautilusWindow *window,
 	GtkAction *action;
 	GtkWidget *menuitem;
 
-	g_assert (NAUTILUS_IS_WINDOW (window));
-	g_assert (NAUTILUS_IS_BOOKMARK (bookmark));
+	g_assert (NEMO_IS_WINDOW (window));
+	g_assert (NEMO_IS_BOOKMARK (bookmark));
 
 	bookmark_holder = bookmark_holder_new (bookmark, window, refresh_callback, failed_callback);
-	name = nautilus_bookmark_get_name (bookmark);
+	name = nemo_bookmark_get_name (bookmark);
 
 	/* Create menu item with pixbuf */
-	icon = nautilus_bookmark_get_icon (bookmark);
+	icon = nemo_bookmark_get_icon (bookmark);
 
 	g_snprintf (action_name, sizeof (action_name), "%s%d", parent_id, index_in_parent);
 
@@ -348,25 +348,25 @@ nautilus_menus_append_bookmark_to_menu (NautilusWindow *window,
 }
 
 static void
-update_bookmarks (NautilusWindow *window)
+update_bookmarks (NemoWindow *window)
 {
-        NautilusBookmarkList *bookmarks;
-	NautilusBookmark *bookmark;
+        NemoBookmarkList *bookmarks;
+	NemoBookmark *bookmark;
 	guint bookmark_count;
 	guint index;
 	GtkUIManager *ui_manager;
 
-	g_assert (NAUTILUS_IS_WINDOW (window));
+	g_assert (NEMO_IS_WINDOW (window));
 	g_assert (window->details->bookmarks_merge_id == 0);
 	g_assert (window->details->bookmarks_action_group == NULL);
 
 	if (window->details->bookmark_list == NULL) {
-		window->details->bookmark_list = nautilus_bookmark_list_new ();
+		window->details->bookmark_list = nemo_bookmark_list_new ();
 	}
 
 	bookmarks = window->details->bookmark_list;
 
-	ui_manager = nautilus_window_get_ui_manager (NAUTILUS_WINDOW (window));
+	ui_manager = nemo_window_get_ui_manager (NEMO_WINDOW (window));
 	
 	window->details->bookmarks_merge_id = gtk_ui_manager_new_merge_id (ui_manager);
 	window->details->bookmarks_action_group = gtk_action_group_new ("BookmarksGroup");
@@ -379,16 +379,16 @@ update_bookmarks (NautilusWindow *window)
 	g_object_unref (window->details->bookmarks_action_group);
 
 	/* append new set of bookmarks */
-	bookmark_count = nautilus_bookmark_list_length (bookmarks);
+	bookmark_count = nemo_bookmark_list_length (bookmarks);
 	for (index = 0; index < bookmark_count; ++index) {
-		bookmark = nautilus_bookmark_list_item_at (bookmarks, index);
+		bookmark = nemo_bookmark_list_item_at (bookmarks, index);
 
-		if (nautilus_bookmark_uri_known_not_to_exist (bookmark)) {
+		if (nemo_bookmark_uri_known_not_to_exist (bookmark)) {
 			continue;
 		}
 
-		nautilus_menus_append_bookmark_to_menu
-			(NAUTILUS_WINDOW (window),
+		nemo_menus_append_bookmark_to_menu
+			(NEMO_WINDOW (window),
 			 bookmark,
 			 MENU_PATH_BOOKMARKS_PLACEHOLDER,
 			 "dynamic",
@@ -401,24 +401,24 @@ update_bookmarks (NautilusWindow *window)
 }
 
 static void
-refresh_bookmarks_menu (NautilusWindow *window)
+refresh_bookmarks_menu (NemoWindow *window)
 {
-	g_assert (NAUTILUS_IS_WINDOW (window));
+	g_assert (NEMO_IS_WINDOW (window));
 
 	remove_bookmarks_menu_items (window);
 	update_bookmarks (window);
 }
 
 /**
- * nautilus_window_initialize_bookmarks_menu
+ * nemo_window_initialize_bookmarks_menu
  * 
  * Fill in bookmarks menu with stored bookmarks, and wire up signals
  * so we'll be notified when bookmark list changes.
  */
 void 
-nautilus_window_initialize_bookmarks_menu (NautilusWindow *window)
+nemo_window_initialize_bookmarks_menu (NemoWindow *window)
 {
-	g_assert (NAUTILUS_IS_WINDOW (window));
+	g_assert (NEMO_IS_WINDOW (window));
 
 	refresh_bookmarks_menu (window);
 

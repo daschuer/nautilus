@@ -1,5 +1,5 @@
-# #-#-#-#-#  ne.po (nautilus.gnome-2-20.ne)  #-#-#-#-#
-# translation of nautilus.gnome-2-20.ne.po to Nepali
+# #-#-#-#-#  ne.po (nemo.gnome-2-20.ne)  #-#-#-#-#
+# translation of nemo.gnome-2-20.ne.po to Nepali
 # This file is distributed under the same license as the PACKAGE package.
 # Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER.
 #
@@ -29,8 +29,8 @@
 #, fuzzy
 msgid ""
 msgstr ""
-"#-#-#-#-#  ne.po (nautilus.gnome-2-20.ne)  #-#-#-#-#\n"
-"Project-Id-Version: nautilus.gnome-2-20.ne\n"
+"#-#-#-#-#  ne.po (nemo.gnome-2-20.ne)  #-#-#-#-#\n"
+"Project-Id-Version: nemo.gnome-2-20.ne\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2007-09-19 03:43+0100\n"
 "PO-Revision-Date: 2008-01-07 15:50+0545\n"
@@ -163,8 +163,8 @@ msgid "Envy"
 msgstr "जलन"
 
 #. translators: this is the name of an emblem
-#: ../data/browser.xml.h:28 ../src/nautilus-emblem-sidebar.c:940
-#: ../src/nautilus-property-browser.c:1823
+#: ../data/browser.xml.h:28 ../src/nemo-emblem-sidebar.c:940
+#: ../src/nemo-property-browser.c:1823
 msgid "Erase"
 msgstr "मेटनुहोस्"
 
@@ -332,13 +332,13 @@ msgstr "चिन्हहरू"
 msgid "_Patterns"
 msgstr "बाँन्कीहरू"
 
-#: ../data/nautilus.xml.in.h:1
+#: ../data/nemo.xml.in.h:1
 msgid "Saved search"
 msgstr "बचत गरिएको खोजी"
 
 #. Translators: date_modified - mtime, the last time file contents were changed
 #. date_changed  - ctime, the last time file meta-information changed
-#: ../libnautilus-private/apps_nautilus_preferences.schemas.in.h:3
+#: ../libnemo-private/apps_nemo_preferences.schemas.in.h:3
 msgid ""
 "A list of captions below an icon in the icon view and the desktop. The "
 "actual number of captions shown depends on the zoom level. Possible values "
@@ -351,23 +351,23 @@ msgstr ""
 "\"परिमार्जित मिति\", \"परिवर्तित मिति\", \"पहुँच गरिएको मिति \", \"मालिक\", \"समूह"
 "\", \"अनुमतिहरू\", \"अष्ठक अनुमतिहरू\" र \"माईम प्रकार\" हुन ।"
 
-#: ../libnautilus-private/apps_nautilus_preferences.schemas.in.h:4
+#: ../libnemo-private/apps_nemo_preferences.schemas.in.h:4
 msgid "Always use the location entry, instead of the pathbar"
 msgstr "मार्गपट्टीको सट्टामा सधैँ स्थान प्रविष्टि प्रयोग गर्नुहोस्"
 
-#: ../libnautilus-private/apps_nautilus_preferences.schemas.in.h:5
+#: ../libnemo-private/apps_nemo_preferences.schemas.in.h:5
 msgid "Computer icon visible on desktop"
 msgstr "डेस्कटपमा कम्प्युटर प्रतिमा दृश्यात्मक"
 
-#: ../libnautilus-private/apps_nautilus_preferences.schemas.in.h:6
+#: ../libnemo-private/apps_nemo_preferences.schemas.in.h:6
 msgid "Criteria for search bar searching"
 msgstr "खोजी पट्टी खोजीका लागि मापदण्ड"
 
-#: ../libnautilus-private/apps_nautilus_preferences.schemas.in.h:7
+#: ../libnemo-private/apps_nemo_preferences.schemas.in.h:7
 msgid ""
 "Criteria when matching files searched for in the search bar. If set to "
-"\"search_by_text\", then Nautilus will Search for files by file name only. "
-"If set to \"search_by_text_and_properties\", then Nautilus will search for "
+"\"search_by_text\", then Nemo will Search for files by file name only. "
+"If set to \"search_by_text_and_properties\", then Nemo will search for "
 "files by file name and file properties."
 msgstr ""
 "खोजी पट्टीमा मिल्दो फाइलहरूका लागि खोजी गर्दा मापदण्ड । यदि \"search_by_text\" मा "
@@ -375,103 +375,103 @@ msgstr ""
 "\"search_by_text_and_properties\" मा सेट गरेमा, नउटिलसले फाइलहरूका लागि फाइल नाम "
 "र फाइल गुणद्वारा खोजी गर्नेछ ।"
 
-#: ../libnautilus-private/apps_nautilus_preferences.schemas.in.h:8
-msgid "Current Nautilus theme (deprecated)"
+#: ../libnemo-private/apps_nemo_preferences.schemas.in.h:8
+msgid "Current Nemo theme (deprecated)"
 msgstr "हालको नउटिलस विषयवस्तु (बिरोध गरिएको)"
 
-#: ../libnautilus-private/apps_nautilus_preferences.schemas.in.h:9
+#: ../libnemo-private/apps_nemo_preferences.schemas.in.h:9
 msgid "Custom Background Set"
 msgstr "अनुकूल पृष्ठभूमि सेट"
 
-#: ../libnautilus-private/apps_nautilus_preferences.schemas.in.h:10
+#: ../libnemo-private/apps_nemo_preferences.schemas.in.h:10
 msgid "Custom Side Pane Background Set"
 msgstr "अनुकूल छेउ फलक पृष्ठभूमि सेट"
 
-#: ../libnautilus-private/apps_nautilus_preferences.schemas.in.h:11
+#: ../libnemo-private/apps_nemo_preferences.schemas.in.h:11
 msgid "Date Format"
 msgstr "मिति ढाँचा"
 
-#: ../libnautilus-private/apps_nautilus_preferences.schemas.in.h:12
+#: ../libnemo-private/apps_nemo_preferences.schemas.in.h:12
 msgid "Default Background Color"
 msgstr "पूर्वनिर्धारित पृष्ठभूमि रङ"
 
-#: ../libnautilus-private/apps_nautilus_preferences.schemas.in.h:13
+#: ../libnemo-private/apps_nemo_preferences.schemas.in.h:13
 msgid "Default Background Filename"
 msgstr "पूर्वनिर्धारित पृष्ठभूमि फाइल नाम"
 
-#: ../libnautilus-private/apps_nautilus_preferences.schemas.in.h:14
+#: ../libnemo-private/apps_nemo_preferences.schemas.in.h:14
 msgid "Default Side Pane Background Color"
 msgstr "पूर्वनिर्धारित छेउ फलक पृष्ठभूमि रङ"
 
-#: ../libnautilus-private/apps_nautilus_preferences.schemas.in.h:15
+#: ../libnemo-private/apps_nemo_preferences.schemas.in.h:15
 msgid "Default Side Pane Background Filename"
 msgstr "पूर्वनिर्धारित छेउ फलक पृष्ठभूमि फाइल नाम"
 
-#: ../libnautilus-private/apps_nautilus_preferences.schemas.in.h:16
+#: ../libnemo-private/apps_nemo_preferences.schemas.in.h:16
 msgid "Default Thumbnail Icon Size"
 msgstr "पूर्वनिर्धारित थम्बनेल प्रतिमा साइज"
 
-#: ../libnautilus-private/apps_nautilus_preferences.schemas.in.h:17
+#: ../libnemo-private/apps_nemo_preferences.schemas.in.h:17
 msgid "Default column order in the list view"
 msgstr "सूची दृश्यमा पूर्वनिर्धारित स्तम्भ क्रम"
 
-#: ../libnautilus-private/apps_nautilus_preferences.schemas.in.h:18
+#: ../libnemo-private/apps_nemo_preferences.schemas.in.h:18
 msgid "Default column order in the list view."
 msgstr "सूची दृश्यमा पूर्वनिर्धारित स्तम्भ क्रम ।"
 
-#: ../libnautilus-private/apps_nautilus_preferences.schemas.in.h:19
+#: ../libnemo-private/apps_nemo_preferences.schemas.in.h:19
 msgid "Default folder viewer"
 msgstr "पूर्वनिर्धारित फोल्डर दर्शक"
 
-#: ../libnautilus-private/apps_nautilus_preferences.schemas.in.h:20
+#: ../libnemo-private/apps_nemo_preferences.schemas.in.h:20
 msgid "Default icon zoom level"
 msgstr "पूर्वनिर्धारित प्रतिमा जुम तह"
 
-#: ../libnautilus-private/apps_nautilus_preferences.schemas.in.h:21
+#: ../libnemo-private/apps_nemo_preferences.schemas.in.h:21
 msgid "Default list of columns visible in the list view"
 msgstr "सूची दृश्यमा दृश्यात्मक स्तम्भहरूको पूर्वनिर्धारित सूची"
 
-#: ../libnautilus-private/apps_nautilus_preferences.schemas.in.h:22
+#: ../libnemo-private/apps_nemo_preferences.schemas.in.h:22
 msgid "Default list of columns visible in the list view."
 msgstr "सूची दृश्यमा दृश्यात्मक स्तम्भहरूको पूर्वनिर्धारित सूची ।"
 
-#: ../libnautilus-private/apps_nautilus_preferences.schemas.in.h:23
+#: ../libnemo-private/apps_nemo_preferences.schemas.in.h:23
 msgid "Default list zoom level"
 msgstr "पूर्वनिर्धारित सूची जुम तह"
 
-#: ../libnautilus-private/apps_nautilus_preferences.schemas.in.h:24
+#: ../libnemo-private/apps_nemo_preferences.schemas.in.h:24
 msgid "Default sort order"
 msgstr "पूर्वनिर्धारित क्रमबद्ध क्रम"
 
-#: ../libnautilus-private/apps_nautilus_preferences.schemas.in.h:25
+#: ../libnemo-private/apps_nemo_preferences.schemas.in.h:25
 msgid "Default zoom level used by the icon view."
 msgstr "प्रतिमा दृश्यद्वारा प्रयोग गरिएको पूर्वनिर्धारित जुम तह ।"
 
-#: ../libnautilus-private/apps_nautilus_preferences.schemas.in.h:26
+#: ../libnemo-private/apps_nemo_preferences.schemas.in.h:26
 msgid "Default zoom level used by the list view."
 msgstr "सूची दृश्यद्वारा प्रयोग गरिएको पूर्वनिर्धारित जुम तह ।"
 
-#: ../libnautilus-private/apps_nautilus_preferences.schemas.in.h:27
+#: ../libnemo-private/apps_nemo_preferences.schemas.in.h:27
 msgid "Desktop computer icon name"
 msgstr "डेस्कटप कम्प्युटर प्रतिमा नाम"
 
-#: ../libnautilus-private/apps_nautilus_preferences.schemas.in.h:28
+#: ../libnemo-private/apps_nemo_preferences.schemas.in.h:28
 msgid "Desktop font"
 msgstr "डेस्कटप फन्ट"
 
-#: ../libnautilus-private/apps_nautilus_preferences.schemas.in.h:29
+#: ../libnemo-private/apps_nemo_preferences.schemas.in.h:29
 msgid "Desktop home icon name"
 msgstr "डेस्कटप गृह प्रतिमा नाम"
 
-#: ../libnautilus-private/apps_nautilus_preferences.schemas.in.h:30
+#: ../libnemo-private/apps_nemo_preferences.schemas.in.h:30
 msgid "Desktop trash icon name"
 msgstr "डेस्कटप रद्दीटोकरी प्रतिमा नाम"
 
-#: ../libnautilus-private/apps_nautilus_preferences.schemas.in.h:31
-msgid "Enables the classic Nautilus behavior, where all windows are browsers"
+#: ../libnemo-private/apps_nemo_preferences.schemas.in.h:31
+msgid "Enables the classic Nemo behavior, where all windows are browsers"
 msgstr "प्राचीन नउटिलस व्यवहार सक्षम पार्दछ, जहाँ सबै सञ्झ्यालहरू ब्राउजरहरू हुन"
 
-#: ../libnautilus-private/apps_nautilus_preferences.schemas.in.h:32
+#: ../libnemo-private/apps_nemo_preferences.schemas.in.h:32
 msgid ""
 "Filename for the default folder background. Only used if background_set is "
 "true."
@@ -479,7 +479,7 @@ msgstr ""
 "पूर्वनिर्धारित फोल्डर पृष्ठभूमिका लागि फाइलनाम । यदि पृष्ठभूमि सेट ठीक छ भने मात्र प्रयोग "
 "गरिन्छ ।"
 
-#: ../libnautilus-private/apps_nautilus_preferences.schemas.in.h:33
+#: ../libnemo-private/apps_nemo_preferences.schemas.in.h:33
 msgid ""
 "Filename for the default side pane background. Only used if "
 "side_pane_background_set is true."
@@ -487,10 +487,10 @@ msgstr ""
 "पूर्वनिर्धारित साइड फलक पृष्ठभूमिका लागि फाइल नाम । यदि साइड फलक पृष्ठभूमि सेट ठीक भए "
 "मात्र प्रयोग गरिन्छ ।"
 
-#: ../libnautilus-private/apps_nautilus_preferences.schemas.in.h:34
+#: ../libnemo-private/apps_nemo_preferences.schemas.in.h:34
 msgid ""
 "Folders over this size will be truncated to around this size. The purpose of "
-"this is to avoid unintentionally blowing the heap and killing Nautilus on "
+"this is to avoid unintentionally blowing the heap and killing Nemo on "
 "massive folders. A negative value denotes no limit. The limit is approximate "
 "due to the reading of folders chunk-wise."
 msgstr ""
@@ -499,74 +499,74 @@ msgstr ""
 "नकरात्मक मानले कुनै सीमा निर्दिष्ट गर्दैन । सीमा भनेको लगभग फोल्डरहरूको टुक्रागत पढाइको "
 "कारणले हो ।"
 
-#: ../libnautilus-private/apps_nautilus_preferences.schemas.in.h:35
+#: ../libnemo-private/apps_nemo_preferences.schemas.in.h:35
 msgid "Home icon visible on desktop"
 msgstr "डेस्कटपमा गृह प्रतिमा दृश्यात्मक छ"
 
-#: ../libnautilus-private/apps_nautilus_preferences.schemas.in.h:36
+#: ../libnemo-private/apps_nemo_preferences.schemas.in.h:36
 msgid ""
-"If set to true, Nautilus will only show folders in the tree side pane. "
+"If set to true, Nemo will only show folders in the tree side pane. "
 "Otherwise it will show both folders and files."
 msgstr ""
 "यदि ठीकसँग सेट गरेमा, नटलसले ट्रि छेउ फलक भित्र फोल्डरहरू मात्र देखाउनेछ । अन्यथा यसले "
 "फोल्डरहरू र फाइलहरू दुवै देखाउनेछ ।"
 
-#: ../libnautilus-private/apps_nautilus_preferences.schemas.in.h:37
+#: ../libnemo-private/apps_nemo_preferences.schemas.in.h:37
 msgid ""
 "If set to true, newly opened windows will have the location bar visible."
 msgstr "यदि ठीकसँग सेट गरेमा, नयाँ खोलिएको सञ्झ्यालहरूको स्थानपट्टी दृश्यात्मक हुनेछ ।"
 
-#: ../libnautilus-private/apps_nautilus_preferences.schemas.in.h:38
+#: ../libnemo-private/apps_nemo_preferences.schemas.in.h:38
 msgid "If set to true, newly opened windows will have the side pane visible."
 msgstr "यदि सेट ठीकसँग गरेमा, नयाँ खोलिएको सञ्झ्यालहरूको छेउ फलक दृश्यात्मक हुनेछ ।"
 
-#: ../libnautilus-private/apps_nautilus_preferences.schemas.in.h:39
+#: ../libnemo-private/apps_nemo_preferences.schemas.in.h:39
 msgid "If set to true, newly opened windows will have the status bar visible."
 msgstr "यदि ठीकसँग सेट गरेमा, नयाँ खोलिएको सञ्झ्यालहरूको स्थितिपट्टी दृश्यात्मक हुनेछ ।"
 
-#: ../libnautilus-private/apps_nautilus_preferences.schemas.in.h:40
+#: ../libnemo-private/apps_nemo_preferences.schemas.in.h:40
 msgid "If set to true, newly opened windows will have toolbars visible."
 msgstr "यदि ठीकसँग सेट गरेमा, नयाँ खोलिएको सञ्झ्यालहरूको उपकरणपट्टीहरू दृश्यात्मक हुनेछ ।"
 
-#: ../libnautilus-private/apps_nautilus_preferences.schemas.in.h:41
+#: ../libnemo-private/apps_nemo_preferences.schemas.in.h:41
 msgid ""
-"If set to true, then Nautilus browser windows will always use a textual "
+"If set to true, then Nemo browser windows will always use a textual "
 "input entry for the location toolbar, instead of the pathbar."
 msgstr ""
 "यदि ठीकसँग सेट गरेमा, नटलस ब्राउजर सञ्झ्यालहरूले स्थान उपकरणपट्टीका लागि मार्ग पट्टीको "
 "सट्टामा सधै मौलिक आगत प्रविष्टि प्रयोग गर्नेछ ।"
 
-#: ../libnautilus-private/apps_nautilus_preferences.schemas.in.h:42
+#: ../libnemo-private/apps_nemo_preferences.schemas.in.h:42
 msgid ""
-"If set to true, then Nautilus lets you edit and display file permissions in "
+"If set to true, then Nemo lets you edit and display file permissions in "
 "a more unix-like way, accessing some more esoteric options."
 msgstr ""
 "यदि ठीकसँग सेट गरेमा, नटलसले तपाईँलाई धेरै युनिक्स-जस्तै बाटोमा फाइल अनुमतिहरू केही धेरै गुप्त "
 "विकल्पहरू पहुँच गरेर सम्पादन गर्न अनुमति दिन्छ ।"
 
-#: ../libnautilus-private/apps_nautilus_preferences.schemas.in.h:43
+#: ../libnemo-private/apps_nemo_preferences.schemas.in.h:43
 msgid ""
-"If set to true, then Nautilus shows folders prior to showing files in the "
+"If set to true, then Nemo shows folders prior to showing files in the "
 "icon and list views."
 msgstr ""
 "यदि ठीकसँग सेट गरेमा, नटलसले प्रतिमा र सूची दृश्यहरूमा फाइलहरू देखाउन फोल्डर प्राथमिकता "
 "देखाउँदछ ।"
 
-#: ../libnautilus-private/apps_nautilus_preferences.schemas.in.h:44
+#: ../libnemo-private/apps_nemo_preferences.schemas.in.h:44
 msgid ""
-"If set to true, then Nautilus will ask for confirmation when you attempt to "
+"If set to true, then Nemo will ask for confirmation when you attempt to "
 "delete files, or empty the Trash."
 msgstr ""
 "यदि ठीकसँग सेट गरेमा, तपाईँले फाइलहरू मेट्न, वा रद्दीटोकरी खाली गर्न प्रयत्न गर्नुहुन्छ "
 "नटलसले यकिनका लागि सोध्नेछ ।"
 
-#: ../libnautilus-private/apps_nautilus_preferences.schemas.in.h:45
-msgid "If set to true, then Nautilus will draw the icons on the desktop."
+#: ../libnemo-private/apps_nemo_preferences.schemas.in.h:45
+msgid "If set to true, then Nemo will draw the icons on the desktop."
 msgstr "यदि ठीकसँग सेट गरेमा, नटलसले डेस्कटपमा प्रतिमाहरू कोर्नेछ ।"
 
-#: ../libnautilus-private/apps_nautilus_preferences.schemas.in.h:46
+#: ../libnemo-private/apps_nemo_preferences.schemas.in.h:46
 msgid ""
-"If set to true, then Nautilus will have a feature allowing you to delete a "
+"If set to true, then Nemo will have a feature allowing you to delete a "
 "file immediately and in-place, instead of moving it to the trash. This "
 "feature can be dangerous, so use caution."
 msgstr ""
@@ -574,25 +574,25 @@ msgstr ""
 "सार्नुको सट्टा फाइल तुरून्त मेट्न अनुमति दिन्छ । यो विशेषता खतरनाक हुनसक्दछ, त्यसैले सावधानी "
 "अपनाउनुहोस् ।"
 
-#: ../libnautilus-private/apps_nautilus_preferences.schemas.in.h:47
+#: ../libnemo-private/apps_nemo_preferences.schemas.in.h:47
 msgid ""
-"If set to true, then Nautilus will use the user's home folder as the "
+"If set to true, then Nemo will use the user's home folder as the "
 "desktop. If it is false, then it will use ~/Desktop as the desktop."
 msgstr ""
 "यदि सहि तरिकाले सेट गरेमा, नटलसले डेस्कटपको रूपमा प्रयोगकर्ताको गृह फोल्डर प्रयोग गर्नेछ । "
 "यदि यो गलत छ भने, यसले डेस्कटपको रूपमा ~/डेस्कटप प्रयोग गर्नेछ ।"
 
-#: ../libnautilus-private/apps_nautilus_preferences.schemas.in.h:48
+#: ../libnemo-private/apps_nemo_preferences.schemas.in.h:48
 msgid ""
-"If set to true, then all Nautilus windows will be browser windows. This is "
-"how Nautilus used to behave before version 2.6, and some people prefer this "
+"If set to true, then all Nemo windows will be browser windows. This is "
+"how Nemo used to behave before version 2.6, and some people prefer this "
 "behavior."
 msgstr ""
 "यदि सहि तरिकाले सेट गरेमा, सबै नटलस सञ्झ्यालहरू ब्राउजर सञ्झ्यालहरू हुनेछन् । यसले संस्करण "
 "२.६ भन्दा पहिले नटलसले कस्तो व्यवहार र्ने गर्दथ्यो र केही मानिसहरूले यस्तो ब्यबहार रुचाउँथ्यो "
 "भन्ने देखाउँदछ ।"
 
-#: ../libnautilus-private/apps_nautilus_preferences.schemas.in.h:49
+#: ../libnemo-private/apps_nemo_preferences.schemas.in.h:49
 msgid ""
 "If set to true, then backup files such as those created by Emacs are "
 "displayed. Currently, only files ending in a tilde (~) are considered backup "
@@ -601,7 +601,7 @@ msgstr ""
 "यदि सहि तरिकाले सेट गरेमा, इम्याक्सद्वारा सिर्जना गरिएको जस्तै जगेडा फाइलहरू प्रदर्शन "
 "गरिन्छन् । हालै, टिल्ड (~) मा अन्त्य हुने फाइलहरूलाई मात्र जगेडा फाइलहरूको रूपमा लिइन्छ ।"
 
-#: ../libnautilus-private/apps_nautilus_preferences.schemas.in.h:50
+#: ../libnemo-private/apps_nemo_preferences.schemas.in.h:50
 msgid ""
 "If set to true, then hidden files are shown in the file manager. Hidden "
 "files are either dotfiles or are listed in the folder's .hidden file."
@@ -609,7 +609,7 @@ msgstr ""
 "यदि सहि तरिकाले सेट गरेमा, लुकेका फाइलहरू फाइल प्रबन्धकमा देखाइन्छ । लुकेका फाइलहरू या त "
 "डटफाइलहरू हुन वा फोल्डरको .hidden file मा सूचीबद्ध गरिएको हुन्छ ।"
 
-#: ../libnautilus-private/apps_nautilus_preferences.schemas.in.h:51
+#: ../libnemo-private/apps_nemo_preferences.schemas.in.h:51
 msgid ""
 "If this is set to true, an icon linking to the Network Servers view will be "
 "put on the desktop."
@@ -617,7 +617,7 @@ msgstr ""
 "यदि यो सहि तरिकाले सेट गरिएको छ भने, सञ्जाल सर्भर दृश्यसँग लिङ्क भएको एउटा प्रतिमा "
 "डेस्कटपमा राखिनेछ ।"
 
-#: ../libnautilus-private/apps_nautilus_preferences.schemas.in.h:52
+#: ../libnemo-private/apps_nemo_preferences.schemas.in.h:52
 msgid ""
 "If this is set to true, an icon linking to the computer location will be put "
 "on the desktop."
@@ -625,7 +625,7 @@ msgstr ""
 "यदि यो सहि तरिकाले सेट गरिएको छ भने, कम्प्युटर स्थानसँग लिङ्क भएको एउटा प्रतिमा "
 "डेस्कटपमा राखिनेछ ।"
 
-#: ../libnautilus-private/apps_nautilus_preferences.schemas.in.h:53
+#: ../libnemo-private/apps_nemo_preferences.schemas.in.h:53
 msgid ""
 "If this is set to true, an icon linking to the home folder will be put on "
 "the desktop."
@@ -633,7 +633,7 @@ msgstr ""
 "यदि यो सहि तरिकाले सेट गरिएको छ भने, गृह फोल्डरसँग लिङ्क भएको एउटा प्रतिमा डेस्कटपमा "
 "राखिनेछ ।"
 
-#: ../libnautilus-private/apps_nautilus_preferences.schemas.in.h:54
+#: ../libnemo-private/apps_nemo_preferences.schemas.in.h:54
 msgid ""
 "If this is set to true, an icon linking to the trash will be put on the "
 "desktop."
@@ -641,7 +641,7 @@ msgstr ""
 "यदि यो सहि तरिकाले सेट गरिएको छ भने, रद्दीटोकरीसँग लिङ्क भएको एउटा प्रतिमा डेस्कटपमा "
 "राखिनेछ ।"
 
-#: ../libnautilus-private/apps_nautilus_preferences.schemas.in.h:55
+#: ../libnemo-private/apps_nemo_preferences.schemas.in.h:55
 msgid ""
 "If this is set to true, icons linking to mounted volumes will be put on the "
 "desktop."
@@ -649,7 +649,7 @@ msgstr ""
 "यदि यो सहि तरिकाले सेट गरिएको छ भने, माउन्ट गरिएको भोल्युमसँग लिङ्क भएको प्रतिमाहरू "
 "डेस्कटपमा राखिनेछन् ।"
 
-#: ../libnautilus-private/apps_nautilus_preferences.schemas.in.h:56
+#: ../libnemo-private/apps_nemo_preferences.schemas.in.h:56
 msgid ""
 "If true, files in new windows will be sorted in reverse order. ie, if sorted "
 "by name, then instead of sorting the files from \"a\" to \"z\", they will be "
@@ -659,7 +659,7 @@ msgstr ""
 "नामद्वारा क्रमबद्ध गरेमा, \"a\" देखि \"z\" सम्म फाइलहरू क्रमबद्ध गर्नुको सट्टा, \"z\" "
 "देखि \"a\" सम्म क्रमबद्ध गरिनेछ ।"
 
-#: ../libnautilus-private/apps_nautilus_preferences.schemas.in.h:57
+#: ../libnemo-private/apps_nemo_preferences.schemas.in.h:57
 msgid ""
 "If true, files in new windows will be sorted in reverse order. ie, if sorted "
 "by name, then instead of sorting the files from \"a\" to \"z\", they will be "
@@ -671,20 +671,20 @@ msgstr ""
 "देखि \"a\" सम्म क्रमबद्ध गरिनेछ; यदि साइजद्वारा क्रमबद्ध गरिएमा बढोत्तरीको सट्टा "
 "तिनिहरू घट्दो तरिकाले क्रमबद्ध गरिनेनेछ ।"
 
-#: ../libnautilus-private/apps_nautilus_preferences.schemas.in.h:58
+#: ../libnemo-private/apps_nemo_preferences.schemas.in.h:58
 msgid "If true, icons will be laid out tighter by default in new windows."
 msgstr "यदि सहि भएमा, प्रतिमाहरू पूर्वनिर्धारितद्वारा नयाँ सञ्झ्यालमा दह्रोसँग राखिनेछ ।"
 
-#: ../libnautilus-private/apps_nautilus_preferences.schemas.in.h:59
+#: ../libnemo-private/apps_nemo_preferences.schemas.in.h:59
 msgid ""
 "If true, labels will be placed beside icons rather than underneath them."
 msgstr "यदि सहि भए, लेबुलहरू प्रतिमाहरूको मुनि भन्दा प्रतिमाकोसँगै राखिनेछ ।"
 
-#: ../libnautilus-private/apps_nautilus_preferences.schemas.in.h:60
+#: ../libnemo-private/apps_nemo_preferences.schemas.in.h:60
 msgid "If true, new windows will use manual layout by default."
 msgstr "यदि सहि छ भने, नयाँ सञ्झ्यालहरूले पूर्वनिर्धारितद्वारा म्यानुअल सजावट प्रयोग गर्नेछ ।"
 
-#: ../libnautilus-private/apps_nautilus_preferences.schemas.in.h:61
+#: ../libnemo-private/apps_nemo_preferences.schemas.in.h:61
 msgid ""
 "Images over this size (in bytes) won't be thumbnailed. The purpose of this "
 "setting is to avoid thumbnailing large images that may take a long time to "
@@ -693,47 +693,47 @@ msgstr ""
 "यस साइज (बाइट्समा) भन्दा बढीको छविहरूलाई थम्बनेल गरिने छैन । यो सेटिङको उद्देश्य ठूलो "
 "छविहरूलाई थम्बनेल गर्न बाट हटाउनु हो जसले लोड हुन धेरै समय लिन्छ र धेरै स्मृति प्रयोग गर्दछ ।"
 
-#: ../libnautilus-private/apps_nautilus_preferences.schemas.in.h:62
+#: ../libnemo-private/apps_nemo_preferences.schemas.in.h:62
 msgid "List of possible captions on icons"
 msgstr "प्रतिमाहरूमा सम्भाव्य क्याप्सनहरूको सूची"
 
-#: ../libnautilus-private/apps_nautilus_preferences.schemas.in.h:63
+#: ../libnemo-private/apps_nemo_preferences.schemas.in.h:63
 msgid "Maximum handled files in a folder"
 msgstr "फोल्डरमा अघिकतम ह्यान्डल गरिएका फाइलहरू"
 
-#: ../libnautilus-private/apps_nautilus_preferences.schemas.in.h:64
+#: ../libnemo-private/apps_nemo_preferences.schemas.in.h:64
 msgid "Maximum image size for thumbnailing"
 msgstr "थम्बनेल गर्नका लागि अधिकतम छवि साइज"
 
-#: ../libnautilus-private/apps_nautilus_preferences.schemas.in.h:65
+#: ../libnemo-private/apps_nemo_preferences.schemas.in.h:65
 msgid ""
-"Name of the Nautilus theme to use. This has been deprecated as of Nautilus "
+"Name of the Nemo theme to use. This has been deprecated as of Nemo "
 "2.2. Please use the icon theme instead."
 msgstr ""
 "प्रयोग गर्नलाई नटलस विषयवस्तुको नाम । यसलाई नटलस २.२ को विरूद्ध गरिएको छ । कृपया "
 "सट्टामा प्रतिमा प्रयोग गर्नुहोस् ।"
 
-#: ../libnautilus-private/apps_nautilus_preferences.schemas.in.h:66
-msgid "Nautilus handles drawing the desktop"
+#: ../libnemo-private/apps_nemo_preferences.schemas.in.h:66
+msgid "Nemo handles drawing the desktop"
 msgstr "नटलसले डेस्कटप कोर्न ह्यान्डल गर्दछ"
 
-#: ../libnautilus-private/apps_nautilus_preferences.schemas.in.h:67
-msgid "Nautilus uses the users home folder as the desktop"
+#: ../libnemo-private/apps_nemo_preferences.schemas.in.h:67
+msgid "Nemo uses the users home folder as the desktop"
 msgstr "नटलसले डेस्कटपको रूपमा प्रयोगकर्ता गृह फोल्डर प्रयोग गर्दछ"
 
-#: ../libnautilus-private/apps_nautilus_preferences.schemas.in.h:68
+#: ../libnemo-private/apps_nemo_preferences.schemas.in.h:68
 msgid "Network Servers icon visible on the desktop"
 msgstr "डेस्कटपमा सञ्जाल सर्भर प्रतिमा दृश्यात्मक छ"
 
-#: ../libnautilus-private/apps_nautilus_preferences.schemas.in.h:69
+#: ../libnemo-private/apps_nemo_preferences.schemas.in.h:69
 msgid "Network servers icon name"
 msgstr "सञ्जाल सर्भर प्रतिमा नाम"
 
-#: ../libnautilus-private/apps_nautilus_preferences.schemas.in.h:70
+#: ../libnemo-private/apps_nemo_preferences.schemas.in.h:70
 msgid "Only show folders in the tree side pane"
 msgstr "ट्रि छेउ फलकमा फोल्डरहरू मात्र देखाउनुहोस्"
 
-#: ../libnautilus-private/apps_nautilus_preferences.schemas.in.h:71
+#: ../libnemo-private/apps_nemo_preferences.schemas.in.h:71
 msgid ""
 "Possible values are \"single\" to launch files on a single click, or \"double"
 "\" to launch them on a double click."
@@ -741,54 +741,54 @@ msgstr ""
 "सम्भाव्य मानहरू फाइललाई एकल क्लिकमा सुरुआत गर्न \"एकल\", वा फाइलहरूलाई डबल क्लिकमा "
 "सुरुआत गर्न \"डवल\" हुन ।"
 
-#: ../libnautilus-private/apps_nautilus_preferences.schemas.in.h:72
+#: ../libnemo-private/apps_nemo_preferences.schemas.in.h:72
 msgid "Put labels beside icons"
 msgstr "लेबुलहरू प्रतिमाहरूको छेउमा राख्नुहोस्"
 
-#: ../libnautilus-private/apps_nautilus_preferences.schemas.in.h:73
+#: ../libnemo-private/apps_nemo_preferences.schemas.in.h:73
 msgid "Reverse sort order in new windows"
 msgstr "नयाँ सञ्झ्यालहरूमा क्रमबद्ध क्रम उल्टो पार्नुहोस्"
 
 #. Translators: please note this can choose the size. e.g.
 #. "Sans 15". Please do not change "Sans", only change the size if you need to. In
 #. most cases, this should be left alone.
-#: ../libnautilus-private/apps_nautilus_preferences.schemas.in.h:77
+#: ../libnemo-private/apps_nemo_preferences.schemas.in.h:77
 msgid "Sans 10"
 msgstr "सान्स १०"
 
-#: ../libnautilus-private/apps_nautilus_preferences.schemas.in.h:78
+#: ../libnemo-private/apps_nemo_preferences.schemas.in.h:78
 msgid "Show advanced permissions in in the file property dialog"
 msgstr "फाइल गुण संवादमा उन्नत अनुमतिहरू देखाउनुहोस्"
 
-#: ../libnautilus-private/apps_nautilus_preferences.schemas.in.h:79
+#: ../libnemo-private/apps_nemo_preferences.schemas.in.h:79
 msgid "Show folders first in windows"
 msgstr "सञ्झ्यालहरूमा पहिले फोल्डरहरू देखाउनुहोस्"
 
-#: ../libnautilus-private/apps_nautilus_preferences.schemas.in.h:80
+#: ../libnemo-private/apps_nemo_preferences.schemas.in.h:80
 msgid "Show location bar in new windows"
 msgstr "नयाँ सञ्झ्यालहरूमा स्थानपट्टी देखाउनुहोस्"
 
-#: ../libnautilus-private/apps_nautilus_preferences.schemas.in.h:81
+#: ../libnemo-private/apps_nemo_preferences.schemas.in.h:81
 msgid "Show mounted volumes on the desktop"
 msgstr "डेस्कटपमा माउन्ट गरिएका भोल्युमहरू देखाउनुहोस्"
 
-#: ../libnautilus-private/apps_nautilus_preferences.schemas.in.h:82
+#: ../libnemo-private/apps_nemo_preferences.schemas.in.h:82
 msgid "Show side pane in new windows"
 msgstr "नयाँ सञ्झ्यालहरूमा छेउ फलक देखाउनुहोस्"
 
-#: ../libnautilus-private/apps_nautilus_preferences.schemas.in.h:83
+#: ../libnemo-private/apps_nemo_preferences.schemas.in.h:83
 msgid "Show status bar in new windows"
 msgstr "नयाँ सञ्झ्यालहरूमा वस्तुस्थिति पट्टी देखाउनुहोस्"
 
-#: ../libnautilus-private/apps_nautilus_preferences.schemas.in.h:84
+#: ../libnemo-private/apps_nemo_preferences.schemas.in.h:84
 msgid "Show toolbar in new windows"
 msgstr "नयाँ सञ्झ्यालहरूमा उपकरणपट्टी देखाउनुहोस्"
 
-#: ../libnautilus-private/apps_nautilus_preferences.schemas.in.h:85
+#: ../libnemo-private/apps_nemo_preferences.schemas.in.h:85
 msgid "Side pane view"
 msgstr "छेउ फलक दृश्य"
 
-#: ../libnautilus-private/apps_nautilus_preferences.schemas.in.h:86
+#: ../libnemo-private/apps_nemo_preferences.schemas.in.h:86
 msgid ""
 "Speed tradeoff for when to preview a sound file when mousing over a files "
 "icon. If set to \"always\" then always plays the sound, even if the file is "
@@ -801,7 +801,7 @@ msgstr ""
 "पूर्वावलोकनत्रहरू बजाउँदछ । यदि \"never\" मा सेट गर्नुभयो भने यसले कहिले पनि ध्वनि "
 "पूर्वावलोकन गर्दैन ।"
 
-#: ../libnautilus-private/apps_nautilus_preferences.schemas.in.h:87
+#: ../libnemo-private/apps_nemo_preferences.schemas.in.h:87
 msgid ""
 "Speed tradeoff for when to show a preview of text file contents in the "
 "file's icon. If set to \"always\" then always show previews, even if the "
@@ -815,7 +815,7 @@ msgstr ""
 "लागि पूर्वावलोकन मात्र देखाउनुहोस् । यदि \"never\" मा सेट गरेमा कहिले पनि पूर्वावलोकन "
 "डेटा पढ्न झञ्झट नगर्नुहोस् ।"
 
-#: ../libnautilus-private/apps_nautilus_preferences.schemas.in.h:88
+#: ../libnemo-private/apps_nemo_preferences.schemas.in.h:88
 msgid ""
 "Speed tradeoff for when to show an image file as a thumbnail. If set to "
 "\"always\" then always thumbnail, even if the folder is on a remote server. "
@@ -829,7 +829,7 @@ msgstr ""
 "। यदि \"never\" मा सेट गरेमा कहिले पनि थम्बनेल छविलाई दिक्क नगर्नुहोस्, मात्र साधारण "
 "प्रतिमा प्रयोग गर्नुहोस् ।"
 
-#: ../libnautilus-private/apps_nautilus_preferences.schemas.in.h:89
+#: ../libnemo-private/apps_nemo_preferences.schemas.in.h:89
 msgid ""
 "Speed tradeoff for when to show the number of items in a folder. If set to "
 "\"always\" then always show item counts, even if the folder is on a remote "
@@ -841,11 +841,11 @@ msgstr ""
 "\"local_only\" सेट गरेमा स्थनिय फाइल प्रणालीहरूका लागि गणना मात्र देखाउनुहोस् । यदि "
 "\"never\" मा सेट गर्नुभयो भने वस्तु गणना गर्न झञ्झट नमान्नुहोस् ।"
 
-#: ../libnautilus-private/apps_nautilus_preferences.schemas.in.h:90
+#: ../libnemo-private/apps_nemo_preferences.schemas.in.h:90
 msgid "The default size of an icon for a thumbnail in the icon view."
 msgstr "प्रतिमा दृश्यमा थम्बनेलका लागि एउटा प्रतिमाको पूर्वनिर्धारित साइज ।"
 
-#: ../libnautilus-private/apps_nautilus_preferences.schemas.in.h:91
+#: ../libnemo-private/apps_nemo_preferences.schemas.in.h:91
 msgid ""
 "The default sort-order for items in the icon view. Possible values are \"name"
 "\", \"size\", \"type\", \"modification_date\", and \"emblems\"."
@@ -853,7 +853,7 @@ msgstr ""
 "प्रतिमा दृश्यमा वस्तुहरूका लागि पूर्वनिर्धारित क्रमबद्ध-क्रम । सम्भाव्य मानहरू \"नाम \", "
 "\"साइज\", \"प्रकार\", \"परिमार्जन मिति\", र \"चिन्हहरू\" हुन ।"
 
-#: ../libnautilus-private/apps_nautilus_preferences.schemas.in.h:92
+#: ../libnemo-private/apps_nemo_preferences.schemas.in.h:92
 msgid ""
 "The default sort-order for the items in the list view. Possible values are "
 "\"name\", \"size\", \"type\", and \"modification_date\"."
@@ -861,26 +861,26 @@ msgstr ""
 "सूची दृश्यमा वस्तुहरूका लागि पूर्वनिर्धारित क्रमबद्ध-क्रम । सम्भाव्य मानहरू \"नाम\", \"साइज"
 "\", \"प्रकार\", र \"परिमार्जन मिति\" हुन ।"
 
-#: ../libnautilus-private/apps_nautilus_preferences.schemas.in.h:93
+#: ../libnemo-private/apps_nemo_preferences.schemas.in.h:93
 msgid "The default width of the side pane in new windows."
 msgstr "नयाँ सञ्झ्यालहरूमा छेउ फलकको पूर्वनिर्धारित चौडाइ ।"
 
-#: ../libnautilus-private/apps_nautilus_preferences.schemas.in.h:94
+#: ../libnemo-private/apps_nemo_preferences.schemas.in.h:94
 msgid "The font description used for the icons on the desktop."
 msgstr "डेस्कटपमा प्रतिमाहरूका लागि प्रयोग गरिने फन्ट विवरण ।"
 
-#: ../libnautilus-private/apps_nautilus_preferences.schemas.in.h:95
+#: ../libnemo-private/apps_nemo_preferences.schemas.in.h:95
 msgid ""
 "The format of file dates. Possible values are \"locale\", \"iso\", and "
 "\"informal\"."
 msgstr ""
 "फाइल मितिहरूको ढाँचा । सम्भाव्य मानहरू \"लोक्याल\", \"iso\", र \"अनौपचारिक\" हुन् ।"
 
-#: ../libnautilus-private/apps_nautilus_preferences.schemas.in.h:96
+#: ../libnemo-private/apps_nemo_preferences.schemas.in.h:96
 msgid "The side pane view to show in newly opened windows."
 msgstr "नयाँ खोलिएको सञ्झ्यालहरूमा देखाउनलाई छेउ फलक दृश्य ।"
 
-#: ../libnautilus-private/apps_nautilus_preferences.schemas.in.h:97
+#: ../libnemo-private/apps_nemo_preferences.schemas.in.h:97
 msgid ""
 "This name can be set if you want a custom name for the computer icon on the "
 "desktop."
@@ -888,14 +888,14 @@ msgstr ""
 "यदि तपाईँ डेस्कटपमा कम्प्युटर प्रतिमाका लागि अनुकूल नाम चाहनुहुन्छ भने यो नाम सेट गर्न "
 "सकिन्छ ।"
 
-#: ../libnautilus-private/apps_nautilus_preferences.schemas.in.h:98
+#: ../libnemo-private/apps_nemo_preferences.schemas.in.h:98
 msgid ""
 "This name can be set if you want a custom name for the home icon on the "
 "desktop."
 msgstr ""
 "यदि तपाईँ डेस्कटपमा गृह प्रतिमाका लागि अनुकूल नाम चाहनुहुन्छ भने यो नाम सेट गर्न सकिन्छ ।"
 
-#: ../libnautilus-private/apps_nautilus_preferences.schemas.in.h:99
+#: ../libnemo-private/apps_nemo_preferences.schemas.in.h:99
 msgid ""
 "This name can be set if you want a custom name for the network servers icon "
 "on the desktop."
@@ -903,7 +903,7 @@ msgstr ""
 "यदि तपाईँ डेस्कटपमा सञ्जाल सर्भर प्रतिमाका लागि अनुकूल नाम चाहनुहुन्छ भने यो नाम सेट गर्न "
 "सकिन्छ ।"
 
-#: ../libnautilus-private/apps_nautilus_preferences.schemas.in.h:100
+#: ../libnemo-private/apps_nemo_preferences.schemas.in.h:100
 msgid ""
 "This name can be set if you want a custom name for the trash icon on the "
 "desktop."
@@ -911,27 +911,27 @@ msgstr ""
 "यदि तपाईँ डेस्कटपमा रद्दीटोकरी प्रतिमाका लागि अनुकूल नाम चाहनुहुन्छ भने यो नाम सेट गर्न "
 "सकिन्छ ।"
 
-#: ../libnautilus-private/apps_nautilus_preferences.schemas.in.h:101
+#: ../libnemo-private/apps_nemo_preferences.schemas.in.h:101
 msgid "Trash icon visible on desktop"
 msgstr "डेस्कटपमा रद्दीटोकरी प्रतिमा दृश्यात्मक छ"
 
-#: ../libnautilus-private/apps_nautilus_preferences.schemas.in.h:102
+#: ../libnemo-private/apps_nemo_preferences.schemas.in.h:102
 msgid "Type of click used to launch/open files"
 msgstr "फाइलहरू सुरुआत गर्न/खोल्न प्रयोग गरिने क्लिकको प्रकार"
 
-#: ../libnautilus-private/apps_nautilus_preferences.schemas.in.h:103
+#: ../libnemo-private/apps_nemo_preferences.schemas.in.h:103
 msgid "Use manual layout in new windows"
 msgstr "नयाँ सञ्झ्यालहरूमा म्यानुअल सजावट प्रयोग गर्नुहोस्"
 
-#: ../libnautilus-private/apps_nautilus_preferences.schemas.in.h:104
+#: ../libnemo-private/apps_nemo_preferences.schemas.in.h:104
 msgid "Use tighter layout in new windows"
 msgstr "नयाँ सञ्झ्यालहरूमा खँदिलो सजावट प्रयोग गर्नुहोस्"
 
-#: ../libnautilus-private/apps_nautilus_preferences.schemas.in.h:105
+#: ../libnemo-private/apps_nemo_preferences.schemas.in.h:105
 msgid "What to do with executable text files when activated"
 msgstr "कार्यान्वयन योग्य पाठ फाइलहरूलाई सक्रिय पारिए पछि के गर्नु पर्दछ"
 
-#: ../libnautilus-private/apps_nautilus_preferences.schemas.in.h:106
+#: ../libnemo-private/apps_nemo_preferences.schemas.in.h:106
 msgid ""
 "What to do with executable text files when they are activated (single or "
 "double clicked). Possible values are \"launch\" to launch them as programs, "
@@ -943,7 +943,7 @@ msgstr ""
 "गर्नु पर्दछ भन्ने सोध्नलाई \"सोध्नुहोस्\" र पाठ फाइलको रूपमा तिनिहरूलाई प्रदर्शन गर्न "
 "\"प्रदर्शन गर्नुहोस्\" हुन् ।"
 
-#: ../libnautilus-private/apps_nautilus_preferences.schemas.in.h:107
+#: ../libnemo-private/apps_nemo_preferences.schemas.in.h:107
 msgid ""
 "When a folder is visited this viewer is used unless you have selected "
 "another view for that particular folder. Possible values are \"list_view\" "
@@ -952,208 +952,208 @@ msgstr ""
 "जब फोल्डर निरिक्षण गरिन्छ त्यस निश्चित फोल्डरका लागि तपाईँले अर्को दृश्य चयन गर्नु नभए "
 "सम्म यो दर्शक प्रयोग गरिन्छ । सम्भाव्य मानहरू \"सूची दृश्य\" र \"प्रतिमा दृश्य\" हुन् ।"
 
-#: ../libnautilus-private/apps_nautilus_preferences.schemas.in.h:108
+#: ../libnemo-private/apps_nemo_preferences.schemas.in.h:108
 msgid "When to show number of items in a folder"
 msgstr "फोल्डरमा वस्तुहरूको सङ्ख्या कहिले देखाउनु पर्दछ"
 
-#: ../libnautilus-private/apps_nautilus_preferences.schemas.in.h:109
+#: ../libnemo-private/apps_nemo_preferences.schemas.in.h:109
 msgid "When to show preview text in icons"
 msgstr "प्रतिमाहरूमा पूर्वावलोकन पाठ कहिले देखाउनु पर्दछ"
 
-#: ../libnautilus-private/apps_nautilus_preferences.schemas.in.h:110
+#: ../libnemo-private/apps_nemo_preferences.schemas.in.h:110
 msgid "When to show thumbnails of image files"
 msgstr "छवि फाइलहरूको थम्बनेल्स कहिले देखाउनु पर्दछ"
 
-#: ../libnautilus-private/apps_nautilus_preferences.schemas.in.h:111
+#: ../libnemo-private/apps_nemo_preferences.schemas.in.h:111
 msgid "Whether a custom default folder background has been set."
 msgstr "एउटा अनुकुल पूर्वनिर्धारित फोल्डर पृष्ठभूमि सेट गरिएको त छैन ।"
 
-#: ../libnautilus-private/apps_nautilus_preferences.schemas.in.h:112
+#: ../libnemo-private/apps_nemo_preferences.schemas.in.h:112
 msgid "Whether a custom default side pane background has been set."
 msgstr "एउटा अनुकुल पूर्वनिर्धारित छेउ फलक पृष्ठभूमि सेट गरिएको छ या छैन ।"
 
-#: ../libnautilus-private/apps_nautilus_preferences.schemas.in.h:113
+#: ../libnemo-private/apps_nemo_preferences.schemas.in.h:113
 msgid "Whether to ask for confirmation when deleting files, or emptying Trash"
 msgstr "फाइलहरू मेट्दा वा रद्दीटोकरी खाली गर्दा यकिनका लागि सोध्नु पर्दछ या पर्दैन"
 
-#: ../libnautilus-private/apps_nautilus_preferences.schemas.in.h:114
+#: ../libnemo-private/apps_nemo_preferences.schemas.in.h:114
 msgid "Whether to enable immediate deletion"
 msgstr "तत्कालिन मेटाइ सक्षम पार्नु पर्दछ या पर्दैन"
 
-#: ../libnautilus-private/apps_nautilus_preferences.schemas.in.h:115
+#: ../libnemo-private/apps_nemo_preferences.schemas.in.h:115
 msgid "Whether to preview sounds when mousing over an icon"
 msgstr "एउटा प्रतिमा माथि माउस लैजाँदा ध्वनिहरू पूर्वावलिकन गर्नुपर्दछ या पर्दैन"
 
-#: ../libnautilus-private/apps_nautilus_preferences.schemas.in.h:116
+#: ../libnemo-private/apps_nemo_preferences.schemas.in.h:116
 msgid "Whether to show backup files"
 msgstr "जगेडा फाइलहरू देखाउनु पर्दछ या पर्दैन"
 
-#: ../libnautilus-private/apps_nautilus_preferences.schemas.in.h:117
+#: ../libnemo-private/apps_nemo_preferences.schemas.in.h:117
 msgid "Whether to show hidden files"
 msgstr "लुकाइएको फाइलहरू देखाउनु पर्दछ या पर्दैन"
 
-#: ../libnautilus-private/apps_nautilus_preferences.schemas.in.h:118
+#: ../libnemo-private/apps_nemo_preferences.schemas.in.h:118
 msgid "Width of the side pane"
 msgstr "छेउ फलकको चौडाइ"
 
 #. name, stock id
 #. label, accelerator
-#: ../libnautilus-private/nautilus-clipboard.c:442
+#: ../libnemo-private/nemo-clipboard.c:442
 msgid "Cut the selected text to the clipboard"
 msgstr "चयन गरिएको पाठ क्लिपबोर्डमा काट्नुहोस्"
 
 #. name, stock id
 #. label, accelerator
-#: ../libnautilus-private/nautilus-clipboard.c:446
+#: ../libnemo-private/nemo-clipboard.c:446
 msgid "Copy the selected text to the clipboard"
 msgstr "चयन गरिएको पाठ क्लिपबोर्डमा प्रतिलिपि गर्नुहोस्"
 
 #. name, stock id
 #. label, accelerator
-#: ../libnautilus-private/nautilus-clipboard.c:450
+#: ../libnemo-private/nemo-clipboard.c:450
 msgid "Paste the text stored on the clipboard"
 msgstr "क्लिपबोर्डमा भण्डारण गरिएको पाठ टाँस्नुहोस्"
 
 #. name, stock id
-#: ../libnautilus-private/nautilus-clipboard.c:453
+#: ../libnemo-private/nemo-clipboard.c:453
 #: ../src/file-manager/fm-directory-view.c:6967
 msgid "Select _All"
 msgstr "सबै चयन गर्नुहोस्"
 
 #. label, accelerator
-#: ../libnautilus-private/nautilus-clipboard.c:454
+#: ../libnemo-private/nemo-clipboard.c:454
 msgid "Select all the text in a text field"
 msgstr "पाठ फाँटमा सबै पाठ चयन गर्नुहोस्"
 
-#: ../libnautilus-private/nautilus-column-chooser.c:394
+#: ../libnemo-private/nemo-column-chooser.c:394
 msgid "Move _Up"
 msgstr "माथि सार्नुहोस्"
 
-#: ../libnautilus-private/nautilus-column-chooser.c:404
+#: ../libnemo-private/nemo-column-chooser.c:404
 msgid "Move Dow_n"
 msgstr "तल सार्नुहोस्"
 
-#: ../libnautilus-private/nautilus-column-chooser.c:413
+#: ../libnemo-private/nemo-column-chooser.c:413
 msgid "_Show"
 msgstr "देखाउनुहोस्"
 
-#: ../libnautilus-private/nautilus-column-chooser.c:423
+#: ../libnemo-private/nemo-column-chooser.c:423
 msgid "Hi_de"
 msgstr "लुकाउनुहोस्"
 
-#: ../libnautilus-private/nautilus-column-chooser.c:436
+#: ../libnemo-private/nemo-column-chooser.c:436
 msgid "Use De_fault"
 msgstr "पूर्वनिर्धारित प्रयोग गर्नुहोस्"
 
-#: ../libnautilus-private/nautilus-column-utilities.c:43
+#: ../libnemo-private/nemo-column-utilities.c:43
 #: ../src/file-manager/fm-list-view.c:1375
 #: ../eel/eel-mime-application-chooser.c:246
 msgid "Name"
 msgstr "नाम"
 
-#: ../libnautilus-private/nautilus-column-utilities.c:44
+#: ../libnemo-private/nemo-column-utilities.c:44
 msgid "The name and icon of the file."
 msgstr "फाइलको नाम र प्रतिमा ।"
 
-#: ../libnautilus-private/nautilus-column-utilities.c:50
+#: ../libnemo-private/nemo-column-utilities.c:50
 msgid "Size"
 msgstr "साइज"
 
-#: ../libnautilus-private/nautilus-column-utilities.c:51
+#: ../libnemo-private/nemo-column-utilities.c:51
 msgid "The size of the file."
 msgstr "फाइलको साइज ।"
 
-#: ../libnautilus-private/nautilus-column-utilities.c:58
+#: ../libnemo-private/nemo-column-utilities.c:58
 msgid "Type"
 msgstr "प्रकार"
 
-#: ../libnautilus-private/nautilus-column-utilities.c:59
+#: ../libnemo-private/nemo-column-utilities.c:59
 msgid "The type of the file."
 msgstr "फाइलको प्रकार ।"
 
-#: ../libnautilus-private/nautilus-column-utilities.c:65
-#: ../src/nautilus-image-properties-page.c:245
+#: ../libnemo-private/nemo-column-utilities.c:65
+#: ../src/nemo-image-properties-page.c:245
 msgid "Date Modified"
 msgstr "मिति परिमार्जन गरियो"
 
-#: ../libnautilus-private/nautilus-column-utilities.c:66
+#: ../libnemo-private/nemo-column-utilities.c:66
 msgid "The date the file was modified."
 msgstr "फाइल परिमार्जन गरिएको मिति ।"
 
-#: ../libnautilus-private/nautilus-column-utilities.c:73
+#: ../libnemo-private/nemo-column-utilities.c:73
 msgid "Date Accessed"
 msgstr "मिति पहुँच प्राप्त गरियो"
 
-#: ../libnautilus-private/nautilus-column-utilities.c:74
+#: ../libnemo-private/nemo-column-utilities.c:74
 msgid "The date the file was accessed."
 msgstr "फाइल पहुँच प्राप्त गरिएको मिति ।"
 
-#: ../libnautilus-private/nautilus-column-utilities.c:81
+#: ../libnemo-private/nemo-column-utilities.c:81
 msgid "Owner"
 msgstr "मालिक"
 
-#: ../libnautilus-private/nautilus-column-utilities.c:82
+#: ../libnemo-private/nemo-column-utilities.c:82
 msgid "The owner of the file."
 msgstr "फाइलको मालिक ।"
 
-#: ../libnautilus-private/nautilus-column-utilities.c:89
+#: ../libnemo-private/nemo-column-utilities.c:89
 msgid "Group"
 msgstr "समूह"
 
-#: ../libnautilus-private/nautilus-column-utilities.c:90
+#: ../libnemo-private/nemo-column-utilities.c:90
 msgid "The group of the file."
 msgstr "फाइलको समूह ।"
 
-#: ../libnautilus-private/nautilus-column-utilities.c:97
+#: ../libnemo-private/nemo-column-utilities.c:97
 #: ../src/file-manager/fm-properties-window.c:4537
 msgid "Permissions"
 msgstr "अनुमतिहरू"
 
-#: ../libnautilus-private/nautilus-column-utilities.c:98
+#: ../libnemo-private/nemo-column-utilities.c:98
 msgid "The permissions of the file."
 msgstr "फाइलको अनुमतिहरू ।"
 
-#: ../libnautilus-private/nautilus-column-utilities.c:105
+#: ../libnemo-private/nemo-column-utilities.c:105
 msgid "Octal Permissions"
 msgstr "ओक्टल अनुमतिहरू"
 
-#: ../libnautilus-private/nautilus-column-utilities.c:106
+#: ../libnemo-private/nemo-column-utilities.c:106
 msgid "The permissions of the file, in octal notation."
 msgstr "ओक्टल सङ्केतमा फाइलको अनुमतिहरू ।"
 
-#: ../libnautilus-private/nautilus-column-utilities.c:113
+#: ../libnemo-private/nemo-column-utilities.c:113
 msgid "MIME Type"
 msgstr "माइम प्रकार"
 
-#: ../libnautilus-private/nautilus-column-utilities.c:114
+#: ../libnemo-private/nemo-column-utilities.c:114
 msgid "The mime type of the file."
 msgstr "फाइलको माइम प्रकार ।"
 
-#: ../libnautilus-private/nautilus-column-utilities.c:120
+#: ../libnemo-private/nemo-column-utilities.c:120
 msgid "SELinux Context"
 msgstr "SELinux प्रसङ्ग"
 
-#: ../libnautilus-private/nautilus-column-utilities.c:121
+#: ../libnemo-private/nemo-column-utilities.c:121
 msgid "The SELinux security context of the file."
 msgstr "फाइलको SELinux सुरक्षा प्रसङ्ग ।"
 
-#: ../libnautilus-private/nautilus-customization-data.c:392
-#: ../src/nautilus-property-browser.c:1867
+#: ../libnemo-private/nemo-customization-data.c:392
+#: ../src/nemo-property-browser.c:1867
 msgid "Reset"
 msgstr "रिसेट गर्नुहोस्"
 
-#: ../libnautilus-private/nautilus-desktop-directory-file.c:443
-#: ../libnautilus-private/nautilus-desktop-icon-file.c:163
-#: ../libnautilus-private/nautilus-trash-file.c:692
+#: ../libnemo-private/nemo-desktop-directory-file.c:443
+#: ../libnemo-private/nemo-desktop-icon-file.c:163
+#: ../libnemo-private/nemo-trash-file.c:692
 msgid "on the desktop"
 msgstr "डेस्कटपमा"
 
-#: ../libnautilus-private/nautilus-desktop-link-monitor.c:115
+#: ../libnemo-private/nemo-desktop-link-monitor.c:115
 #, c-format
 msgid "You cannot move the volume \"%s\" to the trash."
 msgstr "तपाईँले रद्दीटोकरीमा \"%s\" भोल्युम सार्न सक्नुहुन्न ।"
 
-#: ../libnautilus-private/nautilus-desktop-link-monitor.c:125
+#: ../libnemo-private/nemo-desktop-link-monitor.c:125
 msgid ""
 "If you want to eject the volume, please use \"Eject\" in the popup menu of "
 "the volume."
@@ -1161,7 +1161,7 @@ msgstr ""
 "यदि तपाईँ भोल्युम निकाल्न चाहनुहुन्छ भने, कृपया भोल्युमको पपअप मेनुमा \"निकाल्नुहोस्\" प्रयोग "
 "गर्नुहोस् ।"
 
-#: ../libnautilus-private/nautilus-desktop-link-monitor.c:134
+#: ../libnemo-private/nemo-desktop-link-monitor.c:134
 msgid ""
 "If you want to unmount the volume, please use \"Unmount Volume\" in the "
 "popup menu of the volume."
@@ -1169,48 +1169,48 @@ msgstr ""
 "यदि तपाईँ भोल्युम अनमाउण्ट गर्न चाहनुहुन्छ भने, कृपया भोल्युमको पपअप मेनुमा \"भोल्युम "
 "अनमाउण्ट गर्नुहोस्\" प्रयोग गर्नुहोस् ।"
 
-#: ../libnautilus-private/nautilus-dnd.c:619
+#: ../libnemo-private/nemo-dnd.c:619
 msgid "_Move Here"
 msgstr "यहाँ सार्नुहोस्"
 
-#: ../libnautilus-private/nautilus-dnd.c:624
+#: ../libnemo-private/nemo-dnd.c:624
 msgid "_Copy Here"
 msgstr "यहाँ प्रतिलिपि गर्नुहोस्"
 
-#: ../libnautilus-private/nautilus-dnd.c:629
+#: ../libnemo-private/nemo-dnd.c:629
 msgid "_Link Here"
 msgstr "यहाँ लिङ्क गर्नुहोस्"
 
-#: ../libnautilus-private/nautilus-dnd.c:634
+#: ../libnemo-private/nemo-dnd.c:634
 msgid "Set as _Background"
 msgstr "पृष्ठभूमिको रूपमा सेट गर्नुहोस्"
 
-#: ../libnautilus-private/nautilus-dnd.c:641
-#: ../libnautilus-private/nautilus-dnd.c:694
+#: ../libnemo-private/nemo-dnd.c:641
+#: ../libnemo-private/nemo-dnd.c:694
 msgid "Cancel"
 msgstr "रद्द गर्नुहोस्"
 
-#: ../libnautilus-private/nautilus-dnd.c:682
+#: ../libnemo-private/nemo-dnd.c:682
 msgid "Set as background for _all folders"
 msgstr "सबै फोल्डरका लागि पृष्ठभुमिको रूपमा सेट गर्नुहोस्"
 
-#: ../libnautilus-private/nautilus-dnd.c:687
+#: ../libnemo-private/nemo-dnd.c:687
 msgid "Set as background for _this folder"
 msgstr "यो फोल्डरका लागि पृष्ठभूमिको रूपमा सेट गर्नुहोस्"
 
-#: ../libnautilus-private/nautilus-emblem-utils.c:198
-#: ../libnautilus-private/nautilus-emblem-utils.c:203
-#: ../libnautilus-private/nautilus-emblem-utils.c:258
-#: ../libnautilus-private/nautilus-emblem-utils.c:275
+#: ../libnemo-private/nemo-emblem-utils.c:198
+#: ../libnemo-private/nemo-emblem-utils.c:203
+#: ../libnemo-private/nemo-emblem-utils.c:258
+#: ../libnemo-private/nemo-emblem-utils.c:275
 msgid "The emblem cannot be installed."
 msgstr "चिन्ह स्थापना गर्न सकिँदैन ।"
 
-#: ../libnautilus-private/nautilus-emblem-utils.c:199
+#: ../libnemo-private/nemo-emblem-utils.c:199
 msgid "Sorry, but you must specify a non-blank keyword for the new emblem."
 msgstr ""
 "माफ गर्नुहोस्, तर तपाईँले नयाँ चिन्हका लागि खाली नभएको शब्दकुञ्जी निर्दिष्ट गर्नु पर्दछ ।"
 
-#: ../libnautilus-private/nautilus-emblem-utils.c:204
+#: ../libnemo-private/nemo-emblem-utils.c:204
 msgid ""
 "Sorry, but emblem keywords can only contain letters, spaces and numbers."
 msgstr ""
@@ -1221,86 +1221,86 @@ msgstr ""
 #. * what a keyword is, and people should be passing a unique
 #. * keyword to us anyway
 #.
-#: ../libnautilus-private/nautilus-emblem-utils.c:214
+#: ../libnemo-private/nemo-emblem-utils.c:214
 #, c-format
 msgid "Sorry, but there is already an emblem named \"%s\"."
 msgstr "माफ गर्नुहोस्, तर त्यहाँ \"%s\"नाम गरेको एउटा चिन्ह पहिल्यै छ ।"
 
-#: ../libnautilus-private/nautilus-emblem-utils.c:215
+#: ../libnemo-private/nemo-emblem-utils.c:215
 msgid "Please choose a different emblem name."
 msgstr "कृपया फरक चिन्ह नाम रोज्नुहोस् ।"
 
-#: ../libnautilus-private/nautilus-emblem-utils.c:259
+#: ../libnemo-private/nemo-emblem-utils.c:259
 msgid "Sorry, unable to save custom emblem."
 msgstr "माफ गर्नुहोस्, अनुकूल चिन्ह बचत गर्न अक्षम ।"
 
-#: ../libnautilus-private/nautilus-emblem-utils.c:276
+#: ../libnemo-private/nemo-emblem-utils.c:276
 msgid "Sorry, unable to save custom emblem name."
 msgstr "माफ गर्नुहोस्, अनुकूल चिन्ह नाम बचत गर्न अक्षम ।"
 
-#: ../libnautilus-private/nautilus-file-operations-progress.c:167
+#: ../libnemo-private/nemo-file-operations-progress.c:167
 #, c-format
 msgid "%s %ld of %ld %s"
 msgstr "%s %ld को %ld %s"
 
-#: ../libnautilus-private/nautilus-file-operations-progress.c:447
+#: ../libnemo-private/nemo-file-operations-progress.c:447
 #, c-format
 msgid "(%d:%02d:%02d Remaining)"
 msgstr "(%d:%02d:%02d बाँकी)"
 
-#: ../libnautilus-private/nautilus-file-operations-progress.c:452
+#: ../libnemo-private/nemo-file-operations-progress.c:452
 #, c-format
 msgid "(%d:%02d Remaining)"
 msgstr "(%d:%02d बाँकी)"
 
-#: ../libnautilus-private/nautilus-file-operations.c:452
-#: ../libnautilus-private/nautilus-file-operations.c:481
-#: ../libnautilus-private/nautilus-file-utilities.c:93
-#: ../src/nautilus-connect-server-dialog.c:337
+#: ../libnemo-private/nemo-file-operations.c:452
+#: ../libnemo-private/nemo-file-operations.c:481
+#: ../libnemo-private/nemo-file-utilities.c:93
+#: ../src/nemo-connect-server-dialog.c:337
 #, c-format
 msgid "%s on %s"
 msgstr "%s मा %s"
 
 #. "From" dialog label, source path gets placed next to it in the dialog
-#: ../libnautilus-private/nautilus-file-operations.c:463
+#: ../libnemo-private/nemo-file-operations.c:463
 msgid "From:"
 msgstr "बाट:"
 
 #. "To" dialog label, source path gets placed next to it in the dialog
-#: ../libnautilus-private/nautilus-file-operations.c:490
+#: ../libnemo-private/nemo-file-operations.c:490
 msgid "To:"
 msgstr "लाई:"
 
-#: ../libnautilus-private/nautilus-file-operations.c:671
-#: ../libnautilus-private/nautilus-file-operations.c:719
-#: ../libnautilus-private/nautilus-file-operations.c:724
-#: ../libnautilus-private/nautilus-file-operations.c:734
+#: ../libnemo-private/nemo-file-operations.c:671
+#: ../libnemo-private/nemo-file-operations.c:719
+#: ../libnemo-private/nemo-file-operations.c:724
+#: ../libnemo-private/nemo-file-operations.c:734
 msgid "Error while moving."
 msgstr "सार्दा त्रुटि भयो ।"
 
-#: ../libnautilus-private/nautilus-file-operations.c:672
+#: ../libnemo-private/nemo-file-operations.c:672
 #, c-format
 msgid "\"%s\" cannot be moved because it is on a read-only disk."
 msgstr "\"%s\" सार्न सकिँदैन किनभने यो पढ्न मात्र सकिने डिस्कमा छ ।"
 
-#: ../libnautilus-private/nautilus-file-operations.c:682
-#: ../libnautilus-private/nautilus-file-operations.c:688
+#: ../libnemo-private/nemo-file-operations.c:682
+#: ../libnemo-private/nemo-file-operations.c:688
 msgid "Error while deleting."
 msgstr "मेट्दा त्रुटि भयो ।"
 
-#: ../libnautilus-private/nautilus-file-operations.c:683
+#: ../libnemo-private/nemo-file-operations.c:683
 #, c-format
 msgid ""
 "\"%s\" cannot be deleted because you do not have permissions to modify its "
 "parent folder."
 msgstr "\"%s\" मेट्न सकिँदैन किनभने तपाईँसँग य्यसको प्रमूल फोल्डर परिमार्जन गर्ने अनुमति छ ैन।"
 
-#: ../libnautilus-private/nautilus-file-operations.c:689
+#: ../libnemo-private/nemo-file-operations.c:689
 #, c-format
 msgid "\"%s\" cannot be deleted because it is on a read-only disk."
 msgstr "\"%s\" मेट्न सकिँदैन किनभने यो पढ्न मात्र सकिने डिस्कमा छ ।"
 
-#: ../libnautilus-private/nautilus-file-operations.c:720
+#: ../libnemo-private/nemo-file-operations.c:720
 #, c-format
 msgid ""
 "\"%s\" cannot be moved because you do not have permissions to change it or "
@@ -1309,14 +1309,14 @@ msgstr ""
 "\"%s\" सार्न सकिँदैन किनभने तपाईँसँग यसलाई र यसको प्रमूल फोल्डरलाई परिवर्तन गर्ने अनुमति "
 "छैन ।"
 
-#: ../libnautilus-private/nautilus-file-operations.c:725
+#: ../libnemo-private/nemo-file-operations.c:725
 #, c-format
 msgid ""
 "Cannot move \"%s\" because it or its parent folder are contained in the "
 "destination."
 msgstr "\"%s\" सार्न सकिँदैन किनभने यो र यसका प्रमूल फोल्डर गन्तव्यमा समाविष्ट छन् ।"
 
-#: ../libnautilus-private/nautilus-file-operations.c:735
+#: ../libnemo-private/nemo-file-operations.c:735
 #, c-format
 msgid ""
 "Cannot move \"%s\" to the trash because you do not have permissions to "
@@ -1325,130 +1325,130 @@ msgstr ""
 "\"%s\" लाई रद्दीटोकरीमा सार्न सकिँदैन किनभने तपाईँसँग यसलाई र यसको प्रमूल फोल्डरलाई "
 "परिवर्तन गर्ने अनुमति छैन ।"
 
-#: ../libnautilus-private/nautilus-file-operations.c:757
+#: ../libnemo-private/nemo-file-operations.c:757
 msgid "Error while copying."
 msgstr "प्रतिलिपि गर्दा त्रुटि भयो ।"
 
-#: ../libnautilus-private/nautilus-file-operations.c:758
+#: ../libnemo-private/nemo-file-operations.c:758
 #, c-format
 msgid "\"%s\" cannot be copied because you do not have permissions to read it."
 msgstr "\"%s\" प्रतिलिपि गर्न सकिँदैन किनभने तपाईँसँग त्यसलाई पढ्ने अनुमति छैन ।"
 
-#: ../libnautilus-private/nautilus-file-operations.c:778
-#: ../libnautilus-private/nautilus-file-operations.c:799
-#: ../libnautilus-private/nautilus-file-operations.c:803
+#: ../libnemo-private/nemo-file-operations.c:778
+#: ../libnemo-private/nemo-file-operations.c:799
+#: ../libnemo-private/nemo-file-operations.c:803
 #, c-format
 msgid "Error while copying to \"%s\"."
 msgstr "\"%s\" मा प्रतिलिपि गर्ने क्रममा त्रुटि भयो।"
 
-#: ../libnautilus-private/nautilus-file-operations.c:779
-#: ../libnautilus-private/nautilus-file-operations.c:784
-#: ../libnautilus-private/nautilus-file-operations.c:788
+#: ../libnemo-private/nemo-file-operations.c:779
+#: ../libnemo-private/nemo-file-operations.c:784
+#: ../libnemo-private/nemo-file-operations.c:788
 msgid "There is not enough space on the destination."
 msgstr "गन्तव्यमा पर्याप्त खाली ठाउँ छैन।"
 
-#: ../libnautilus-private/nautilus-file-operations.c:783
+#: ../libnemo-private/nemo-file-operations.c:783
 #, c-format
 msgid "Error while moving to \"%s\"."
 msgstr "\"%s\" मा सार्ने क्रममा त्रुटि।"
 
-#: ../libnautilus-private/nautilus-file-operations.c:787
+#: ../libnemo-private/nemo-file-operations.c:787
 #, c-format
 msgid "Error while creating link in \"%s\"."
 msgstr "\"%s\" मा लिङ्क सिर्जना गर्ने क्रममा त्रुटि भयो।"
 
-#: ../libnautilus-private/nautilus-file-operations.c:800
-#: ../libnautilus-private/nautilus-file-operations.c:811
-#: ../libnautilus-private/nautilus-file-operations.c:822
+#: ../libnemo-private/nemo-file-operations.c:800
+#: ../libnemo-private/nemo-file-operations.c:811
+#: ../libnemo-private/nemo-file-operations.c:822
 msgid "You do not have permissions to write to this folder."
 msgstr "तपाईँसँग यस फोल्डरमा लेख्ने अनुमति छैन।"
 
-#: ../libnautilus-private/nautilus-file-operations.c:804
-#: ../libnautilus-private/nautilus-file-operations.c:815
-#: ../libnautilus-private/nautilus-file-operations.c:826
+#: ../libnemo-private/nemo-file-operations.c:804
+#: ../libnemo-private/nemo-file-operations.c:815
+#: ../libnemo-private/nemo-file-operations.c:826
 msgid "The destination disk is read-only."
 msgstr "गन्तव्य डिस्क पढ्ने मात्र सकिने हो।"
 
-#: ../libnautilus-private/nautilus-file-operations.c:810
-#: ../libnautilus-private/nautilus-file-operations.c:814
+#: ../libnemo-private/nemo-file-operations.c:810
+#: ../libnemo-private/nemo-file-operations.c:814
 #, c-format
 msgid "Error while moving items to \"%s\"."
 msgstr "\"%s\" मा वस्तुहरू सार्ने क्रममा त्रुटि भयो।"
 
-#: ../libnautilus-private/nautilus-file-operations.c:821
-#: ../libnautilus-private/nautilus-file-operations.c:825
+#: ../libnemo-private/nemo-file-operations.c:821
+#: ../libnemo-private/nemo-file-operations.c:825
 #, c-format
 msgid "Error while creating links in \"%s\"."
 msgstr "\"%s\" मा लिङ्कहरू सिर्जना गर्ने क्रममा त्रुटि भयो।"
 
-#: ../libnautilus-private/nautilus-file-operations.c:853
+#: ../libnemo-private/nemo-file-operations.c:853
 #, c-format
 msgid "Error \"%s\" while copying \"%s\"."
 msgstr "\"%s\" प्रतिलिपि गर्ने क्रममा \"%s\" त्रुटि भयो।"
 
-#: ../libnautilus-private/nautilus-file-operations.c:854
-#: ../libnautilus-private/nautilus-file-operations.c:858
-#: ../libnautilus-private/nautilus-file-operations.c:862
-#: ../libnautilus-private/nautilus-file-operations.c:868
-#: ../libnautilus-private/nautilus-file-operations.c:883
-#: ../libnautilus-private/nautilus-file-operations.c:887
-#: ../libnautilus-private/nautilus-file-operations.c:891
-#: ../libnautilus-private/nautilus-file-operations.c:897
+#: ../libnemo-private/nemo-file-operations.c:854
+#: ../libnemo-private/nemo-file-operations.c:858
+#: ../libnemo-private/nemo-file-operations.c:862
+#: ../libnemo-private/nemo-file-operations.c:868
+#: ../libnemo-private/nemo-file-operations.c:883
+#: ../libnemo-private/nemo-file-operations.c:887
+#: ../libnemo-private/nemo-file-operations.c:891
+#: ../libnemo-private/nemo-file-operations.c:897
 msgid "Would you like to continue?"
 msgstr "के तपाईँ जारी राख्न चाहनुहुन्छ ?"
 
-#: ../libnautilus-private/nautilus-file-operations.c:857
+#: ../libnemo-private/nemo-file-operations.c:857
 #, c-format
 msgid "Error \"%s\" while moving \"%s\"."
 msgstr "\"%s\" सार्ने क्रममा \"%s\" त्रुटि भयो।"
 
-#: ../libnautilus-private/nautilus-file-operations.c:861
+#: ../libnemo-private/nemo-file-operations.c:861
 #, c-format
 msgid "Error \"%s\" while creating a link to \"%s\"."
 msgstr "\"%s\" मा लिङ्क सिर्जना गर्ने क्रममा \"%s\" त्रुटि भयो।"
 
-#: ../libnautilus-private/nautilus-file-operations.c:867
+#: ../libnemo-private/nemo-file-operations.c:867
 #, c-format
 msgid "Error \"%s\" while deleting \"%s\"."
 msgstr "\"%s\" मेट्ने क्रममा \"%s\" त्रुटि भयो।"
 
-#: ../libnautilus-private/nautilus-file-operations.c:882
+#: ../libnemo-private/nemo-file-operations.c:882
 #, c-format
 msgid "Error \"%s\" while copying."
 msgstr "प्रतिलिपि गर्ने क्रममा \"%s\" त्रुटि भयो।"
 
-#: ../libnautilus-private/nautilus-file-operations.c:886
+#: ../libnemo-private/nemo-file-operations.c:886
 #, c-format
 msgid "Error \"%s\" while moving."
 msgstr "सार्ने क्रममा \"%s\" त्रुटि भयो।"
 
-#: ../libnautilus-private/nautilus-file-operations.c:890
+#: ../libnemo-private/nemo-file-operations.c:890
 #, c-format
 msgid "Error \"%s\" while linking."
 msgstr "लिङ्क गर्ने क्रममा \"%s\" त्रुटि भयो।"
 
-#: ../libnautilus-private/nautilus-file-operations.c:896
+#: ../libnemo-private/nemo-file-operations.c:896
 #, c-format
 msgid "Error \"%s\" while deleting."
 msgstr "मेट्ने क्रममा \"%s\" त्रुटि भयो।"
 
-#: ../libnautilus-private/nautilus-file-operations.c:1029
-#: ../libnautilus-private/nautilus-file-operations.c:1046
+#: ../libnemo-private/nemo-file-operations.c:1029
+#: ../libnemo-private/nemo-file-operations.c:1046
 msgid "_Retry"
 msgstr "पुन:प्रयास गर्नुहोस्"
 
-#: ../libnautilus-private/nautilus-file-operations.c:1046
-#: ../libnautilus-private/nautilus-file-operations.c:1214
-#: ../libnautilus-private/nautilus-file-operations.c:1233
+#: ../libnemo-private/nemo-file-operations.c:1046
+#: ../libnemo-private/nemo-file-operations.c:1214
+#: ../libnemo-private/nemo-file-operations.c:1233
 msgid "_Skip"
 msgstr "फड्काउनुहोस्"
 
-#: ../libnautilus-private/nautilus-file-operations.c:1137
+#: ../libnemo-private/nemo-file-operations.c:1137
 #, c-format
 msgid "Could not move \"%s\" to the new location."
 msgstr "\"%s\" लाई नयाँ स्थानमा सार्न सकिएन।"
 
-#: ../libnautilus-private/nautilus-file-operations.c:1140
+#: ../libnemo-private/nemo-file-operations.c:1140
 msgid ""
 "The name is already used for a special item that cannot be removed or "
 "replaced.  If you still want to move the item, rename it and try again."
@@ -1456,12 +1456,12 @@ msgstr ""
 "नाम विशेष वस्तुका लागि पहिले नै प्रयोग गरिसकेको छ जुन हटाउन वा बदल्न सकिँदैन। यदि तपाईँ "
 "अझै पनि वस्तु सार्न चाहनुहुन्छ भने, त्यसको पुन: नामकरण गर्नुहोस् र पुन:प्रयास गर्नुहोस्।"
 
-#: ../libnautilus-private/nautilus-file-operations.c:1144
+#: ../libnemo-private/nemo-file-operations.c:1144
 #, c-format
 msgid "Could not copy \"%s\" to the new location."
 msgstr "\"%s\"लाई नयाँ स्थानमा प्रतिलिपि गर्न सकिएन।"
 
-#: ../libnautilus-private/nautilus-file-operations.c:1147
+#: ../libnemo-private/nemo-file-operations.c:1147
 msgid ""
 "The name is already used for a special item that cannot be removed or "
 "replaced.  If you still want to copy the item, rename it and try again."
@@ -1469,19 +1469,19 @@ msgstr ""
 "नाम विशेष वस्तुका लागि पहिले नै प्रयोग गरिसकेको छ जुन हटाउन वा बदल्न सकिँदैन। यदि तपाईँ "
 "अझै पनि वस्तु सार्न चाहनुहुन्छ भने, त्यसको पुन: नामकरण गर्नुहोस् र पुन:प्रयास गर्नुहोस्।"
 
-#: ../libnautilus-private/nautilus-file-operations.c:1172
+#: ../libnemo-private/nemo-file-operations.c:1172
 #, c-format
 msgid "A folder named \"%s\" already exists.  Do you want to replace it?"
 msgstr ""
 "\"%s\" नामको एउटा फोल्डर पहिल्यै अवस्थित छ ।  तपाईँ यसलाई प्रतिस्थापन गर्न चाहनुहुन्छ?"
 
-#: ../libnautilus-private/nautilus-file-operations.c:1175
+#: ../libnemo-private/nemo-file-operations.c:1175
 #, c-format
 msgid "A file named \"%s\" already exists.  Do you want to replace it?"
 msgstr ""
 "\"%s\" नामको एउटा फाइल पहिल्यै अवस्थित छ ।  तपाईँ यसलाई प्रतिस्थापन गर्न चाहनुहुन्छ?"
 
-#: ../libnautilus-private/nautilus-file-operations.c:1194
+#: ../libnemo-private/nemo-file-operations.c:1194
 #, c-format
 msgid ""
 "The folder already exists in \"%s\".  Replacing it will overwrite any files "
@@ -1490,7 +1490,7 @@ msgstr ""
 "यो फोल्डर \"%s\" मा पहिल्यै अवस्थित छ ।  यसलाई प्रतिस्थापन गर्नाले फाइलहरू प्रतिलिपि "
 "गर्दा द्वन्द्व हुने फोल्डर भित्रका कुनै पनि फाइलहरू अधिलेखन हुनेछ ।"
 
-#: ../libnautilus-private/nautilus-file-operations.c:1197
+#: ../libnemo-private/nemo-file-operations.c:1197
 #, c-format
 msgid ""
 "The file already exists in \"%s\".  Replacing it will overwrite its contents."
@@ -1498,16 +1498,16 @@ msgstr ""
 "यो फाइल \"%s\"मा पहिल्यै अवस्थित छ ।  यसलाई प्रतिस्थापन गर्दा यसका समाग्रीहरू अधिलेखन "
 "हुनेछन् ।"
 
-#: ../libnautilus-private/nautilus-file-operations.c:1214
-#: ../libnautilus-private/nautilus-file-operations.c:1233
+#: ../libnemo-private/nemo-file-operations.c:1214
+#: ../libnemo-private/nemo-file-operations.c:1233
 msgid "_Replace"
 msgstr "प्रतिस्थापन गर्नुहोस्"
 
-#: ../libnautilus-private/nautilus-file-operations.c:1233
+#: ../libnemo-private/nemo-file-operations.c:1233
 msgid "S_kip All"
 msgstr "सबै फड्काउनुहोस्"
 
-#: ../libnautilus-private/nautilus-file-operations.c:1233
+#: ../libnemo-private/nemo-file-operations.c:1233
 msgid "Replace _All"
 msgstr "सबै बदल्नुहोस्"
 
@@ -1516,15 +1516,15 @@ msgstr "सबै बदल्नुहोस्"
 #. * (e.g. "folder", "plain text") to file type for symbolic link
 #. * to that kind of file (e.g. "link to folder").
 #.
-#: ../libnautilus-private/nautilus-file-operations.c:1306
-#: ../libnautilus-private/nautilus-file.c:4831
+#: ../libnemo-private/nemo-file-operations.c:1306
+#: ../libnemo-private/nemo-file.c:4831
 #: ../src/file-manager/fm-directory-view.c:9917
 #, c-format
 msgid "Link to %s"
 msgstr "%s मा लिङ्क गर्नुहोस्"
 
 #. appended to new link file
-#: ../libnautilus-private/nautilus-file-operations.c:1310
+#: ../libnemo-private/nemo-file-operations.c:1310
 #, c-format
 msgid "Another link to %s"
 msgstr "%s मा अर्को लिङ्क"
@@ -1533,25 +1533,25 @@ msgstr "%s मा अर्को लिङ्क"
 #. * if there's no way to do that nicely for a
 #. * particular language.
 #.
-#: ../libnautilus-private/nautilus-file-operations.c:1326
+#: ../libnemo-private/nemo-file-operations.c:1326
 #, c-format
 msgid "%dst link to %s"
 msgstr "%dst लिङ्क %s मा"
 
 #. appended to new link file
-#: ../libnautilus-private/nautilus-file-operations.c:1330
+#: ../libnemo-private/nemo-file-operations.c:1330
 #, c-format
 msgid "%dnd link to %s"
 msgstr "%dnd लिङ्क %s मा"
 
 #. appended to new link file
-#: ../libnautilus-private/nautilus-file-operations.c:1334
+#: ../libnemo-private/nemo-file-operations.c:1334
 #, c-format
 msgid "%drd link to %s"
 msgstr "%drd लिङ्क %s मा"
 
 #. appended to new link file
-#: ../libnautilus-private/nautilus-file-operations.c:1338
+#: ../libnemo-private/nemo-file-operations.c:1338
 #, c-format
 msgid "%dth link to %s"
 msgstr "%dth लिङ्क %s मा"
@@ -1561,12 +1561,12 @@ msgstr "%dth लिङ्क %s मा"
 #. * make some or all of them match.
 #.
 #. localizers: tag used to detect the first copy of a file
-#: ../libnautilus-private/nautilus-file-operations.c:1359
+#: ../libnemo-private/nemo-file-operations.c:1359
 msgid " (copy)"
 msgstr " (प्रतिलिपि बनाउनुहोस्)"
 
 #. localizers: tag used to detect the second copy of a file
-#: ../libnautilus-private/nautilus-file-operations.c:1361
+#: ../libnemo-private/nemo-file-operations.c:1361
 msgid " (another copy)"
 msgstr " (अर्को प्रतिलिपि बनाउनुहोस्)"
 
@@ -1574,36 +1574,36 @@ msgstr " (अर्को प्रतिलिपि बनाउनुहो�
 #. localizers: tag used to detect the x12th copy of a file
 #. localizers: tag used to detect the x13th copy of a file
 #. localizers: tag used to detect the xxth copy of a file
-#: ../libnautilus-private/nautilus-file-operations.c:1364
-#: ../libnautilus-private/nautilus-file-operations.c:1366
-#: ../libnautilus-private/nautilus-file-operations.c:1368
-#: ../libnautilus-private/nautilus-file-operations.c:1378
+#: ../libnemo-private/nemo-file-operations.c:1364
+#: ../libnemo-private/nemo-file-operations.c:1366
+#: ../libnemo-private/nemo-file-operations.c:1368
+#: ../libnemo-private/nemo-file-operations.c:1378
 msgid "th copy)"
 msgstr "th प्रतिलिपि)"
 
 #. localizers: tag used to detect the x1st copy of a file
-#: ../libnautilus-private/nautilus-file-operations.c:1371
+#: ../libnemo-private/nemo-file-operations.c:1371
 msgid "st copy)"
 msgstr "st प्रतिलिपि)"
 
 #. localizers: tag used to detect the x2nd copy of a file
-#: ../libnautilus-private/nautilus-file-operations.c:1373
+#: ../libnemo-private/nemo-file-operations.c:1373
 msgid "nd copy)"
 msgstr "nd प्रतिलिपि)"
 
 #. localizers: tag used to detect the x3rd copy of a file
-#: ../libnautilus-private/nautilus-file-operations.c:1375
+#: ../libnemo-private/nemo-file-operations.c:1375
 msgid "rd copy)"
 msgstr "rd प्रतिलिपि)"
 
 #. localizers: appended to first file copy
-#: ../libnautilus-private/nautilus-file-operations.c:1392
+#: ../libnemo-private/nemo-file-operations.c:1392
 #, c-format
 msgid "%s (copy)%s"
 msgstr "%s (प्रतिलिपि)%s"
 
 #. localizers: appended to second file copy
-#: ../libnautilus-private/nautilus-file-operations.c:1394
+#: ../libnemo-private/nemo-file-operations.c:1394
 #, c-format
 msgid "%s (another copy)%s"
 msgstr "%s (अर्को प्रतिलिपि) %s"
@@ -1612,246 +1612,246 @@ msgstr "%s (अर्को प्रतिलिपि) %s"
 #. localizers: appended to x12th file copy
 #. localizers: appended to x13th file copy
 #. localizers: appended to xxth file copy
-#: ../libnautilus-private/nautilus-file-operations.c:1397
-#: ../libnautilus-private/nautilus-file-operations.c:1399
-#: ../libnautilus-private/nautilus-file-operations.c:1401
-#: ../libnautilus-private/nautilus-file-operations.c:1410
+#: ../libnemo-private/nemo-file-operations.c:1397
+#: ../libnemo-private/nemo-file-operations.c:1399
+#: ../libnemo-private/nemo-file-operations.c:1401
+#: ../libnemo-private/nemo-file-operations.c:1410
 #, c-format
 msgid "%s (%dth copy)%s"
 msgstr "%s (%dth प्रतिलिपि) %s"
 
 #. localizers: appended to x1st file copy
-#: ../libnautilus-private/nautilus-file-operations.c:1404
+#: ../libnemo-private/nemo-file-operations.c:1404
 #, c-format
 msgid "%s (%dst copy)%s"
 msgstr "%s (%dst प्रतिलिपि) %s"
 
 #. localizers: appended to x2nd file copy
-#: ../libnautilus-private/nautilus-file-operations.c:1406
+#: ../libnemo-private/nemo-file-operations.c:1406
 #, c-format
 msgid "%s (%dnd copy)%s"
 msgstr "%s (%dnd प्रतिलिपि) %s"
 
 #. localizers: appended to x3rd file copy
-#: ../libnautilus-private/nautilus-file-operations.c:1408
+#: ../libnemo-private/nemo-file-operations.c:1408
 #, c-format
 msgid "%s (%drd copy)%s"
 msgstr "%s (%drd प्रतिलिपि) %s"
 
 #. localizers: opening parentheses to match the "th copy)" string
-#: ../libnautilus-private/nautilus-file-operations.c:1508
+#: ../libnemo-private/nemo-file-operations.c:1508
 msgid " ("
 msgstr " ("
 
 #. localizers: opening parentheses of the "th copy)" string
-#: ../libnautilus-private/nautilus-file-operations.c:1516
+#: ../libnemo-private/nemo-file-operations.c:1516
 #, c-format
 msgid " (%d"
 msgstr " (%d"
 
-#: ../libnautilus-private/nautilus-file-operations.c:1712
-#: ../libnautilus-private/nautilus-file-operations.c:2385
-#: ../libnautilus-private/nautilus-file-operations.c:2581
+#: ../libnemo-private/nemo-file-operations.c:1712
+#: ../libnemo-private/nemo-file-operations.c:2385
+#: ../libnemo-private/nemo-file-operations.c:2581
 #, c-format
 msgid "Unknown GnomeVFSXferProgressStatus %d"
 msgstr "अज्ञात GnomeVFSXferProgressStatus %d"
 
 #. localizers: progress dialog title
-#: ../libnautilus-private/nautilus-file-operations.c:2121
+#: ../libnemo-private/nemo-file-operations.c:2121
 msgid "Moving files to the Trash"
 msgstr "फाइलहरूलाई रद्दीटोकरीमा सार्दै"
 
 #. localizers: label prepended to the progress count
-#: ../libnautilus-private/nautilus-file-operations.c:2123
+#: ../libnemo-private/nemo-file-operations.c:2123
 msgid "Throwing out file:"
 msgstr "फाइल बाहिर फाल्दै:"
 
 #. localizers: label prepended to the name of the current file moved
-#: ../libnautilus-private/nautilus-file-operations.c:2125
-#: ../libnautilus-private/nautilus-file-operations.c:2136
+#: ../libnemo-private/nemo-file-operations.c:2125
+#: ../libnemo-private/nemo-file-operations.c:2136
 msgid "Moving"
 msgstr "सार्दै"
 
-#: ../libnautilus-private/nautilus-file-operations.c:2126
+#: ../libnemo-private/nemo-file-operations.c:2126
 msgid "Preparing to Move to Trash..."
 msgstr "रद्दीटोकरीमा सार्न तयारी गर्दैछ..."
 
 #. localizers: progress dialog title
-#: ../libnautilus-private/nautilus-file-operations.c:2132
+#: ../libnemo-private/nemo-file-operations.c:2132
 msgid "Moving files"
 msgstr "फाइलहरू सार्दै"
 
 #. localizers: label prepended to the progress count
-#: ../libnautilus-private/nautilus-file-operations.c:2134
+#: ../libnemo-private/nemo-file-operations.c:2134
 msgid "Moving file:"
 msgstr "फाइलहरू सार्दै:"
 
-#: ../libnautilus-private/nautilus-file-operations.c:2137
+#: ../libnemo-private/nemo-file-operations.c:2137
 msgid "Preparing To Move..."
 msgstr "सार्नका लागि तैयारी गर्दैछ..."
 
-#: ../libnautilus-private/nautilus-file-operations.c:2138
+#: ../libnemo-private/nemo-file-operations.c:2138
 msgid "Finishing Move..."
 msgstr "सार्ने समाप्त गर्दैछ..."
 
 #. localizers: progress dialog title
-#: ../libnautilus-private/nautilus-file-operations.c:2146
+#: ../libnemo-private/nemo-file-operations.c:2146
 msgid "Creating links to files"
 msgstr "फाइलहरूमा लिङ्क सिर्जना गर्दै"
 
 #. localizers: label prepended to the progress count
-#: ../libnautilus-private/nautilus-file-operations.c:2148
+#: ../libnemo-private/nemo-file-operations.c:2148
 msgid "Linking file:"
 msgstr "फाइल लिङ्क गर्दै:"
 
 #. localizers: label prepended to the name of the current file linked
-#: ../libnautilus-private/nautilus-file-operations.c:2150
+#: ../libnemo-private/nemo-file-operations.c:2150
 msgid "Linking"
 msgstr "लिङ्क गर्दै"
 
-#: ../libnautilus-private/nautilus-file-operations.c:2151
+#: ../libnemo-private/nemo-file-operations.c:2151
 msgid "Preparing to Create Links..."
 msgstr "लिङ्कहरू सिर्जना गर्न तैयारी गर्दैछ..."
 
-#: ../libnautilus-private/nautilus-file-operations.c:2152
+#: ../libnemo-private/nemo-file-operations.c:2152
 msgid "Finishing Creating Links..."
 msgstr "लिङ्कहरू सिर्जना गर्ने समाप्त गर्दैछ..."
 
 #. localizers: progress dialog title
-#: ../libnautilus-private/nautilus-file-operations.c:2158
+#: ../libnemo-private/nemo-file-operations.c:2158
 msgid "Copying files"
 msgstr "फाइलहरू प्रतिलिपि गर्दै"
 
 #. localizers: label prepended to the progress count
-#: ../libnautilus-private/nautilus-file-operations.c:2160
+#: ../libnemo-private/nemo-file-operations.c:2160
 msgid "Copying file:"
 msgstr "फाइल प्रतिलिपि गर्दै:"
 
 #. localizers: label prepended to the name of the current file copied
-#: ../libnautilus-private/nautilus-file-operations.c:2162
+#: ../libnemo-private/nemo-file-operations.c:2162
 msgid "Copying"
 msgstr "प्रतिलिपि गर्दै"
 
-#: ../libnautilus-private/nautilus-file-operations.c:2163
+#: ../libnemo-private/nemo-file-operations.c:2163
 msgid "Preparing To Copy..."
 msgstr "प्रतिलिपि गर्न तयारी गर्दैछ..."
 
-#: ../libnautilus-private/nautilus-file-operations.c:2181
+#: ../libnemo-private/nemo-file-operations.c:2181
 msgid "You cannot copy items into the trash."
 msgstr "तपाईँले रद्दीटोकरीमा वस्तुहरू प्रतिलिपि गर्न सक्नुहुन्न ।"
 
-#: ../libnautilus-private/nautilus-file-operations.c:2182
+#: ../libnemo-private/nemo-file-operations.c:2182
 msgid "You cannot create links inside the trash."
 msgstr "तपाईँले रद्दीटोकरी भित्र लिङ्कहरू सिर्जना गर्न सक्नुहुन्न ।"
 
-#: ../libnautilus-private/nautilus-file-operations.c:2183
+#: ../libnemo-private/nemo-file-operations.c:2183
 msgid "Files and folders can only be moved into the trash."
 msgstr "फाइलहरू र फोल्डरहरू रद्दीटोकरी भित्र मात्र सार्न सकिन्छ ।"
 
-#: ../libnautilus-private/nautilus-file-operations.c:2206
+#: ../libnemo-private/nemo-file-operations.c:2206
 msgid "You cannot move this trash folder."
 msgstr "तपाईँले यो रद्दीटोकरी फोल्डर सार्न सक्नुहुन्न ।"
 
-#: ../libnautilus-private/nautilus-file-operations.c:2207
+#: ../libnemo-private/nemo-file-operations.c:2207
 msgid "You cannot copy this trash folder."
 msgstr "तपाईँले यो रद्दीटोकरी फोल्डरलाई प्रतिलिपि गर्न सक्नुहुन्न ।"
 
-#: ../libnautilus-private/nautilus-file-operations.c:2208
+#: ../libnemo-private/nemo-file-operations.c:2208
 msgid "A trash folder is used for storing items moved to the trash."
 msgstr "रद्दीटोकरी फोल्डर रद्दीटोकरीमा सारिएको वस्तुहरू भण्डारण गर्न प्रयोग गरिन्छ ।"
 
-#: ../libnautilus-private/nautilus-file-operations.c:2232
+#: ../libnemo-private/nemo-file-operations.c:2232
 msgid "You cannot move a folder into itself."
 msgstr "तपाईँले फोल्डर सोहि फोल्डरमा सार्न सक्नुहुन्न ।"
 
-#: ../libnautilus-private/nautilus-file-operations.c:2233
+#: ../libnemo-private/nemo-file-operations.c:2233
 msgid "You cannot copy a folder into itself."
 msgstr "तपाईँले फोल्डर सोहि फोल्डरमा प्रतिलिपि बनाउन सक्नुहुन्न ।"
 
-#: ../libnautilus-private/nautilus-file-operations.c:2234
+#: ../libnemo-private/nemo-file-operations.c:2234
 msgid "The destination folder is inside the source folder."
 msgstr "गन्तव्य फोल्डर स्रोत फोल्डर भित्र छ ।"
 
-#: ../libnautilus-private/nautilus-file-operations.c:2247
+#: ../libnemo-private/nemo-file-operations.c:2247
 msgid "You cannot copy a file over itself."
 msgstr "तपाईँले फाइललाई सोही फाइलमाथि नै प्रतिलिपि गर्न सक्नुहुन्न ।"
 
-#: ../libnautilus-private/nautilus-file-operations.c:2248
+#: ../libnemo-private/nemo-file-operations.c:2248
 msgid "The destination and source are the same file."
 msgstr "गन्तव्य र स्रोत समान फाइल हुन् ।"
 
-#: ../libnautilus-private/nautilus-file-operations.c:2303
-#: ../libnautilus-private/nautilus-file-operations.c:2476
+#: ../libnemo-private/nemo-file-operations.c:2303
+#: ../libnemo-private/nemo-file-operations.c:2476
 msgid "You do not have permissions to write to the destination."
 msgstr "तपाईँसँग गन्तव्यमा लेख्ने अनुमतिहरू छैनन् ।"
 
-#: ../libnautilus-private/nautilus-file-operations.c:2305
-#: ../libnautilus-private/nautilus-file-operations.c:2478
+#: ../libnemo-private/nemo-file-operations.c:2305
+#: ../libnemo-private/nemo-file-operations.c:2478
 msgid "There is no space on the destination."
 msgstr "गन्तव्यमा खालीस्थान छैन ।"
 
-#: ../libnautilus-private/nautilus-file-operations.c:2307
+#: ../libnemo-private/nemo-file-operations.c:2307
 #, c-format
 msgid "Error \"%s\" creating new folder."
 msgstr "नयाँ फोल्डर सिर्जना गर्दा \"%s\" त्रुटि ।"
 
-#: ../libnautilus-private/nautilus-file-operations.c:2312
+#: ../libnemo-private/nemo-file-operations.c:2312
 msgid "Error creating new folder."
 msgstr "नयाँ फोल्डर सिर्जना गर्दा त्रुटि ।"
 
 #. localizers: the initial name of a new folder
-#: ../libnautilus-private/nautilus-file-operations.c:2422
+#: ../libnemo-private/nemo-file-operations.c:2422
 msgid "untitled folder"
 msgstr "शीर्षक नभएको फोल्डर"
 
-#: ../libnautilus-private/nautilus-file-operations.c:2480
+#: ../libnemo-private/nemo-file-operations.c:2480
 #, c-format
 msgid "Error \"%s\" creating new document."
 msgstr "नयाँ कागजात सिर्जना गर्दा \"%s\" त्रुटि ।"
 
-#: ../libnautilus-private/nautilus-file-operations.c:2485
+#: ../libnemo-private/nemo-file-operations.c:2485
 msgid "Error creating new document."
 msgstr "नयाँ कागजात सिर्जना गर्दा त्रुटि ।"
 
-#: ../libnautilus-private/nautilus-file-operations.c:2734
+#: ../libnemo-private/nemo-file-operations.c:2734
 msgid "new file"
 msgstr "नयाँ फाइल"
 
 #. localizers: progress dialog title
-#: ../libnautilus-private/nautilus-file-operations.c:2805
+#: ../libnemo-private/nemo-file-operations.c:2805
 msgid "Deleting files"
 msgstr "फाइलहरू मेट्दै"
 
 #. localizers: label prepended to the progress count
-#: ../libnautilus-private/nautilus-file-operations.c:2807
-#: ../libnautilus-private/nautilus-file-operations.c:2849
+#: ../libnemo-private/nemo-file-operations.c:2807
+#: ../libnemo-private/nemo-file-operations.c:2849
 msgid "Files deleted:"
 msgstr "फाइलहरू मेटियो:"
 
 #. localizers: label prepended to the name of the current file deleted
-#: ../libnautilus-private/nautilus-file-operations.c:2809
-#: ../libnautilus-private/nautilus-file-operations.c:2851
+#: ../libnemo-private/nemo-file-operations.c:2809
+#: ../libnemo-private/nemo-file-operations.c:2851
 msgid "Deleting"
 msgstr "मेट्दै"
 
-#: ../libnautilus-private/nautilus-file-operations.c:2810
+#: ../libnemo-private/nemo-file-operations.c:2810
 msgid "Preparing to Delete files..."
 msgstr "फाइलहरू मेट्न तयारी गर्दैछ..."
 
 #. localizers: progress dialog title
-#: ../libnautilus-private/nautilus-file-operations.c:2847
+#: ../libnemo-private/nemo-file-operations.c:2847
 msgid "Emptying the Trash"
 msgstr "रद्दीटोकरी खाली गर्दै"
 
-#: ../libnautilus-private/nautilus-file-operations.c:2852
+#: ../libnemo-private/nemo-file-operations.c:2852
 msgid "Preparing to Empty the Trash..."
 msgstr "रद्दीटोकरी खाली गर्न तयारी गर्दैछ..."
 
-#: ../libnautilus-private/nautilus-file-operations.c:2888
+#: ../libnemo-private/nemo-file-operations.c:2888
 msgid "Empty all of the items from the trash?"
 msgstr "रद्दीटोकरीबाट सबै वस्तुहरू खाली गर्नुहुन्छ?"
 
-#: ../libnautilus-private/nautilus-file-operations.c:2891
+#: ../libnemo-private/nemo-file-operations.c:2891
 msgid ""
 "If you choose to empty the trash, all items in it will be permanently lost. "
 "Please note that you can also delete them separately."
@@ -1859,15 +1859,15 @@ msgstr ""
 "यदि तपाईँले रद्दीटोकरी खाली गर्न रोज्नुभयो भने, यसमा भएका सबै वस्तुहरू स्थायी रूपले नष्ट "
 "हुनेछन् । कृपया याद राख्नुहोस् तपाईँले तिनिहरू छुट्टाछुट्टै पनि मेट्न सक्नुहुन्छ ।"
 
-#: ../libnautilus-private/nautilus-file-operations.c:2913
+#: ../libnemo-private/nemo-file-operations.c:2913
 msgid "_Empty Trash"
 msgstr "रद्दीटोकरी खाली गर्नुहोस्"
 
-#: ../libnautilus-private/nautilus-file-operations.c:3018
+#: ../libnemo-private/nemo-file-operations.c:3018
 msgid "Do you want to empty the trash before you umount?"
 msgstr "अनमाउन्ट गर्नु पहिले तपाईँ रद्दीटोकरी खाली गर्न चाहनुहुन्छ?"
 
-#: ../libnautilus-private/nautilus-file-operations.c:3020
+#: ../libnemo-private/nemo-file-operations.c:3020
 msgid ""
 "In order to regain the free space on this device the trash must be emptied. "
 "All items in the trash will be permanently lost. "
@@ -1875,53 +1875,53 @@ msgstr ""
 "यो यन्त्रमा खाली स्थान पुन: प्राप्त गर्नका निम्ति रद्दीटोकरी खाली गर्नु पर्दछ । "
 "रद्दीटोकरीमा भएका सबै वस्तुहरू स्थायी रूपमा नष्ट हुनेछन् । "
 
-#: ../libnautilus-private/nautilus-file-operations.c:3026
+#: ../libnemo-private/nemo-file-operations.c:3026
 msgid "Don't Empty Trash"
 msgstr "रद्दीटोकरी खाली नगर्नुहोस्"
 
 #. label, accelerator
-#: ../libnautilus-private/nautilus-file-operations.c:3028
+#: ../libnemo-private/nemo-file-operations.c:3028
 #: ../src/file-manager/fm-desktop-icon-view.c:706
 msgid "Empty Trash"
 msgstr "रद्दीटोकरी खाली गर्नुहोस्"
 
-#: ../libnautilus-private/nautilus-file-utilities.c:81
-#: ../libnautilus-private/nautilus-query.c:135
-#: ../libnautilus-private/nautilus-search-directory-file.c:173
-#: ../libnautilus-private/nautilus-search-directory-file.c:188
-#: ../libnautilus-private/nautilus-search-directory-file.c:210
+#: ../libnemo-private/nemo-file-utilities.c:81
+#: ../libnemo-private/nemo-query.c:135
+#: ../libnemo-private/nemo-search-directory-file.c:173
+#: ../libnemo-private/nemo-search-directory-file.c:188
+#: ../libnemo-private/nemo-search-directory-file.c:210
 msgid "Search"
 msgstr "खोजी गर्नुहोस्"
 
-#: ../libnautilus-private/nautilus-file-utilities.c:882
-#: ../libnautilus-private/nautilus-global-preferences.c:538
-#: ../nautilus-computer.desktop.in.in.h:2
+#: ../libnemo-private/nemo-file-utilities.c:882
+#: ../libnemo-private/nemo-global-preferences.c:538
+#: ../nemo-computer.desktop.in.in.h:2
 msgid "Computer"
 msgstr "कम्प्युटर"
 
-#: ../libnautilus-private/nautilus-file-utilities.c:884
+#: ../libnemo-private/nemo-file-utilities.c:884
 #: ../src/network-scheme.desktop.in.h:2
 msgid "Network"
 msgstr "सञ्जाल"
 
-#: ../libnautilus-private/nautilus-file-utilities.c:886
+#: ../libnemo-private/nemo-file-utilities.c:886
 msgid "Fonts"
 msgstr "फन्टहरू"
 
-#: ../libnautilus-private/nautilus-file-utilities.c:888
+#: ../libnemo-private/nemo-file-utilities.c:888
 msgid "Themes"
 msgstr "विषयवस्तुहरू"
 
-#: ../libnautilus-private/nautilus-file-utilities.c:890
+#: ../libnemo-private/nemo-file-utilities.c:890
 msgid "CD/DVD Creator"
 msgstr "सी डी/डी भी डी सर्जक"
 
-#: ../libnautilus-private/nautilus-file-utilities.c:892
+#: ../libnemo-private/nemo-file-utilities.c:892
 msgid "Windows Network"
 msgstr "सञ्झ्याल सञ्जाल"
 
 #. translators: this is the title of the "dns-sd:///" location
-#: ../libnautilus-private/nautilus-file-utilities.c:895
+#: ../libnemo-private/nemo-file-utilities.c:895
 msgid "Services in"
 msgstr "यसमा सेवाहरू"
 
@@ -1934,71 +1934,71 @@ msgstr "यसमा सेवाहरू"
 #. * the specifiers from the C standard, not extensions.
 #. * These include "%" followed by one of
 #. * "aAbBcdHIjmMpSUwWxXyYZ". There are two extensions
-#. * in the Nautilus version of strftime that can be
+#. * in the Nemo version of strftime that can be
 #. * used (and match GNU extensions). Putting a "-"
 #. * between the "%" and any numeric directive will turn
 #. * off zero padding, and putting a "_" there will use
 #. * space padding instead of zero padding.
 #.
-#: ../libnautilus-private/nautilus-file.c:2949
+#: ../libnemo-private/nemo-file.c:2949
 msgid "today at 00:00:00 PM"
 msgstr "आज अपरान्ह ००:००:०० बजे"
 
-#: ../libnautilus-private/nautilus-file.c:2950
-#: ../src/nautilus-file-management-properties.c:467
+#: ../libnemo-private/nemo-file.c:2950
+#: ../src/nemo-file-management-properties.c:467
 msgid "today at %-I:%M:%S %p"
 msgstr "आज %p %-l:%M:%S बजे"
 
-#: ../libnautilus-private/nautilus-file.c:2952
+#: ../libnemo-private/nemo-file.c:2952
 msgid "today at 00:00 PM"
 msgstr "आज अपरान्ह ००:०० बजे"
 
-#: ../libnautilus-private/nautilus-file.c:2953
+#: ../libnemo-private/nemo-file.c:2953
 msgid "today at %-I:%M %p"
 msgstr "आज %p %-I:%M बजे"
 
-#: ../libnautilus-private/nautilus-file.c:2955
+#: ../libnemo-private/nemo-file.c:2955
 msgid "today, 00:00 PM"
 msgstr "आज, अपरान्ह ००:०० बजे"
 
-#: ../libnautilus-private/nautilus-file.c:2956
+#: ../libnemo-private/nemo-file.c:2956
 msgid "today, %-I:%M %p"
 msgstr "आज, %p %-l:%M"
 
-#: ../libnautilus-private/nautilus-file.c:2958
-#: ../libnautilus-private/nautilus-file.c:2959
+#: ../libnemo-private/nemo-file.c:2958
+#: ../libnemo-private/nemo-file.c:2959
 msgid "today"
 msgstr "आज"
 
 #. Yesterday, use special word.
 #. * Note to localizers: Same issues as "today" string.
 #.
-#: ../libnautilus-private/nautilus-file.c:2968
+#: ../libnemo-private/nemo-file.c:2968
 msgid "yesterday at 00:00:00 PM"
 msgstr "हिजो अपरान्ह ००:००:०० बजे"
 
-#: ../libnautilus-private/nautilus-file.c:2969
+#: ../libnemo-private/nemo-file.c:2969
 msgid "yesterday at %-I:%M:%S %p"
 msgstr "हिजो %p %-l:%M:%S बजे"
 
-#: ../libnautilus-private/nautilus-file.c:2971
+#: ../libnemo-private/nemo-file.c:2971
 msgid "yesterday at 00:00 PM"
 msgstr "हिजो अपरान्ह ००:०० बजे"
 
-#: ../libnautilus-private/nautilus-file.c:2972
+#: ../libnemo-private/nemo-file.c:2972
 msgid "yesterday at %-I:%M %p"
 msgstr "हिजो %p %-I:%M बजे"
 
-#: ../libnautilus-private/nautilus-file.c:2974
+#: ../libnemo-private/nemo-file.c:2974
 msgid "yesterday, 00:00 PM"
 msgstr "हिजो, अपरान्ह ००:०० बजे"
 
-#: ../libnautilus-private/nautilus-file.c:2975
+#: ../libnemo-private/nemo-file.c:2975
 msgid "yesterday, %-I:%M %p"
 msgstr "हिजो, %p %-l:%M"
 
-#: ../libnautilus-private/nautilus-file.c:2977
-#: ../libnautilus-private/nautilus-file.c:2978
+#: ../libnemo-private/nemo-file.c:2977
+#: ../libnemo-private/nemo-file.c:2978
 msgid "yesterday"
 msgstr "हिजो"
 
@@ -2007,63 +2007,63 @@ msgstr "हिजो"
 #. * The width measurement templates correspond to
 #. * the day/month name with the most letters.
 #.
-#: ../libnautilus-private/nautilus-file.c:2989
+#: ../libnemo-private/nemo-file.c:2989
 msgid "Wednesday, September 00 0000 at 00:00:00 PM"
 msgstr "बुधवार, सेप्टेम्बर ०० ०००० अपरान्ह ००:००:०० बजे"
 
-#: ../libnautilus-private/nautilus-file.c:2990
+#: ../libnemo-private/nemo-file.c:2990
 msgid "%A, %B %-d %Y at %-I:%M:%S %p"
 msgstr "%A, %B %-d %Y at %-I:%M:%S %p"
 
-#: ../libnautilus-private/nautilus-file.c:2992
+#: ../libnemo-private/nemo-file.c:2992
 msgid "Mon, Oct 00 0000 at 00:00:00 PM"
 msgstr "सोमबार, अक्टूबर ०० ०००० अपरान्ह ००:००:०० बजे"
 
-#: ../libnautilus-private/nautilus-file.c:2993
+#: ../libnemo-private/nemo-file.c:2993
 msgid "%a, %b %-d %Y at %-I:%M:%S %p"
 msgstr "%a, %b %-d %Y at %-I:%M:%S %p"
 
-#: ../libnautilus-private/nautilus-file.c:2995
+#: ../libnemo-private/nemo-file.c:2995
 msgid "Mon, Oct 00 0000 at 00:00 PM"
 msgstr "सोमबार, अक्टूबर ०० ०००० अपरान्ह ००:०० बजे"
 
-#: ../libnautilus-private/nautilus-file.c:2996
+#: ../libnemo-private/nemo-file.c:2996
 msgid "%a, %b %-d %Y at %-I:%M %p"
 msgstr "%a, %b %-d %Y at %-I:%M %p"
 
-#: ../libnautilus-private/nautilus-file.c:2998
+#: ../libnemo-private/nemo-file.c:2998
 msgid "Oct 00 0000 at 00:00 PM"
 msgstr "अक्टूबर ०० ०००० अपरान्ह ००:०० बजे"
 
-#: ../libnautilus-private/nautilus-file.c:2999
+#: ../libnemo-private/nemo-file.c:2999
 msgid "%b %-d %Y at %-I:%M %p"
 msgstr "%b %-d %Y at %-I:%M %p"
 
-#: ../libnautilus-private/nautilus-file.c:3001
+#: ../libnemo-private/nemo-file.c:3001
 msgid "Oct 00 0000, 00:00 PM"
 msgstr "अक्टूबर ०० ००००, अपरान्ह ००:०० बजे"
 
-#: ../libnautilus-private/nautilus-file.c:3002
+#: ../libnemo-private/nemo-file.c:3002
 msgid "%b %-d %Y, %-I:%M %p"
 msgstr "%b %-d %Y, %-I:%M %p"
 
-#: ../libnautilus-private/nautilus-file.c:3004
+#: ../libnemo-private/nemo-file.c:3004
 msgid "00/00/00, 00:00 PM"
 msgstr "००/००/००, अपरान्ह ००:०० बजे"
 
-#: ../libnautilus-private/nautilus-file.c:3005
+#: ../libnemo-private/nemo-file.c:3005
 msgid "%m/%-d/%y, %-I:%M %p"
 msgstr "%m/%-d/%y, %-I:%M %p"
 
-#: ../libnautilus-private/nautilus-file.c:3007
+#: ../libnemo-private/nemo-file.c:3007
 msgid "00/00/00"
 msgstr "००/००/००"
 
-#: ../libnautilus-private/nautilus-file.c:3008
+#: ../libnemo-private/nemo-file.c:3008
 msgid "%m/%d/%y"
 msgstr "%m/%d/%y"
 
-#: ../libnautilus-private/nautilus-file.c:4345
+#: ../libnemo-private/nemo-file.c:4345
 #: ../src/file-manager/fm-directory-view.c:2266
 #, c-format
 msgid "%u item"
@@ -2071,14 +2071,14 @@ msgid_plural "%u items"
 msgstr[0] "%u वस्तु"
 msgstr[1] "%u वस्तुहरू"
 
-#: ../libnautilus-private/nautilus-file.c:4346
+#: ../libnemo-private/nemo-file.c:4346
 #, c-format
 msgid "%u folder"
 msgid_plural "%u folders"
 msgstr[0] "%u फोल्डर"
 msgstr[1] "%u फोल्डरहरू"
 
-#: ../libnautilus-private/nautilus-file.c:4347
+#: ../libnemo-private/nemo-file.c:4347
 #, c-format
 msgid "%u file"
 msgid_plural "%u files"
@@ -2086,43 +2086,43 @@ msgstr[0] "%u फाइल"
 msgstr[1] "%u फाइलहरू"
 
 #. FIXME: We should use GNOME_VFS_SIZE_FORMAT_STR instead of the explicit format here.
-#: ../libnautilus-private/nautilus-file.c:4425
+#: ../libnemo-private/nemo-file.c:4425
 #, c-format
 msgid "%s (%lld bytes)"
 msgstr "%s (%lld बाइट्स)"
 
 #. This means no contents at all were readable
-#: ../libnautilus-private/nautilus-file.c:4724
-#: ../libnautilus-private/nautilus-file.c:4740
+#: ../libnemo-private/nemo-file.c:4724
+#: ../libnemo-private/nemo-file.c:4740
 msgid "? items"
 msgstr "? वस्तुहरू"
 
 #. This means no contents at all were readable
-#: ../libnautilus-private/nautilus-file.c:4730
+#: ../libnemo-private/nemo-file.c:4730
 msgid "? bytes"
 msgstr "? बाइट्स"
 
-#: ../libnautilus-private/nautilus-file.c:4745
+#: ../libnemo-private/nemo-file.c:4745
 msgid "unknown type"
 msgstr "अज्ञात प्रकार"
 
-#: ../libnautilus-private/nautilus-file.c:4748
+#: ../libnemo-private/nemo-file.c:4748
 msgid "unknown MIME type"
 msgstr "अज्ञात MIME प्रकार"
 
 #. Fallback, use for both unknown attributes and attributes
 #. * for which we have no more appropriate default.
 #.
-#: ../libnautilus-private/nautilus-file.c:4754
+#: ../libnemo-private/nemo-file.c:4754
 #: ../src/file-manager/fm-properties-window.c:1343
 msgid "unknown"
 msgstr "अज्ञात"
 
-#: ../libnautilus-private/nautilus-file.c:4787
+#: ../libnemo-private/nemo-file.c:4787
 msgid "program"
 msgstr "कार्यक्रम"
 
-#: ../libnautilus-private/nautilus-file.c:4805
+#: ../libnemo-private/nemo-file.c:4805
 msgid ""
 "Can't find description even for \"x-directory/normal\". This probably means "
 "that your gnome-vfs.keys file is in the wrong place or isn't being found for "
@@ -2131,7 +2131,7 @@ msgstr ""
 "\"x-डाइरेक्टरी/सामान्य\" का लागि वर्णन फेला पार्न सक्दैन । यसको अर्थ सम्भवत तपाईँको "
 "gnome-vfs.keys फाइल गलत स्थानमा छ वा अन्य कुनै कारणले गर्दा फेला पार्न सकिएन ।"
 
-#: ../libnautilus-private/nautilus-file.c:4809
+#: ../libnemo-private/nemo-file.c:4809
 #, c-format
 msgid ""
 "No description found for mime type \"%s\" (file is \"%s\"), please tell the "
@@ -2140,192 +2140,192 @@ msgstr ""
 "\"%s\" (फाइल \"%s\") माइम प्रकारका लागि वर्णन फेला परेन, कृपया gnome-vfs पत्राचार "
 "सूचीलाई भन्नुहोस् ।"
 
-#: ../libnautilus-private/nautilus-file.c:4825
+#: ../libnemo-private/nemo-file.c:4825
 msgid "link"
 msgstr "लिङ्क"
 
-#: ../libnautilus-private/nautilus-file.c:4845
+#: ../libnemo-private/nemo-file.c:4845
 msgid "link (broken)"
 msgstr "लिङ्क (विच्छेद गरिएको)"
 
-#: ../libnautilus-private/nautilus-file.c:6372
-#: ../libnautilus-private/nautilus-global-preferences.c:544
-#: ../libnautilus-private/nautilus-trash-directory.c:353
-#: ../src/nautilus-places-sidebar.c:358 ../src/nautilus-trash-bar.c:121
+#: ../libnemo-private/nemo-file.c:6372
+#: ../libnemo-private/nemo-global-preferences.c:544
+#: ../libnemo-private/nemo-trash-directory.c:353
+#: ../src/nemo-places-sidebar.c:358 ../src/nemo-trash-bar.c:121
 msgid "Trash"
 msgstr "रद्दीटोकरी"
 
-#: ../libnautilus-private/nautilus-global-preferences.c:72
+#: ../libnemo-private/nemo-global-preferences.c:72
 msgid "_Always"
 msgstr "सधैं"
 
-#: ../libnautilus-private/nautilus-global-preferences.c:73
+#: ../libnemo-private/nemo-global-preferences.c:73
 msgid "_Local File Only"
 msgstr "स्थानीय फाइल मात्र"
 
-#: ../libnautilus-private/nautilus-global-preferences.c:74
+#: ../libnemo-private/nemo-global-preferences.c:74
 msgid "_Never"
 msgstr "कहिल्यै पनि होइन"
 
-#: ../libnautilus-private/nautilus-global-preferences.c:80
+#: ../libnemo-private/nemo-global-preferences.c:80
 #, no-c-format
 msgid "25%"
 msgstr "२५%"
 
-#: ../libnautilus-private/nautilus-global-preferences.c:82
+#: ../libnemo-private/nemo-global-preferences.c:82
 #, no-c-format
 msgid "50%"
 msgstr "५०%"
 
-#: ../libnautilus-private/nautilus-global-preferences.c:84
+#: ../libnemo-private/nemo-global-preferences.c:84
 #, no-c-format
 msgid "75%"
 msgstr "७५%"
 
-#: ../libnautilus-private/nautilus-global-preferences.c:86
+#: ../libnemo-private/nemo-global-preferences.c:86
 #, no-c-format
 msgid "100%"
 msgstr "१००%"
 
-#: ../libnautilus-private/nautilus-global-preferences.c:88
+#: ../libnemo-private/nemo-global-preferences.c:88
 #, no-c-format
 msgid "150%"
 msgstr "१५०%"
 
-#: ../libnautilus-private/nautilus-global-preferences.c:90
+#: ../libnemo-private/nemo-global-preferences.c:90
 #, no-c-format
 msgid "200%"
 msgstr "२००%"
 
-#: ../libnautilus-private/nautilus-global-preferences.c:92
+#: ../libnemo-private/nemo-global-preferences.c:92
 #, no-c-format
 msgid "400%"
 msgstr "४००%"
 
-#: ../libnautilus-private/nautilus-global-preferences.c:97
+#: ../libnemo-private/nemo-global-preferences.c:97
 msgid "100 K"
 msgstr "१०० K"
 
-#: ../libnautilus-private/nautilus-global-preferences.c:98
+#: ../libnemo-private/nemo-global-preferences.c:98
 msgid "500 K"
 msgstr "५०० K"
 
-#: ../libnautilus-private/nautilus-global-preferences.c:99
+#: ../libnemo-private/nemo-global-preferences.c:99
 msgid "1 MB"
 msgstr "१ मेगा बाइट"
 
-#: ../libnautilus-private/nautilus-global-preferences.c:100
+#: ../libnemo-private/nemo-global-preferences.c:100
 msgid "3 MB"
 msgstr "३ मेगा बाइट"
 
-#: ../libnautilus-private/nautilus-global-preferences.c:101
+#: ../libnemo-private/nemo-global-preferences.c:101
 msgid "5 MB"
 msgstr "५ मेगा बाइट"
 
-#: ../libnautilus-private/nautilus-global-preferences.c:102
+#: ../libnemo-private/nemo-global-preferences.c:102
 msgid "10 MB"
 msgstr "१० मेगा बाइट"
 
-#: ../libnautilus-private/nautilus-global-preferences.c:103
+#: ../libnemo-private/nemo-global-preferences.c:103
 msgid "100 MB"
 msgstr "१०० मेगा बाइट"
 
-#: ../libnautilus-private/nautilus-global-preferences.c:109
+#: ../libnemo-private/nemo-global-preferences.c:109
 msgid "Activate items with a _single click"
 msgstr "एकल क्लिकले वस्तुहरू सक्रिय पार्नुहोस्"
 
-#: ../libnautilus-private/nautilus-global-preferences.c:113
+#: ../libnemo-private/nemo-global-preferences.c:113
 msgid "Activate items with a _double click"
 msgstr "डबल क्लिकले वस्तुहरू सक्रिय पार्नुहोस्"
 
-#: ../libnautilus-private/nautilus-global-preferences.c:121
+#: ../libnemo-private/nemo-global-preferences.c:121
 msgid "E_xecute files when they are clicked"
 msgstr "फाइलहरू क्लिक गरेपछि कार्यान्वयन गर्नुहोस्"
 
-#: ../libnautilus-private/nautilus-global-preferences.c:125
+#: ../libnemo-private/nemo-global-preferences.c:125
 msgid "Display _files when they are clicked"
 msgstr "फाइलहरू क्लिक गरेपछि प्रदर्शन गर्नुहोस्"
 
-#: ../libnautilus-private/nautilus-global-preferences.c:129
-#: ../src/nautilus-file-management-properties.glade.h:63
+#: ../libnemo-private/nemo-global-preferences.c:129
+#: ../src/nemo-file-management-properties.glade.h:63
 msgid "_Ask each time"
 msgstr "हरेक पटक सोध्नुहोस्"
 
-#: ../libnautilus-private/nautilus-global-preferences.c:137
+#: ../libnemo-private/nemo-global-preferences.c:137
 msgid "Search for files by file name only"
 msgstr "फाइल नामद्वारा मात्र फाइलहरूका लागि खोजी गर्नुहोस्"
 
-#: ../libnautilus-private/nautilus-global-preferences.c:141
+#: ../libnemo-private/nemo-global-preferences.c:141
 msgid "Search for files by file name and file properties"
 msgstr "फाइल नाम र फाइल गुणद्वारा फाइलहरूका लागि खोजी गर्नुहोस्"
 
-#: ../libnautilus-private/nautilus-global-preferences.c:148
+#: ../libnemo-private/nemo-global-preferences.c:148
 #: ../src/file-manager/fm-icon-container.c:512
 msgid "Icon View"
 msgstr "प्रतिमा दृश्य"
 
-#: ../libnautilus-private/nautilus-global-preferences.c:149
+#: ../libnemo-private/nemo-global-preferences.c:149
 #: ../src/file-manager/fm-list-view.c:1428
 msgid "List View"
 msgstr "सूची दृश्य"
 
-#: ../libnautilus-private/nautilus-global-preferences.c:154
+#: ../libnemo-private/nemo-global-preferences.c:154
 msgid "Manually"
 msgstr "म्यानुअल तरिकाले"
 
-#: ../libnautilus-private/nautilus-global-preferences.c:156
+#: ../libnemo-private/nemo-global-preferences.c:156
 msgid "By Name"
 msgstr "नामद्वारा"
 
-#: ../libnautilus-private/nautilus-global-preferences.c:157
+#: ../libnemo-private/nemo-global-preferences.c:157
 msgid "By Size"
 msgstr "साइजद्वारा"
 
-#: ../libnautilus-private/nautilus-global-preferences.c:158
+#: ../libnemo-private/nemo-global-preferences.c:158
 msgid "By Type"
 msgstr "प्रकारद्वारा"
 
-#: ../libnautilus-private/nautilus-global-preferences.c:159
+#: ../libnemo-private/nemo-global-preferences.c:159
 msgid "By Modification Date"
 msgstr "परिमार्जन मितिद्वारा"
 
-#: ../libnautilus-private/nautilus-global-preferences.c:160
+#: ../libnemo-private/nemo-global-preferences.c:160
 msgid "By Emblems"
 msgstr "चिन्हद्वारा"
 
-#: ../libnautilus-private/nautilus-global-preferences.c:165
+#: ../libnemo-private/nemo-global-preferences.c:165
 msgid "8"
 msgstr "८"
 
-#: ../libnautilus-private/nautilus-global-preferences.c:166
+#: ../libnemo-private/nemo-global-preferences.c:166
 msgid "10"
 msgstr "१०"
 
-#: ../libnautilus-private/nautilus-global-preferences.c:167
+#: ../libnemo-private/nemo-global-preferences.c:167
 msgid "12"
 msgstr "१२"
 
-#: ../libnautilus-private/nautilus-global-preferences.c:168
+#: ../libnemo-private/nemo-global-preferences.c:168
 msgid "14"
 msgstr "१४"
 
-#: ../libnautilus-private/nautilus-global-preferences.c:169
+#: ../libnemo-private/nemo-global-preferences.c:169
 msgid "16"
 msgstr "१६"
 
-#: ../libnautilus-private/nautilus-global-preferences.c:170
+#: ../libnemo-private/nemo-global-preferences.c:170
 msgid "18"
 msgstr "१८"
 
-#: ../libnautilus-private/nautilus-global-preferences.c:171
+#: ../libnemo-private/nemo-global-preferences.c:171
 msgid "20"
 msgstr "२०"
 
-#: ../libnautilus-private/nautilus-global-preferences.c:172
+#: ../libnemo-private/nemo-global-preferences.c:172
 msgid "22"
 msgstr "२२"
 
-#: ../libnautilus-private/nautilus-global-preferences.c:173
+#: ../libnemo-private/nemo-global-preferences.c:173
 msgid "24"
 msgstr "२४"
 
@@ -2337,29 +2337,29 @@ msgstr "२४"
 #. * match the user name string passed by the C code, but not
 #. * put the user name in the final string.
 #.
-#: ../libnautilus-private/nautilus-global-preferences.c:532
+#: ../libnemo-private/nemo-global-preferences.c:532
 #, c-format
 msgid "%s's Home"
 msgstr "%s को गृह"
 
-#: ../libnautilus-private/nautilus-global-preferences.c:550
+#: ../libnemo-private/nemo-global-preferences.c:550
 msgid "Network Servers"
 msgstr "सञ्जाल सर्भरहरू"
 
-#: ../libnautilus-private/nautilus-icon-container.c:2136
+#: ../libnemo-private/nemo-icon-container.c:2136
 msgid "The selection rectangle"
 msgstr "चयन आयात"
 
-#: ../libnautilus-private/nautilus-icon-dnd.c:918
+#: ../libnemo-private/nemo-icon-dnd.c:918
 msgid "Switch to Manual Layout?"
 msgstr "म्यानुअल सजावटमा स्विच गर्नुहुन्छ?"
 
-#: ../libnautilus-private/nautilus-program-choosing.c:136
+#: ../libnemo-private/nemo-program-choosing.c:136
 msgid "Open Failed, would you like to choose another application?"
 msgstr "खोल्न असफल भयो, तपाईँ अर्को अनुप्रयोग रोज्न चाहनुहुन्छ?"
 
-#: ../libnautilus-private/nautilus-program-choosing.c:137
-#: ../libnautilus-private/nautilus-program-choosing.c:168
+#: ../libnemo-private/nemo-program-choosing.c:137
+#: ../libnemo-private/nemo-program-choosing.c:168
 #, c-format
 msgid ""
 "\"%s\" can't open \"%s\" because \"%s\" can't access files at \"%s\" "
@@ -2367,12 +2367,12 @@ msgid ""
 msgstr ""
 "\"%s\"ले \"%s\" खोल्न सक्दैन किनभने \"%s\" ले \"%s\" स्थानहरूमा फाइलहरू पहुँच गर्न सक्दैन ।"
 
-#: ../libnautilus-private/nautilus-program-choosing.c:142
+#: ../libnemo-private/nemo-program-choosing.c:142
 msgid "Open Failed, would you like to choose another action?"
 msgstr "खोल्न असफल भयो, तपाईँ अर्को कार्य रोज्न चाहनुहुन्छ?"
 
-#: ../libnautilus-private/nautilus-program-choosing.c:143
-#: ../libnautilus-private/nautilus-program-choosing.c:175
+#: ../libnemo-private/nemo-program-choosing.c:143
+#: ../libnemo-private/nemo-program-choosing.c:175
 #, c-format
 msgid ""
 "The default action can't open \"%s\" because it can't access files at \"%s\" "
@@ -2381,7 +2381,7 @@ msgstr ""
 "पूर्वनिर्धारित कार्यले \"%s\"खोल्न सक्दैन किनभने यसले \"%s\" स्थानहरूमा फाइलहरू पहुँच गर्न "
 "सक्दैन ।"
 
-#: ../libnautilus-private/nautilus-program-choosing.c:171
+#: ../libnemo-private/nemo-program-choosing.c:171
 msgid ""
 "No other applications are available to view this file.  If you copy this "
 "file onto your computer, you may be able to open it."
@@ -2389,7 +2389,7 @@ msgstr ""
 "यो फाइल हेर्न अन्य अनुप्रयोगहरू उपलब्ध छैनन् ।  यदि तपाईँले यो फाइल तपाईँको कम्प्युटरमा "
 "प्रतिलिपि गर्नुभयो भने, तपाईँले यसलाई सायद खोल्न सक्नुहुन्छ ।"
 
-#: ../libnautilus-private/nautilus-program-choosing.c:177
+#: ../libnemo-private/nemo-program-choosing.c:177
 msgid ""
 "No other actions are available to view this file.  If you copy this file "
 "onto your computer, you may be able to open it."
@@ -2397,8 +2397,8 @@ msgstr ""
 "यो फाइल हेर्न अन्य अनुप्रयोगहरू उपलब्ध छैनन् ।  यदि तपाईँले यो फाइल तपाईँको कम्प्युटरमा "
 "प्रतिलिपि गर्नुभयो भने, तपाईँले यसलाई सायद खोल्न सक्नुहुन्छ ।"
 
-#: ../libnautilus-private/nautilus-program-choosing.c:489
-#: ../libnautilus-private/nautilus-program-choosing.c:731
+#: ../libnemo-private/nemo-program-choosing.c:489
+#: ../libnemo-private/nemo-program-choosing.c:731
 #, c-format
 msgid "Opening %s"
 msgstr "%s खोल्दै"
@@ -2407,103 +2407,103 @@ msgstr "%s खोल्दै"
 #. * and I found these in other places to reuse. We should make them
 #. * better later.
 #. Shouldn't have gotten this error unless there's a : separator.
-#: ../libnautilus-private/nautilus-program-choosing.c:577
-#: ../libnautilus-private/nautilus-program-choosing.c:588
-#: ../libnautilus-private/nautilus-program-choosing.c:596
-#: ../libnautilus-private/nautilus-program-choosing.c:601
-#: ../src/nautilus-window-manage-views.c:1474
-#: ../src/nautilus-window-manage-views.c:1480
-#: ../src/nautilus-window-manage-views.c:1508
-#: ../src/nautilus-window-manage-views.c:1516
-#: ../src/nautilus-window-manage-views.c:1522
-#: ../src/nautilus-window-manage-views.c:1543
-#: ../src/nautilus-window-manage-views.c:1561
+#: ../libnemo-private/nemo-program-choosing.c:577
+#: ../libnemo-private/nemo-program-choosing.c:588
+#: ../libnemo-private/nemo-program-choosing.c:596
+#: ../libnemo-private/nemo-program-choosing.c:601
+#: ../src/nemo-window-manage-views.c:1474
+#: ../src/nemo-window-manage-views.c:1480
+#: ../src/nemo-window-manage-views.c:1508
+#: ../src/nemo-window-manage-views.c:1516
+#: ../src/nemo-window-manage-views.c:1522
+#: ../src/nemo-window-manage-views.c:1543
+#: ../src/nemo-window-manage-views.c:1561
 #, c-format
 msgid "Couldn't display \"%s\"."
 msgstr "\"%s\" प्रदर्शन गर्न सकेन ।"
 
-#: ../libnautilus-private/nautilus-program-choosing.c:590
-#: ../libnautilus-private/nautilus-program-choosing.c:913
-#: ../libnautilus-private/nautilus-program-choosing.c:981
+#: ../libnemo-private/nemo-program-choosing.c:590
+#: ../libnemo-private/nemo-program-choosing.c:913
+#: ../libnemo-private/nemo-program-choosing.c:981
 msgid "There was an error launching the application."
 msgstr "अनुप्रयोग सुरुआत गर्दा त्यहाँ एउटा त्रुटि थियो ।"
 
-#: ../libnautilus-private/nautilus-program-choosing.c:598
-#: ../src/nautilus-window-manage-views.c:1518
+#: ../libnemo-private/nemo-program-choosing.c:598
+#: ../src/nemo-window-manage-views.c:1518
 msgid "The attempt to log in failed."
 msgstr "लगइन गर्ने प्रयास असफल भयो ।"
 
-#: ../libnautilus-private/nautilus-program-choosing.c:603
-#: ../src/nautilus-window-manage-views.c:1524
+#: ../libnemo-private/nemo-program-choosing.c:603
+#: ../src/nemo-window-manage-views.c:1524
 msgid "Access was denied."
 msgstr "पहुँच अस्विकार गरियो ।"
 
-#: ../libnautilus-private/nautilus-program-choosing.c:608
-#: ../src/nautilus-window-manage-views.c:1535
+#: ../libnemo-private/nemo-program-choosing.c:608
+#: ../src/nemo-window-manage-views.c:1535
 #, c-format
 msgid "Couldn't display \"%s\", because no host \"%s\" could be found."
 msgstr "\"%s\" प्रदर्शन गर्न सकेन, किनभने \"%s\" होस्ट फेला पार्न सकिएन ।"
 
-#: ../libnautilus-private/nautilus-program-choosing.c:611
-#: ../src/nautilus-window-manage-views.c:1538
+#: ../libnemo-private/nemo-program-choosing.c:611
+#: ../src/nemo-window-manage-views.c:1538
 msgid ""
 "Check that the spelling is correct and that your proxy settings are correct."
 msgstr "हिज्जे र तपाईँको प्रोक्सि सेटिङ सहि छन् भन्ने जाँच गर्नुहोस् ।"
 
-#: ../libnautilus-private/nautilus-program-choosing.c:616
-#: ../src/nautilus-window-manage-views.c:1496
+#: ../libnemo-private/nemo-program-choosing.c:616
+#: ../src/nemo-window-manage-views.c:1496
 #, c-format
 msgid "\"%s\" is not a valid location."
 msgstr "\"%s\" एउटा वैध स्थान होइन ।"
 
-#: ../libnautilus-private/nautilus-program-choosing.c:619
-#: ../libnautilus-private/nautilus-program-choosing.c:626
-#: ../src/nautilus-connect-server-dialog.c:202
-#: ../src/nautilus-property-browser.c:1189
-#: ../src/nautilus-window-manage-views.c:1491
-#: ../src/nautilus-window-manage-views.c:1499
+#: ../libnemo-private/nemo-program-choosing.c:619
+#: ../libnemo-private/nemo-program-choosing.c:626
+#: ../src/nemo-connect-server-dialog.c:202
+#: ../src/nemo-property-browser.c:1189
+#: ../src/nemo-window-manage-views.c:1491
+#: ../src/nemo-window-manage-views.c:1499
 msgid "Please check the spelling and try again."
 msgstr "कृपया हिज्जे जाँच गर्नुहोस् र फेरि प्रयास गर्नुहोस् ।"
 
-#: ../libnautilus-private/nautilus-program-choosing.c:623
-#: ../src/nautilus-window-manage-views.c:1488
+#: ../libnemo-private/nemo-program-choosing.c:623
+#: ../src/nemo-window-manage-views.c:1488
 #, c-format
 msgid "Couldn't find \"%s\"."
 msgstr "\"%s\" फेला पार्न सकेन ।"
 
-#: ../libnautilus-private/nautilus-program-choosing.c:734
+#: ../libnemo-private/nemo-program-choosing.c:734
 #, c-format
 msgid "Opening %d Item"
 msgid_plural "Opening %d Items"
 msgstr[0] "%d वस्तु खोल्दै"
 msgstr[1] "%d वस्तुहरू खोल्दै"
 
-#: ../libnautilus-private/nautilus-program-choosing.c:899
+#: ../libnemo-private/nemo-program-choosing.c:899
 msgid "Sorry, but you can't execute commands from a remote site."
 msgstr "माफ गर्नुहोस्, तर तपाईँले टाढाको साइटबाट आदेशहरू कार्यान्वयन गर्न सक्नुहुन्न ।"
 
-#: ../libnautilus-private/nautilus-program-choosing.c:901
+#: ../libnemo-private/nemo-program-choosing.c:901
 msgid "This is disabled due to security considerations."
 msgstr "सुरक्षाका कारणले गर्दा यो निष्क्रिय भयो ।"
 
-#: ../libnautilus-private/nautilus-program-choosing.c:911
-#: ../libnautilus-private/nautilus-program-choosing.c:979
+#: ../libnemo-private/nemo-program-choosing.c:911
+#: ../libnemo-private/nemo-program-choosing.c:979
 msgid "Details: "
 msgstr "विस्तृत विवरणहरू: "
 
-#: ../libnautilus-private/nautilus-program-choosing.c:942
-#: ../libnautilus-private/nautilus-program-choosing.c:953
+#: ../libnemo-private/nemo-program-choosing.c:942
+#: ../libnemo-private/nemo-program-choosing.c:953
 msgid "This drop target only supports local files."
 msgstr "यस छोड्ने लक्ष्यले स्थानीय फाइलहरूलाई मात्र समर्थन गर्दछ ।"
 
-#: ../libnautilus-private/nautilus-program-choosing.c:943
+#: ../libnemo-private/nemo-program-choosing.c:943
 msgid ""
 "To open non-local files copy them to a local folder and then drop them again."
 msgstr ""
 "गैर-स्थानीय फाइलहरू खोल्न तिनिहरूलाई स्थानीय फोल्डरमा प्रतिलिपि गर्नुहोस् र त्यसपछि "
 "तिनिहरूलाई फेरि छोड्नुहोस् ।"
 
-#: ../libnautilus-private/nautilus-program-choosing.c:954
+#: ../libnemo-private/nemo-program-choosing.c:954
 msgid ""
 "To open non-local files copy them to a local folder and then drop them "
 "again. The local files you dropped have already been opened."
@@ -2511,91 +2511,91 @@ msgstr ""
 "गैर-स्थानीय फाइलहरू खोल्न तिनिहरूलाई स्थानीय फोल्डरमा प्रतिलिपि बनाउनुहोस् र त्यसपछि "
 "तिनिहरूलाई फेरि छोड्नुहोस् । तपाईँले छोड्नु भएको स्थानीय फाइलहरू पहिल्यै नै खोलिसकेको छ ।"
 
-#: ../libnautilus-private/nautilus-query.c:138
+#: ../libnemo-private/nemo-query.c:138
 #, c-format
 msgid "Search for \"%s\""
 msgstr "\"%s\" का लागि खोजी गर्नुहोस्"
 
-#: ../libnautilus-private/nautilus-undo-signal-handlers.c:174
-#: ../src/nautilus-query-editor.c:979
+#: ../libnemo-private/nemo-undo-signal-handlers.c:174
+#: ../src/nemo-query-editor.c:979
 msgid "Edit"
 msgstr "सम्पादन गर्नुहोस्"
 
-#: ../libnautilus-private/nautilus-undo-signal-handlers.c:175
+#: ../libnemo-private/nemo-undo-signal-handlers.c:175
 msgid "Undo Edit"
 msgstr "सम्पादन पूर्वस्थितिमा फर्काउनुहोस्"
 
-#: ../libnautilus-private/nautilus-undo-signal-handlers.c:176
+#: ../libnemo-private/nemo-undo-signal-handlers.c:176
 msgid "Undo the edit"
 msgstr "सम्पादन पूर्वस्थितिमा फर्काउनुहोस्"
 
-#: ../libnautilus-private/nautilus-undo-signal-handlers.c:177
+#: ../libnemo-private/nemo-undo-signal-handlers.c:177
 msgid "Redo Edit"
 msgstr "सम्पादन रिडु गर्नुहोस्"
 
-#: ../libnautilus-private/nautilus-undo-signal-handlers.c:178
+#: ../libnemo-private/nemo-undo-signal-handlers.c:178
 msgid "Redo the edit"
 msgstr "सम्पादन गरिएको रिडु गर्नुहोस्"
 
 #. label, accelerator
-#: ../nautilus-computer.desktop.in.in.h:1 ../src/nautilus-window-menus.c:658
+#: ../nemo-computer.desktop.in.in.h:1 ../src/nemo-window-menus.c:658
 msgid ""
 "Browse all local and remote disks and folders accessible from this computer"
 msgstr "सबै स्थानीय र टाढाको डिस्कहरू र यो क्मप्युटरबाट पहुँचयोग्य फोल्डरहरू ब्राउज गर्नुहोस्"
 
-#: ../nautilus-file-management-properties.desktop.in.in.h:1
+#: ../nemo-file-management-properties.desktop.in.in.h:1
 msgid "Change the behaviour and appearance of file manager windows"
 msgstr "फाइल प्रबन्धक सञ्झ्यालहरूको ब्यबहार र देखावट परिवर्तन गर्नुहोस्"
 
-#: ../nautilus-file-management-properties.desktop.in.in.h:2
+#: ../nemo-file-management-properties.desktop.in.in.h:2
 msgid "File Management"
 msgstr "फाइल ब्यवस्थापन"
 
-#: ../nautilus-folder-handler.desktop.in.in.h:1
+#: ../nemo-folder-handler.desktop.in.in.h:1
 msgid "Open Folder"
 msgstr "फोल्डर खोल्नुहोस्"
 
-#: ../nautilus-home.desktop.in.in.h:1 ../src/file-manager/fm-tree-view.c:1394
+#: ../nemo-home.desktop.in.in.h:1 ../src/file-manager/fm-tree-view.c:1394
 msgid "Home Folder"
 msgstr "गृह फोल्डर"
 
 #. label, accelerator
-#: ../nautilus-home.desktop.in.in.h:2 ../src/nautilus-window-menus.c:654
+#: ../nemo-home.desktop.in.in.h:2 ../src/nemo-window-menus.c:654
 msgid "Open your personal folder"
 msgstr "तपाईँको व्यक्तिगत फोल्डर खोल्नुहोस्"
 
-#: ../nautilus.desktop.in.in.h:1
+#: ../nemo.desktop.in.in.h:1
 msgid "Browse the file system with the file manager"
 msgstr "फाइल प्रबन्धकसँग फाइल प्रणाली ब्राउज गर्नुहोस्"
 
-#: ../nautilus.desktop.in.in.h:2
+#: ../nemo.desktop.in.in.h:2
 msgid "File Browser"
 msgstr "फाइल ब्राउजर"
 
-#: ../src/Nautilus_shell.server.in.h:1
-msgid "Factory for Nautilus shell and file manager"
+#: ../src/Nemo_shell.server.in.h:1
+msgid "Factory for Nemo shell and file manager"
 msgstr "नटलस शेल र फाइल प्रबन्धकका लागि कारखाना"
 
-#: ../src/Nautilus_shell.server.in.h:2
-msgid "Nautilus factory"
+#: ../src/Nemo_shell.server.in.h:2
+msgid "Nemo factory"
 msgstr "नटलस कारखाना"
 
-#: ../src/Nautilus_shell.server.in.h:3
-msgid "Nautilus metafile factory"
+#: ../src/Nemo_shell.server.in.h:3
+msgid "Nemo metafile factory"
 msgstr "नटलस मेटाफाइल कारखाना"
 
-#: ../src/Nautilus_shell.server.in.h:4
-msgid "Nautilus shell"
+#: ../src/Nemo_shell.server.in.h:4
+msgid "Nemo shell"
 msgstr "नटलस शेल"
 
-#: ../src/Nautilus_shell.server.in.h:5
+#: ../src/Nemo_shell.server.in.h:5
 msgid ""
-"Nautilus shell operations that can be done from subsequent command-line "
+"Nemo shell operations that can be done from subsequent command-line "
 "invocations"
 msgstr "नटलस शेल सञ्चालन जुन उपक्रम आदेश-रेखा आहवानबाट गर्न सकिन्छ ।"
 
-#: ../src/Nautilus_shell.server.in.h:6
-msgid "Produces metafile objects for accessing Nautilus metadata"
+#: ../src/Nemo_shell.server.in.h:6
+msgid "Produces metafile objects for accessing Nemo metadata"
 msgstr "नटलस मेटाडेटा पहुँच गर्नका लागि मेटाफाइल वस्तुहरू उत्पादन गर्दछ"
 
 #: ../src/file-manager/fm-desktop-icon-view.c:617
@@ -2639,13 +2639,13 @@ msgstr ""
 #. label, accelerator
 #: ../src/file-manager/fm-desktop-icon-view.c:708
 #: ../src/file-manager/fm-directory-view.c:6946
-#: ../src/nautilus-trash-bar.c:132
+#: ../src/nemo-trash-bar.c:132
 msgid "Delete all items in the Trash"
 msgstr "रद्दीटोकरीमा भएका सबै वस्तुहरू मेट्नुहोस्"
 
 #: ../src/file-manager/fm-desktop-icon-view.c:797
-#: ../src/nautilus-desktop-window.c:246 ../src/nautilus-pathbar.c:1122
-#: ../src/nautilus-places-sidebar.c:259
+#: ../src/nemo-desktop-window.c:246 ../src/nemo-pathbar.c:1122
+#: ../src/nemo-places-sidebar.c:259
 msgid "Desktop"
 msgstr "डेस्कटप"
 
@@ -2674,7 +2674,7 @@ msgid "Are you sure you want to open all files?"
 msgstr "तपाईँ सबै फाइलहरू खोल्न निश्चित हुनुहुन्छ?"
 
 #: ../src/file-manager/fm-directory-view.c:669
-#: ../src/nautilus-location-bar.c:154
+#: ../src/nemo-location-bar.c:154
 #, c-format
 msgid "This will open %d separate window."
 msgid_plural "This will open %d separate windows."
@@ -2702,8 +2702,8 @@ msgstr "यदि तपाईँले एउटा वस्तु मेट�
 
 #: ../src/file-manager/fm-directory-view.c:1168
 #: ../src/file-manager/fm-properties-window.c:4762
-#: ../src/nautilus-connect-server-dialog.c:401
-#: ../src/nautilus-location-dialog.c:115
+#: ../src/nemo-connect-server-dialog.c:401
+#: ../src/nemo-location-dialog.c:115
 msgid "There was an error displaying help."
 msgstr "मद्दत प्रदर्शन गर्दा त्यहाँ एउटा त्रुटि थियो ।"
 
@@ -2724,7 +2724,7 @@ msgid "Search _name:"
 msgstr "खोजी नाम:"
 
 #: ../src/file-manager/fm-directory-view.c:1346
-#: ../src/nautilus-connect-server-dialog.c:574
+#: ../src/nemo-connect-server-dialog.c:574
 msgid "_Folder:"
 msgstr "फोल्डर:"
 
@@ -2808,7 +2808,7 @@ msgstr "%s%s, %s"
 #.
 #: ../src/file-manager/fm-directory-view.c:2377
 #, c-format
-msgid "The folder \"%s\" contains more files than Nautilus can handle."
+msgid "The folder \"%s\" contains more files than Nemo can handle."
 msgstr "\"%s\" फोल्डरले नटिलसले ह्याण्डल गर्न सक्ने भन्दा बढि फाइलहरू समाविष्ट गर्दछ ।"
 
 #: ../src/file-manager/fm-directory-view.c:2383
@@ -2955,17 +2955,17 @@ msgid ""
 "names. When executed from a remote folder (e.g. a folder showing web or ftp "
 "content), scripts will be passed no parameters.\n"
 "\n"
-"In all cases, the following environment variables will be set by Nautilus, "
+"In all cases, the following environment variables will be set by Nemo, "
 "which the scripts may use:\n"
 "\n"
-"NAUTILUS_SCRIPT_SELECTED_FILE_PATHS: newline-delimited paths for selected "
+"NEMO_SCRIPT_SELECTED_FILE_PATHS: newline-delimited paths for selected "
 "files (only if local)\n"
 "\n"
-"NAUTILUS_SCRIPT_SELECTED_URIS: newline-delimited URIs for selected files\n"
+"NEMO_SCRIPT_SELECTED_URIS: newline-delimited URIs for selected files\n"
 "\n"
-"NAUTILUS_SCRIPT_CURRENT_URI: URI for current location\n"
+"NEMO_SCRIPT_CURRENT_URI: URI for current location\n"
 "\n"
-"NAUTILUS_SCRIPT_WINDOW_GEOMETRY: position and size of current window"
+"NEMO_SCRIPT_WINDOW_GEOMETRY: position and size of current window"
 msgstr ""
 "यस फोल्डरमा रहेका सबै कार्यान्वयन योग्य फाइलहरू स्क्रिप्ट मेनुमा देखापर्नेछ । मेनुबाट स्क्रिप्ट "
 "रोज्दा त्यो स्क्रिप्ट चालु गर्नेछ ।\n"
@@ -2976,15 +2976,15 @@ msgstr ""
 "\n"
 "सबै केसहरूमा, स्क्रिप्टहरूले प्रयोग गर्न सक्ने निम्न परिवेश चलहरू नटलसद्वारा सेट गरिनेछ:\n"
 "\n"
-"NAUTILUS_SCRIPT_SELECTED_FILE_PATHS: चयन गरिएको फाइलहरू (यदि स्थानीय भए मात्र) "
+"NEMO_SCRIPT_SELECTED_FILE_PATHS: चयन गरिएको फाइलहरू (यदि स्थानीय भए मात्र) "
 "का लागि नयाँ लाइन सीमा निर्धारित मार्गहरू\n"
 "\n"
-"NAUTILUS_SCRIPT_SELECTED_URIS: चयन गरिएको फाइलहरूका लागि नयाँ लाइन सिमा "
+"NEMO_SCRIPT_SELECTED_URIS: चयन गरिएको फाइलहरूका लागि नयाँ लाइन सिमा "
 "निर्धारित URIs\n"
 "\n"
-"NAUTILUS_SCRIPT_CURRENT_URI: हालको स्थानका लागि URI\n"
+"NEMO_SCRIPT_CURRENT_URI: हालको स्थानका लागि URI\n"
 "\n"
-"NAUTILUS_SCRIPT_WINDOW_GEOMETRY: हालको सञ्झ्यालको स्थिति र साइज"
+"NEMO_SCRIPT_WINDOW_GEOMETRY: हालको सञ्झ्यालको स्थिति र साइज"
 
 #: ../src/file-manager/fm-directory-view.c:6105
 #: ../src/file-manager/fm-tree-view.c:963
@@ -3090,12 +3090,12 @@ msgstr "खाली फाइल"
 msgid "Create a new empty file inside this folder"
 msgstr "यस फोल्डरभित्र एउटा नयाँ खाली फाइल सिर्जना गर्नुहोस्"
 
-#. #-#-#-#-#  ne.po (nautilus.gnome-2-20.ne)  #-#-#-#-#
+#. #-#-#-#-#  ne.po (nemo.gnome-2-20.ne)  #-#-#-#-#
 #. name, stock id
 #: ../src/file-manager/fm-directory-view.c:6921
 #: ../src/file-manager/fm-directory-view.c:7800
 #: ../src/file-manager/fm-tree-view.c:1253
-#: ../src/nautilus-places-sidebar.c:1448 ../eel/eel-open-with-dialog.c:993
+#: ../src/nemo-places-sidebar.c:1448 ../eel/eel-open-with-dialog.c:993
 msgid "_Open"
 msgstr "खोल्नुहोस्"
 
@@ -3299,7 +3299,7 @@ msgstr "चयन गरिएको भोल्युम अनमाउन्
 #. name, stock id
 #: ../src/file-manager/fm-directory-view.c:7015
 #: ../src/file-manager/fm-directory-view.c:7031
-#: ../src/nautilus-places-sidebar.c:1497
+#: ../src/nemo-places-sidebar.c:1497
 msgid "_Eject"
 msgstr "निकाल्नुहोस्"
 
@@ -3311,7 +3311,7 @@ msgstr "चयन गरिएको भोल्युम निकाल्न
 #. name, stock id
 #: ../src/file-manager/fm-directory-view.c:7019
 #: ../src/file-manager/fm-directory-view.c:7035
-#: ../src/nautilus-places-sidebar.c:1504
+#: ../src/nemo-places-sidebar.c:1504
 msgid "_Format"
 msgstr "ढाँचा"
 
@@ -3529,7 +3529,7 @@ msgstr "URL"
 
 #: ../src/file-manager/fm-ditem-page.c:343
 #: ../src/file-manager/fm-ditem-page.c:354
-#: ../src/nautilus-image-properties-page.c:302
+#: ../src/nemo-image-properties-page.c:302
 msgid "Description"
 msgstr "वर्णन"
 
@@ -3896,23 +3896,23 @@ msgid "You can't assign more than one custom icon at a time!"
 msgstr "तपाईँले एकै पटकमा एकभन्दा बढी अनुकूल प्रतिमा मानाङ्कन गर्न सक्नुहुन्न !"
 
 #: ../src/file-manager/fm-properties-window.c:539
-#: ../src/nautilus-information-panel.c:502
+#: ../src/nemo-information-panel.c:502
 msgid "Please drag just one image to set a custom icon."
 msgstr "अनुकूल प्रतिमा सेट गर्न कृपया एउटा मात्र छवि तान्नुहोस् ।"
 
 #: ../src/file-manager/fm-properties-window.c:547
-#: ../src/nautilus-information-panel.c:521
+#: ../src/nemo-information-panel.c:521
 msgid "The file that you dropped is not local."
 msgstr "तपाईँले छोड्नु भएको फाइल स्थानीय होइन ।"
 
 #: ../src/file-manager/fm-properties-window.c:548
 #: ../src/file-manager/fm-properties-window.c:554
-#: ../src/nautilus-information-panel.c:522
+#: ../src/nemo-information-panel.c:522
 msgid "You can only use local images as custom icons."
 msgstr "तपाईँले स्थानीय छविहरू मात्र अनुकूल प्रतिमाहरूको रूपमा प्रयोग गर्न सक्नुहुन्छ ।"
 
 #: ../src/file-manager/fm-properties-window.c:553
-#: ../src/nautilus-information-panel.c:527
+#: ../src/nemo-information-panel.c:527
 msgid "The file that you dropped is not an image."
 msgstr "तपाईँले छोड्नु भएको फाइल एउटा छवि होइन ।"
 
@@ -4017,7 +4017,7 @@ msgid "Size:"
 msgstr "साइज:"
 
 #: ../src/file-manager/fm-properties-window.c:3073
-#: ../src/nautilus-location-bar.c:59
+#: ../src/nemo-location-bar.c:59
 msgid "Location:"
 msgstr "स्थान:"
 
@@ -4046,7 +4046,7 @@ msgid "Accessed:"
 msgstr "पहुँच प्राप्त:"
 
 #: ../src/file-manager/fm-properties-window.c:3222
-#: ../src/nautilus-emblem-sidebar.c:1044
+#: ../src/nemo-emblem-sidebar.c:1044
 msgid "Emblems"
 msgstr "चिन्हहरू"
 
@@ -4105,7 +4105,7 @@ msgstr "फाइल पहुँच:"
 
 #: ../src/file-manager/fm-properties-window.c:3964
 #: ../src/file-manager/fm-properties-window.c:3975
-#: ../src/nautilus-file-management-properties.c:293
+#: ../src/nemo-file-management-properties.c:293
 msgid "None"
 msgstr "कुनै पनि होइन"
 
@@ -4247,7 +4247,7 @@ msgid "Move to Trash"
 msgstr "रद्दीटोकरीमा सार्नुहोस्"
 
 #: ../src/file-manager/fm-tree-view.c:1396
-#: ../src/nautilus-places-sidebar.c:269
+#: ../src/nemo-places-sidebar.c:269
 msgid "File System"
 msgstr "फाइल प्रणाली"
 
@@ -4263,41 +4263,41 @@ msgstr "ट्रि"
 msgid "Show Tree"
 msgstr "ट्रि देखाउनुहोस्"
 
-#: ../src/nautilus-application.c:282
+#: ../src/nemo-application.c:282
 #, c-format
-msgid "Nautilus could not create the required folder \"%s\"."
+msgid "Nemo could not create the required folder \"%s\"."
 msgstr "नटलसले \"%s\" आवश्यक फोल्डर सिर्जना गर्न सकेन ।"
 
-#: ../src/nautilus-application.c:284
+#: ../src/nemo-application.c:284
 msgid ""
-"Before running Nautilus, please create the following folder, or set "
-"permissions such that Nautilus can create it."
+"Before running Nemo, please create the following folder, or set "
+"permissions such that Nemo can create it."
 msgstr ""
 "नटलस चलाउनुभन्दा पहिले, कृपया निम्न फोल्डर सिर्जना गर्नुहोस्, वा त्यस्तो अनुमतिहरू सेट "
 "गर्नुहोस् कि नटलसले त्यो सिर्जना गर्न सकोस् ।"
 
-#: ../src/nautilus-application.c:287
+#: ../src/nemo-application.c:287
 #, c-format
-msgid "Nautilus could not create the following required folders: %s."
+msgid "Nemo could not create the following required folders: %s."
 msgstr "नटलसले निम्न आवश्यक फोल्डरहरू सिर्जना गर्न सकेन: %s ।"
 
-#: ../src/nautilus-application.c:289
+#: ../src/nemo-application.c:289
 msgid ""
-"Before running Nautilus, please create these folders, or set permissions "
-"such that Nautilus can create them."
+"Before running Nemo, please create these folders, or set permissions "
+"such that Nemo can create them."
 msgstr ""
 "नटलस चलाउनु भन्दा पहिले, कृपया यी फोल्डरहरू सिर्जना गर्नुहोस्, वा त्यस्तो अनुमतिहरू सेट "
 "गर्नुहोस् कि नटलसले तिनिहरू सिर्जना गर्न सकोस् ।"
 
-#: ../src/nautilus-application.c:348
+#: ../src/nemo-application.c:348
 msgid "Link To Old Desktop"
 msgstr "पुरानो डेस्कटपलाई लिङ्क गर्नुहोस्"
 
-#: ../src/nautilus-application.c:364
+#: ../src/nemo-application.c:364
 msgid "A link called \"Link To Old Desktop\" has been created on the desktop."
 msgstr "\"पुरानो डेस्कटपमा लिङ्क गर्नुहोस\" भनिने एउटा लिङ्क डेस्कटपमा सिर्जना गरिएको छ ।"
 
-#: ../src/nautilus-application.c:365
+#: ../src/nemo-application.c:365
 msgid ""
 "The location of the desktop directory has changed in GNOME 2.4. You can open "
 "the link and move over the files you want, then delete the link."
@@ -4306,36 +4306,36 @@ msgstr ""
 "तपाईँले चहानुभएको फाइलहरू माथी सार्न सक्नुहुन्छ, त्यसपछि लिङ्क मेट्न सक्नुहुन्छ ।"
 
 #. Can't register myself due to trouble locating the
-#. * Nautilus_Shell.server file. This has happened when you
-#. * launch Nautilus with an LD_LIBRARY_PATH that
+#. * Nemo_Shell.server file. This has happened when you
+#. * launch Nemo with an LD_LIBRARY_PATH that
 #. * doesn't include the directory containing the oaf
 #. * library. It could also happen if the
-#. * Nautilus_Shell.server file was not present for some
+#. * Nemo_Shell.server file was not present for some
 #. * reason. Sometimes killing oafd and gconfd fixes
 #. * this problem but we don't exactly understand why,
 #. * since neither of the above causes explain it.
 #.
-#: ../src/nautilus-application.c:561
+#: ../src/nemo-application.c:561
 msgid ""
-"Nautilus can't be used now. Running the command \"bonobo-slay\" from the "
+"Nemo can't be used now. Running the command \"bonobo-slay\" from the "
 "console may fix the problem. If not, you can try rebooting the computer or "
-"installing Nautilus again."
+"installing Nemo again."
 msgstr ""
 "नटलस अहिले प्रयोग गर्न सकिँदैन । कन्सोलबाट आदेश \"bonobo-slay\" चलाउनाले समस्या स्थिर "
 "हुनसक्दछ । यदि भएन भने, तपाईँले कम्प्युटर फेरि बुट गर्न प्रयास गर्न सक्नुहुन्छ वा नटलस फेरि "
 "स्थापना गर्न सक्नुहुन्छ ।"
 
 #. FIXME bugzilla.gnome.org 42536: The guesses and stuff here are lame.
-#: ../src/nautilus-application.c:567
+#: ../src/nemo-application.c:567
 msgid ""
-"Nautilus can't be used now. Running the command \"bonobo-slay\" from the "
+"Nemo can't be used now. Running the command \"bonobo-slay\" from the "
 "console may fix the problem. If not, you can try rebooting the computer or "
-"installing Nautilus again.\n"
+"installing Nemo again.\n"
 "\n"
-"Bonobo couldn't locate the Nautilus_shell.server file. One cause of this "
+"Bonobo couldn't locate the Nemo_shell.server file. One cause of this "
 "seems to be an LD_LIBRARY_PATH that does not include the bonobo-activation "
 "library's directory. Another possible cause would be bad install with a "
-"missing Nautilus_Shell.server file.\n"
+"missing Nemo_Shell.server file.\n"
 "\n"
 "Running \"bonobo-slay\" will kill all Bonobo Activation and GConf processes, "
 "which may be needed by other applications.\n"
@@ -4350,9 +4350,9 @@ msgstr ""
 "समाधान हुनसक्दछ । यदि भएन भने, तपाईँले कम्प्युटर फेरि बुट गर्न प्रयास गर्न सक्नुहुन्छ वा नटलस "
 "फेरि स्थापना गर्न सक्नुहुन्छ ।\n"
 "\n"
-"बोनोबोले Nautilus_shell.server फाइल राख्न सकेन । यसको एउटा कारण एउटा "
+"बोनोबोले Nemo_shell.server फाइल राख्न सकेन । यसको एउटा कारण एउटा "
 "LD_LIBRARY_PATH जस्तो देखिन्छ जुसले बोनोबो सक्रिय लाइब्रेरीको डाइरेक्टरी समावेश गर्दैन । "
-"अर्को सम्भावित कारण Nautilus_Shell.server फाइल जडान गर्दाको खराबी हुनसक्दछ ।\n"
+"अर्को सम्भावित कारण Nemo_Shell.server फाइल जडान गर्दाको खराबी हुनसक्दछ ।\n"
 "\n"
 "\"bonobo-slay\" फाइल चालु गर्दा बोनोबो सक्रियता र जीकन्फ प्रक्रियालाई नष्ट गर्नेछ जुन "
 "अर्को अनुप्रयोगहरूद्वारा आवश्यक हुन सक्दछ ।\n"
@@ -4371,42 +4371,42 @@ msgstr ""
 #. * good message.
 #.
 #. FIXME bugzilla.gnome.org 42538: When can this happen?
-#: ../src/nautilus-application.c:597 ../src/nautilus-application.c:615
-#: ../src/nautilus-application.c:622
-msgid "Nautilus can't be used now, due to an unexpected error."
+#: ../src/nemo-application.c:597 ../src/nemo-application.c:615
+#: ../src/nemo-application.c:622
+msgid "Nemo can't be used now, due to an unexpected error."
 msgstr "अनपेक्षित त्रुटिका कारणले गर्दा अहिले नटलसको प्रयोग गर्न सकिँदैन ।"
 
-#: ../src/nautilus-application.c:598
+#: ../src/nemo-application.c:598
 msgid ""
-"Nautilus can't be used now, due to an unexpected error from Bonobo when "
+"Nemo can't be used now, due to an unexpected error from Bonobo when "
 "attempting to register the file manager view server."
 msgstr ""
 "फाइल प्रबन्धक दृश्य सर्भर दर्ता गर्ने प्रयास गर्दा बोनोबोबाट अनपेक्षित त्रुटिका कारणले गर्दा "
 "अहिले नटलसको प्रयोग गर्न सकिँदैन ।"
 
-#: ../src/nautilus-application.c:616
+#: ../src/nemo-application.c:616
 msgid ""
-"Nautilus can't be used now, due to an unexpected error from Bonobo when "
+"Nemo can't be used now, due to an unexpected error from Bonobo when "
 "attempting to locate the factory. Killing bonobo-activation-server and "
-"restarting Nautilus may help fix the problem."
+"restarting Nemo may help fix the problem."
 msgstr ""
 "बोनोबोबाट कारखाना राख्न प्रयास गर्दा अनपेक्षित त्रुटिका कारणले गर्दा अहिले नटलसको "
 "प्रयोग गर्न सकिँदैन । बोनोबो सक्रिय सर्भर नष्ट गरेर नटलस पुन: सुरु गर्नाले समस्या समाधानमा "
 "मद्दत गर्न सक्दछ ।"
 
-#: ../src/nautilus-application.c:623
+#: ../src/nemo-application.c:623
 msgid ""
-"Nautilus can't be used now, due to an unexpected error from Bonobo when "
+"Nemo can't be used now, due to an unexpected error from Bonobo when "
 "attempting to locate the shell object. Killing bonobo-activation-server and "
-"restarting Nautilus may help fix the problem."
+"restarting Nemo may help fix the problem."
 msgstr ""
 "शेल वस्तु राख्न प्रयास गर्दा बोनोबोबाट अनपेक्षित त्रुटिका कारणले गर्दा अहिले नटलसको प्रयोग "
 "गर्न सकिँदैन । बोनोबो सक्रिय सर्भर नष्ट गरेर नटलस पुन: सुरु गर्नाले समस्या समाधान गर्न "
 "मद्दत गर्न सक्दछ ।"
 
-#: ../src/nautilus-bookmarks-window.c:158
-#: ../src/nautilus-file-management-properties.c:216
-#: ../src/nautilus-property-browser.c:1562 ../src/nautilus-window-menus.c:495
+#: ../src/nemo-bookmarks-window.c:158
+#: ../src/nemo-file-management-properties.c:216
+#: ../src/nemo-property-browser.c:1562 ../src/nemo-window-menus.c:495
 #, c-format
 msgid ""
 "There was an error displaying help: \n"
@@ -4415,36 +4415,36 @@ msgstr ""
 "मद्दत प्रदर्शन गर्दा त्यहाँ एउटा त्रुटि थियो: \n"
 "%s"
 
-#: ../src/nautilus-bookmarks-window.c:192
+#: ../src/nemo-bookmarks-window.c:192
 msgid "No bookmarks defined"
 msgstr "कुनै पुस्तकचिनोहरू परिभाषित गरिएको छैन"
 
-#: ../src/nautilus-bookmarks-window.glade.h:1
+#: ../src/nemo-bookmarks-window.glade.h:1
 msgid "<b>_Bookmarks</b>"
 msgstr "<b>पुस्तकचिनोहरू</b>"
 
-#: ../src/nautilus-bookmarks-window.glade.h:2
+#: ../src/nemo-bookmarks-window.glade.h:2
 msgid "<b>_Location</b>"
 msgstr "<b>स्थान</b>"
 
-#: ../src/nautilus-bookmarks-window.glade.h:3
+#: ../src/nemo-bookmarks-window.glade.h:3
 msgid "<b>_Name</b>"
 msgstr "<b>नाम</b>"
 
-#: ../src/nautilus-bookmarks-window.glade.h:4
+#: ../src/nemo-bookmarks-window.glade.h:4
 msgid "Edit Bookmarks"
 msgstr "पुस्तकचिनोहरू सम्पादन गर्नुहोस्"
 
-#: ../src/nautilus-connect-server-dialog-main.c:67
+#: ../src/nemo-connect-server-dialog-main.c:67
 #, c-format
 msgid "Can't display location \"%s\""
 msgstr "\"%s\" स्थान प्रदर्शन गर्न सक्दैन"
 
-#: ../src/nautilus-connect-server-dialog-main.c:102
+#: ../src/nemo-connect-server-dialog-main.c:102
 msgid "[URI]"
 msgstr "[URI]"
 
-#: ../src/nautilus-connect-server-dialog-main.c:111
+#: ../src/nemo-connect-server-dialog-main.c:111
 msgid ""
 "\n"
 "\n"
@@ -4454,128 +4454,128 @@ msgstr ""
 "\n"
 "सर्भर माउन्टमा जडान थप्नुहोस्"
 
-#: ../src/nautilus-connect-server-dialog.c:118
+#: ../src/nemo-connect-server-dialog.c:118
 msgid "Custom Location"
 msgstr "अनुकूल स्थान"
 
-#: ../src/nautilus-connect-server-dialog.c:120
+#: ../src/nemo-connect-server-dialog.c:120
 msgid "SSH"
 msgstr "SSH"
 
-#: ../src/nautilus-connect-server-dialog.c:123
+#: ../src/nemo-connect-server-dialog.c:123
 msgid "Public FTP"
 msgstr "साझा FTP"
 
-#: ../src/nautilus-connect-server-dialog.c:125
+#: ../src/nemo-connect-server-dialog.c:125
 msgid "FTP (with login)"
 msgstr "FTP (लगइन सहित)"
 
-#: ../src/nautilus-connect-server-dialog.c:128
+#: ../src/nemo-connect-server-dialog.c:128
 msgid "Windows share"
 msgstr "सञ्झ्यालहरू साझेदारी"
 
-#: ../src/nautilus-connect-server-dialog.c:130
+#: ../src/nemo-connect-server-dialog.c:130
 msgid "WebDAV (HTTP)"
 msgstr "WebDAV (HTTP)"
 
-#: ../src/nautilus-connect-server-dialog.c:132
+#: ../src/nemo-connect-server-dialog.c:132
 msgid "Secure WebDAV (HTTPS)"
 msgstr "सुरक्षित WebDAV (HTTPS)"
 
-#: ../src/nautilus-connect-server-dialog.c:200
+#: ../src/nemo-connect-server-dialog.c:200
 #, c-format
 msgid "Can't Connect to Server. \"%s\" is not a valid location."
 msgstr "सर्भरमा जडान गर्न सक्दैन । \"%s\" वैध स्थान होइन ।"
 
-#: ../src/nautilus-connect-server-dialog.c:216
+#: ../src/nemo-connect-server-dialog.c:216
 msgid "Can't Connect to Server. You must enter a name for the server."
 msgstr "सर्भरमा जडान गर्न सक्दैन । तपाईँले सर्भरका लागि नाम प्रविष्ट गर्नु पर्दछ ।"
 
-#: ../src/nautilus-connect-server-dialog.c:217
+#: ../src/nemo-connect-server-dialog.c:217
 msgid "Please enter a name and try again."
 msgstr "कृपया नाम प्रविष्ट गर्नुहोस् र पुन: प्रयास गर्नुहोस् ।"
 
-#: ../src/nautilus-connect-server-dialog.c:480
+#: ../src/nemo-connect-server-dialog.c:480
 msgid "_Location (URI):"
 msgstr "स्थान (URL):"
 
-#: ../src/nautilus-connect-server-dialog.c:502
+#: ../src/nemo-connect-server-dialog.c:502
 msgid "_Server:"
 msgstr "सर्भर:"
 
-#: ../src/nautilus-connect-server-dialog.c:521
+#: ../src/nemo-connect-server-dialog.c:521
 msgid "Optional information:"
 msgstr "वैकल्पिक सूचना:"
 
-#: ../src/nautilus-connect-server-dialog.c:533
+#: ../src/nemo-connect-server-dialog.c:533
 msgid "_Share:"
 msgstr "साझेदारी:"
 
-#: ../src/nautilus-connect-server-dialog.c:554
+#: ../src/nemo-connect-server-dialog.c:554
 msgid "_Port:"
 msgstr "पोर्ट:"
 
-#: ../src/nautilus-connect-server-dialog.c:594
+#: ../src/nemo-connect-server-dialog.c:594
 msgid "_User Name:"
 msgstr "प्रयोगकर्ता नाम:"
 
-#: ../src/nautilus-connect-server-dialog.c:615
+#: ../src/nemo-connect-server-dialog.c:615
 msgid "_Domain Name:"
 msgstr "डोमेन नाम:"
 
-#: ../src/nautilus-connect-server-dialog.c:639
+#: ../src/nemo-connect-server-dialog.c:639
 msgid "_Name to use for connection:"
 msgstr "जडानका लागि प्रयोग गर्नलाई नाम:"
 
-#: ../src/nautilus-connect-server-dialog.c:821
+#: ../src/nemo-connect-server-dialog.c:821
 msgid "Connect to Server"
 msgstr "सर्भरमा जडान गर्नुहोस्"
 
-#: ../src/nautilus-connect-server-dialog.c:838
+#: ../src/nemo-connect-server-dialog.c:838
 msgid "Service _type:"
 msgstr "सेवा प्रकार:"
 
-#: ../src/nautilus-connect-server-dialog.c:943
+#: ../src/nemo-connect-server-dialog.c:943
 msgid "Browse _Network"
 msgstr "सञ्जाल ब्राउज गर्नुहोस्"
 
-#: ../src/nautilus-connect-server-dialog.c:949
+#: ../src/nemo-connect-server-dialog.c:949
 msgid "C_onnect"
 msgstr "जडान गर्नुहोस्"
 
-#: ../src/nautilus-emblem-sidebar.c:241
+#: ../src/nemo-emblem-sidebar.c:241
 #, c-format
 msgid "Couldn't remove emblem with name '%s'."
 msgstr "'%s' नामसँगै चिन्ह हटाउन सकेन ।"
 
-#: ../src/nautilus-emblem-sidebar.c:242 ../src/nautilus-emblem-sidebar.c:276
+#: ../src/nemo-emblem-sidebar.c:242 ../src/nemo-emblem-sidebar.c:276
 msgid ""
 "This is probably because the emblem is a permanent one, and not one that you "
 "added yourself."
 msgstr "यो सम्भवत स्थायी चिन्ह भएकोले हुनसक्दछ, र तपाईँले आफैं थप्नु भएको होइन ।"
 
-#: ../src/nautilus-emblem-sidebar.c:275
+#: ../src/nemo-emblem-sidebar.c:275
 #, c-format
 msgid "Couldn't rename emblem with name '%s'."
 msgstr "'%s' नामले चिन्हलाई पुन: नामाकरण गर्न सकेन ।"
 
-#: ../src/nautilus-emblem-sidebar.c:295
+#: ../src/nemo-emblem-sidebar.c:295
 msgid "Rename Emblem"
 msgstr "चिन्हको पुन: नामकरण गर्नुहोस्"
 
-#: ../src/nautilus-emblem-sidebar.c:314
+#: ../src/nemo-emblem-sidebar.c:314
 msgid "Enter a new name for the displayed emblem:"
 msgstr "प्रदर्शन गरिएको चिन्हका लागि नयाँ नाम प्रविष्ट गर्नुहोस्:"
 
-#: ../src/nautilus-emblem-sidebar.c:368
+#: ../src/nemo-emblem-sidebar.c:368
 msgid "Rename"
 msgstr "पुन: नामकरण गर्नुहोस्"
 
-#: ../src/nautilus-emblem-sidebar.c:540
+#: ../src/nemo-emblem-sidebar.c:540
 msgid "Add Emblems..."
 msgstr "चिन्हहरू थप्नुहोस्..."
 
-#: ../src/nautilus-emblem-sidebar.c:556
+#: ../src/nemo-emblem-sidebar.c:556
 msgid ""
 "Enter a descriptive name next to each emblem.  This name will be used in "
 "other places to identify the emblem."
@@ -4583,7 +4583,7 @@ msgstr ""
 "हरेक चिन्हको पछि विवरणात्मक नाम प्रविष्ट गर्नुहोस् ।  यो नाम चिन्ह पहिचान गर्न अर्को "
 "स्थानमा प्रयोग गरिनेछ ।"
 
-#: ../src/nautilus-emblem-sidebar.c:558
+#: ../src/nemo-emblem-sidebar.c:558
 msgid ""
 "Enter a descriptive name next to the emblem.  This name will be used in "
 "other places to identify the emblem."
@@ -4591,45 +4591,45 @@ msgstr ""
 "चिन्हको पछि विवरणात्मक नाम प्रविष्ट गर्नुहोस् ।  यो नाम चिन्ह पहिचान गर्न अर्को "
 "स्थानहरूमा प्रयोग गरिनेछ ।"
 
-#: ../src/nautilus-emblem-sidebar.c:777
+#: ../src/nemo-emblem-sidebar.c:777
 msgid "Some of the files could not be added as emblems."
 msgstr "केही फाइलहरू चिन्हहरूको रूपमा थप्न सकिएन ।"
 
-#: ../src/nautilus-emblem-sidebar.c:777 ../src/nautilus-emblem-sidebar.c:779
+#: ../src/nemo-emblem-sidebar.c:777 ../src/nemo-emblem-sidebar.c:779
 msgid "The emblems do not appear to be valid images."
 msgstr "चिन्हहरू वैध छविहरू जस्तो देखा पर्दैन ।"
 
-#: ../src/nautilus-emblem-sidebar.c:779
+#: ../src/nemo-emblem-sidebar.c:779
 msgid "None of the files could be added as emblems."
 msgstr "चिन्हहरूको रूपमा कुनै पनि फाइलहरू थप्न सकिएन ।"
 
-#: ../src/nautilus-emblem-sidebar.c:800 ../src/nautilus-emblem-sidebar.c:825
-#: ../src/nautilus-emblem-sidebar.c:874
+#: ../src/nemo-emblem-sidebar.c:800 ../src/nemo-emblem-sidebar.c:825
+#: ../src/nemo-emblem-sidebar.c:874
 msgid "The emblem cannot be added."
 msgstr "चिन्ह थप्न सकिँदैन ।"
 
-#: ../src/nautilus-emblem-sidebar.c:800
+#: ../src/nemo-emblem-sidebar.c:800
 msgid "The dragged text was not a valid file location."
 msgstr "तानिएको पाठ वैध फाइल स्थान थिएन ।"
 
-#: ../src/nautilus-emblem-sidebar.c:820 ../src/nautilus-emblem-sidebar.c:873
+#: ../src/nemo-emblem-sidebar.c:820 ../src/nemo-emblem-sidebar.c:873
 #, c-format
 msgid "The file '%s' does not appear to be a valid image."
 msgstr "'%s' फाइल वैध फाइल जस्तो देखा पर्दैन ।"
 
-#: ../src/nautilus-emblem-sidebar.c:823
+#: ../src/nemo-emblem-sidebar.c:823
 msgid "The dragged file does not appear to be a valid image."
 msgstr "तानिएको फाइल एउटा वैध छवि जस्तो देखा पर्दैन ।"
 
-#: ../src/nautilus-emblem-sidebar.c:1050
+#: ../src/nemo-emblem-sidebar.c:1050
 msgid "Show Emblems"
 msgstr "चिन्हहरू देखाउनुहोस्"
 
-#: ../src/nautilus-file-management-properties.glade.h:1
+#: ../src/nemo-file-management-properties.glade.h:1
 msgid "    "
 msgstr "    "
 
-#: ../src/nautilus-file-management-properties.glade.h:2
+#: ../src/nemo-file-management-properties.glade.h:2
 msgid ""
 "100 KB\n"
 "500 KB\n"
@@ -4649,7 +4649,7 @@ msgstr ""
 "१०० मेगा बाइट\n"
 "१ गिगा बाइट"
 
-#: ../src/nautilus-file-management-properties.glade.h:11
+#: ../src/nemo-file-management-properties.glade.h:11
 #, no-c-format
 msgid ""
 "25%\n"
@@ -4668,63 +4668,63 @@ msgstr ""
 "२००%\n"
 "४००%"
 
-#: ../src/nautilus-file-management-properties.glade.h:18
+#: ../src/nemo-file-management-properties.glade.h:18
 msgid "<span weight=\"bold\">Behavior</span>"
 msgstr "<span weight=\"bold\">व्यवहार</span>"
 
-#: ../src/nautilus-file-management-properties.glade.h:19
+#: ../src/nemo-file-management-properties.glade.h:19
 msgid "<span weight=\"bold\">Date</span>"
 msgstr "<span weight=\"bold\">मिति</span>"
 
-#: ../src/nautilus-file-management-properties.glade.h:20
+#: ../src/nemo-file-management-properties.glade.h:20
 msgid "<span weight=\"bold\">Default View</span>"
 msgstr "<span weight=\"bold\">पूर्वनिर्धारित दृश्य</span>"
 
-#: ../src/nautilus-file-management-properties.glade.h:21
+#: ../src/nemo-file-management-properties.glade.h:21
 msgid "<span weight=\"bold\">Executable Text Files</span>"
 msgstr "<span weight=\"bold\">कार्यान्वयन योग्य पाठ फाइलहरू</span>"
 
-#: ../src/nautilus-file-management-properties.glade.h:22
+#: ../src/nemo-file-management-properties.glade.h:22
 msgid "<span weight=\"bold\">Folders</span>"
 msgstr "<span weight=\"bold\">फोल्डरहरू</span>"
 
-#: ../src/nautilus-file-management-properties.glade.h:23
+#: ../src/nemo-file-management-properties.glade.h:23
 msgid "<span weight=\"bold\">Icon Captions</span>"
 msgstr "<span weight=\"bold\">प्रतिमा क्याप्सनहरू</span>"
 
-#: ../src/nautilus-file-management-properties.glade.h:24
+#: ../src/nemo-file-management-properties.glade.h:24
 msgid "<span weight=\"bold\">Icon View Defaults</span>"
 msgstr "<span weight=\"bold\">प्रतिमा दृश्य पूर्वनिर्धारितहरू</span>"
 
-#: ../src/nautilus-file-management-properties.glade.h:25
+#: ../src/nemo-file-management-properties.glade.h:25
 msgid "<span weight=\"bold\">List Columns</span>"
 msgstr "<span weight=\"bold\">सूची स्तम्भहरू</span>"
 
-#: ../src/nautilus-file-management-properties.glade.h:26
+#: ../src/nemo-file-management-properties.glade.h:26
 msgid "<span weight=\"bold\">List View Defaults</span>"
 msgstr "<span weight=\"bold\">सूची दृश्य पूर्वनिर्धारितहरू</span>"
 
-#: ../src/nautilus-file-management-properties.glade.h:27
+#: ../src/nemo-file-management-properties.glade.h:27
 msgid "<span weight=\"bold\">Other Previewable Files</span>"
 msgstr "<span weight=\"bold\">अन्य पूर्वावलोकन योग्य फाइलहरू</span>"
 
-#: ../src/nautilus-file-management-properties.glade.h:28
+#: ../src/nemo-file-management-properties.glade.h:28
 msgid "<span weight=\"bold\">Sound Files</span>"
 msgstr "<span weight=\"bold\">ध्वनि फाइलहरू</span>"
 
-#: ../src/nautilus-file-management-properties.glade.h:29
+#: ../src/nemo-file-management-properties.glade.h:29
 msgid "<span weight=\"bold\">Text Files</span>"
 msgstr "<span weight=\"bold\">पाठ फाइलहरू</span>"
 
-#: ../src/nautilus-file-management-properties.glade.h:30
+#: ../src/nemo-file-management-properties.glade.h:30
 msgid "<span weight=\"bold\">Trash</span>"
 msgstr "<span weight=\"bold\">रद्दीटोकरी</span>"
 
-#: ../src/nautilus-file-management-properties.glade.h:31
+#: ../src/nemo-file-management-properties.glade.h:31
 msgid "<span weight=\"bold\">Tree View Defaults</span>"
 msgstr "<span weight=\"bold\">पूर्वनिर्धारित ट्रि दृश्य</span>"
 
-#: ../src/nautilus-file-management-properties.glade.h:32
+#: ../src/nemo-file-management-properties.glade.h:32
 msgid ""
 "Always\n"
 "Local Files Only\n"
@@ -4734,19 +4734,19 @@ msgstr ""
 "स्थानीय फाइलहरू मात्र\n"
 "कहिले पनि होइन"
 
-#: ../src/nautilus-file-management-properties.glade.h:35
+#: ../src/nemo-file-management-properties.glade.h:35
 msgid "Always open in _browser windows"
 msgstr "सधै ब्राउजर सञ्झ्यालमा खोल्नुहोस्"
 
-#: ../src/nautilus-file-management-properties.glade.h:36
+#: ../src/nemo-file-management-properties.glade.h:36
 msgid "Ask before _emptying the Trash or deleting files"
 msgstr "रद्दीटोकरी खाली गर्नुभन्दा पहिले वा फाइलहरू मेट्नु पहिले सोध्नुहोस्"
 
-#: ../src/nautilus-file-management-properties.glade.h:37
+#: ../src/nemo-file-management-properties.glade.h:37
 msgid "Behavior"
 msgstr "व्यवहार"
 
-#: ../src/nautilus-file-management-properties.glade.h:38
+#: ../src/nemo-file-management-properties.glade.h:38
 msgid ""
 "By Name\n"
 "By Size\n"
@@ -4760,7 +4760,7 @@ msgstr ""
 "परिमार्जित मितिद्धारा\n"
 "चिन्हहरूद्धारा"
 
-#: ../src/nautilus-file-management-properties.glade.h:43
+#: ../src/nemo-file-management-properties.glade.h:43
 msgid ""
 "Choose the order of information to appear beneath icon names. More "
 "information will appear when zooming in closer."
@@ -4768,31 +4768,31 @@ msgstr ""
 "प्रतिमा नामहरूको मुनि देखा पार्न सूचनाको क्रम रोज्नुहोस् । जब नजिकबाट जुम गरिन्छ धेरै सूचना "
 "देखा पर्दछ ।"
 
-#: ../src/nautilus-file-management-properties.glade.h:44
+#: ../src/nemo-file-management-properties.glade.h:44
 msgid "Choose the order of information to appear in the list view."
 msgstr "सूची दृश्यमा देखा पर्न सूचनाको क्रम रोज्नुहोस् ।"
 
-#: ../src/nautilus-file-management-properties.glade.h:45
+#: ../src/nemo-file-management-properties.glade.h:45
 msgid "Count _number of items:"
 msgstr "वस्तुहरूको सङ्ख्या गणना गर्नुहोस्:"
 
-#: ../src/nautilus-file-management-properties.glade.h:46
+#: ../src/nemo-file-management-properties.glade.h:46
 msgid "Default _zoom level:"
 msgstr "पूर्वनिर्धारित जुम तह:"
 
-#: ../src/nautilus-file-management-properties.glade.h:47
+#: ../src/nemo-file-management-properties.glade.h:47
 msgid "Display"
 msgstr "प्रदर्शन गर्नुहोस्"
 
-#: ../src/nautilus-file-management-properties.glade.h:48
+#: ../src/nemo-file-management-properties.glade.h:48
 msgid "File Management Preferences"
 msgstr "फाइल ब्यवस्थापन प्राथमिकताहरू"
 
-#: ../src/nautilus-file-management-properties.glade.h:49
+#: ../src/nemo-file-management-properties.glade.h:49
 msgid "I_nclude a Delete command that bypasses Trash"
 msgstr "मेट्ने आदेश समावेश गर्नुहोस् जसले रद्दीटोकरी बाइपास गर्दछ"
 
-#: ../src/nautilus-file-management-properties.glade.h:50
+#: ../src/nemo-file-management-properties.glade.h:50
 msgid ""
 "Icon View\n"
 "List View"
@@ -4800,89 +4800,89 @@ msgstr ""
 "प्रतिमा दृश्य\n"
 "सूची दृश्य"
 
-#: ../src/nautilus-file-management-properties.glade.h:52
+#: ../src/nemo-file-management-properties.glade.h:52
 msgid "List Columns"
 msgstr "सूची स्तम्भहरू"
 
-#: ../src/nautilus-file-management-properties.glade.h:53
+#: ../src/nemo-file-management-properties.glade.h:53
 msgid "Preview"
 msgstr "पूर्वावलोकन गर्नुहोस्"
 
-#: ../src/nautilus-file-management-properties.glade.h:54
+#: ../src/nemo-file-management-properties.glade.h:54
 msgid "Preview _sound files:"
 msgstr "ध्वनि फाइलहरू पूर्वावलोकन गर्नुहोस्:"
 
-#: ../src/nautilus-file-management-properties.glade.h:55
+#: ../src/nemo-file-management-properties.glade.h:55
 msgid "Show _only folders"
 msgstr "फोल्डरहरू मात्र देखाउनुहोस्"
 
-#: ../src/nautilus-file-management-properties.glade.h:56
+#: ../src/nemo-file-management-properties.glade.h:56
 msgid "Show _thumbnails:"
 msgstr "थम्बनेलहरू देखाउनुहोस्:"
 
-#: ../src/nautilus-file-management-properties.glade.h:57
+#: ../src/nemo-file-management-properties.glade.h:57
 msgid "Show hidden and _backup files"
 msgstr "लुकाइएका र जगेडा फाइलहरू देखाउनुहोस्"
 
-#: ../src/nautilus-file-management-properties.glade.h:58
+#: ../src/nemo-file-management-properties.glade.h:58
 msgid "Show te_xt in icons:"
 msgstr "प्रतिमाहरूमा पाठ देखाउनुहोस्:"
 
-#: ../src/nautilus-file-management-properties.glade.h:59
+#: ../src/nemo-file-management-properties.glade.h:59
 msgid "Sort _folders before files"
 msgstr "फाइलहरू अगाडि फोल्डरहरू क्रमबद्ध गर्नुहोस्"
 
-#: ../src/nautilus-file-management-properties.glade.h:60
+#: ../src/nemo-file-management-properties.glade.h:60
 msgid "View _new folders using:"
 msgstr "प्रयोग गरेर नयाँ फोल्डर हेर्नुहोस्:"
 
-#: ../src/nautilus-file-management-properties.glade.h:61
+#: ../src/nemo-file-management-properties.glade.h:61
 msgid "Views"
 msgstr "दृश्यहरू"
 
-#: ../src/nautilus-file-management-properties.glade.h:62
+#: ../src/nemo-file-management-properties.glade.h:62
 msgid "_Arrange items:"
 msgstr "वस्तुहरू मिलाउनुहोस्:"
 
-#: ../src/nautilus-file-management-properties.glade.h:64
+#: ../src/nemo-file-management-properties.glade.h:64
 msgid "_Default zoom level:"
 msgstr "पूर्वनिर्धारित जुम तह:"
 
-#: ../src/nautilus-file-management-properties.glade.h:65
+#: ../src/nemo-file-management-properties.glade.h:65
 msgid "_Double click to open items"
 msgstr "वस्तुहरू खोल्नका लागि डबल क्लिक गर्नुहोस्"
 
-#: ../src/nautilus-file-management-properties.glade.h:66
+#: ../src/nemo-file-management-properties.glade.h:66
 msgid "_Format:"
 msgstr "ढाँचा:"
 
-#: ../src/nautilus-file-management-properties.glade.h:67
+#: ../src/nemo-file-management-properties.glade.h:67
 msgid "_Only for files smaller than:"
 msgstr "भन्दा साना फाइलहरूका लागि मात्र:"
 
-#: ../src/nautilus-file-management-properties.glade.h:68
+#: ../src/nemo-file-management-properties.glade.h:68
 msgid "_Run executable text files when they are opened"
 msgstr "कार्यान्वयन योग्य पाठ फाइलहरू खुला रहेका बेला चलाउनुहोस्"
 
-#: ../src/nautilus-file-management-properties.glade.h:69
+#: ../src/nemo-file-management-properties.glade.h:69
 msgid "_Single click to open items"
 msgstr "वस्तुहरू खोल्नका लागि एकल क्लिक गर्नुहोस्"
 
-#: ../src/nautilus-file-management-properties.glade.h:70
+#: ../src/nemo-file-management-properties.glade.h:70
 msgid "_Text beside icons"
 msgstr "प्रतिमा बाहेका पाठ"
 
-#: ../src/nautilus-file-management-properties.glade.h:71
+#: ../src/nemo-file-management-properties.glade.h:71
 msgid "_Use compact layout"
 msgstr "जटिल सजावट प्रयोग गर्नुहोस्"
 
-#: ../src/nautilus-file-management-properties.glade.h:72
+#: ../src/nemo-file-management-properties.glade.h:72
 msgid "_View executable text files when they are opened"
 msgstr "तिनीहरू खुला रहेका बेला कार्यान्वयन योग्य पाठ फाइलहरू हेर्नुहोस्"
 
-#: ../src/nautilus-first-time-druid.c:40
+#: ../src/nemo-first-time-druid.c:40
 msgid ""
-"Existence of this file indicates that the Nautilus configuration druid\n"
+"Existence of this file indicates that the Nemo configuration druid\n"
 "has been presented.\n"
 "\n"
 "You can manually erase this file to present the druid again.\n"
@@ -4892,199 +4892,199 @@ msgstr ""
 "\n"
 "तपाईँले फेरि ड्रुइड प्रस्तुत गर्न म्यानुअल तरिकाले यो फाइल मेट्न सक्नुहुन्छ ।\n"
 
-#: ../src/nautilus-history-sidebar.c:285
+#: ../src/nemo-history-sidebar.c:285
 msgid "History"
 msgstr "इतिहास"
 
-#: ../src/nautilus-history-sidebar.c:291
+#: ../src/nemo-history-sidebar.c:291
 msgid "Show History"
 msgstr "इतिहास देखाउनुहोस्"
 
-#: ../src/nautilus-image-properties-page.c:237
+#: ../src/nemo-image-properties-page.c:237
 msgid "Camera Brand"
 msgstr "क्यामेरा मार्क"
 
-#: ../src/nautilus-image-properties-page.c:238
+#: ../src/nemo-image-properties-page.c:238
 msgid "Camera Model"
 msgstr "क्यामेरा नमूना"
 
 #. Choose which date to show in order of relevance
-#: ../src/nautilus-image-properties-page.c:241
+#: ../src/nemo-image-properties-page.c:241
 msgid "Date Taken"
 msgstr "लिइएको मिति"
 
-#: ../src/nautilus-image-properties-page.c:243
+#: ../src/nemo-image-properties-page.c:243
 msgid "Date Digitized"
 msgstr "अंकीकरण गरिएको मिति"
 
-#: ../src/nautilus-image-properties-page.c:249
+#: ../src/nemo-image-properties-page.c:249
 msgid "Exposure Time"
 msgstr "प्रदर्शन समय"
 
-#: ../src/nautilus-image-properties-page.c:250
+#: ../src/nemo-image-properties-page.c:250
 msgid "Aperture Value"
 msgstr "छिद्र मान"
 
-#: ../src/nautilus-image-properties-page.c:251
+#: ../src/nemo-image-properties-page.c:251
 msgid "ISO Speed Rating"
 msgstr "ISO गति दर"
 
-#: ../src/nautilus-image-properties-page.c:252
+#: ../src/nemo-image-properties-page.c:252
 msgid "Flash Fired"
 msgstr "फ्ल्यास फायर्ड"
 
-#: ../src/nautilus-image-properties-page.c:253
+#: ../src/nemo-image-properties-page.c:253
 msgid "Metering Mode"
 msgstr "मापक मोड"
 
-#: ../src/nautilus-image-properties-page.c:254
+#: ../src/nemo-image-properties-page.c:254
 msgid "Exposure Program"
 msgstr "देखाउने कार्यक्रम"
 
-#: ../src/nautilus-image-properties-page.c:255
+#: ../src/nemo-image-properties-page.c:255
 msgid "Focal Length"
 msgstr "केन्द्रित लम्बाइ"
 
-#: ../src/nautilus-image-properties-page.c:256
+#: ../src/nemo-image-properties-page.c:256
 msgid "Software"
 msgstr "सफ्टवेयर"
 
-#: ../src/nautilus-image-properties-page.c:301
-#: ../src/nautilus-query-editor.c:130
+#: ../src/nemo-image-properties-page.c:301
+#: ../src/nemo-query-editor.c:130
 msgid "Location"
 msgstr "स्थान"
 
-#: ../src/nautilus-image-properties-page.c:303
+#: ../src/nemo-image-properties-page.c:303
 msgid "Keywords"
 msgstr "कुञ्जीशब्दहरू"
 
-#: ../src/nautilus-image-properties-page.c:304
+#: ../src/nemo-image-properties-page.c:304
 msgid "Creator"
 msgstr "सर्जक"
 
-#: ../src/nautilus-image-properties-page.c:305
+#: ../src/nemo-image-properties-page.c:305
 msgid "Copyright"
 msgstr "प्रतिलिपि अधिकार"
 
-#: ../src/nautilus-image-properties-page.c:306
+#: ../src/nemo-image-properties-page.c:306
 msgid "Rating"
 msgstr "दर निर्धारण गर्दै"
 
-#: ../src/nautilus-image-properties-page.c:327
+#: ../src/nemo-image-properties-page.c:327
 msgid "Image Type:"
 msgstr "छवि प्रकार:"
 
-#: ../src/nautilus-image-properties-page.c:328
+#: ../src/nemo-image-properties-page.c:328
 #, c-format
 msgid "<b>Width:</b> %d pixel\n"
 msgid_plural "<b>Width:</b> %d pixels\n"
 msgstr[0] "<b>चौडाइ:</b> %d पिक्सेल\n"
 msgstr[1] "<b>चौडाइ:</b> %d पिक्सेल\n"
 
-#: ../src/nautilus-image-properties-page.c:332
+#: ../src/nemo-image-properties-page.c:332
 #, c-format
 msgid "<b>Height:</b> %d pixel\n"
 msgid_plural "<b>Height:</b> %d pixels\n"
 msgstr[0] "<b>उचाइ:</b> %d पिक्सेल\n"
 msgstr[1] "<b>उचाइ:</b> %d पिक्सेल\n"
 
-#: ../src/nautilus-image-properties-page.c:350
+#: ../src/nemo-image-properties-page.c:350
 msgid "Failed to load image information"
 msgstr "छवि सूचना लोड गर्न असफल भयो"
 
-#: ../src/nautilus-image-properties-page.c:525
+#: ../src/nemo-image-properties-page.c:525
 msgid "loading..."
 msgstr "लोड गर्दैछ..."
 
-#: ../src/nautilus-image-properties-page.c:591
+#: ../src/nemo-image-properties-page.c:591
 msgid "Image"
 msgstr "छवि"
 
-#: ../src/nautilus-information-panel.c:166
+#: ../src/nemo-information-panel.c:166
 msgid "Information"
 msgstr "सूचना"
 
-#: ../src/nautilus-information-panel.c:172
+#: ../src/nemo-information-panel.c:172
 msgid "Show Information"
 msgstr "सूचना देखाउनुहोस्"
 
 #. add the reset background item, possibly disabled
-#: ../src/nautilus-information-panel.c:362
+#: ../src/nemo-information-panel.c:362
 msgid "Use _Default Background"
 msgstr "पूर्वनिर्धारित पृष्ठभूमि प्रयोग गर्नुहोस्"
 
-#: ../src/nautilus-information-panel.c:501
+#: ../src/nemo-information-panel.c:501
 msgid "You can't assign more than one custom icon at a time."
 msgstr "तपाईँले एकपटकमा एकभन्दा बढी अनुकूल प्रतिमाहरू मानाङ्कन गर्न सक्नुहुन्न ।"
 
-#: ../src/nautilus-information-panel.c:528
+#: ../src/nemo-information-panel.c:528
 msgid "You can only use images as custom icons."
 msgstr "तपाईँले अनुकूल प्रतिमाहरूको रूपमा छविहरू मात्र प्रयोग गर्न सक्नुहुन्छ ।"
 
-#: ../src/nautilus-information-panel.c:846
+#: ../src/nemo-information-panel.c:846
 #, c-format
 msgid "Open with %s"
 msgstr "%s सँग खोल्नुहोस्"
 
-#: ../src/nautilus-location-bar.c:60
+#: ../src/nemo-location-bar.c:60
 msgid "Go To:"
 msgstr "जानुहोस्:"
 
-#: ../src/nautilus-location-bar.c:150
+#: ../src/nemo-location-bar.c:150
 #, c-format
 msgid "Do you want to view %d location?"
 msgid_plural "Do you want to view %d locations?"
 msgstr[0] "तपाईँ %d स्थान हेर्न चाहनुहुन्छ?"
 msgstr[1] "तपाईँ %d स्थानहरू हेर्न चाहनुहुन्छ?"
 
-#: ../src/nautilus-location-dialog.c:156
+#: ../src/nemo-location-dialog.c:156
 msgid "Open Location"
 msgstr "स्थान खोल्नुहोस्"
 
-#: ../src/nautilus-location-dialog.c:167
+#: ../src/nemo-location-dialog.c:167
 msgid "_Location:"
 msgstr "स्थान:"
 
-#: ../src/nautilus-main.c:380
+#: ../src/nemo-main.c:380
 msgid "Perform a quick set of self-check tests."
 msgstr "आफै-जाँच परीक्षणहरूको द्रुत सेट कार्यसम्पादन गर्नुहोस् ।"
 
-#: ../src/nautilus-main.c:383
+#: ../src/nemo-main.c:383
 msgid "Create the initial window with the given geometry."
 msgstr "दिइएको रेखागणित अनुसार पहिलो सञ्झ्याल सिर्जना गर्नुहोस् ।"
 
-#: ../src/nautilus-main.c:383
+#: ../src/nemo-main.c:383
 msgid "GEOMETRY"
 msgstr "ज्यामिति"
 
-#: ../src/nautilus-main.c:385
+#: ../src/nemo-main.c:385
 msgid "Only create windows for explicitly specified URIs."
 msgstr "स्पष्ट रूपले निर्दिष्ट गरिएको URIs का लागि मात्र सञ्झ्याल सिर्जना गर्नुहोस् ।"
 
-#: ../src/nautilus-main.c:387
+#: ../src/nemo-main.c:387
 msgid ""
 "Do not manage the desktop (ignore the preference set in the preferences "
 "dialog)."
 msgstr "डेस्कटप प्रबन्ध (प्राथमिकता संवादभित्र प्राथमिकता सेट उपेक्षा गर्नुहोस्) नगर्नुहोस् ।"
 
-#: ../src/nautilus-main.c:389
+#: ../src/nemo-main.c:389
 msgid "open a browser window."
 msgstr "ब्राउजर सञ्झ्याल खोल्नुहोस् ।"
 
-#: ../src/nautilus-main.c:391
-msgid "Quit Nautilus."
+#: ../src/nemo-main.c:391
+msgid "Quit Nemo."
 msgstr "नटलस अन्त्य गर्नुहोस् ।"
 
-#: ../src/nautilus-main.c:393
-msgid "Restart Nautilus."
+#: ../src/nemo-main.c:393
+msgid "Restart Nemo."
 msgstr "नटलस पुन: सुरुआत गर्नुहोस् ।"
 
-#: ../src/nautilus-main.c:394
+#: ../src/nemo-main.c:394
 msgid "[URI...]"
 msgstr "[URI...]"
 
-#. Translators: --no-default-window is a nautilus command line parameter, don't modify it.
-#: ../src/nautilus-main.c:397
+#. Translators: --no-default-window is a nemo command line parameter, don't modify it.
+#: ../src/nemo-main.c:397
 msgid ""
 "Load a saved session from the specified file. Implies \"--no-default-window"
 "\"."
@@ -5092,15 +5092,15 @@ msgstr ""
 "निर्दिष्ट गरिएको फाइलबाट बचत गरिएको सत्र लोड गर्नुहोस् । \"--no-default-window\" "
 "सूचीत गर्दछ ।"
 
-#: ../src/nautilus-main.c:397
+#: ../src/nemo-main.c:397
 msgid "FILENAME"
 msgstr "FILENAME"
 
-#: ../src/nautilus-main.c:435
+#: ../src/nemo-main.c:435
 msgid "File Manager"
 msgstr "फाइल प्रबन्धक"
 
-#: ../src/nautilus-main.c:436
+#: ../src/nemo-main.c:436
 msgid ""
 "\n"
 "\n"
@@ -5111,646 +5111,646 @@ msgstr ""
 "फाइल प्रबन्धकसँग फाइल प्रणाली ब्राउज गर्नुहोस्"
 
 #. Set initial window title
-#: ../src/nautilus-main.c:448 ../src/nautilus-spatial-window.c:430
-#: ../src/nautilus-window-menus.c:433 ../src/nautilus-window-menus.c:435
-#: ../src/nautilus-window.c:167
-msgid "Nautilus"
+#: ../src/nemo-main.c:448 ../src/nemo-spatial-window.c:430
+#: ../src/nemo-window-menus.c:433 ../src/nemo-window-menus.c:435
+#: ../src/nemo-window.c:167
+msgid "Nemo"
 msgstr "नटलस"
 
 #. translators: %s is an option (e.g. --check)
-#: ../src/nautilus-main.c:481 ../src/nautilus-main.c:490
-#: ../src/nautilus-main.c:495
+#: ../src/nemo-main.c:481 ../src/nemo-main.c:490
+#: ../src/nemo-main.c:495
 #, c-format
-msgid "nautilus: %s cannot be used with URIs.\n"
+msgid "nemo: %s cannot be used with URIs.\n"
 msgstr "नटलस: %s लाई URIs सँग प्रयोग गर्न सकिँदैन ।\n"
 
-#: ../src/nautilus-main.c:486
+#: ../src/nemo-main.c:486
 #, c-format
-msgid "nautilus: --check cannot be used with other options.\n"
+msgid "nemo: --check cannot be used with other options.\n"
 msgstr "नटलस: --check लाई अन्य विकल्पहरूसँग प्रयोग गर्न सकिँदैन ।\n"
 
-#: ../src/nautilus-main.c:500
+#: ../src/nemo-main.c:500
 #, c-format
-msgid "nautilus: --geometry cannot be used with more than one URI.\n"
+msgid "nemo: --geometry cannot be used with more than one URI.\n"
 msgstr "नटलस: --geometry लाई एकभन्दा बढी URI सँग प्रयोग गर्न सकिँदैंन ।\n"
 
 #. This is a little joke, shows up occasionally. I only
 #. * implemented this feature so I could use this joke.
 #.
-#: ../src/nautilus-navigation-window-menus.c:117
+#: ../src/nemo-navigation-window-menus.c:117
 msgid "Are you sure you want to forget history?"
 msgstr "तपाईँ इतिहास बिर्सन निश्चित रूपले चाहनुहुन्छ?"
 
-#: ../src/nautilus-navigation-window-menus.c:118
+#: ../src/nemo-navigation-window-menus.c:118
 msgid "If you do, you will be doomed to repeat it."
 msgstr "यदि तपाईँले गर्नुभयो भने, तपाईँले त्यसलाई दोहोर्याउन कर लाग्दछ ।"
 
-#: ../src/nautilus-navigation-window-menus.c:120
+#: ../src/nemo-navigation-window-menus.c:120
 msgid "Are you sure you want to clear the list of locations you have visited?"
 msgstr "तपाईँले हेर्नु भएको स्थानहरूको सूची खाली गर्न निश्चित हुनुहुन्छ?"
 
-#: ../src/nautilus-navigation-window-menus.c:122
+#: ../src/nemo-navigation-window-menus.c:122
 msgid "If you clear the list of locations, they will be permanently deleted."
 msgstr "यदि तपाईँले स्थानहरूको सूची खाली गर्नुभयो भने, तिनीहरू स्थायी रूपले मेटिनेछन् ।"
 
-#: ../src/nautilus-navigation-window-menus.c:289
-#: ../src/nautilus-window-bookmarks.c:98
+#: ../src/nemo-navigation-window-menus.c:289
+#: ../src/nemo-window-bookmarks.c:98
 #, c-format
 msgid "The location \"%s\" does not exist."
 msgstr "%s स्थान अवस्थित छैन ।"
 
-#: ../src/nautilus-navigation-window-menus.c:291
+#: ../src/nemo-navigation-window-menus.c:291
 msgid "The history location doesn't exist."
 msgstr "इतिहास स्थान अवस्थित छैन ।"
 
-#: ../src/nautilus-navigation-window-menus.c:446
+#: ../src/nemo-navigation-window-menus.c:446
 msgid "_Go"
 msgstr "जानुहोस्"
 
 #. name, stock id, label
-#: ../src/nautilus-navigation-window-menus.c:447
+#: ../src/nemo-navigation-window-menus.c:447
 msgid "_Bookmarks"
 msgstr "पुस्तकचिनोहरू"
 
 #. name, stock id, label
-#: ../src/nautilus-navigation-window-menus.c:448
+#: ../src/nemo-navigation-window-menus.c:448
 msgid "Open New _Window"
 msgstr "नयाँ सञ्झ्याल खोल्नुहोस्"
 
 #. name, stock id, label
-#: ../src/nautilus-navigation-window-menus.c:449
-msgid "Open another Nautilus window for the displayed location"
+#: ../src/nemo-navigation-window-menus.c:449
+msgid "Open another Nemo window for the displayed location"
 msgstr "प्रदर्शित स्थानका लागि अर्को नटलस सञ्झ्याल खोल्नुहोस्"
 
-#: ../src/nautilus-navigation-window-menus.c:451
+#: ../src/nemo-navigation-window-menus.c:451
 msgid "Close _All Windows"
 msgstr "सबै सञ्झ्यालहरू बन्द गर्नुहोस्"
 
 #. name, stock id, label
-#: ../src/nautilus-navigation-window-menus.c:452
+#: ../src/nemo-navigation-window-menus.c:452
 msgid "Close all Navigation windows"
 msgstr "सबै नेभिगेसन सञ्झ्यालहरू बन्द गर्नुहोस्"
 
-#: ../src/nautilus-navigation-window-menus.c:454
+#: ../src/nemo-navigation-window-menus.c:454
 msgid "_Location..."
 msgstr "स्थान..."
 
 #. name, stock id, label
-#: ../src/nautilus-navigation-window-menus.c:455
-#: ../src/nautilus-spatial-window.c:868
+#: ../src/nemo-navigation-window-menus.c:455
+#: ../src/nemo-spatial-window.c:868
 msgid "Specify a location to open"
 msgstr "खोल्नका लागि स्थान निर्दिष्ट गर्नुहोस्"
 
-#: ../src/nautilus-navigation-window-menus.c:457
+#: ../src/nemo-navigation-window-menus.c:457
 msgid "Clea_r History"
 msgstr "इतिहास खाली गर्नुहोस्"
 
 #. name, stock id, label
-#: ../src/nautilus-navigation-window-menus.c:458
+#: ../src/nemo-navigation-window-menus.c:458
 msgid "Clear contents of Go menu and Back/Forward lists"
 msgstr "पछाडि जानुहोस् मेनु र अगाडि/पछाडि सूचीहरूको सामग्रीहरू खाली गर्नुहोस्"
 
-#: ../src/nautilus-navigation-window-menus.c:460
-#: ../src/nautilus-spatial-window.c:876
+#: ../src/nemo-navigation-window-menus.c:460
+#: ../src/nemo-spatial-window.c:876
 msgid "_Add Bookmark"
 msgstr "पुस्तकचिनो थप्नुहोस्"
 
 #. name, stock id, label
-#: ../src/nautilus-navigation-window-menus.c:461
-#: ../src/nautilus-spatial-window.c:877
+#: ../src/nemo-navigation-window-menus.c:461
+#: ../src/nemo-spatial-window.c:877
 msgid "Add a bookmark for the current location to this menu"
 msgstr "यस मेनुमा हालको स्थानका लागि पुस्तकचिनो थप्नुहोस्"
 
-#: ../src/nautilus-navigation-window-menus.c:463
-#: ../src/nautilus-spatial-window.c:879
+#: ../src/nemo-navigation-window-menus.c:463
+#: ../src/nemo-spatial-window.c:879
 msgid "_Edit Bookmarks"
 msgstr "पुस्तकचिनोहरू सम्पादन गर्नुहोस्"
 
 #. name, stock id, label
-#: ../src/nautilus-navigation-window-menus.c:464
-#: ../src/nautilus-spatial-window.c:880
+#: ../src/nemo-navigation-window-menus.c:464
+#: ../src/nemo-spatial-window.c:880
 msgid "Display a window that allows editing the bookmarks in this menu"
 msgstr "यस मेनुमा पुस्तकचिनोहरू सम्पादन गर्न अनुमति दिने सञ्झ्याल प्रदर्शन गर्नुहोस्"
 
-#: ../src/nautilus-navigation-window-menus.c:466
-#: ../src/nautilus-spatial-window.c:882
+#: ../src/nemo-navigation-window-menus.c:466
+#: ../src/nemo-spatial-window.c:882
 msgid "_Search for Files..."
 msgstr "फाइलहरूका लागि खोजि गर्नुहोस्..."
 
 #. name, stock id, label
-#: ../src/nautilus-navigation-window-menus.c:467
-#: ../src/nautilus-spatial-window.c:883
+#: ../src/nemo-navigation-window-menus.c:467
+#: ../src/nemo-spatial-window.c:883
 msgid "Locate documents and folders on this computer by name or content"
 msgstr "यस कम्प्युटरमा नाम वा विषयद्वारा कागजातहरू र फोल्डरहरू राख्नुहोस्"
 
 #. name, stock id
-#: ../src/nautilus-navigation-window-menus.c:474
+#: ../src/nemo-navigation-window-menus.c:474
 msgid "_Main Toolbar"
 msgstr "मुख्य उपकरणपट्टी"
 
 #. label, accelerator
-#: ../src/nautilus-navigation-window-menus.c:475
+#: ../src/nemo-navigation-window-menus.c:475
 msgid "Change the visibility of this window's main toolbar"
 msgstr "यस सञ्झ्यालको मुख्य उपकरणपट्टीको दृश्यात्मक्ता परिवर्तन गर्नुहोस्"
 
 #. is_active
 #. name, stock id
-#: ../src/nautilus-navigation-window-menus.c:479
+#: ../src/nemo-navigation-window-menus.c:479
 msgid "_Side Pane"
 msgstr "छेउ फलक"
 
 #. label, accelerator
-#: ../src/nautilus-navigation-window-menus.c:480
+#: ../src/nemo-navigation-window-menus.c:480
 msgid "Change the visibility of this window's side pane"
 msgstr "यस सञ्झ्यालको छेउपट्टीको दृश्यात्मक्ता परिवर्तन गर्नुहोस्"
 
 #. is_active
 #. name, stock id
-#: ../src/nautilus-navigation-window-menus.c:484
+#: ../src/nemo-navigation-window-menus.c:484
 msgid "Location _Bar"
 msgstr "स्थानपट्टी"
 
 #. label, accelerator
-#: ../src/nautilus-navigation-window-menus.c:485
+#: ../src/nemo-navigation-window-menus.c:485
 msgid "Change the visibility of this window's location bar"
 msgstr "यस सञ्झ्यालको स्थानपट्टीको दृश्यात्मकता परिवर्तन गर्नुहोस्"
 
 #. is_active
 #. name, stock id
-#: ../src/nautilus-navigation-window-menus.c:489
+#: ../src/nemo-navigation-window-menus.c:489
 msgid "St_atusbar"
 msgstr "वस्तुस्थितिपट्टी"
 
 #. label, accelerator
-#: ../src/nautilus-navigation-window-menus.c:490
+#: ../src/nemo-navigation-window-menus.c:490
 msgid "Change the visibility of this window's statusbar"
 msgstr "यस सञ्झ्यालको वस्तुस्थितिपट्टीको दृश्यात्मकता परिवर्तन गर्नुहोस्"
 
-#: ../src/nautilus-navigation-window-menus.c:514
+#: ../src/nemo-navigation-window-menus.c:514
 msgid "_Back"
 msgstr "पछाडि"
 
-#: ../src/nautilus-navigation-window-menus.c:516
+#: ../src/nemo-navigation-window-menus.c:516
 msgid "Go to the previous visited location"
 msgstr "अघिल्लो भ्रमण गरिको स्थानमा जानुहोस्"
 
-#: ../src/nautilus-navigation-window-menus.c:517
+#: ../src/nemo-navigation-window-menus.c:517
 msgid "Back history"
 msgstr "पछाडि इतिहास"
 
-#: ../src/nautilus-navigation-window-menus.c:531
+#: ../src/nemo-navigation-window-menus.c:531
 msgid "_Forward"
 msgstr "अगाडि"
 
-#: ../src/nautilus-navigation-window-menus.c:533
+#: ../src/nemo-navigation-window-menus.c:533
 msgid "Go to the next visited location"
 msgstr "पछिल्लो भ्रमण गरिएको स्थानमा जानुहोस्"
 
-#: ../src/nautilus-navigation-window-menus.c:534
+#: ../src/nemo-navigation-window-menus.c:534
 msgid "Forward history"
 msgstr "इतिहास फरवार्ड गर्नुहोस्"
 
-#: ../src/nautilus-navigation-window-menus.c:548
+#: ../src/nemo-navigation-window-menus.c:548
 msgid "_Search"
 msgstr "खोजी गर्नुहोस्"
 
-#: ../src/nautilus-navigation-window.c:187
+#: ../src/nemo-navigation-window.c:187
 msgid "Toggle between button and text-based location bar"
 msgstr "बटन र पाठ-आधारित स्थान पट्टीबीच टगल गर्नुहोस्"
 
-#: ../src/nautilus-navigation-window.c:925
+#: ../src/nemo-navigation-window.c:925
 #, c-format
 msgid "%s - File Browser"
 msgstr "%s - फाइल ब्राउजर"
 
-#: ../src/nautilus-notes-viewer.c:388 ../src/nautilus-notes-viewer.c:498
+#: ../src/nemo-notes-viewer.c:388 ../src/nemo-notes-viewer.c:498
 msgid "Notes"
 msgstr "द्रष्टव्यहरू"
 
-#: ../src/nautilus-notes-viewer.c:394
+#: ../src/nemo-notes-viewer.c:394
 msgid "Show Notes"
 msgstr "द्रष्टव्यहरू देखाउनुहोस्"
 
-#: ../src/nautilus-places-sidebar.c:1456
+#: ../src/nemo-places-sidebar.c:1456
 msgid "Open in New _Window"
 msgstr "नयाँ सञ्झ्यालमा खोल्नुहोस्"
 
-#: ../src/nautilus-places-sidebar.c:1462
+#: ../src/nemo-places-sidebar.c:1462
 msgid "Remove"
 msgstr "हटाउनुहोस्"
 
-#: ../src/nautilus-places-sidebar.c:1471
+#: ../src/nemo-places-sidebar.c:1471
 msgid "Rename..."
 msgstr "पुन: नामकरण गर्नुहोस्..."
 
-#: ../src/nautilus-places-sidebar.c:1483
+#: ../src/nemo-places-sidebar.c:1483
 msgid "_Mount"
 msgstr "माउन्ट गर्नुहोस्"
 
-#: ../src/nautilus-places-sidebar.c:1490
+#: ../src/nemo-places-sidebar.c:1490
 msgid "_Unmount"
 msgstr "अनमाउण्ट गर्नुहोस्"
 
 #. Empty Trash menu item
-#: ../src/nautilus-places-sidebar.c:1513 ../src/nautilus-trash-bar.c:125
+#: ../src/nemo-places-sidebar.c:1513 ../src/nemo-trash-bar.c:125
 msgid "Empty _Trash"
 msgstr "रद्दीटोकरी खाली गर्नुहोस्"
 
-#: ../src/nautilus-places-sidebar.c:1773
+#: ../src/nemo-places-sidebar.c:1773
 msgid "Places"
 msgstr "स्थानहरू"
 
-#: ../src/nautilus-places-sidebar.c:1779
+#: ../src/nemo-places-sidebar.c:1779
 msgid "Show Places"
 msgstr "स्थानहरू देखाउनुहोस्"
 
 #. set the title and standard close accelerator
-#: ../src/nautilus-property-browser.c:280
+#: ../src/nemo-property-browser.c:280
 msgid "Backgrounds and Emblems"
 msgstr "पृष्ठभूमि र प्रतीक"
 
-#: ../src/nautilus-property-browser.c:389
+#: ../src/nemo-property-browser.c:389
 msgid "_Remove..."
 msgstr "हटाउनुहोस्..."
 
-#: ../src/nautilus-property-browser.c:409
+#: ../src/nemo-property-browser.c:409
 msgid "_Add new..."
 msgstr "नयाँ थप्नुहोस्..."
 
-#: ../src/nautilus-property-browser.c:974
+#: ../src/nemo-property-browser.c:974
 #, c-format
 msgid "Sorry, but pattern %s couldn't be deleted."
 msgstr "माफ गर्नुहोस्, तर %s बाँन्की मेट्न सकिँदैन ।"
 
-#: ../src/nautilus-property-browser.c:975
+#: ../src/nemo-property-browser.c:975
 msgid "Check that you have permission to delete the pattern."
 msgstr "बाँन्की मेट्न तपाईँसँग अनुमति भएको जाँच गर्नुहोस् ।"
 
-#: ../src/nautilus-property-browser.c:1004
+#: ../src/nemo-property-browser.c:1004
 #, c-format
 msgid "Sorry, but emblem %s couldn't be deleted."
 msgstr "माफ गर्नुहोस्, तर %s चिन्ह मेट्न सकिँदैन ।"
 
-#: ../src/nautilus-property-browser.c:1005
+#: ../src/nemo-property-browser.c:1005
 msgid "Check that you have permission to delete the emblem."
 msgstr "चिन्ह मेट्न तपाईँसँग अनुमति भएको जाँच गर्नुहोस् ।"
 
-#: ../src/nautilus-property-browser.c:1052
+#: ../src/nemo-property-browser.c:1052
 msgid "Create a New Emblem"
 msgstr "नयाँ चिन्ह सिर्जना गर्नुहोस्"
 
 #. make the keyword label and field
-#: ../src/nautilus-property-browser.c:1074
+#: ../src/nemo-property-browser.c:1074
 msgid "_Keyword:"
 msgstr "कुञ्जीशब्द:"
 
 #. set up a gnome icon entry to pick the image file
-#: ../src/nautilus-property-browser.c:1093
+#: ../src/nemo-property-browser.c:1093
 msgid "_Image:"
 msgstr "छवि:"
 
-#: ../src/nautilus-property-browser.c:1101
+#: ../src/nemo-property-browser.c:1101
 msgid "Select an Image File for the New Emblem"
 msgstr "नयाँ चिन्हका लागि एउटा छवि फाइल चयन गर्नुहोस्"
 
-#: ../src/nautilus-property-browser.c:1126
+#: ../src/nemo-property-browser.c:1126
 msgid "Create a New Color:"
 msgstr "नयाँ रङ सिर्जना गर्नुहोस्:"
 
 #. make the name label and field
-#: ../src/nautilus-property-browser.c:1140
+#: ../src/nemo-property-browser.c:1140
 msgid "Color _name:"
 msgstr "रङ नाम:"
 
-#: ../src/nautilus-property-browser.c:1156
+#: ../src/nemo-property-browser.c:1156
 msgid "Color _value:"
 msgstr "रङ मान:"
 
-#: ../src/nautilus-property-browser.c:1188
+#: ../src/nemo-property-browser.c:1188
 #, c-format
 msgid "Sorry, but \"%s\" is not a valid file name."
 msgstr "माफ गर्नुहोस्, तर \"%s\" वैध फाइल नाम होइन ।"
 
-#: ../src/nautilus-property-browser.c:1191
+#: ../src/nemo-property-browser.c:1191
 msgid "Sorry, but you did not supply a valid file name."
 msgstr "माफ गर्नुहोस्, तर तपाईँले वैध फाइल नाम पूर्ति गर्नुभएको छैन ।"
 
-#: ../src/nautilus-property-browser.c:1192
+#: ../src/nemo-property-browser.c:1192
 msgid "Please try again."
 msgstr "कृपया पुन:प्रयास गर्नुहोस् ।"
 
-#: ../src/nautilus-property-browser.c:1205
+#: ../src/nemo-property-browser.c:1205
 msgid "Sorry, but you can't replace the reset image."
 msgstr "माफ गर्नुहोस्, तर तपाईँले रिसेट गरिएको छवि प्रतिस्थापन गर्न सक्नुहुन्न ।"
 
-#: ../src/nautilus-property-browser.c:1206
+#: ../src/nemo-property-browser.c:1206
 msgid "Reset is a special image that cannot be deleted."
 msgstr "रिसेट विशेष छवि हो जसलाई मेट्न सकिँदैन ।"
 
-#: ../src/nautilus-property-browser.c:1238
+#: ../src/nemo-property-browser.c:1238
 #, c-format
 msgid "Sorry, but the pattern %s couldn't be installed."
 msgstr "माफ गर्नुहोस्, तर %s बाँन्की स्थापना गर्न सकिँदैन ।"
 
-#: ../src/nautilus-property-browser.c:1258
+#: ../src/nemo-property-browser.c:1258
 msgid "Select an Image File to Add as a Pattern"
 msgstr "बाँन्कीको रूपमा थप्नका लागि एउटा छवि फाइल चयन गर्नुहोस्"
 
-#: ../src/nautilus-property-browser.c:1310
-#: ../src/nautilus-property-browser.c:1341
+#: ../src/nemo-property-browser.c:1310
+#: ../src/nemo-property-browser.c:1341
 msgid "The color cannot be installed."
 msgstr "रङ स्थापना गर्न सकिँदैन ।"
 
-#: ../src/nautilus-property-browser.c:1311
+#: ../src/nemo-property-browser.c:1311
 msgid "Sorry, but you must specify an unused color name for the new color."
 msgstr ""
 "माफ गर्नुहोस्, तर तपाईँले नयाँ रङका लागि प्रयोग नभएको रङ नाम निर्दिष्ट गर्नु पर्दछ ।"
 
-#: ../src/nautilus-property-browser.c:1342
+#: ../src/nemo-property-browser.c:1342
 msgid "Sorry, but you must specify a non-blank name for the new color."
 msgstr "माफ गर्नुहोस्, तर तपाईँले नयाँ रङका लागि खाली नभएको नाम निर्दिष्ट गर्नु पर्दछ ।"
 
-#: ../src/nautilus-property-browser.c:1395
+#: ../src/nemo-property-browser.c:1395
 msgid "Select a Color to Add"
 msgstr "थप्नका लागि एउटा रङ चयन गर्नुहोस्"
 
-#: ../src/nautilus-property-browser.c:1432
-#: ../src/nautilus-property-browser.c:1448
+#: ../src/nemo-property-browser.c:1432
+#: ../src/nemo-property-browser.c:1448
 #, c-format
 msgid "Sorry, but \"%s\" is not a usable image file."
 msgstr "माफ गर्नुहोस्, तर %s उपयोगी छवि फाइल होइन ।"
 
-#: ../src/nautilus-property-browser.c:1433
-#: ../src/nautilus-property-browser.c:1449
+#: ../src/nemo-property-browser.c:1433
+#: ../src/nemo-property-browser.c:1449
 msgid "The file is not an image."
 msgstr "यो फाइल एउटा छवि होइन ।"
 
-#: ../src/nautilus-property-browser.c:2153
+#: ../src/nemo-property-browser.c:2153
 msgid "Select a Category:"
 msgstr "कोटि चयन गर्नुहोस्:"
 
-#: ../src/nautilus-property-browser.c:2162
+#: ../src/nemo-property-browser.c:2162
 msgid "C_ancel Remove"
 msgstr "'हटाउनुहोस्' रद्द गर्नुहोस्"
 
-#: ../src/nautilus-property-browser.c:2168
+#: ../src/nemo-property-browser.c:2168
 msgid "_Add a New Pattern..."
 msgstr "नयाँ बाँन्की थप्नुहोस्..."
 
-#: ../src/nautilus-property-browser.c:2171
+#: ../src/nemo-property-browser.c:2171
 msgid "_Add a New Color..."
 msgstr "नयाँ रङ थप्नुहोस्..."
 
-#: ../src/nautilus-property-browser.c:2174
+#: ../src/nemo-property-browser.c:2174
 msgid "_Add a New Emblem..."
 msgstr "नयाँ चिन्ह थप्नुहोस्...."
 
-#: ../src/nautilus-property-browser.c:2197
+#: ../src/nemo-property-browser.c:2197
 msgid "Click on a pattern to remove it"
 msgstr "बान्की हटाउन त्यसमा क्लिक गर्नुहोस्"
 
-#: ../src/nautilus-property-browser.c:2200
+#: ../src/nemo-property-browser.c:2200
 msgid "Click on a color to remove it"
 msgstr "रङ हटाउन त्यसमा क्लिक गर्नुहोस्"
 
-#: ../src/nautilus-property-browser.c:2203
+#: ../src/nemo-property-browser.c:2203
 msgid "Click on an emblem to remove it"
 msgstr "एउटा चिन्ह हटाउन त्यसमा क्लिक गर्नुहोस्"
 
-#: ../src/nautilus-property-browser.c:2212
+#: ../src/nemo-property-browser.c:2212
 msgid "Patterns:"
 msgstr "बाँन्कीहरू:"
 
-#: ../src/nautilus-property-browser.c:2215
+#: ../src/nemo-property-browser.c:2215
 msgid "Colors:"
 msgstr "रङहरू:"
 
-#: ../src/nautilus-property-browser.c:2218
+#: ../src/nemo-property-browser.c:2218
 msgid "Emblems:"
 msgstr "चिन्हहरू:"
 
-#: ../src/nautilus-property-browser.c:2238
+#: ../src/nemo-property-browser.c:2238
 msgid "_Remove a Pattern..."
 msgstr "बाँन्की हटाउनुहोस्..."
 
-#: ../src/nautilus-property-browser.c:2241
+#: ../src/nemo-property-browser.c:2241
 msgid "_Remove a Color..."
 msgstr "रङ हटाउनुहोस्..."
 
-#: ../src/nautilus-property-browser.c:2244
+#: ../src/nemo-property-browser.c:2244
 msgid "_Remove an Emblem..."
 msgstr "एउटा चिन्ह हटाउनुहोस्..."
 
-#: ../src/nautilus-query-editor.c:136
+#: ../src/nemo-query-editor.c:136
 msgid "File Type"
 msgstr "फाइल प्रकार"
 
-#: ../src/nautilus-query-editor.c:273
+#: ../src/nemo-query-editor.c:273
 msgid "Select folder to search in"
 msgstr "खोजीमा फोल्डर चयन गर्नुहोस्"
 
-#: ../src/nautilus-query-editor.c:357
+#: ../src/nemo-query-editor.c:357
 msgid "Documents"
 msgstr "कागजातहरू"
 
-#: ../src/nautilus-query-editor.c:375
+#: ../src/nemo-query-editor.c:375
 msgid "Music"
 msgstr "सङ्गित"
 
-#: ../src/nautilus-query-editor.c:389
+#: ../src/nemo-query-editor.c:389
 msgid "Video"
 msgstr "भिडियो"
 
-#: ../src/nautilus-query-editor.c:405
+#: ../src/nemo-query-editor.c:405
 msgid "Picture"
 msgstr "तस्वीर"
 
-#: ../src/nautilus-query-editor.c:425
+#: ../src/nemo-query-editor.c:425
 msgid "Illustration"
 msgstr "उदाहरण"
 
-#: ../src/nautilus-query-editor.c:439
+#: ../src/nemo-query-editor.c:439
 msgid "Spreadsheet"
 msgstr "स्प्रेडसिट"
 
-#: ../src/nautilus-query-editor.c:455
+#: ../src/nemo-query-editor.c:455
 msgid "Presentation"
 msgstr "प्रस्तुतिकरण"
 
-#: ../src/nautilus-query-editor.c:464
+#: ../src/nemo-query-editor.c:464
 msgid "Pdf / Postscript"
 msgstr "Pdf / पोष्टस्क्रिप्ट"
 
-#: ../src/nautilus-query-editor.c:472
+#: ../src/nemo-query-editor.c:472
 msgid "Text File"
 msgstr "पाठ फाइल"
 
-#: ../src/nautilus-query-editor.c:544
+#: ../src/nemo-query-editor.c:544
 msgid "Select type"
 msgstr "प्रकार चयन गर्नुहोस्"
 
-#: ../src/nautilus-query-editor.c:628
+#: ../src/nemo-query-editor.c:628
 msgid "Any"
 msgstr "कुनै"
 
-#: ../src/nautilus-query-editor.c:643
+#: ../src/nemo-query-editor.c:643
 msgid "Other Type..."
 msgstr "अन्य प्रकार..."
 
-#: ../src/nautilus-query-editor.c:928
+#: ../src/nemo-query-editor.c:928
 msgid "Remove this criterion from the search"
 msgstr "खोजीबाट यो मापदण्ड हटाउनुहोस्"
 
-#: ../src/nautilus-query-editor.c:973
+#: ../src/nemo-query-editor.c:973
 msgid "Search Folder"
 msgstr "फोल्डर खोजी गर्नुहोस्"
 
-#: ../src/nautilus-query-editor.c:987
+#: ../src/nemo-query-editor.c:987
 msgid "Edit the saved search"
 msgstr "बचत गरिएको खोजी सम्पादन गर्नुहोस्"
 
-#: ../src/nautilus-query-editor.c:1018
+#: ../src/nemo-query-editor.c:1018
 msgid "Add a new criterion to this search"
 msgstr "यस खोजीमा नयाँ मापदण्ड थप्नुहोस्"
 
-#: ../src/nautilus-query-editor.c:1022
+#: ../src/nemo-query-editor.c:1022
 msgid "Go"
 msgstr "जानुहोस्"
 
-#: ../src/nautilus-query-editor.c:1024
+#: ../src/nemo-query-editor.c:1024
 msgid "Reload"
 msgstr "पुन:लोड गर्नुहोस्"
 
-#: ../src/nautilus-query-editor.c:1029
+#: ../src/nemo-query-editor.c:1029
 msgid "Perform or update the search"
 msgstr "खोजी सम्पादन गर्नुहोस् वा अद्यावधिक गर्नुहोस्"
 
-#: ../src/nautilus-query-editor.c:1050
+#: ../src/nemo-query-editor.c:1050
 msgid "_Search for:"
 msgstr "यसका लागि खोजी गर्नुहोस्:"
 
-#: ../src/nautilus-query-editor.c:1079
+#: ../src/nemo-query-editor.c:1079
 msgid "Search results"
 msgstr "परिणामहरू खोजी गर्नुहोस्"
 
-#: ../src/nautilus-search-bar.c:141
+#: ../src/nemo-search-bar.c:141
 msgid "Search:"
 msgstr "खोजी गर्नुहोस्:"
 
-#: ../src/nautilus-side-pane.c:420
+#: ../src/nemo-side-pane.c:420
 msgid "Close the side pane"
 msgstr "छेउ फलक बन्द गर्नुहोस्"
 
-#: ../src/nautilus-spatial-window.c:866
+#: ../src/nemo-spatial-window.c:866
 msgid "_Places"
 msgstr "स्थानहरू"
 
 #. name, stock id, label
-#: ../src/nautilus-spatial-window.c:867
+#: ../src/nemo-spatial-window.c:867
 msgid "Open _Location..."
 msgstr "स्थान खोल्नुहोस्...."
 
-#: ../src/nautilus-spatial-window.c:870
+#: ../src/nemo-spatial-window.c:870
 msgid "Close P_arent Folders"
 msgstr "प्रमूल फोल्डरहरू बन्द गर्नुहोस्"
 
 #. name, stock id, label
-#: ../src/nautilus-spatial-window.c:871
+#: ../src/nemo-spatial-window.c:871
 msgid "Close this folder's parents"
 msgstr "यस फोल्डरको प्रमूलहरू बन्द गर्नुहोस्"
 
-#: ../src/nautilus-spatial-window.c:873
+#: ../src/nemo-spatial-window.c:873
 msgid "Clos_e All Folders"
 msgstr "सबै फोल्डरहरू बन्द गर्नुहोस्"
 
 #. name, stock id, label
-#: ../src/nautilus-spatial-window.c:874
+#: ../src/nemo-spatial-window.c:874
 msgid "Close all folder windows"
 msgstr "सबै फोल्डर सञ्झ्यालहरू बन्द गर्नुहोस्"
 
-#: ../src/nautilus-throbber.c:82
+#: ../src/nemo-throbber.c:82
 msgid "throbber"
 msgstr "थ्रोबर"
 
-#: ../src/nautilus-throbber.c:83
+#: ../src/nemo-throbber.c:83
 msgid "provides visual status"
 msgstr "दृश्यात्मक वस्तुस्थिति उपलब्ध गर्दछ"
 
-#: ../src/nautilus-window-bookmarks.c:96
+#: ../src/nemo-window-bookmarks.c:96
 msgid ""
 "Do you want to remove any bookmarks with the non-existing location from your "
 "list?"
 msgstr "तपाईँ सूचीबाट अवस्थित नभएको स्थानसँगै कुनै पनि पुस्तकचिनोहरू हटाउन चाहनुहुन्छ?"
 
-#: ../src/nautilus-window-bookmarks.c:101
+#: ../src/nemo-window-bookmarks.c:101
 msgid "Bookmark for Nonexistent Location"
 msgstr "अवस्थित नभएको स्थानका लागि पुस्तकचिनो"
 
-#: ../src/nautilus-window-manage-views.c:655
+#: ../src/nemo-window-manage-views.c:655
 msgid "You can choose another view or go to a different location."
 msgstr "तपाईँले अर्को दृश्य रोज्न सक्नुहुन्छ वा फरक स्थानमा जान सक्नुहुन्छ ।"
 
-#: ../src/nautilus-window-manage-views.c:668
+#: ../src/nemo-window-manage-views.c:668
 msgid "The location cannot be displayed with this viewer."
 msgstr "यो स्थान यस दर्शकसँग प्रदर्शन गर्न सकिँदैन ।"
 
-#: ../src/nautilus-window-manage-views.c:1053
+#: ../src/nemo-window-manage-views.c:1053
 msgid "Content View"
 msgstr "हालको दृश्य"
 
-#: ../src/nautilus-window-manage-views.c:1054
+#: ../src/nemo-window-manage-views.c:1054
 msgid "View of the current folder"
 msgstr "हालको फोल्डरको दृश्य"
 
-#: ../src/nautilus-window-manage-views.c:1477
-msgid "Nautilus has no installed viewer capable of displaying the folder."
+#: ../src/nemo-window-manage-views.c:1477
+msgid "Nemo has no installed viewer capable of displaying the folder."
 msgstr "नटलससँग फोल्डर प्रदर्शन गर्न क्षमता भएको दर्शक स्थापना गरिएको छैन ।"
 
-#: ../src/nautilus-window-manage-views.c:1483
+#: ../src/nemo-window-manage-views.c:1483
 msgid "The location is not a folder."
 msgstr "स्थान फोल्डर होइन ।"
 
-#: ../src/nautilus-window-manage-views.c:1510
+#: ../src/nemo-window-manage-views.c:1510
 #, c-format
-msgid "Nautilus cannot handle %s: locations."
+msgid "Nemo cannot handle %s: locations."
 msgstr "नटलसले %s: स्थानहरू ह्यान्डल गर्न सक्दैन ।"
 
-#: ../src/nautilus-window-manage-views.c:1545
+#: ../src/nemo-window-manage-views.c:1545
 msgid "Check that your proxy settings are correct."
 msgstr "तपाईँको प्रोक्सी सेटिङहरू सही भएको जाँच गर्नुहोस् ।"
 
-#: ../src/nautilus-window-manage-views.c:1550
+#: ../src/nemo-window-manage-views.c:1550
 #, c-format
 msgid ""
-"Couldn't display \"%s\", because Nautilus cannot contact the SMB master "
+"Couldn't display \"%s\", because Nemo cannot contact the SMB master "
 "browser."
 msgstr ""
 "\"%s\" प्रदर्शन गर्न सकेन, किनभने नटलसले SMB मास्टर ब्राउजरलाई सम्पर्क गर्न सक्दैन ।"
 
-#: ../src/nautilus-window-manage-views.c:1553
+#: ../src/nemo-window-manage-views.c:1553
 msgid "Check that an SMB server is running in the local network."
 msgstr "एउटा SMB सर्भर स्थानीय सञ्जालमा चलिरहेको जाँच गर्नुहोस् ।"
 
-#: ../src/nautilus-window-manage-views.c:1563
+#: ../src/nemo-window-manage-views.c:1563
 msgid "Check if the service is available."
 msgstr "यदि सेवा उपलब्ध छ भने जाँच गर्नुहोस् ।"
 
-#: ../src/nautilus-window-manage-views.c:1567
+#: ../src/nemo-window-manage-views.c:1567
 #, c-format
-msgid "Nautilus cannot display \"%s\"."
+msgid "Nemo cannot display \"%s\"."
 msgstr "नटलसले \"%s\" प्रदर्शन सक्दैन ।"
 
-#: ../src/nautilus-window-manage-views.c:1569
+#: ../src/nemo-window-manage-views.c:1569
 msgid "Please select another viewer and try again."
 msgstr "कृपया अर्को दर्शक चयन गर्नुहोस् र पुन:प्रयास गर्नुहोस् ।"
 
-#: ../src/nautilus-window-menus.c:174
+#: ../src/nemo-window-menus.c:174
 msgid "Go to the location specified by this bookmark"
 msgstr "यस पुस्तकचिनोद्वारा निर्दिष्ट गरिएको स्थानमा जानुहोस्"
 
-#: ../src/nautilus-window-menus.c:414
+#: ../src/nemo-window-menus.c:414
 msgid ""
-"Nautilus is free software; you can redistribute it and/or modify it under "
+"Nemo is free software; you can redistribute it and/or modify it under "
 "the terms of the GNU General Public License as published by the Free "
 "Software Foundation; either version 2 of the License, or (at your option) "
 "any later version."
@@ -5759,9 +5759,9 @@ msgstr ""
 "साधरण सार्वजनिक इजाजत पत्रको संस्करण २ वा (तपाईँको विकल्पमा) कुनै पनि नयाँ पछिल्लो "
 "संस्करण अन्तर्गत रहेर पुन: वितरण गर्न सक्नुहुन्छ र/वा परिमार्जन गर्न सक्नुहुन्छ ।"
 
-#: ../src/nautilus-window-menus.c:418
+#: ../src/nemo-window-menus.c:418
 msgid ""
-"Nautilus is distributed in the hope that it will be useful, but WITHOUT ANY "
+"Nemo is distributed in the hope that it will be useful, but WITHOUT ANY "
 "WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS "
 "FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more "
 "details."
@@ -5770,265 +5770,265 @@ msgstr ""
 "ब्यापारिक वा मिलानको ब्यबाहरिक वारेन्टी बिना नै वितरण गरिएको छ ।  अरु विस्तृत "
 "विवरणका लागि GNU साधारण सार्वजनिक इजाजतपत्र हेर्नुहोस् ।"
 
-#: ../src/nautilus-window-menus.c:422
+#: ../src/nemo-window-menus.c:422
 msgid ""
 "You should have received a copy of the GNU General Public License along with "
-"Nautilus; if not, write to the Free Software Foundation, Inc., 59 Temple "
+"Nemo; if not, write to the Free Software Foundation, Inc., 59 Temple "
 "Place, Suite 330, Boston, MA  02111-1307  USA"
 msgstr ""
 "तपाईँले नटलससँगै GNU साधरण सार्वजनिक इजाजपत्रको प्रतिलिपि पनि प्राप्त गरेको हुनुपर्दछ; "
 "यदि नभएमा, Free Software Foundation, Inc., \n"
 "59 Temple Place, Suite 330, Boston, MA 02111-1307 USA लाई लेख्नुहोस् ।"
 
-#: ../src/nautilus-window-menus.c:438
+#: ../src/nemo-window-menus.c:438
 msgid ""
-"Nautilus is a graphical shell for GNOME that makes it easy to manage your "
+"Nemo is a graphical shell for GNOME that makes it easy to manage your "
 "files and the rest of your system."
 msgstr ""
 "नटलस GNOME का लागि ग्राफिकल शेल हो जसले तपाईँको फाइलहरू र तपाईँको बाँकी प्रणाली "
 "प्रबन्ध गर्न सजिलो बनाउँदछ ।"
 
-#: ../src/nautilus-window-menus.c:442
-msgid "Copyright © 1999-2007 The Nautilus authors"
+#: ../src/nemo-window-menus.c:442
+msgid "Copyright © 1999-2007 The Nemo authors"
 msgstr "प्रतिलिपि अधिकार © १९९९-२००५ नटलस लेखक"
 
 #. Translators should localize the following string
 #. * which will be displayed at the bottom of the about
 #. * box to give credit to the translator(s).
 #.
-#: ../src/nautilus-window-menus.c:452
+#: ../src/nemo-window-menus.c:452
 msgid "translator-credits"
 msgstr "महेश सुबेदी<submanesh@yahoo.com>, नारायाण कुमार मगर<narayan@mpp.org.np>"
 
-#: ../src/nautilus-window-menus.c:455
-msgid "Nautilus Web Site"
+#: ../src/nemo-window-menus.c:455
+msgid "Nemo Web Site"
 msgstr "नटलस वेब साइट"
 
-#: ../src/nautilus-window-menus.c:583
+#: ../src/nemo-window-menus.c:583
 msgid "_File"
 msgstr "फाइल"
 
 #. name, stock id, label
-#: ../src/nautilus-window-menus.c:584
+#: ../src/nemo-window-menus.c:584
 msgid "_Edit"
 msgstr "सम्पादन गर्नुहोस्"
 
 #. name, stock id, label
-#: ../src/nautilus-window-menus.c:585
+#: ../src/nemo-window-menus.c:585
 msgid "_View"
 msgstr "दृश्य"
 
 #. name, stock id, label
-#: ../src/nautilus-window-menus.c:586
+#: ../src/nemo-window-menus.c:586
 msgid "_Help"
 msgstr "मद्दत"
 
 #. name, stock id, label
 #. name, stock id
-#: ../src/nautilus-window-menus.c:588
+#: ../src/nemo-window-menus.c:588
 msgid "_Close"
 msgstr "बन्द गर्नुहोस्"
 
 #. label, accelerator
-#: ../src/nautilus-window-menus.c:589
+#: ../src/nemo-window-menus.c:589
 msgid "Close this folder"
 msgstr "यो फोल्डर बन्द गर्नुहोस्"
 
-#: ../src/nautilus-window-menus.c:592
+#: ../src/nemo-window-menus.c:592
 msgid "_Backgrounds and Emblems..."
 msgstr "पृष्ठभूमि र चिन्हहरू..."
 
-#: ../src/nautilus-window-menus.c:593
+#: ../src/nemo-window-menus.c:593
 msgid ""
 "Display patterns, colors, and emblems that can be used to customize "
 "appearance"
 msgstr "देखावट अनुकूलन गर्न प्रयोग गर्न सकिने बाँन्कीहरू, रङहरू र चिन्हहरू प्रदर्शन गर्नुहोस्"
 
-#: ../src/nautilus-window-menus.c:596
+#: ../src/nemo-window-menus.c:596
 msgid "Prefere_nces"
 msgstr "प्राथमिकता"
 
-#: ../src/nautilus-window-menus.c:597
-msgid "Edit Nautilus preferences"
+#: ../src/nemo-window-menus.c:597
+msgid "Edit Nemo preferences"
 msgstr "नटलस प्राथमिकताहरू सम्पादन गर्नुहोस्"
 
-#: ../src/nautilus-window-menus.c:599
+#: ../src/nemo-window-menus.c:599
 msgid "_Undo"
 msgstr "पूर्वस्थितिमा फर्काउनुहोस्"
 
 #. name, stock id, label
-#: ../src/nautilus-window-menus.c:600
+#: ../src/nemo-window-menus.c:600
 msgid "Undo the last text change"
 msgstr "अन्तिम परिवर्तित पाठलाई पूर्वस्थितिमा फर्काउनुहोस्"
 
-#: ../src/nautilus-window-menus.c:602
+#: ../src/nemo-window-menus.c:602
 msgid "Open _Parent"
 msgstr "प्रमूल खोल्नुहोस्"
 
 #. name, stock id, label
-#: ../src/nautilus-window-menus.c:603
+#: ../src/nemo-window-menus.c:603
 msgid "Open the parent folder"
 msgstr "प्रमूल फोल्डर खोल्नुहोस्"
 
 #. name, stock id
-#: ../src/nautilus-window-menus.c:609
+#: ../src/nemo-window-menus.c:609
 msgid "_Stop"
 msgstr "रोक्नुहोस्"
 
 #. label, accelerator
-#: ../src/nautilus-window-menus.c:610
+#: ../src/nemo-window-menus.c:610
 msgid "Stop loading the current location"
 msgstr "हालको स्थान लोड गर्न रोक्नुहोस्"
 
 #. name, stock id
-#: ../src/nautilus-window-menus.c:613
+#: ../src/nemo-window-menus.c:613
 msgid "_Reload"
 msgstr "पुन:लोड गर्नुहोस्"
 
 #. label, accelerator
-#: ../src/nautilus-window-menus.c:614
+#: ../src/nemo-window-menus.c:614
 msgid "Reload the current location"
 msgstr "हालको स्थान पुन: लोड गर्नुहोस्"
 
 #. name, stock id
-#: ../src/nautilus-window-menus.c:617
+#: ../src/nemo-window-menus.c:617
 msgid "_Contents"
 msgstr "सामग्रीहरू"
 
 #. label, accelerator
-#: ../src/nautilus-window-menus.c:618
-msgid "Display Nautilus help"
+#: ../src/nemo-window-menus.c:618
+msgid "Display Nemo help"
 msgstr "नटलस मद्दत प्रदर्शन गर्नुहोस्"
 
 #. name, stock id
-#: ../src/nautilus-window-menus.c:621
+#: ../src/nemo-window-menus.c:621
 msgid "_About"
 msgstr "बारेमा"
 
 #. label, accelerator
-#: ../src/nautilus-window-menus.c:622
-msgid "Display credits for the creators of Nautilus"
+#: ../src/nemo-window-menus.c:622
+msgid "Display credits for the creators of Nemo"
 msgstr "नटलस सर्जकहरूका लागि श्रेय प्रदर्शन गर्नुहोस्"
 
 #. name, stock id
-#: ../src/nautilus-window-menus.c:625
+#: ../src/nemo-window-menus.c:625
 msgid "Zoom _In"
 msgstr "जुम बढाउनुहोस्"
 
 #. label, accelerator
-#: ../src/nautilus-window-menus.c:626 ../src/nautilus-zoom-control.c:96
+#: ../src/nemo-window-menus.c:626 ../src/nemo-zoom-control.c:96
 msgid "Show the contents in more detail"
 msgstr "अरू विस्तृत विवरणमा सामग्रीहरू देखाउनुहोस्"
 
 #. name, stock id
-#: ../src/nautilus-window-menus.c:637
+#: ../src/nemo-window-menus.c:637
 msgid "Zoom _Out"
 msgstr "जुम घटाउनुहोस्"
 
 #. label, accelerator
-#: ../src/nautilus-window-menus.c:638 ../src/nautilus-zoom-control.c:97
+#: ../src/nemo-window-menus.c:638 ../src/nemo-zoom-control.c:97
 msgid "Show the contents in less detail"
 msgstr "कम विवरणमा सामग्रीहरू देखाउनुहोस्"
 
 #. name, stock id
-#: ../src/nautilus-window-menus.c:645
+#: ../src/nemo-window-menus.c:645
 msgid "Normal Si_ze"
 msgstr "सामान्य साइज"
 
 #. label, accelerator
-#: ../src/nautilus-window-menus.c:646
+#: ../src/nemo-window-menus.c:646
 msgid "Show the contents at the normal size"
 msgstr "सामान्य साइजमा सामग्रीहरू देखाउनुहोस्"
 
 #. name, stock id
-#: ../src/nautilus-window-menus.c:649
+#: ../src/nemo-window-menus.c:649
 msgid "Connect to _Server..."
 msgstr "सर्भरमा जडान गर्नुहोस्..."
 
 #. label, accelerator
-#: ../src/nautilus-window-menus.c:650
+#: ../src/nemo-window-menus.c:650
 msgid "Connect to a remote computer or shared disk"
 msgstr "टाढाको कम्प्युटर वा साझेदारी गरिएको डिस्कमा जडान गर्नुहोस्"
 
 #. name, stock id
-#: ../src/nautilus-window-menus.c:653
+#: ../src/nemo-window-menus.c:653
 msgid "_Home Folder"
 msgstr "गृह फोल्डर"
 
 #. name, stock id
-#: ../src/nautilus-window-menus.c:657
+#: ../src/nemo-window-menus.c:657
 msgid "_Computer"
 msgstr "कम्प्युटर"
 
 #. name, stock id
-#: ../src/nautilus-window-menus.c:661
+#: ../src/nemo-window-menus.c:661
 msgid "_Network"
 msgstr "सञ्जाल"
 
 #. label, accelerator
-#: ../src/nautilus-window-menus.c:662 ../src/network-scheme.desktop.in.h:1
+#: ../src/nemo-window-menus.c:662 ../src/network-scheme.desktop.in.h:1
 msgid "Browse bookmarked and local network locations"
 msgstr "पुस्तकचिनो लगाइएको र स्थानीय सञ्जाल स्थानहरू ब्राउज गर्नुहोस्"
 
 #. name, stock id
-#: ../src/nautilus-window-menus.c:665
+#: ../src/nemo-window-menus.c:665
 msgid "T_emplates"
 msgstr "टेम्पलेटहरू"
 
 #. label, accelerator
-#: ../src/nautilus-window-menus.c:666
+#: ../src/nemo-window-menus.c:666
 msgid "Open your personal templates folder"
 msgstr "तपाईँको व्यक्तिगत टेम्पलेट फोल्डर खोल्नुहोस्"
 
 #. name, stock id
-#: ../src/nautilus-window-menus.c:669
+#: ../src/nemo-window-menus.c:669
 msgid "_Trash"
 msgstr "रद्दीटोकरी"
 
 #. label, accelerator
-#: ../src/nautilus-window-menus.c:670
+#: ../src/nemo-window-menus.c:670
 msgid "Open your personal trash folder"
 msgstr "तपाईँको व्यक्तिगत रद्दीटोकरी फोल्डर खोल्नुहोस्"
 
 #. name, stock id
-#: ../src/nautilus-window-menus.c:673
+#: ../src/nemo-window-menus.c:673
 msgid "CD/_DVD Creator"
 msgstr "सी डी/डी भी डी सर्जक"
 
 #. label, accelerator
-#: ../src/nautilus-window-menus.c:674
+#: ../src/nemo-window-menus.c:674
 msgid "Open a folder into which you can drag files to burn to a CD or DVD"
 msgstr "फोल्डर खोल्नुहोस् जहाँ तपाईँले सीडी वा डीभीडीमा बर्न गर्न फाइलहरू तान्न सक्नुहुन्छ"
 
-#: ../src/nautilus-window-menus.c:700
+#: ../src/nemo-window-menus.c:700
 msgid "_Up"
 msgstr "माथि"
 
-#: ../src/nautilus-window-menus.c:703
+#: ../src/nemo-window-menus.c:703
 msgid "_Home"
 msgstr "गृह"
 
-#: ../src/nautilus-zoom-control.c:84
+#: ../src/nemo-zoom-control.c:84
 msgid "Zoom In"
 msgstr "जुम बढाउनुहोस्"
 
-#: ../src/nautilus-zoom-control.c:85
+#: ../src/nemo-zoom-control.c:85
 msgid "Zoom Out"
 msgstr "जुम घटाउनुहोस्"
 
-#: ../src/nautilus-zoom-control.c:86
+#: ../src/nemo-zoom-control.c:86
 msgid "Zoom to Default"
 msgstr "पूर्वनिर्धारितमा जुम गर्नुहोस्"
 
-#: ../src/nautilus-zoom-control.c:98
+#: ../src/nemo-zoom-control.c:98
 msgid "Show in the default detail level"
 msgstr "पूर्वनिर्धारित विवरण स्तरमा देखाउनुहोस्"
 
-#: ../src/nautilus-zoom-control.c:888
+#: ../src/nemo-zoom-control.c:888
 msgid "Zoom"
 msgstr "जुम"
 
-#: ../src/nautilus-zoom-control.c:894
+#: ../src/nemo-zoom-control.c:894
 msgid "Set the zoom level of the current view"
 msgstr "हालको दृश्यको जुम तह सेट गर्नुहोस्"
 

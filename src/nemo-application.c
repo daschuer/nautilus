@@ -1,17 +1,17 @@
 /* -*- Mode: C; indent-tabs-mode: t; c-basic-offset: 8; tab-width: 8 -*- */
 /*
- * nautilus-application: main Nautilus application class.
+ * nemo-application: main Nemo application class.
  *
  * Copyright (C) 1999, 2000 Red Hat, Inc.
  * Copyright (C) 2000, 2001 Eazel, Inc.
  * Copyright (C) 2010, Cosimo Cecchi <cosimoc@gnome.org>
  *
- * Nautilus is free software; you can redistribute it and/or
+ * Nemo is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
  * published by the Free Software Foundation; either version 2 of the
  * License, or (at your option) any later version.
  *
- * Nautilus is distributed in the hope that it will be useful,
+ * Nemo is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
  * General Public License for more details.
@@ -28,42 +28,42 @@
 
 #include <config.h>
 
-#include "nautilus-application.h"
+#include "nemo-application.h"
 
 #if ENABLE_EMPTY_VIEW
-#include "nautilus-empty-view.h"
+#include "nemo-empty-view.h"
 #endif /* ENABLE_EMPTY_VIEW */
 
-#include "nautilus-desktop-icon-view.h"
-#include "nautilus-desktop-window.h"
-#include "nautilus-freedesktop-dbus.h"
-#include "nautilus-icon-view.h"
-#include "nautilus-image-properties-page.h"
-#include "nautilus-list-view.h"
-#include "nautilus-previewer.h"
-#include "nautilus-progress-ui-handler.h"
-#include "nautilus-self-check-functions.h"
-#include "nautilus-window.h"
-#include "nautilus-window-bookmarks.h"
-#include "nautilus-window-manage-views.h"
-#include "nautilus-window-private.h"
-#include "nautilus-window-slot.h"
+#include "nemo-desktop-icon-view.h"
+#include "nemo-desktop-window.h"
+#include "nemo-freedesktop-dbus.h"
+#include "nemo-icon-view.h"
+#include "nemo-image-properties-page.h"
+#include "nemo-list-view.h"
+#include "nemo-previewer.h"
+#include "nemo-progress-ui-handler.h"
+#include "nemo-self-check-functions.h"
+#include "nemo-window.h"
+#include "nemo-window-bookmarks.h"
+#include "nemo-window-manage-views.h"
+#include "nemo-window-private.h"
+#include "nemo-window-slot.h"
 
-#include <libnautilus-private/nautilus-dbus-manager.h>
-#include <libnautilus-private/nautilus-desktop-link-monitor.h>
-#include <libnautilus-private/nautilus-directory-private.h>
-#include <libnautilus-private/nautilus-file-utilities.h>
-#include <libnautilus-private/nautilus-file-operations.h>
-#include <libnautilus-private/nautilus-global-preferences.h>
-#include <libnautilus-private/nautilus-lib-self-check-functions.h>
-#include <libnautilus-private/nautilus-module.h>
-#include <libnautilus-private/nautilus-signaller.h>
-#include <libnautilus-private/nautilus-ui-utilities.h>
-#include <libnautilus-private/nautilus-undo-manager.h>
-#include <libnautilus-extension/nautilus-menu-provider.h>
+#include <libnemo-private/nemo-dbus-manager.h>
+#include <libnemo-private/nemo-desktop-link-monitor.h>
+#include <libnemo-private/nemo-directory-private.h>
+#include <libnemo-private/nemo-file-utilities.h>
+#include <libnemo-private/nemo-file-operations.h>
+#include <libnemo-private/nemo-global-preferences.h>
+#include <libnemo-private/nemo-lib-self-check-functions.h>
+#include <libnemo-private/nemo-module.h>
+#include <libnemo-private/nemo-signaller.h>
+#include <libnemo-private/nemo-ui-utilities.h>
+#include <libnemo-private/nemo-undo-manager.h>
+#include <libnemo-extension/nemo-menu-provider.h>
 
-#define DEBUG_FLAG NAUTILUS_DEBUG_APPLICATION
-#include <libnautilus-private/nautilus-debug.h>
+#define DEBUG_FLAG NEMO_DEBUG_APPLICATION
+#include <libnemo-private/nemo-debug.h>
 
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -77,18 +77,22 @@
 #include <gdk/gdkx.h>
 #include <gtk/gtk.h>
 
+#ifdef HAVE_UNITY
+#include "src/unity-bookmarks-handler.h"
+#endif
+
 /* Keep window from shrinking down ridiculously small; numbers are somewhat arbitrary */
 #define APPLICATION_WINDOW_MIN_WIDTH	300
 #define APPLICATION_WINDOW_MIN_HEIGHT	100
 
 #define START_STATE_CONFIG "start-state"
 
-#define NAUTILUS_ACCEL_MAP_SAVE_DELAY 30
+#define NEMO_ACCEL_MAP_SAVE_DELAY 30
 
-static NautilusApplication *singleton = NULL;
+static NemoApplication *singleton = NULL;
 
 /* Keeps track of all the desktop windows. */
-static GList *nautilus_application_desktop_windows;
+static GList *nemo_application_desktop_windows;
 
 /* The saving of the accelerator map was requested  */
 static gboolean save_of_accel_map_requested = FALSE;
@@ -96,35 +100,35 @@ static gboolean save_of_accel_map_requested = FALSE;
 static void     desktop_changed_callback          (gpointer                  user_data);
 static void     mount_removed_callback            (GVolumeMonitor            *monitor,
 						   GMount                    *mount,
-						   NautilusApplication       *application);
+						   NemoApplication       *application);
 static void     mount_added_callback              (GVolumeMonitor            *monitor,
 						   GMount                    *mount,
-						   NautilusApplication       *application);
+						   NemoApplication       *application);
 
-G_DEFINE_TYPE (NautilusApplication, nautilus_application, GTK_TYPE_APPLICATION);
+G_DEFINE_TYPE (NemoApplication, nemo_application, GTK_TYPE_APPLICATION);
 
-struct _NautilusApplicationPriv {
+struct _NemoApplicationPriv {
 	GVolumeMonitor *volume_monitor;
-	NautilusProgressUIHandler *progress_handler;
+	NemoProgressUIHandler *progress_handler;
 
 	gboolean no_desktop;
 	gchar *geometry;
 };
 
 static gboolean
-check_required_directories (NautilusApplication *application)
+check_required_directories (NemoApplication *application)
 {
 	char *user_directory;
 	char *desktop_directory;
 	GSList *directories;
 	gboolean ret;
 
-	g_assert (NAUTILUS_IS_APPLICATION (application));
+	g_assert (NEMO_IS_APPLICATION (application));
 
 	ret = TRUE;
 
-	user_directory = nautilus_get_user_directory ();
-	desktop_directory = nautilus_get_desktop_directory ();
+	user_directory = nemo_get_user_directory ();
+	desktop_directory = nemo_get_desktop_directory ();
 
 	directories = NULL;
 
@@ -154,15 +158,15 @@ check_required_directories (NautilusApplication *application)
 		}
 
 		if (failed_count == 1) {
-			error_string = g_strdup_printf (_("Nautilus could not create the required folder \"%s\"."),
+			error_string = g_strdup_printf (_("Nemo could not create the required folder \"%s\"."),
 							directories_as_string->str);
-			detail_string = _("Before running Nautilus, please create the following folder, or "
-					  "set permissions such that Nautilus can create it.");
+			detail_string = _("Before running Nemo, please create the following folder, or "
+					  "set permissions such that Nemo can create it.");
 		} else {
-			error_string = g_strdup_printf (_("Nautilus could not create the following required folders: "
+			error_string = g_strdup_printf (_("Nemo could not create the following required folders: "
 							  "%s."), directories_as_string->str);
-			detail_string = _("Before running Nautilus, please create these folders, or "
-					  "set permissions such that Nautilus can create them.");
+			detail_string = _("Before running Nemo, please create these folders, or "
+					  "set permissions such that Nemo can create them.");
 		}
 
 		dialog = eel_show_error_dialog (error_string, detail_string, NULL);
@@ -182,10 +186,10 @@ check_required_directories (NautilusApplication *application)
 }
 
 static void
-menu_provider_items_updated_handler (NautilusMenuProvider *provider, GtkWidget* parent_window, gpointer data)
+menu_provider_items_updated_handler (NemoMenuProvider *provider, GtkWidget* parent_window, gpointer data)
 {
 
-	g_signal_emit_by_name (nautilus_signaller_get_current (),
+	g_signal_emit_by_name (nemo_signaller_get_current (),
 			       "popup_menu_changed");
 }
 
@@ -195,17 +199,17 @@ menu_provider_init_callback (void)
         GList *providers;
         GList *l;
 
-        providers = nautilus_module_get_extensions_for_type (NAUTILUS_TYPE_MENU_PROVIDER);
+        providers = nemo_module_get_extensions_for_type (NEMO_TYPE_MENU_PROVIDER);
 
         for (l = providers; l != NULL; l = l->next) {
-                NautilusMenuProvider *provider = NAUTILUS_MENU_PROVIDER (l->data);
+                NemoMenuProvider *provider = NEMO_MENU_PROVIDER (l->data);
 
 		g_signal_connect_after (G_OBJECT (provider), "items_updated",
                            (GCallback)menu_provider_items_updated_handler,
                            NULL);
         }
 
-        nautilus_module_extension_list_free (providers);
+        nemo_module_extension_list_free (providers);
 }
 
 static void
@@ -225,7 +229,7 @@ mark_desktop_files_trusted (void)
 		goto out;
 	}
 
-	f = nautilus_get_desktop_location ();
+	f = nemo_get_desktop_location ();
 	e = g_file_enumerate_children (f,
 				       G_FILE_ATTRIBUTE_STANDARD_TYPE ","
 				       G_FILE_ATTRIBUTE_STANDARD_NAME ","
@@ -243,7 +247,7 @@ mark_desktop_files_trusted (void)
 		if (g_str_has_suffix (name, ".desktop") &&
 		    !g_file_info_get_attribute_boolean (info, G_FILE_ATTRIBUTE_ACCESS_CAN_EXECUTE)) {
 			c = g_file_get_child (f, name);
-			nautilus_file_mark_desktop_file_trusted (c,
+			nemo_file_mark_desktop_file_trusted (c,
 								 NULL, FALSE,
 								 NULL, NULL);
 			g_object_unref (c);
@@ -262,9 +266,9 @@ mark_desktop_files_trusted (void)
 }
 
 static void
-do_upgrades_once (NautilusApplication *self)
+do_upgrades_once (NemoApplication *self)
 {
-	char *metafile_dir, *updated, *nautilus_dir, *xdg_dir;
+	char *metafile_dir, *updated, *nemo_dir, *xdg_dir;
 	const gchar *message;
 	int fd, res;
 
@@ -273,11 +277,11 @@ do_upgrades_once (NautilusApplication *self)
 	}
 
 	metafile_dir = g_build_filename (g_get_home_dir (),
-					 ".nautilus/metafiles", NULL);
+					 ".nemo/metafiles", NULL);
 	if (g_file_test (metafile_dir, G_FILE_TEST_IS_DIR)) {
 		updated = g_build_filename (metafile_dir, "migrated-to-gvfs", NULL);
 		if (!g_file_test (updated, G_FILE_TEST_EXISTS)) {
-			g_spawn_command_line_async (LIBEXECDIR"/nautilus-convert-metadata --quiet", NULL);
+			g_spawn_command_line_async (LIBEXECDIR"/nemo-convert-metadata --quiet", NULL);
 			fd = g_creat (updated, 0600);
 			if (fd != -1) {
 				close (fd);
@@ -287,19 +291,19 @@ do_upgrades_once (NautilusApplication *self)
 	}
 	g_free (metafile_dir);
 
-	nautilus_dir = g_build_filename (g_get_home_dir (),
-					 ".nautilus", NULL);
-	xdg_dir = nautilus_get_user_directory ();
-	if (g_file_test (nautilus_dir, G_FILE_TEST_IS_DIR)) {
+	nemo_dir = g_build_filename (g_get_home_dir (),
+					 ".nemo", NULL);
+	xdg_dir = nemo_get_user_directory ();
+	if (g_file_test (nemo_dir, G_FILE_TEST_IS_DIR)) {
 		/* test if we already attempted to migrate first */
-		updated = g_build_filename (nautilus_dir, "DEPRECATED-DIRECTORY", NULL);
-		message = _("Nautilus 3.0 deprecated this directory and tried migrating "
-			    "this configuration to ~/.config/nautilus");
+		updated = g_build_filename (nemo_dir, "DEPRECATED-DIRECTORY", NULL);
+		message = _("Nemo 3.0 deprecated this directory and tried migrating "
+			    "this configuration to ~/.config/nemo");
 		if (!g_file_test (updated, G_FILE_TEST_EXISTS)) {
 			/* rename() works fine if the destination directory is
 			 * empty.
 			 */
-			res = g_rename (nautilus_dir, xdg_dir);
+			res = g_rename (nemo_dir, xdg_dir);
 
 			if (res == -1) {
 				fd = g_creat (updated, 0600);
@@ -313,7 +317,7 @@ do_upgrades_once (NautilusApplication *self)
 		g_free (updated);
 	}
 
-	g_free (nautilus_dir);
+	g_free (nemo_dir);
 	g_free (xdg_dir);
 }
 
@@ -373,21 +377,21 @@ desktop_unrealize_cb (GtkWidget        *widget,
 static gboolean
 selection_clear_event_cb (GtkWidget	        *widget,
 			  GdkEventSelection     *event,
-			  NautilusDesktopWindow *window)
+			  NemoDesktopWindow *window)
 {
 	gtk_widget_destroy (GTK_WIDGET (window));
 	
-	nautilus_application_desktop_windows =
-		g_list_remove (nautilus_application_desktop_windows, window);
+	nemo_application_desktop_windows =
+		g_list_remove (nemo_application_desktop_windows, window);
 
 	return TRUE;
 }
 
 static void
-nautilus_application_create_desktop_windows (NautilusApplication *application)
+nemo_application_create_desktop_windows (NemoApplication *application)
 {
 	GdkDisplay *display;
-	NautilusDesktopWindow *window;
+	NemoDesktopWindow *window;
 	GtkWidget *selection_widget;
 	int screens, i;
 
@@ -400,7 +404,7 @@ nautilus_application_create_desktop_windows (NautilusApplication *application)
 		
 		selection_widget = get_desktop_manager_selection (display, i);
 		if (selection_widget != NULL) {
-			window = nautilus_desktop_window_new (gdk_display_get_screen (display, i));
+			window = nemo_desktop_window_new (gdk_display_get_screen (display, i));
 
 			g_signal_connect (selection_widget, "selection_clear_event",
 					  G_CALLBACK (selection_clear_event_cb), window);
@@ -408,14 +412,14 @@ nautilus_application_create_desktop_windows (NautilusApplication *application)
 			g_signal_connect (window, "unrealize",
 					  G_CALLBACK (desktop_unrealize_cb), selection_widget);
 			
-			/* We realize it immediately so that the NAUTILUS_DESKTOP_WINDOW_ID
+			/* We realize it immediately so that the NEMO_DESKTOP_WINDOW_ID
 			   property is set so gnome-settings-daemon doesn't try to set the
 			   background. And we do a gdk_flush() to be sure X gets it. */
 			gtk_widget_realize (GTK_WIDGET (window));
 			gdk_flush ();
 
-			nautilus_application_desktop_windows =
-				g_list_prepend (nautilus_application_desktop_windows, window);
+			nemo_application_desktop_windows =
+				g_list_prepend (nemo_application_desktop_windows, window);
 
 			gtk_application_add_window (GTK_APPLICATION (application),
 						    GTK_WINDOW (window));
@@ -424,68 +428,68 @@ nautilus_application_create_desktop_windows (NautilusApplication *application)
 }
 
 static void
-nautilus_application_open_desktop (NautilusApplication *application)
+nemo_application_open_desktop (NemoApplication *application)
 {
-	if (nautilus_application_desktop_windows == NULL) {
-		nautilus_application_create_desktop_windows (application);
+	if (nemo_application_desktop_windows == NULL) {
+		nemo_application_create_desktop_windows (application);
 	}
 }
 
 static void
-nautilus_application_close_desktop (void)
+nemo_application_close_desktop (void)
 {
-	if (nautilus_application_desktop_windows != NULL) {
-		g_list_foreach (nautilus_application_desktop_windows,
+	if (nemo_application_desktop_windows != NULL) {
+		g_list_foreach (nemo_application_desktop_windows,
 				(GFunc) gtk_widget_destroy, NULL);
-		g_list_free (nautilus_application_desktop_windows);
-		nautilus_application_desktop_windows = NULL;
+		g_list_free (nemo_application_desktop_windows);
+		nemo_application_desktop_windows = NULL;
 	}
 }
 
 void
-nautilus_application_close_all_windows (NautilusApplication *self)
+nemo_application_close_all_windows (NemoApplication *self)
 {
 	GList *list_copy;
 	GList *l;
 	
 	list_copy = g_list_copy (gtk_application_get_windows (GTK_APPLICATION (self)));
 	for (l = list_copy; l != NULL; l = l->next) {
-		NautilusWindow *window;
+		NemoWindow *window;
 		
-		window = NAUTILUS_WINDOW (l->data);
-		nautilus_window_close (window);
+		window = NEMO_WINDOW (l->data);
+		nemo_window_close (window);
 	}
 	g_list_free (list_copy);
 }
 
 static gboolean
-nautilus_window_delete_event_callback (GtkWidget *widget,
+nemo_window_delete_event_callback (GtkWidget *widget,
 				       GdkEvent *event,
 				       gpointer user_data)
 {
-	NautilusWindow *window;
+	NemoWindow *window;
 
-	window = NAUTILUS_WINDOW (widget);
-	nautilus_window_close (window);
+	window = NEMO_WINDOW (widget);
+	nemo_window_close (window);
 
 	return TRUE;
 }				       
 
 
-static NautilusWindow *
-create_window (NautilusApplication *application,
+static NemoWindow *
+create_window (NemoApplication *application,
 	       GdkScreen *screen)
 {
-	NautilusWindow *window;
+	NemoWindow *window;
 	
-	g_return_val_if_fail (NAUTILUS_IS_APPLICATION (application), NULL);
+	g_return_val_if_fail (NEMO_IS_APPLICATION (application), NULL);
 	
-	window = g_object_new (NAUTILUS_TYPE_WINDOW,
+	window = g_object_new (NEMO_TYPE_WINDOW,
 			       "screen", screen,
 			       NULL);
 
 	g_signal_connect_data (window, "delete_event",
-			       G_CALLBACK (nautilus_window_delete_event_callback), NULL, NULL,
+			       G_CALLBACK (nemo_window_delete_event_callback), NULL, NULL,
 			       G_CONNECT_AFTER);
 
 	gtk_application_add_window (GTK_APPLICATION (application),
@@ -500,8 +504,8 @@ create_window (NautilusApplication *application,
 }
 
 static gboolean
-another_navigation_window_already_showing (NautilusApplication *application,
-					   NautilusWindow *the_window)
+another_navigation_window_already_showing (NemoApplication *application,
+					   NemoWindow *the_window)
 {
 	GList *list, *item;
 	
@@ -515,20 +519,20 @@ another_navigation_window_already_showing (NautilusApplication *application,
 	return FALSE;
 }
 
-NautilusWindow *
-nautilus_application_create_window (NautilusApplication *application,
+NemoWindow *
+nemo_application_create_window (NemoApplication *application,
 				    GdkScreen           *screen)
 {
-	NautilusWindow *window;
+	NemoWindow *window;
 	char *geometry_string;
 	gboolean maximized;
 
-	g_return_val_if_fail (NAUTILUS_IS_APPLICATION (application), NULL);
+	g_return_val_if_fail (NEMO_IS_APPLICATION (application), NULL);
 
 	window = create_window (application, screen);
 
 	maximized = g_settings_get_boolean
-		(nautilus_window_state, NAUTILUS_WINDOW_STATE_MAXIMIZED);
+		(nemo_window_state, NEMO_WINDOW_STATE_MAXIMIZED);
 	if (maximized) {
 		gtk_window_maximize (GTK_WINDOW (window));
 	} else {
@@ -536,7 +540,7 @@ nautilus_application_create_window (NautilusApplication *application,
 	}
 
 	geometry_string = g_settings_get_string
-		(nautilus_window_state, NAUTILUS_WINDOW_STATE_GEOMETRY);
+		(nemo_window_state, NEMO_WINDOW_STATE_GEOMETRY);
 	if (geometry_string != NULL &&
 	    geometry_string[0] != 0) {
 		/* Ignore saved window position if a window with the same
@@ -546,8 +550,8 @@ nautilus_application_create_window (NautilusApplication *application,
 		eel_gtk_window_set_initial_geometry_from_string 
 			(GTK_WINDOW (window), 
 			 geometry_string,
-			 NAUTILUS_WINDOW_MIN_WIDTH,
-			 NAUTILUS_WINDOW_MIN_HEIGHT,
+			 NEMO_WINDOW_MIN_WIDTH,
+			 NEMO_WINDOW_MIN_HEIGHT,
 			 another_navigation_window_already_showing (application, window));
 	}
 	g_free (geometry_string);
@@ -561,20 +565,20 @@ nautilus_application_create_window (NautilusApplication *application,
 static void
 desktop_changed_callback (gpointer user_data)
 {
-	NautilusApplication *application;
+	NemoApplication *application;
 
-	application = NAUTILUS_APPLICATION (user_data);
-	if (g_settings_get_boolean (gnome_background_preferences, NAUTILUS_PREFERENCES_SHOW_DESKTOP)) {
-		nautilus_application_open_desktop (application);
+	application = NEMO_APPLICATION (user_data);
+	if (g_settings_get_boolean (gnome_background_preferences, NEMO_PREFERENCES_SHOW_DESKTOP)) {
+		nemo_application_open_desktop (application);
 	} else {
-		nautilus_application_close_desktop ();
+		nemo_application_close_desktop ();
 	}
 }
 
 static gboolean
-window_can_be_closed (NautilusWindow *window)
+window_can_be_closed (NemoWindow *window)
 {
-	if (!NAUTILUS_IS_DESKTOP_WINDOW (window)) {
+	if (!NEMO_IS_DESKTOP_WINDOW (window)) {
 		return TRUE;
 	}
 	
@@ -584,9 +588,9 @@ window_can_be_closed (NautilusWindow *window)
 static void
 mount_added_callback (GVolumeMonitor *monitor,
 		      GMount *mount,
-		      NautilusApplication *application)
+		      NemoApplication *application)
 {
-	NautilusDirectory *directory;
+	NemoDirectory *directory;
 	GFile *root;
 	gchar *uri;
 		
@@ -596,11 +600,11 @@ mount_added_callback (GVolumeMonitor *monitor,
 	DEBUG ("Added mount at uri %s", uri);
 	g_free (uri);
 	
-	directory = nautilus_directory_get_existing (root);
+	directory = nemo_directory_get_existing (root);
 	g_object_unref (root);
 	if (directory != NULL) {
-		nautilus_directory_force_reload (directory);
-		nautilus_directory_unref (directory);
+		nemo_directory_force_reload (directory);
+		nemo_directory_unref (directory);
 	}
 }
 
@@ -612,12 +616,12 @@ mount_added_callback (GVolumeMonitor *monitor,
 static void
 mount_removed_callback (GVolumeMonitor *monitor,
 			GMount *mount,
-			NautilusApplication *application)
+			NemoApplication *application)
 {
 	GList *window_list, *node, *close_list;
-	NautilusWindow *window;
-	NautilusWindowSlot *slot;
-	NautilusWindowSlot *force_no_close_slot;
+	NemoWindow *window;
+	NemoWindowSlot *slot;
+	NemoWindowSlot *force_no_close_slot;
 	GFile *root, *computer;
 	gchar *uri;
 	gint n_slots;
@@ -637,18 +641,18 @@ mount_removed_callback (GVolumeMonitor *monitor,
 
 	/* Construct a list of windows to be closed. Do not add the non-closable windows to the list. */
 	for (node = window_list; node != NULL; node = node->next) {
-		window = NAUTILUS_WINDOW (node->data);
+		window = NEMO_WINDOW (node->data);
 		if (window != NULL && window_can_be_closed (window)) {
 			GList *l;
 			GList *lp;
 
 			for (lp = window->details->panes; lp != NULL; lp = lp->next) {
-				NautilusWindowPane *pane;
-				pane = (NautilusWindowPane*) lp->data;
+				NemoWindowPane *pane;
+				pane = (NemoWindowPane*) lp->data;
 				for (l = pane->slots; l != NULL; l = l->next) {
 					slot = l->data;
 					n_slots++;
-					if (nautilus_window_slot_should_close_with_mount (slot, mount)) {
+					if (nemo_window_slot_should_close_with_mount (slot, mount)) {
 						close_list = g_list_prepend (close_list, slot);
 					}
 				} /* for all slots */
@@ -656,7 +660,7 @@ mount_removed_callback (GVolumeMonitor *monitor,
 		}
 	}
 
-	if ((nautilus_application_desktop_windows == NULL) &&
+	if ((nemo_application_desktop_windows == NULL) &&
 	    (close_list != NULL) &&
 	    (g_list_length (close_list) == n_slots)) {
 		/* We are trying to close all open slots. Keep one navigation slot open. */
@@ -668,10 +672,10 @@ mount_removed_callback (GVolumeMonitor *monitor,
 		slot = node->data;
 
 		if (slot != force_no_close_slot) {
-			nautilus_window_pane_slot_close (slot->pane, slot);
+			nemo_window_pane_slot_close (slot->pane, slot);
 		} else {
 			computer = g_file_new_for_path (g_get_home_dir ());
-			nautilus_window_slot_go_to (slot, computer, FALSE);
+			nemo_window_slot_go_to (slot, computer, FALSE);
 			g_object_unref(computer);
 		}
 	}
@@ -680,18 +684,18 @@ mount_removed_callback (GVolumeMonitor *monitor,
 }
 
 static void
-open_window (NautilusApplication *application,
+open_window (NemoApplication *application,
 	     GFile *location, GdkScreen *screen, const char *geometry)
 {
-	NautilusWindow *window;
+	NemoWindow *window;
 	gchar *uri;
 
 	uri = g_file_get_uri (location);
 	DEBUG ("Opening new window at uri %s", uri);
 
-	window = nautilus_application_create_window (application,
+	window = nemo_application_create_window (application,
 						     screen);
-	nautilus_window_go_to (window, location);
+	nemo_window_go_to (window, location);
 
 	if (geometry != NULL && !gtk_widget_get_visible (GTK_WIDGET (window))) {
 		/* never maximize windows opened from shell if a
@@ -709,7 +713,7 @@ open_window (NautilusApplication *application,
 }
 
 static void
-open_windows (NautilusApplication *application,
+open_windows (NemoApplication *application,
 	      GFile **files,
 	      gint n_files,
 	      GdkScreen *screen,
@@ -729,38 +733,38 @@ open_windows (NautilusApplication *application,
 }
 
 void
-nautilus_application_open_location (NautilusApplication *application,
+nemo_application_open_location (NemoApplication *application,
 				    GFile *location,
 				    GFile *selection,
 				    const char *startup_id)
 {
-	NautilusWindow *window;
+	NemoWindow *window;
 	GList *sel_list = NULL;
 
-	window = nautilus_application_create_window (application, gdk_screen_get_default ());
+	window = nemo_application_create_window (application, gdk_screen_get_default ());
 	gtk_window_set_startup_id (GTK_WINDOW (window), startup_id);
 
 	if (selection != NULL) {
-		sel_list = g_list_prepend (sel_list, nautilus_file_get (selection));
+		sel_list = g_list_prepend (sel_list, nemo_file_get (selection));
 	}
 
-	nautilus_window_slot_open_location (nautilus_window_get_active_slot (window),
+	nemo_window_slot_open_location (nemo_window_get_active_slot (window),
 					    location,
 					    0,
 					    sel_list);
 
 	if (sel_list != NULL) {
-		nautilus_file_list_free (sel_list);
+		nemo_file_list_free (sel_list);
 	}
 }
 
 static void
-nautilus_application_open (GApplication *app,
+nemo_application_open (GApplication *app,
 			   GFile **files,
 			   gint n_files,
 			   const gchar *hint)
 {
-	NautilusApplication *self = NAUTILUS_APPLICATION (app);
+	NemoApplication *self = NEMO_APPLICATION (app);
 
 	DEBUG ("Open called on the GApplication instance; %d files", n_files);
 
@@ -770,7 +774,7 @@ nautilus_application_open (GApplication *app,
 }
 
 static GObject *
-nautilus_application_constructor (GType type,
+nemo_application_constructor (GType type,
 				  guint n_construct_params,
 				  GObjectConstructParam *construct_params)
 {
@@ -780,42 +784,42 @@ nautilus_application_constructor (GType type,
                 return G_OBJECT (singleton);
         }
 
-        retval = G_OBJECT_CLASS (nautilus_application_parent_class)->constructor
+        retval = G_OBJECT_CLASS (nemo_application_parent_class)->constructor
                 (type, n_construct_params, construct_params);
 
-        singleton = NAUTILUS_APPLICATION (retval);
+        singleton = NEMO_APPLICATION (retval);
         g_object_add_weak_pointer (retval, (gpointer) &singleton);
 
         return retval;
 }
 
 static void
-nautilus_application_init (NautilusApplication *application)
+nemo_application_init (NemoApplication *application)
 {
 	GSimpleAction *action;
 
 	application->priv =
-		G_TYPE_INSTANCE_GET_PRIVATE (application, NAUTILUS_TYPE_APPLICATION,
-					     NautilusApplicationPriv);
+		G_TYPE_INSTANCE_GET_PRIVATE (application, NEMO_TYPE_APPLICATION,
+					     NemoApplicationPriv);
 
 	action = g_simple_action_new ("quit", NULL);
 
         g_action_map_add_action (G_ACTION_MAP (application), G_ACTION (action));
 
 	g_signal_connect_swapped (action, "activate",
-				  G_CALLBACK (nautilus_application_quit), application);
+				  G_CALLBACK (nemo_application_quit), application);
 
 	g_object_unref (action);
 }
 
 static void
-nautilus_application_finalize (GObject *object)
+nemo_application_finalize (GObject *object)
 {
-	NautilusApplication *application;
+	NemoApplication *application;
 
-	application = NAUTILUS_APPLICATION (object);
+	application = NEMO_APPLICATION (object);
 
-	nautilus_bookmarks_exiting ();
+	nemo_bookmarks_exiting ();
 
 	g_clear_object (&application->undo_manager);
 	g_clear_object (&application->priv->volume_monitor);
@@ -823,15 +827,15 @@ nautilus_application_finalize (GObject *object)
 
 	g_free (application->priv->geometry);
 
-	nautilus_dbus_manager_stop ();
-	nautilus_freedesktop_dbus_stop ();
+	nemo_dbus_manager_stop ();
+	nemo_freedesktop_dbus_stop ();
 	notify_uninit ();
 
-        G_OBJECT_CLASS (nautilus_application_parent_class)->finalize (object);
+        G_OBJECT_CLASS (nemo_application_parent_class)->finalize (object);
 }
 
 static gboolean
-do_cmdline_sanity_checks (NautilusApplication *self,
+do_cmdline_sanity_checks (NemoApplication *self,
 			  gboolean perform_self_check,
 			  gboolean version,
 			  gboolean kill_shell,
@@ -867,15 +871,15 @@ do_cmdline_sanity_checks (NautilusApplication *self,
 static void
 do_perform_self_checks (gint *exit_status)
 {
-#ifndef NAUTILUS_OMIT_SELF_CHECK
-	/* Run the checks (each twice) for nautilus and libnautilus-private. */
+#ifndef NEMO_OMIT_SELF_CHECK
+	/* Run the checks (each twice) for nemo and libnemo-private. */
 
-	nautilus_run_self_checks ();
-	nautilus_run_lib_self_checks ();
+	nemo_run_self_checks ();
+	nemo_run_lib_self_checks ();
 	eel_exit_if_self_checks_failed ();
 
-	nautilus_run_self_checks ();
-	nautilus_run_lib_self_checks ();
+	nemo_run_self_checks ();
+	nemo_run_lib_self_checks ();
 	eel_exit_if_self_checks_failed ();
 #endif
 
@@ -883,7 +887,7 @@ do_perform_self_checks (gint *exit_status)
 }
 
 void
-nautilus_application_quit (NautilusApplication *self)
+nemo_application_quit (NemoApplication *self)
 {
 	GApplication *app = G_APPLICATION (self);
 	GList *windows;
@@ -893,7 +897,7 @@ nautilus_application_quit (NautilusApplication *self)
 }
 
 static gboolean
-nautilus_application_local_command_line (GApplication *application,
+nemo_application_local_command_line (GApplication *application,
 					 gchar ***arguments,
 					 gint *exit_status)
 {
@@ -903,10 +907,10 @@ nautilus_application_local_command_line (GApplication *application,
 	gboolean kill_shell = FALSE;
 	gboolean no_default_window = FALSE;
 	gchar **remaining = NULL;
-	NautilusApplication *self = NAUTILUS_APPLICATION (application);
+	NemoApplication *self = NEMO_APPLICATION (application);
 
 	const GOptionEntry options[] = {
-#ifndef NAUTILUS_OMIT_SELF_CHECK
+#ifndef NEMO_OMIT_SELF_CHECK
 		{ "check", 'c', 0, G_OPTION_ARG_NONE, &perform_self_check, 
 		  N_("Perform a quick set of self-check tests."), NULL },
 #endif
@@ -922,7 +926,7 @@ nautilus_application_local_command_line (GApplication *application,
 		{ "no-desktop", '\0', 0, G_OPTION_ARG_NONE, &self->priv->no_desktop,
 		  N_("Do not manage the desktop (ignore the preference set in the preferences dialog)."), NULL },
 		{ "quit", 'q', 0, G_OPTION_ARG_NONE, &kill_shell, 
-		  N_("Quit Nautilus."), NULL },
+		  N_("Quit Nemo."), NULL },
 		{ G_OPTION_REMAINING, 0, 0, G_OPTION_ARG_STRING_ARRAY, &remaining, NULL,  N_("[URI...]") },
 
 		{ NULL }
@@ -950,7 +954,7 @@ nautilus_application_local_command_line (GApplication *application,
 	}
 
 	if (version) {
-		g_print ("GNOME nautilus " PACKAGE_VERSION "\n");
+		g_print ("GNOME nemo " PACKAGE_VERSION "\n");
 		goto out;
 	}
 
@@ -1040,37 +1044,37 @@ init_icons_and_styles (void)
 {
 	/* initialize search path for custom icons */
 	gtk_icon_theme_append_search_path (gtk_icon_theme_get_default (),
-					   NAUTILUS_DATADIR G_DIR_SEPARATOR_S "icons");
+					   NEMO_DATADIR G_DIR_SEPARATOR_S "icons");
 }
 
 static void
-init_desktop (NautilusApplication *self)
+init_desktop (NemoApplication *self)
 {
 	/* Initialize the desktop link monitor singleton */
-	nautilus_desktop_link_monitor_get ();
+	nemo_desktop_link_monitor_get ();
 
 	if (!self->priv->no_desktop &&
 	    !g_settings_get_boolean (gnome_background_preferences,
-				     NAUTILUS_PREFERENCES_SHOW_DESKTOP)) {
+				     NEMO_PREFERENCES_SHOW_DESKTOP)) {
 		self->priv->no_desktop = TRUE;
 	}
 
 	if (!self->priv->no_desktop) {
-		nautilus_application_open_desktop (self);
+		nemo_application_open_desktop (self);
 	}
 
 	/* Monitor the preference to show or hide the desktop */
-	g_signal_connect_swapped (gnome_background_preferences, "changed::" NAUTILUS_PREFERENCES_SHOW_DESKTOP,
+	g_signal_connect_swapped (gnome_background_preferences, "changed::" NEMO_PREFERENCES_SHOW_DESKTOP,
 				  G_CALLBACK (desktop_changed_callback),
 				  self);
 }
 
 static gboolean 
-nautilus_application_save_accel_map (gpointer data)
+nemo_application_save_accel_map (gpointer data)
 {
 	if (save_of_accel_map_requested) {
 		char *accel_map_filename;
-	 	accel_map_filename = nautilus_get_accel_map_file ();
+	 	accel_map_filename = nemo_get_accel_map_file ();
 	 	if (accel_map_filename) {
 	 		gtk_accel_map_save (accel_map_filename);
 	 		g_free (accel_map_filename);
@@ -1088,8 +1092,8 @@ queue_accel_map_save_callback (GtkAccelMap *object, gchar *accel_path,
 {
 	if (!save_of_accel_map_requested) {
 		save_of_accel_map_requested = TRUE;
-		g_timeout_add_seconds (NAUTILUS_ACCEL_MAP_SAVE_DELAY, 
-				nautilus_application_save_accel_map, NULL);
+		g_timeout_add_seconds (NEMO_ACCEL_MAP_SAVE_DELAY, 
+				nemo_application_save_accel_map, NULL);
 	}
 }
 
@@ -1099,7 +1103,7 @@ init_gtk_accels (void)
 	char *accel_map_filename;
 
 	/* load accelerator map, and register save callback */
-	accel_map_filename = nautilus_get_accel_map_file ();
+	accel_map_filename = nemo_get_accel_map_file ();
 	if (accel_map_filename) {
 		gtk_accel_map_load (accel_map_filename);
 		g_free (accel_map_filename);
@@ -1110,53 +1114,53 @@ init_gtk_accels (void)
 }
 
 static void
-nautilus_application_startup (GApplication *app)
+nemo_application_startup (GApplication *app)
 {
-	NautilusApplication *self = NAUTILUS_APPLICATION (app);
+	NemoApplication *self = NEMO_APPLICATION (app);
 
 	/* chain up to the GTK+ implementation early, so gtk_init()
 	 * is called for us.
 	 */
-	G_APPLICATION_CLASS (nautilus_application_parent_class)->startup (app);
+	G_APPLICATION_CLASS (nemo_application_parent_class)->startup (app);
 
 	/* initialize the previewer singleton */
-	nautilus_previewer_get_singleton ();
+	nemo_previewer_get_singleton ();
 
 	/* create an undo manager */
-	self->undo_manager = nautilus_undo_manager_new ();
+	self->undo_manager = nemo_undo_manager_new ();
 
 	/* create DBus manager */
-	nautilus_dbus_manager_start (app);
-	nautilus_freedesktop_dbus_start (self);
+	nemo_dbus_manager_start (app);
+	nemo_freedesktop_dbus_start (self);
 
 	/* initialize preferences and create the global GSettings objects */
-	nautilus_global_preferences_init ();
+	nemo_global_preferences_init ();
 
 	/* register views */
-	nautilus_icon_view_register ();
-	nautilus_desktop_icon_view_register ();
-	nautilus_list_view_register ();
-	nautilus_icon_view_compact_register ();
+	nemo_icon_view_register ();
+	nemo_desktop_icon_view_register ();
+	nemo_list_view_register ();
+	nemo_icon_view_compact_register ();
 #if ENABLE_EMPTY_VIEW
-	nautilus_empty_view_register ();
+	nemo_empty_view_register ();
 #endif
 
 	/* register property pages */
-	nautilus_image_properties_page_register ();
+	nemo_image_properties_page_register ();
 
 	/* initialize theming */
 	init_icons_and_styles ();
 	init_gtk_accels ();
 	
-	/* initialize nautilus modules */
-	nautilus_module_setup ();
+	/* initialize nemo modules */
+	nemo_module_setup ();
 
 	/* attach menu-provider module callback */
 	menu_provider_init_callback ();
 	
 	/* Initialize the UI handler singleton for file operations */
 	notify_init (GETTEXT_PACKAGE);
-	self->priv->progress_handler = nautilus_progress_ui_handler_new ();
+	self->priv->progress_handler = nemo_progress_ui_handler_new ();
 
 	/* Watch for unmounts so we can close open windows */
 	/* TODO-gio: This should be using the UNMOUNTED feature of GFileMonitor instead */
@@ -1166,70 +1170,74 @@ nautilus_application_startup (GApplication *app)
 	g_signal_connect_object (self->priv->volume_monitor, "mount_added",
 				 G_CALLBACK (mount_added_callback), self, 0);
 
-	/* Check the user's ~/.nautilus directories and post warnings
+	/* Check the user's ~/.nemo directories and post warnings
 	 * if there are problems.
 	 */
 	check_required_directories (self);
 	init_desktop (self);
 
 	do_upgrades_once (self);
+
+#ifdef HAVE_UNITY
+    unity_bookmarks_handler_initialize ();
+#endif
 }
 
 static void
-nautilus_application_quit_mainloop (GApplication *app)
+nemo_application_quit_mainloop (GApplication *app)
 {
 	DEBUG ("Quitting mainloop");
 
-	nautilus_icon_info_clear_caches ();
- 	nautilus_application_save_accel_map (NULL);
+	nemo_icon_info_clear_caches ();
+ 	nemo_application_save_accel_map (NULL);
 
-	G_APPLICATION_CLASS (nautilus_application_parent_class)->quit_mainloop (app);
+	G_APPLICATION_CLASS (nemo_application_parent_class)->quit_mainloop (app);
 }
 
 static void
-nautilus_application_window_removed (GtkApplication *app,
+nemo_application_window_removed (GtkApplication *app,
 				     GtkWindow *window)
 {
-	NautilusPreviewer *previewer;
+	NemoPreviewer *previewer;
 
 	/* chain to parent */
-	GTK_APPLICATION_CLASS (nautilus_application_parent_class)->window_removed (app, window);
+	GTK_APPLICATION_CLASS (nemo_application_parent_class)->window_removed (app, window);
 
 	/* if this was the last window, close the previewer */
 	if (g_list_length (gtk_application_get_windows (app)) == 0) {
-		previewer = nautilus_previewer_get_singleton ();
-		nautilus_previewer_call_close (previewer);
+		previewer = nemo_previewer_get_singleton ();
+		nemo_previewer_call_close (previewer);
 	}
 }
 
 static void
-nautilus_application_class_init (NautilusApplicationClass *class)
+nemo_application_class_init (NemoApplicationClass *class)
 {
         GObjectClass *object_class;
 	GApplicationClass *application_class;
 	GtkApplicationClass *gtkapp_class;
 
         object_class = G_OBJECT_CLASS (class);
-	object_class->constructor = nautilus_application_constructor;
-        object_class->finalize = nautilus_application_finalize;
+	object_class->constructor = nemo_application_constructor;
+        object_class->finalize = nemo_application_finalize;
 
 	application_class = G_APPLICATION_CLASS (class);
-	application_class->startup = nautilus_application_startup;
-	application_class->quit_mainloop = nautilus_application_quit_mainloop;
-	application_class->open = nautilus_application_open;
-	application_class->local_command_line = nautilus_application_local_command_line;
+	application_class->startup = nemo_application_startup;
+	application_class->quit_mainloop = nemo_application_quit_mainloop;
+	application_class->open = nemo_application_open;
+	application_class->local_command_line = nemo_application_local_command_line;
 
 	gtkapp_class = GTK_APPLICATION_CLASS (class);
-	gtkapp_class->window_removed = nautilus_application_window_removed;
+	gtkapp_class->window_removed = nemo_application_window_removed;
 
-	g_type_class_add_private (class, sizeof (NautilusApplicationPriv));
+	g_type_class_add_private (class, sizeof (NemoApplicationPriv));
 }
 
-NautilusApplication *
-nautilus_application_get_singleton (void)
+NemoApplication *
+nemo_application_get_singleton (void)
 {
-	return g_object_new (NAUTILUS_TYPE_APPLICATION,
-			     "application-id", "org.gnome.NautilusApplication",
+	return g_object_new (NEMO_TYPE_APPLICATION,
+			     "application-id", "org.gnome.NemoApplication",
 			     "flags", G_APPLICATION_HANDLES_OPEN,
 			     NULL);
 }

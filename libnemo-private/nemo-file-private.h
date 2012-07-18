@@ -1,6 +1,6 @@
 /* -*- Mode: C; indent-tabs-mode: t; c-basic-offset: 8; tab-width: 8 -*-
 
-   nautilus-file-private.h:
+   nemo-file-private.h:
  
    Copyright (C) 1999, 2000, 2001 Eazel, Inc.
   
@@ -22,25 +22,25 @@
    Author: Darin Adler <darin@bentspoon.com>
 */
 
-#ifndef NAUTILUS_FILE_PRIVATE_H
-#define NAUTILUS_FILE_PRIVATE_H
+#ifndef NEMO_FILE_PRIVATE_H
+#define NEMO_FILE_PRIVATE_H
 
-#include <libnautilus-private/nautilus-directory.h>
-#include <libnautilus-private/nautilus-file.h>
-#include <libnautilus-private/nautilus-monitor.h>
-#include <libnautilus-private/nautilus-file-undo-operations.h>
+#include <libnemo-private/nemo-directory.h>
+#include <libnemo-private/nemo-file.h>
+#include <libnemo-private/nemo-monitor.h>
+#include <libnemo-private/nemo-file-undo-operations.h>
 #include <eel/eel-glib-extensions.h>
 #include <eel/eel-string.h>
 
-#define NAUTILUS_FILE_LARGE_TOP_LEFT_TEXT_MAXIMUM_CHARACTERS_PER_LINE 80
-#define NAUTILUS_FILE_LARGE_TOP_LEFT_TEXT_MAXIMUM_LINES               24
-#define NAUTILUS_FILE_LARGE_TOP_LEFT_TEXT_MAXIMUM_BYTES               10000
+#define NEMO_FILE_LARGE_TOP_LEFT_TEXT_MAXIMUM_CHARACTERS_PER_LINE 80
+#define NEMO_FILE_LARGE_TOP_LEFT_TEXT_MAXIMUM_LINES               24
+#define NEMO_FILE_LARGE_TOP_LEFT_TEXT_MAXIMUM_BYTES               10000
 
-#define NAUTILUS_FILE_TOP_LEFT_TEXT_MAXIMUM_CHARACTERS_PER_LINE 10
-#define NAUTILUS_FILE_TOP_LEFT_TEXT_MAXIMUM_LINES               5
-#define NAUTILUS_FILE_TOP_LEFT_TEXT_MAXIMUM_BYTES               1024
+#define NEMO_FILE_TOP_LEFT_TEXT_MAXIMUM_CHARACTERS_PER_LINE 10
+#define NEMO_FILE_TOP_LEFT_TEXT_MAXIMUM_LINES               5
+#define NEMO_FILE_TOP_LEFT_TEXT_MAXIMUM_BYTES               1024
 
-#define NAUTILUS_FILE_DEFAULT_ATTRIBUTES				\
+#define NEMO_FILE_DEFAULT_ATTRIBUTES				\
 	"standard::*,access::*,mountable::*,time::*,unix::*,owner::*,selinux::*,thumbnail::*,id::filesystem,trash::orig-path,trash::deletion-date,metadata::*"
 
 /* These are in the typical sort order. Known things come first, then
@@ -52,9 +52,9 @@ typedef enum {
 	UNKNOWN
 } Knowledge;
 
-struct NautilusFileDetails
+struct NemoFileDetails
 {
-	NautilusDirectory *directory;
+	NemoDirectory *directory;
 	
 	eel_ref_str name;
 
@@ -106,7 +106,7 @@ struct NautilusFileDetails
 	GList *mime_list; /* If this is a directory, the list of MIME types in it. */
 	char *top_left_text;
 
-	/* Info you might get from a link (.desktop, .directory or nautilus link) */
+	/* Info you might get from a link (.desktop, .directory or nemo link) */
 	GIcon *custom_icon;
 	char *activation_uri;
 
@@ -124,7 +124,7 @@ struct NautilusFileDetails
 	 */
 	GList *operations_in_progress;
 
-	/* NautilusInfoProviders that need to be run for this file */
+	/* NemoInfoProviders that need to be run for this file */
 	GList *pending_info_providers;
 
 	/* Emblems provided by extensions */
@@ -141,14 +141,14 @@ struct NautilusFileDetails
 	GMount *mount;
 	
 	/* boolean fields: bitfield to save space, since there can be
-           many NautilusFile objects. */
+           many NemoFile objects. */
 
 	eel_boolean_bit unconfirmed                   : 1;
 	eel_boolean_bit is_gone                       : 1;
 	/* Set when emitting files_added on the directory to make sure we
 	   add a file, and only once */
 	eel_boolean_bit is_added                      : 1;
-	/* Set by the NautilusDirectory while it's loading the file
+	/* Set by the NemoDirectory while it's loading the file
 	 * list so the file knows not to do redundant I/O.
 	 */
 	eel_boolean_bit loading_directory             : 1;
@@ -160,7 +160,7 @@ struct NautilusFileDetails
 	eel_boolean_bit directory_count_failed        : 1;
 	eel_boolean_bit directory_count_is_up_to_date : 1;
 
-	eel_boolean_bit deep_counts_status      : 2; /* NautilusRequestStatus */
+	eel_boolean_bit deep_counts_status      : 2; /* NemoRequestStatus */
 	/* no deep_counts_are_up_to_date field; since we expose
            intermediate values for this attribute, we do actually
            forget it rather than invalidating. */
@@ -226,83 +226,83 @@ struct NautilusFileDetails
 };
 
 typedef struct {
-	NautilusFile *file;
+	NemoFile *file;
 	GCancellable *cancellable;
-	NautilusFileOperationCallback callback;
+	NemoFileOperationCallback callback;
 	gpointer callback_data;
 	gboolean is_rename;
 	
 	gpointer data;
 	GDestroyNotify free_data;
-	NautilusFileUndoInfo *undo_info;
-} NautilusFileOperation;
+	NemoFileUndoInfo *undo_info;
+} NemoFileOperation;
 
-NautilusFile *nautilus_file_new_from_info                  (NautilusDirectory      *directory,
+NemoFile *nemo_file_new_from_info                  (NemoDirectory      *directory,
 							    GFileInfo              *info);
-void          nautilus_file_emit_changed                   (NautilusFile           *file);
-void          nautilus_file_mark_gone                      (NautilusFile           *file);
-char *        nautilus_extract_top_left_text               (const char             *text,
+void          nemo_file_emit_changed                   (NemoFile           *file);
+void          nemo_file_mark_gone                      (NemoFile           *file);
+char *        nemo_extract_top_left_text               (const char             *text,
 							    gboolean                large,
 							    int                     length);
-void          nautilus_file_set_directory                  (NautilusFile           *file,
-							    NautilusDirectory      *directory);
-gboolean      nautilus_file_get_date                       (NautilusFile           *file,
-							    NautilusDateType        date_type,
+void          nemo_file_set_directory                  (NemoFile           *file,
+							    NemoDirectory      *directory);
+gboolean      nemo_file_get_date                       (NemoFile           *file,
+							    NemoDateType        date_type,
 							    time_t                 *date);
-void          nautilus_file_updated_deep_count_in_progress (NautilusFile           *file);
+void          nemo_file_updated_deep_count_in_progress (NemoFile           *file);
 
 
-void          nautilus_file_clear_info                     (NautilusFile           *file);
+void          nemo_file_clear_info                     (NemoFile           *file);
 /* Compare file's state with a fresh file info struct, return FALSE if
  * no change, update file and return TRUE if the file info contains
  * new state.  */
-gboolean      nautilus_file_update_info                    (NautilusFile           *file,
+gboolean      nemo_file_update_info                    (NemoFile           *file,
 							    GFileInfo              *info);
-gboolean      nautilus_file_update_name                    (NautilusFile           *file,
+gboolean      nemo_file_update_name                    (NemoFile           *file,
 							    const char             *name);
-gboolean      nautilus_file_update_metadata_from_info      (NautilusFile           *file,
+gboolean      nemo_file_update_metadata_from_info      (NemoFile           *file,
 							    GFileInfo              *info);
 
-gboolean      nautilus_file_update_name_and_directory      (NautilusFile           *file,
+gboolean      nemo_file_update_name_and_directory      (NemoFile           *file,
 							    const char             *name,
-							    NautilusDirectory      *directory);
+							    NemoDirectory      *directory);
 
-gboolean      nautilus_file_set_display_name               (NautilusFile           *file,
+gboolean      nemo_file_set_display_name               (NemoFile           *file,
 							    const char             *display_name,
 							    const char             *edit_name,
 							    gboolean                custom);
-void          nautilus_file_set_mount                      (NautilusFile           *file,
+void          nemo_file_set_mount                      (NemoFile           *file,
 							    GMount                 *mount);
 
 /* Return true if the top lefts of files in this directory should be
  * fetched, according to the preference settings.
  */
-gboolean      nautilus_file_should_get_top_left_text       (NautilusFile           *file);
+gboolean      nemo_file_should_get_top_left_text       (NemoFile           *file);
 
 /* Mark specified attributes for this file out of date without canceling current
  * I/O or kicking off new I/O.
  */
-void                   nautilus_file_invalidate_attributes_internal     (NautilusFile           *file,
-									 NautilusFileAttributes  file_attributes);
-NautilusFileAttributes nautilus_file_get_all_attributes                 (void);
-gboolean               nautilus_file_is_self_owned                      (NautilusFile           *file);
-void                   nautilus_file_invalidate_count_and_mime_list     (NautilusFile           *file);
-gboolean               nautilus_file_rename_in_progress                 (NautilusFile           *file);
-void                   nautilus_file_invalidate_extension_info_internal (NautilusFile           *file);
-void                   nautilus_file_info_providers_done                (NautilusFile           *file);
+void                   nemo_file_invalidate_attributes_internal     (NemoFile           *file,
+									 NemoFileAttributes  file_attributes);
+NemoFileAttributes nemo_file_get_all_attributes                 (void);
+gboolean               nemo_file_is_self_owned                      (NemoFile           *file);
+void                   nemo_file_invalidate_count_and_mime_list     (NemoFile           *file);
+gboolean               nemo_file_rename_in_progress                 (NemoFile           *file);
+void                   nemo_file_invalidate_extension_info_internal (NemoFile           *file);
+void                   nemo_file_info_providers_done                (NemoFile           *file);
 
 
 /* Thumbnailing: */
-void          nautilus_file_set_is_thumbnailing            (NautilusFile           *file,
+void          nemo_file_set_is_thumbnailing            (NemoFile           *file,
 							    gboolean                is_thumbnailing);
 
-NautilusFileOperation *nautilus_file_operation_new      (NautilusFile                  *file,
-							 NautilusFileOperationCallback  callback,
+NemoFileOperation *nemo_file_operation_new      (NemoFile                  *file,
+							 NemoFileOperationCallback  callback,
 							 gpointer                       callback_data);
-void                   nautilus_file_operation_free     (NautilusFileOperation         *op);
-void                   nautilus_file_operation_complete (NautilusFileOperation         *op,
+void                   nemo_file_operation_free     (NemoFileOperation         *op);
+void                   nemo_file_operation_complete (NemoFileOperation         *op,
 							 GFile                         *result_location,
 							 GError                        *error);
-void                   nautilus_file_operation_cancel   (NautilusFileOperation         *op);
+void                   nemo_file_operation_cancel   (NemoFileOperation         *op);
 
 #endif

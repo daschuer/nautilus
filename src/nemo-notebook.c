@@ -6,7 +6,7 @@
  *    (ephy-notebook.c)
  *
  *  Copyright © 2008 Free Software Foundation, Inc.
- *    (nautilus-notebook.c)
+ *    (nemo-notebook.c)
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -26,13 +26,13 @@
 
 #include "config.h"
 
-#include "nautilus-notebook.h"
+#include "nemo-notebook.h"
 
-#include "nautilus-window.h"
-#include "nautilus-window-manage-views.h"
-#include "nautilus-window-private.h"
-#include "nautilus-window-slot.h"
-#include "nautilus-window-slot-dnd.h"
+#include "nemo-window.h"
+#include "nemo-window-manage-views.h"
+#include "nemo-window-private.h"
+#include "nemo-window-slot.h"
+#include "nemo-window-slot-dnd.h"
 
 #include <glib/gi18n.h>
 #include <gio/gio.h>
@@ -41,20 +41,20 @@
 #define AFTER_ALL_TABS -1
 #define NOT_IN_APP_WINDOWS -2
 
-static void nautilus_notebook_init		 (NautilusNotebook *notebook);
-static void nautilus_notebook_class_init	 (NautilusNotebookClass *klass);
-static int  nautilus_notebook_insert_page	 (GtkNotebook *notebook,
+static void nemo_notebook_init		 (NemoNotebook *notebook);
+static void nemo_notebook_class_init	 (NemoNotebookClass *klass);
+static int  nemo_notebook_insert_page	 (GtkNotebook *notebook,
 					  GtkWidget *child,
 					  GtkWidget *tab_label,
 					  GtkWidget *menu_label,
 					  int position);
-static void nautilus_notebook_remove	 (GtkContainer *container,
+static void nemo_notebook_remove	 (GtkContainer *container,
 					  GtkWidget *tab_widget);
 
 static const GtkTargetEntry url_drag_types[] = 
 {
-	{ NAUTILUS_ICON_DND_GNOME_ICON_LIST_TYPE, 0, NAUTILUS_ICON_DND_GNOME_ICON_LIST },
-	{ NAUTILUS_ICON_DND_URI_LIST_TYPE, 0, NAUTILUS_ICON_DND_URI_LIST },
+	{ NEMO_ICON_DND_GNOME_ICON_LIST_TYPE, 0, NEMO_ICON_DND_GNOME_ICON_LIST },
+	{ NEMO_ICON_DND_URI_LIST_TYPE, 0, NEMO_ICON_DND_URI_LIST },
 };
 
 enum
@@ -65,34 +65,34 @@ enum
 
 static guint signals[LAST_SIGNAL];
 
-G_DEFINE_TYPE (NautilusNotebook, nautilus_notebook, GTK_TYPE_NOTEBOOK);
+G_DEFINE_TYPE (NemoNotebook, nemo_notebook, GTK_TYPE_NOTEBOOK);
 
 static void
-nautilus_notebook_class_init (NautilusNotebookClass *klass)
+nemo_notebook_class_init (NemoNotebookClass *klass)
 {
 	GObjectClass *object_class = G_OBJECT_CLASS (klass);
 	GtkContainerClass *container_class = GTK_CONTAINER_CLASS (klass);
 	GtkNotebookClass *notebook_class = GTK_NOTEBOOK_CLASS (klass);
 
-	container_class->remove = nautilus_notebook_remove;
+	container_class->remove = nemo_notebook_remove;
 
-	notebook_class->insert_page = nautilus_notebook_insert_page;
+	notebook_class->insert_page = nemo_notebook_insert_page;
 
 	signals[TAB_CLOSE_REQUEST] =
 		g_signal_new ("tab-close-request",
 			      G_OBJECT_CLASS_TYPE (object_class),
 			      G_SIGNAL_RUN_LAST,
-			      G_STRUCT_OFFSET (NautilusNotebookClass, tab_close_request),
+			      G_STRUCT_OFFSET (NemoNotebookClass, tab_close_request),
 			      NULL, NULL,
 			      g_cclosure_marshal_VOID__OBJECT,
 			      G_TYPE_NONE,
 			      1,
-			      NAUTILUS_TYPE_WINDOW_SLOT);
+			      NEMO_TYPE_WINDOW_SLOT);
 }
 
 
 /* FIXME remove when gtknotebook's func for this becomes public, bug #.... */
-static NautilusNotebook *
+static NemoNotebook *
 find_notebook_at_pointer (gint abs_x, gint abs_y)
 {
 	GdkDeviceManager *manager;
@@ -117,20 +117,20 @@ find_notebook_at_pointer (gint abs_x, gint abs_y)
 	/* get the GtkWidget which owns the toplevel GdkWindow */
 	gdk_window_get_user_data (toplevel_win, &toplevel);
 
-	/* toplevel should be an NautilusWindow */
-	if (toplevel != NULL && NAUTILUS_IS_WINDOW (toplevel))
+	/* toplevel should be an NemoWindow */
+	if (toplevel != NULL && NEMO_IS_WINDOW (toplevel))
 	{
-		return NAUTILUS_NOTEBOOK (NAUTILUS_WINDOW (toplevel)->details->active_pane->notebook);
+		return NEMO_NOTEBOOK (NEMO_WINDOW (toplevel)->details->active_pane->notebook);
 	}
 
 	return NULL;
 }
 
 static gboolean
-is_in_notebook_window (NautilusNotebook *notebook,
+is_in_notebook_window (NemoNotebook *notebook,
 		       gint abs_x, gint abs_y)
 {
-	NautilusNotebook *nb_at_pointer;
+	NemoNotebook *nb_at_pointer;
 
 	nb_at_pointer = find_notebook_at_pointer (abs_x, abs_y);
 
@@ -138,7 +138,7 @@ is_in_notebook_window (NautilusNotebook *notebook,
 }
 
 static gint
-find_tab_num_at_pos (NautilusNotebook *notebook, gint abs_x, gint abs_y)
+find_tab_num_at_pos (NemoNotebook *notebook, gint abs_x, gint abs_y)
 {
 	GtkPositionType tab_pos;
 	int page_num = 0;
@@ -201,7 +201,7 @@ find_tab_num_at_pos (NautilusNotebook *notebook, gint abs_x, gint abs_y)
 }
 
 static gboolean
-button_press_cb (NautilusNotebook *notebook,
+button_press_cb (NemoNotebook *notebook,
 		 GdkEventButton *event,
 		 gpointer data)
 {
@@ -229,7 +229,7 @@ button_press_cb (NautilusNotebook *notebook,
 }
 
 static void
-nautilus_notebook_init (NautilusNotebook *notebook)
+nemo_notebook_init (NemoNotebook *notebook)
 {
 	gtk_notebook_set_scrollable (GTK_NOTEBOOK (notebook), TRUE);
 	gtk_notebook_set_show_border (GTK_NOTEBOOK (notebook), FALSE);
@@ -253,14 +253,14 @@ nautilus_notebook_init (NautilusNotebook *notebook)
 }
 
 void
-nautilus_notebook_sync_loading (NautilusNotebook *notebook,
-				NautilusWindowSlot *slot)
+nemo_notebook_sync_loading (NemoNotebook *notebook,
+				NemoWindowSlot *slot)
 {
 	GtkWidget *tab_label, *spinner, *icon;
 	gboolean active;
 
-	g_return_if_fail (NAUTILUS_IS_NOTEBOOK (notebook));
-	g_return_if_fail (NAUTILUS_IS_WINDOW_SLOT (slot));
+	g_return_if_fail (NEMO_IS_NOTEBOOK (notebook));
+	g_return_if_fail (NEMO_IS_WINDOW_SLOT (slot));
 
 	tab_label = gtk_notebook_get_tab_label (GTK_NOTEBOOK (notebook), 
 						GTK_WIDGET (slot));
@@ -288,14 +288,14 @@ nautilus_notebook_sync_loading (NautilusNotebook *notebook,
 }
 
 void
-nautilus_notebook_sync_tab_label (NautilusNotebook *notebook,
-				  NautilusWindowSlot *slot)
+nemo_notebook_sync_tab_label (NemoNotebook *notebook,
+				  NemoWindowSlot *slot)
 {
 	GtkWidget *hbox, *label;
 	char *location_name;
 
-	g_return_if_fail (NAUTILUS_IS_NOTEBOOK (notebook));
-	g_return_if_fail (NAUTILUS_IS_WINDOW_SLOT (slot));
+	g_return_if_fail (NEMO_IS_NOTEBOOK (notebook));
+	g_return_if_fail (NEMO_IS_WINDOW_SLOT (slot));
 
 	hbox = gtk_notebook_get_tab_label (GTK_NOTEBOOK (notebook), GTK_WIDGET (slot));
 	g_return_if_fail (GTK_IS_WIDGET (hbox));
@@ -319,18 +319,18 @@ nautilus_notebook_sync_tab_label (NautilusNotebook *notebook,
 
 static void
 close_button_clicked_cb (GtkWidget *widget,
-			 NautilusWindowSlot *slot)
+			 NemoWindowSlot *slot)
 {
 	GtkWidget *notebook;
 
-	notebook = gtk_widget_get_ancestor (GTK_WIDGET (slot), NAUTILUS_TYPE_NOTEBOOK);
+	notebook = gtk_widget_get_ancestor (GTK_WIDGET (slot), NEMO_TYPE_NOTEBOOK);
 	if (notebook != NULL) {
 		g_signal_emit (notebook, signals[TAB_CLOSE_REQUEST], 0, slot);
 	}
 }
 
 static GtkWidget *
-build_tab_label (NautilusNotebook *nb, NautilusWindowSlot *slot)
+build_tab_label (NemoNotebook *nb, NemoWindowSlot *slot)
 {
 	GtkWidget *hbox, *label, *close_button, *image, *spinner, *icon;
 
@@ -364,7 +364,7 @@ build_tab_label (NautilusNotebook *nb, NautilusWindowSlot *slot)
 	/* don't allow focus on the close button */
 	gtk_button_set_focus_on_click (GTK_BUTTON (close_button), FALSE);
 
-	gtk_widget_set_name (close_button, "nautilus-tab-close-button");
+	gtk_widget_set_name (close_button, "nemo-tab-close-button");
 
 	image = gtk_image_new_from_icon_name ("window-close-symbolic", GTK_ICON_SIZE_MENU);
 	gtk_widget_set_tooltip_text (close_button, _("Close tab"));
@@ -377,7 +377,7 @@ build_tab_label (NautilusNotebook *nb, NautilusWindowSlot *slot)
 	gtk_box_pack_start (GTK_BOX (hbox), close_button, FALSE, FALSE, 0);
 	gtk_widget_show (close_button);
 
-	nautilus_drag_slot_proxy_init (hbox, NULL, slot);
+	nemo_drag_slot_proxy_init (hbox, NULL, slot);
 
 	g_object_set_data (G_OBJECT (hbox), "label", label);
 	g_object_set_data (G_OBJECT (hbox), "spinner", spinner);
@@ -388,7 +388,7 @@ build_tab_label (NautilusNotebook *nb, NautilusWindowSlot *slot)
 }
 
 static int
-nautilus_notebook_insert_page (GtkNotebook *gnotebook,
+nemo_notebook_insert_page (GtkNotebook *gnotebook,
 			       GtkWidget *tab_widget,
 			       GtkWidget *tab_label,
 			       GtkWidget *menu_label,
@@ -396,7 +396,7 @@ nautilus_notebook_insert_page (GtkNotebook *gnotebook,
 {
 	g_assert (GTK_IS_WIDGET (tab_widget));
 
-	position = GTK_NOTEBOOK_CLASS (nautilus_notebook_parent_class)->insert_page (gnotebook,
+	position = GTK_NOTEBOOK_CLASS (nemo_notebook_parent_class)->insert_page (gnotebook,
 										     tab_widget,
 										     tab_label,
 										     menu_label,
@@ -410,16 +410,16 @@ nautilus_notebook_insert_page (GtkNotebook *gnotebook,
 }
 
 int
-nautilus_notebook_add_tab (NautilusNotebook *notebook,
-			   NautilusWindowSlot *slot,
+nemo_notebook_add_tab (NemoNotebook *notebook,
+			   NemoWindowSlot *slot,
 			   int position,
 			   gboolean jump_to)
 {
 	GtkNotebook *gnotebook = GTK_NOTEBOOK (notebook);
 	GtkWidget *tab_label;
 
-	g_return_val_if_fail (NAUTILUS_IS_NOTEBOOK (notebook), -1);
-	g_return_val_if_fail (NAUTILUS_IS_WINDOW_SLOT (slot), -1);
+	g_return_val_if_fail (NEMO_IS_NOTEBOOK (notebook), -1);
+	g_return_val_if_fail (NEMO_IS_WINDOW_SLOT (slot), -1);
 
 	tab_label = build_tab_label (notebook, slot);
 
@@ -433,8 +433,8 @@ nautilus_notebook_add_tab (NautilusNotebook *notebook,
 				 "tab-expand", TRUE,
 				 NULL);
 
-	nautilus_notebook_sync_tab_label (notebook, slot);
-	nautilus_notebook_sync_loading (notebook, slot);
+	nemo_notebook_sync_tab_label (notebook, slot);
+	nemo_notebook_sync_loading (notebook, slot);
 
 
 	/* FIXME gtk bug! */
@@ -452,11 +452,11 @@ nautilus_notebook_add_tab (NautilusNotebook *notebook,
 }
 
 static void
-nautilus_notebook_remove (GtkContainer *container,
+nemo_notebook_remove (GtkContainer *container,
 			  GtkWidget *tab_widget)
 {
 	GtkNotebook *gnotebook = GTK_NOTEBOOK (container);
-	GTK_CONTAINER_CLASS (nautilus_notebook_parent_class)->remove (container, tab_widget);
+	GTK_CONTAINER_CLASS (nemo_notebook_parent_class)->remove (container, tab_widget);
 
 	gtk_notebook_set_show_tabs (gnotebook,
 				    gtk_notebook_get_n_pages (gnotebook) > 1);
@@ -464,16 +464,16 @@ nautilus_notebook_remove (GtkContainer *container,
 }
 
 void
-nautilus_notebook_reorder_current_child_relative (NautilusNotebook *notebook,
+nemo_notebook_reorder_current_child_relative (NemoNotebook *notebook,
 						  int offset)
 {
 	GtkNotebook *gnotebook;
 	GtkWidget *child;
 	int page;
 
-	g_return_if_fail (NAUTILUS_IS_NOTEBOOK (notebook));
+	g_return_if_fail (NEMO_IS_NOTEBOOK (notebook));
 
-	if (!nautilus_notebook_can_reorder_current_child_relative (notebook, offset)) {
+	if (!nemo_notebook_can_reorder_current_child_relative (notebook, offset)) {
 		return;
 	}
 
@@ -485,15 +485,15 @@ nautilus_notebook_reorder_current_child_relative (NautilusNotebook *notebook,
 }
 
 void
-nautilus_notebook_set_current_page_relative (NautilusNotebook *notebook,
+nemo_notebook_set_current_page_relative (NemoNotebook *notebook,
 					     int offset)
 {
 	GtkNotebook *gnotebook;
 	int page;
 
-	g_return_if_fail (NAUTILUS_IS_NOTEBOOK (notebook));
+	g_return_if_fail (NEMO_IS_NOTEBOOK (notebook));
 
-	if (!nautilus_notebook_can_set_current_page_relative (notebook, offset)) {
+	if (!nemo_notebook_can_set_current_page_relative (notebook, offset)) {
 		return;
 	}
 
@@ -505,7 +505,7 @@ nautilus_notebook_set_current_page_relative (NautilusNotebook *notebook,
 }
 
 static gboolean
-nautilus_notebook_is_valid_relative_position (NautilusNotebook *notebook,
+nemo_notebook_is_valid_relative_position (NemoNotebook *notebook,
 					      int offset)
 {
 	GtkNotebook *gnotebook;
@@ -526,20 +526,20 @@ nautilus_notebook_is_valid_relative_position (NautilusNotebook *notebook,
 }
 
 gboolean
-nautilus_notebook_can_reorder_current_child_relative (NautilusNotebook *notebook,
+nemo_notebook_can_reorder_current_child_relative (NemoNotebook *notebook,
 						      int offset)
 {
-	g_return_val_if_fail (NAUTILUS_IS_NOTEBOOK (notebook), FALSE);
+	g_return_val_if_fail (NEMO_IS_NOTEBOOK (notebook), FALSE);
 
-	return nautilus_notebook_is_valid_relative_position (notebook, offset);
+	return nemo_notebook_is_valid_relative_position (notebook, offset);
 }
 
 gboolean
-nautilus_notebook_can_set_current_page_relative (NautilusNotebook *notebook,
+nemo_notebook_can_set_current_page_relative (NemoNotebook *notebook,
 						 int offset)
 {
-	g_return_val_if_fail (NAUTILUS_IS_NOTEBOOK (notebook), FALSE);
+	g_return_val_if_fail (NEMO_IS_NOTEBOOK (notebook), FALSE);
 
-	return nautilus_notebook_is_valid_relative_position (notebook, offset);
+	return nemo_notebook_is_valid_relative_position (notebook, offset);
 }
 

@@ -1,6 +1,6 @@
 /* -*- Mode: C; indent-tabs-mode: t; c-basic-offset: 8; tab-width: 8 -*- */
 /*
- * nautilus-progress-ui-handler.h: file operation progress user interface.
+ * nemo-progress-ui-handler.h: file operation progress user interface.
  *
  * Copyright (C) 2007, 2011 Red Hat, Inc.
  *
@@ -24,42 +24,42 @@
  *
  */
 
-#ifndef __NAUTILUS_PROGRESS_UI_HANDLER_H__
-#define __NAUTILUS_PROGRESS_UI_HANDLER_H__
+#ifndef __NEMO_PROGRESS_UI_HANDLER_H__
+#define __NEMO_PROGRESS_UI_HANDLER_H__
 
 #include <glib-object.h>
 
 G_BEGIN_DECLS
 
-#define NAUTILUS_TYPE_PROGRESS_UI_HANDLER nautilus_progress_ui_handler_get_type()
-#define NAUTILUS_PROGRESS_UI_HANDLER(obj) \
-  (G_TYPE_CHECK_INSTANCE_CAST ((obj), NAUTILUS_TYPE_PROGRESS_UI_HANDLER, NautilusProgressUIHandler))
-#define NAUTILUS_PROGRESS_UI_HANDLER_CLASS(klass) \
-  (G_TYPE_CHECK_CLASS_CAST ((klass), NAUTILUS_TYPE_PROGRESS_UI_HANDLER, NautilusProgressUIHandlerClass))
-#define NAUTILUS_IS_PROGRESS_UI_HANDLER(obj) \
-  (G_TYPE_CHECK_INSTANCE_TYPE ((obj), NAUTILUS_TYPE_PROGRESS_UI_HANDLER))
-#define NAUTILUS_IS_PROGRESS_UI_HANDLER_CLASS(klass) \
-  (G_TYPE_CHECK_CLASS_TYPE ((klass), NAUTILUS_TYPE_PROGRESS_UI_HANDLER))
-#define NAUTILUS_PROGRESS_UI_HANDLER_GET_CLASS(obj) \
-  (G_TYPE_INSTANCE_GET_CLASS ((obj), NAUTILUS_TYPE_PROGRESS_UI_HANDLER, NautilusProgressUIHandlerClass))
+#define NEMO_TYPE_PROGRESS_UI_HANDLER nemo_progress_ui_handler_get_type()
+#define NEMO_PROGRESS_UI_HANDLER(obj) \
+  (G_TYPE_CHECK_INSTANCE_CAST ((obj), NEMO_TYPE_PROGRESS_UI_HANDLER, NemoProgressUIHandler))
+#define NEMO_PROGRESS_UI_HANDLER_CLASS(klass) \
+  (G_TYPE_CHECK_CLASS_CAST ((klass), NEMO_TYPE_PROGRESS_UI_HANDLER, NemoProgressUIHandlerClass))
+#define NEMO_IS_PROGRESS_UI_HANDLER(obj) \
+  (G_TYPE_CHECK_INSTANCE_TYPE ((obj), NEMO_TYPE_PROGRESS_UI_HANDLER))
+#define NEMO_IS_PROGRESS_UI_HANDLER_CLASS(klass) \
+  (G_TYPE_CHECK_CLASS_TYPE ((klass), NEMO_TYPE_PROGRESS_UI_HANDLER))
+#define NEMO_PROGRESS_UI_HANDLER_GET_CLASS(obj) \
+  (G_TYPE_INSTANCE_GET_CLASS ((obj), NEMO_TYPE_PROGRESS_UI_HANDLER, NemoProgressUIHandlerClass))
 
-typedef struct _NautilusProgressUIHandlerPriv NautilusProgressUIHandlerPriv;
+typedef struct _NemoProgressUIHandlerPriv NemoProgressUIHandlerPriv;
 
 typedef struct {
   GObject parent;
 
   /* private */
-  NautilusProgressUIHandlerPriv *priv;
-} NautilusProgressUIHandler;
+  NemoProgressUIHandlerPriv *priv;
+} NemoProgressUIHandler;
 
 typedef struct {
   GObjectClass parent_class;
-} NautilusProgressUIHandlerClass;
+} NemoProgressUIHandlerClass;
 
-GType nautilus_progress_ui_handler_get_type (void);
+GType nemo_progress_ui_handler_get_type (void);
 
-NautilusProgressUIHandler * nautilus_progress_ui_handler_new (void);
+NemoProgressUIHandler * nemo_progress_ui_handler_new (void);
 
 G_END_DECLS
 
-#endif /* __NAUTILUS_PROGRESS_UI_HANDLER_H__ */
+#endif /* __NEMO_PROGRESS_UI_HANDLER_H__ */

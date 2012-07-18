@@ -1,6 +1,6 @@
 /* -*- Mode: C; indent-tabs-mode: t; c-basic-offset: 8; tab-width: 8 -*-
 
-   nautilus-view-factory.h: register and create NautilusViews
+   nemo-view-factory.h: register and create NemoViews
  
    Copyright (C) 2004 Red Hat Inc.
   
@@ -22,28 +22,28 @@
    Author: Alexander Larsson <alexl@redhat.com>
 */
 
-#ifndef NAUTILUS_VIEW_FACTORY_H
-#define NAUTILUS_VIEW_FACTORY_H
+#ifndef NEMO_VIEW_FACTORY_H
+#define NEMO_VIEW_FACTORY_H
 
 #include <string.h>
 
 #include <gio/gio.h>
 
-#include "nautilus-view.h"
-#include "nautilus-window-slot.h"
+#include "nemo-view.h"
+#include "nemo-window-slot.h"
 
 G_BEGIN_DECLS
 
-typedef struct _NautilusViewInfo NautilusViewInfo;
+typedef struct _NemoViewInfo NemoViewInfo;
 
-struct _NautilusViewInfo {
+struct _NemoViewInfo {
 	char *id;
 	char *view_combo_label;               /* Foo View (used in preferences dialog and navigation combo) */
 	char *view_menu_label_with_mnemonic;  /* View -> _Foo (this is the "_Foo" part) */
 	char *error_label;                 /* The foo view encountered an error. */
 	char *startup_error_label;         /* The foo view encountered an error while starting up. */
 	char *display_location_label;      /* Display this location with the foo view. */
-	NautilusView * (*create) (NautilusWindowSlot *slot);
+	NemoView * (*create) (NemoWindowSlot *slot);
 	/* BONOBOTODO: More args here */
 	gboolean (*supports_uri) (const char *uri,
 				  GFileType file_type,
@@ -51,15 +51,15 @@ struct _NautilusViewInfo {
 };
 
 
-void                    nautilus_view_factory_register          (NautilusViewInfo   *view_info);
-const NautilusViewInfo *nautilus_view_factory_lookup            (const char         *id);
-NautilusView *          nautilus_view_factory_create            (const char         *id,
-								 NautilusWindowSlot *slot);
-gboolean                nautilus_view_factory_view_supports_uri (const char         *id,
+void                    nemo_view_factory_register          (NemoViewInfo   *view_info);
+const NemoViewInfo *nemo_view_factory_lookup            (const char         *id);
+NemoView *          nemo_view_factory_create            (const char         *id,
+								 NemoWindowSlot *slot);
+gboolean                nemo_view_factory_view_supports_uri (const char         *id,
 								 GFile              *location,
 								 GFileType          file_type,
 								 const char         *mime_type);
-GList *                 nautilus_view_factory_get_views_for_uri (const char         *uri,
+GList *                 nemo_view_factory_get_views_for_uri (const char         *uri,
 								 GFileType          file_type,
 								 const char         *mime_type);
 
@@ -68,4 +68,4 @@ GList *                 nautilus_view_factory_get_views_for_uri (const char     
 
 G_END_DECLS
 
-#endif /* NAUTILUS_VIEW_FACTORY_H */
+#endif /* NEMO_VIEW_FACTORY_H */

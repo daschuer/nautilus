@@ -27,11 +27,11 @@
 #include <gtk/gtk.h>
 
 #include <glib/gi18n.h>
-#include <libnautilus-private/nautilus-undo.h>
+#include <libnemo-private/nemo-undo.h>
 
 #include <string.h>
 
-#include "nautilus-undo-signal-handlers.h"
+#include "nemo-undo-signal-handlers.h"
 
 
 typedef struct {
@@ -51,25 +51,25 @@ static void restore_editable_from_undo_snapshot_callback (GObject 	*target,
 static void editable_register_edit_undo 		 (GtkEditable 	*editable);
 static void free_editable_object_data 			 (gpointer 	data);
 
-/* nautilus_undo_set_up_nautilus_entry_for_undo
+/* nemo_undo_set_up_nemo_entry_for_undo
  * 
  * Functions and callback methods to handle undo 
- * in a NautilusEntry
+ * in a NemoEntry
  */
 
 static void 
-nautilus_entry_user_changed_callback (NautilusEntry *entry)
+nemo_entry_user_changed_callback (NemoEntry *entry)
 {		
 	/* Register undo transaction */	
 	editable_register_edit_undo (GTK_EDITABLE (entry));
 }
 
 void
-nautilus_undo_set_up_nautilus_entry_for_undo (NautilusEntry *entry)
+nemo_undo_set_up_nemo_entry_for_undo (NemoEntry *entry)
 {
 	EditableUndoObjectData *data;
 	
-	if (!NAUTILUS_IS_ENTRY (entry) ) {
+	if (!NEMO_IS_ENTRY (entry) ) {
 		return;
 	}
 
@@ -80,27 +80,27 @@ nautilus_undo_set_up_nautilus_entry_for_undo (NautilusEntry *entry)
 
 	/* Connect to entry signals */
 	g_signal_connect (entry, "user_changed",
-			  G_CALLBACK (nautilus_entry_user_changed_callback),
+			  G_CALLBACK (nemo_entry_user_changed_callback),
 			  NULL);
 }
 
 void
-nautilus_undo_tear_down_nautilus_entry_for_undo (NautilusEntry *entry)
+nemo_undo_tear_down_nemo_entry_for_undo (NemoEntry *entry)
 {
-	if (!NAUTILUS_IS_ENTRY (entry) ) {
+	if (!NEMO_IS_ENTRY (entry) ) {
 		return;
 	}
 
 	/* Disconnect from entry signals */
 	g_signal_handlers_disconnect_by_func
-		(entry, G_CALLBACK (nautilus_entry_user_changed_callback), NULL);
+		(entry, G_CALLBACK (nemo_entry_user_changed_callback), NULL);
 
 }
 
-/* nautilus_undo_set_up_nautilus_entry_for_undo
+/* nemo_undo_set_up_nemo_entry_for_undo
  * 
  * Functions and callback methods to handle undo 
- * in a NautilusEntry
+ * in a NemoEntry
  */
 
 static void 
@@ -165,7 +165,7 @@ editable_register_edit_undo (GtkEditable *editable)
 					   &undo_data->selection_start,
 					   &undo_data->selection_end);
 
-	nautilus_undo_register
+	nemo_undo_register
 		(G_OBJECT (editable),
 		 restore_editable_from_undo_snapshot_callback,
 		 undo_data,
@@ -180,7 +180,7 @@ editable_register_edit_undo (GtkEditable *editable)
 }
 
 void
-nautilus_undo_set_up_editable_for_undo (GtkEditable *editable)
+nemo_undo_set_up_editable_for_undo (GtkEditable *editable)
 {
 	EditableUndoObjectData *data;
 	
@@ -202,7 +202,7 @@ nautilus_undo_set_up_editable_for_undo (GtkEditable *editable)
 }
 
 void
-nautilus_undo_tear_down_editable_for_undo (GtkEditable *editable)
+nemo_undo_tear_down_editable_for_undo (GtkEditable *editable)
 {
 	if (!GTK_IS_EDITABLE (editable) ) {
 		return;

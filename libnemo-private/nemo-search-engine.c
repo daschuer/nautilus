@@ -2,12 +2,12 @@
 /*
  * Copyright (C) 2005 Novell, Inc.
  *
- * Nautilus is free software; you can redistribute it and/or
+ * Nemo is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
  * published by the Free Software Foundation; either version 2 of the
  * License, or (at your option) any later version.
  *
- * Nautilus is distributed in the hope that it will be useful,
+ * Nemo is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
  * General Public License for more details.
@@ -22,11 +22,11 @@
  */
 
 #include <config.h>
-#include "nautilus-search-engine.h"
-#include "nautilus-search-engine-simple.h"
+#include "nemo-search-engine.h"
+#include "nemo-search-engine-simple.h"
 
 #ifdef ENABLE_TRACKER
-#include "nautilus-search-engine-tracker.h"
+#include "nemo-search-engine-tracker.h"
 #endif
 
 enum {
@@ -39,17 +39,17 @@ enum {
 
 static guint signals[LAST_SIGNAL];
 
-G_DEFINE_ABSTRACT_TYPE (NautilusSearchEngine, nautilus_search_engine,
+G_DEFINE_ABSTRACT_TYPE (NemoSearchEngine, nemo_search_engine,
 			G_TYPE_OBJECT);
 
 static void
-nautilus_search_engine_class_init (NautilusSearchEngineClass *class)
+nemo_search_engine_class_init (NemoSearchEngineClass *class)
 {
 	signals[HITS_ADDED] =
 		g_signal_new ("hits-added",
 		              G_TYPE_FROM_CLASS (class),
 		              G_SIGNAL_RUN_LAST,
-		              G_STRUCT_OFFSET (NautilusSearchEngineClass, hits_added),
+		              G_STRUCT_OFFSET (NemoSearchEngineClass, hits_added),
 		              NULL, NULL,
 		              g_cclosure_marshal_VOID__POINTER,
 		              G_TYPE_NONE, 1,
@@ -59,7 +59,7 @@ nautilus_search_engine_class_init (NautilusSearchEngineClass *class)
 		g_signal_new ("hits-subtracted",
 		              G_TYPE_FROM_CLASS (class),
 		              G_SIGNAL_RUN_LAST,
-		              G_STRUCT_OFFSET (NautilusSearchEngineClass, hits_subtracted),
+		              G_STRUCT_OFFSET (NemoSearchEngineClass, hits_subtracted),
 		              NULL, NULL,
 		              g_cclosure_marshal_VOID__POINTER,
 		              G_TYPE_NONE, 1,
@@ -69,7 +69,7 @@ nautilus_search_engine_class_init (NautilusSearchEngineClass *class)
 		g_signal_new ("finished",
 		              G_TYPE_FROM_CLASS (class),
 		              G_SIGNAL_RUN_LAST,
-		              G_STRUCT_OFFSET (NautilusSearchEngineClass, finished),
+		              G_STRUCT_OFFSET (NemoSearchEngineClass, finished),
 		              NULL, NULL,
 		              g_cclosure_marshal_VOID__VOID,
 		              G_TYPE_NONE, 0);
@@ -78,7 +78,7 @@ nautilus_search_engine_class_init (NautilusSearchEngineClass *class)
 		g_signal_new ("error",
 		              G_TYPE_FROM_CLASS (class),
 		              G_SIGNAL_RUN_LAST,
-		              G_STRUCT_OFFSET (NautilusSearchEngineClass, error),
+		              G_STRUCT_OFFSET (NemoSearchEngineClass, error),
 		              NULL, NULL,
 		              g_cclosure_marshal_VOID__STRING,
 		              G_TYPE_NONE, 1,
@@ -87,84 +87,84 @@ nautilus_search_engine_class_init (NautilusSearchEngineClass *class)
 }
 
 static void
-nautilus_search_engine_init (NautilusSearchEngine *engine)
+nemo_search_engine_init (NemoSearchEngine *engine)
 {
 }
 
-NautilusSearchEngine *
-nautilus_search_engine_new (void)
+NemoSearchEngine *
+nemo_search_engine_new (void)
 {
-	NautilusSearchEngine *engine;
+	NemoSearchEngine *engine;
 	
 #ifdef ENABLE_TRACKER	
-	engine = nautilus_search_engine_tracker_new ();
+	engine = nemo_search_engine_tracker_new ();
 	if (engine) {
 		return engine;
 	}
 #endif
 	
-	engine = nautilus_search_engine_simple_new ();
+	engine = nemo_search_engine_simple_new ();
 	return engine;
 }
 
 void
-nautilus_search_engine_set_query (NautilusSearchEngine *engine, NautilusQuery *query)
+nemo_search_engine_set_query (NemoSearchEngine *engine, NemoQuery *query)
 {
-	g_return_if_fail (NAUTILUS_IS_SEARCH_ENGINE (engine));
-	g_return_if_fail (NAUTILUS_SEARCH_ENGINE_GET_CLASS (engine)->set_query != NULL);
+	g_return_if_fail (NEMO_IS_SEARCH_ENGINE (engine));
+	g_return_if_fail (NEMO_SEARCH_ENGINE_GET_CLASS (engine)->set_query != NULL);
 
-	NAUTILUS_SEARCH_ENGINE_GET_CLASS (engine)->set_query (engine, query);
+	NEMO_SEARCH_ENGINE_GET_CLASS (engine)->set_query (engine, query);
 }
 
 void
-nautilus_search_engine_start (NautilusSearchEngine *engine)
+nemo_search_engine_start (NemoSearchEngine *engine)
 {
-	g_return_if_fail (NAUTILUS_IS_SEARCH_ENGINE (engine));
-	g_return_if_fail (NAUTILUS_SEARCH_ENGINE_GET_CLASS (engine)->start != NULL);
+	g_return_if_fail (NEMO_IS_SEARCH_ENGINE (engine));
+	g_return_if_fail (NEMO_SEARCH_ENGINE_GET_CLASS (engine)->start != NULL);
 
-	NAUTILUS_SEARCH_ENGINE_GET_CLASS (engine)->start (engine);
+	NEMO_SEARCH_ENGINE_GET_CLASS (engine)->start (engine);
 }
 
 
 void
-nautilus_search_engine_stop (NautilusSearchEngine *engine)
+nemo_search_engine_stop (NemoSearchEngine *engine)
 {
-	g_return_if_fail (NAUTILUS_IS_SEARCH_ENGINE (engine));
-	g_return_if_fail (NAUTILUS_SEARCH_ENGINE_GET_CLASS (engine)->stop != NULL);
+	g_return_if_fail (NEMO_IS_SEARCH_ENGINE (engine));
+	g_return_if_fail (NEMO_SEARCH_ENGINE_GET_CLASS (engine)->stop != NULL);
 
-	NAUTILUS_SEARCH_ENGINE_GET_CLASS (engine)->stop (engine);
+	NEMO_SEARCH_ENGINE_GET_CLASS (engine)->stop (engine);
 }
 
 void	       
-nautilus_search_engine_hits_added (NautilusSearchEngine *engine, GList *hits)
+nemo_search_engine_hits_added (NemoSearchEngine *engine, GList *hits)
 {
-	g_return_if_fail (NAUTILUS_IS_SEARCH_ENGINE (engine));
+	g_return_if_fail (NEMO_IS_SEARCH_ENGINE (engine));
 
 	g_signal_emit (engine, signals[HITS_ADDED], 0, hits);
 }
 
 
 void	       
-nautilus_search_engine_hits_subtracted (NautilusSearchEngine *engine, GList *hits)
+nemo_search_engine_hits_subtracted (NemoSearchEngine *engine, GList *hits)
 {
-	g_return_if_fail (NAUTILUS_IS_SEARCH_ENGINE (engine));
+	g_return_if_fail (NEMO_IS_SEARCH_ENGINE (engine));
 
 	g_signal_emit (engine, signals[HITS_SUBTRACTED], 0, hits);
 }
 
 
 void	       
-nautilus_search_engine_finished (NautilusSearchEngine *engine)
+nemo_search_engine_finished (NemoSearchEngine *engine)
 {
-	g_return_if_fail (NAUTILUS_IS_SEARCH_ENGINE (engine));
+	g_return_if_fail (NEMO_IS_SEARCH_ENGINE (engine));
 
 	g_signal_emit (engine, signals[FINISHED], 0);
 }
 
 void
-nautilus_search_engine_error (NautilusSearchEngine *engine, const char *error_message)
+nemo_search_engine_error (NemoSearchEngine *engine, const char *error_message)
 {
-	g_return_if_fail (NAUTILUS_IS_SEARCH_ENGINE (engine));
+	g_return_if_fail (NEMO_IS_SEARCH_ENGINE (engine));
 
 	g_signal_emit (engine, signals[ERROR], 0, error_message);
 }

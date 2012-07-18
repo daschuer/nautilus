@@ -20,33 +20,33 @@
    Author: Maciej Stachowiak <mjs@noisehavoc.org>
 */
 
-#ifndef NAUTILUS_FILE_QUEUE_H
-#define NAUTILUS_FILE_QUEUE_H
+#ifndef NEMO_FILE_QUEUE_H
+#define NEMO_FILE_QUEUE_H
 
-#include <libnautilus-private/nautilus-file.h>
+#include <libnemo-private/nemo-file.h>
 
-typedef struct NautilusFileQueue NautilusFileQueue;
+typedef struct NemoFileQueue NemoFileQueue;
 
-NautilusFileQueue *nautilus_file_queue_new      (void);
-void               nautilus_file_queue_destroy  (NautilusFileQueue *queue);
+NemoFileQueue *nemo_file_queue_new      (void);
+void               nemo_file_queue_destroy  (NemoFileQueue *queue);
 
 /* Add a file to the tail of the queue, unless it's already in the queue */
-void               nautilus_file_queue_enqueue  (NautilusFileQueue *queue,
-						 NautilusFile      *file);
+void               nemo_file_queue_enqueue  (NemoFileQueue *queue,
+						 NemoFile      *file);
 
 /* Return the file at the head of the queue after removing it from the
  * queue. This is dangerous unless you have another ref to the file,
  * since it will unref it.  
  */
-NautilusFile *     nautilus_file_queue_dequeue  (NautilusFileQueue *queue);
+NemoFile *     nemo_file_queue_dequeue  (NemoFileQueue *queue);
 
 /* Remove a file from an arbitrary point in the queue in constant time. */
-void               nautilus_file_queue_remove   (NautilusFileQueue *queue,
-						 NautilusFile      *file);
+void               nemo_file_queue_remove   (NemoFileQueue *queue,
+						 NemoFile      *file);
 
 /* Get the file at the head of the queue without removing or unrefing it. */
-NautilusFile *     nautilus_file_queue_head     (NautilusFileQueue *queue);
+NemoFile *     nemo_file_queue_head     (NemoFileQueue *queue);
 
-gboolean           nautilus_file_queue_is_empty (NautilusFileQueue *queue);
+gboolean           nemo_file_queue_is_empty (NemoFileQueue *queue);
 
-#endif /* NAUTILUS_FILE_CHANGES_QUEUE_H */
+#endif /* NEMO_FILE_CHANGES_QUEUE_H */

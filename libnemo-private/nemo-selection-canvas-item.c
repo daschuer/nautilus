@@ -1,6 +1,6 @@
 /* -*- Mode: C; indent-tabs-mode: t; c-basic-offset: 8; tab-width: 8 -*- */
 
-/* Nautilus - Canvas item for floating selection.
+/* Nemo - Canvas item for floating selection.
  *
  * Copyright (C) 1997, 1998, 1999, 2000 Free Software Foundation
  * Copyright (C) 2011 Red Hat Inc.
@@ -26,7 +26,7 @@
 
 #include <config.h>
 
-#include "nautilus-selection-canvas-item.h"
+#include "nemo-selection-canvas-item.h"
 
 #include <math.h>
 
@@ -49,7 +49,7 @@ typedef struct {
   int x0, y0, x1, y1;
 }  Rect;
 
-struct _NautilusSelectionCanvasItemDetails {
+struct _NemoSelectionCanvasItemDetails {
 	Rect last_update_rect;
 	Rect last_outline_update_rect;
 	int last_outline_update_width;
@@ -76,21 +76,21 @@ struct _NautilusSelectionCanvasItemDetails {
 	guint fade_out_handler_id;
 };
 
-G_DEFINE_TYPE (NautilusSelectionCanvasItem, nautilus_selection_canvas_item, EEL_TYPE_CANVAS_ITEM);
+G_DEFINE_TYPE (NemoSelectionCanvasItem, nemo_selection_canvas_item, EEL_TYPE_CANVAS_ITEM);
 
 #define DASH_ON 0.8
 #define DASH_OFF 1.7
 static void
-nautilus_selection_canvas_item_draw (EelCanvasItem *item,
+nemo_selection_canvas_item_draw (EelCanvasItem *item,
 				     cairo_t *cr,
 				     cairo_region_t *region)
 {
-	NautilusSelectionCanvasItem *self;
+	NemoSelectionCanvasItem *self;
 	double x1, y1, x2, y2;
 	int cx1, cy1, cx2, cy2;
 	double i2w_dx, i2w_dy;
 
-	self = NAUTILUS_SELECTION_CANVAS_ITEM (item);
+	self = NEMO_SELECTION_CANVAS_ITEM (item);
 
 	/* Get canvas pixel coordinates */
 	i2w_dx = 0.0;
@@ -157,20 +157,20 @@ nautilus_selection_canvas_item_draw (EelCanvasItem *item,
 }
 
 static double
-nautilus_selection_canvas_item_point (EelCanvasItem *item,
+nemo_selection_canvas_item_point (EelCanvasItem *item,
 				      double x,
 				      double y,
 				      int cx,
 				      int cy,
 				      EelCanvasItem **actual_item)
 {
-	NautilusSelectionCanvasItem *self;
+	NemoSelectionCanvasItem *self;
 	double x1, y1, x2, y2;
 	double hwidth;
 	double dx, dy;
 	double tmp;
 
-	self = NAUTILUS_SELECTION_CANVAS_ITEM (item);
+	self = NEMO_SELECTION_CANVAS_ITEM (item);
 	*actual_item = item;
 
 	/* Find the bounds for the rectangle plus its outline width */
@@ -331,13 +331,13 @@ make_rect (int x0, int y0, int x1, int y1)
 }
 
 static void
-nautilus_selection_canvas_item_update (EelCanvasItem *item,
+nemo_selection_canvas_item_update (EelCanvasItem *item,
 				       double i2w_dx,
 				       double i2w_dy,
 				       gint flags)
 {
-	NautilusSelectionCanvasItem *self;
-	NautilusSelectionCanvasItemDetails *priv;
+	NemoSelectionCanvasItem *self;
+	NemoSelectionCanvasItemDetails *priv;
 	double x1, y1, x2, y2;
 	int cx1, cy1, cx2, cy2;
 	int repaint_rects_count, i;
@@ -345,10 +345,10 @@ nautilus_selection_canvas_item_update (EelCanvasItem *item,
 	int width_lt, width_rb;
 	Rect update_rect, repaint_rects[4];
 
-	if (EEL_CANVAS_ITEM_CLASS (nautilus_selection_canvas_item_parent_class)->update)
-		(* EEL_CANVAS_ITEM_CLASS (nautilus_selection_canvas_item_parent_class)->update) (item, i2w_dx, i2w_dy, flags);
+	if (EEL_CANVAS_ITEM_CLASS (nemo_selection_canvas_item_parent_class)->update)
+		(* EEL_CANVAS_ITEM_CLASS (nemo_selection_canvas_item_parent_class)->update) (item, i2w_dx, i2w_dy, flags);
 
-	self = NAUTILUS_SELECTION_CANVAS_ITEM (item);
+	self = NEMO_SELECTION_CANVAS_ITEM (item);
 	priv = self->priv;
 
 	x1 = priv->x1 + i2w_dx;
@@ -402,13 +402,13 @@ nautilus_selection_canvas_item_update (EelCanvasItem *item,
 }
 
 static void
-nautilus_selection_canvas_item_translate (EelCanvasItem *item,
+nemo_selection_canvas_item_translate (EelCanvasItem *item,
 					  double dx,
 					  double dy)
 {
-	NautilusSelectionCanvasItem *self;
+	NemoSelectionCanvasItem *self;
 
-	self = NAUTILUS_SELECTION_CANVAS_ITEM (item);
+	self = NEMO_SELECTION_CANVAS_ITEM (item);
 
 	self->priv->x1 += dx;
 	self->priv->y1 += dy;
@@ -417,16 +417,16 @@ nautilus_selection_canvas_item_translate (EelCanvasItem *item,
 }
 
 static void
-nautilus_selection_canvas_item_bounds (EelCanvasItem *item,
+nemo_selection_canvas_item_bounds (EelCanvasItem *item,
 				       double *x1,
 				       double *y1,
 				       double *x2,
 				       double *y2)
 {
-	NautilusSelectionCanvasItem *self;
+	NemoSelectionCanvasItem *self;
 	double hwidth;
 
-	self = NAUTILUS_SELECTION_CANVAS_ITEM (item);
+	self = NEMO_SELECTION_CANVAS_ITEM (item);
 
 	hwidth = (self->priv->width / item->canvas->pixels_per_unit) / 2.0;
 
@@ -442,7 +442,7 @@ nautilus_selection_canvas_item_bounds (EelCanvasItem *item,
 static gboolean
 fade_and_request_redraw (gpointer user_data)
 {
-	NautilusSelectionCanvasItem *self = user_data;
+	NemoSelectionCanvasItem *self = user_data;
 
 	if (self->priv->fade_out_fill_alpha <= 0 ||
 	    self->priv->fade_out_outline_alpha <= 0) {
@@ -461,7 +461,7 @@ fade_and_request_redraw (gpointer user_data)
 }
 
 void
-nautilus_selection_canvas_item_fade_out (NautilusSelectionCanvasItem *self,
+nemo_selection_canvas_item_fade_out (NemoSelectionCanvasItem *self,
 					 guint transition_time)
 {
 	self->priv->fade_out_fill_alpha = self->priv->fill_color.alpha;
@@ -476,20 +476,20 @@ nautilus_selection_canvas_item_fade_out (NautilusSelectionCanvasItem *self,
 }
 
 static void
-nautilus_selection_canvas_item_dispose (GObject *obj)
+nemo_selection_canvas_item_dispose (GObject *obj)
 {
-	NautilusSelectionCanvasItem *self = NAUTILUS_SELECTION_CANVAS_ITEM (obj);
+	NemoSelectionCanvasItem *self = NEMO_SELECTION_CANVAS_ITEM (obj);
 
 	if (self->priv->fade_out_handler_id != 0) {
 		g_source_remove (self->priv->fade_out_handler_id);
 		self->priv->fade_out_handler_id = 0;
 	}
 
-	G_OBJECT_CLASS (nautilus_selection_canvas_item_parent_class)->dispose (obj);
+	G_OBJECT_CLASS (nemo_selection_canvas_item_parent_class)->dispose (obj);
 }
 
 static void
-do_set_fill (NautilusSelectionCanvasItem *self,
+do_set_fill (NemoSelectionCanvasItem *self,
 	     gboolean fill_set)
 {
 	if (self->priv->fill_set != fill_set) {
@@ -499,7 +499,7 @@ do_set_fill (NautilusSelectionCanvasItem *self,
 }
 
 static void
-do_set_outline (NautilusSelectionCanvasItem *self,
+do_set_outline (NemoSelectionCanvasItem *self,
 		gboolean outline_set)
 {
 	if (self->priv->outline_set != outline_set) {
@@ -509,15 +509,15 @@ do_set_outline (NautilusSelectionCanvasItem *self,
 }
 
 static void
-nautilus_selection_canvas_item_set_property (GObject *object,
+nemo_selection_canvas_item_set_property (GObject *object,
 					     guint param_id,
 					     const GValue *value,
 					     GParamSpec *pspec)
 {
 	EelCanvasItem *item;
-	NautilusSelectionCanvasItem *self;
+	NemoSelectionCanvasItem *self;
 
-	self = NAUTILUS_SELECTION_CANVAS_ITEM (object);
+	self = NEMO_SELECTION_CANVAS_ITEM (object);
 	item = EEL_CANVAS_ITEM (object);
 
 	switch (param_id) {
@@ -594,14 +594,14 @@ nautilus_selection_canvas_item_set_property (GObject *object,
 }
 
 static void
-nautilus_selection_canvas_item_get_property (GObject *object,
+nemo_selection_canvas_item_get_property (GObject *object,
 					     guint param_id,
 					     GValue *value,
 					     GParamSpec *pspec)
 {
-	NautilusSelectionCanvasItem *self;
+	NemoSelectionCanvasItem *self;
 
-	self = NAUTILUS_SELECTION_CANVAS_ITEM (object);
+	self = NEMO_SELECTION_CANVAS_ITEM (object);
 
 	switch (param_id) {
 	case PROP_X1:
@@ -641,7 +641,7 @@ nautilus_selection_canvas_item_get_property (GObject *object,
 }
 
 static void
-nautilus_selection_canvas_item_class_init (NautilusSelectionCanvasItemClass *klass)
+nemo_selection_canvas_item_class_init (NemoSelectionCanvasItemClass *klass)
 {
 	EelCanvasItemClass *item_class;
 	GObjectClass *gobject_class;
@@ -649,15 +649,15 @@ nautilus_selection_canvas_item_class_init (NautilusSelectionCanvasItemClass *kla
 	gobject_class = G_OBJECT_CLASS (klass);
 	item_class = EEL_CANVAS_ITEM_CLASS (klass);
 
-	gobject_class->set_property = nautilus_selection_canvas_item_set_property;
-	gobject_class->get_property = nautilus_selection_canvas_item_get_property;
-	gobject_class->dispose = nautilus_selection_canvas_item_dispose;
+	gobject_class->set_property = nemo_selection_canvas_item_set_property;
+	gobject_class->get_property = nemo_selection_canvas_item_get_property;
+	gobject_class->dispose = nemo_selection_canvas_item_dispose;
 
-	item_class->draw = nautilus_selection_canvas_item_draw;
-	item_class->point = nautilus_selection_canvas_item_point;
-	item_class->update = nautilus_selection_canvas_item_update;
-	item_class->bounds = nautilus_selection_canvas_item_bounds;
-	item_class->translate = nautilus_selection_canvas_item_translate;
+	item_class->draw = nemo_selection_canvas_item_draw;
+	item_class->point = nemo_selection_canvas_item_point;
+	item_class->update = nemo_selection_canvas_item_update;
+	item_class->bounds = nemo_selection_canvas_item_bounds;
+	item_class->translate = nemo_selection_canvas_item_translate;
 
 	properties[PROP_X1] = 
                  g_param_spec_double ("x1", NULL, NULL,
@@ -692,14 +692,14 @@ nautilus_selection_canvas_item_class_init (NautilusSelectionCanvasItemClass *kla
 				    G_PARAM_READWRITE);
 
 	g_object_class_install_properties (gobject_class, NUM_PROPERTIES, properties);
-	g_type_class_add_private (klass, sizeof (NautilusSelectionCanvasItemDetails));
+	g_type_class_add_private (klass, sizeof (NemoSelectionCanvasItemDetails));
 }
 
 static void
-nautilus_selection_canvas_item_init (NautilusSelectionCanvasItem *self)
+nemo_selection_canvas_item_init (NemoSelectionCanvasItem *self)
 {
-	self->priv = G_TYPE_INSTANCE_GET_PRIVATE (self, NAUTILUS_TYPE_SELECTION_CANVAS_ITEM,
-						  NautilusSelectionCanvasItemDetails);
+	self->priv = G_TYPE_INSTANCE_GET_PRIVATE (self, NEMO_TYPE_SELECTION_CANVAS_ITEM,
+						  NemoSelectionCanvasItemDetails);
 }
 
 

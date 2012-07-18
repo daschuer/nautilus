@@ -1,6 +1,6 @@
 /* -*- Mode: C; indent-tabs-mode: t; c-basic-offset: 8; tab-width: 8 -*-
 
-   nautilus-link.c: .desktop link files.
+   nemo-link.c: .desktop link files.
  
    Copyright (C) 2001 Red Hat, Inc.
   
@@ -24,14 +24,14 @@
 */
 
 #include <config.h>
-#include "nautilus-link.h"
+#include "nemo-link.h"
 
-#include "nautilus-directory-notify.h"
-#include "nautilus-directory.h"
-#include "nautilus-file-utilities.h"
-#include "nautilus-file.h"
-#include "nautilus-program-choosing.h"
-#include "nautilus-icon-names.h"
+#include "nemo-directory-notify.h"
+#include "nemo-directory.h"
+#include "nemo-file-utilities.h"
+#include "nemo-file.h"
+#include "nemo-program-choosing.h"
+#include "nemo-icon-names.h"
 #include <eel/eel-vfs-extensions.h>
 #include <glib/gi18n.h>
 #include <gio/gio.h>
@@ -40,10 +40,10 @@
 
 #define MAIN_GROUP "Desktop Entry"
 
-#define NAUTILUS_LINK_GENERIC_TAG	"Link"
-#define NAUTILUS_LINK_TRASH_TAG 	"X-nautilus-trash"
-#define NAUTILUS_LINK_MOUNT_TAG 	"FSDevice"
-#define NAUTILUS_LINK_HOME_TAG 		"X-nautilus-home"
+#define NEMO_LINK_GENERIC_TAG	"Link"
+#define NEMO_LINK_TRASH_TAG 	"X-nemo-trash"
+#define NEMO_LINK_MOUNT_TAG 	"FSDevice"
+#define NEMO_LINK_HOME_TAG 		"X-nemo-home"
 
 static gboolean
 is_link_mime_type (const char *mime_type)
@@ -176,7 +176,7 @@ slurp_key_string (const char *uri,
 }
 
 gboolean
-nautilus_link_local_create (const char     *directory_uri,
+nemo_link_local_create (const char     *directory_uri,
 			    const char     *base_name,
 			    const char     *display_name,
 			    const char     *image,
@@ -189,7 +189,7 @@ nautilus_link_local_create (const char     *directory_uri,
 	char *uri, *contents;
 	GFile *file;
 	GList dummy_list;
-	NautilusFileChangesQueuePosition item;
+	NemoFileChangesQueuePosition item;
 
 	g_return_val_if_fail (directory_uri != NULL, FALSE);
 	g_return_val_if_fail (base_name != NULL, FALSE);
@@ -202,13 +202,13 @@ nautilus_link_local_create (const char     *directory_uri,
 	}
 
 	if (eel_uri_is_desktop (directory_uri)) {
-		real_directory_uri = nautilus_get_desktop_directory_uri ();
+		real_directory_uri = nemo_get_desktop_directory_uri ();
 	} else {
 		real_directory_uri = g_strdup (directory_uri);
 	}
 
 	if (unique_filename) {
-		uri = nautilus_ensure_unique_file_name (real_directory_uri,
+		uri = nemo_ensure_unique_file_name (real_directory_uri,
 							base_name, ".desktop");
 		if (uri == NULL) {
 			g_free (real_directory_uri);
@@ -260,7 +260,7 @@ nautilus_link_local_create (const char     *directory_uri,
 	dummy_list.data = file;
 	dummy_list.next = NULL;
 	dummy_list.prev = NULL;
-	nautilus_directory_notify_files_added (&dummy_list);
+	nemo_directory_notify_files_added (&dummy_list);
 
 	if (point != NULL) {
 		item.location = file;
@@ -272,7 +272,7 @@ nautilus_link_local_create (const char     *directory_uri,
 		dummy_list.next = NULL;
 		dummy_list.prev = NULL;
 	
-		nautilus_directory_schedule_position_set (&dummy_list);
+		nemo_directory_schedule_position_set (&dummy_list);
 	}
 
 	g_object_unref (file);
@@ -296,7 +296,7 @@ get_language (void)
 } 
 
 static gboolean
-nautilus_link_local_set_key (const char *uri,
+nemo_link_local_set_key (const char *uri,
 			     const char *key,
 			     const char *value,
 			     gboolean    localize)
@@ -330,28 +330,28 @@ nautilus_link_local_set_key (const char *uri,
 }
 
 gboolean
-nautilus_link_local_set_text (const char *uri,
+nemo_link_local_set_text (const char *uri,
 			      const char *text)
 {
-	return nautilus_link_local_set_key (uri, "Name", text, TRUE);
+	return nemo_link_local_set_key (uri, "Name", text, TRUE);
 }
 
 
 gboolean
-nautilus_link_local_set_icon (const char        *uri,
+nemo_link_local_set_icon (const char        *uri,
 			      const char        *icon)
 {
-	return nautilus_link_local_set_key (uri, "Icon", icon, FALSE);
+	return nemo_link_local_set_key (uri, "Icon", icon, FALSE);
 }
 
 char *
-nautilus_link_local_get_text (const char *path)
+nemo_link_local_get_text (const char *path)
 {
 	return slurp_key_string (path, "Name", TRUE);
 }
 
 static char *
-nautilus_link_get_link_uri_from_desktop (GKeyFile *key_file, const char *desktop_file_uri)
+nemo_link_get_link_uri_from_desktop (GKeyFile *key_file, const char *desktop_file_uri)
 {
 	GFile *file, *parent;
 	char *type;
@@ -368,10 +368,10 @@ nautilus_link_get_link_uri_from_desktop (GKeyFile *key_file, const char *desktop
 	if (strcmp (type, "URL") == 0) {
 		/* Some old broken desktop files use this nonstandard feature, we need handle it though */
 		retval = g_key_file_get_string (key_file, MAIN_GROUP, "Exec", NULL);
-	} else if ((strcmp (type, NAUTILUS_LINK_GENERIC_TAG) == 0) ||
-		   (strcmp (type, NAUTILUS_LINK_MOUNT_TAG) == 0) ||
-		   (strcmp (type, NAUTILUS_LINK_TRASH_TAG) == 0) ||
-		   (strcmp (type, NAUTILUS_LINK_HOME_TAG) == 0)) {
+	} else if ((strcmp (type, NEMO_LINK_GENERIC_TAG) == 0) ||
+		   (strcmp (type, NEMO_LINK_MOUNT_TAG) == 0) ||
+		   (strcmp (type, NEMO_LINK_TRASH_TAG) == 0) ||
+		   (strcmp (type, NEMO_LINK_HOME_TAG) == 0)) {
 		retval = g_key_file_get_string (key_file, MAIN_GROUP, "URL", NULL);
 	}
 	g_free (type);
@@ -403,13 +403,13 @@ nautilus_link_get_link_uri_from_desktop (GKeyFile *key_file, const char *desktop
 }
 
 static char *
-nautilus_link_get_link_name_from_desktop (GKeyFile *key_file)
+nemo_link_get_link_name_from_desktop (GKeyFile *key_file)
 {
 	return g_key_file_get_locale_string (key_file, MAIN_GROUP, "Name", NULL, NULL);
 }
 
 static GIcon *
-nautilus_link_get_link_icon_from_desktop (GKeyFile *key_file)
+nemo_link_get_link_icon_from_desktop (GKeyFile *key_file)
 {
 	char *icon_str, *p, *type = NULL;
 	GFile *file;
@@ -436,7 +436,7 @@ nautilus_link_get_link_icon_from_desktop (GKeyFile *key_file)
 		} else if (g_strcmp0 (type, "FSDevice") == 0) {
 			icon_str = g_strdup ("drive-harddisk");
 		} else if (g_strcmp0 (type, "Directory") == 0) {
-			icon_str = g_strdup (NAUTILUS_ICON_FOLDER);
+			icon_str = g_strdup (NEMO_ICON_FOLDER);
 		} else if (g_strcmp0 (type, "Service") == 0 ||
 			   g_strcmp0 (type, "ServiceType") == 0) {
 			icon_str = g_strdup ("folder-remote");
@@ -485,7 +485,7 @@ nautilus_link_get_link_icon_from_desktop (GKeyFile *key_file)
 }
 
 char *
-nautilus_link_local_get_link_uri (const char *uri)
+nemo_link_local_get_link_uri (const char *uri)
 {
 	GKeyFile *key_file;
 	char *retval;
@@ -499,7 +499,7 @@ nautilus_link_local_get_link_uri (const char *uri)
 		return NULL;
 	}
 
-	retval = nautilus_link_get_link_uri_from_desktop (key_file, uri);
+	retval = nemo_link_get_link_uri_from_desktop (key_file, uri);
 	g_key_file_free (key_file);
 
 	return retval;
@@ -538,7 +538,7 @@ get_session (void)
 }
 
 void
-nautilus_link_get_link_info_given_file_contents (const char  *file_contents,
+nemo_link_get_link_info_given_file_contents (const char  *file_contents,
 						 int          link_file_size,
 						 const char  *file_uri,
 						 char       **uri,
@@ -564,9 +564,9 @@ nautilus_link_get_link_info_given_file_contents (const char  *file_contents,
 		return; 
 	}
 
-	*uri = nautilus_link_get_link_uri_from_desktop (key_file, file_uri);
-	*name = nautilus_link_get_link_name_from_desktop (key_file);
-	*icon = nautilus_link_get_link_icon_from_desktop (key_file);
+	*uri = nemo_link_get_link_uri_from_desktop (key_file, file_uri);
+	*name = nemo_link_get_link_name_from_desktop (key_file);
+	*icon = nemo_link_get_link_icon_from_desktop (key_file);
 
 	*is_launcher = FALSE;
 	type = g_key_file_get_string (key_file, MAIN_GROUP, "Type", NULL);

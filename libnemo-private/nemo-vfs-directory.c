@@ -1,6 +1,6 @@
 /* -*- Mode: C; indent-tabs-mode: t; c-basic-offset: 8; tab-width: 8 -*-
 
-   nautilus-vfs-directory.c: Subclass of NautilusDirectory to help implement the
+   nemo-vfs-directory.c: Subclass of NemoDirectory to help implement the
    virtual trash directory.
  
    Copyright (C) 1999, 2000 Eazel, Inc.
@@ -24,39 +24,39 @@
 */
 
 #include <config.h>
-#include "nautilus-vfs-directory.h"
+#include "nemo-vfs-directory.h"
 
-#include "nautilus-directory-private.h"
-#include "nautilus-file-private.h"
+#include "nemo-directory-private.h"
+#include "nemo-file-private.h"
 
-G_DEFINE_TYPE (NautilusVFSDirectory, nautilus_vfs_directory, NAUTILUS_TYPE_DIRECTORY);
+G_DEFINE_TYPE (NemoVFSDirectory, nemo_vfs_directory, NEMO_TYPE_DIRECTORY);
 
 static void
-nautilus_vfs_directory_init (NautilusVFSDirectory *directory)
+nemo_vfs_directory_init (NemoVFSDirectory *directory)
 {
 
 }
 
 static gboolean
-vfs_contains_file (NautilusDirectory *directory,
-		   NautilusFile *file)
+vfs_contains_file (NemoDirectory *directory,
+		   NemoFile *file)
 {
-	g_assert (NAUTILUS_IS_VFS_DIRECTORY (directory));
-	g_assert (NAUTILUS_IS_FILE (file));
+	g_assert (NEMO_IS_VFS_DIRECTORY (directory));
+	g_assert (NEMO_IS_FILE (file));
 
 	return file->details->directory == directory;
 }
 
 static void
-vfs_call_when_ready (NautilusDirectory *directory,
-		     NautilusFileAttributes file_attributes,
+vfs_call_when_ready (NemoDirectory *directory,
+		     NemoFileAttributes file_attributes,
 		     gboolean wait_for_file_list,
-		     NautilusDirectoryCallback callback,
+		     NemoDirectoryCallback callback,
 		     gpointer callback_data)
 {
-	g_assert (NAUTILUS_IS_VFS_DIRECTORY (directory));
+	g_assert (NEMO_IS_VFS_DIRECTORY (directory));
 
-	nautilus_directory_call_when_ready_internal
+	nemo_directory_call_when_ready_internal
 		(directory,
 		 NULL,
 		 file_attributes,
@@ -67,13 +67,13 @@ vfs_call_when_ready (NautilusDirectory *directory,
 }
 
 static void
-vfs_cancel_callback (NautilusDirectory *directory,
-		     NautilusDirectoryCallback callback,
+vfs_cancel_callback (NemoDirectory *directory,
+		     NemoDirectoryCallback callback,
 		     gpointer callback_data)
 {
-	g_assert (NAUTILUS_IS_VFS_DIRECTORY (directory));
+	g_assert (NEMO_IS_VFS_DIRECTORY (directory));
 
-	nautilus_directory_cancel_callback_internal
+	nemo_directory_cancel_callback_internal
 		(directory,
 		 NULL,
 		 callback,
@@ -82,17 +82,17 @@ vfs_cancel_callback (NautilusDirectory *directory,
 }
 
 static void
-vfs_file_monitor_add (NautilusDirectory *directory,
+vfs_file_monitor_add (NemoDirectory *directory,
 		      gconstpointer client,
 		      gboolean monitor_hidden_files,
-		      NautilusFileAttributes file_attributes,
-		      NautilusDirectoryCallback callback,
+		      NemoFileAttributes file_attributes,
+		      NemoDirectoryCallback callback,
 		      gpointer callback_data)
 {
-	g_assert (NAUTILUS_IS_VFS_DIRECTORY (directory));
+	g_assert (NEMO_IS_VFS_DIRECTORY (directory));
 	g_assert (client != NULL);
 
-	nautilus_directory_monitor_add_internal
+	nemo_directory_monitor_add_internal
 		(directory, NULL,
 		 client,
 		 monitor_hidden_files,
@@ -101,48 +101,48 @@ vfs_file_monitor_add (NautilusDirectory *directory,
 }
 
 static void
-vfs_file_monitor_remove (NautilusDirectory *directory,
+vfs_file_monitor_remove (NemoDirectory *directory,
 			 gconstpointer client)
 {
-	g_assert (NAUTILUS_IS_VFS_DIRECTORY (directory));
+	g_assert (NEMO_IS_VFS_DIRECTORY (directory));
 	g_assert (client != NULL);
 	
-	nautilus_directory_monitor_remove_internal (directory, NULL, client);
+	nemo_directory_monitor_remove_internal (directory, NULL, client);
 }
 
 static void
-vfs_force_reload (NautilusDirectory *directory)
+vfs_force_reload (NemoDirectory *directory)
 {
-	NautilusFileAttributes all_attributes;
+	NemoFileAttributes all_attributes;
 
-	g_assert (NAUTILUS_IS_DIRECTORY (directory));
+	g_assert (NEMO_IS_DIRECTORY (directory));
 
-	all_attributes = nautilus_file_get_all_attributes ();
-	nautilus_directory_force_reload_internal (directory,
+	all_attributes = nemo_file_get_all_attributes ();
+	nemo_directory_force_reload_internal (directory,
 						  all_attributes);
 }
 
 static gboolean
-vfs_are_all_files_seen (NautilusDirectory *directory)
+vfs_are_all_files_seen (NemoDirectory *directory)
 {
-	g_assert (NAUTILUS_IS_VFS_DIRECTORY (directory));
+	g_assert (NEMO_IS_VFS_DIRECTORY (directory));
 	
 	return directory->details->directory_loaded;
 }
 
 static gboolean
-vfs_is_not_empty (NautilusDirectory *directory)
+vfs_is_not_empty (NemoDirectory *directory)
 {
-	g_assert (NAUTILUS_IS_VFS_DIRECTORY (directory));
-	g_assert (nautilus_directory_is_anyone_monitoring_file_list (directory));
+	g_assert (NEMO_IS_VFS_DIRECTORY (directory));
+	g_assert (nemo_directory_is_anyone_monitoring_file_list (directory));
 
 	return directory->details->file_list != NULL;
 }
 
 static void
-nautilus_vfs_directory_class_init (NautilusVFSDirectoryClass *klass)
+nemo_vfs_directory_class_init (NemoVFSDirectoryClass *klass)
 {
-	NautilusDirectoryClass *directory_class = NAUTILUS_DIRECTORY_CLASS (klass);
+	NemoDirectoryClass *directory_class = NEMO_DIRECTORY_CLASS (klass);
 
 	directory_class->contains_file = vfs_contains_file;
 	directory_class->call_when_ready = vfs_call_when_ready;

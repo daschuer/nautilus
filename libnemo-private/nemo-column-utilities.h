@@ -1,6 +1,6 @@
 /* -*- Mode: C; indent-tabs-mode: t; c-basic-offset: 8; tab-width: 8 -*- */
 
-/* nautilus-column-utilities.h - Utilities related to column specifications
+/* nemo-column-utilities.h - Utilities related to column specifications
 
    Copyright (C) 2004 Novell, Inc.
 
@@ -22,20 +22,20 @@
    Authors: Dave Camp <dave@ximian.com>
 */
 
-#ifndef NAUTILUS_COLUMN_UTILITIES_H
-#define NAUTILUS_COLUMN_UTILITIES_H
+#ifndef NEMO_COLUMN_UTILITIES_H
+#define NEMO_COLUMN_UTILITIES_H
 
-#include <libnautilus-extension/nautilus-column.h>
-#include <libnautilus-private/nautilus-file.h>
+#include <libnemo-extension/nemo-column.h>
+#include <libnemo-private/nemo-file.h>
 
-GList *nautilus_get_all_columns       (void);
-GList *nautilus_get_common_columns    (void);
-GList *nautilus_get_columns_for_file (NautilusFile *file);
-GList *nautilus_column_list_copy      (GList       *columns);
-void   nautilus_column_list_free      (GList       *columns);
+GList *nemo_get_all_columns       (void);
+GList *nemo_get_common_columns    (void);
+GList *nemo_get_columns_for_file (NemoFile *file);
+GList *nemo_column_list_copy      (GList       *columns);
+void   nemo_column_list_free      (GList       *columns);
 
-GList *nautilus_sort_columns          (GList       *columns,
+GList *nemo_sort_columns          (GList       *columns,
 				       char       **column_order);
 
 
-#endif /* NAUTILUS_COLUMN_UTILITIES_H */
+#endif /* NEMO_COLUMN_UTILITIES_H */

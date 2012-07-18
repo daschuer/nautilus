@@ -1,6 +1,6 @@
 /* -*- Mode: C; indent-tabs-mode: t; c-basic-offset: 8; tab-width: 8 -*- */
 /*
- * nautilus-progress-ui-handler.c: file operation progress user interface.
+ * nemo-progress-ui-handler.c: file operation progress user interface.
  *
  * Copyright (C) 2007, 2011 Red Hat, Inc.
  *
@@ -26,20 +26,25 @@
 
 #include <config.h>
 
-#include "nautilus-progress-ui-handler.h"
+#include "nemo-progress-ui-handler.h"
 
-#include "nautilus-application.h"
-#include "nautilus-progress-info-widget.h"
+#include "nemo-application.h"
+#include "nemo-progress-info-widget.h"
 
 #include <glib/gi18n.h>
 
-#include <libnautilus-private/nautilus-progress-info.h>
-#include <libnautilus-private/nautilus-progress-info-manager.h>
+#include <libnemo-private/nemo-progress-info.h>
+#include <libnemo-private/nemo-progress-info-manager.h>
 
 #include <libnotify/notify.h>
 
-struct _NautilusProgressUIHandlerPriv {
-	NautilusProgressInfoManager *manager;
+#ifdef HAVE_UNITY
+#include <unity.h>
+#include "unity-quicklist-handler.h"
+#endif
+
+struct _NemoProgressUIHandlerPriv {
+	NemoProgressInfoManager *manager;
 
 	GtkWidget *progress_window;
 	GtkWidget *window_vbox;
@@ -47,9 +52,12 @@ struct _NautilusProgressUIHandlerPriv {
 
 	NotifyNotification *progress_notification;
 	GtkStatusIcon *status_icon;
+#ifdef HAVE_UNITY
+	UnityQuicklistHandler *unity_quicklist_handler;
+#endif
 };
 
-G_DEFINE_TYPE (NautilusProgressUIHandler, nautilus_progress_ui_handler, G_TYPE_OBJECT);
+G_DEFINE_TYPE (NemoProgressUIHandler, nemo_progress_ui_handler, G_TYPE_OBJECT);
 
 /* Our policy for showing progress notification is the following:
  * - file operations that end within two seconds do not get notified in any way
@@ -74,7 +82,7 @@ static gboolean server_has_persistence (void);
 
 static void
 status_icon_activate_cb (GtkStatusIcon *icon,
-			 NautilusProgressUIHandler *self)
+			 NemoProgressUIHandler *self)
 {	
 	gtk_status_icon_set_visible (icon, FALSE);
 	gtk_window_present (GTK_WINDOW (self->priv->progress_window));
@@ -85,7 +93,7 @@ notification_show_details_cb (NotifyNotification *notification,
 			      char *action_name,
 			      gpointer user_data)
 {
-	NautilusProgressUIHandler *self = user_data;
+	NemoProgressUIHandler *self = user_data;
 
 
 	if (g_strcmp0 (action_name, ACTION_DETAILS) != 0) {
@@ -97,7 +105,7 @@ notification_show_details_cb (NotifyNotification *notification,
 }
 
 static void
-progress_ui_handler_ensure_notification (NautilusProgressUIHandler *self)
+progress_ui_handler_ensure_notification (NemoProgressUIHandler *self)
 {
 	NotifyNotification *notify;
 
@@ -121,7 +129,7 @@ progress_ui_handler_ensure_notification (NautilusProgressUIHandler *self)
 }
 
 static void
-progress_ui_handler_ensure_status_icon (NautilusProgressUIHandler *self)
+progress_ui_handler_ensure_status_icon (NemoProgressUIHandler *self)
 {
 	GIcon *icon;
 	GtkStatusIcon *status_icon;
@@ -143,7 +151,7 @@ progress_ui_handler_ensure_status_icon (NautilusProgressUIHandler *self)
 }
 
 static void
-progress_ui_handler_update_notification (NautilusProgressUIHandler *self)
+progress_ui_handler_update_notification (NemoProgressUIHandler *self)
 {
 	gchar *body;
 
@@ -165,7 +173,7 @@ progress_ui_handler_update_notification (NautilusProgressUIHandler *self)
 }
 
 static void
-progress_ui_handler_update_status_icon (NautilusProgressUIHandler *self)
+progress_ui_handler_update_status_icon (NemoProgressUIHandler *self)
 {
 	gchar *tooltip;
 
@@ -181,10 +189,212 @@ progress_ui_handler_update_status_icon (NautilusProgressUIHandler *self)
 	gtk_status_icon_set_visible (self->priv->status_icon, TRUE);
 }
 
+#ifdef HAVE_UNITY
+
+static void
+progress_ui_handler_unity_progress_changed (NemoProgressInfo *info,
+                                            NemoProgressUIHandler *self)
+{
+	g_return_if_fail (self);
+	g_return_if_fail (self->priv->unity_quicklist_handler);
+	g_return_if_fail (self->priv->manager);
+
+	GList *infos, *l;
+	double progress = 0;
+	double c, current = 0;
+	double t, total = 0;
+
+	infos = nemo_progress_info_manager_get_all_infos (self->priv->manager);
+
+	for (l = infos; l; l = l->next) {
+		NemoProgressInfo *i = l->data;
+		c = nemo_progress_info_get_current (i);
+		t = nemo_progress_info_get_total (i);
+
+		if (c < 0) c = 0;
+		if (t <= 0) continue;
+
+		total += t;
+		current += c;
+	}
+
+	if (current >= 0 && total > 0)
+		progress = current / total;
+
+	if (progress > 1.0)
+		progress = 1.0;
+
+	for (l = unity_quicklist_get_launcher_entries (self->priv->unity_quicklist_handler); l; l = l->next) {
+		UnityLauncherEntry *entry = l->data;
+		unity_launcher_entry_set_progress (entry, progress);
+	}
+}
+
+static gboolean
+progress_ui_handler_disable_unity_urgency (UnityLauncherEntry *entry)
+{
+	g_return_if_fail (entry);
+
+	unity_launcher_entry_set_urgent (entry, FALSE);
+	return FALSE;
+}
+
+static void
+progress_ui_handler_unity_quicklist_show_activated (DbusmenuMenuitem *menu,
+                                                    guint timestamp,
+                                                    NemoProgressUIHandler *self)
+{
+	g_return_if_fail (self);
+
+	if (!gtk_widget_get_visible (self->priv->progress_window)) {
+		gtk_window_present (GTK_WINDOW (self->priv->progress_window));
+	} else {
+		gtk_window_set_keep_above (GTK_WINDOW (self->priv->progress_window), TRUE);
+		gtk_window_set_keep_above (GTK_WINDOW (self->priv->progress_window), FALSE);
+	}
+}
+
+static void
+progress_ui_handler_unity_quicklist_cancel_activated (DbusmenuMenuitem *menu,
+                                                      guint timestamp,
+                                                      NemoProgressUIHandler *self)
+{
+	g_return_if_fail (self);
+	g_return_if_fail (self->priv->manager);
+
+	GList *infos, *l;
+	infos = nemo_progress_info_manager_get_all_infos (self->priv->manager);
+
+	for (l = infos; l; l = l->next) {
+		NemoProgressInfo *info = l->data;
+		nemo_progress_info_cancel (info);
+	}
+}
+
+static DbusmenuMenuitem *
+progress_ui_handler_build_unity_quicklist (NemoProgressUIHandler *self)
+{
+	g_return_if_fail (self);
+	GList *l;
+
+	for (l = unity_quicklist_get_launcher_entries (self->priv->unity_quicklist_handler); l; l = l->next) {
+		UnityLauncherEntry *entry = l->data;
+
+		DbusmenuMenuitem *quickmenu = dbusmenu_menuitem_new ();
+		dbusmenu_menuitem_property_set (quickmenu,
+		                                DBUSMENU_MENUITEM_PROP_LABEL,
+			                            UNITY_QUICKLIST_SHOW_COPY_DIALOG);
+		dbusmenu_menuitem_property_set_bool (quickmenu,
+		                                     DBUSMENU_MENUITEM_PROP_VISIBLE, FALSE);
+		unity_quicklist_handler_append_menuitem (entry, quickmenu);
+		g_signal_connect (quickmenu, DBUSMENU_MENUITEM_SIGNAL_ITEM_ACTIVATED,
+		                  (GCallback) progress_ui_handler_unity_quicklist_show_activated,
+			              self);
+
+		quickmenu = dbusmenu_menuitem_new ();
+		dbusmenu_menuitem_property_set (quickmenu,
+			                            DBUSMENU_MENUITEM_PROP_LABEL,
+				                        UNITY_QUICKLIST_CANCEL_COPY);
+		dbusmenu_menuitem_property_set_bool (quickmenu,
+		                                     DBUSMENU_MENUITEM_PROP_VISIBLE, FALSE);
+		unity_quicklist_handler_append_menuitem (entry, quickmenu);
+		g_signal_connect (quickmenu, DBUSMENU_MENUITEM_SIGNAL_ITEM_ACTIVATED,
+		                  (GCallback) progress_ui_handler_unity_quicklist_cancel_activated,
+			              self);
+	}
+}
+
+static void
+progress_ui_handler_show_unity_quicklist (NemoProgressUIHandler *self,
+                                          UnityLauncherEntry *entry,
+                                          gboolean show)
+{
+	g_return_if_fail (self);
+	g_return_if_fail (entry);
+
+	DbusmenuMenuitem *ql;
+	GList *children, *l;
+
+	ql = unity_launcher_entry_get_quicklist (entry);
+	children = dbusmenu_menuitem_get_children (ql);
+
+	for (l = children; l; l = l->next) {
+		DbusmenuMenuitem *child = l->data;
+		if (unity_quicklist_handler_menuitem_is_progress_item (child))
+			dbusmenu_menuitem_property_set_bool(child,
+	                                    DBUSMENU_MENUITEM_PROP_VISIBLE, show);
+	}
+}
+
+static void
+progress_ui_handler_update_unity_launcher_entry (NemoProgressUIHandler *self,
+                                                 NemoProgressInfo *info,
+                                                 UnityLauncherEntry *entry)
+{
+	g_return_if_fail (self);
+	g_return_if_fail (entry);
+
+	if (self->priv->active_infos > 0) {
+		unity_launcher_entry_set_progress_visible (entry, TRUE);
+		progress_ui_handler_show_unity_quicklist (self, entry, TRUE);
+		progress_ui_handler_unity_progress_changed (NULL, self);
+
+		if (self->priv->active_infos > 1) {
+			unity_launcher_entry_set_count (entry, self->priv->active_infos);
+			unity_launcher_entry_set_count_visible (entry, TRUE);
+		} else {
+			unity_launcher_entry_set_count_visible (entry, FALSE);
+		}
+	} else {
+		unity_launcher_entry_set_progress_visible (entry, FALSE);
+		unity_launcher_entry_set_progress (entry, 0.0);
+		unity_launcher_entry_set_count_visible (entry, FALSE);
+		progress_ui_handler_show_unity_quicklist (self, entry, FALSE);
+		GCancellable *pc = nemo_progress_info_get_cancellable (info);
+
+		if (!g_cancellable_is_cancelled (pc)) {
+			unity_launcher_entry_set_urgent (entry, TRUE);
+
+			g_timeout_add_seconds (2, (GSourceFunc)
+				               progress_ui_handler_disable_unity_urgency,
+					       entry);
+		}
+	}
+}
+
+static void
+progress_ui_handler_update_unity_launcher (NemoProgressUIHandler *self,
+                                           NemoProgressInfo *info,
+                                           gboolean added)
+{
+	g_return_if_fail (self);
+	GList *l;
+
+	if (!self->priv->unity_quicklist_handler) {
+		self->priv->unity_quicklist_handler = unity_quicklist_handler_get_singleton ();
+		if (!self->priv->unity_quicklist_handler)
+			return;
+
+		progress_ui_handler_build_unity_quicklist (self);
+	}
+
+	for (l = unity_quicklist_get_launcher_entries (self->priv->unity_quicklist_handler); l; l = l->next) {
+		UnityLauncherEntry *entry = l->data;
+		progress_ui_handler_update_unity_launcher_entry (self, info, entry);
+	}
+
+	if (added) {
+		g_signal_connect (info, "progress-changed",
+				  (GCallback) progress_ui_handler_unity_progress_changed,
+				  self);
+	}
+}
+#endif
+
 static gboolean
 progress_window_delete_event (GtkWidget *widget,
 			      GdkEvent *event,
-			      NautilusProgressUIHandler *self)
+			      NemoProgressUIHandler *self)
 {
 	gtk_widget_hide (widget);
 
@@ -198,9 +408,10 @@ progress_window_delete_event (GtkWidget *widget,
 }
 
 static void
-progress_ui_handler_ensure_window (NautilusProgressUIHandler *self)
+progress_ui_handler_ensure_window (NemoProgressUIHandler *self)
 {
 	GtkWidget *vbox, *progress_window;
+	const gchar *desktop_environment = g_getenv ("DESKTOP_SESSION");
 	
 	if (self->priv->progress_window != NULL) {
 		return;
@@ -215,11 +426,15 @@ progress_ui_handler_ensure_window (NautilusProgressUIHandler *self)
 	gtk_window_set_title (GTK_WINDOW (progress_window),
 			      _("File Operations"));
 	gtk_window_set_wmclass (GTK_WINDOW (progress_window),
-				"file_progress", "Nautilus");
+				"file_progress", "Nemo");
 	gtk_window_set_position (GTK_WINDOW (progress_window),
 				 GTK_WIN_POS_CENTER);
 	gtk_window_set_icon_name (GTK_WINDOW (progress_window),
 				"system-file-manager");
+	if ((!g_strcmp0(desktop_environment, "ubuntu")) ||
+	       (!g_strcmp0(desktop_environment, "ubuntu-2d")))
+	    gtk_window_set_skip_taskbar_hint (GTK_WINDOW (progress_window),
+				TRUE);
 
 	vbox = gtk_box_new (GTK_ORIENTATION_VERTICAL, 0);
 	gtk_box_set_spacing (GTK_BOX (vbox), 5);
@@ -234,7 +449,7 @@ progress_ui_handler_ensure_window (NautilusProgressUIHandler *self)
 }
 
 static void
-progress_ui_handler_update_notification_or_status (NautilusProgressUIHandler *self)
+progress_ui_handler_update_notification_or_status (NemoProgressUIHandler *self)
 {
 	if (server_has_persistence ()) {
 		progress_ui_handler_update_notification (self);
@@ -244,12 +459,12 @@ progress_ui_handler_update_notification_or_status (NautilusProgressUIHandler *se
 }
 
 static void
-progress_ui_handler_add_to_window (NautilusProgressUIHandler *self,
-				   NautilusProgressInfo *info)
+progress_ui_handler_add_to_window (NemoProgressUIHandler *self,
+				   NemoProgressInfo *info)
 {
 	GtkWidget *progress;
 
-	progress = nautilus_progress_info_widget_new (info);
+	progress = nemo_progress_info_widget_new (info);
 	progress_ui_handler_ensure_window (self);
 
 	gtk_box_pack_start (GTK_BOX (self->priv->window_vbox),
@@ -260,7 +475,7 @@ progress_ui_handler_add_to_window (NautilusProgressUIHandler *self,
 }
 
 static void
-progress_ui_handler_show_complete_notification (NautilusProgressUIHandler *self)
+progress_ui_handler_show_complete_notification (NemoProgressUIHandler *self)
 {
 	NotifyNotification *complete_notification;
 
@@ -278,7 +493,7 @@ progress_ui_handler_show_complete_notification (NautilusProgressUIHandler *self)
 }
 
 static void
-progress_ui_handler_hide_notification_or_status (NautilusProgressUIHandler *self)
+progress_ui_handler_hide_notification_or_status (NemoProgressUIHandler *self)
 {
 	if (self->priv->status_icon != NULL) {
 		gtk_status_icon_set_visible (self->priv->status_icon, FALSE);
@@ -291,8 +506,8 @@ progress_ui_handler_hide_notification_or_status (NautilusProgressUIHandler *self
 }
 
 static void
-progress_info_finished_cb (NautilusProgressInfo *info,
-			   NautilusProgressUIHandler *self)
+progress_info_finished_cb (NemoProgressInfo *info,
+			   NemoProgressUIHandler *self)
 {
 	self->priv->active_infos--;
 
@@ -308,11 +523,15 @@ progress_info_finished_cb (NautilusProgressInfo *info,
 			progress_ui_handler_show_complete_notification (self);
 		}
 	}
+
+#ifdef HAVE_UNITY
+	progress_ui_handler_update_unity_launcher (self, info, FALSE);
+#endif
 }
 
 static void
-handle_new_progress_info (NautilusProgressUIHandler *self,
-			  NautilusProgressInfo *info)
+handle_new_progress_info (NemoProgressUIHandler *self,
+			  NemoProgressInfo *info)
 {
 	g_signal_connect (info, "finished",
 			  G_CALLBACK (progress_info_finished_cb), self);
@@ -330,11 +549,15 @@ handle_new_progress_info (NautilusProgressUIHandler *self,
 			progress_ui_handler_update_notification_or_status (self);
 		}
 	}
+
+#ifdef HAVE_UNITY
+	progress_ui_handler_update_unity_launcher (self, info, TRUE);
+#endif
 }
 
 typedef struct {
-	NautilusProgressInfo *info;
-	NautilusProgressUIHandler *self;
+	NemoProgressInfo *info;
+	NemoProgressUIHandler *self;
 } TimeoutData;
 
 static void
@@ -347,8 +570,8 @@ timeout_data_free (TimeoutData *data)
 }
 
 static TimeoutData *
-timeout_data_new (NautilusProgressUIHandler *self,
-		  NautilusProgressInfo *info)
+timeout_data_new (NemoProgressUIHandler *self,
+		  NemoProgressInfo *info)
 {
 	TimeoutData *retval;
 
@@ -362,14 +585,14 @@ timeout_data_new (NautilusProgressUIHandler *self,
 static gboolean
 new_op_started_timeout (TimeoutData *data)
 {
-	NautilusProgressInfo *info = data->info;
-	NautilusProgressUIHandler *self = data->self;
+	NemoProgressInfo *info = data->info;
+	NemoProgressUIHandler *self = data->self;
 
-	if (nautilus_progress_info_get_is_paused (info)) {
+	if (nemo_progress_info_get_is_paused (info)) {
 		return TRUE;
 	}
 
-	if (!nautilus_progress_info_get_is_finished (info)) {
+	if (!nemo_progress_info_get_is_finished (info)) {
 		handle_new_progress_info (self, info);
 	}
 
@@ -379,25 +602,25 @@ new_op_started_timeout (TimeoutData *data)
 }
 
 static void
-release_application (NautilusProgressInfo *info,
-		     NautilusProgressUIHandler *self)
+release_application (NemoProgressInfo *info,
+		     NemoProgressUIHandler *self)
 {
-	NautilusApplication *app;
+	NemoApplication *app;
 
 	/* release the GApplication hold we acquired */
-	app = nautilus_application_get_singleton ();
+	app = nemo_application_get_singleton ();
 	g_application_release (G_APPLICATION (app));
 }
 
 static void
-progress_info_started_cb (NautilusProgressInfo *info,
-			  NautilusProgressUIHandler *self)
+progress_info_started_cb (NemoProgressInfo *info,
+			  NemoProgressUIHandler *self)
 {
-	NautilusApplication *app;
+	NemoApplication *app;
 	TimeoutData *data;
 
 	/* hold GApplication so we never quit while there's an operation pending */
-	app = nautilus_application_get_singleton ();
+	app = nemo_application_get_singleton ();
 	g_application_hold (G_APPLICATION (app));
 
 	g_signal_connect (info, "finished",
@@ -412,22 +635,22 @@ progress_info_started_cb (NautilusProgressInfo *info,
 }
 
 static void
-new_progress_info_cb (NautilusProgressInfoManager *manager,
-		      NautilusProgressInfo *info,
-		      NautilusProgressUIHandler *self)
+new_progress_info_cb (NemoProgressInfoManager *manager,
+		      NemoProgressInfo *info,
+		      NemoProgressUIHandler *self)
 {
 	g_signal_connect (info, "started",
 			  G_CALLBACK (progress_info_started_cb), self);
 }
 
 static void
-nautilus_progress_ui_handler_dispose (GObject *obj)
+nemo_progress_ui_handler_dispose (GObject *obj)
 {
-	NautilusProgressUIHandler *self = NAUTILUS_PROGRESS_UI_HANDLER (obj);
+	NemoProgressUIHandler *self = NEMO_PROGRESS_UI_HANDLER (obj);
 
 	g_clear_object (&self->priv->manager);
 
-	G_OBJECT_CLASS (nautilus_progress_ui_handler_parent_class)->dispose (obj);
+	G_OBJECT_CLASS (nemo_progress_ui_handler_parent_class)->dispose (obj);
 }
 
 static gboolean
@@ -456,29 +679,29 @@ server_has_persistence (void)
 }
 
 static void
-nautilus_progress_ui_handler_init (NautilusProgressUIHandler *self)
+nemo_progress_ui_handler_init (NemoProgressUIHandler *self)
 {
-	self->priv = G_TYPE_INSTANCE_GET_PRIVATE (self, NAUTILUS_TYPE_PROGRESS_UI_HANDLER,
-						  NautilusProgressUIHandlerPriv);
+	self->priv = G_TYPE_INSTANCE_GET_PRIVATE (self, NEMO_TYPE_PROGRESS_UI_HANDLER,
+						  NemoProgressUIHandlerPriv);
 
-	self->priv->manager = nautilus_progress_info_manager_new ();
+	self->priv->manager = nemo_progress_info_manager_new ();
 	g_signal_connect (self->priv->manager, "new-progress-info",
 			  G_CALLBACK (new_progress_info_cb), self);
 }
 
 static void
-nautilus_progress_ui_handler_class_init (NautilusProgressUIHandlerClass *klass)
+nemo_progress_ui_handler_class_init (NemoProgressUIHandlerClass *klass)
 {
 	GObjectClass *oclass;
 
 	oclass = G_OBJECT_CLASS (klass);
-	oclass->dispose = nautilus_progress_ui_handler_dispose;
+	oclass->dispose = nemo_progress_ui_handler_dispose;
 	
-	g_type_class_add_private (klass, sizeof (NautilusProgressUIHandlerPriv));
+	g_type_class_add_private (klass, sizeof (NemoProgressUIHandlerPriv));
 }
 
-NautilusProgressUIHandler *
-nautilus_progress_ui_handler_new (void)
+NemoProgressUIHandler *
+nemo_progress_ui_handler_new (void)
 {
-	return g_object_new (NAUTILUS_TYPE_PROGRESS_UI_HANDLER, NULL);
+	return g_object_new (NEMO_TYPE_PROGRESS_UI_HANDLER, NULL);
 }

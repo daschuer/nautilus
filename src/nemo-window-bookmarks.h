@@ -1,16 +1,16 @@
 /* -*- Mode: C; indent-tabs-mode: t; c-basic-offset: 8; tab-width: 8 -*- */
 
 /*
- * Nautilus
+ * Nemo
  *
  * Copyright (C) 2005 Red Hat, Inc.
  *
- * Nautilus is free software; you can redistribute it and/or
+ * Nemo is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
  * published by the Free Software Foundation; either version 2 of the
  * License, or (at your option) any later version.
  *
- * Nautilus is distributed in the hope that it will be useful,
+ * Nemo is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
  * General Public License for more details.
@@ -22,16 +22,16 @@
  * Author:  Alexander Larsson <alexl@redhat.com>
  */
 
-#ifndef NAUTILUS_WINDOW_BOOKMARKS_H
-#define NAUTILUS_WINDOW_BOOKMARKS_H
+#ifndef NEMO_WINDOW_BOOKMARKS_H
+#define NEMO_WINDOW_BOOKMARKS_H
 
-#include <libnautilus-private/nautilus-bookmark.h>
-#include <nautilus-window.h>
-#include "nautilus-bookmark-list.h"
+#include <libnemo-private/nemo-bookmark.h>
+#include <nemo-window.h>
+#include "nemo-bookmark-list.h"
 
-void                  nautilus_bookmarks_exiting                        (void);
-void                  nautilus_window_add_bookmark_for_current_location (NautilusWindow *window);
-void                  nautilus_window_edit_bookmarks                    (NautilusWindow *window);
-void                  nautilus_window_initialize_bookmarks_menu         (NautilusWindow *window);
+void                  nemo_bookmarks_exiting                        (void);
+void                  nemo_window_add_bookmark_for_current_location (NemoWindow *window);
+void                  nemo_window_edit_bookmarks                    (NemoWindow *window);
+void                  nemo_window_initialize_bookmarks_menu         (NemoWindow *window);
 
 #endif

@@ -24,113 +24,113 @@
 
 #include <gtk/gtk.h>
 #include <gdk/gdk.h>
-#include <libnautilus-private/nautilus-file.h>
-#include <libnautilus-private/nautilus-directory.h>
-#include <libnautilus-extension/nautilus-column.h>
+#include <libnemo-private/nemo-file.h>
+#include <libnemo-private/nemo-directory.h>
+#include <libnemo-extension/nemo-column.h>
 
-#ifndef NAUTILUS_LIST_MODEL_H
-#define NAUTILUS_LIST_MODEL_H
+#ifndef NEMO_LIST_MODEL_H
+#define NEMO_LIST_MODEL_H
 
-#define NAUTILUS_TYPE_LIST_MODEL nautilus_list_model_get_type()
-#define NAUTILUS_LIST_MODEL(obj) \
-  (G_TYPE_CHECK_INSTANCE_CAST ((obj), NAUTILUS_TYPE_LIST_MODEL, NautilusListModel))
-#define NAUTILUS_LIST_MODEL_CLASS(klass) \
-  (G_TYPE_CHECK_CLASS_CAST ((klass), NAUTILUS_TYPE_LIST_MODEL, NautilusListModelClass))
-#define NAUTILUS_IS_LIST_MODEL(obj) \
-  (G_TYPE_CHECK_INSTANCE_TYPE ((obj), NAUTILUS_TYPE_LIST_MODEL))
-#define NAUTILUS_IS_LIST_MODEL_CLASS(klass) \
-  (G_TYPE_CHECK_CLASS_TYPE ((klass), NAUTILUS_TYPE_LIST_MODEL))
-#define NAUTILUS_LIST_MODEL_GET_CLASS(obj) \
-  (G_TYPE_INSTANCE_GET_CLASS ((obj), NAUTILUS_TYPE_LIST_MODEL, NautilusListModelClass))
+#define NEMO_TYPE_LIST_MODEL nemo_list_model_get_type()
+#define NEMO_LIST_MODEL(obj) \
+  (G_TYPE_CHECK_INSTANCE_CAST ((obj), NEMO_TYPE_LIST_MODEL, NemoListModel))
+#define NEMO_LIST_MODEL_CLASS(klass) \
+  (G_TYPE_CHECK_CLASS_CAST ((klass), NEMO_TYPE_LIST_MODEL, NemoListModelClass))
+#define NEMO_IS_LIST_MODEL(obj) \
+  (G_TYPE_CHECK_INSTANCE_TYPE ((obj), NEMO_TYPE_LIST_MODEL))
+#define NEMO_IS_LIST_MODEL_CLASS(klass) \
+  (G_TYPE_CHECK_CLASS_TYPE ((klass), NEMO_TYPE_LIST_MODEL))
+#define NEMO_LIST_MODEL_GET_CLASS(obj) \
+  (G_TYPE_INSTANCE_GET_CLASS ((obj), NEMO_TYPE_LIST_MODEL, NemoListModelClass))
 
 enum {
-	NAUTILUS_LIST_MODEL_FILE_COLUMN,
-	NAUTILUS_LIST_MODEL_SUBDIRECTORY_COLUMN,
-	NAUTILUS_LIST_MODEL_SMALLEST_ICON_COLUMN,
-	NAUTILUS_LIST_MODEL_SMALLER_ICON_COLUMN,
-	NAUTILUS_LIST_MODEL_SMALL_ICON_COLUMN,
-	NAUTILUS_LIST_MODEL_STANDARD_ICON_COLUMN,
-	NAUTILUS_LIST_MODEL_LARGE_ICON_COLUMN,
-	NAUTILUS_LIST_MODEL_LARGER_ICON_COLUMN,
-	NAUTILUS_LIST_MODEL_LARGEST_ICON_COLUMN,
-	NAUTILUS_LIST_MODEL_FILE_NAME_IS_EDITABLE_COLUMN,
-	NAUTILUS_LIST_MODEL_NUM_COLUMNS
+	NEMO_LIST_MODEL_FILE_COLUMN,
+	NEMO_LIST_MODEL_SUBDIRECTORY_COLUMN,
+	NEMO_LIST_MODEL_SMALLEST_ICON_COLUMN,
+	NEMO_LIST_MODEL_SMALLER_ICON_COLUMN,
+	NEMO_LIST_MODEL_SMALL_ICON_COLUMN,
+	NEMO_LIST_MODEL_STANDARD_ICON_COLUMN,
+	NEMO_LIST_MODEL_LARGE_ICON_COLUMN,
+	NEMO_LIST_MODEL_LARGER_ICON_COLUMN,
+	NEMO_LIST_MODEL_LARGEST_ICON_COLUMN,
+	NEMO_LIST_MODEL_FILE_NAME_IS_EDITABLE_COLUMN,
+	NEMO_LIST_MODEL_NUM_COLUMNS
 };
 
-typedef struct NautilusListModelDetails NautilusListModelDetails;
+typedef struct NemoListModelDetails NemoListModelDetails;
 
-typedef struct NautilusListModel {
+typedef struct NemoListModel {
 	GObject parent_instance;
-	NautilusListModelDetails *details;
-} NautilusListModel;
+	NemoListModelDetails *details;
+} NemoListModel;
 
 typedef struct {
 	GObjectClass parent_class;
 
-	void (* subdirectory_unloaded)(NautilusListModel *model,
-				       NautilusDirectory *subdirectory);
-} NautilusListModelClass;
+	void (* subdirectory_unloaded)(NemoListModel *model,
+				       NemoDirectory *subdirectory);
+} NemoListModelClass;
 
-GType    nautilus_list_model_get_type                          (void);
-gboolean nautilus_list_model_add_file                          (NautilusListModel          *model,
-								NautilusFile         *file,
-								NautilusDirectory    *directory);
-void     nautilus_list_model_file_changed                      (NautilusListModel          *model,
-								NautilusFile         *file,
-								NautilusDirectory    *directory);
-gboolean nautilus_list_model_is_empty                          (NautilusListModel          *model);
-guint    nautilus_list_model_get_length                        (NautilusListModel          *model);
-void     nautilus_list_model_remove_file                       (NautilusListModel          *model,
-								NautilusFile         *file,
-								NautilusDirectory    *directory);
-void     nautilus_list_model_clear                             (NautilusListModel          *model);
-gboolean nautilus_list_model_get_tree_iter_from_file           (NautilusListModel          *model,
-								NautilusFile         *file,
-								NautilusDirectory    *directory,
+GType    nemo_list_model_get_type                          (void);
+gboolean nemo_list_model_add_file                          (NemoListModel          *model,
+								NemoFile         *file,
+								NemoDirectory    *directory);
+void     nemo_list_model_file_changed                      (NemoListModel          *model,
+								NemoFile         *file,
+								NemoDirectory    *directory);
+gboolean nemo_list_model_is_empty                          (NemoListModel          *model);
+guint    nemo_list_model_get_length                        (NemoListModel          *model);
+void     nemo_list_model_remove_file                       (NemoListModel          *model,
+								NemoFile         *file,
+								NemoDirectory    *directory);
+void     nemo_list_model_clear                             (NemoListModel          *model);
+gboolean nemo_list_model_get_tree_iter_from_file           (NemoListModel          *model,
+								NemoFile         *file,
+								NemoDirectory    *directory,
 								GtkTreeIter          *iter);
-GList *  nautilus_list_model_get_all_iters_for_file            (NautilusListModel          *model,
-								NautilusFile         *file);
-gboolean nautilus_list_model_get_first_iter_for_file           (NautilusListModel          *model,
-								NautilusFile         *file,
+GList *  nemo_list_model_get_all_iters_for_file            (NemoListModel          *model,
+								NemoFile         *file);
+gboolean nemo_list_model_get_first_iter_for_file           (NemoListModel          *model,
+								NemoFile         *file,
 								GtkTreeIter          *iter);
-void     nautilus_list_model_set_should_sort_directories_first (NautilusListModel          *model,
+void     nemo_list_model_set_should_sort_directories_first (NemoListModel          *model,
 								gboolean              sort_directories_first);
 
-int      nautilus_list_model_get_sort_column_id_from_attribute (NautilusListModel *model,
+int      nemo_list_model_get_sort_column_id_from_attribute (NemoListModel *model,
 								GQuark       attribute);
-GQuark   nautilus_list_model_get_attribute_from_sort_column_id (NautilusListModel *model,
+GQuark   nemo_list_model_get_attribute_from_sort_column_id (NemoListModel *model,
 								int sort_column_id);
-void     nautilus_list_model_sort_files                        (NautilusListModel *model,
+void     nemo_list_model_sort_files                        (NemoListModel *model,
 								GList **files);
 
-NautilusZoomLevel nautilus_list_model_get_zoom_level_from_column_id (int               column);
-int               nautilus_list_model_get_column_id_from_zoom_level (NautilusZoomLevel zoom_level);
+NemoZoomLevel nemo_list_model_get_zoom_level_from_column_id (int               column);
+int               nemo_list_model_get_column_id_from_zoom_level (NemoZoomLevel zoom_level);
 
-NautilusFile *    nautilus_list_model_file_for_path (NautilusListModel *model, GtkTreePath *path);
-gboolean          nautilus_list_model_load_subdirectory (NautilusListModel *model, GtkTreePath *path, NautilusDirectory **directory);
-void              nautilus_list_model_unload_subdirectory (NautilusListModel *model, GtkTreeIter *iter);
+NemoFile *    nemo_list_model_file_for_path (NemoListModel *model, GtkTreePath *path);
+gboolean          nemo_list_model_load_subdirectory (NemoListModel *model, GtkTreePath *path, NemoDirectory **directory);
+void              nemo_list_model_unload_subdirectory (NemoListModel *model, GtkTreeIter *iter);
 
-void              nautilus_list_model_set_drag_view (NautilusListModel *model,
+void              nemo_list_model_set_drag_view (NemoListModel *model,
 						     GtkTreeView *view,
 						     int begin_x, 
 						     int begin_y);
 
-GtkTargetList *   nautilus_list_model_get_drag_target_list (void);
+GtkTargetList *   nemo_list_model_get_drag_target_list (void);
 
-int               nautilus_list_model_compare_func (NautilusListModel *model,
-						    NautilusFile *file1,
-						    NautilusFile *file2);
+int               nemo_list_model_compare_func (NemoListModel *model,
+						    NemoFile *file1,
+						    NemoFile *file2);
 
 
-int               nautilus_list_model_add_column (NautilusListModel *model,
-						  NautilusColumn *column);
-int               nautilus_list_model_get_column_number (NautilusListModel *model,
+int               nemo_list_model_add_column (NemoListModel *model,
+						  NemoColumn *column);
+int               nemo_list_model_get_column_number (NemoListModel *model,
 							 const char *column_name);
 
-void              nautilus_list_model_subdirectory_done_loading (NautilusListModel       *model,
-								 NautilusDirectory *directory);
+void              nemo_list_model_subdirectory_done_loading (NemoListModel       *model,
+								 NemoDirectory *directory);
 
-void              nautilus_list_model_set_highlight_for_files (NautilusListModel *model,
+void              nemo_list_model_set_highlight_for_files (NemoListModel *model,
 							       GList *files);
 						   
-#endif /* NAUTILUS_LIST_MODEL_H */
+#endif /* NEMO_LIST_MODEL_H */

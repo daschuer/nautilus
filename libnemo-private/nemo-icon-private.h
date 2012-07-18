@@ -22,22 +22,22 @@
    Author: Ettore Perazzoli <ettore@gnu.org>
 */
 
-#ifndef NAUTILUS_ICON_CONTAINER_PRIVATE_H
-#define NAUTILUS_ICON_CONTAINER_PRIVATE_H
+#ifndef NEMO_ICON_CONTAINER_PRIVATE_H
+#define NEMO_ICON_CONTAINER_PRIVATE_H
 
 #include <eel/eel-glib-extensions.h>
-#include <libnautilus-private/nautilus-icon-canvas-item.h>
-#include <libnautilus-private/nautilus-icon-container.h>
-#include <libnautilus-private/nautilus-icon-dnd.h>
+#include <libnemo-private/nemo-icon-canvas-item.h>
+#include <libnemo-private/nemo-icon-container.h>
+#include <libnemo-private/nemo-icon-dnd.h>
 
 /* An Icon. */
 
 typedef struct {
 	/* Object represented by this icon. */
-	NautilusIconData *data;
+	NemoIconData *data;
 
 	/* Canvas item for the icon. */
-	NautilusIconCanvasItem *item;
+	NemoIconCanvasItem *item;
 
 	/* X/Y coordinates. */
 	double x, y;
@@ -46,7 +46,7 @@ typedef struct {
 	 * In RTL mode x is RTL x position, we use saved_ltr_x for
 	 * keeping track of x value before it gets converted into
 	 * RTL value, this is used for saving the icon position 
-	 * to the nautilus metafile. 
+	 * to the nemo metafile. 
 	 */
 	 double saved_ltr_x;
 	
@@ -66,10 +66,10 @@ typedef struct {
 	eel_boolean_bit is_monitored : 1;
 
 	eel_boolean_bit has_lazy_position : 1;
-} NautilusIcon;
+} NemoIcon;
 
 
-/* Private NautilusIconContainer members. */
+/* Private NemoIconContainer members. */
 
 typedef struct {
 	gboolean active;
@@ -84,7 +84,7 @@ typedef struct {
 	EelDRect prev_rect;
 	int last_adj_x;
 	int last_adj_y;
-} NautilusIconRubberbandInfo;
+} NemoIconRubberbandInfo;
 
 typedef enum {
 	DRAG_STATE_INITIAL,
@@ -118,33 +118,33 @@ enum {
 	LAST_LABEL_COLOR
 };
 
-struct NautilusIconContainerDetails {
+struct NemoIconContainerDetails {
 	/* List of icons. */
 	GList *icons;
 	GList *new_icons;
 	GHashTable *icon_set;
 
 	/* Current icon for keyboard navigation. */
-	NautilusIcon *keyboard_focus;
-	NautilusIcon *keyboard_rubberband_start;
+	NemoIcon *keyboard_focus;
+	NemoIcon *keyboard_rubberband_start;
 
 	/* Current icon with stretch handles, so we have only one. */
-	NautilusIcon *stretch_icon;
+	NemoIcon *stretch_icon;
 	double stretch_initial_x, stretch_initial_y;
 	guint stretch_initial_size;
 	
 	/* Last highlighted drop target. */
-	NautilusIcon *drop_target;
+	NemoIcon *drop_target;
 
 	/* Rubberbanding status. */
-	NautilusIconRubberbandInfo rubberband_info;
+	NemoIconRubberbandInfo rubberband_info;
 
 	/* Timeout used to make a selected icon fully visible after a short
 	 * period of time. (The timeout is needed to make sure
 	 * double-clicking still works.)
 	 */
 	guint keyboard_icon_reveal_timer_id;
-	NautilusIcon *keyboard_icon_to_reveal;
+	NemoIcon *keyboard_icon_to_reveal;
 
 	/* Used to coalesce selection changed signals in some cases */
 	guint selection_changed_id;
@@ -152,19 +152,19 @@ struct NautilusIconContainerDetails {
 	/* If a request is made to reveal an unpositioned icon we remember
 	 * it and reveal it once it gets positioned (in relayout).
 	 */
-	NautilusIcon *pending_icon_to_reveal;
+	NemoIcon *pending_icon_to_reveal;
 
 	/* If a request is made to rename an unpositioned icon we remember
 	 * it and start renaming it once it gets positioned (in relayout).
 	 */
-	NautilusIcon *pending_icon_to_rename;
+	NemoIcon *pending_icon_to_rename;
 
 	/* Remembered information about the start of the current event. */
 	guint32 button_down_time;
 	
 	/* Drag state. Valid only if drag_button is non-zero. */
 	guint drag_button;
-	NautilusIcon *drag_icon;
+	NemoIcon *drag_icon;
 	int drag_x, drag_y;
 	DragState drag_state;
 	gboolean drag_started;
@@ -172,10 +172,10 @@ struct NautilusIconContainerDetails {
 	gboolean drag_allow_moves;
 
 	gboolean icon_selected_on_button_down;
-	NautilusIcon *double_click_icon[2]; /* Both clicks in a double click need to be on the same icon */
+	NemoIcon *double_click_icon[2]; /* Both clicks in a double click need to be on the same icon */
 	guint double_click_button[2];
 
-	NautilusIcon *range_selection_base_icon;
+	NemoIcon *range_selection_base_icon;
 	
 	/* Renaming Details */
 	gboolean renaming;
@@ -192,7 +192,7 @@ struct NautilusIconContainerDetails {
 	guint align_idle_id;
 
 	/* DnD info. */
-	NautilusIconDndInfo *dnd_info;
+	NemoIconDndInfo *dnd_info;
 
 	/* zoom level */
 	int zoom_level;
@@ -201,7 +201,7 @@ struct NautilusIconContainerDetails {
 	char *font;
 	
 	/* font sizes used to draw labels */
-	int font_size_table[NAUTILUS_ZOOM_LEVEL_LARGEST + 1];
+	int font_size_table[NEMO_ZOOM_LEVEL_LARGEST + 1];
 
 	/* State used so arrow keys don't wander if icons aren't lined up.
 	 */
@@ -219,10 +219,10 @@ struct NautilusIconContainerDetails {
 	gboolean all_columns_same_width;
 	
 	/* Layout mode */
-	NautilusIconLayoutMode layout_mode;
+	NemoIconLayoutMode layout_mode;
 
 	/* Label position */
-	NautilusIconLabelPosition label_position;
+	NemoIconLabelPosition label_position;
 
 	/* Forced icon size, iff greater than 0 */
 	int forced_icon_size;
@@ -280,28 +280,28 @@ struct NautilusIconContainerDetails {
 };
 
 /* Private functions shared by mutiple files. */
-NautilusIcon *nautilus_icon_container_get_icon_by_uri             (NautilusIconContainer *container,
+NemoIcon *nemo_icon_container_get_icon_by_uri             (NemoIconContainer *container,
 								   const char            *uri);
-void          nautilus_icon_container_move_icon                   (NautilusIconContainer *container,
-								   NautilusIcon          *icon,
+void          nemo_icon_container_move_icon                   (NemoIconContainer *container,
+								   NemoIcon          *icon,
 								   int                    x,
 								   int                    y,
 								   double                 scale,
 								   gboolean               raise,
 								   gboolean               snap,
 								   gboolean		  update_position);
-void          nautilus_icon_container_select_list_unselect_others (NautilusIconContainer *container,
+void          nemo_icon_container_select_list_unselect_others (NemoIconContainer *container,
 								   GList                 *icons);
-char *        nautilus_icon_container_get_icon_uri                (NautilusIconContainer *container,
-								   NautilusIcon          *icon);
-char *        nautilus_icon_container_get_icon_drop_target_uri    (NautilusIconContainer *container,
-								   NautilusIcon          *icon);
-void          nautilus_icon_container_update_icon                 (NautilusIconContainer *container,
-								   NautilusIcon          *icon);
-gboolean      nautilus_icon_container_has_stored_icon_positions   (NautilusIconContainer *container);
-gboolean      nautilus_icon_container_scroll                      (NautilusIconContainer *container,
+char *        nemo_icon_container_get_icon_uri                (NemoIconContainer *container,
+								   NemoIcon          *icon);
+char *        nemo_icon_container_get_icon_drop_target_uri    (NemoIconContainer *container,
+								   NemoIcon          *icon);
+void          nemo_icon_container_update_icon                 (NemoIconContainer *container,
+								   NemoIcon          *icon);
+gboolean      nemo_icon_container_has_stored_icon_positions   (NemoIconContainer *container);
+gboolean      nemo_icon_container_scroll                      (NemoIconContainer *container,
 								   int                    delta_x,
 								   int                    delta_y);
-void          nautilus_icon_container_update_scroll_region        (NautilusIconContainer *container);
+void          nemo_icon_container_update_scroll_region        (NemoIconContainer *container);
 
-#endif /* NAUTILUS_ICON_CONTAINER_PRIVATE_H */
+#endif /* NEMO_ICON_CONTAINER_PRIVATE_H */

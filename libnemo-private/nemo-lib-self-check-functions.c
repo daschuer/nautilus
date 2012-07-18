@@ -1,7 +1,7 @@
 /* -*- Mode: C; indent-tabs-mode: t; c-basic-offset: 8; tab-width: 8 -*-
    
-   nautilus-lib-self-check-functions.c: Wrapper for all self check functions
-   in Nautilus proper.
+   nemo-lib-self-check-functions.c: Wrapper for all self check functions
+   in Nemo proper.
  
    Copyright (C) 2000 Eazel, Inc.
   
@@ -25,14 +25,14 @@
 
 #include <config.h>
 
-#if ! defined (NAUTILUS_OMIT_SELF_CHECK)
+#if ! defined (NEMO_OMIT_SELF_CHECK)
 
-#include "nautilus-lib-self-check-functions.h"
+#include "nemo-lib-self-check-functions.h"
 
 void
-nautilus_run_lib_self_checks (void)
+nemo_run_lib_self_checks (void)
 {
-	NAUTILUS_LIB_FOR_EACH_SELF_CHECK_FUNCTION (EEL_CALL_SELF_CHECK_FUNCTION)
+	NEMO_LIB_FOR_EACH_SELF_CHECK_FUNCTION (EEL_CALL_SELF_CHECK_FUNCTION)
 }
 
-#endif /* ! NAUTILUS_OMIT_SELF_CHECK */
+#endif /* ! NEMO_OMIT_SELF_CHECK */

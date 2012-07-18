@@ -1,6 +1,6 @@
 /* -*- Mode: C; indent-tabs-mode: t; c-basic-offset: 8; tab-width: 8 -*-
 
-   nautilus-desktop-directory.c: Subclass of NautilusDirectory to implement
+   nemo-desktop-directory.c: Subclass of NemoDirectory to implement
    a virtual directory consisting of the desktop directory and the desktop
    icons
  
@@ -25,27 +25,27 @@
 */
 
 #include <config.h>
-#include "nautilus-desktop-directory.h"
+#include "nemo-desktop-directory.h"
 
-#include "nautilus-directory-private.h"
-#include "nautilus-file.h"
-#include "nautilus-file-private.h"
-#include "nautilus-file-utilities.h"
-#include "nautilus-global-preferences.h"
+#include "nemo-directory-private.h"
+#include "nemo-file.h"
+#include "nemo-file-private.h"
+#include "nemo-file-utilities.h"
+#include "nemo-global-preferences.h"
 #include <gtk/gtk.h>
 
-struct NautilusDesktopDirectoryDetails {
-	NautilusDirectory *real_directory;
+struct NemoDesktopDirectoryDetails {
+	NemoDirectory *real_directory;
 	GHashTable *callbacks;
 	GHashTable *monitors;
 };
 
 typedef struct {
-	NautilusDesktopDirectory *desktop_dir;
-	NautilusDirectoryCallback callback;
+	NemoDesktopDirectory *desktop_dir;
+	NemoDirectoryCallback callback;
 	gpointer callback_data;
 
-	NautilusFileAttributes wait_for_attributes;
+	NemoFileAttributes wait_for_attributes;
 	gboolean wait_for_file_list;
 
 	GList *non_ready_directories;
@@ -54,26 +54,26 @@ typedef struct {
 
 
 typedef struct {
-	NautilusDesktopDirectory *desktop_dir;
+	NemoDesktopDirectory *desktop_dir;
 
 	gboolean monitor_hidden_files;
-	NautilusFileAttributes monitor_attributes;
+	NemoFileAttributes monitor_attributes;
 } MergedMonitor;
 
 static void desktop_directory_changed_callback (gpointer data);
 
-G_DEFINE_TYPE (NautilusDesktopDirectory, nautilus_desktop_directory,
-	       NAUTILUS_TYPE_DIRECTORY);
+G_DEFINE_TYPE (NemoDesktopDirectory, nemo_desktop_directory,
+	       NEMO_TYPE_DIRECTORY);
 
 static gboolean
-desktop_contains_file (NautilusDirectory *directory,
-		       NautilusFile *file)
+desktop_contains_file (NemoDirectory *directory,
+		       NemoFile *file)
 {
-	NautilusDesktopDirectory *desktop;
+	NemoDesktopDirectory *desktop;
 
-	desktop = NAUTILUS_DESKTOP_DIRECTORY (directory);
+	desktop = NEMO_DESKTOP_DIRECTORY (directory);
 
-	if (nautilus_directory_contains_file (desktop->details->real_directory, file)) {
+	if (nemo_directory_contains_file (desktop->details->real_directory, file)) {
 		return TRUE;
 	}
 
@@ -107,10 +107,10 @@ static void
 merged_callback_destroy (MergedCallback *merged_callback)
 {
 	g_assert (merged_callback != NULL);
-	g_assert (NAUTILUS_IS_DESKTOP_DIRECTORY (merged_callback->desktop_dir));
+	g_assert (NEMO_IS_DESKTOP_DIRECTORY (merged_callback->desktop_dir));
 
 	g_list_free (merged_callback->non_ready_directories);
-	nautilus_file_list_free (merged_callback->merged_file_list);
+	nemo_file_list_free (merged_callback->merged_file_list);
 	g_free (merged_callback);
 }
 
@@ -126,7 +126,7 @@ merged_callback_check_done (MergedCallback *merged_callback)
 	g_hash_table_steal (merged_callback->desktop_dir->details->callbacks, merged_callback);
 
 	/* We are ready, so do the real callback. */
-	(* merged_callback->callback) (NAUTILUS_DIRECTORY (merged_callback->desktop_dir),
+	(* merged_callback->callback) (NEMO_DIRECTORY (merged_callback->desktop_dir),
 				       merged_callback->merged_file_list,
 				       merged_callback->callback_data);
 
@@ -136,7 +136,7 @@ merged_callback_check_done (MergedCallback *merged_callback)
 
 static void
 merged_callback_remove_directory (MergedCallback *merged_callback,
-				  NautilusDirectory *directory)
+				  NemoDirectory *directory)
 {
 	merged_callback->non_ready_directories = g_list_remove
 		(merged_callback->non_ready_directories, directory);
@@ -144,13 +144,13 @@ merged_callback_remove_directory (MergedCallback *merged_callback,
 }
 
 static void
-directory_ready_callback (NautilusDirectory *directory,
+directory_ready_callback (NemoDirectory *directory,
 			  GList *files,
 			  gpointer callback_data)
 {
 	MergedCallback *merged_callback;
 
-	g_assert (NAUTILUS_IS_DIRECTORY (directory));
+	g_assert (NEMO_IS_DIRECTORY (directory));
 	g_assert (callback_data != NULL);
 
 	merged_callback = callback_data;
@@ -159,23 +159,23 @@ directory_ready_callback (NautilusDirectory *directory,
 	/* Update based on this call. */
 	merged_callback->merged_file_list = g_list_concat
 		(merged_callback->merged_file_list,
-		 nautilus_file_list_copy (files));
+		 nemo_file_list_copy (files));
 
 	/* Check if we are ready. */
 	merged_callback_remove_directory (merged_callback, directory);
 }
 
 static void
-desktop_call_when_ready (NautilusDirectory *directory,
-			 NautilusFileAttributes file_attributes,
+desktop_call_when_ready (NemoDirectory *directory,
+			 NemoFileAttributes file_attributes,
 			 gboolean wait_for_file_list,
-			 NautilusDirectoryCallback callback,
+			 NemoDirectoryCallback callback,
 			 gpointer callback_data)
 {
-	NautilusDesktopDirectory *desktop;
+	NemoDesktopDirectory *desktop;
 	MergedCallback search_key, *merged_callback;
 
-	desktop = NAUTILUS_DESKTOP_DIRECTORY (directory);
+	desktop = NEMO_DESKTOP_DIRECTORY (directory);
 
 	/* Check to be sure we aren't overwriting. */
 	search_key.callback = callback;
@@ -199,19 +199,19 @@ desktop_call_when_ready (NautilusDirectory *directory,
 
 
 	merged_callback->merged_file_list = g_list_concat (NULL,
-							   nautilus_file_list_copy (directory->details->file_list));
+							   nemo_file_list_copy (directory->details->file_list));
 
 	/* Put it in the hash table. */
 	g_hash_table_insert (desktop->details->callbacks,
 			     merged_callback, merged_callback);
 
 	/* Now tell all the directories about it. */
-	nautilus_directory_call_when_ready
+	nemo_directory_call_when_ready
 		(desktop->details->real_directory,
 		 merged_callback->wait_for_attributes,
 		 merged_callback->wait_for_file_list,
 		 directory_ready_callback, merged_callback);
-	nautilus_directory_call_when_ready_internal
+	nemo_directory_call_when_ready_internal
 		(directory,
 		 NULL,
 		 merged_callback->wait_for_attributes,
@@ -223,15 +223,15 @@ desktop_call_when_ready (NautilusDirectory *directory,
 }
 
 static void
-desktop_cancel_callback (NautilusDirectory *directory,
-			NautilusDirectoryCallback callback,
+desktop_cancel_callback (NemoDirectory *directory,
+			NemoDirectoryCallback callback,
 			gpointer callback_data)
 {
-	NautilusDesktopDirectory *desktop;
+	NemoDesktopDirectory *desktop;
 	MergedCallback search_key, *merged_callback;
 	GList *node;
 
-	desktop = NAUTILUS_DESKTOP_DIRECTORY (directory);
+	desktop = NEMO_DESKTOP_DIRECTORY (directory);
 
 	/* Find the entry in the table. */
 	search_key.callback = callback;
@@ -246,7 +246,7 @@ desktop_cancel_callback (NautilusDirectory *directory,
 
 	/* Tell all the directories to cancel the call. */
 	for (node = merged_callback->non_ready_directories; node != NULL; node = node->next) {
-		nautilus_directory_cancel_callback
+		nemo_directory_cancel_callback
 			(node->data,
 			 directory_ready_callback, merged_callback);
 	}
@@ -256,20 +256,20 @@ desktop_cancel_callback (NautilusDirectory *directory,
 static void
 merged_monitor_destroy (MergedMonitor *monitor)
 {
-	NautilusDesktopDirectory *desktop;
+	NemoDesktopDirectory *desktop;
 
 	desktop = monitor->desktop_dir;
 	
 	/* Call through to the real directory remove calls. */
-	nautilus_directory_file_monitor_remove (desktop->details->real_directory, monitor);
+	nemo_directory_file_monitor_remove (desktop->details->real_directory, monitor);
 
-	nautilus_directory_monitor_remove_internal (NAUTILUS_DIRECTORY (desktop), NULL, monitor);
+	nemo_directory_monitor_remove_internal (NEMO_DIRECTORY (desktop), NULL, monitor);
 	
 	g_free (monitor);
 }
 
 static void
-build_merged_callback_list (NautilusDirectory *directory,
+build_merged_callback_list (NemoDirectory *directory,
 			    GList *file_list,
 			    gpointer callback_data)
 {
@@ -277,22 +277,22 @@ build_merged_callback_list (NautilusDirectory *directory,
 
 	merged_list = callback_data;
 	*merged_list = g_list_concat (*merged_list,
-				      nautilus_file_list_copy (file_list));
+				      nemo_file_list_copy (file_list));
 }
 
 static void
-desktop_monitor_add (NautilusDirectory *directory,
+desktop_monitor_add (NemoDirectory *directory,
 		    gconstpointer client,
 		    gboolean monitor_hidden_files,
-		    NautilusFileAttributes file_attributes,
-		    NautilusDirectoryCallback callback,
+		    NemoFileAttributes file_attributes,
+		    NemoDirectoryCallback callback,
 		    gpointer callback_data)
 {
-	NautilusDesktopDirectory *desktop;
+	NemoDesktopDirectory *desktop;
 	MergedMonitor *monitor;
 	GList *merged_callback_list;
 
-	desktop = NAUTILUS_DESKTOP_DIRECTORY (directory);
+	desktop = NEMO_DESKTOP_DIRECTORY (directory);
 
 	/* Map the client to a unique value so this doesn't interfere
 	 * with direct monitoring of the directory by the same client.
@@ -313,7 +313,7 @@ desktop_monitor_add (NautilusDirectory *directory,
 	merged_callback_list = NULL;
 
 	/* Call up to real dir */
-	nautilus_directory_file_monitor_add
+	nemo_directory_file_monitor_add
 		(desktop->details->real_directory, monitor,
 		 monitor_hidden_files,
 		 file_attributes,
@@ -321,23 +321,23 @@ desktop_monitor_add (NautilusDirectory *directory,
 	
 	/* Handle the desktop part */
 	merged_callback_list = g_list_concat (merged_callback_list,
-					      nautilus_file_list_copy (directory->details->file_list));
+					      nemo_file_list_copy (directory->details->file_list));
 
 	
 	if (callback != NULL) {
 		(* callback) (directory, merged_callback_list, callback_data);
 	}
-	nautilus_file_list_free (merged_callback_list);
+	nemo_file_list_free (merged_callback_list);
 }
 
 static void
-desktop_monitor_remove (NautilusDirectory *directory,
+desktop_monitor_remove (NemoDirectory *directory,
 		       gconstpointer client)
 {
-	NautilusDesktopDirectory *desktop;
+	NemoDesktopDirectory *desktop;
 	MergedMonitor *monitor;
 	
-	desktop = NAUTILUS_DESKTOP_DIRECTORY (directory);
+	desktop = NEMO_DESKTOP_DIRECTORY (directory);
 
 	monitor = g_hash_table_lookup (desktop->details->monitors, client);
 	if (monitor == NULL) {
@@ -348,26 +348,26 @@ desktop_monitor_remove (NautilusDirectory *directory,
 }
 
 static void
-desktop_force_reload (NautilusDirectory *directory)
+desktop_force_reload (NemoDirectory *directory)
 {
-	NautilusDesktopDirectory *desktop;
+	NemoDesktopDirectory *desktop;
 
-	desktop = NAUTILUS_DESKTOP_DIRECTORY (directory);
+	desktop = NEMO_DESKTOP_DIRECTORY (directory);
 
-	nautilus_directory_force_reload (desktop->details->real_directory);
+	nemo_directory_force_reload (desktop->details->real_directory);
 
 	/* We don't invalidate the files in desktop, since they are always
 	   up to date. (And we don't ever want to mark them invalid.) */
 }
 
 static gboolean
-desktop_are_all_files_seen (NautilusDirectory *directory)
+desktop_are_all_files_seen (NemoDirectory *directory)
 {
-	NautilusDesktopDirectory *desktop;
+	NemoDesktopDirectory *desktop;
 
-	desktop = NAUTILUS_DESKTOP_DIRECTORY (directory);
+	desktop = NEMO_DESKTOP_DIRECTORY (directory);
 
-	if (!nautilus_directory_are_all_files_seen (desktop->details->real_directory)) {
+	if (!nemo_directory_are_all_files_seen (desktop->details->real_directory)) {
 		return FALSE;
 	}
 
@@ -375,13 +375,13 @@ desktop_are_all_files_seen (NautilusDirectory *directory)
 }
 
 static gboolean
-desktop_is_not_empty (NautilusDirectory *directory)
+desktop_is_not_empty (NemoDirectory *directory)
 {
-	NautilusDesktopDirectory *desktop;
+	NemoDesktopDirectory *desktop;
 
-	desktop = NAUTILUS_DESKTOP_DIRECTORY (directory);
+	desktop = NEMO_DESKTOP_DIRECTORY (directory);
 
-	if (nautilus_directory_is_not_empty (desktop->details->real_directory)) {
+	if (nemo_directory_is_not_empty (desktop->details->real_directory)) {
 		return TRUE;
 	}
 
@@ -389,21 +389,21 @@ desktop_is_not_empty (NautilusDirectory *directory)
 }
 
 static GList *
-desktop_get_file_list (NautilusDirectory *directory)
+desktop_get_file_list (NemoDirectory *directory)
 {
 	GList *real_dir_file_list, *desktop_dir_file_list = NULL;
 	
-	real_dir_file_list = nautilus_directory_get_file_list
-				(NAUTILUS_DESKTOP_DIRECTORY (directory)->details->real_directory);
-	desktop_dir_file_list = NAUTILUS_DIRECTORY_CLASS (nautilus_desktop_directory_parent_class)->get_file_list (directory);
+	real_dir_file_list = nemo_directory_get_file_list
+				(NEMO_DESKTOP_DIRECTORY (directory)->details->real_directory);
+	desktop_dir_file_list = NEMO_DIRECTORY_CLASS (nemo_desktop_directory_parent_class)->get_file_list (directory);
 
 	return g_list_concat (real_dir_file_list, desktop_dir_file_list);
 }
 
-NautilusDirectory *
-nautilus_desktop_directory_get_real_directory (NautilusDesktopDirectory *desktop)
+NemoDirectory *
+nemo_desktop_directory_get_real_directory (NemoDesktopDirectory *desktop)
 {
-	nautilus_directory_ref (desktop->details->real_directory);
+	nemo_directory_ref (desktop->details->real_directory);
 	return desktop->details->real_directory;
 }
 
@@ -411,53 +411,53 @@ nautilus_desktop_directory_get_real_directory (NautilusDesktopDirectory *desktop
 static void
 desktop_finalize (GObject *object)
 {
-	NautilusDesktopDirectory *desktop;
+	NemoDesktopDirectory *desktop;
 
-	desktop = NAUTILUS_DESKTOP_DIRECTORY (object);
+	desktop = NEMO_DESKTOP_DIRECTORY (object);
 
-	nautilus_directory_unref (desktop->details->real_directory);
+	nemo_directory_unref (desktop->details->real_directory);
 
 	g_hash_table_destroy (desktop->details->callbacks);
 	g_hash_table_destroy (desktop->details->monitors);
 	g_free (desktop->details);
 
-	g_signal_handlers_disconnect_by_func (nautilus_preferences,
+	g_signal_handlers_disconnect_by_func (nemo_preferences,
 					      desktop_directory_changed_callback,
 					      desktop);
 
-	G_OBJECT_CLASS (nautilus_desktop_directory_parent_class)->finalize (object);
+	G_OBJECT_CLASS (nemo_desktop_directory_parent_class)->finalize (object);
 }
 
 static void
-done_loading_callback (NautilusDirectory *real_directory,
-		       NautilusDesktopDirectory *desktop)
+done_loading_callback (NemoDirectory *real_directory,
+		       NemoDesktopDirectory *desktop)
 {
-     nautilus_directory_emit_done_loading (NAUTILUS_DIRECTORY (desktop));
+     nemo_directory_emit_done_loading (NEMO_DIRECTORY (desktop));
 }
 
 
 static void
-forward_files_added_cover (NautilusDirectory *real_directory,
+forward_files_added_cover (NemoDirectory *real_directory,
 			   GList *files,
 			   gpointer callback_data)
 {
-	nautilus_directory_emit_files_added (NAUTILUS_DIRECTORY (callback_data), files);
+	nemo_directory_emit_files_added (NEMO_DIRECTORY (callback_data), files);
 }
 
 static void
-forward_files_changed_cover (NautilusDirectory *real_directory,
+forward_files_changed_cover (NemoDirectory *real_directory,
 			     GList *files,
 			     gpointer callback_data)
 {
-	nautilus_directory_emit_files_changed (NAUTILUS_DIRECTORY (callback_data), files);
+	nemo_directory_emit_files_changed (NEMO_DIRECTORY (callback_data), files);
 }
 
 static void
-update_desktop_directory (NautilusDesktopDirectory *desktop)
+update_desktop_directory (NemoDesktopDirectory *desktop)
 {
 	char *desktop_path;
 	char *desktop_uri;
-	NautilusDirectory *real_directory;
+	NemoDirectory *real_directory;
 
 	real_directory = desktop->details->real_directory;
 	if (real_directory != NULL) {
@@ -468,12 +468,12 @@ update_desktop_directory (NautilusDesktopDirectory *desktop)
 		g_signal_handlers_disconnect_by_func (real_directory, forward_files_added_cover, desktop);
 		g_signal_handlers_disconnect_by_func (real_directory, forward_files_changed_cover, desktop);
 
-		nautilus_directory_unref (real_directory);
+		nemo_directory_unref (real_directory);
 	}
 
-	desktop_path = nautilus_get_desktop_directory ();
+	desktop_path = nemo_get_desktop_directory ();
 	desktop_uri = g_filename_to_uri (desktop_path, NULL, NULL);
-	real_directory = nautilus_directory_get_by_uri (desktop_uri);
+	real_directory = nemo_directory_get_by_uri (desktop_uri);
 	g_free (desktop_uri);
 	g_free (desktop_path);
 
@@ -490,14 +490,14 @@ update_desktop_directory (NautilusDesktopDirectory *desktop)
 static void
 desktop_directory_changed_callback (gpointer data)
 {
-	update_desktop_directory (NAUTILUS_DESKTOP_DIRECTORY (data));
-	nautilus_directory_force_reload (NAUTILUS_DIRECTORY (data));
+	update_desktop_directory (NEMO_DESKTOP_DIRECTORY (data));
+	nemo_directory_force_reload (NEMO_DIRECTORY (data));
 }
 
 static void
-nautilus_desktop_directory_init (NautilusDesktopDirectory *desktop)
+nemo_desktop_directory_init (NemoDesktopDirectory *desktop)
 {
-	desktop->details = g_new0 (NautilusDesktopDirectoryDetails, 1);
+	desktop->details = g_new0 (NemoDesktopDirectoryDetails, 1);
 
 	desktop->details->callbacks = g_hash_table_new_full
 		(merged_callback_hash, merged_callback_equal,
@@ -505,19 +505,19 @@ nautilus_desktop_directory_init (NautilusDesktopDirectory *desktop)
 	desktop->details->monitors = g_hash_table_new_full (NULL, NULL,
 							    NULL, (GDestroyNotify)merged_monitor_destroy);
 
-	update_desktop_directory (NAUTILUS_DESKTOP_DIRECTORY (desktop));
+	update_desktop_directory (NEMO_DESKTOP_DIRECTORY (desktop));
 
-	g_signal_connect_swapped (nautilus_preferences, "changed::" NAUTILUS_PREFERENCES_DESKTOP_IS_HOME_DIR,
+	g_signal_connect_swapped (nemo_preferences, "changed::" NEMO_PREFERENCES_DESKTOP_IS_HOME_DIR,
 				  G_CALLBACK(desktop_directory_changed_callback),
 				  desktop);
 }
 
 static void
-nautilus_desktop_directory_class_init (NautilusDesktopDirectoryClass *class)
+nemo_desktop_directory_class_init (NemoDesktopDirectoryClass *class)
 {
-	NautilusDirectoryClass *directory_class;
+	NemoDirectoryClass *directory_class;
 
-	directory_class = NAUTILUS_DIRECTORY_CLASS (class);
+	directory_class = NEMO_DIRECTORY_CLASS (class);
 	
 	G_OBJECT_CLASS (class)->finalize = desktop_finalize;
 
@@ -530,7 +530,7 @@ nautilus_desktop_directory_class_init (NautilusDesktopDirectoryClass *class)
  	directory_class->are_all_files_seen = desktop_are_all_files_seen;
 	directory_class->is_not_empty = desktop_is_not_empty;
 	/* Override get_file_list so that we can return the list of files
-	 * in NautilusDesktopDirectory->details->real_directory,
+	 * in NemoDesktopDirectory->details->real_directory,
 	 * in addition to the list of standard desktop icons on the desktop.
 	 */
 	directory_class->get_file_list = desktop_get_file_list;

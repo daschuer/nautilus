@@ -25,7 +25,7 @@ Major changes in 3.3.92 are:
 * Don't hide Open With applications for subtypes of application/x-desktop
 * Add support for the "network" GVolume class identifier
 * Fix a crash at exit with certain extensions that keep refs of the
-  NautilusFileInfos
+  NemoFileInfos
 * Fix initial focus row when moving the focus into the Places sidebar
 * Fix Shift+Click selection when going back/forward in browsing history
 * Fix packing of desktop file box in properties view
@@ -58,11 +58,11 @@ Major changes in 3.3.4 are:
 * Show both the current file counter and the total files in file operations UI
 * Lazily initialize the notification daemon
 * Move the UI files and icons into GResources
-* Refactor of NautilusWindowPane and NautilusWindowSlot code
-* libnautilus-extension GIR coverage has been improved
+* Refactor of NemoWindowPane and NemoWindowSlot code
+* libnemo-extension GIR coverage has been improved
 
 Major changes in 3.3.3 are:
-* Implement the org.freedesktop.FileManager1 DBus interface
+* Implement the org.freedesktop.NemoFileManager1 DBus interface
 * Show context menu for current folder when clicking empty space
   in list view
 * Sort XDG dirs in the places sidebar according to the current locale
@@ -97,7 +97,7 @@ Major changes in 3.2.0 are:
 * Lots of translation updates
 
 Major changes in 3.1.92 are:
-* Hopefully fix once and for all NautilusWindow keybindings
+* Hopefully fix once and for all NemoWindow keybindings
 * Don't hide the floating bar on hover if it's interactive
 * Fix canvas accessibility implementation for GTK 3.2
 * Don't warn when opening multiple files with one application
@@ -202,7 +202,7 @@ Major changes in 2.91.90 are:
 * Remove the spatial mode
 * Updated tracker search engine to use libtracker-sparql
 * Consistently use "Home" instead of the username
-* Rename the GSettings schema path to /org/gnome/nautilus
+* Rename the GSettings schema path to /org/gnome/nemo
 * Remove the ability for extensions to create toolbar items
 
 Major changes in 2.91.9 are:
@@ -220,7 +220,7 @@ Major changes in 2.91.8 are:
 * Fix some drawing regressions while renaming
 * Fix issues with the default sort order selection
 * Completely remove GConf dependency
-* Large refactor of NautilusWindow/NautilusView architecture
+* Large refactor of NemoWindow/NemoView architecture
 * Cleanup installed desktop files
 * Fix a couple of crashers
 * Build with GCC 4.6
@@ -240,7 +240,7 @@ Major changes in 2.91.5 are:
 * Remove 'exit-with-last-window' preference
 * Remove support for saving state with XSMP
 * Fix some UI GtkStyleContext regressions
-* Fix a11y for NautilusIconCanvasItem
+* Fix a11y for NemoIconCanvasItem
 * Properly support '~' in the location bar
 
 Major changes in 2.91.4 are:
@@ -274,7 +274,7 @@ Major changes in 2.91.1 are:
 * Add a settings key to make the background fade effect optional
 * Add a settings key to register an external mass-renamer
 * Drop support for old EXIF/XMP APIs
-* Move the nautilus-sendto extension module in-tree
+* Move the nemo-sendto extension module in-tree
 
 Major changes in  2.91.0.1 are:
 * Fix a crash related to GtkSpinner
@@ -336,7 +336,7 @@ Major changes in 2.31.1 are:
 * Fix a number of issues related to DnD in the places sidebar
 * New icon for audio preview
 * Don't show Unmount when showing Eject/Safe Removal
-* Bump libnautilus-extension API version
+* Bump libnemo-extension API version
 * Fix a number of UI glitches
 * Translation updates
 
@@ -352,7 +352,7 @@ Major changes in 2.30.0 are:
 * By default, don't exit with last window even if desktop is
   not visible. This way we still run to handle e.g. volume
   monitoring. If you don't want this, change
-  /apps/nautilus/preferences/exit_with_last_window
+  /apps/nemo/preferences/exit_with_last_window
   to True in gconf
 * Don't show weird border around desktop
 * Correctly put focus on view for new windows
@@ -397,7 +397,7 @@ Major changes in 2.29.1 are:
 * Browser UI reorganization
 * Better background support on multi-monitor setups
 * Support new "default location" on mounts (supported by ftp and sftp)
-* Add extension api to lookup NautilusFileInfo objects
+* Add extension api to lookup NemoFileInfo objects
 * Make the search toolbar button a toggle button
 * Ctrl+shift does multiple range selection in list view
 
@@ -415,7 +415,7 @@ Major changes in 2.27.92 are:
 * Fix warning in new power manager inhibiting
 
 Major changes in 2.27.91 are:
-* Migrate old-style nautilus metadata to gvfs metadata
+* Migrate old-style nemo metadata to gvfs metadata
 * Fix viewing of very small image files
 * Respect disable_command_line option
 * Reverse mouse button used for back/forward to same as firefox
@@ -462,7 +462,7 @@ Major changes in 2.26.1 are:
 * Better handling of thumbnail scaling
 * Support XDS in list view
 * Make session loading work
-* Start Nautilus on requested screen
+* Start Nemo on requested screen
 * Fix crashes
 * Fix possible infinite layout loop in compact mode
 * Update fallback icon to not look like gnome 1.x
@@ -513,7 +513,7 @@ Major changes in 2.25.3 are:
 * Update to new PackageKit API
 
 Major changes in 2.25.2 are:
-* Merged eel into nautilus
+* Merged eel into nemo
 * Use single glib/gtk includes
 * Support PackageKit application search
 * Fix new windows not appearing after successful mount
@@ -560,7 +560,7 @@ Major changes in 2.23.91 are:
   * Nicer icon container bounds
   * (Again) vastly improved keyboard navigation, especially in RTL mode
   * No more overlapping desktop icons, when files are added or volumes mounted
-    while Nautilus is not running. This is implemented with metadata timestamps when
+    while Nemo is not running. This is implemented with metadata timestamps when
     the desktop icons are laid out.
   * Rewrite large chunks of icon canvas text size handling
   * Clear underlying items if hovered or selected item overlaps them
@@ -621,8 +621,8 @@ Major changes in 2.23.5 are:
   * Fix bookmark reordering
   * Make DND indication consistent with GTK+ file chooser
 * Async I/O
-  * Use NautilusFile instead of GFile for path bar display name
-  * Use NautilusFile for DND "same FS" check
+  * Use NemoFile instead of GFile for path bar display name
+  * Use NemoFile for DND "same FS" check
 * Fix navigation where window was inconsistently "stuck" between two
   directories, i.e. the view was not completely changed.
 * Fix huge leak - status bar messages were never popped from the stack
@@ -699,7 +699,7 @@ Major changes in 2.23.1 are:
 * Unify session save/restore routines with "--restart" and "--load-session"
 * Allow to invert selection
 * Do not automount mount points inside hidden hierarchies
-* Add NautilusFileInfo APIs: can_write(), get_mount(), get_parent_info()
+* Add NemoFileInfo APIs: can_write(), get_mount(), get_parent_info()
 * Add initial Gtk-doc support.
 * Remove some dead code.
 
@@ -895,7 +895,7 @@ Major changes in 2.17.91 are:
 * Fix crashes and memory leaks
 
 Major changes in 2.17.90 are:
-* Add nautilus_file_info_get_activation_uri for extensions
+* Add nemo_file_info_get_activation_uri for extensions
 * Zero-pad seconds in progress display
 * Fix permissions of files created from templates
 * Support multimedia keys
@@ -927,7 +927,7 @@ Major changes in 2.16.2 are:
 * Handle throbbers with different sizes
 * Don't add a newline when pasting filenames
 * Better a11y relationships betweeen widgets
-* Make nautilus --quit not be restarted by session
+* Make nemo --quit not be restarted by session
 * Fix occasional stuck grabs when rubberband selecting 
 * Don't timeout typeahead when scrolling with mouse wheel
 * Add X-GNOME-Bugzilla-Version to desktop files
@@ -972,7 +972,7 @@ Major changes in 2.15.4 are:
 * Improve extension interface
 * Add complete session management
 * Handle removal of the displayed location more elegantly
-* Use proper nautilus-cd-burner icon
+* Use proper nemo-cd-burner icon
 * Support dropping uris, urls and text to subfolders
 * Fix leaks and warnings
 
@@ -1041,7 +1041,7 @@ Major changes in 2.13.92 are:
 
 Major changes in 2.13.91 are:
 * Fix a desktop icon positioning bug
-* Fix opening saved searches file from outside nautilus
+* Fix opening saved searches file from outside nemo
 
 Major changes in 2.13.90 are:
 * Add option to always use the location bar to the preferences dialog
@@ -1184,7 +1184,7 @@ Major changes in 2.11.1 are:
 * Speed up delete in list view
 * Fix rename in list view breaking when there was a file change
 * Removed "new terminal" from desktop context menu
-  If you want this, install the nautilus-open-terminal extension,
+  If you want this, install the nemo-open-terminal extension,
   its much better than this feature ever was.
 * Don't thumbnail files constantly if they're changing
 * Fixed a loop that could happen on remote locations when removing
@@ -1240,7 +1240,7 @@ Major changes in 2.9.2 are:
 * Fix crash in bookmark dialog if parent window goes away
 
 Major changes since 2.8.2 are:
-* Bonobo not used for nautilus views
+* Bonobo not used for nemo views
 * GtkUIManager used for the ui, not BonoboUI
 
 Major changes since 2.8.1 are:
@@ -1274,7 +1274,7 @@ Major changes since 2.8.0 are:
 * Performance fixes when selecting files
 * Performance increase in folder load
 * Allow pasting files as text
-* Fix nautilus extensions such as file-roller menus
+* Fix nemo extensions such as file-roller menus
 * Made select by pattern work in trash
 * Fixed cut/paste of text when renaming in listview
 * Always use homedir icon for homedir
@@ -1393,7 +1393,7 @@ Major changes since 2.5.6 are:
 Major changes since 2.5.5 are:
 * hig/ui tweaks
 * ngettext support
-* distribute nautilus-list-view-ui.xml
+* distribute nemo-list-view-ui.xml
 * New mimetype detection approach
 * performance fixes
 * non-modal open with other dialog
@@ -1440,7 +1440,7 @@ Major changes since 2.5.1.1 are:
 
 Major changes since 2.5.1 are:
 
-* Fixed a NautilusFile leak
+* Fixed a NemoFile leak
 * DISABLE_DEPRECATED fixes.
 
 Major changes since 2.5.0 are:
@@ -1528,7 +1528,7 @@ Major changes since 2.3.6 are:
 
 * String fixes
 
-* Added documentation on nautilus internals
+* Added documentation on nemo internals
 
 * Various fixes
 
@@ -1610,7 +1610,7 @@ Major changes since 2.2.3 are:
 
 * Performance increases on directory loads.
 
-* Integrate nautilus-cd-burner
+* Integrate nemo-cd-burner
 
 * "Keep Aligned" mode on desktop
 
@@ -1650,25 +1650,25 @@ Major changes since 2.2.2 are:
 
 * Fix show backup/hidden files and some default view preferences
 
-* Set the Nautilus application name used when grouping in the task
+* Set the Nemo application name used when grouping in the task
   list.
 
-* Converted NautilusFile to a GObject
+* Converted NemoFile to a GObject
 
 * Make the thumbnail size prefs not affect external thumbnailers, as
   it makes little sense for e.g. videos.
 
-* Allow you to exit nautilus-file-management-properties
+* Allow you to exit nemo-file-management-properties
 
-* Fix crash when droping from other app to Nautilus
+* Fix crash when droping from other app to Nemo
 
-* Use startup notification when launching Nautilus
+* Use startup notification when launching Nemo
 
 * Don't save window geometry when maximized
 
-* Added code to migrate Nautilus 1.0.x scripts
+* Added code to migrate Nemo 1.0.x scripts
 
-* Added some docs about keyboard and mouse navigation in nautilus views.
+* Added some docs about keyboard and mouse navigation in nemo views.
 
 * Better accessibility support in the icon view
 
@@ -1721,7 +1721,7 @@ Major changes since 2.2.1 are:
 
 * Fix duplicated entries in context menu.
 
-* Don't session manage NautilusViews
+* Don't session manage NemoViews
 
 * Multi-head fixes for the preference dialog
 
@@ -1758,7 +1758,7 @@ Major changes since 2.2.0.1 are:
 
 Major changes since 2.2.0 are:
 
-* NautilusView refcounting fix
+* NemoView refcounting fix
 
 * New translations
 
@@ -1828,7 +1828,7 @@ Major changes since 2.1.2 are:
 
 * Lots of smalll bugfixes.
 
-* Make bonobo property pages regular controls instead of NautilusViews.
+* Make bonobo property pages regular controls instead of NemoViews.
 
 * Mimetype-sensitive context menu plugins
 
@@ -1860,13 +1860,13 @@ Major changes since 2.1.0 are:
 
 * Uses new pango wrap mode in icon view
 
-* Work on exterminating Nautilus themes
+* Work on exterminating Nemo themes
 
 * Recent files support
 
 Major changes since 2.0.7 are:
 
-* Nautilus now uses the system icon theme.
+* Nemo now uses the system icon theme.
 
 * The sidebar tabs have been replaced with a new widget.
 
@@ -1925,7 +1925,7 @@ Major changes since 2.0.1 are:
 
 * Reflect changes in the eel background api.
 
-* Fix for crash when invoking "nautilus -q".
+* Fix for crash when invoking "nemo -q".
 
 
 Major changes since 2.0.0 are:
@@ -1934,7 +1934,7 @@ Major changes since 2.0.0 are:
 
 * Various bugfixes
 
-* The Gnome Nautilus theme now follows the gtk+ theme better
+* The Gnome Nemo theme now follows the gtk+ theme better
 
 * Window geometry is stored even in open-directories-in-same-window mode
 
@@ -1976,7 +1976,7 @@ Major changes since 1.0.x are:
 
 * New emblems added to the default set of emblems.
 
-* Support for editing vfolder menus using nautilus.
+* Support for editing vfolder menus using nemo.
 
 * Made most normal component in-process.
 

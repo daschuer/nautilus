@@ -1,6 +1,6 @@
 /*
- *  nautilus-column.h - Info columns exported by 
- *                      NautilusColumnProvider objects.
+ *  nemo-column.h - Info columns exported by 
+ *                      NemoColumnProvider objects.
  *
  *  Copyright (C) 2003 Novell, Inc.
  *
@@ -22,42 +22,42 @@
  *
  */
 
-#ifndef NAUTILUS_COLUMN_H
-#define NAUTILUS_COLUMN_H
+#ifndef NEMO_COLUMN_H
+#define NEMO_COLUMN_H
 
 #include <glib-object.h>
-#include "nautilus-extension-types.h"
+#include "nemo-extension-types.h"
 
 G_BEGIN_DECLS
 
-#define NAUTILUS_TYPE_COLUMN            (nautilus_column_get_type())
-#define NAUTILUS_COLUMN(obj)            (G_TYPE_CHECK_INSTANCE_CAST ((obj), NAUTILUS_TYPE_COLUMN, NautilusColumn))
-#define NAUTILUS_COLUMN_CLASS(klass)    (G_TYPE_CHECK_CLASS_CAST ((klass), NAUTILUS_TYPE_COLUMN, NautilusColumnClass))
-#define NAUTILUS_INFO_IS_COLUMN(obj)         (G_TYPE_CHECK_INSTANCE_TYPE ((obj), NAUTILUS_TYPE_COLUMN))
-#define NAUTILUS_INFO_IS_COLUMN_CLASS(klass) (G_TYPE_CHECK_CLASS_TYPE ((obj), NAUTILUS_TYPE_COLUMN))
-#define NAUTILUS_COLUMN_GET_CLASS(obj)  (G_TYPE_INSTANCE_GET_CLASS((obj), NAUTILUS_TYPE_COLUMN, NautilusColumnClass))
+#define NEMO_TYPE_COLUMN            (nemo_column_get_type())
+#define NEMO_COLUMN(obj)            (G_TYPE_CHECK_INSTANCE_CAST ((obj), NEMO_TYPE_COLUMN, NemoColumn))
+#define NEMO_COLUMN_CLASS(klass)    (G_TYPE_CHECK_CLASS_CAST ((klass), NEMO_TYPE_COLUMN, NemoColumnClass))
+#define NEMO_INFO_IS_COLUMN(obj)         (G_TYPE_CHECK_INSTANCE_TYPE ((obj), NEMO_TYPE_COLUMN))
+#define NEMO_INFO_IS_COLUMN_CLASS(klass) (G_TYPE_CHECK_CLASS_TYPE ((obj), NEMO_TYPE_COLUMN))
+#define NEMO_COLUMN_GET_CLASS(obj)  (G_TYPE_INSTANCE_GET_CLASS((obj), NEMO_TYPE_COLUMN, NemoColumnClass))
 
-typedef struct _NautilusColumn        NautilusColumn;
-typedef struct _NautilusColumnDetails NautilusColumnDetails;
-typedef struct _NautilusColumnClass   NautilusColumnClass;
+typedef struct _NemoColumn        NemoColumn;
+typedef struct _NemoColumnDetails NemoColumnDetails;
+typedef struct _NemoColumnClass   NemoColumnClass;
 
-struct _NautilusColumn {
+struct _NemoColumn {
 	GObject parent;
 
-	NautilusColumnDetails *details;
+	NemoColumnDetails *details;
 };
 
-struct _NautilusColumnClass {
+struct _NemoColumnClass {
 	GObjectClass parent;
 };
 
-GType             nautilus_column_get_type        (void);
-NautilusColumn *  nautilus_column_new             (const char     *name,
+GType             nemo_column_get_type        (void);
+NemoColumn *  nemo_column_new             (const char     *name,
 						   const char     *attribute,
 						   const char     *label,
 						   const char     *description);
 
-/* NautilusColumn has the following properties:
+/* NemoColumn has the following properties:
  *   name (string)        - the identifier for the column
  *   attribute (string)   - the file attribute to be displayed in the 
  *                          column

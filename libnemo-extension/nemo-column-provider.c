@@ -1,5 +1,5 @@
 /*
- *  nautilus-column-provider.c - Interface for Nautilus extensions 
+ *  nemo-column-provider.c - Interface for Nemo extensions 
  *                               that provide column specifications.
  *
  *  Copyright (C) 2003 Novell, Inc.
@@ -23,24 +23,24 @@
  */
 
 #include <config.h>
-#include "nautilus-column-provider.h"
+#include "nemo-column-provider.h"
 
 #include <glib-object.h>
 
 static void
-nautilus_column_provider_base_init (gpointer g_class)
+nemo_column_provider_base_init (gpointer g_class)
 {
 }
 
 GType                   
-nautilus_column_provider_get_type (void)
+nemo_column_provider_get_type (void)
 {
 	static GType type = 0;
 
 	if (!type) {
 		const GTypeInfo info = {
-			sizeof (NautilusColumnProviderIface),
-			nautilus_column_provider_base_init,
+			sizeof (NemoColumnProviderIface),
+			nemo_column_provider_base_init,
 			NULL,
 			NULL,
 			NULL,
@@ -51,7 +51,7 @@ nautilus_column_provider_get_type (void)
 		};
 		
 		type = g_type_register_static (G_TYPE_INTERFACE, 
-					       "NautilusColumnProvider",
+					       "NemoColumnProvider",
 					       &info, 0);
 		g_type_interface_add_prerequisite (type, G_TYPE_OBJECT);
 	}
@@ -60,18 +60,18 @@ nautilus_column_provider_get_type (void)
 }
 
 /**
- * nautilus_column_provider_get_columns:
- * @provider: a #NautilusColumnProvider
+ * nemo_column_provider_get_columns:
+ * @provider: a #NemoColumnProvider
  *
- * Returns: (element-type NautilusColumn) (transfer full): the provided #NautilusColumn objects
+ * Returns: (element-type NemoColumn) (transfer full): the provided #NemoColumn objects
  */
 GList *
-nautilus_column_provider_get_columns (NautilusColumnProvider *provider)
+nemo_column_provider_get_columns (NemoColumnProvider *provider)
 {
-	g_return_val_if_fail (NAUTILUS_IS_COLUMN_PROVIDER (provider), NULL);
-	g_return_val_if_fail (NAUTILUS_COLUMN_PROVIDER_GET_IFACE (provider)->get_columns != NULL, NULL);
+	g_return_val_if_fail (NEMO_IS_COLUMN_PROVIDER (provider), NULL);
+	g_return_val_if_fail (NEMO_COLUMN_PROVIDER_GET_IFACE (provider)->get_columns != NULL, NULL);
 
-	return NAUTILUS_COLUMN_PROVIDER_GET_IFACE (provider)->get_columns 
+	return NEMO_COLUMN_PROVIDER_GET_IFACE (provider)->get_columns 
 		(provider);
 }
 

@@ -1,15 +1,15 @@
 /* -*- Mode: C; indent-tabs-mode: t; c-basic-offset: 8; tab-width: 8 -*- */
 /*
- * Nautilus
+ * Nemo
  *
  * Copyright (C) 2011 Red Hat, Inc.
  *
- * Nautilus is free software; you can redistribute it and/or
+ * Nemo is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
  * published by the Free Software Foundation; either version 2 of the
  * License, or (at your option) any later version.
  *
- * Nautilus is distributed in the hope that it will be useful,
+ * Nemo is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
  * General Public License for more details.
@@ -24,9 +24,9 @@
 
 #include <config.h>
 
-#include "nautilus-progress-info-manager.h"
+#include "nemo-progress-info-manager.h"
 
-struct _NautilusProgressInfoManagerPriv {
+struct _NemoProgressInfoManagerPriv {
 	GList *progress_infos;
 };
 
@@ -35,27 +35,27 @@ enum {
 	LAST_SIGNAL
 };
 
-static NautilusProgressInfoManager *singleton = NULL;
+static NemoProgressInfoManager *singleton = NULL;
 
 static guint signals[LAST_SIGNAL] = { 0, };
 
-G_DEFINE_TYPE (NautilusProgressInfoManager, nautilus_progress_info_manager,
+G_DEFINE_TYPE (NemoProgressInfoManager, nemo_progress_info_manager,
                G_TYPE_OBJECT);
 
 static void
-nautilus_progress_info_manager_finalize (GObject *obj)
+nemo_progress_info_manager_finalize (GObject *obj)
 {
-	NautilusProgressInfoManager *self = NAUTILUS_PROGRESS_INFO_MANAGER (obj);
+	NemoProgressInfoManager *self = NEMO_PROGRESS_INFO_MANAGER (obj);
 
 	if (self->priv->progress_infos != NULL) {
 		g_list_free_full (self->priv->progress_infos, g_object_unref);
 	}
 
-	G_OBJECT_CLASS (nautilus_progress_info_manager_parent_class)->finalize (obj);
+	G_OBJECT_CLASS (nemo_progress_info_manager_parent_class)->finalize (obj);
 }
 
 static GObject *
-nautilus_progress_info_manager_constructor (GType type,
+nemo_progress_info_manager_constructor (GType type,
 					    guint n_props,
 					    GObjectConstructParam *props)
 {
@@ -65,30 +65,30 @@ nautilus_progress_info_manager_constructor (GType type,
 		return g_object_ref (singleton);
 	}
 
-	retval = G_OBJECT_CLASS (nautilus_progress_info_manager_parent_class)->constructor
+	retval = G_OBJECT_CLASS (nemo_progress_info_manager_parent_class)->constructor
 		(type, n_props, props);
 
-	singleton = NAUTILUS_PROGRESS_INFO_MANAGER (retval);
+	singleton = NEMO_PROGRESS_INFO_MANAGER (retval);
 	g_object_add_weak_pointer (retval, (gpointer) &singleton);
 
 	return retval;
 }
 
 static void
-nautilus_progress_info_manager_init (NautilusProgressInfoManager *self)
+nemo_progress_info_manager_init (NemoProgressInfoManager *self)
 {
-	self->priv = G_TYPE_INSTANCE_GET_PRIVATE (self, NAUTILUS_TYPE_PROGRESS_INFO_MANAGER,
-						  NautilusProgressInfoManagerPriv);
+	self->priv = G_TYPE_INSTANCE_GET_PRIVATE (self, NEMO_TYPE_PROGRESS_INFO_MANAGER,
+						  NemoProgressInfoManagerPriv);
 }
 
 static void
-nautilus_progress_info_manager_class_init (NautilusProgressInfoManagerClass *klass)
+nemo_progress_info_manager_class_init (NemoProgressInfoManagerClass *klass)
 {
 	GObjectClass *oclass;
 
 	oclass = G_OBJECT_CLASS (klass);
-	oclass->constructor = nautilus_progress_info_manager_constructor;
-	oclass->finalize = nautilus_progress_info_manager_finalize;
+	oclass->constructor = nemo_progress_info_manager_constructor;
+	oclass->finalize = nemo_progress_info_manager_finalize;
 
 	signals[NEW_PROGRESS_INFO] =
 		g_signal_new ("new-progress-info",
@@ -98,28 +98,28 @@ nautilus_progress_info_manager_class_init (NautilusProgressInfoManagerClass *kla
 			      g_cclosure_marshal_VOID__OBJECT,
 			      G_TYPE_NONE,
 			      1,
-			      NAUTILUS_TYPE_PROGRESS_INFO);
+			      NEMO_TYPE_PROGRESS_INFO);
 
-	g_type_class_add_private (klass, sizeof (NautilusProgressInfoManagerPriv));
+	g_type_class_add_private (klass, sizeof (NemoProgressInfoManagerPriv));
 }
 
 static void
-progress_info_finished_cb (NautilusProgressInfo *info,
-			   NautilusProgressInfoManager *self)
+progress_info_finished_cb (NemoProgressInfo *info,
+			   NemoProgressInfoManager *self)
 {
 	self->priv->progress_infos =
 		g_list_remove (self->priv->progress_infos, info);
 }
 
-NautilusProgressInfoManager *
-nautilus_progress_info_manager_new (void)
+NemoProgressInfoManager *
+nemo_progress_info_manager_new (void)
 {
-	return g_object_new (NAUTILUS_TYPE_PROGRESS_INFO_MANAGER, NULL);
+	return g_object_new (NEMO_TYPE_PROGRESS_INFO_MANAGER, NULL);
 }
 
 void
-nautilus_progress_info_manager_add_new_info (NautilusProgressInfoManager *self,
-					     NautilusProgressInfo *info)
+nemo_progress_info_manager_add_new_info (NemoProgressInfoManager *self,
+					     NemoProgressInfo *info)
 {
 	if (g_list_find (self->priv->progress_infos, info) != NULL) {
 		g_warning ("Adding two times the same progress info object to the manager");
@@ -136,7 +136,7 @@ nautilus_progress_info_manager_add_new_info (NautilusProgressInfoManager *self,
 }
 
 GList *
-nautilus_progress_info_manager_get_all_infos (NautilusProgressInfoManager *self)
+nemo_progress_info_manager_get_all_infos (NemoProgressInfoManager *self)
 {
 	return self->priv->progress_infos;
 }

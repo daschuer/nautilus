@@ -1,6 +1,6 @@
 /* -*- Mode: C; indent-tabs-mode: t; c-basic-offset: 8; tab-width: 8 -*- */
 
-/* NautilusUndoManager - Undo/Redo transaction manager.
+/* NemoUndoManager - Undo/Redo transaction manager.
  *
  * Copyright (C) 2000 Eazel, Inc.
  *
@@ -23,14 +23,14 @@
  */
 
 #include <config.h>
-#include <libnautilus-private/nautilus-undo-manager.h>
-#include <libnautilus-private/nautilus-undo-transaction.h>
+#include <libnemo-private/nemo-undo-manager.h>
+#include <libnemo-private/nemo-undo-transaction.h>
 
 #include <gtk/gtk.h>
-#include "nautilus-undo-private.h"
+#include "nemo-undo-private.h"
 
-struct NautilusUndoManagerDetails {
-	NautilusUndoTransaction *transaction;
+struct NemoUndoManagerDetails {
+	NemoUndoTransaction *transaction;
 
 	/* These are used to tell undo from redo. */
 	gboolean current_transaction_is_redo;
@@ -55,14 +55,14 @@ typedef struct {
 	char *no_undo_menu_item_hint;
 } UndoMenuHandlerConnection;
 
-G_DEFINE_TYPE (NautilusUndoManager,
-	       nautilus_undo_manager,
+G_DEFINE_TYPE (NemoUndoManager,
+	       nemo_undo_manager,
 	       G_TYPE_OBJECT)
 
 static void
-release_transaction (NautilusUndoManager *manager)
+release_transaction (NemoUndoManager *manager)
 {
-	NautilusUndoTransaction *transaction;
+	NemoUndoTransaction *transaction;
 
 	transaction = manager->details->transaction;
 	manager->details->transaction = NULL;
@@ -72,10 +72,10 @@ release_transaction (NautilusUndoManager *manager)
 }
 
 void
-nautilus_undo_manager_append (NautilusUndoManager *manager,
-			      NautilusUndoTransaction *transaction)
+nemo_undo_manager_append (NemoUndoManager *manager,
+			      NemoUndoTransaction *transaction)
 {
-	NautilusUndoTransaction *duplicate_transaction;
+	NemoUndoTransaction *duplicate_transaction;
 
 	/* Check, complain, and ignore the passed-in transaction if we
 	 * get more than one within a single undo operation. The single
@@ -101,8 +101,8 @@ nautilus_undo_manager_append (NautilusUndoManager *manager,
 }
 
 void
-nautilus_undo_manager_forget (NautilusUndoManager *manager,
-			      NautilusUndoTransaction *transaction)
+nemo_undo_manager_forget (NemoUndoManager *manager,
+			      NemoUndoTransaction *transaction)
 {
 	/* Nothing to forget unless the item we are passed is the
 	 * transaction we are currently holding.
@@ -118,24 +118,24 @@ nautilus_undo_manager_forget (NautilusUndoManager *manager,
 	g_signal_emit (manager, signals[CHANGED], 0);
 }
 
-NautilusUndoManager *
-nautilus_undo_manager_new (void)
+NemoUndoManager *
+nemo_undo_manager_new (void)
 {
-	return NAUTILUS_UNDO_MANAGER (g_object_new (nautilus_undo_manager_get_type (), NULL));
+	return NEMO_UNDO_MANAGER (g_object_new (nemo_undo_manager_get_type (), NULL));
 }
 
 static void
-nautilus_undo_manager_init (NautilusUndoManager *manager)
+nemo_undo_manager_init (NemoUndoManager *manager)
 {
-	manager->details = g_new0 (NautilusUndoManagerDetails, 1);
+	manager->details = g_new0 (NemoUndoManagerDetails, 1);
 }
 
 void
-nautilus_undo_manager_undo (NautilusUndoManager *manager)
+nemo_undo_manager_undo (NemoUndoManager *manager)
 {
-	NautilusUndoTransaction *transaction;
+	NemoUndoTransaction *transaction;
 
-	g_return_if_fail (NAUTILUS_IS_UNDO_MANAGER (manager));
+	g_return_if_fail (NEMO_IS_UNDO_MANAGER (manager));
 
 	transaction = manager->details->transaction;
 	manager->details->transaction = NULL;
@@ -150,7 +150,7 @@ nautilus_undo_manager_undo (NautilusUndoManager *manager)
 			!manager->details->current_transaction_is_redo;
 		manager->details->undo_in_progress = TRUE;
 		manager->details->num_transactions_during_undo = 0;
-		nautilus_undo_transaction_undo (transaction);
+		nemo_undo_transaction_undo (transaction);
 		manager->details->undo_in_progress = FALSE;
 		manager->details->new_transaction_is_redo = FALSE;
 
@@ -165,30 +165,30 @@ nautilus_undo_manager_undo (NautilusUndoManager *manager)
 static void
 finalize (GObject *object)
 {
-	NautilusUndoManager *manager;
+	NemoUndoManager *manager;
 
-	manager = NAUTILUS_UNDO_MANAGER (object);
+	manager = NEMO_UNDO_MANAGER (object);
 
 	release_transaction (manager);
 
 	g_free (manager->details);
 
-	if (G_OBJECT_CLASS (nautilus_undo_manager_parent_class)->finalize) {
-		(* G_OBJECT_CLASS (nautilus_undo_manager_parent_class)->finalize) (object);
+	if (G_OBJECT_CLASS (nemo_undo_manager_parent_class)->finalize) {
+		(* G_OBJECT_CLASS (nemo_undo_manager_parent_class)->finalize) (object);
 	}
 }
 
 void
-nautilus_undo_manager_attach (NautilusUndoManager *manager, GObject *target)
+nemo_undo_manager_attach (NemoUndoManager *manager, GObject *target)
 {
-	g_return_if_fail (NAUTILUS_IS_UNDO_MANAGER (manager));
+	g_return_if_fail (NEMO_IS_UNDO_MANAGER (manager));
 	g_return_if_fail (G_IS_OBJECT (target));
 
-	nautilus_undo_attach_undo_manager (G_OBJECT (target), manager);
+	nemo_undo_attach_undo_manager (G_OBJECT (target), manager);
 }
 
 static void
-nautilus_undo_manager_class_init (NautilusUndoManagerClass *class)
+nemo_undo_manager_class_init (NemoUndoManagerClass *class)
 {
 	G_OBJECT_CLASS (class)->finalize = finalize;
 
@@ -196,7 +196,7 @@ nautilus_undo_manager_class_init (NautilusUndoManagerClass *class)
 		("changed",
 		 G_TYPE_FROM_CLASS (class),
 		 G_SIGNAL_RUN_LAST,
-		 G_STRUCT_OFFSET (NautilusUndoManagerClass,
+		 G_STRUCT_OFFSET (NemoUndoManagerClass,
 				  changed),
 		 NULL, NULL,
 		 g_cclosure_marshal_VOID__VOID,

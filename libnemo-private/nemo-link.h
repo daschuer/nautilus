@@ -1,6 +1,6 @@
 /* -*- Mode: C; indent-tabs-mode: t; c-basic-offset: 8; tab-width: 8 -*-
 
-   nautilus-link.h: .
+   nemo-link.h: .
 
    Copyright (C) 2001 Red Hat, Inc.
 
@@ -22,12 +22,12 @@
    Authors: Jonathan Blandford <jrb@redhat.com>
 */
 
-#ifndef NAUTILUS_LINK_H
-#define NAUTILUS_LINK_H
+#ifndef NEMO_LINK_H
+#define NEMO_LINK_H
 
 #include <gdk/gdk.h>
 
-gboolean         nautilus_link_local_create                      (const char        *directory_uri,
+gboolean         nemo_link_local_create                      (const char        *directory_uri,
 								  const char        *base_name,
 								  const char        *display_name,
 								  const char        *image,
@@ -35,13 +35,13 @@ gboolean         nautilus_link_local_create                      (const char    
 								  const GdkPoint    *point,
 								  int                screen,
 								  gboolean           unique_filename);
-gboolean         nautilus_link_local_set_text                    (const char        *uri,
+gboolean         nemo_link_local_set_text                    (const char        *uri,
 								 const char        *text);
-gboolean         nautilus_link_local_set_icon                    (const char        *uri,
+gboolean         nemo_link_local_set_icon                    (const char        *uri,
 								  const char        *icon);
-char *           nautilus_link_local_get_text                    (const char        *uri);
-char *           nautilus_link_local_get_link_uri                (const char        *uri);
-void             nautilus_link_get_link_info_given_file_contents (const char        *file_contents,
+char *           nemo_link_local_get_text                    (const char        *uri);
+char *           nemo_link_local_get_link_uri                (const char        *uri);
+void             nemo_link_get_link_info_given_file_contents (const char        *file_contents,
 								  int                link_file_size,
 								  const char        *file_uri,
 								  char             **uri,
@@ -50,4 +50,4 @@ void             nautilus_link_get_link_info_given_file_contents (const char    
 								  gboolean          *is_launcher,
 								  gboolean          *is_foreign);
 
-#endif /* NAUTILUS_LINK_H */
+#endif /* NEMO_LINK_H */

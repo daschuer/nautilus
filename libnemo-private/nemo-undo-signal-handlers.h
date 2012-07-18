@@ -22,14 +22,14 @@
  * Boston, MA 02111-1307, USA.
  */
 
-#ifndef NAUTILUS_UNDO_SIGNAL_HANDLERS_H
-#define NAUTILUS_UNDO_SIGNAL_HANDLERS_H
+#ifndef NEMO_UNDO_SIGNAL_HANDLERS_H
+#define NEMO_UNDO_SIGNAL_HANDLERS_H
 
-#include <libnautilus-private/nautilus-entry.h>
+#include <libnemo-private/nemo-entry.h>
 
-void nautilus_undo_set_up_nautilus_entry_for_undo 	(NautilusEntry	*entry);
-void nautilus_undo_tear_down_nautilus_entry_for_undo 	(NautilusEntry	*entry);
-void nautilus_undo_set_up_editable_for_undo 		(GtkEditable 	*editable);
-void nautilus_undo_tear_down_editable_for_undo 		(GtkEditable 	*editable);
+void nemo_undo_set_up_nemo_entry_for_undo 	(NemoEntry	*entry);
+void nemo_undo_tear_down_nemo_entry_for_undo 	(NemoEntry	*entry);
+void nemo_undo_set_up_editable_for_undo 		(GtkEditable 	*editable);
+void nemo_undo_tear_down_editable_for_undo 		(GtkEditable 	*editable);
 
-#endif /* NAUTILUS_UNDO_SIGNAL_HANDLERS_H */
+#endif /* NEMO_UNDO_SIGNAL_HANDLERS_H */

@@ -1,6 +1,6 @@
 /* -*- Mode: C; indent-tabs-mode: t; c-basic-offset: 8; tab-width: 8 -*-
 
-   nautilus-search-directory-file.h: Subclass of NautilusFile to implement the
+   nemo-search-directory-file.h: Subclass of NemoFile to implement the
    the case of the search directory
  
    Copyright (C) 2003 Red Hat, Inc.
@@ -23,35 +23,35 @@
    Author: Alexander Larsson <alexl@redhat.com>
 */
 
-#ifndef NAUTILUS_SEARCH_DIRECTORY_FILE_H
-#define NAUTILUS_SEARCH_DIRECTORY_FILE_H
+#ifndef NEMO_SEARCH_DIRECTORY_FILE_H
+#define NEMO_SEARCH_DIRECTORY_FILE_H
 
-#include <libnautilus-private/nautilus-file.h>
+#include <libnemo-private/nemo-file.h>
 
-#define NAUTILUS_TYPE_SEARCH_DIRECTORY_FILE nautilus_search_directory_file_get_type()
-#define NAUTILUS_SEARCH_DIRECTORY_FILE(obj) \
-  (G_TYPE_CHECK_INSTANCE_CAST ((obj), NAUTILUS_TYPE_SEARCH_DIRECTORY_FILE, NautilusSearchDirectoryFile))
-#define NAUTILUS_SEARCH_DIRECTORY_FILE_CLASS(klass) \
-  (G_TYPE_CHECK_CLASS_CAST ((klass), NAUTILUS_TYPE_SEARCH_DIRECTORY_FILE, NautilusSearchDirectoryFileClass))
-#define NAUTILUS_IS_SEARCH_DIRECTORY_FILE(obj) \
-  (G_TYPE_CHECK_INSTANCE_TYPE ((obj), NAUTILUS_TYPE_SEARCH_DIRECTORY_FILE))
-#define NAUTILUS_IS_SEARCH_DIRECTORY_FILE_CLASS(klass) \
-  (G_TYPE_CHECK_CLASS_TYPE ((klass), NAUTILUS_TYPE_SEARCH_DIRECTORY_FILE))
-#define NAUTILUS_SEARCH_DIRECTORY_FILE_GET_CLASS(obj) \
-  (G_TYPE_INSTANCE_GET_CLASS ((obj), NAUTILUS_TYPE_SEARCH_DIRECTORY_FILE, NautilusSearchDirectoryFileClass))
+#define NEMO_TYPE_SEARCH_DIRECTORY_FILE nemo_search_directory_file_get_type()
+#define NEMO_SEARCH_DIRECTORY_FILE(obj) \
+  (G_TYPE_CHECK_INSTANCE_CAST ((obj), NEMO_TYPE_SEARCH_DIRECTORY_FILE, NemoSearchDirectoryFile))
+#define NEMO_SEARCH_DIRECTORY_FILE_CLASS(klass) \
+  (G_TYPE_CHECK_CLASS_CAST ((klass), NEMO_TYPE_SEARCH_DIRECTORY_FILE, NemoSearchDirectoryFileClass))
+#define NEMO_IS_SEARCH_DIRECTORY_FILE(obj) \
+  (G_TYPE_CHECK_INSTANCE_TYPE ((obj), NEMO_TYPE_SEARCH_DIRECTORY_FILE))
+#define NEMO_IS_SEARCH_DIRECTORY_FILE_CLASS(klass) \
+  (G_TYPE_CHECK_CLASS_TYPE ((klass), NEMO_TYPE_SEARCH_DIRECTORY_FILE))
+#define NEMO_SEARCH_DIRECTORY_FILE_GET_CLASS(obj) \
+  (G_TYPE_INSTANCE_GET_CLASS ((obj), NEMO_TYPE_SEARCH_DIRECTORY_FILE, NemoSearchDirectoryFileClass))
 
-typedef struct NautilusSearchDirectoryFileDetails NautilusSearchDirectoryFileDetails;
-
-typedef struct {
-	NautilusFile parent_slot;
-	NautilusSearchDirectoryFileDetails *details;
-} NautilusSearchDirectoryFile;
+typedef struct NemoSearchDirectoryFileDetails NemoSearchDirectoryFileDetails;
 
 typedef struct {
-	NautilusFileClass parent_slot;
-} NautilusSearchDirectoryFileClass;
+	NemoFile parent_slot;
+	NemoSearchDirectoryFileDetails *details;
+} NemoSearchDirectoryFile;
 
-GType   nautilus_search_directory_file_get_type (void);
-void    nautilus_search_directory_file_update_display_name (NautilusSearchDirectoryFile *search_file);
+typedef struct {
+	NemoFileClass parent_slot;
+} NemoSearchDirectoryFileClass;
 
-#endif /* NAUTILUS_SEARCH_DIRECTORY_FILE_H */
+GType   nemo_search_directory_file_get_type (void);
+void    nemo_search_directory_file_update_display_name (NemoSearchDirectoryFile *search_file);
+
+#endif /* NEMO_SEARCH_DIRECTORY_FILE_H */

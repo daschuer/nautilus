@@ -1,6 +1,6 @@
 /* -*- Mode: C; indent-tabs-mode: t; c-basic-offset: 8; tab-width: 8 -*- */
 
-/* nautilus-icon-dnd.c - Drag & drop handling for the icon container widget.
+/* nemo-icon-dnd.c - Drag & drop handling for the icon container widget.
 
    Copyright (C) 1999, 2000 Free Software Foundation
    Copyright (C) 2000 Eazel, Inc.
@@ -33,13 +33,13 @@
 
 #include <config.h>
 #include <math.h>
-#include "nautilus-icon-dnd.h"
+#include "nemo-icon-dnd.h"
 
-#include "nautilus-file-dnd.h"
-#include "nautilus-icon-private.h"
-#include "nautilus-link.h"
-#include "nautilus-metadata.h"
-#include "nautilus-selection-canvas-item.h"
+#include "nemo-file-dnd.h"
+#include "nemo-icon-private.h"
+#include "nemo-link.h"
+#include "nemo-metadata.h"
+#include "nemo-selection-canvas-item.h"
 #include <eel/eel-glib-extensions.h>
 #include <eel/eel-gnome-extensions.h>
 #include <eel/eel-graphic-effects.h>
@@ -52,29 +52,29 @@
 #include <gtk/gtk.h>
 #include <glib/gi18n.h>
 
-#include <libnautilus-private/nautilus-desktop-background.h>
-#include <libnautilus-private/nautilus-file-utilities.h>
-#include <libnautilus-private/nautilus-file-changes-queue.h>
+#include <libnemo-private/nemo-desktop-background.h>
+#include <libnemo-private/nemo-file-utilities.h>
+#include <libnemo-private/nemo-file-changes-queue.h>
 #include <stdio.h>
 #include <string.h>
 
-#define DEBUG_FLAG NAUTILUS_DEBUG_ICON_CONTAINER
-#include "nautilus-debug.h"
+#define DEBUG_FLAG NEMO_DEBUG_ICON_CONTAINER
+#include "nemo-debug.h"
 
 static const GtkTargetEntry drag_types [] = {
-	{ NAUTILUS_ICON_DND_GNOME_ICON_LIST_TYPE, 0, NAUTILUS_ICON_DND_GNOME_ICON_LIST },
-	{ NAUTILUS_ICON_DND_URI_LIST_TYPE, 0, NAUTILUS_ICON_DND_URI_LIST },
+	{ NEMO_ICON_DND_GNOME_ICON_LIST_TYPE, 0, NEMO_ICON_DND_GNOME_ICON_LIST },
+	{ NEMO_ICON_DND_URI_LIST_TYPE, 0, NEMO_ICON_DND_URI_LIST },
 };
 
 static const GtkTargetEntry drop_types [] = {
-	{ NAUTILUS_ICON_DND_GNOME_ICON_LIST_TYPE, 0, NAUTILUS_ICON_DND_GNOME_ICON_LIST },
+	{ NEMO_ICON_DND_GNOME_ICON_LIST_TYPE, 0, NEMO_ICON_DND_GNOME_ICON_LIST },
 	/* prefer "_NETSCAPE_URL" over "text/uri-list" to satisfy web browsers. */
-	{ NAUTILUS_ICON_DND_NETSCAPE_URL_TYPE, 0, NAUTILUS_ICON_DND_NETSCAPE_URL },
-	{ NAUTILUS_ICON_DND_URI_LIST_TYPE, 0, NAUTILUS_ICON_DND_URI_LIST },
-	{ NAUTILUS_ICON_DND_XDNDDIRECTSAVE_TYPE, 0, NAUTILUS_ICON_DND_XDNDDIRECTSAVE }, /* XDS Protocol Type */
-	{ NAUTILUS_ICON_DND_RAW_TYPE, 0, NAUTILUS_ICON_DND_RAW },
+	{ NEMO_ICON_DND_NETSCAPE_URL_TYPE, 0, NEMO_ICON_DND_NETSCAPE_URL },
+	{ NEMO_ICON_DND_URI_LIST_TYPE, 0, NEMO_ICON_DND_URI_LIST },
+	{ NEMO_ICON_DND_XDNDDIRECTSAVE_TYPE, 0, NEMO_ICON_DND_XDNDDIRECTSAVE }, /* XDS Protocol Type */
+	{ NEMO_ICON_DND_RAW_TYPE, 0, NEMO_ICON_DND_RAW },
 	/* Must be last: */
-	{ NAUTILUS_ICON_DND_ROOTWINDOW_DROP_TYPE,  0, NAUTILUS_ICON_DND_ROOTWINDOW_DROP }
+	{ NEMO_ICON_DND_ROOTWINDOW_DROP_TYPE,  0, NEMO_ICON_DND_ROOTWINDOW_DROP }
 };
 static void     stop_dnd_highlight         (GtkWidget      *widget);
 static void     dnd_highlight_queue_redraw (GtkWidget      *widget);
@@ -82,13 +82,13 @@ static void     dnd_highlight_queue_redraw (GtkWidget      *widget);
 static GtkTargetList *drop_types_list = NULL;
 static GtkTargetList *drop_types_list_root = NULL;
 
-static char * nautilus_icon_container_find_drop_target (NautilusIconContainer *container,
+static char * nemo_icon_container_find_drop_target (NemoIconContainer *container,
 							GdkDragContext *context,
 							int x, int y, gboolean *icon_hit,
 							gboolean rewrite_desktop);
 
 static EelCanvasItem *
-create_selection_shadow (NautilusIconContainer *container,
+create_selection_shadow (NemoIconContainer *container,
 			 GList *list)
 {
 	EelCanvasGroup *group;
@@ -128,7 +128,7 @@ create_selection_shadow (NautilusIconContainer *container,
 					NULL));
 	
 	for (p = list; p != NULL; p = p->next) {
-		NautilusDragSelectionItem *item;
+		NemoDragSelectionItem *item;
 		int x1, y1, x2, y2;
 		GdkRGBA black = { 0, 0, 0, 1 };
 
@@ -146,7 +146,7 @@ create_selection_shadow (NautilusIconContainer *container,
 		if (x2 >= min_x && x1 <= max_x && y2 >= min_y && y1 <= max_y)
 			eel_canvas_item_new
 				(group,
-				 NAUTILUS_TYPE_SELECTION_CANVAS_ITEM,
+				 NEMO_TYPE_SELECTION_CANVAS_ITEM,
 				 "x1", (double) x1,
 				 "y1", (double) y1,
 				 "x2", (double) x2,
@@ -178,7 +178,7 @@ set_shadow_position (EelCanvasItem *shadow,
 /* iteration glue struct */
 typedef struct {
 	gpointer iterator_context;
-	NautilusDragEachSelectedItemDataGet iteratee;
+	NemoDragEachSelectedItemDataGet iteratee;
 	gpointer iteratee_data;
 } IconGetDataBinderContext;
 
@@ -217,25 +217,25 @@ canvas_widget_to_world (EelCanvas *canvas,
 }
 
 static gboolean
-icon_get_data_binder (NautilusIcon *icon, gpointer data)
+icon_get_data_binder (NemoIcon *icon, gpointer data)
 {
 	IconGetDataBinderContext *context;
 	EelDRect world_rect;
 	EelIRect widget_rect;
 	char *uri;
-	NautilusIconContainer *container;
+	NemoIconContainer *container;
 
 	context = (IconGetDataBinderContext *)data;
 
-	g_assert (NAUTILUS_IS_ICON_CONTAINER (context->iterator_context));
+	g_assert (NEMO_IS_ICON_CONTAINER (context->iterator_context));
 
-	container = NAUTILUS_ICON_CONTAINER (context->iterator_context);
+	container = NEMO_ICON_CONTAINER (context->iterator_context);
 
-	world_rect = nautilus_icon_canvas_item_get_icon_rectangle (icon->item);
+	world_rect = nemo_icon_canvas_item_get_icon_rectangle (icon->item);
 
 	canvas_rect_world_to_widget (EEL_CANVAS (container), &world_rect, &widget_rect);
 
-	uri = nautilus_icon_container_get_icon_uri (container, icon);
+	uri = nemo_icon_container_get_icon_uri (container, icon);
 	if (uri == NULL) {
 		g_warning ("no URI for one of the iterated icons");
 		return TRUE;
@@ -261,15 +261,15 @@ icon_get_data_binder (NautilusIcon *icon, gpointer data)
 	return TRUE;
 }
 
-/* Iterate over each selected icon in a NautilusIconContainer,
+/* Iterate over each selected icon in a NemoIconContainer,
  * calling each_function on each.
  */
 static void
-nautilus_icon_container_each_selected_icon (NautilusIconContainer *container,
-	gboolean (*each_function) (NautilusIcon *, gpointer), gpointer data)
+nemo_icon_container_each_selected_icon (NemoIconContainer *container,
+	gboolean (*each_function) (NemoIcon *, gpointer), gpointer data)
 {
 	GList *p;
-	NautilusIcon *icon;
+	NemoIcon *icon;
 
 	for (p = container->details->icons; p != NULL; p = p->next) {
 		icon = p->data;
@@ -282,24 +282,24 @@ nautilus_icon_container_each_selected_icon (NautilusIconContainer *container,
 	}
 }
 
-/* Adaptor function used with nautilus_icon_container_each_selected_icon
+/* Adaptor function used with nemo_icon_container_each_selected_icon
  * to help iterate over all selected items, passing uris, x, y, w and h
  * values to the iteratee
  */
 static void
-each_icon_get_data_binder (NautilusDragEachSelectedItemDataGet iteratee, 
+each_icon_get_data_binder (NemoDragEachSelectedItemDataGet iteratee, 
 	gpointer iterator_context, gpointer data)
 {
 	IconGetDataBinderContext context;
-	NautilusIconContainer *container;
+	NemoIconContainer *container;
 
-	g_assert (NAUTILUS_IS_ICON_CONTAINER (iterator_context));
-	container = NAUTILUS_ICON_CONTAINER (iterator_context);
+	g_assert (NEMO_IS_ICON_CONTAINER (iterator_context));
+	container = NEMO_ICON_CONTAINER (iterator_context);
 
 	context.iterator_context = iterator_context;
 	context.iteratee = iteratee;
 	context.iteratee_data = data;
-	nautilus_icon_container_each_selected_icon (container, icon_get_data_binder, &context);
+	nemo_icon_container_each_selected_icon (container, icon_get_data_binder, &context);
 }
 
 /* Called when the data for drag&drop is needed */
@@ -312,14 +312,14 @@ drag_data_get_callback (GtkWidget *widget,
 			gpointer data)
 {
 	g_assert (widget != NULL);
-	g_assert (NAUTILUS_IS_ICON_CONTAINER (widget));
+	g_assert (NEMO_IS_ICON_CONTAINER (widget));
 	g_return_if_fail (context != NULL);
 
-	/* Call common function from nautilus-drag that set's up
+	/* Call common function from nemo-drag that set's up
 	 * the selection data in the right format. Pass it means to
 	 * iterate all the selected icons.
 	 */
-	nautilus_drag_drag_data_get (widget, context, selection_data,
+	nemo_drag_drag_data_get (widget, context, selection_data,
 		info, time, widget, each_icon_get_data_binder);
 }
 
@@ -327,7 +327,7 @@ drag_data_get_callback (GtkWidget *widget,
 /* Target-side handling of the drag.  */
 
 static void
-nautilus_icon_container_position_shadow (NautilusIconContainer *container,
+nemo_icon_container_position_shadow (NemoIconContainer *container,
 					 int x, int y)
 {
 	EelCanvasItem *shadow;
@@ -346,18 +346,18 @@ nautilus_icon_container_position_shadow (NautilusIconContainer *container,
 }
 
 static void
-nautilus_icon_container_dropped_icon_feedback (GtkWidget *widget,
+nemo_icon_container_dropped_icon_feedback (GtkWidget *widget,
 					       GtkSelectionData *data,
 					       int x, int y)
 {
-	NautilusIconContainer *container;
-	NautilusIconDndInfo *dnd_info;
+	NemoIconContainer *container;
+	NemoIconDndInfo *dnd_info;
 
-	container = NAUTILUS_ICON_CONTAINER (widget);
+	container = NEMO_ICON_CONTAINER (widget);
 	dnd_info = container->details->dnd_info;
 	
 	/* Delete old selection list. */
-	nautilus_drag_destroy_selection_list (dnd_info->drag_info.selection_list);
+	nemo_drag_destroy_selection_list (dnd_info->drag_info.selection_list);
 	dnd_info->drag_info.selection_list = NULL;
 
 	/* Delete old shadow if any. */
@@ -368,9 +368,9 @@ nautilus_icon_container_dropped_icon_feedback (GtkWidget *widget,
 	}
 
 	/* Build the selection list and the shadow. */
-	dnd_info->drag_info.selection_list = nautilus_drag_build_selection_list (data);
+	dnd_info->drag_info.selection_list = nemo_drag_build_selection_list (data);
 	dnd_info->shadow = create_selection_shadow (container, dnd_info->drag_info.selection_list);
-	nautilus_icon_container_position_shadow (container, x, y);
+	nemo_icon_container_position_shadow (container, x, y);
 }
 
 static char *
@@ -379,7 +379,7 @@ get_direct_save_filename (GdkDragContext *context)
 	guchar *prop_text;
 	gint prop_len;
 
-	if (!gdk_property_get (gdk_drag_context_get_source_window (context), gdk_atom_intern (NAUTILUS_ICON_DND_XDNDDIRECTSAVE_TYPE, FALSE),
+	if (!gdk_property_get (gdk_drag_context_get_source_window (context), gdk_atom_intern (NEMO_ICON_DND_XDNDDIRECTSAVE_TYPE, FALSE),
 			       gdk_atom_intern ("text/plain", FALSE), 0, 1024, FALSE, NULL, NULL,
 			       &prop_len, &prop_text)) {
 		return NULL;
@@ -401,19 +401,19 @@ get_direct_save_filename (GdkDragContext *context)
 }
 
 static void
-set_direct_save_uri (GtkWidget *widget, GdkDragContext *context, NautilusDragInfo *drag_info, int x, int y)
+set_direct_save_uri (GtkWidget *widget, GdkDragContext *context, NemoDragInfo *drag_info, int x, int y)
 {
 	GFile *base, *child;
 	char *filename, *drop_target;
 	gchar *uri;
 	
 	drag_info->got_drop_data_type = TRUE;
-	drag_info->data_type = NAUTILUS_ICON_DND_XDNDDIRECTSAVE;
+	drag_info->data_type = NEMO_ICON_DND_XDNDDIRECTSAVE;
 	
 	uri = NULL;
 	
 	filename = get_direct_save_filename (context);
-	drop_target = nautilus_icon_container_find_drop_target (NAUTILUS_ICON_CONTAINER (widget), 
+	drop_target = nemo_icon_container_find_drop_target (NEMO_ICON_CONTAINER (widget), 
 								context, x, y, NULL, TRUE);
 	
 	if (drop_target && eel_uri_is_trash (drop_target)) {
@@ -431,7 +431,7 @@ set_direct_save_uri (GtkWidget *widget, GdkDragContext *context, NautilusDragInf
 		
 		/* Change the uri property */
 		gdk_property_change (gdk_drag_context_get_source_window (context),
-				     gdk_atom_intern (NAUTILUS_ICON_DND_XDNDDIRECTSAVE_TYPE, FALSE),
+				     gdk_atom_intern (NEMO_ICON_DND_XDNDDIRECTSAVE_TYPE, FALSE),
 				     gdk_atom_intern ("text/plain", FALSE), 8,
 				     GDK_PROP_MODE_REPLACE, (const guchar *) uri,
 				     strlen (uri));
@@ -453,15 +453,15 @@ get_data_on_first_target_we_support (GtkWidget *widget, GdkDragContext *context,
 	if (drop_types_list == NULL) {
 		drop_types_list = gtk_target_list_new (drop_types,
 						       G_N_ELEMENTS (drop_types) - 1);
-		gtk_target_list_add_text_targets (drop_types_list, NAUTILUS_ICON_DND_TEXT);
+		gtk_target_list_add_text_targets (drop_types_list, NEMO_ICON_DND_TEXT);
 	}
 	if (drop_types_list_root == NULL) {
 		drop_types_list_root = gtk_target_list_new (drop_types,
 							    G_N_ELEMENTS (drop_types));
-		gtk_target_list_add_text_targets (drop_types_list_root, NAUTILUS_ICON_DND_TEXT);
+		gtk_target_list_add_text_targets (drop_types_list_root, NEMO_ICON_DND_TEXT);
 	}
 	
-	if (nautilus_icon_container_get_is_desktop (NAUTILUS_ICON_CONTAINER (widget))) {
+	if (nemo_icon_container_get_is_desktop (NEMO_ICON_CONTAINER (widget))) {
 		list = drop_types_list_root;
 	} else {
 		list = drop_types_list;
@@ -470,24 +470,24 @@ get_data_on_first_target_we_support (GtkWidget *widget, GdkDragContext *context,
 	target = gtk_drag_dest_find_target (widget, context, list);
 	if (target != GDK_NONE) {
 		guint info;
-		NautilusDragInfo *drag_info;
+		NemoDragInfo *drag_info;
 		gboolean found;
 
-		drag_info = &(NAUTILUS_ICON_CONTAINER (widget)->details->dnd_info->drag_info);
+		drag_info = &(NEMO_ICON_CONTAINER (widget)->details->dnd_info->drag_info);
 
 		found = gtk_target_list_find (list, target, &info);
 		g_assert (found);
 
 		/* Don't get_data for destructive ops */
-		if ((info == NAUTILUS_ICON_DND_ROOTWINDOW_DROP ||
-		     info == NAUTILUS_ICON_DND_XDNDDIRECTSAVE) &&
+		if ((info == NEMO_ICON_DND_ROOTWINDOW_DROP ||
+		     info == NEMO_ICON_DND_XDNDDIRECTSAVE) &&
 		    !drag_info->drop_occured) {
 			/* We can't call get_data here, because that would
 			   make the source execute the rootwin action or the direct save */
 			drag_info->got_drop_data_type = TRUE;
 			drag_info->data_type = info;
 		} else {
-			if (info == NAUTILUS_ICON_DND_XDNDDIRECTSAVE) {
+			if (info == NEMO_ICON_DND_XDNDDIRECTSAVE) {
 				set_direct_save_uri (widget, context, drag_info, x, y);
 			}
 			gtk_drag_get_data (GTK_WIDGET (widget), context,
@@ -497,11 +497,11 @@ get_data_on_first_target_we_support (GtkWidget *widget, GdkDragContext *context,
 }
 
 static void
-nautilus_icon_container_ensure_drag_data (NautilusIconContainer *container,
+nemo_icon_container_ensure_drag_data (NemoIconContainer *container,
 					  GdkDragContext *context,
 					  guint32 time)
 {
-	NautilusIconDndInfo *dnd_info;
+	NemoIconDndInfo *dnd_info;
 
 	dnd_info = container->details->dnd_info;
 
@@ -515,18 +515,18 @@ drag_end_callback (GtkWidget *widget,
 		   GdkDragContext *context,
 		   gpointer data)
 {
-	NautilusIconContainer *container;
-	NautilusIconDndInfo *dnd_info;
+	NemoIconContainer *container;
+	NemoIconDndInfo *dnd_info;
 
-	container = NAUTILUS_ICON_CONTAINER (widget);
+	container = NEMO_ICON_CONTAINER (widget);
 	dnd_info = container->details->dnd_info;
 
-	nautilus_drag_destroy_selection_list (dnd_info->drag_info.selection_list);
+	nemo_drag_destroy_selection_list (dnd_info->drag_info.selection_list);
 	dnd_info->drag_info.selection_list = NULL;
 }
 
-static NautilusIcon *
-nautilus_icon_container_item_at (NautilusIconContainer *container,
+static NemoIcon *
+nemo_icon_container_item_at (NemoIconContainer *container,
 				 int x, int y)
 {
 	GList *p;
@@ -545,7 +545,7 @@ nautilus_icon_container_item_at (NautilusIconContainer *container,
 	point.y1 = y + size;
 
 	for (p = container->details->icons; p != NULL; p = p->next) {
-		NautilusIcon *icon;
+		NemoIcon *icon;
 		icon = p->data;
 		
 		eel_canvas_w2c (EEL_CANVAS (container),
@@ -558,7 +558,7 @@ nautilus_icon_container_item_at (NautilusIconContainer *container,
 				point.y1,
 				&canvas_point.x1,
 				&canvas_point.y1);
-		if (nautilus_icon_canvas_item_hit_test_rectangle (icon->item, canvas_point)) {
+		if (nemo_icon_canvas_item_hit_test_rectangle (icon->item, canvas_point)) {
 			return icon;
 		}
 	}
@@ -567,7 +567,7 @@ nautilus_icon_container_item_at (NautilusIconContainer *container,
 }
 
 static char *
-get_container_uri (NautilusIconContainer *container)
+get_container_uri (NemoIconContainer *container)
 {
 	char *uri;
 
@@ -578,7 +578,7 @@ get_container_uri (NautilusIconContainer *container)
 }
 
 static gboolean
-nautilus_icon_container_selection_items_local (NautilusIconContainer *container,
+nemo_icon_container_selection_items_local (NemoIconContainer *container,
 					       GList *items)
 {
 	char *container_uri_string;
@@ -593,9 +593,9 @@ nautilus_icon_container_selection_items_local (NautilusIconContainer *container,
 	container_uri_string = get_container_uri (container);
 	
 	if (eel_uri_is_desktop (container_uri_string)) {
-		result = nautilus_drag_items_on_desktop (items);
+		result = nemo_drag_items_on_desktop (items);
 	} else {
-		result = nautilus_drag_items_local (container_uri_string, items);
+		result = nemo_drag_items_local (container_uri_string, items);
 	}
 	g_free (container_uri_string);
 	
@@ -604,7 +604,7 @@ nautilus_icon_container_selection_items_local (NautilusIconContainer *container,
 
 /* handle dropped url */
 static void
-receive_dropped_netscape_url (NautilusIconContainer *container, const char *encoded_url, GdkDragContext *context, int x, int y)
+receive_dropped_netscape_url (NemoIconContainer *container, const char *encoded_url, GdkDragContext *context, int x, int y)
 {
 	char *drop_target;
 
@@ -612,7 +612,7 @@ receive_dropped_netscape_url (NautilusIconContainer *container, const char *enco
 		return;
 	}
 
-	drop_target = nautilus_icon_container_find_drop_target (container, context, x, y, NULL, TRUE);
+	drop_target = nemo_icon_container_find_drop_target (container, context, x, y, NULL, TRUE);
 
 	g_signal_emit_by_name (container, "handle_netscape_url",
 			       encoded_url,
@@ -625,7 +625,7 @@ receive_dropped_netscape_url (NautilusIconContainer *container, const char *enco
 
 /* handle dropped uri list */
 static void
-receive_dropped_uri_list (NautilusIconContainer *container, const char *uri_list, GdkDragContext *context, int x, int y)
+receive_dropped_uri_list (NemoIconContainer *container, const char *uri_list, GdkDragContext *context, int x, int y)
 {	
 	char *drop_target;
 
@@ -633,7 +633,7 @@ receive_dropped_uri_list (NautilusIconContainer *container, const char *uri_list
 		return;
 	}
 
-	drop_target = nautilus_icon_container_find_drop_target (container, context, x, y, NULL, TRUE);
+	drop_target = nemo_icon_container_find_drop_target (container, context, x, y, NULL, TRUE);
 
 	g_signal_emit_by_name (container, "handle_uri_list",
 				 uri_list,
@@ -646,7 +646,7 @@ receive_dropped_uri_list (NautilusIconContainer *container, const char *uri_list
 
 /* handle dropped text */
 static void
-receive_dropped_text (NautilusIconContainer *container, const char *text, GdkDragContext *context, int x, int y)
+receive_dropped_text (NemoIconContainer *container, const char *text, GdkDragContext *context, int x, int y)
 {	
 	char *drop_target;
 
@@ -654,7 +654,7 @@ receive_dropped_text (NautilusIconContainer *container, const char *text, GdkDra
 		return;
 	}
 
-	drop_target = nautilus_icon_container_find_drop_target (container, context, x, y, NULL, TRUE);
+	drop_target = nemo_icon_container_find_drop_target (container, context, x, y, NULL, TRUE);
 	
 	g_signal_emit_by_name (container, "handle_text",
 			       text,
@@ -667,7 +667,7 @@ receive_dropped_text (NautilusIconContainer *container, const char *text, GdkDra
 
 /* handle dropped raw data */
 static void
-receive_dropped_raw (NautilusIconContainer *container, const char *raw_data, int length, const char *direct_save_uri, GdkDragContext *context, int x, int y)
+receive_dropped_raw (NemoIconContainer *container, const char *raw_data, int length, const char *direct_save_uri, GdkDragContext *context, int x, int y)
 {
 	char *drop_target;
 
@@ -675,7 +675,7 @@ receive_dropped_raw (NautilusIconContainer *container, const char *raw_data, int
 		return;
 	}
 
-	drop_target = nautilus_icon_container_find_drop_target (container, context, x, y, NULL, TRUE);
+	drop_target = nemo_icon_container_find_drop_target (container, context, x, y, NULL, TRUE);
 
 	g_signal_emit_by_name (container, "handle_raw",
 			       raw_data,
@@ -691,15 +691,15 @@ receive_dropped_raw (NautilusIconContainer *container, const char *raw_data, int
 static int
 auto_scroll_timeout_callback (gpointer data)
 {
-	NautilusIconContainer *container;
+	NemoIconContainer *container;
 	GtkWidget *widget;
 	float x_scroll_delta, y_scroll_delta;
 	GdkRectangle exposed_area;
 	GtkAllocation allocation;
 
-	g_assert (NAUTILUS_IS_ICON_CONTAINER (data));
+	g_assert (NEMO_IS_ICON_CONTAINER (data));
 	widget = GTK_WIDGET (data);
-	container = NAUTILUS_ICON_CONTAINER (widget);
+	container = NEMO_ICON_CONTAINER (widget);
 
 	if (container->details->dnd_info->drag_info.waiting_to_autoscroll
 	    && container->details->dnd_info->drag_info.start_auto_scroll_in > eel_get_system_time()) {
@@ -709,7 +709,7 @@ auto_scroll_timeout_callback (gpointer data)
 
 	container->details->dnd_info->drag_info.waiting_to_autoscroll = FALSE;
 
-	nautilus_drag_autoscroll_calculate_delta (widget, &x_scroll_delta, &y_scroll_delta);
+	nemo_drag_autoscroll_calculate_delta (widget, &x_scroll_delta, &y_scroll_delta);
 	if (x_scroll_delta == 0 && y_scroll_delta == 0) {
 		/* no work */
 		return TRUE;
@@ -718,7 +718,7 @@ auto_scroll_timeout_callback (gpointer data)
 	/* Clear the old dnd highlight frame */
 	dnd_highlight_queue_redraw (widget);
 	
-	if (!nautilus_icon_container_scroll (container, (int)x_scroll_delta, (int)y_scroll_delta)) {
+	if (!nemo_icon_container_scroll (container, (int)x_scroll_delta, (int)y_scroll_delta)) {
 		/* the scroll value got pinned to a min or max adjustment value,
 		 * we ended up not scrolling
 		 */
@@ -768,28 +768,28 @@ auto_scroll_timeout_callback (gpointer data)
 }
 
 static void
-set_up_auto_scroll_if_needed (NautilusIconContainer *container)
+set_up_auto_scroll_if_needed (NemoIconContainer *container)
 {
-	nautilus_drag_autoscroll_start (&container->details->dnd_info->drag_info,
+	nemo_drag_autoscroll_start (&container->details->dnd_info->drag_info,
 					GTK_WIDGET (container),
 					auto_scroll_timeout_callback,
 					container);
 }
 
 static void
-stop_auto_scroll (NautilusIconContainer *container)
+stop_auto_scroll (NemoIconContainer *container)
 {
-	nautilus_drag_autoscroll_stop (&container->details->dnd_info->drag_info);
+	nemo_drag_autoscroll_stop (&container->details->dnd_info->drag_info);
 }
 
 static void
-handle_local_move (NautilusIconContainer *container,
+handle_local_move (NemoIconContainer *container,
 		   double world_x, double world_y)
 {
 	GList *moved_icons, *p;
-	NautilusDragSelectionItem *item;
-	NautilusIcon *icon;
-	NautilusFile *file;
+	NemoDragSelectionItem *item;
+	NemoIcon *icon;
+	NemoFile *file;
 	char screen_string[32];
 	GdkScreen *screen;
 	time_t now;
@@ -805,7 +805,7 @@ handle_local_move (NautilusIconContainer *container,
 	for (p = container->details->dnd_info->drag_info.selection_list; p != NULL; p = p->next) {
 		item = p->data;
 		
-		icon = nautilus_icon_container_get_icon_by_uri
+		icon = nemo_icon_container_get_icon_by_uri
 			(container, item->uri);
 
 		if (icon == NULL) {
@@ -813,25 +813,25 @@ handle_local_move (NautilusIconContainer *container,
 			 * this screen
 			 */
 
-			file = nautilus_file_get_by_uri (item->uri);
+			file = nemo_file_get_by_uri (item->uri);
 
 			screen = gtk_widget_get_screen (GTK_WIDGET (container));
 			g_snprintf (screen_string, sizeof (screen_string), "%d",
 				    gdk_screen_get_number (screen));
-			nautilus_file_set_metadata (file,
-					NAUTILUS_METADATA_KEY_SCREEN,
+			nemo_file_set_metadata (file,
+					NEMO_METADATA_KEY_SCREEN,
 					NULL, screen_string);
-			nautilus_file_set_time_metadata (file,
-							 NAUTILUS_METADATA_KEY_ICON_POSITION_TIMESTAMP, now);
+			nemo_file_set_time_metadata (file,
+							 NEMO_METADATA_KEY_ICON_POSITION_TIMESTAMP, now);
 
-			nautilus_icon_container_add (container, NAUTILUS_ICON_CONTAINER_ICON_DATA (file));
+			nemo_icon_container_add (container, NEMO_ICON_CONTAINER_ICON_DATA (file));
 			
-			icon = nautilus_icon_container_get_icon_by_uri
+			icon = nemo_icon_container_get_icon_by_uri
 				(container, item->uri);
 		}
 
 		if (item->got_icon_position) {
-			nautilus_icon_container_move_icon
+			nemo_icon_container_move_icon
 				(container, icon,
 				 world_x + item->icon_x, world_y + item->icon_y,
 				 icon->scale,
@@ -839,15 +839,15 @@ handle_local_move (NautilusIconContainer *container,
 		}
 		moved_icons = g_list_prepend (moved_icons, icon);
 	}		
-	nautilus_icon_container_select_list_unselect_others
+	nemo_icon_container_select_list_unselect_others
 		(container, moved_icons);
 	/* Might have been moved in a way that requires adjusting scroll region. */
-	nautilus_icon_container_update_scroll_region (container);
+	nemo_icon_container_update_scroll_region (container);
 	g_list_free (moved_icons);
 }
 
 static void
-handle_nonlocal_move (NautilusIconContainer *container,
+handle_nonlocal_move (NemoIconContainer *container,
 		      GdkDragAction action,
 		      int x, int y,
 		      const char *target_uri,
@@ -866,11 +866,11 @@ handle_nonlocal_move (NautilusIconContainer *container,
 	source_uris = NULL;
 	for (p = container->details->dnd_info->drag_info.selection_list; p != NULL; p = p->next) {
 		/* do a shallow copy of all the uri strings of the copied files */
-		source_uris = g_list_prepend (source_uris, ((NautilusDragSelectionItem *)p->data)->uri);
+		source_uris = g_list_prepend (source_uris, ((NemoDragSelectionItem *)p->data)->uri);
 	}
 	source_uris = g_list_reverse (source_uris);
 	
-	is_rtl = nautilus_icon_container_is_layout_rtl (container);
+	is_rtl = nemo_icon_container_is_layout_rtl (container);
 
 	source_item_locations = g_array_new (FALSE, TRUE, sizeof (GdkPoint));
 	if (!icon_hit) {
@@ -882,19 +882,19 @@ handle_nonlocal_move (NautilusIconContainer *container,
 			
 		for (index = 0, p = container->details->dnd_info->drag_info.selection_list;
 			p != NULL; index++, p = p->next) {
-		    	item_x = ((NautilusDragSelectionItem *)p->data)->icon_x;
+		    	item_x = ((NemoDragSelectionItem *)p->data)->icon_x;
 			if (is_rtl)
-				item_x = -item_x - ((NautilusDragSelectionItem *)p->data)->icon_width;
+				item_x = -item_x - ((NemoDragSelectionItem *)p->data)->icon_width;
 		     	g_array_index (source_item_locations, GdkPoint, index).x = item_x;
 		     	g_array_index (source_item_locations, GdkPoint, index).y =
-				((NautilusDragSelectionItem *)p->data)->icon_y;
+				((NemoDragSelectionItem *)p->data)->icon_y;
 		}
 	}
 
 	free_target_uri = FALSE;
  	/* Rewrite internal desktop URIs to the normal target uri */
 	if (eel_uri_is_desktop (target_uri)) {
-		target_uri = nautilus_get_desktop_directory_uri ();
+		target_uri = nemo_get_desktop_directory_uri ();
 		free_target_uri = TRUE;
 	}
 
@@ -920,15 +920,15 @@ handle_nonlocal_move (NautilusIconContainer *container,
 }
 
 static char *
-nautilus_icon_container_find_drop_target (NautilusIconContainer *container,
+nemo_icon_container_find_drop_target (NemoIconContainer *container,
 					  GdkDragContext *context,
 					  int x, int y,
 					  gboolean *icon_hit,
 					  gboolean rewrite_desktop)
 {
-	NautilusIcon *drop_target_icon;
+	NemoIcon *drop_target_icon;
 	double world_x, world_y;
-	NautilusFile *file;
+	NemoFile *file;
 	char *icon_uri;
 	char *container_uri;
 	
@@ -949,13 +949,13 @@ nautilus_icon_container_find_drop_target (NautilusIconContainer *container,
 	 */
 
 	/* Find the item we hit with our drop, if any */	
-	drop_target_icon = nautilus_icon_container_item_at (container, world_x, world_y);
+	drop_target_icon = nemo_icon_container_item_at (container, world_x, world_y);
 	if (drop_target_icon != NULL) {
-		icon_uri = nautilus_icon_container_get_icon_uri (container, drop_target_icon);
+		icon_uri = nemo_icon_container_get_icon_uri (container, drop_target_icon);
 		if (icon_uri != NULL) {
-			file = nautilus_file_get_by_uri (icon_uri);
+			file = nemo_file_get_by_uri (icon_uri);
 
-			if (!nautilus_drag_can_accept_info (file,
+			if (!nemo_drag_can_accept_info (file,
 							    container->details->dnd_info->drag_info.data_type,
 							    container->details->dnd_info->drag_info.selection_list)) {
 			 	/* the item we dropped our selection on cannot accept the items,
@@ -965,7 +965,7 @@ nautilus_icon_container_find_drop_target (NautilusIconContainer *container,
 			}
 			
 			g_free (icon_uri);
-			nautilus_file_unref (file);
+			nemo_file_unref (file);
 		}
 	}
 
@@ -980,7 +980,7 @@ nautilus_icon_container_find_drop_target (NautilusIconContainer *container,
 		    container_uri != NULL &&
 		    eel_uri_is_desktop (container_uri)) {
 			g_free (container_uri);
-			container_uri = nautilus_get_desktop_directory_uri ();
+			container_uri = nemo_get_desktop_directory_uri ();
 		}
 		
 		return container_uri;
@@ -989,14 +989,14 @@ nautilus_icon_container_find_drop_target (NautilusIconContainer *container,
 	if (icon_hit) {
 		*icon_hit = TRUE;
 	}
-	return nautilus_icon_container_get_icon_drop_target_uri (container, drop_target_icon);
+	return nemo_icon_container_get_icon_drop_target_uri (container, drop_target_icon);
 }
 
 static gboolean
 selection_is_image_file (GList *selection_list)
 {
 	const char *mime_type;
-	NautilusDragSelectionItem *selected_item;
+	NemoDragSelectionItem *selected_item;
 	gboolean result;
 	GFile *location;
 	GFileInfo *info;
@@ -1031,7 +1031,7 @@ selection_is_image_file (GList *selection_list)
 
 
 static void
-nautilus_icon_container_receive_dropped_icons (NautilusIconContainer *container,
+nemo_icon_container_receive_dropped_icons (NemoIconContainer *container,
 					       GdkDragContext *context,
 					       int x, int y)
 {
@@ -1040,7 +1040,7 @@ nautilus_icon_container_receive_dropped_icons (NautilusIconContainer *container,
 	double world_x, world_y;
 	gboolean icon_hit;
 	GdkDragAction action, real_action;
-	NautilusDragSelectionItem *selected_item;
+	NemoDragSelectionItem *selected_item;
 
 	drop_target = NULL;
 
@@ -1053,7 +1053,7 @@ nautilus_icon_container_receive_dropped_icons (NautilusIconContainer *container,
 	if (real_action == GDK_ACTION_ASK) {
 		/* FIXME bugzilla.gnome.org 42485: This belongs in FMDirectoryView, not here. */
 		/* Check for special case items in selection list */
-		if (nautilus_drag_selection_includes_special_link (container->details->dnd_info->drag_info.selection_list)) {
+		if (nemo_drag_selection_includes_special_link (container->details->dnd_info->drag_info.selection_list)) {
 			/* We only want to move the trash */
 			action = GDK_ACTION_MOVE;
 		} else {
@@ -1062,22 +1062,22 @@ nautilus_icon_container_receive_dropped_icons (NautilusIconContainer *container,
 			
 			if (eel_uri_is_desktop (container_uri) &&
 			    selection_is_image_file (container->details->dnd_info->drag_info.selection_list)) {
-				action |= NAUTILUS_DND_ACTION_SET_AS_BACKGROUND;
+				action |= NEMO_DND_ACTION_SET_AS_BACKGROUND;
 			}
 
 			g_free (container_uri);
 		}
-		real_action = nautilus_drag_drop_action_ask
+		real_action = nemo_drag_drop_action_ask
 			(GTK_WIDGET (container), action);
 	}
 	
-	if (real_action == (GdkDragAction) NAUTILUS_DND_ACTION_SET_AS_BACKGROUND) {
-		NautilusDesktopBackground *background;
+	if (real_action == (GdkDragAction) NEMO_DND_ACTION_SET_AS_BACKGROUND) {
+		NemoDesktopBackground *background;
 
-		background = nautilus_desktop_background_new (container);
+		background = nemo_desktop_background_new (container);
 		selected_item = container->details->dnd_info->drag_info.selection_list->data;
 
-		nautilus_desktop_background_receive_dropped_background_image (background,
+		nemo_desktop_background_receive_dropped_background_image (background,
 									      selected_item->uri);
 
 		g_object_unref (background);
@@ -1091,7 +1091,7 @@ nautilus_icon_container_receive_dropped_icons (NautilusIconContainer *container,
 					    y + gtk_adjustment_get_value (gtk_scrollable_get_vadjustment (GTK_SCROLLABLE (container))),
 					    &world_x, &world_y);
 
-		drop_target = nautilus_icon_container_find_drop_target (container, 
+		drop_target = nemo_icon_container_find_drop_target (container, 
 									context, x, y, &icon_hit, FALSE);
 
 		local_move_only = FALSE;
@@ -1099,7 +1099,7 @@ nautilus_icon_container_receive_dropped_icons (NautilusIconContainer *container,
 			/* we can just move the icon positions if the move ended up in
 			 * the item's parent container
 			 */
-			local_move_only = nautilus_icon_container_selection_items_local
+			local_move_only = nemo_icon_container_selection_items_local
 				(container, container->details->dnd_info->drag_info.selection_list);
 		}
 
@@ -1111,12 +1111,12 @@ nautilus_icon_container_receive_dropped_icons (NautilusIconContainer *container,
 	}
 
 	g_free (drop_target);
-	nautilus_drag_destroy_selection_list (container->details->dnd_info->drag_info.selection_list);
+	nemo_drag_destroy_selection_list (container->details->dnd_info->drag_info.selection_list);
 	container->details->dnd_info->drag_info.selection_list = NULL;
 }
 
 static void
-nautilus_icon_container_get_drop_action (NautilusIconContainer *container,
+nemo_icon_container_get_drop_action (NemoIconContainer *container,
 					 GdkDragContext *context,
 					 int x, int y,
 					 int *action)
@@ -1137,49 +1137,49 @@ nautilus_icon_container_get_drop_action (NautilusIconContainer *container,
 
 	/* case out on the type of object being dragged */
 	switch (container->details->dnd_info->drag_info.data_type) {
-	case NAUTILUS_ICON_DND_GNOME_ICON_LIST:
+	case NEMO_ICON_DND_GNOME_ICON_LIST:
 		if (container->details->dnd_info->drag_info.selection_list == NULL) {
 			return;
 		}
-		drop_target = nautilus_icon_container_find_drop_target (container,
+		drop_target = nemo_icon_container_find_drop_target (container,
 									context, x, y, &icon_hit, FALSE);
 		if (!drop_target) {
 			return;
 		}
-		nautilus_drag_default_drop_action_for_icons (context, drop_target, 
+		nemo_drag_default_drop_action_for_icons (context, drop_target, 
 							     container->details->dnd_info->drag_info.selection_list, 
 							     action);
 		g_free (drop_target);
 		break;
-	case NAUTILUS_ICON_DND_URI_LIST:
-		drop_target = nautilus_icon_container_find_drop_target (container,
+	case NEMO_ICON_DND_URI_LIST:
+		drop_target = nemo_icon_container_find_drop_target (container,
 									context, x, y, &icon_hit, FALSE);
-		*action = nautilus_drag_default_drop_action_for_uri_list (context, drop_target);
+		*action = nemo_drag_default_drop_action_for_uri_list (context, drop_target);
 
 		g_free (drop_target);
 		break;
 
-	case NAUTILUS_ICON_DND_NETSCAPE_URL:
-		*action = nautilus_drag_default_drop_action_for_netscape_url (context);
+	case NEMO_ICON_DND_NETSCAPE_URL:
+		*action = nemo_drag_default_drop_action_for_netscape_url (context);
 		break;
 
-	case NAUTILUS_ICON_DND_ROOTWINDOW_DROP:
+	case NEMO_ICON_DND_ROOTWINDOW_DROP:
 		*action = gdk_drag_context_get_suggested_action (context);
 		break;
 
-	case NAUTILUS_ICON_DND_TEXT:
-	case NAUTILUS_ICON_DND_XDNDDIRECTSAVE:
-	case NAUTILUS_ICON_DND_RAW:
+	case NEMO_ICON_DND_TEXT:
+	case NEMO_ICON_DND_XDNDDIRECTSAVE:
+	case NEMO_ICON_DND_RAW:
 		*action = GDK_ACTION_COPY;
 		break;
 	}
 }
 
 static void
-set_drop_target (NautilusIconContainer *container,
-		 NautilusIcon *icon)
+set_drop_target (NemoIconContainer *container,
+		 NemoIcon *icon)
 {
-	NautilusIcon *old_icon;
+	NemoIcon *old_icon;
 
 	/* Check if current drop target changed, update icon drop
 	 * higlight if needed.
@@ -1191,26 +1191,26 @@ set_drop_target (NautilusIconContainer *container,
 
 	/* Remember the new drop target for the next round. */
 	container->details->drop_target = icon;
-	nautilus_icon_container_update_icon (container, old_icon);
-	nautilus_icon_container_update_icon (container, icon);
+	nemo_icon_container_update_icon (container, old_icon);
+	nemo_icon_container_update_icon (container, icon);
 }
 
 static void
-nautilus_icon_dnd_update_drop_target (NautilusIconContainer *container,
+nemo_icon_dnd_update_drop_target (NemoIconContainer *container,
 				      GdkDragContext *context,
 				      int x, int y)
 {
-	NautilusIcon *icon;
-	NautilusFile *file;
+	NemoIcon *icon;
+	NemoFile *file;
 	double world_x, world_y;
 	char *uri;
 	
-	g_assert (NAUTILUS_IS_ICON_CONTAINER (container));
+	g_assert (NEMO_IS_ICON_CONTAINER (container));
 
 	canvas_widget_to_world (EEL_CANVAS (container), x, y, &world_x, &world_y);
 
 	/* Find the item we hit with our drop, if any. */
-	icon = nautilus_icon_container_item_at (container, world_x, world_y);
+	icon = nemo_icon_container_item_at (container, world_x, world_y);
 
 	/* FIXME bugzilla.gnome.org 42485: 
 	 * These "can_accept_items" tests need to be done by
@@ -1220,26 +1220,26 @@ nautilus_icon_dnd_update_drop_target (NautilusIconContainer *container,
 
 	/* Find if target icon accepts our drop. */
 	if (icon != NULL) {
-		    uri = nautilus_icon_container_get_icon_uri (container, icon);
-		    file = nautilus_file_get_by_uri (uri);
+		    uri = nemo_icon_container_get_icon_uri (container, icon);
+		    file = nemo_file_get_by_uri (uri);
 		    g_free (uri);
 		
-		    if (!nautilus_drag_can_accept_info (file,
+		    if (!nemo_drag_can_accept_info (file,
 					    		container->details->dnd_info->drag_info.data_type,
 							container->details->dnd_info->drag_info.selection_list)) {
 			    icon = NULL;
 		    }
 
-		    nautilus_file_unref (file);
+		    nemo_file_unref (file);
 	}
 
 	set_drop_target (container, icon);
 }
 
 static void
-nautilus_icon_container_free_drag_data (NautilusIconContainer *container)
+nemo_icon_container_free_drag_data (NemoIconContainer *container)
 {
-	NautilusIconDndInfo *dnd_info;
+	NemoIconDndInfo *dnd_info;
 
 	dnd_info = container->details->dnd_info;
 	
@@ -1267,18 +1267,18 @@ drag_leave_callback (GtkWidget *widget,
 		     guint32 time,
 		     gpointer data)
 {
-	NautilusIconDndInfo *dnd_info;
+	NemoIconDndInfo *dnd_info;
 
-	dnd_info = NAUTILUS_ICON_CONTAINER (widget)->details->dnd_info;
+	dnd_info = NEMO_ICON_CONTAINER (widget)->details->dnd_info;
 	
 	if (dnd_info->shadow != NULL)
 		eel_canvas_item_hide (dnd_info->shadow);
 
 	stop_dnd_highlight (widget);
 	
-	set_drop_target (NAUTILUS_ICON_CONTAINER (widget), NULL);
-	stop_auto_scroll (NAUTILUS_ICON_CONTAINER (widget));
-	nautilus_icon_container_free_drag_data(NAUTILUS_ICON_CONTAINER (widget));
+	set_drop_target (NEMO_ICON_CONTAINER (widget), NULL);
+	stop_auto_scroll (NEMO_ICON_CONTAINER (widget));
+	nemo_icon_container_free_drag_data(NEMO_ICON_CONTAINER (widget));
 }
 
 static void
@@ -1286,13 +1286,13 @@ drag_begin_callback (GtkWidget      *widget,
 		     GdkDragContext *context,
 		     gpointer        data)
 {
-	NautilusIconContainer *container;
+	NemoIconContainer *container;
 	cairo_surface_t *surface;
 	double x1, y1, x2, y2, winx, winy;
 	int x_offset, y_offset;
 	int start_x, start_y;
 
-	container = NAUTILUS_ICON_CONTAINER (widget);
+	container = NEMO_ICON_CONTAINER (widget);
 
 	start_x = container->details->dnd_info->drag_info.start_x +
 		gtk_adjustment_get_value (gtk_scrollable_get_hadjustment (GTK_SCROLLABLE (container)));
@@ -1300,7 +1300,7 @@ drag_begin_callback (GtkWidget      *widget,
 		gtk_adjustment_get_value (gtk_scrollable_get_vadjustment (GTK_SCROLLABLE (container)));
 
         /* create a pixmap and mask to drag with */
-        surface = nautilus_icon_canvas_item_get_drag_surface (container->details->drag_icon->item);
+        surface = nemo_icon_canvas_item_get_drag_surface (container->details->drag_icon->item);
 
         /* compute the image's offset */
 	eel_canvas_item_get_bounds (EEL_CANVAS_ITEM (container->details->drag_icon->item),
@@ -1316,16 +1316,16 @@ drag_begin_callback (GtkWidget      *widget,
 }
 
 void
-nautilus_icon_dnd_begin_drag (NautilusIconContainer *container,
+nemo_icon_dnd_begin_drag (NemoIconContainer *container,
 			      GdkDragAction actions,
 			      int button,
 			      GdkEventMotion *event,
 			      int                    start_x,
 			      int                    start_y)
 {
-	NautilusIconDndInfo *dnd_info;
+	NemoIconDndInfo *dnd_info;
 	
-	g_return_if_fail (NAUTILUS_IS_ICON_CONTAINER (container));
+	g_return_if_fail (NEMO_IS_ICON_CONTAINER (container));
 	g_return_if_fail (event != NULL);
 
 	dnd_info = container->details->dnd_info;
@@ -1379,11 +1379,11 @@ drag_highlight_draw (GtkWidget *widget,
 static void
 dnd_highlight_queue_redraw (GtkWidget *widget)
 {
-	NautilusIconDndInfo *dnd_info;
+	NemoIconDndInfo *dnd_info;
 	int width, height;
 	GtkAllocation allocation;
 	
-	dnd_info = NAUTILUS_ICON_CONTAINER (widget)->details->dnd_info;
+	dnd_info = NEMO_ICON_CONTAINER (widget)->details->dnd_info;
 	
 	if (!dnd_info->highlighted) {
 		return;
@@ -1413,10 +1413,10 @@ dnd_highlight_queue_redraw (GtkWidget *widget)
 static void
 start_dnd_highlight (GtkWidget *widget)
 {
-	NautilusIconDndInfo *dnd_info;
+	NemoIconDndInfo *dnd_info;
 	GtkWidget *toplevel;
 	
-	dnd_info = NAUTILUS_ICON_CONTAINER (widget)->details->dnd_info;
+	dnd_info = NEMO_ICON_CONTAINER (widget)->details->dnd_info;
 
 	toplevel = gtk_widget_get_toplevel (widget);
 	if (toplevel != NULL &&
@@ -1436,9 +1436,9 @@ start_dnd_highlight (GtkWidget *widget)
 static void
 stop_dnd_highlight (GtkWidget *widget)
 {
-	NautilusIconDndInfo *dnd_info;
+	NemoIconDndInfo *dnd_info;
 	
-	dnd_info = NAUTILUS_ICON_CONTAINER (widget)->details->dnd_info;
+	dnd_info = NEMO_ICON_CONTAINER (widget)->details->dnd_info;
 
 	if (dnd_info->highlighted) {
 		g_signal_handlers_disconnect_by_func (widget,
@@ -1457,15 +1457,15 @@ drag_motion_callback (GtkWidget *widget,
 {
 	int action;
 
-	nautilus_icon_container_ensure_drag_data (NAUTILUS_ICON_CONTAINER (widget), context, time);
-	nautilus_icon_container_position_shadow (NAUTILUS_ICON_CONTAINER (widget), x, y);
-	nautilus_icon_dnd_update_drop_target (NAUTILUS_ICON_CONTAINER (widget), context, x, y);
-	set_up_auto_scroll_if_needed (NAUTILUS_ICON_CONTAINER (widget));
+	nemo_icon_container_ensure_drag_data (NEMO_ICON_CONTAINER (widget), context, time);
+	nemo_icon_container_position_shadow (NEMO_ICON_CONTAINER (widget), x, y);
+	nemo_icon_dnd_update_drop_target (NEMO_ICON_CONTAINER (widget), context, x, y);
+	set_up_auto_scroll_if_needed (NEMO_ICON_CONTAINER (widget));
 	/* Find out what the drop actions are based on our drag selection and
 	 * the drop target.
 	 */
 	action = 0;
-	nautilus_icon_container_get_drop_action (NAUTILUS_ICON_CONTAINER (widget), context, x, y,
+	nemo_icon_container_get_drop_action (NEMO_ICON_CONTAINER (widget), context, x, y,
 						 &action);
 	if (action != 0) {
 		start_dnd_highlight (widget);
@@ -1484,9 +1484,9 @@ drag_drop_callback (GtkWidget *widget,
 		    guint32 time,
 		    gpointer data)
 {
-	NautilusIconDndInfo *dnd_info;
+	NemoIconDndInfo *dnd_info;
 
-	dnd_info = NAUTILUS_ICON_CONTAINER (widget)->details->dnd_info;
+	dnd_info = NEMO_ICON_CONTAINER (widget)->details->dnd_info;
 
 	/* tell the drag_data_received callback that
 	   the drop occured and that it can actually
@@ -1501,11 +1501,11 @@ drag_drop_callback (GtkWidget *widget,
 }
 
 void
-nautilus_icon_dnd_end_drag (NautilusIconContainer *container)
+nemo_icon_dnd_end_drag (NemoIconContainer *container)
 {
-	NautilusIconDndInfo *dnd_info;
+	NemoIconDndInfo *dnd_info;
 
-	g_return_if_fail (NAUTILUS_IS_ICON_CONTAINER (container));
+	g_return_if_fail (NEMO_IS_ICON_CONTAINER (container));
 		
 	dnd_info = container->details->dnd_info;
 	g_return_if_fail (dnd_info != NULL);
@@ -1533,25 +1533,25 @@ drag_data_received_callback (GtkWidget *widget,
 			     guint32 time,
 			     gpointer user_data)
 {
-    	NautilusDragInfo *drag_info;
+    	NemoDragInfo *drag_info;
 	char *tmp;
 	const char *tmp_raw;
 	int length;
 	gboolean success;
 
-	drag_info = &(NAUTILUS_ICON_CONTAINER (widget)->details->dnd_info->drag_info);
+	drag_info = &(NEMO_ICON_CONTAINER (widget)->details->dnd_info->drag_info);
 
 	drag_info->got_drop_data_type = TRUE;
 	drag_info->data_type = info;
 
 	switch (info) {
-	case NAUTILUS_ICON_DND_GNOME_ICON_LIST:
-		nautilus_icon_container_dropped_icon_feedback (widget, data, x, y);
+	case NEMO_ICON_DND_GNOME_ICON_LIST:
+		nemo_icon_container_dropped_icon_feedback (widget, data, x, y);
 		break;
-	case NAUTILUS_ICON_DND_URI_LIST:
-	case NAUTILUS_ICON_DND_TEXT:
-	case NAUTILUS_ICON_DND_XDNDDIRECTSAVE:
-	case NAUTILUS_ICON_DND_RAW:
+	case NEMO_ICON_DND_URI_LIST:
+	case NEMO_ICON_DND_TEXT:
+	case NEMO_ICON_DND_XDNDDIRECTSAVE:
+	case NEMO_ICON_DND_RAW:
 		/* Save the data so we can do the actual work on drop. */
 		if (drag_info->selection_data != NULL) {
 			gtk_selection_data_free (drag_info->selection_data);
@@ -1560,13 +1560,13 @@ drag_data_received_callback (GtkWidget *widget,
 		break;
 
 	/* Netscape keeps sending us the data, even though we accept the first drag */
-	case NAUTILUS_ICON_DND_NETSCAPE_URL:
+	case NEMO_ICON_DND_NETSCAPE_URL:
 		if (drag_info->selection_data != NULL) {
 			gtk_selection_data_free (drag_info->selection_data);
 			drag_info->selection_data = gtk_selection_data_copy (data);
 		}
 		break;
-	case NAUTILUS_ICON_DND_ROOTWINDOW_DROP:
+	case NEMO_ICON_DND_ROOTWINDOW_DROP:
 		/* Do nothing, this won't even happen, since we don't want to call get_data twice */
 		break;
 	}
@@ -1578,44 +1578,44 @@ drag_data_received_callback (GtkWidget *widget,
 
 		success = FALSE;
 		switch (info) {
-		case NAUTILUS_ICON_DND_GNOME_ICON_LIST:
-			nautilus_icon_container_receive_dropped_icons
-				(NAUTILUS_ICON_CONTAINER (widget),
+		case NEMO_ICON_DND_GNOME_ICON_LIST:
+			nemo_icon_container_receive_dropped_icons
+				(NEMO_ICON_CONTAINER (widget),
 				 context, x, y);
 			break;
-		case NAUTILUS_ICON_DND_NETSCAPE_URL:
+		case NEMO_ICON_DND_NETSCAPE_URL:
 			receive_dropped_netscape_url
-				(NAUTILUS_ICON_CONTAINER (widget),
+				(NEMO_ICON_CONTAINER (widget),
 				 (char *) gtk_selection_data_get_data (data), context, x, y);
 			success = TRUE;
 			break;
-		case NAUTILUS_ICON_DND_URI_LIST:
+		case NEMO_ICON_DND_URI_LIST:
 			receive_dropped_uri_list
-				(NAUTILUS_ICON_CONTAINER (widget),
+				(NEMO_ICON_CONTAINER (widget),
 				 (char *) gtk_selection_data_get_data (data), context, x, y);
 			success = TRUE;
 			break;
-		case NAUTILUS_ICON_DND_TEXT:
+		case NEMO_ICON_DND_TEXT:
 			tmp = gtk_selection_data_get_text (data);
 			receive_dropped_text
-				(NAUTILUS_ICON_CONTAINER (widget),
+				(NEMO_ICON_CONTAINER (widget),
 				 (char *) tmp, context, x, y);
 			success = TRUE;
 			g_free (tmp);
 			break;
-		case NAUTILUS_ICON_DND_RAW:
+		case NEMO_ICON_DND_RAW:
 			length = gtk_selection_data_get_length (data);
 			tmp_raw = gtk_selection_data_get_data (data);
 			receive_dropped_raw
-				(NAUTILUS_ICON_CONTAINER (widget),
+				(NEMO_ICON_CONTAINER (widget),
 				 tmp_raw, length, drag_info->direct_save_uri,
 				 context, x, y);
 			success = TRUE;
 			break;
-		case NAUTILUS_ICON_DND_ROOTWINDOW_DROP:
+		case NEMO_ICON_DND_ROOTWINDOW_DROP:
 			/* Do nothing, everything is done by the sender */
 			break;
-		case NAUTILUS_ICON_DND_XDNDDIRECTSAVE:
+		case NEMO_ICON_DND_XDNDDIRECTSAVE:
 		{
 			const guchar *selection_data;
 			gint selection_length;
@@ -1629,7 +1629,7 @@ drag_data_received_callback (GtkWidget *widget,
 			    selection_length == 1 &&
 			    selection_data[0] == 'F') {
 				gtk_drag_get_data (widget, context,
-				                  gdk_atom_intern (NAUTILUS_ICON_DND_RAW_TYPE,
+				                  gdk_atom_intern (NEMO_ICON_DND_RAW_TYPE,
 				                                   FALSE),
 				                  time);
 				return;
@@ -1642,25 +1642,25 @@ drag_data_received_callback (GtkWidget *widget,
 
 				location = g_file_new_for_uri (drag_info->direct_save_uri);
 
-				nautilus_file_changes_queue_file_added (location);
+				nemo_file_changes_queue_file_added (location);
 				p.x = x; p.y = y;
-				nautilus_file_changes_queue_schedule_position_set (
+				nemo_file_changes_queue_schedule_position_set (
 				                 location,
 				                 p,
 				                 gdk_screen_get_number (
 				                             gtk_widget_get_screen (widget)));
 				g_object_unref (location);
-				nautilus_file_changes_consume_changes (TRUE);
+				nemo_file_changes_consume_changes (TRUE);
 				success = TRUE;
 			}
 			break;
-		} /* NAUTILUS_ICON_DND_XDNDDIRECTSAVE */
+		} /* NEMO_ICON_DND_XDNDDIRECTSAVE */
 		}
 		gtk_drag_finish (context, success, FALSE, time);
 		
-		nautilus_icon_container_free_drag_data (NAUTILUS_ICON_CONTAINER (widget));
+		nemo_icon_container_free_drag_data (NEMO_ICON_CONTAINER (widget));
 		
-		set_drop_target (NAUTILUS_ICON_CONTAINER (widget), NULL);
+		set_drop_target (NEMO_ICON_CONTAINER (widget), NULL);
 
 		/* reinitialise it for the next dnd */
 		drag_info->drop_occured = FALSE;
@@ -1669,17 +1669,17 @@ drag_data_received_callback (GtkWidget *widget,
 }
 
 void
-nautilus_icon_dnd_init (NautilusIconContainer *container)
+nemo_icon_dnd_init (NemoIconContainer *container)
 {
 	GtkTargetList *targets;
 	int n_elements;
 	
 	g_return_if_fail (container != NULL);
-	g_return_if_fail (NAUTILUS_IS_ICON_CONTAINER (container));
+	g_return_if_fail (NEMO_IS_ICON_CONTAINER (container));
 
 
-	container->details->dnd_info = g_new0 (NautilusIconDndInfo, 1);
-	nautilus_drag_init (&container->details->dnd_info->drag_info,
+	container->details->dnd_info = g_new0 (NemoIconDndInfo, 1);
+	nemo_drag_init (&container->details->dnd_info->drag_info,
 		drag_types, G_N_ELEMENTS (drag_types), TRUE);
 
 	/* Set up the widget as a drag destination.
@@ -1687,7 +1687,7 @@ nautilus_icon_dnd_init (NautilusIconContainer *container)
          * implemented by dealing with events manually.)
 	 */
 	n_elements = G_N_ELEMENTS (drop_types);
-	if (!nautilus_icon_container_get_is_desktop (container)) {
+	if (!nemo_icon_container_get_is_desktop (container)) {
 		/* Don't set up rootwindow drop */
 		n_elements -= 1;
 	}
@@ -1697,7 +1697,7 @@ nautilus_icon_dnd_init (NautilusIconContainer *container)
 			   GDK_ACTION_COPY | GDK_ACTION_MOVE | GDK_ACTION_LINK | GDK_ACTION_ASK);
 
 	targets = gtk_drag_dest_get_target_list (GTK_WIDGET (container));
-	gtk_target_list_add_text_targets (targets, NAUTILUS_ICON_DND_TEXT);
+	gtk_target_list_add_text_targets (targets, NEMO_ICON_DND_TEXT);
 
 	
 	/* Messages for outgoing drag. */
@@ -1720,14 +1720,14 @@ nautilus_icon_dnd_init (NautilusIconContainer *container)
 }
 
 void
-nautilus_icon_dnd_fini (NautilusIconContainer *container)
+nemo_icon_dnd_fini (NemoIconContainer *container)
 {
-	g_return_if_fail (NAUTILUS_IS_ICON_CONTAINER (container));
+	g_return_if_fail (NEMO_IS_ICON_CONTAINER (container));
 
 	if (container->details->dnd_info != NULL) {
 		stop_auto_scroll (container);
 
-		nautilus_drag_finalize (&container->details->dnd_info->drag_info);
+		nemo_drag_finalize (&container->details->dnd_info->drag_info);
 		container->details->dnd_info = NULL;
 	}
 }

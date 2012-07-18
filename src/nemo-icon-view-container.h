@@ -22,46 +22,46 @@
    Author: Michael Meeks <michael@ximian.com>
 */
 
-#ifndef NAUTILUS_ICON_VIEW_CONTAINER_H
-#define NAUTILUS_ICON_VIEW_CONTAINER_H
+#ifndef NEMO_ICON_VIEW_CONTAINER_H
+#define NEMO_ICON_VIEW_CONTAINER_H
 
-#include "nautilus-icon-view.h"
+#include "nemo-icon-view.h"
 
-#include <libnautilus-private/nautilus-icon-container.h>
+#include <libnemo-private/nemo-icon-container.h>
 
-typedef struct NautilusIconViewContainer NautilusIconViewContainer;
-typedef struct NautilusIconViewContainerClass NautilusIconViewContainerClass;
+typedef struct NemoIconViewContainer NemoIconViewContainer;
+typedef struct NemoIconViewContainerClass NemoIconViewContainerClass;
 
-#define NAUTILUS_TYPE_ICON_VIEW_CONTAINER nautilus_icon_view_container_get_type()
-#define NAUTILUS_ICON_VIEW_CONTAINER(obj) \
-  (G_TYPE_CHECK_INSTANCE_CAST ((obj), NAUTILUS_TYPE_ICON_VIEW_CONTAINER, NautilusIconViewContainer))
-#define NAUTILUS_ICON_VIEW_CONTAINER_CLASS(klass) \
-  (G_TYPE_CHECK_CLASS_CAST ((klass), NAUTILUS_TYPE_ICON_VIEW_CONTAINER, NautilusIconViewContainerClass))
-#define NAUTILUS_IS_ICON_VIEW_CONTAINER(obj) \
-  (G_TYPE_CHECK_INSTANCE_TYPE ((obj), NAUTILUS_TYPE_ICON_VIEW_CONTAINER))
-#define NAUTILUS_IS_ICON_VIEW_CONTAINER_CLASS(klass) \
-  (G_TYPE_CHECK_CLASS_TYPE ((klass), NAUTILUS_TYPE_ICON_VIEW_CONTAINER))
-#define NAUTILUS_ICON_VIEW_CONTAINER_GET_CLASS(obj) \
-  (G_TYPE_INSTANCE_GET_CLASS ((obj), NAUTILUS_TYPE_ICON_VIEW_CONTAINER, NautilusIconViewContainerClass))
+#define NEMO_TYPE_ICON_VIEW_CONTAINER nemo_icon_view_container_get_type()
+#define NEMO_ICON_VIEW_CONTAINER(obj) \
+  (G_TYPE_CHECK_INSTANCE_CAST ((obj), NEMO_TYPE_ICON_VIEW_CONTAINER, NemoIconViewContainer))
+#define NEMO_ICON_VIEW_CONTAINER_CLASS(klass) \
+  (G_TYPE_CHECK_CLASS_CAST ((klass), NEMO_TYPE_ICON_VIEW_CONTAINER, NemoIconViewContainerClass))
+#define NEMO_IS_ICON_VIEW_CONTAINER(obj) \
+  (G_TYPE_CHECK_INSTANCE_TYPE ((obj), NEMO_TYPE_ICON_VIEW_CONTAINER))
+#define NEMO_IS_ICON_VIEW_CONTAINER_CLASS(klass) \
+  (G_TYPE_CHECK_CLASS_TYPE ((klass), NEMO_TYPE_ICON_VIEW_CONTAINER))
+#define NEMO_ICON_VIEW_CONTAINER_GET_CLASS(obj) \
+  (G_TYPE_INSTANCE_GET_CLASS ((obj), NEMO_TYPE_ICON_VIEW_CONTAINER, NemoIconViewContainerClass))
 
-typedef struct NautilusIconViewContainerDetails NautilusIconViewContainerDetails;
+typedef struct NemoIconViewContainerDetails NemoIconViewContainerDetails;
 
-struct NautilusIconViewContainer {
-	NautilusIconContainer parent;
+struct NemoIconViewContainer {
+	NemoIconContainer parent;
 
-	NautilusIconView *view;
+	NemoIconView *view;
 	gboolean    sort_for_desktop;
 };
 
-struct NautilusIconViewContainerClass {
-	NautilusIconContainerClass parent_class;
+struct NemoIconViewContainerClass {
+	NemoIconContainerClass parent_class;
 };
 
-GType                  nautilus_icon_view_container_get_type         (void);
-NautilusIconContainer *nautilus_icon_view_container_construct        (NautilusIconViewContainer *icon_container,
-								      NautilusIconView      *view);
-NautilusIconContainer *nautilus_icon_view_container_new              (NautilusIconView      *view);
-void                   nautilus_icon_view_container_set_sort_desktop (NautilusIconViewContainer *container,
+GType                  nemo_icon_view_container_get_type         (void);
+NemoIconContainer *nemo_icon_view_container_construct        (NemoIconViewContainer *icon_container,
+								      NemoIconView      *view);
+NemoIconContainer *nemo_icon_view_container_new              (NemoIconView      *view);
+void                   nemo_icon_view_container_set_sort_desktop (NemoIconViewContainer *container,
 								      gboolean         desktop);
 
-#endif /* NAUTILUS_ICON_VIEW_CONTAINER_H */
+#endif /* NEMO_ICON_VIEW_CONTAINER_H */

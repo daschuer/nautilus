@@ -1,6 +1,6 @@
 /* -*- Mode: C; indent-tabs-mode: t; c-basic-offset: 8; tab-width: 8 -*-
 
-   nautilus-cell-renderer-text-ellipsized.c: Cell renderer for text which
+   nemo-cell-renderer-text-ellipsized.c: Cell renderer for text which
    will use pango ellipsization but deactivate it temporarily for the size
    calculation to get the size based on the actual text length.
  
@@ -24,36 +24,36 @@
    Author: Martin Wehner <martin.wehner@gmail.com>
 */
 
-#ifndef NAUTILUS_CELL_RENDERER_TEXT_ELLIPSIZED_H
-#define NAUTILUS_CELL_RENDERER_TEXT_ELLIPSIZED_H
+#ifndef NEMO_CELL_RENDERER_TEXT_ELLIPSIZED_H
+#define NEMO_CELL_RENDERER_TEXT_ELLIPSIZED_H
 
 #include <gtk/gtk.h>
 
-#define NAUTILUS_TYPE_CELL_RENDERER_TEXT_ELLIPSIZED nautilus_cell_renderer_text_ellipsized_get_type()
-#define NAUTILUS_CELL_RENDERER_TEXT_ELLIPSIZED(obj) \
-  (G_TYPE_CHECK_INSTANCE_CAST ((obj), NAUTILUS_TYPE_CELL_RENDERER_TEXT_ELLIPSIZED, NautilusCellRendererTextEllipsized))
-#define NAUTILUS_CELL_RENDERER_TEXT_ELLIPSIZED_CLASS(klass) \
-  (G_TYPE_CHECK_CLASS_CAST ((klass), NAUTILUS_TYPE_CELL_RENDERER_TEXT_ELLIPSIZED, NautilusCellRendererTextEllipsizedClass))
-#define NAUTILUS_IS_CELL_RENDERER_TEXT_ELLIPSIZED(obj) \
-  (G_TYPE_CHECK_INSTANCE_TYPE ((obj), NAUTILUS_TYPE_CELL_RENDERER_TEXT_ELLIPSIZED))
-#define NAUTILUS_IS_CELL_RENDERER_TEXT_ELLIPSIZED_CLASS(klass) \
-  (G_TYPE_CHECK_CLASS_TYPE ((klass), NAUTILUS_TYPE_CELL_RENDERER_TEXT_ELLIPSIZED))
-#define NAUTILUS_CELL_RENDERER_TEXT_ELLIPSIZED_GET_CLASS(obj) \
-  (G_TYPE_INSTANCE_GET_CLASS ((obj), NAUTILUS_TYPE_CELL_RENDERER_TEXT_ELLIPSIZED, NautilusCellRendererTextEllipsizedClass))
+#define NEMO_TYPE_CELL_RENDERER_TEXT_ELLIPSIZED nemo_cell_renderer_text_ellipsized_get_type()
+#define NEMO_CELL_RENDERER_TEXT_ELLIPSIZED(obj) \
+  (G_TYPE_CHECK_INSTANCE_CAST ((obj), NEMO_TYPE_CELL_RENDERER_TEXT_ELLIPSIZED, NemoCellRendererTextEllipsized))
+#define NEMO_CELL_RENDERER_TEXT_ELLIPSIZED_CLASS(klass) \
+  (G_TYPE_CHECK_CLASS_CAST ((klass), NEMO_TYPE_CELL_RENDERER_TEXT_ELLIPSIZED, NemoCellRendererTextEllipsizedClass))
+#define NEMO_IS_CELL_RENDERER_TEXT_ELLIPSIZED(obj) \
+  (G_TYPE_CHECK_INSTANCE_TYPE ((obj), NEMO_TYPE_CELL_RENDERER_TEXT_ELLIPSIZED))
+#define NEMO_IS_CELL_RENDERER_TEXT_ELLIPSIZED_CLASS(klass) \
+  (G_TYPE_CHECK_CLASS_TYPE ((klass), NEMO_TYPE_CELL_RENDERER_TEXT_ELLIPSIZED))
+#define NEMO_CELL_RENDERER_TEXT_ELLIPSIZED_GET_CLASS(obj) \
+  (G_TYPE_INSTANCE_GET_CLASS ((obj), NEMO_TYPE_CELL_RENDERER_TEXT_ELLIPSIZED, NemoCellRendererTextEllipsizedClass))
 
 
-typedef struct _NautilusCellRendererTextEllipsized NautilusCellRendererTextEllipsized;
-typedef struct _NautilusCellRendererTextEllipsizedClass NautilusCellRendererTextEllipsizedClass;
+typedef struct _NemoCellRendererTextEllipsized NemoCellRendererTextEllipsized;
+typedef struct _NemoCellRendererTextEllipsizedClass NemoCellRendererTextEllipsizedClass;
 
-struct _NautilusCellRendererTextEllipsized {
+struct _NemoCellRendererTextEllipsized {
 	GtkCellRendererText parent;
 };
 
-struct _NautilusCellRendererTextEllipsizedClass {
+struct _NemoCellRendererTextEllipsizedClass {
 	GtkCellRendererTextClass parent_class;
 };
 
-GType		 nautilus_cell_renderer_text_ellipsized_get_type (void);
-GtkCellRenderer *nautilus_cell_renderer_text_ellipsized_new      (void);
+GType		 nemo_cell_renderer_text_ellipsized_get_type (void);
+GtkCellRenderer *nemo_cell_renderer_text_ellipsized_new      (void);
 
-#endif /* NAUTILUS_CELL_RENDERER_TEXT_ELLIPSIZED_H */
+#endif /* NEMO_CELL_RENDERER_TEXT_ELLIPSIZED_H */

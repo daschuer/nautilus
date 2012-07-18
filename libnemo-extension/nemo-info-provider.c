@@ -1,5 +1,5 @@
 /*
- *  nautilus-info-provider.c - Interface for Nautilus extensions that 
+ *  nemo-info-provider.c - Interface for Nemo extensions that 
  *                             provide info about files.
  *
  *  Copyright (C) 2003 Novell, Inc.
@@ -23,24 +23,24 @@
  */
 
 #include <config.h>
-#include "nautilus-info-provider.h"
+#include "nemo-info-provider.h"
 
 #include <glib-object.h>
 
 static void
-nautilus_info_provider_base_init (gpointer g_class)
+nemo_info_provider_base_init (gpointer g_class)
 {
 }
 
 GType                   
-nautilus_info_provider_get_type (void)
+nemo_info_provider_get_type (void)
 {
 	static GType type = 0;
 
 	if (!type) {
 		const GTypeInfo info = {
-			sizeof (NautilusInfoProviderIface),
-			nautilus_info_provider_base_init,
+			sizeof (NemoInfoProviderIface),
+			nemo_info_provider_base_init,
 			NULL,
 			NULL,
 			NULL,
@@ -51,7 +51,7 @@ nautilus_info_provider_get_type (void)
 		};
 		
 		type = g_type_register_static (G_TYPE_INTERFACE, 
-					       "NautilusInfoProvider",
+					       "NemoInfoProvider",
 					       &info, 0);
 		g_type_interface_add_prerequisite (type, G_TYPE_OBJECT);
 	}
@@ -59,52 +59,52 @@ nautilus_info_provider_get_type (void)
 	return type;
 }
 
-NautilusOperationResult 
-nautilus_info_provider_update_file_info (NautilusInfoProvider *provider,
-					 NautilusFileInfo *file,
+NemoOperationResult 
+nemo_info_provider_update_file_info (NemoInfoProvider *provider,
+					 NemoFileInfo *file,
 					 GClosure *update_complete,
-					 NautilusOperationHandle **handle)
+					 NemoOperationHandle **handle)
 {
-	g_return_val_if_fail (NAUTILUS_IS_INFO_PROVIDER (provider),
-			      NAUTILUS_OPERATION_FAILED);
-	g_return_val_if_fail (NAUTILUS_INFO_PROVIDER_GET_IFACE (provider)->update_file_info != NULL,
-			      NAUTILUS_OPERATION_FAILED);
+	g_return_val_if_fail (NEMO_IS_INFO_PROVIDER (provider),
+			      NEMO_OPERATION_FAILED);
+	g_return_val_if_fail (NEMO_INFO_PROVIDER_GET_IFACE (provider)->update_file_info != NULL,
+			      NEMO_OPERATION_FAILED);
 	g_return_val_if_fail (update_complete != NULL, 
-			      NAUTILUS_OPERATION_FAILED);
-	g_return_val_if_fail (handle != NULL, NAUTILUS_OPERATION_FAILED);
+			      NEMO_OPERATION_FAILED);
+	g_return_val_if_fail (handle != NULL, NEMO_OPERATION_FAILED);
 
-	return NAUTILUS_INFO_PROVIDER_GET_IFACE (provider)->update_file_info 
+	return NEMO_INFO_PROVIDER_GET_IFACE (provider)->update_file_info 
 		(provider, file, update_complete, handle);
 }
 
 void
-nautilus_info_provider_cancel_update (NautilusInfoProvider *provider,
-				      NautilusOperationHandle *handle)
+nemo_info_provider_cancel_update (NemoInfoProvider *provider,
+				      NemoOperationHandle *handle)
 {
-	g_return_if_fail (NAUTILUS_IS_INFO_PROVIDER (provider));
-	g_return_if_fail (NAUTILUS_INFO_PROVIDER_GET_IFACE (provider)->cancel_update != NULL);
-	g_return_if_fail (NAUTILUS_INFO_PROVIDER_GET_IFACE (provider)->cancel_update != NULL);
+	g_return_if_fail (NEMO_IS_INFO_PROVIDER (provider));
+	g_return_if_fail (NEMO_INFO_PROVIDER_GET_IFACE (provider)->cancel_update != NULL);
+	g_return_if_fail (NEMO_INFO_PROVIDER_GET_IFACE (provider)->cancel_update != NULL);
 	g_return_if_fail (handle != NULL);
 
-	NAUTILUS_INFO_PROVIDER_GET_IFACE (provider)->cancel_update (provider,
+	NEMO_INFO_PROVIDER_GET_IFACE (provider)->cancel_update (provider,
 								    handle);
 }
 
 void
-nautilus_info_provider_update_complete_invoke (GClosure *update_complete,
-					       NautilusInfoProvider *provider,
-					       NautilusOperationHandle *handle,
-					       NautilusOperationResult result)
+nemo_info_provider_update_complete_invoke (GClosure *update_complete,
+					       NemoInfoProvider *provider,
+					       NemoOperationHandle *handle,
+					       NemoOperationResult result)
 {
 	GValue args[3] = { { 0, } };
 	GValue return_val = { 0, };
 	
 	g_return_if_fail (update_complete != NULL);
-	g_return_if_fail (NAUTILUS_IS_INFO_PROVIDER (provider));
+	g_return_if_fail (NEMO_IS_INFO_PROVIDER (provider));
 
-	g_value_init (&args[0], NAUTILUS_TYPE_INFO_PROVIDER);
+	g_value_init (&args[0], NEMO_TYPE_INFO_PROVIDER);
 	g_value_init (&args[1], G_TYPE_POINTER);
-	g_value_init (&args[2], NAUTILUS_TYPE_OPERATION_RESULT);
+	g_value_init (&args[2], NEMO_TYPE_OPERATION_RESULT);
 
 	g_value_set_object (&args[0], provider);
 	g_value_set_pointer (&args[1], handle);

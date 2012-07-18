@@ -23,33 +23,33 @@
    Authors: John Sullivan <sullivan@eazel.com>
 */
 
-#ifndef NAUTILUS_ERROR_REPORTING_H
-#define NAUTILUS_ERROR_REPORTING_H
+#ifndef NEMO_ERROR_REPORTING_H
+#define NEMO_ERROR_REPORTING_H
 
 #include <gtk/gtk.h>
-#include <libnautilus-private/nautilus-file.h>
+#include <libnemo-private/nemo-file.h>
 
-void nautilus_report_error_loading_directory	 (NautilusFile   *file,
+void nemo_report_error_loading_directory	 (NemoFile   *file,
 						  GError         *error,
 						  GtkWindow	 *parent_window);
-void nautilus_report_error_renaming_file         (NautilusFile *file,
+void nemo_report_error_renaming_file         (NemoFile *file,
 						  const char *new_name,
 						  GError *error,
 						  GtkWindow *parent_window);
-void nautilus_report_error_setting_permissions (NautilusFile   *file,
+void nemo_report_error_setting_permissions (NemoFile   *file,
 						GError         *error,
 						GtkWindow	 *parent_window);
-void nautilus_report_error_setting_owner       (NautilusFile   *file,
+void nemo_report_error_setting_owner       (NemoFile   *file,
 						GError         *error,  
 						GtkWindow	 *parent_window);
-void nautilus_report_error_setting_group       (NautilusFile   *file,
+void nemo_report_error_setting_group       (NemoFile   *file,
 						GError         *error,
 						GtkWindow	 *parent_window);
 
 /* FIXME bugzilla.gnome.org 42394: Should this file be renamed or should this function be moved? */
-void nautilus_rename_file                      (NautilusFile   *file,
+void nemo_rename_file                      (NemoFile   *file,
 						const char     *new_name,
-						NautilusFileOperationCallback callback,
+						NemoFileOperationCallback callback,
 						gpointer callback_data);
 
-#endif /* NAUTILUS_ERROR_REPORTING_H */
+#endif /* NEMO_ERROR_REPORTING_H */

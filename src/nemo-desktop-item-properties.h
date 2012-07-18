@@ -21,8 +21,8 @@
  * 
  */
 
-#ifndef NAUTILUS_DESKTOP_ITEM_PROPERTIES_H
-#define NAUTILUS_DESKTOP_ITEM_PROPERTIES_H
+#ifndef NEMO_DESKTOP_ITEM_PROPERTIES_H
+#define NEMO_DESKTOP_ITEM_PROPERTIES_H
 
 #include <glib.h>
 #include <glib-object.h>
@@ -31,17 +31,17 @@
 G_BEGIN_DECLS
 
 /* This is a mis-nomer. Launcher editables initially were displayed on separate
- * a property notebook page, which implemented the NautilusPropertyPageProvider
+ * a property notebook page, which implemented the NemoPropertyPageProvider
  * interface.
  *
  * Nowadays, they are displayed on the "Basic" page, so just the setup
  * routines are left.
  */
 
-GtkWidget *nautilus_desktop_item_properties_make_box (GtkSizeGroup *label_size_group,
+GtkWidget *nemo_desktop_item_properties_make_box (GtkSizeGroup *label_size_group,
                                                       GList *files);
-gboolean   nautilus_desktop_item_properties_should_show (GList *files);
+gboolean   nemo_desktop_item_properties_should_show (GList *files);
 
 G_END_DECLS
 
-#endif /* NAUTILUS_DESKTOP_ITEM_PROPERTIES_H */
+#endif /* NEMO_DESKTOP_ITEM_PROPERTIES_H */

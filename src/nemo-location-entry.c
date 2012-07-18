@@ -1,16 +1,16 @@
 /* -*- Mode: C; indent-tabs-mode: t; c-basic-offset: 8; tab-width: 8 -*- */
 
 /*
- * Nautilus
+ * Nemo
  *
  * Copyright (C) 2000 Eazel, Inc.
  *
- * Nautilus is free software; you can redistribute it and/or
+ * Nemo is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
  * published by the Free Software Foundation; either version 2 of the
  * License, or (at your option) any later version.
  *
- * Nautilus is distributed in the hope that it will be useful,
+ * Nemo is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
  * General Public License for more details.
@@ -27,26 +27,26 @@
  *
  */
 
-/* nautilus-location-bar.c - Location bar for Nautilus
+/* nemo-location-bar.c - Location bar for Nemo
  */
 
 #include <config.h>
-#include "nautilus-location-entry.h"
+#include "nemo-location-entry.h"
 
-#include "nautilus-window-private.h"
-#include "nautilus-window.h"
+#include "nemo-window-private.h"
+#include "nemo-window.h"
 #include <gtk/gtk.h>
 #include <gdk/gdkkeysyms.h>
 #include <glib/gi18n.h>
 #include <gio/gio.h>
-#include <libnautilus-private/nautilus-file-utilities.h>
-#include <libnautilus-private/nautilus-entry.h>
-#include <libnautilus-private/nautilus-icon-dnd.h>
-#include <libnautilus-private/nautilus-clipboard.h>
+#include <libnemo-private/nemo-file-utilities.h>
+#include <libnemo-private/nemo-entry.h>
+#include <libnemo-private/nemo-icon-dnd.h>
+#include <libnemo-private/nemo-clipboard.h>
 #include <stdio.h>
 #include <string.h>
 
-struct NautilusLocationEntryDetails {
+struct NemoLocationEntryDetails {
 	GtkLabel *label;
 	
 	char *current_directory;
@@ -57,10 +57,10 @@ struct NautilusLocationEntryDetails {
 	gboolean has_special_text;
 	gboolean setting_special_text;
 	gchar *special_text;
-	NautilusLocationEntryAction secondary_action;
+	NemoLocationEntryAction secondary_action;
 };
 
-G_DEFINE_TYPE (NautilusLocationEntry, nautilus_location_entry, NAUTILUS_TYPE_ENTRY);
+G_DEFINE_TYPE (NemoLocationEntry, nemo_location_entry, NEMO_TYPE_ENTRY);
 
 /* routine that performs the tab expansion.  Extract the directory name and
    incomplete basename, then iterate through the directory trying to complete it.  If we
@@ -69,12 +69,12 @@ G_DEFINE_TYPE (NautilusLocationEntry, nautilus_location_entry, NAUTILUS_TYPE_ENT
 static gboolean
 try_to_expand_path (gpointer callback_data)
 {
-	NautilusLocationEntry *entry;
+	NemoLocationEntry *entry;
 	GtkEditable *editable;
 	char *suffix, *user_location, *absolute_location, *uri_scheme;
 	int user_location_length, pos;
 
-	entry = NAUTILUS_LOCATION_ENTRY (callback_data);
+	entry = NEMO_LOCATION_ENTRY (callback_data);
 	editable = GTK_EDITABLE (entry);
 	user_location = gtk_editable_get_chars (editable, 0, -1);
 	user_location_length = g_utf8_strlen (user_location, -1);
@@ -184,7 +184,7 @@ position_and_selection_are_at_end (GtkEditable *editable)
 
 static void
 got_completion_data_callback (GFilenameCompleter *completer,
-			      NautilusLocationEntry *entry)
+			      NemoLocationEntry *entry)
 {
 	if (entry->details->idle_id) {
 		g_source_remove (entry->details->idle_id);
@@ -196,7 +196,7 @@ got_completion_data_callback (GFilenameCompleter *completer,
 static void
 editable_event_after_callback (GtkEntry *entry,
 			       GdkEvent *event,
-			       NautilusLocationEntry *location_entry)
+			       NemoLocationEntry *location_entry)
 {
 	GtkEditable *editable;
 	GdkEventKey *keyevent;
@@ -244,22 +244,22 @@ editable_event_after_callback (GtkEntry *entry,
 static void
 finalize (GObject *object)
 {
-	NautilusLocationEntry *entry;
+	NemoLocationEntry *entry;
 
-	entry = NAUTILUS_LOCATION_ENTRY (object);
+	entry = NEMO_LOCATION_ENTRY (object);
 
 	g_object_unref (entry->details->completer);
 	g_free (entry->details->special_text);
 
-	G_OBJECT_CLASS (nautilus_location_entry_parent_class)->finalize (object);
+	G_OBJECT_CLASS (nemo_location_entry_parent_class)->finalize (object);
 }
 
 static void
 destroy (GtkWidget *object)
 {
-	NautilusLocationEntry *entry;
+	NemoLocationEntry *entry;
 
-	entry = NAUTILUS_LOCATION_ENTRY (object);
+	entry = NEMO_LOCATION_ENTRY (object);
 	
 	/* cancel the pending idle call, if any */
 	if (entry->details->idle_id != 0) {
@@ -270,11 +270,11 @@ destroy (GtkWidget *object)
 	g_free (entry->details->current_directory);
 	entry->details->current_directory = NULL;
 	
-	GTK_WIDGET_CLASS (nautilus_location_entry_parent_class)->destroy (object);
+	GTK_WIDGET_CLASS (nemo_location_entry_parent_class)->destroy (object);
 }
 
 static void
-nautilus_location_entry_text_changed (NautilusLocationEntry *entry,
+nemo_location_entry_text_changed (NemoLocationEntry *entry,
 				      GParamSpec            *pspec)
 {
 	if (entry->details->setting_special_text) {
@@ -285,16 +285,16 @@ nautilus_location_entry_text_changed (NautilusLocationEntry *entry,
 }
 
 static void
-nautilus_location_entry_icon_release (GtkEntry *gentry,
+nemo_location_entry_icon_release (GtkEntry *gentry,
 				      GtkEntryIconPosition position,
 				      GdkEvent *event,
 				      gpointer unused)
 {
-	switch (NAUTILUS_LOCATION_ENTRY (gentry)->details->secondary_action) {
-	case NAUTILUS_LOCATION_ENTRY_ACTION_GOTO:
+	switch (NEMO_LOCATION_ENTRY (gentry)->details->secondary_action) {
+	case NEMO_LOCATION_ENTRY_ACTION_GOTO:
 		g_signal_emit_by_name (gentry, "activate", gentry);
 		break;
-	case NAUTILUS_LOCATION_ENTRY_ACTION_CLEAR:
+	case NEMO_LOCATION_ENTRY_ACTION_CLEAR:
 		gtk_entry_set_text (gentry, "");
 		break;
 	default:
@@ -303,10 +303,10 @@ nautilus_location_entry_icon_release (GtkEntry *gentry,
 }
 
 static gboolean
-nautilus_location_entry_focus_in (GtkWidget     *widget,
+nemo_location_entry_focus_in (GtkWidget     *widget,
 				  GdkEventFocus *event)
 {
-	NautilusLocationEntry *entry = NAUTILUS_LOCATION_ENTRY (widget);
+	NemoLocationEntry *entry = NEMO_LOCATION_ENTRY (widget);
 
 	if (entry->details->has_special_text) {
 		entry->details->setting_special_text = TRUE;
@@ -314,17 +314,17 @@ nautilus_location_entry_focus_in (GtkWidget     *widget,
 		entry->details->setting_special_text = FALSE;
 	}
 
-	return GTK_WIDGET_CLASS (nautilus_location_entry_parent_class)->focus_in_event (widget, event);
+	return GTK_WIDGET_CLASS (nemo_location_entry_parent_class)->focus_in_event (widget, event);
 }
 
 static void
-nautilus_location_entry_activate (GtkEntry *entry)
+nemo_location_entry_activate (GtkEntry *entry)
 {
-	NautilusLocationEntry *loc_entry;
+	NemoLocationEntry *loc_entry;
 	const gchar *entry_text;
 	gchar *full_path, *uri_scheme = NULL;
 
-	loc_entry = NAUTILUS_LOCATION_ENTRY (entry);
+	loc_entry = NEMO_LOCATION_ENTRY (entry);
 	entry_text = gtk_entry_get_text (entry);
 
 	if (entry_text != NULL && *entry_text != '\0') {
@@ -340,54 +340,54 @@ nautilus_location_entry_activate (GtkEntry *entry)
 		g_free (uri_scheme);
 	}
 
-	GTK_ENTRY_CLASS (nautilus_location_entry_parent_class)->activate (entry);
+	GTK_ENTRY_CLASS (nemo_location_entry_parent_class)->activate (entry);
 }
 
 static void
-nautilus_location_entry_class_init (NautilusLocationEntryClass *class)
+nemo_location_entry_class_init (NemoLocationEntryClass *class)
 {
 	GtkWidgetClass *widget_class;
 	GObjectClass *gobject_class;
 	GtkEntryClass *entry_class;
 
 	widget_class = GTK_WIDGET_CLASS (class);
-	widget_class->focus_in_event = nautilus_location_entry_focus_in;
+	widget_class->focus_in_event = nemo_location_entry_focus_in;
 	widget_class->destroy = destroy;
 
 	gobject_class = G_OBJECT_CLASS (class);
 	gobject_class->finalize = finalize;
 
 	entry_class = GTK_ENTRY_CLASS (class);
-	entry_class->activate = nautilus_location_entry_activate;
+	entry_class->activate = nemo_location_entry_activate;
 
-	g_type_class_add_private (class, sizeof (NautilusLocationEntryDetails));
+	g_type_class_add_private (class, sizeof (NemoLocationEntryDetails));
 }
 
 void
-nautilus_location_entry_update_current_location (NautilusLocationEntry *entry,
+nemo_location_entry_update_current_location (NemoLocationEntry *entry,
 						 const char *location)
 {
 	g_free (entry->details->current_directory);
 	entry->details->current_directory = g_strdup (location);
 
-	nautilus_entry_set_text (NAUTILUS_ENTRY (entry), location);
+	nemo_entry_set_text (NEMO_ENTRY (entry), location);
 	set_position_and_selection_to_end (GTK_EDITABLE (entry));
 }
 
 void
-nautilus_location_entry_set_secondary_action (NautilusLocationEntry *entry,
-					      NautilusLocationEntryAction secondary_action)
+nemo_location_entry_set_secondary_action (NemoLocationEntry *entry,
+					      NemoLocationEntryAction secondary_action)
 {
 	if (entry->details->secondary_action == secondary_action) {
 		return;
 	}
 	switch (secondary_action) {
-	case NAUTILUS_LOCATION_ENTRY_ACTION_CLEAR:
+	case NEMO_LOCATION_ENTRY_ACTION_CLEAR:
 		gtk_entry_set_icon_from_icon_name (GTK_ENTRY (entry), 
 						   GTK_ENTRY_ICON_SECONDARY,
 						   "edit-clear-symbolic");
 		break;
-	case NAUTILUS_LOCATION_ENTRY_ACTION_GOTO:
+	case NEMO_LOCATION_ENTRY_ACTION_GOTO:
 		gtk_entry_set_icon_from_icon_name (GTK_ENTRY (entry),
 						   GTK_ENTRY_ICON_SECONDARY,
 						   "go-next-symbolic");
@@ -399,44 +399,44 @@ nautilus_location_entry_set_secondary_action (NautilusLocationEntry *entry,
 }
 
 static void
-nautilus_location_entry_init (NautilusLocationEntry *entry)
+nemo_location_entry_init (NemoLocationEntry *entry)
 {
-	entry->details = G_TYPE_INSTANCE_GET_PRIVATE (entry, NAUTILUS_TYPE_LOCATION_ENTRY,
-						      NautilusLocationEntryDetails);
+	entry->details = G_TYPE_INSTANCE_GET_PRIVATE (entry, NEMO_TYPE_LOCATION_ENTRY,
+						      NemoLocationEntryDetails);
 
 	entry->details->completer = g_filename_completer_new ();
 	g_filename_completer_set_dirs_only (entry->details->completer, TRUE);
 
-	nautilus_location_entry_set_secondary_action (entry,
-						      NAUTILUS_LOCATION_ENTRY_ACTION_CLEAR);
+	nemo_location_entry_set_secondary_action (entry,
+						      NEMO_LOCATION_ENTRY_ACTION_CLEAR);
 
-	nautilus_entry_set_special_tab_handling (NAUTILUS_ENTRY (entry), TRUE);
+	nemo_entry_set_special_tab_handling (NEMO_ENTRY (entry), TRUE);
 
 	g_signal_connect (entry, "event_after",
 		          G_CALLBACK (editable_event_after_callback), entry);
 
 	g_signal_connect (entry, "notify::text",
-			  G_CALLBACK (nautilus_location_entry_text_changed), NULL);
+			  G_CALLBACK (nemo_location_entry_text_changed), NULL);
 
 	g_signal_connect (entry, "icon-release",
-			  G_CALLBACK (nautilus_location_entry_icon_release), NULL);
+			  G_CALLBACK (nemo_location_entry_icon_release), NULL);
 
 	g_signal_connect (entry->details->completer, "got_completion_data",
 		          G_CALLBACK (got_completion_data_callback), entry);
 }
 
 GtkWidget *
-nautilus_location_entry_new (void)
+nemo_location_entry_new (void)
 {
 	GtkWidget *entry;
 
-	entry = gtk_widget_new (NAUTILUS_TYPE_LOCATION_ENTRY, NULL);
+	entry = gtk_widget_new (NEMO_TYPE_LOCATION_ENTRY, NULL);
 
 	return entry;
 }
 
 void
-nautilus_location_entry_set_special_text (NautilusLocationEntry *entry,
+nemo_location_entry_set_special_text (NemoLocationEntry *entry,
 					  const char            *special_text)
 {
 	entry->details->has_special_text = TRUE;

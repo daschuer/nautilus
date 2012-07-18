@@ -1,14 +1,14 @@
 /*
- * nautilus-dbus-manager: nautilus DBus interface
+ * nemo-dbus-manager: nemo DBus interface
  *
  * Copyright (C) 2010, Red Hat, Inc.
  *
- * Nautilus is free software; you can redistribute it and/or
+ * Nemo is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
  * published by the Free Software Foundation; either version 2 of the
  * License, or (at your option) any later version.
  *
- * Nautilus is distributed in the hope that it will be useful,
+ * Nemo is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
  * General Public License for more details.
@@ -23,32 +23,32 @@
 
 #include <config.h>
 
-#include "nautilus-dbus-manager.h"
-#include "nautilus-generated.h"
+#include "nemo-dbus-manager.h"
+#include "nemo-generated.h"
 
-#include "nautilus-file-operations.h"
+#include "nemo-file-operations.h"
 
-#define DEBUG_FLAG NAUTILUS_DEBUG_DBUS
-#include "nautilus-debug.h"
+#define DEBUG_FLAG NEMO_DEBUG_DBUS
+#include "nemo-debug.h"
 
 #include <gio/gio.h>
 
-typedef struct _NautilusDBusManager NautilusDBusManager;
-typedef struct _NautilusDBusManagerClass NautilusDBusManagerClass;
+typedef struct _NemoDBusManager NemoDBusManager;
+typedef struct _NemoDBusManagerClass NemoDBusManagerClass;
 
-struct _NautilusDBusManager {
+struct _NemoDBusManager {
   GObject parent;
 
   GDBusConnection *connection;
   GApplication *application;
 
   GDBusObjectManagerServer *object_manager;
-  NautilusDBusFileOperations *file_operations;
+  NemoDBusFileOperations *file_operations;
 
   guint owner_id;
 };
 
-struct _NautilusDBusManagerClass {
+struct _NemoDBusManagerClass {
   GObjectClass parent_class;
 };
 
@@ -61,15 +61,15 @@ enum {
 
 static GParamSpec *properties[NUM_PROPERTIES] = { NULL, };
 
-static GType nautilus_dbus_manager_get_type (void) G_GNUC_CONST;
-G_DEFINE_TYPE (NautilusDBusManager, nautilus_dbus_manager, G_TYPE_OBJECT);
+static GType nemo_dbus_manager_get_type (void) G_GNUC_CONST;
+G_DEFINE_TYPE (NemoDBusManager, nemo_dbus_manager, G_TYPE_OBJECT);
 
-static NautilusDBusManager *singleton = NULL;
+static NemoDBusManager *singleton = NULL;
 
 static void
-nautilus_dbus_manager_dispose (GObject *object)
+nemo_dbus_manager_dispose (GObject *object)
 {
-  NautilusDBusManager *self = (NautilusDBusManager *) object;
+  NemoDBusManager *self = (NemoDBusManager *) object;
 
   /* Unown before unregistering so we're not registred in a partial state */
   if (self->owner_id != 0)
@@ -91,13 +91,13 @@ nautilus_dbus_manager_dispose (GObject *object)
 
   g_clear_object (&self->connection);
 
-  G_OBJECT_CLASS (nautilus_dbus_manager_parent_class)->dispose (object);
+  G_OBJECT_CLASS (nemo_dbus_manager_parent_class)->dispose (object);
 }
 
 static gboolean
 service_timeout_handler (gpointer user_data)
 {
-  NautilusDBusManager *self = user_data;
+  NemoDBusManager *self = user_data;
 
   DEBUG ("Reached the DBus service timeout");
 
@@ -110,7 +110,7 @@ service_timeout_handler (gpointer user_data)
 }
 
 static gboolean
-handle_copy_file (NautilusDBusFileOperations *object,
+handle_copy_file (NemoDBusFileOperations *object,
 		  GDBusMethodInvocation *invocation,
 		  const gchar *source_uri,
 		  const gchar *source_display_name,
@@ -129,18 +129,18 @@ handle_copy_file (NautilusDBusFileOperations *object,
   if (source_display_name != NULL && source_display_name[0] != '\0')
     source_name = source_display_name;
 
-  nautilus_file_operations_copy_file (source_file, target_dir, source_name, target_name,
+  nemo_file_operations_copy_file (source_file, target_dir, source_name, target_name,
 				      NULL, NULL, NULL);
 
   g_object_unref (source_file);
   g_object_unref (target_dir);
 
-  nautilus_dbus_file_operations_complete_copy_file (object, invocation);
+  nemo_dbus_file_operations_complete_copy_file (object, invocation);
   return TRUE; /* invocation was handled */
 }
 
 static gboolean
-handle_copy_uris (NautilusDBusFileOperations *object,
+handle_copy_uris (NemoDBusFileOperations *object,
 		  GDBusMethodInvocation *invocation,
 		  const gchar **sources,
 		  const gchar *destination)
@@ -155,24 +155,24 @@ handle_copy_uris (NautilusDBusFileOperations *object,
     source_files = g_list_prepend (source_files,
                                    g_file_new_for_uri (sources[idx]));
 
-  nautilus_file_operations_copy (source_files, NULL,
+  nemo_file_operations_copy (source_files, NULL,
                                  dest_dir,
                                  NULL, NULL, NULL);
 
   g_list_free_full (source_files, g_object_unref);
   g_object_unref (dest_dir);
 
-  nautilus_dbus_file_operations_complete_copy_uris (object, invocation);
+  nemo_dbus_file_operations_complete_copy_uris (object, invocation);
   return TRUE; /* invocation was handled */
 }
 
 static gboolean
-handle_empty_trash (NautilusDBusFileOperations *object,
+handle_empty_trash (NemoDBusFileOperations *object,
 		    GDBusMethodInvocation *invocation)
 {
-  nautilus_file_operations_empty_trash (NULL);
+  nemo_file_operations_empty_trash (NULL);
 
-  nautilus_dbus_file_operations_complete_empty_trash (object, invocation);
+  nemo_dbus_file_operations_complete_empty_trash (object, invocation);
   return TRUE; /* invocation was handled */
 }
 
@@ -181,15 +181,15 @@ bus_acquired_handler_cb (GDBusConnection *conn,
                          const gchar *name,
                          gpointer user_data)
 {
-  NautilusDBusManager *self = user_data;
+  NemoDBusManager *self = user_data;
 
   DEBUG ("Bus acquired at %s", name);
 
   self->connection = g_object_ref (conn);
 
-  self->object_manager = g_dbus_object_manager_server_new ("/org/gnome/Nautilus");
+  self->object_manager = g_dbus_object_manager_server_new ("/org/gnome/Nemo");
 
-  self->file_operations = nautilus_dbus_file_operations_skeleton_new ();
+  self->file_operations = nemo_dbus_file_operations_skeleton_new ();
 
   g_signal_connect (self->file_operations,
 		    "handle-copy-uris",
@@ -205,7 +205,7 @@ bus_acquired_handler_cb (GDBusConnection *conn,
 		    self);
 
   g_dbus_interface_skeleton_export (G_DBUS_INTERFACE_SKELETON (self->file_operations), self->connection,
-				    "/org/gnome/Nautilus", NULL);
+				    "/org/gnome/Nemo", NULL);
 
   g_dbus_object_manager_server_set_connection (self->object_manager, self->connection);
 
@@ -229,18 +229,18 @@ on_name_acquired (GDBusConnection *connection,
 }
 
 static void
-nautilus_dbus_manager_init (NautilusDBusManager *self)
+nemo_dbus_manager_init (NemoDBusManager *self)
 {
   /* do nothing */
 }
 
 static void
-nautilus_dbus_manager_set_property (GObject *object,
+nemo_dbus_manager_set_property (GObject *object,
                                     guint property_id,
                                     const GValue *value,
                                     GParamSpec *pspec)
 {
-  NautilusDBusManager *self = (NautilusDBusManager *) (object);
+  NemoDBusManager *self = (NemoDBusManager *) (object);
 
   switch (property_id)
     {
@@ -254,16 +254,16 @@ nautilus_dbus_manager_set_property (GObject *object,
 }
 
 static void
-nautilus_dbus_manager_constructed (GObject *object)
+nemo_dbus_manager_constructed (GObject *object)
 {
-  NautilusDBusManager *self = (NautilusDBusManager *) (object);
+  NemoDBusManager *self = (NemoDBusManager *) (object);
 
-  G_OBJECT_CLASS (nautilus_dbus_manager_parent_class)->constructed (object);
+  G_OBJECT_CLASS (nemo_dbus_manager_parent_class)->constructed (object);
 
   g_application_hold (self->application);
 
   self->owner_id = g_bus_own_name (G_BUS_TYPE_SESSION,
-				   "org.gnome.Nautilus",
+				   "org.gnome.Nemo",
 				   G_BUS_NAME_OWNER_FLAGS_NONE,
 				   bus_acquired_handler_cb,
 				   on_name_acquired,
@@ -273,13 +273,13 @@ nautilus_dbus_manager_constructed (GObject *object)
 }
 
 static void
-nautilus_dbus_manager_class_init (NautilusDBusManagerClass *klass)
+nemo_dbus_manager_class_init (NemoDBusManagerClass *klass)
 {
   GObjectClass *oclass = G_OBJECT_CLASS (klass);
 
-  oclass->dispose = nautilus_dbus_manager_dispose;
-  oclass->constructed = nautilus_dbus_manager_constructed;
-  oclass->set_property = nautilus_dbus_manager_set_property;
+  oclass->dispose = nemo_dbus_manager_dispose;
+  oclass->constructed = nemo_dbus_manager_constructed;
+  oclass->set_property = nemo_dbus_manager_set_property;
 
   properties[PROP_APPLICATION] =
     g_param_spec_object ("application",
@@ -293,15 +293,15 @@ nautilus_dbus_manager_class_init (NautilusDBusManagerClass *klass)
 }
 
 void
-nautilus_dbus_manager_start (GApplication *application)
+nemo_dbus_manager_start (GApplication *application)
 {
-  singleton = g_object_new (nautilus_dbus_manager_get_type (),
+  singleton = g_object_new (nemo_dbus_manager_get_type (),
                             "application", application,
                             NULL);
 }
 
 void
-nautilus_dbus_manager_stop (void)
+nemo_dbus_manager_stop (void)
 {
   g_clear_object (&singleton);
 }

@@ -23,17 +23,17 @@
 
 #include <config.h>
 
-#include "nautilus-desktop-item-properties.h"
+#include "nemo-desktop-item-properties.h"
 
 #include <string.h>
 
 #include <eel/eel-glib-extensions.h>
 #include <gtk/gtk.h>
 #include <glib/gi18n.h>
-#include <libnautilus-extension/nautilus-extension-types.h>
-#include <libnautilus-extension/nautilus-file-info.h>
-#include <libnautilus-private/nautilus-file.h>
-#include <libnautilus-private/nautilus-file-attributes.h>
+#include <libnemo-extension/nemo-extension-types.h>
+#include <libnemo-extension/nemo-file-info.h>
+#include <libnemo-private/nemo-file.h>
+#include <libnemo-private/nemo-file-attributes.h>
 
 #define MAIN_GROUP "Desktop Entry"
 
@@ -156,7 +156,7 @@ item_entry_free (ItemEntry *entry)
 }
 
 static void
-nautilus_desktop_item_properties_url_drag_data_received (GtkWidget *widget, GdkDragContext *context,
+nemo_desktop_item_properties_url_drag_data_received (GtkWidget *widget, GdkDragContext *context,
                                                          int x, int y,
                                                          GtkSelectionData *selection_data,
                                                          guint info, guint time,
@@ -186,7 +186,7 @@ nautilus_desktop_item_properties_url_drag_data_received (GtkWidget *widget, GdkD
 }
 
 static void
-nautilus_desktop_item_properties_exec_drag_data_received (GtkWidget *widget, GdkDragContext *context,
+nemo_desktop_item_properties_exec_drag_data_received (GtkWidget *widget, GdkDragContext *context,
                                                           int x, int y,
                                                           GtkSelectionData *selection_data,
                                                           guint info, guint time,
@@ -194,7 +194,7 @@ nautilus_desktop_item_properties_exec_drag_data_received (GtkWidget *widget, Gdk
 {
 	char **uris;
 	gboolean exactly_one;
-	NautilusFile *file;
+	NemoFile *file;
 	GKeyFile *key_file;
 	char *uri, *type, *exec;
 	
@@ -206,12 +206,12 @@ nautilus_desktop_item_properties_exec_drag_data_received (GtkWidget *widget, Gdk
 		return;
 	}
 
-	file = nautilus_file_get_by_uri (uris[0]);
+	file = nemo_file_get_by_uri (uris[0]);
 
 	g_return_if_fail (file != NULL);
 	
-	uri = nautilus_file_get_uri (file);
-	if (nautilus_file_is_mime_type (file, "application/x-desktop")) {
+	uri = nemo_file_get_uri (file);
+	if (nemo_file_is_mime_type (file, "application/x-desktop")) {
 		key_file = _g_key_file_new_from_uri (uri, G_KEY_FILE_NONE, NULL);
 		if (key_file != NULL) {
 			type = g_key_file_get_string (key_file, MAIN_GROUP, "Type", NULL);
@@ -232,7 +232,7 @@ nautilus_desktop_item_properties_exec_drag_data_received (GtkWidget *widget, Gdk
 	
 	g_free (uri);
 	
-	nautilus_file_unref (file);
+	nemo_file_unref (file);
 	
 	g_strfreev (uris);
 }
@@ -364,7 +364,7 @@ build_grid (GtkWidget *container,
 					   GDK_ACTION_COPY | GDK_ACTION_MOVE);
 			
 			g_signal_connect (entry, "drag_data_received",
-					  G_CALLBACK (nautilus_desktop_item_properties_url_drag_data_received),
+					  G_CALLBACK (nemo_desktop_item_properties_url_drag_data_received),
 					  entry);
 		} else if (strcmp (item_entry->field, "Exec") == 0) {
 			gtk_drag_dest_set (GTK_WIDGET (entry),
@@ -373,7 +373,7 @@ build_grid (GtkWidget *container,
 					   GDK_ACTION_COPY | GDK_ACTION_MOVE);
 			
 			g_signal_connect (entry, "drag_data_received",
-					  G_CALLBACK (nautilus_desktop_item_properties_exec_drag_data_received),
+					  G_CALLBACK (nemo_desktop_item_properties_exec_drag_data_received),
 					  entry);
 		}
 	}
@@ -466,7 +466,7 @@ ditem_read_cb (GObject *source_object,
 }
 
 static void
-nautilus_desktop_item_properties_create_begin (const char *uri,
+nemo_desktop_item_properties_create_begin (const char *uri,
                                                GtkWidget *box)
 {
 	GFile *location;
@@ -478,40 +478,40 @@ nautilus_desktop_item_properties_create_begin (const char *uri,
 }
 
 GtkWidget *
-nautilus_desktop_item_properties_make_box (GtkSizeGroup *label_size_group,
+nemo_desktop_item_properties_make_box (GtkSizeGroup *label_size_group,
                                            GList *files)
 {
-	NautilusFileInfo *info;
+	NemoFileInfo *info;
 	char *uri;
 	GtkWidget *box;
 
-	g_assert (nautilus_desktop_item_properties_should_show (files));
+	g_assert (nemo_desktop_item_properties_should_show (files));
 
 	box = gtk_box_new (GTK_ORIENTATION_VERTICAL, 6);
 	g_object_set_data_full (G_OBJECT (box), "label-size-group",
 				label_size_group, (GDestroyNotify) g_object_unref);
 
-	info = NAUTILUS_FILE_INFO (files->data);
+	info = NEMO_FILE_INFO (files->data);
 
-	uri = nautilus_file_info_get_uri (info);
-	nautilus_desktop_item_properties_create_begin (uri, box);
+	uri = nemo_file_info_get_uri (info);
+	nemo_desktop_item_properties_create_begin (uri, box);
 	g_free (uri);
 
 	return box;
 }
 
 gboolean
-nautilus_desktop_item_properties_should_show (GList *files)
+nemo_desktop_item_properties_should_show (GList *files)
 {
-	NautilusFileInfo *info;
+	NemoFileInfo *info;
 
 	if (!files || files->next) {
 		return FALSE;
 	}
 
-	info = NAUTILUS_FILE_INFO (files->data);
+	info = NEMO_FILE_INFO (files->data);
 
-	if (!nautilus_file_info_is_mime_type (info, "application/x-desktop")) {
+	if (!nemo_file_info_is_mime_type (info, "application/x-desktop")) {
 		return FALSE;
 	}
 

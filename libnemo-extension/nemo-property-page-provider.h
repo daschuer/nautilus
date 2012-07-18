@@ -1,5 +1,5 @@
 /*
- *  nautilus-property-page-provider.h - Interface for Nautilus extensions
+ *  nemo-property-page-provider.h - Interface for Nemo extensions
  *                                      that provide property pages.
  *
  *  Copyright (C) 2003 Novell, Inc.
@@ -22,40 +22,40 @@
  *
  */
 
-/* This interface is implemented by Nautilus extensions that want to 
+/* This interface is implemented by Nemo extensions that want to 
  * add property page to property dialogs.  Extensions are called when 
- * Nautilus needs property pages for a selection.  They are passed a 
- * list of NautilusFileInfo objects for which information should
+ * Nemo needs property pages for a selection.  They are passed a 
+ * list of NemoFileInfo objects for which information should
  * be displayed  */
 
-#ifndef NAUTILUS_PROPERTY_PAGE_PROVIDER_H
-#define NAUTILUS_PROPERTY_PAGE_PROVIDER_H
+#ifndef NEMO_PROPERTY_PAGE_PROVIDER_H
+#define NEMO_PROPERTY_PAGE_PROVIDER_H
 
 #include <glib-object.h>
-#include "nautilus-extension-types.h"
-#include "nautilus-file-info.h"
-#include "nautilus-property-page.h"
+#include "nemo-extension-types.h"
+#include "nemo-file-info.h"
+#include "nemo-property-page.h"
 
 G_BEGIN_DECLS
 
-#define NAUTILUS_TYPE_PROPERTY_PAGE_PROVIDER           (nautilus_property_page_provider_get_type ())
-#define NAUTILUS_PROPERTY_PAGE_PROVIDER(obj)           (G_TYPE_CHECK_INSTANCE_CAST ((obj), NAUTILUS_TYPE_PROPERTY_PAGE_PROVIDER, NautilusPropertyPageProvider))
-#define NAUTILUS_IS_PROPERTY_PAGE_PROVIDER(obj)        (G_TYPE_CHECK_INSTANCE_TYPE ((obj), NAUTILUS_TYPE_PROPERTY_PAGE_PROVIDER))
-#define NAUTILUS_PROPERTY_PAGE_PROVIDER_GET_IFACE(obj) (G_TYPE_INSTANCE_GET_INTERFACE ((obj), NAUTILUS_TYPE_PROPERTY_PAGE_PROVIDER, NautilusPropertyPageProviderIface))
+#define NEMO_TYPE_PROPERTY_PAGE_PROVIDER           (nemo_property_page_provider_get_type ())
+#define NEMO_PROPERTY_PAGE_PROVIDER(obj)           (G_TYPE_CHECK_INSTANCE_CAST ((obj), NEMO_TYPE_PROPERTY_PAGE_PROVIDER, NemoPropertyPageProvider))
+#define NEMO_IS_PROPERTY_PAGE_PROVIDER(obj)        (G_TYPE_CHECK_INSTANCE_TYPE ((obj), NEMO_TYPE_PROPERTY_PAGE_PROVIDER))
+#define NEMO_PROPERTY_PAGE_PROVIDER_GET_IFACE(obj) (G_TYPE_INSTANCE_GET_INTERFACE ((obj), NEMO_TYPE_PROPERTY_PAGE_PROVIDER, NemoPropertyPageProviderIface))
 
-typedef struct _NautilusPropertyPageProvider       NautilusPropertyPageProvider;
-typedef struct _NautilusPropertyPageProviderIface  NautilusPropertyPageProviderIface;
+typedef struct _NemoPropertyPageProvider       NemoPropertyPageProvider;
+typedef struct _NemoPropertyPageProviderIface  NemoPropertyPageProviderIface;
 
-struct _NautilusPropertyPageProviderIface {
+struct _NemoPropertyPageProviderIface {
 	GTypeInterface g_iface;
 
-	GList *(*get_pages) (NautilusPropertyPageProvider     *provider,
+	GList *(*get_pages) (NemoPropertyPageProvider     *provider,
 			     GList                    *files);
 };
 
 /* Interface Functions */
-GType                   nautilus_property_page_provider_get_type  (void);
-GList                  *nautilus_property_page_provider_get_pages (NautilusPropertyPageProvider *provider,
+GType                   nemo_property_page_provider_get_type  (void);
+GList                  *nemo_property_page_provider_get_pages (NemoPropertyPageProvider *provider,
 								   GList                        *files);
 
 G_END_DECLS

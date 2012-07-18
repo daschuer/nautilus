@@ -23,34 +23,34 @@
 */
 #include <config.h>
 
-#include "nautilus-icon-view-container.h"
+#include "nemo-icon-view-container.h"
 
 #include <string.h>
 #include <glib/gi18n.h>
 #include <gio/gio.h>
 #include <eel/eel-glib-extensions.h>
-#include <libnautilus-private/nautilus-global-preferences.h>
-#include <libnautilus-private/nautilus-file-attributes.h>
-#include <libnautilus-private/nautilus-thumbnails.h>
-#include <libnautilus-private/nautilus-desktop-icon-file.h>
+#include <libnemo-private/nemo-global-preferences.h>
+#include <libnemo-private/nemo-file-attributes.h>
+#include <libnemo-private/nemo-thumbnails.h>
+#include <libnemo-private/nemo-desktop-icon-file.h>
 
 #define ICON_TEXT_ATTRIBUTES_NUM_ITEMS		3
 #define ICON_TEXT_ATTRIBUTES_DEFAULT_TOKENS	"size,date_modified,type"
 
-G_DEFINE_TYPE (NautilusIconViewContainer, nautilus_icon_view_container, NAUTILUS_TYPE_ICON_CONTAINER);
+G_DEFINE_TYPE (NemoIconViewContainer, nemo_icon_view_container, NEMO_TYPE_ICON_CONTAINER);
 
 static GQuark attribute_none_q;
 
-static NautilusIconView *
-get_icon_view (NautilusIconContainer *container)
+static NemoIconView *
+get_icon_view (NemoIconContainer *container)
 {
 	/* Type unsafe comparison for performance */
-	return ((NautilusIconViewContainer *)container)->view;
+	return ((NemoIconViewContainer *)container)->view;
 }
 
-static NautilusIconInfo *
-nautilus_icon_view_container_get_icon_images (NautilusIconContainer *container,
-					      NautilusIconData      *data,
+static NemoIconInfo *
+nemo_icon_view_container_get_icon_images (NemoIconContainer *container,
+					      NemoIconData      *data,
 					      int                    size,
 					      char                 **embedded_text,
 					      gboolean               for_drag_accept,
@@ -58,61 +58,61 @@ nautilus_icon_view_container_get_icon_images (NautilusIconContainer *container,
 					      gboolean              *embedded_text_needs_loading,
 					      gboolean              *has_window_open)
 {
-	NautilusIconView *icon_view;
+	NemoIconView *icon_view;
 	char **emblems_to_ignore;
-	NautilusFile *file;
+	NemoFile *file;
 	gboolean use_embedding;
-	NautilusFileIconFlags flags;
-	NautilusIconInfo *icon_info;
+	NemoFileIconFlags flags;
+	NemoIconInfo *icon_info;
 	GdkPixbuf *pixbuf;
 	GIcon *emblemed_icon;
 	GEmblem *emblem;
 	GList *emblem_icons, *l;
 
-	file = (NautilusFile *) data;
+	file = (NemoFile *) data;
 
-	g_assert (NAUTILUS_IS_FILE (file));
+	g_assert (NEMO_IS_FILE (file));
 	icon_view = get_icon_view (container);
 	g_return_val_if_fail (icon_view != NULL, NULL);
 
 	use_embedding = FALSE;
 	if (embedded_text) {
-		*embedded_text = nautilus_file_peek_top_left_text (file, need_large_embeddded_text, embedded_text_needs_loading);
+		*embedded_text = nemo_file_peek_top_left_text (file, need_large_embeddded_text, embedded_text_needs_loading);
 		use_embedding = *embedded_text != NULL;
 	}
 	
-	*has_window_open = nautilus_file_has_open_window (file);
+	*has_window_open = nemo_file_has_open_window (file);
 
-	flags = NAUTILUS_FILE_ICON_FLAGS_USE_MOUNT_ICON_AS_EMBLEM;
-	if (!nautilus_icon_view_is_compact (icon_view) ||
-	    nautilus_icon_container_get_zoom_level (container) > NAUTILUS_ZOOM_LEVEL_STANDARD) {
-		flags |= NAUTILUS_FILE_ICON_FLAGS_USE_THUMBNAILS;
-		if (nautilus_icon_view_is_compact (icon_view)) {
-			flags |= NAUTILUS_FILE_ICON_FLAGS_FORCE_THUMBNAIL_SIZE;
+	flags = NEMO_FILE_ICON_FLAGS_USE_MOUNT_ICON_AS_EMBLEM;
+	if (!nemo_icon_view_is_compact (icon_view) ||
+	    nemo_icon_container_get_zoom_level (container) > NEMO_ZOOM_LEVEL_STANDARD) {
+		flags |= NEMO_FILE_ICON_FLAGS_USE_THUMBNAILS;
+		if (nemo_icon_view_is_compact (icon_view)) {
+			flags |= NEMO_FILE_ICON_FLAGS_FORCE_THUMBNAIL_SIZE;
 		}
 	}
 
 	if (use_embedding) {
-		flags |= NAUTILUS_FILE_ICON_FLAGS_EMBEDDING_TEXT;
+		flags |= NEMO_FILE_ICON_FLAGS_EMBEDDING_TEXT;
 	}
 	if (for_drag_accept) {
-		flags |= NAUTILUS_FILE_ICON_FLAGS_FOR_DRAG_ACCEPT;
+		flags |= NEMO_FILE_ICON_FLAGS_FOR_DRAG_ACCEPT;
 	}
 
-	emblems_to_ignore = nautilus_view_get_emblem_names_to_exclude 
-		(NAUTILUS_VIEW (icon_view));
-	emblem_icons = nautilus_file_get_emblem_icons (file,
+	emblems_to_ignore = nemo_view_get_emblem_names_to_exclude 
+		(NEMO_VIEW (icon_view));
+	emblem_icons = nemo_file_get_emblem_icons (file,
 						       emblems_to_ignore);
 	g_strfreev (emblems_to_ignore);
 
-	icon_info = nautilus_file_get_icon (file, size, flags);
+	icon_info = nemo_file_get_icon (file, size, flags);
 
 	/* apply emblems */
 	if (emblem_icons != NULL) {
 		l = emblem_icons;
 
 		emblem = g_emblem_new (l->data);
-		pixbuf = nautilus_icon_info_get_pixbuf (icon_info);
+		pixbuf = nemo_icon_info_get_pixbuf (icon_info);
 		emblemed_icon = g_emblemed_icon_new (G_ICON (pixbuf), emblem);
 		g_object_unref (emblem);
 
@@ -124,7 +124,7 @@ nautilus_icon_view_container_get_icon_images (NautilusIconContainer *container,
 		}
 
 		g_clear_object (&icon_info);
-		icon_info = nautilus_icon_info_lookup (emblemed_icon, size);
+		icon_info = nemo_icon_info_lookup (emblemed_icon, size);
 
 		g_object_unref (pixbuf);
 		g_object_unref (emblemed_icon);
@@ -138,74 +138,74 @@ nautilus_icon_view_container_get_icon_images (NautilusIconContainer *container,
 }
 
 static char *
-nautilus_icon_view_container_get_icon_description (NautilusIconContainer *container,
-						   NautilusIconData      *data)
+nemo_icon_view_container_get_icon_description (NemoIconContainer *container,
+						   NemoIconData      *data)
 {
-	NautilusFile *file;
+	NemoFile *file;
 	char *mime_type;
 	const char *description;
 
-	file = NAUTILUS_FILE (data);
-	g_assert (NAUTILUS_IS_FILE (file));
+	file = NEMO_FILE (data);
+	g_assert (NEMO_IS_FILE (file));
 
-	if (NAUTILUS_IS_DESKTOP_ICON_FILE (file)) {
+	if (NEMO_IS_DESKTOP_ICON_FILE (file)) {
 		return NULL;
 	}
 
-	mime_type = nautilus_file_get_mime_type (file);
+	mime_type = nemo_file_get_mime_type (file);
 	description = g_content_type_get_description (mime_type);
 	g_free (mime_type);
 	return g_strdup (description);
 }
 
 static void
-nautilus_icon_view_container_start_monitor_top_left (NautilusIconContainer *container,
-						     NautilusIconData      *data,
+nemo_icon_view_container_start_monitor_top_left (NemoIconContainer *container,
+						     NemoIconData      *data,
 						     gconstpointer          client,
 						     gboolean               large_text)
 {
-	NautilusFile *file;
-	NautilusFileAttributes attributes;
+	NemoFile *file;
+	NemoFileAttributes attributes;
 		
-	file = (NautilusFile *) data;
+	file = (NemoFile *) data;
 
-	g_assert (NAUTILUS_IS_FILE (file));
+	g_assert (NEMO_IS_FILE (file));
 
-	attributes = NAUTILUS_FILE_ATTRIBUTE_TOP_LEFT_TEXT;
+	attributes = NEMO_FILE_ATTRIBUTE_TOP_LEFT_TEXT;
 	if (large_text) {
-		attributes |= NAUTILUS_FILE_ATTRIBUTE_LARGE_TOP_LEFT_TEXT;
+		attributes |= NEMO_FILE_ATTRIBUTE_LARGE_TOP_LEFT_TEXT;
 	}
-	nautilus_file_monitor_add (file, client, attributes);
+	nemo_file_monitor_add (file, client, attributes);
 }
 
 static void
-nautilus_icon_view_container_stop_monitor_top_left (NautilusIconContainer *container,
-						    NautilusIconData      *data,
+nemo_icon_view_container_stop_monitor_top_left (NemoIconContainer *container,
+						    NemoIconData      *data,
 						    gconstpointer          client)
 {
-	NautilusFile *file;
+	NemoFile *file;
 
-	file = (NautilusFile *) data;
+	file = (NemoFile *) data;
 
-	g_assert (NAUTILUS_IS_FILE (file));
+	g_assert (NEMO_IS_FILE (file));
 
-	nautilus_file_monitor_remove (file, client);
+	nemo_file_monitor_remove (file, client);
 }
 
 static void
-nautilus_icon_view_container_prioritize_thumbnailing (NautilusIconContainer *container,
-						      NautilusIconData      *data)
+nemo_icon_view_container_prioritize_thumbnailing (NemoIconContainer *container,
+						      NemoIconData      *data)
 {
-	NautilusFile *file;
+	NemoFile *file;
 	char *uri;
 
-	file = (NautilusFile *) data;
+	file = (NemoFile *) data;
 
-	g_assert (NAUTILUS_IS_FILE (file));
+	g_assert (NEMO_IS_FILE (file));
 
-	if (nautilus_file_is_thumbnailing (file)) {
-		uri = nautilus_file_get_uri (file);
-		nautilus_thumbnail_prioritize (uri);
+	if (nemo_file_is_thumbnailing (file)) {
+		uri = nemo_file_get_uri (file);
+		nemo_thumbnail_prioritize (uri);
 		g_free (uri);
 	}
 }
@@ -215,13 +215,13 @@ nautilus_icon_view_container_prioritize_thumbnailing (NautilusIconContainer *con
  * beneath icons.
  */
 static GQuark *
-nautilus_icon_view_container_get_icon_text_attributes_from_preferences (void)
+nemo_icon_view_container_get_icon_text_attributes_from_preferences (void)
 {
 	static GQuark *attributes = NULL;
 
 	if (attributes == NULL) {
-		eel_g_settings_add_auto_strv_as_quarks (nautilus_icon_view_preferences,
-							NAUTILUS_PREFERENCES_ICON_VIEW_CAPTIONS,
+		eel_g_settings_add_auto_strv_as_quarks (nemo_icon_view_preferences,
+							NEMO_PREFERENCES_ICON_VIEW_CAPTIONS,
 							&attributes);
 	}
 
@@ -238,7 +238,7 @@ nautilus_icon_view_container_get_icon_text_attributes_from_preferences (void)
 	 *    config files.  Its also possible to use a third party GConf key
 	 *    editor and store garbage for the keys in question.
 	 *
-	 * Thankfully, the Nautilus preferences machinery deals with both of
+	 * Thankfully, the Nemo preferences machinery deals with both of
 	 * these cases.
 	 *
 	 * In the first case, the preferences dialog widgetry prevents
@@ -266,34 +266,34 @@ quarkv_length (GQuark *attributes)
 }
 
 /**
- * nautilus_icon_view_get_icon_text_attribute_names:
+ * nemo_icon_view_get_icon_text_attribute_names:
  *
  * Get a list representing which text attributes should be displayed
  * beneath an icon. The result is dependent on zoom level and possibly
  * user configuration. Don't free the result.
- * @view: NautilusIconView to query.
+ * @view: NemoIconView to query.
  * 
  **/
 static GQuark *
-nautilus_icon_view_container_get_icon_text_attribute_names (NautilusIconContainer *container,
+nemo_icon_view_container_get_icon_text_attribute_names (NemoIconContainer *container,
 							    int *len)
 {
 	GQuark *attributes;
 	int piece_count;
 
 	const int pieces_by_level[] = {
-		0,	/* NAUTILUS_ZOOM_LEVEL_SMALLEST */
-		0,	/* NAUTILUS_ZOOM_LEVEL_SMALLER */
-		0,	/* NAUTILUS_ZOOM_LEVEL_SMALL */
-		1,	/* NAUTILUS_ZOOM_LEVEL_STANDARD */
-		2,	/* NAUTILUS_ZOOM_LEVEL_LARGE */
-		2,	/* NAUTILUS_ZOOM_LEVEL_LARGER */
-		3	/* NAUTILUS_ZOOM_LEVEL_LARGEST */
+		0,	/* NEMO_ZOOM_LEVEL_SMALLEST */
+		0,	/* NEMO_ZOOM_LEVEL_SMALLER */
+		0,	/* NEMO_ZOOM_LEVEL_SMALL */
+		1,	/* NEMO_ZOOM_LEVEL_STANDARD */
+		2,	/* NEMO_ZOOM_LEVEL_LARGE */
+		2,	/* NEMO_ZOOM_LEVEL_LARGER */
+		3	/* NEMO_ZOOM_LEVEL_LARGEST */
 	};
 
-	piece_count = pieces_by_level[nautilus_icon_container_get_zoom_level (container)];
+	piece_count = pieces_by_level[nemo_icon_container_get_zoom_level (container)];
 
-	attributes = nautilus_icon_view_container_get_icon_text_attributes_from_preferences ();
+	attributes = nemo_icon_view_container_get_icon_text_attributes_from_preferences ();
 
 	*len = MIN (piece_count, quarkv_length (attributes));
 
@@ -304,8 +304,8 @@ nautilus_icon_view_container_get_icon_text_attribute_names (NautilusIconContaine
  * part below that is not editable.
  */
 static void
-nautilus_icon_view_container_get_icon_text (NautilusIconContainer *container,
-					    NautilusIconData      *data,
+nemo_icon_view_container_get_icon_text (NemoIconContainer *container,
+					    NemoIconData      *data,
 					    char                 **editable_text,
 					    char                 **additional_text,
 					    gboolean               include_invisible)
@@ -313,13 +313,13 @@ nautilus_icon_view_container_get_icon_text (NautilusIconContainer *container,
 	GQuark *attributes;
 	char *text_array[4];
 	int i, j, num_attributes;
-	NautilusIconView *icon_view;
-	NautilusFile *file;
+	NemoIconView *icon_view;
+	NemoFile *file;
 	gboolean use_additional;
 
-	file = NAUTILUS_FILE (data);
+	file = NEMO_FILE (data);
 
-	g_assert (NAUTILUS_IS_FILE (file));
+	g_assert (NEMO_IS_FILE (file));
 	g_assert (editable_text != NULL);
 	icon_view = get_icon_view (container);
 	g_return_if_fail (icon_view != NULL);
@@ -327,25 +327,25 @@ nautilus_icon_view_container_get_icon_text (NautilusIconContainer *container,
 	use_additional = (additional_text != NULL);
 
 	/* In the smallest zoom mode, no text is drawn. */
-	if (nautilus_icon_container_get_zoom_level (container) == NAUTILUS_ZOOM_LEVEL_SMALLEST &&
+	if (nemo_icon_container_get_zoom_level (container) == NEMO_ZOOM_LEVEL_SMALLEST &&
             !include_invisible) {
 		*editable_text = NULL;
 	} else {
-		/* Strip the suffix for nautilus object xml files. */
-		*editable_text = nautilus_file_get_display_name (file);
+		/* Strip the suffix for nemo object xml files. */
+		*editable_text = nemo_file_get_display_name (file);
 	}
 
 	if (!use_additional) {
 		return;
 	}
 
-	if (nautilus_icon_view_is_compact (icon_view)) {
+	if (nemo_icon_view_is_compact (icon_view)) {
 		*additional_text = NULL;
 		return;
 	}
 
-	if (NAUTILUS_IS_DESKTOP_ICON_FILE (file) ||
-	    nautilus_file_is_nautilus_link (file)) {
+	if (NEMO_IS_DESKTOP_ICON_FILE (file) ||
+	    nemo_file_is_nemo_link (file)) {
 		/* Don't show the normal extra information for desktop icons,
 		 * or desktop files, it doesn't make sense. */
  		*additional_text = NULL;
@@ -353,7 +353,7 @@ nautilus_icon_view_container_get_icon_text (NautilusIconContainer *container,
 	}
 
 	/* Find out what attributes go below each icon. */
-	attributes = nautilus_icon_view_container_get_icon_text_attribute_names (container,
+	attributes = nemo_icon_view_container_get_icon_text_attribute_names (container,
 									   &num_attributes);
 
 	/* Get the attributes. */
@@ -364,7 +364,7 @@ nautilus_icon_view_container_get_icon_text (NautilusIconContainer *container,
 		}
 
 		text_array[j++] =
-			nautilus_file_get_string_attribute_with_default_q (file, attributes[i]);
+			nemo_file_get_string_attribute_with_default_q (file, attributes[i]);
 	}
 	text_array[j] = NULL;
 
@@ -401,30 +401,30 @@ typedef enum {
 } SortCategory;
 
 static SortCategory
-get_sort_category (NautilusFile *file)
+get_sort_category (NemoFile *file)
 {
-	NautilusDesktopLink *link;
+	NemoDesktopLink *link;
 	SortCategory category;
 
 	category = SORT_OTHER;
 	
-	if (NAUTILUS_IS_DESKTOP_ICON_FILE (file)) {
-		link = nautilus_desktop_icon_file_get_link (NAUTILUS_DESKTOP_ICON_FILE (file));
+	if (NEMO_IS_DESKTOP_ICON_FILE (file)) {
+		link = nemo_desktop_icon_file_get_link (NEMO_DESKTOP_ICON_FILE (file));
 		if (link != NULL) {
-			switch (nautilus_desktop_link_get_link_type (link)) {
-			case NAUTILUS_DESKTOP_LINK_COMPUTER:
+			switch (nemo_desktop_link_get_link_type (link)) {
+			case NEMO_DESKTOP_LINK_COMPUTER:
 				category = SORT_COMPUTER_LINK;
 				break;
-			case NAUTILUS_DESKTOP_LINK_HOME:
+			case NEMO_DESKTOP_LINK_HOME:
 				category = SORT_HOME_LINK;
 				break;
-			case NAUTILUS_DESKTOP_LINK_MOUNT:
+			case NEMO_DESKTOP_LINK_MOUNT:
 				category = SORT_MOUNT_LINK;
 				break;
-			case NAUTILUS_DESKTOP_LINK_TRASH:
+			case NEMO_DESKTOP_LINK_TRASH:
 				category = SORT_TRASH_LINK;
 				break;
-			case NAUTILUS_DESKTOP_LINK_NETWORK:
+			case NEMO_DESKTOP_LINK_NETWORK:
 				category = SORT_NETWORK_LINK;
 				break;
 			default:
@@ -439,28 +439,28 @@ get_sort_category (NautilusFile *file)
 }
 
 static int
-fm_desktop_icon_container_icons_compare (NautilusIconContainer *container,
-					 NautilusIconData      *data_a,
-					 NautilusIconData      *data_b)
+fm_desktop_icon_container_icons_compare (NemoIconContainer *container,
+					 NemoIconData      *data_a,
+					 NemoIconData      *data_b)
 {
-	NautilusFile *file_a;
-	NautilusFile *file_b;
-	NautilusView *directory_view;
+	NemoFile *file_a;
+	NemoFile *file_b;
+	NemoView *directory_view;
 	SortCategory category_a, category_b;
 
-	file_a = (NautilusFile *) data_a;
-	file_b = (NautilusFile *) data_b;
+	file_a = (NemoFile *) data_a;
+	file_b = (NemoFile *) data_b;
 
-	directory_view = NAUTILUS_VIEW (NAUTILUS_ICON_VIEW_CONTAINER (container)->view);
+	directory_view = NEMO_VIEW (NEMO_ICON_VIEW_CONTAINER (container)->view);
 	g_return_val_if_fail (directory_view != NULL, 0);
 	
 	category_a = get_sort_category (file_a);
 	category_b = get_sort_category (file_b);
 
 	if (category_a == category_b) {
-		return nautilus_file_compare_for_sort 
-			(file_a, file_b, NAUTILUS_FILE_SORT_BY_DISPLAY_NAME, 
-			 nautilus_view_should_sort_directories_first (directory_view),
+		return nemo_file_compare_for_sort 
+			(file_a, file_b, NEMO_FILE_SORT_BY_DISPLAY_NAME, 
+			 nemo_view_should_sort_directories_first (directory_view),
 			 FALSE);
 	}
 
@@ -472,110 +472,110 @@ fm_desktop_icon_container_icons_compare (NautilusIconContainer *container,
 }
 
 static int
-nautilus_icon_view_container_compare_icons (NautilusIconContainer *container,
-					    NautilusIconData      *icon_a,
-					    NautilusIconData      *icon_b)
+nemo_icon_view_container_compare_icons (NemoIconContainer *container,
+					    NemoIconData      *icon_a,
+					    NemoIconData      *icon_b)
 {
-	NautilusIconView *icon_view;
+	NemoIconView *icon_view;
 
 	icon_view = get_icon_view (container);
 	g_return_val_if_fail (icon_view != NULL, 0);
 
-	if (NAUTILUS_ICON_VIEW_CONTAINER (container)->sort_for_desktop) {
+	if (NEMO_ICON_VIEW_CONTAINER (container)->sort_for_desktop) {
 		return fm_desktop_icon_container_icons_compare
 			(container, icon_a, icon_b);
 	}
 
 	/* Type unsafe comparisons for performance */
-	return nautilus_icon_view_compare_files (icon_view,
-					   (NautilusFile *)icon_a,
-					   (NautilusFile *)icon_b);
+	return nemo_icon_view_compare_files (icon_view,
+					   (NemoFile *)icon_a,
+					   (NemoFile *)icon_b);
 }
 
 static int
-nautilus_icon_view_container_compare_icons_by_name (NautilusIconContainer *container,
-						    NautilusIconData      *icon_a,
-						    NautilusIconData      *icon_b)
+nemo_icon_view_container_compare_icons_by_name (NemoIconContainer *container,
+						    NemoIconData      *icon_a,
+						    NemoIconData      *icon_b)
 {
-	return nautilus_file_compare_for_sort
-		(NAUTILUS_FILE (icon_a),
-		 NAUTILUS_FILE (icon_b),
-		 NAUTILUS_FILE_SORT_BY_DISPLAY_NAME,
+	return nemo_file_compare_for_sort
+		(NEMO_FILE (icon_a),
+		 NEMO_FILE (icon_b),
+		 NEMO_FILE_SORT_BY_DISPLAY_NAME,
 		 FALSE, FALSE);
 }
 
 static void
-nautilus_icon_view_container_freeze_updates (NautilusIconContainer *container)
+nemo_icon_view_container_freeze_updates (NemoIconContainer *container)
 {
-	NautilusIconView *icon_view;
+	NemoIconView *icon_view;
 	icon_view = get_icon_view (container);
 	g_return_if_fail (icon_view != NULL);
-	nautilus_view_freeze_updates (NAUTILUS_VIEW (icon_view));
+	nemo_view_freeze_updates (NEMO_VIEW (icon_view));
 }
 
 static void
-nautilus_icon_view_container_unfreeze_updates (NautilusIconContainer *container)
+nemo_icon_view_container_unfreeze_updates (NemoIconContainer *container)
 {
-	NautilusIconView *icon_view;
+	NemoIconView *icon_view;
 	icon_view = get_icon_view (container);
 	g_return_if_fail (icon_view != NULL);
-	nautilus_view_unfreeze_updates (NAUTILUS_VIEW (icon_view));
+	nemo_view_unfreeze_updates (NEMO_VIEW (icon_view));
 }
 
 static void
-nautilus_icon_view_container_class_init (NautilusIconViewContainerClass *klass)
+nemo_icon_view_container_class_init (NemoIconViewContainerClass *klass)
 {
-	NautilusIconContainerClass *ic_class;
+	NemoIconContainerClass *ic_class;
 
 	ic_class = &klass->parent_class;
 
 	attribute_none_q = g_quark_from_static_string ("none");
 	
-	ic_class->get_icon_text = nautilus_icon_view_container_get_icon_text;
-	ic_class->get_icon_images = nautilus_icon_view_container_get_icon_images;
-	ic_class->get_icon_description = nautilus_icon_view_container_get_icon_description;
-	ic_class->start_monitor_top_left = nautilus_icon_view_container_start_monitor_top_left;
-	ic_class->stop_monitor_top_left = nautilus_icon_view_container_stop_monitor_top_left;
-	ic_class->prioritize_thumbnailing = nautilus_icon_view_container_prioritize_thumbnailing;
+	ic_class->get_icon_text = nemo_icon_view_container_get_icon_text;
+	ic_class->get_icon_images = nemo_icon_view_container_get_icon_images;
+	ic_class->get_icon_description = nemo_icon_view_container_get_icon_description;
+	ic_class->start_monitor_top_left = nemo_icon_view_container_start_monitor_top_left;
+	ic_class->stop_monitor_top_left = nemo_icon_view_container_stop_monitor_top_left;
+	ic_class->prioritize_thumbnailing = nemo_icon_view_container_prioritize_thumbnailing;
 
-	ic_class->compare_icons = nautilus_icon_view_container_compare_icons;
-	ic_class->compare_icons_by_name = nautilus_icon_view_container_compare_icons_by_name;
-	ic_class->freeze_updates = nautilus_icon_view_container_freeze_updates;
-	ic_class->unfreeze_updates = nautilus_icon_view_container_unfreeze_updates;
+	ic_class->compare_icons = nemo_icon_view_container_compare_icons;
+	ic_class->compare_icons_by_name = nemo_icon_view_container_compare_icons_by_name;
+	ic_class->freeze_updates = nemo_icon_view_container_freeze_updates;
+	ic_class->unfreeze_updates = nemo_icon_view_container_unfreeze_updates;
 }
 
 static void
-nautilus_icon_view_container_init (NautilusIconViewContainer *icon_container)
+nemo_icon_view_container_init (NemoIconViewContainer *icon_container)
 {
 	gtk_style_context_add_class (gtk_widget_get_style_context (GTK_WIDGET (icon_container)),
 				     GTK_STYLE_CLASS_VIEW);
 
 }
 
-NautilusIconContainer *
-nautilus_icon_view_container_construct (NautilusIconViewContainer *icon_container, NautilusIconView *view)
+NemoIconContainer *
+nemo_icon_view_container_construct (NemoIconViewContainer *icon_container, NemoIconView *view)
 {
 	AtkObject *atk_obj;
 
-	g_return_val_if_fail (NAUTILUS_IS_ICON_VIEW (view), NULL);
+	g_return_val_if_fail (NEMO_IS_ICON_VIEW (view), NULL);
 
 	icon_container->view = view;
 	atk_obj = gtk_widget_get_accessible (GTK_WIDGET (icon_container));
 	atk_object_set_name (atk_obj, _("Icon View"));
 
-	return NAUTILUS_ICON_CONTAINER (icon_container);
+	return NEMO_ICON_CONTAINER (icon_container);
 }
 
-NautilusIconContainer *
-nautilus_icon_view_container_new (NautilusIconView *view)
+NemoIconContainer *
+nemo_icon_view_container_new (NemoIconView *view)
 {
-	return nautilus_icon_view_container_construct
-		(g_object_new (NAUTILUS_TYPE_ICON_VIEW_CONTAINER, NULL),
+	return nemo_icon_view_container_construct
+		(g_object_new (NEMO_TYPE_ICON_VIEW_CONTAINER, NULL),
 		 view);
 }
 
 void
-nautilus_icon_view_container_set_sort_desktop (NautilusIconViewContainer *container,
+nemo_icon_view_container_set_sort_desktop (NemoIconViewContainer *container,
 					       gboolean         desktop)
 {
 	container->sort_for_desktop = desktop;

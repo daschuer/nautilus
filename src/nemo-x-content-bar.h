@@ -22,40 +22,40 @@
  *
  */
 
-#ifndef __NAUTILUS_X_CONTENT_BAR_H
-#define __NAUTILUS_X_CONTENT_BAR_H
+#ifndef __NEMO_X_CONTENT_BAR_H
+#define __NEMO_X_CONTENT_BAR_H
 
 #include <gtk/gtk.h>
 #include <gio/gio.h>
 
 G_BEGIN_DECLS
 
-#define NAUTILUS_TYPE_X_CONTENT_BAR         (nautilus_x_content_bar_get_type ())
-#define NAUTILUS_X_CONTENT_BAR(o)           (G_TYPE_CHECK_INSTANCE_CAST ((o), NAUTILUS_TYPE_X_CONTENT_BAR, NautilusXContentBar))
-#define NAUTILUS_X_CONTENT_BAR_CLASS(k)     (G_TYPE_CHECK_CLASS_CAST((k), NAUTILUS_TYPE_X_CONTENT_BAR, NautilusXContentBarClass))
-#define NAUTILUS_IS_X_CONTENT_BAR(o)        (G_TYPE_CHECK_INSTANCE_TYPE ((o), NAUTILUS_TYPE_X_CONTENT_BAR))
-#define NAUTILUS_IS_X_CONTENT_BAR_CLASS(k)  (G_TYPE_CHECK_CLASS_TYPE ((k), NAUTILUS_TYPE_X_CONTENT_BAR))
-#define NAUTILUS_X_CONTENT_BAR_GET_CLASS(o) (G_TYPE_INSTANCE_GET_CLASS ((o), NAUTILUS_TYPE_X_CONTENT_BAR, NautilusXContentBarClass))
+#define NEMO_TYPE_X_CONTENT_BAR         (nemo_x_content_bar_get_type ())
+#define NEMO_X_CONTENT_BAR(o)           (G_TYPE_CHECK_INSTANCE_CAST ((o), NEMO_TYPE_X_CONTENT_BAR, NemoXContentBar))
+#define NEMO_X_CONTENT_BAR_CLASS(k)     (G_TYPE_CHECK_CLASS_CAST((k), NEMO_TYPE_X_CONTENT_BAR, NemoXContentBarClass))
+#define NEMO_IS_X_CONTENT_BAR(o)        (G_TYPE_CHECK_INSTANCE_TYPE ((o), NEMO_TYPE_X_CONTENT_BAR))
+#define NEMO_IS_X_CONTENT_BAR_CLASS(k)  (G_TYPE_CHECK_CLASS_TYPE ((k), NEMO_TYPE_X_CONTENT_BAR))
+#define NEMO_X_CONTENT_BAR_GET_CLASS(o) (G_TYPE_INSTANCE_GET_CLASS ((o), NEMO_TYPE_X_CONTENT_BAR, NemoXContentBarClass))
 
-typedef struct NautilusXContentBarPrivate NautilusXContentBarPrivate;
+typedef struct NemoXContentBarPrivate NemoXContentBarPrivate;
 
 typedef struct
 {
 	GtkInfoBar parent;
 
-	NautilusXContentBarPrivate *priv;
-} NautilusXContentBar;
+	NemoXContentBarPrivate *priv;
+} NemoXContentBar;
 
 typedef struct
 {
 	GtkInfoBarClass parent_class;
-} NautilusXContentBarClass;
+} NemoXContentBarClass;
 
-GType		 nautilus_x_content_bar_get_type	(void) G_GNUC_CONST;
+GType		 nemo_x_content_bar_get_type	(void) G_GNUC_CONST;
 
-GtkWidget	*nautilus_x_content_bar_new		   (GMount              *mount, 
+GtkWidget	*nemo_x_content_bar_new		   (GMount              *mount, 
 							    const char          *x_content_type);
 
 G_END_DECLS
 
-#endif /* __NAUTILUS_X_CONTENT_BAR_H */
+#endif /* __NEMO_X_CONTENT_BAR_H */

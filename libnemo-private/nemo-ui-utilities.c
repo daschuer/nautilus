@@ -1,6 +1,6 @@
 /* -*- Mode: C; indent-tabs-mode: t; c-basic-offset: 8; tab-width: 8 -*- */
 
-/* nautilus-ui-utilities.c - helper functions for GtkUIManager stuff
+/* nemo-ui-utilities.c - helper functions for GtkUIManager stuff
 
    Copyright (C) 2004 Red Hat, Inc.
 
@@ -23,15 +23,15 @@
 */
 
 #include <config.h>
-#include "nautilus-ui-utilities.h"
-#include "nautilus-icon-info.h"
+#include "nemo-ui-utilities.h"
+#include "nemo-icon-info.h"
 #include <gio/gio.h>
 
 #include <gtk/gtk.h>
 #include <eel/eel-debug.h>
 
 void
-nautilus_ui_unmerge_ui (GtkUIManager *ui_manager,
+nemo_ui_unmerge_ui (GtkUIManager *ui_manager,
 			guint *merge_id,
 			GtkActionGroup **action_group)
 {
@@ -48,7 +48,7 @@ nautilus_ui_unmerge_ui (GtkUIManager *ui_manager,
 }
      
 void
-nautilus_ui_prepare_merge_ui (GtkUIManager *ui_manager,
+nemo_ui_prepare_merge_ui (GtkUIManager *ui_manager,
 			      const char *name,
 			      guint *merge_id,
 			      GtkActionGroup **action_group)
@@ -64,11 +64,11 @@ static void
 extension_action_callback (GtkAction *action,
 			   gpointer callback_data)
 {
-	nautilus_menu_item_activate (NAUTILUS_MENU_ITEM (callback_data));
+	nemo_menu_item_activate (NEMO_MENU_ITEM (callback_data));
 }
 
 GtkAction *
-nautilus_action_from_menu_item (NautilusMenuItem *item)
+nemo_action_from_menu_item (NemoMenuItem *item)
 {
 	char *name, *label, *tip, *icon_name;
 	gboolean sensitive, priority;
@@ -88,7 +88,7 @@ nautilus_action_from_menu_item (NautilusMenuItem *item)
 				 NULL);
 
 	if (icon_name != NULL) {
-		pixbuf = nautilus_ui_get_menu_icon (icon_name);
+		pixbuf = nemo_ui_get_menu_icon (icon_name);
 		if (pixbuf != NULL) {
 			gtk_action_set_gicon (action, G_ICON (pixbuf));
 			g_object_unref (pixbuf);
@@ -112,7 +112,7 @@ nautilus_action_from_menu_item (NautilusMenuItem *item)
 }
 
 gboolean
-nautilus_event_should_open_in_new_tab (void)
+nemo_event_should_open_in_new_tab (void)
 {
 	GdkEvent *event;
 
@@ -132,20 +132,20 @@ nautilus_event_should_open_in_new_tab (void)
 }
 
 GdkPixbuf *
-nautilus_ui_get_menu_icon (const char *icon_name)
+nemo_ui_get_menu_icon (const char *icon_name)
 {
-	NautilusIconInfo *info;
+	NemoIconInfo *info;
 	GdkPixbuf *pixbuf;
 	int size;
 
-	size = nautilus_get_icon_size_for_stock_size (GTK_ICON_SIZE_MENU);
+	size = nemo_get_icon_size_for_stock_size (GTK_ICON_SIZE_MENU);
 
 	if (g_path_is_absolute (icon_name)) {
-		info = nautilus_icon_info_lookup_from_path (icon_name, size);
+		info = nemo_icon_info_lookup_from_path (icon_name, size);
 	} else {
-		info = nautilus_icon_info_lookup_from_name (icon_name, size);
+		info = nemo_icon_info_lookup_from_name (icon_name, size);
 	}
-	pixbuf = nautilus_icon_info_get_pixbuf_nodefault_at_size (info, size);
+	pixbuf = nemo_icon_info_get_pixbuf_nodefault_at_size (info, size);
 	g_object_unref (info);
 
 	return pixbuf;

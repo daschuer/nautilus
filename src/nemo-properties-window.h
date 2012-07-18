@@ -23,46 +23,46 @@
    Authors: Darin Adler <darin@bentspoon.com>
 */
 
-#ifndef NAUTILUS_PROPERTIES_WINDOW_H
-#define NAUTILUS_PROPERTIES_WINDOW_H
+#ifndef NEMO_PROPERTIES_WINDOW_H
+#define NEMO_PROPERTIES_WINDOW_H
 
 #include <gtk/gtk.h>
-#include <libnautilus-private/nautilus-file.h>
+#include <libnemo-private/nemo-file.h>
 
-typedef struct NautilusPropertiesWindow NautilusPropertiesWindow;
+typedef struct NemoPropertiesWindow NemoPropertiesWindow;
 
-#define NAUTILUS_TYPE_PROPERTIES_WINDOW nautilus_properties_window_get_type()
-#define NAUTILUS_PROPERTIES_WINDOW(obj) \
-  (G_TYPE_CHECK_INSTANCE_CAST ((obj), NAUTILUS_TYPE_PROPERTIES_WINDOW, NautilusPropertiesWindow))
-#define NAUTILUS_PROPERTIES_WINDOW_CLASS(klass) \
-  (G_TYPE_CHECK_CLASS_CAST ((klass), NAUTILUS_TYPE_PROPERTIES_WINDOW, NautilusPropertiesWindowClass))
-#define NAUTILUS_IS_PROPERTIES_WINDOW(obj) \
-  (G_TYPE_CHECK_INSTANCE_TYPE ((obj), NAUTILUS_TYPE_PROPERTIES_WINDOW))
-#define NAUTILUS_IS_PROPERTIES_WINDOW_CLASS(klass) \
-  (G_TYPE_CHECK_CLASS_TYPE ((klass), NAUTILUS_TYPE_PROPERTIES_WINDOW))
-#define NAUTILUS_PROPERTIES_WINDOW_GET_CLASS(obj) \
-  (G_TYPE_INSTANCE_GET_CLASS ((obj), NAUTILUS_TYPE_PROPERTIES_WINDOW, NautilusPropertiesWindowClass))
+#define NEMO_TYPE_PROPERTIES_WINDOW nemo_properties_window_get_type()
+#define NEMO_PROPERTIES_WINDOW(obj) \
+  (G_TYPE_CHECK_INSTANCE_CAST ((obj), NEMO_TYPE_PROPERTIES_WINDOW, NemoPropertiesWindow))
+#define NEMO_PROPERTIES_WINDOW_CLASS(klass) \
+  (G_TYPE_CHECK_CLASS_CAST ((klass), NEMO_TYPE_PROPERTIES_WINDOW, NemoPropertiesWindowClass))
+#define NEMO_IS_PROPERTIES_WINDOW(obj) \
+  (G_TYPE_CHECK_INSTANCE_TYPE ((obj), NEMO_TYPE_PROPERTIES_WINDOW))
+#define NEMO_IS_PROPERTIES_WINDOW_CLASS(klass) \
+  (G_TYPE_CHECK_CLASS_TYPE ((klass), NEMO_TYPE_PROPERTIES_WINDOW))
+#define NEMO_PROPERTIES_WINDOW_GET_CLASS(obj) \
+  (G_TYPE_INSTANCE_GET_CLASS ((obj), NEMO_TYPE_PROPERTIES_WINDOW, NemoPropertiesWindowClass))
 
-typedef struct NautilusPropertiesWindowDetails NautilusPropertiesWindowDetails;
+typedef struct NemoPropertiesWindowDetails NemoPropertiesWindowDetails;
 
-struct NautilusPropertiesWindow {
+struct NemoPropertiesWindow {
 	GtkDialog window;
-	NautilusPropertiesWindowDetails *details;	
+	NemoPropertiesWindowDetails *details;	
 };
 
-struct NautilusPropertiesWindowClass {
+struct NemoPropertiesWindowClass {
 	GtkDialogClass parent_class;
 	
 	/* Keybinding signals */
-	void (* close)    (NautilusPropertiesWindow *window);
+	void (* close)    (NemoPropertiesWindow *window);
 };
 
-typedef struct NautilusPropertiesWindowClass NautilusPropertiesWindowClass;
+typedef struct NemoPropertiesWindowClass NemoPropertiesWindowClass;
 
-GType   nautilus_properties_window_get_type   (void);
+GType   nemo_properties_window_get_type   (void);
 
-void 	nautilus_properties_window_present    (GList       *files,
+void 	nemo_properties_window_present    (GList       *files,
 					       GtkWidget   *parent_widget,
 					       const gchar *startup_id);
 
-#endif /* NAUTILUS_PROPERTIES_WINDOW_H */
+#endif /* NEMO_PROPERTIES_WINDOW_H */

@@ -1,5 +1,5 @@
-=== nautilus 2.26.2 ===
-=== nautilus 2.26.1 ===
+=== nemo 2.26.2 ===
+=== nemo 2.26.1 ===
 
 2009-03-24  Alexander Larsson  <alexl@redhat.com>
 
@@ -12,8 +12,8 @@
 	* Makefile.am: remove -version-info LDFLAG from eel,
 	as this is not a private library anymore.
 
-=== nautilus 2.26.0 ===
-=== nautilus 2.25.93 ===
+=== nemo 2.26.0 ===
+=== nemo 2.25.93 ===
 
 2009-03-09  Alexander Larsson  <alexl@redhat.com>
 
@@ -38,8 +38,8 @@
 	Ignore pending background changes when we've realized the
 	background to avoid an unnecessary re-set of the pixmap.
 
-=== nautilus 2.25.91 ===
-=== nautilus 2.25.4 ===
+=== nemo 2.25.91 ===
+=== nemo 2.25.4 ===
 
 2009-01-28  Cosimo Cecchi  <cosimoc@gnome.org>
 
@@ -82,7 +82,7 @@
 	Support fading between backgrounds.
 	Bug #552859, patch by Ray Strode.
 
-=== nautilus 2.25.2 ===
+=== nemo 2.25.2 ===
 
 2008-12-15  Alexander Larsson  <alexl@redhat.com>
 
@@ -930,7 +930,7 @@ Fri Jan 25 14:08:11 2008  Søren Sandmann  <sandmann@redhat.com>
         * eel/Makefile.am:
         * eel/eel-mime-application-chooser.[ch]:
         * eel/eel-open-with-dialog.[ch]:
-	Move these to nautilus
+	Move these to nemo
 
 2007-10-01  Alexander Larsson  <alexl@redhat.com>
 
@@ -970,7 +970,7 @@ Fri Jan 25 14:08:11 2008  Søren Sandmann  <sandmann@redhat.com>
 2007-09-26  Alexander Larsson  <alexl@redhat.com>
 
 	* eel/eel-vfs-extensions.c:
-	Remove code not used by nautilus anymore
+	Remove code not used by nemo anymore
 
 2007-11-28  Soren Sandmann <sandmann@redhat.com>
 
@@ -1274,7 +1274,7 @@ Fri Jan 25 14:08:11 2008  Søren Sandmann  <sandmann@redhat.com>
 2006-11-20  Alexander Larsson  <alexl@redhat.com>
 
 	* configure.in: 
-	Call it 2.16.3 to match nautilus release
+	Call it 2.16.3 to match nemo release
 	
 	* NEWS:
 	Update for release.
@@ -1328,7 +1328,7 @@ Fri Jan 25 14:08:11 2008  Søren Sandmann  <sandmann@redhat.com>
 2006-08-23  Alexander Larsson  <alexl@redhat.com>
 
 	* eel/eel-vfs-extensions.c: (eel_vfs_has_capability):
-	Fix crash that happened on DnD from firefox in nautilus.
+	Fix crash that happened on DnD from firefox in nemo.
 
 2006-08-21  Alexander Larsson  <alexl@redhat.com>
 
@@ -1471,7 +1471,7 @@ Fri Jan 25 14:08:11 2008  Søren Sandmann  <sandmann@redhat.com>
 	eel_make_uri_from_input_with_trailing_ws, eel_make_uri_from_shell_arg,
 	eel_uris_match, eel_uri_get_scheme, eel_uri_make_full_from_relative.
 	They have been moved into gnome-vfs itself for a long time and they
-	are not used anymore in nautilus. (bug #342237)
+	are not used anymore in nemo. (bug #342237)
 
 2006-05-16  Martin Wehner  <martin.wehner@gmail.com>
 
@@ -1911,7 +1911,7 @@ Fri Jan 25 14:08:11 2008  Søren Sandmann  <sandmann@redhat.com>
 2005-07-20  Mikael Hallendal  <micke@imendio.com>
 
 	* eel/eel-vfs-extensions.[ch] (eel_uri_is_search):
-	Add x-nautilus-search URI.
+	Add x-nemo-search URI.
 
 2005-07-19  Alexander Larsson  <alexl@redhat.com>
 
@@ -2712,7 +2712,7 @@ Mon Jul 19 22:10:59 2004  Jonathan Blandford  <jrb@gnome.org>
 
 	* eel/eel-canvas-util.c: (eel_canvas_get_miter_points):
 	* eel/eel-canvas.c: (emit_event):
-	Update from foocanvas. May fix nautilus event crash.
+	Update from foocanvas. May fix nemo event crash.
 
 2004-01-19  Narayana Pattipati <narayana.pattipati@wipro.com>
 
@@ -3645,7 +3645,7 @@ Wed Dec  4 12:50:35 2002  HideToshi Tajima  <hidetoshi.tajima@sun.com>
 
 	* eel/eel-background.c
 	(eel_background_load_image_callback): disable,
-	until the nautilus side is re-thunk.
+	until the nemo side is re-thunk.
 
 2002-09-03  Michael Meeks  <michael@ximian.com>
 
@@ -3752,7 +3752,7 @@ Wed Dec  4 12:50:35 2002  HideToshi Tajima  <hidetoshi.tajima@sun.com>
 
 2002-07-18  Federico Mena Quintero  <federico@ximian.com>
 
-	Fixes the eel part of #46238; see Nautilus for the rest of the fix.
+	Fixes the eel part of #46238; see Nemo for the rest of the fix.
 
 	* eel/eel-background.c (eel_background_ensure_realized): If we
 	fail to parse the color spec, don't default to white.  Instead use
@@ -3980,7 +3980,7 @@ Wed Dec  4 12:50:35 2002  HideToshi Tajima  <hidetoshi.tajima@sun.com>
 2002-05-27  Michael Meeks  <michael@ximian.com>
 
 	* eel/eel-vfs-extensions.c
-	(eel_make_valid_utf8): copy from nautilus
+	(eel_make_valid_utf8): copy from nemo
 	(eel_format_uri_for_display_internal): use it
 	for awkward (invalid) cases, that we still need to
 	display in an error dialog.
@@ -4247,7 +4247,7 @@ Wed Dec  4 12:50:35 2002  HideToshi Tajima  <hidetoshi.tajima@sun.com>
 	* eel/eel-preferences-item.[ch]:
 	Add EEL_PREFERENCE_ITEM_ENUMERATION_MENU_INTEGER type that
 	stores the integer value of the enum. This is needed for
-	the Nautilus thumbnail size limit.
+	the Nemo thumbnail size limit.
 
 2002-04-04  Dave Camp  <dave@ximian.com>
 
@@ -4493,7 +4493,7 @@ Wed Dec  4 12:50:35 2002  HideToshi Tajima  <hidetoshi.tajima@sun.com>
 	* eel/eel-image-table.h (EelImageTableEvent):
 	Add the original GdkEvent to the EelImageTableEvent. You
 	may need e.g. the time from the event. (Needed to fix
-	stuck grab in nautilus.)
+	stuck grab in nemo.)
 
 2002-03-08  Darin Adler  <darin@bentspoon.com>
 
@@ -4594,7 +4594,7 @@ Wed Dec  4 12:50:35 2002  HideToshi Tajima  <hidetoshi.tajima@sun.com>
 	(draw_background_callback), (eel_widget_background_changed):
 	Add bitmap generation and caching capability.
 	(eel_background_set_is_constant_size): set if windows don't change size,
-	used by the nautilus desktop window.
+	used by the nemo desktop window.
 	(eel_background_is_too_complex_for_gtk_style); Remve. Not used anymore.
 	(eel_background_receive_dropped_background_image): Remove old reset.png hack.
 
@@ -5080,8 +5080,8 @@ Wed Dec  4 12:50:35 2002  HideToshi Tajima  <hidetoshi.tajima@sun.com>
 	* eel/eel-clist.h: Remove.
 	* eel/eel-ctree.c: Remove.
 	* eel/eel-ctree.h: Remove.
-	* eel/eel-dnd.c: Move back into Nautilus.
-	* eel/eel-dnd.h: Move back into Nautilus.
+	* eel/eel-dnd.c: Move back into Nemo.
+	* eel/eel-dnd.h: Move back into Nemo.
 	* eel/eel-list-column-title.c: Remove.
 	* eel/eel-list-column-title.h: Remove.
 	* eel/eel-list.c: Remove.
@@ -5196,7 +5196,7 @@ Mon Feb  4 11:24:21 2002  Owen Taylor  <otaylor@redhat.com>
 	Add RENDER_LIBS and eel-canvas-rect.[ch]
 
 	* eel/eel-canvas-rect.[ch]:
-	New type EelCanvasRect. Implemented for the Nautilus
+	New type EelCanvasRect. Implemented for the Nemo
 	selection rectangle.
 	
 	* eel/eel-lib-self-check-functions.h:
@@ -5473,7 +5473,7 @@ Thu Jan 10 10:53:52 2002  Owen Taylor  <otaylor@redhat.com>
 2002-01-04  Havoc Pennington  <hp@pobox.com>
 
 	* eel/eel-gconf-extensions.c (eel_gconf_monitor_add): don't do the
-	recursive preload here, too much stuff in /apps/nautilus it seems
+	recursive preload here, too much stuff in /apps/nemo it seems
 	like. Rely on explicit preloads in other code.
 
 	* eel/eel-font-picker.c (font_picker_get_selected_style_entry):
@@ -5763,7 +5763,7 @@ Thu Jan 10 10:53:52 2002  Owen Taylor  <otaylor@redhat.com>
 	(eel_background_set_image_uri_and_color):
 	* eel/eel-background.h:
 	Add support for synchronous loading of image (needed to fix
-	flash when starting Nautilus desktop)
+	flash when starting Nemo desktop)
 
 2002-01-02  Anders Carlsson  <andersca@gnu.org>
 
@@ -6429,7 +6429,7 @@ Mon Nov 19 17:34:16 2001  Jonathan Blandford  <jrb@webwynk.net>
 	* eel/eel-background.c: (eel_background_is_dark): Make this work
 	with background images that are transparent or partly-transparent.
 	It turns out this was another part of the problem with the default
-	Nautilus theme's text color.
+	Nemo theme's text color.
 	
 	* eel/eel-gdk-pixbuf-extensions.h:
 	* eel/eel-gdk-pixbuf-extensions.c: (eel_gdk_pixbuf_average_value):
@@ -6660,12 +6660,12 @@ Mon Nov 19 17:34:16 2001  Jonathan Blandford  <jrb@webwynk.net>
 
 	Change from the stable eel-1-0 branch.
 	
-	Make these widgets more useful outside Nautilus by providing
+	Make these widgets more useful outside Nemo by providing
 	functions to change ui elements (such as titles and descriptions)
 	as well iterators.
 
 	These changes do not affect either binary or source compatibility
-	for Nautilus.
+	for Nemo.
 	
 	* eel/eel-preferences-box.h:
 	* eel/eel-preferences-box.c:
@@ -7044,7 +7044,7 @@ Wed Aug 15 16:32:56 2001  Jonathan Blandford  <jrb@redhat.com>
 	to prepend a string to the collection.
 	(eel_string_list_append_string_list): Rename from
 	eel_string_list_append () which was a confusing name.
-	This API change doesnt affect Nautilus or Eel since neither used
+	This API change doesnt affect Nemo or Eel since neither used
 	this function.
 
 2001-07-18  Darin Adler  <darin@bentspoon.com>
@@ -7438,7 +7438,7 @@ Wed Aug 15 16:32:56 2001  Jonathan Blandford  <jrb@redhat.com>
 	(eel_labeled_image_remove):
 	Simplify the implementations of GtkContainer methods by using the
 	functions in eel-gtk-container.[ch].  Theres probably other
-	widgets in Eel and Nautilus that could benefit from this
+	widgets in Eel and Nemo that could benefit from this
 	simplification/code sharing as well.
 
 	* eel/eel-self-checks.c: (eel_check_double_result):
@@ -7492,7 +7492,7 @@ Wed Aug 15 16:32:56 2001  Jonathan Blandford  <jrb@redhat.com>
 
 	* eel/eel-list.c: (eel_list_button_release): Fixed code that was
 	passing x twice instead of x and y that prevented single-click
-	from working in the Nautilus list view. Also did some other
+	from working in the Nemo list view. Also did some other
 	cleanups to behavior when multiple buttons are pressed at once.
 
 2001-05-22  John Harper  <jsh@pixelslut.com>
@@ -7556,7 +7556,7 @@ Wed Aug 15 16:32:56 2001  Jonathan Blandford  <jrb@redhat.com>
 
 	* eel/eel-preferences-item.c:
 	(preferences_item_create_editable_string):
-	Restore a silly hack for the sake of Nautilus.  Id like to
+	Restore a silly hack for the sake of Nemo.  Id like to
 	properly fix this, but not so close to a release.
 	
 2001-05-04  Ramiro Estrugo  <ramiro@eazel.com>
@@ -7591,7 +7591,7 @@ Wed Aug 15 16:32:56 2001  Jonathan Blandford  <jrb@redhat.com>
 	* eel/eel-preferences.c:
 	* eel/eel-preferences.h:
 	* eel/eel.h:
-	Move over some more stuff over from Nautilus.
+	Move over some more stuff over from Nemo.
 	
 2001-05-03  Darin Adler  <darin@eazel.com>
 
@@ -7622,7 +7622,7 @@ Wed Aug 15 16:32:56 2001  Jonathan Blandford  <jrb@redhat.com>
 	(eel_dimensions_equal), (eel_art_ipoint_assign),
 	(eel_art_ipoint_equal), (test_intersect), (test_union),
 	(eel_self_check_art_extensions): Some more art extensions.
-	Currently unused in Eel or Nautilus.
+	Currently unused in Eel or Nemo.
 
 	* eel/eel-self-checks.h:
 	* eel/eel-self-checks.c:
@@ -7720,7 +7720,7 @@ Wed Aug 15 16:32:56 2001  Jonathan Blandford  <jrb@redhat.com>
 
 	Fixed bug 8198 ("New Terminal" does not use GNOME default
 	applications). This involved changing the API, so it requires
-	changes to Nautilus too.
+	changes to Nemo too.
 
 	* eel/eel-glib-extensions.c: (eel_shell_quote): Make it smarter so
 	it doesn't quote simple things with no fancy characters in them.
@@ -7862,7 +7862,7 @@ Wed Aug 15 16:32:56 2001  Jonathan Blandford  <jrb@redhat.com>
 
 2001-04-26  John Sullivan  <sullivan@eazel.com>
 
-	Merged from nautilus-1 branch:
+	Merged from nemo-1 branch:
 
 	2001-03-30  Ramiro Estrugo  <ramiro@eazel.com>
 
@@ -7935,7 +7935,7 @@ Wed Aug 15 16:32:56 2001  Jonathan Blandford  <jrb@redhat.com>
 	(eel_radio_button_group_initialize),
 	(eel_radio_button_group_destroy), (button_toggled),
 	(eel_radio_button_group_insert):
-	Nautilus style tweaks.  Remove unused constant.  Change signal
+	Nemo style tweaks.  Remove unused constant.  Change signal
 	signature to be simpler.  Remove the signal data nastiness and let
 	the caller find out the active item by using the getter methods
 	instead.  	
@@ -8167,7 +8167,7 @@ Wed Aug 15 16:32:56 2001  Jonathan Blandford  <jrb@redhat.com>
 	* eel/eel-canvas-rect.c:
 	* eel/eel-canvas-rect.h:
 	Added new class that Chris Lahey and I are working on should make
-	the selection rectangle in Nautilus much faster.
+	the selection rectangle in Nemo much faster.
 
 2001-04-18  Ramiro Estrugo  <ramiro@eazel.com>
 
@@ -8199,13 +8199,13 @@ Wed Aug 15 16:32:56 2001  Jonathan Blandford  <jrb@redhat.com>
 	(eel_string_picker_insert_string), (eel_string_picker_contains),
 	(eel_string_picker_get_index_for_string),
 	(eel_string_picker_clear): Some minor tweaking to conform with
-	Nautilus style some more.
+	Nemo style some more.
 	
 2001-04-17  Darin Adler  <darin@eazel.com>
 
 	* eel/Makefile.am:
 	* eel/eel.h:
-	Take eel-dnd.h out. This should go back to Nautilus at some
+	Take eel-dnd.h out. This should go back to Nemo at some
 	point, I think.
 
 	* eel/eel-dnd.h:
@@ -8293,7 +8293,7 @@ Wed Aug 15 16:32:56 2001  Jonathan Blandford  <jrb@redhat.com>
 	(eel_string_list_get_longest_string_length), (str_is_equal),
 	(eel_self_check_string_list):
 	Change implementation of string list to use a GSList instead of a
-	GList.  A few changes to match the nautilus style more.
+	GList.  A few changes to match the nemo style more.
 
 2001-04-16  Ramiro Estrugo  <ramiro@eazel.com>
 
@@ -8360,10 +8360,10 @@ Wed Aug 15 16:32:56 2001  Jonathan Blandford  <jrb@redhat.com>
 
 	* eel/check-program.c: (main):
 	* eel/eel-glib-extensions.c: (eel_g_hash_table_new_free_at_exit):
-	Use NAUTILUS_DEBUG, not EEL_DEBUG for now.
+	Use NEMO_DEBUG, not EEL_DEBUG for now.
 
 	* eel/eel-font-manager.c: (ensure_local_font_table):
-	Use ~/.nautilus instead of ~/.eel for compatibility.
+	Use ~/.nemo instead of ~/.eel for compatibility.
 	
 2001-04-09  Pavel Cisler  <pavel@eazel.com>
 
@@ -8491,7 +8491,7 @@ Wed Aug 15 16:32:56 2001  Jonathan Blandford  <jrb@redhat.com>
 	* eel/eel-list-column-title.h:
 	* eel/eel-list.c:
 	* eel/eel-list.h:
-	Move clist, ctree, and list widgets over from Nautilus.
+	Move clist, ctree, and list widgets over from Nemo.
 	
 2001-04-04  Ramiro Estrugo  <ramiro@eazel.com>
 
@@ -8530,7 +8530,7 @@ Wed Aug 15 16:32:56 2001  Jonathan Blandford  <jrb@redhat.com>
 	(eel_is_remote_uri), (eel_make_directory_and_parents),
 	(eel_copy_uri_simple), (eel_self_check_vfs_extensions):
 	Move gnome-vfs extensions over from
-	nautilus/nautilus-file-utilities.[ch]
+	nemo/nemo-file-utilities.[ch]
 	
 2001-04-04  Ramiro Estrugo  <ramiro@eazel.com>
 
@@ -8538,7 +8538,7 @@ Wed Aug 15 16:32:56 2001  Jonathan Blandford  <jrb@redhat.com>
 	* README:
 	* RENAMING:
 	* THANKS:
-	Updated to be Eel specific.  Removed crufy leftover from Nautilus
+	Updated to be Eel specific.  Removed crufy leftover from Nemo
 	move.
 
 	* configure.in:
@@ -8633,7 +8633,7 @@ Wed Aug 15 16:32:56 2001  Jonathan Blandford  <jrb@redhat.com>
 2001-04-03  Ramiro Estrugo  <ramiro@eazel.com>
 
 	* eel/eel-ellipsizing-label.c: (recompute_ellipsized_text):
-	Synchronize with Nautilus (for the last time hopefully).
+	Synchronize with Nemo (for the last time hopefully).
 
 2001-04-02  Ramiro Estrugo  <ramiro@eazel.com>
 
@@ -8667,7 +8667,7 @@ Wed Aug 15 16:32:56 2001  Jonathan Blandford  <jrb@redhat.com>
 	* eel/eel-stock-dialogs.c:
 	(timed_wait_delayed_close_timeout_callback), (timed_wait_free):
 	* eel/eel-text-caption.c:
-	Synchronize with Nautilus.
+	Synchronize with Nemo.
 	
 2001-04-02  Ramiro Estrugo  <ramiro@eazel.com>
 
@@ -8751,7 +8751,7 @@ Wed Aug 15 16:32:56 2001  Jonathan Blandford  <jrb@redhat.com>
 	* test/Makefile.am:
 	* test/test.c: (eel_pixmap_file):
 	* test/test.h:
-	Synchronize with nautilus.
+	Synchronize with nemo.
 	
 2001-03-28  Ramiro Estrugo  <ramiro@eazel.com>
 
@@ -8763,11 +8763,11 @@ Wed Aug 15 16:32:56 2001  Jonathan Blandford  <jrb@redhat.com>
 	* Makefile.am:
 	* acconfig.h:
 	* configure.in:
-	Remove more Nautilus cruft.  Make distcheck now passes.
+	Remove more Nemo cruft.  Make distcheck now passes.
 	
 2001-03-28  Ramiro Estrugo  <ramiro@eazel.com>
 
-	Change 'nautilus' namespace to 'eel' everywhere.
+	Change 'nemo' namespace to 'eel' everywhere.
 	
 	* eel/Makefile.am:
 	* eel/check-program.c: (main):

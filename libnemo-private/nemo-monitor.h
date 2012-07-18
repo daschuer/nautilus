@@ -1,6 +1,6 @@
 /* -*- Mode: C; indent-tabs-mode: t; c-basic-offset: 8; tab-width: 8 -*-
 
-   nautilus-monitor.h: file and directory change monitoring for nautilus
+   nemo-monitor.h: file and directory change monitoring for nemo
  
    Copyright (C) 2000, 2001 Eazel, Inc.
   
@@ -23,16 +23,16 @@
             Darin Adler <darin@bentspoon.com>
 */
 
-#ifndef NAUTILUS_MONITOR_H
-#define NAUTILUS_MONITOR_H
+#ifndef NEMO_MONITOR_H
+#define NEMO_MONITOR_H
 
 #include <glib.h>
 #include <gio/gio.h>
 
-typedef struct NautilusMonitor NautilusMonitor;
+typedef struct NemoMonitor NemoMonitor;
 
-gboolean         nautilus_monitor_active    (void);
-NautilusMonitor *nautilus_monitor_directory (GFile *location);
-void             nautilus_monitor_cancel    (NautilusMonitor *monitor);
+gboolean         nemo_monitor_active    (void);
+NemoMonitor *nemo_monitor_directory (GFile *location);
+void             nemo_monitor_cancel    (NemoMonitor *monitor);
 
-#endif /* NAUTILUS_MONITOR_H */
+#endif /* NEMO_MONITOR_H */

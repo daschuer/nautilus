@@ -24,11 +24,11 @@
 
 #include <config.h>
 
-#include "nautilus-properties-window.h"
+#include "nemo-properties-window.h"
 
-#include "nautilus-desktop-item-properties.h"
-#include "nautilus-error-reporting.h"
-#include "nautilus-mime-actions.h"
+#include "nemo-desktop-item-properties.h"
+#include "nemo-error-reporting.h"
+#include "nemo-mime-actions.h"
 
 #include <gtk/gtk.h>
 #include <gdk/gdkkeysyms.h>
@@ -48,18 +48,18 @@
 #include <eel/eel-string.h>
 #include <eel/eel-vfs-extensions.h>
 
-#include <libnautilus-extension/nautilus-property-page-provider.h>
-#include <libnautilus-private/nautilus-entry.h>
-#include <libnautilus-private/nautilus-file-attributes.h>
-#include <libnautilus-private/nautilus-file-operations.h>
-#include <libnautilus-private/nautilus-desktop-icon-file.h>
-#include <libnautilus-private/nautilus-global-preferences.h>
-#include <libnautilus-private/nautilus-link.h>
-#include <libnautilus-private/nautilus-metadata.h>
-#include <libnautilus-private/nautilus-mime-application-chooser.h>
-#include <libnautilus-private/nautilus-module.h>
-#include <libnautilus-private/nautilus-undo-signal-handlers.h>
-#include <libnautilus-private/nautilus-undo.h>
+#include <libnemo-extension/nemo-property-page-provider.h>
+#include <libnemo-private/nemo-entry.h>
+#include <libnemo-private/nemo-file-attributes.h>
+#include <libnemo-private/nemo-file-operations.h>
+#include <libnemo-private/nemo-desktop-icon-file.h>
+#include <libnemo-private/nemo-global-preferences.h>
+#include <libnemo-private/nemo-link.h>
+#include <libnemo-private/nemo-metadata.h>
+#include <libnemo-private/nemo-mime-application-chooser.h>
+#include <libnemo-private/nemo-module.h>
+#include <libnemo-private/nemo-undo-signal-handlers.h>
+#include <libnemo-private/nemo-undo.h>
 
 #if HAVE_SYS_VFS_H
 #include <sys/vfs.h>
@@ -86,7 +86,7 @@
 static GHashTable *windows;
 static GHashTable *pending_lists;
 
-struct NautilusPropertiesWindowDetails {	
+struct NemoPropertiesWindowDetails {	
 	GList *original_files;
 	GList *target_files;
 	
@@ -108,10 +108,10 @@ struct NautilusPropertiesWindowDetails {
 	guint update_directory_contents_timeout_id;
 	guint update_files_timeout_id;
 
-	NautilusFile *group_change_file;
+	NemoFile *group_change_file;
 	char         *group_change_group;
 	unsigned int  group_change_timeout;
-	NautilusFile *owner_change_file;
+	NemoFile *owner_change_file;
 	char         *owner_change_owner;
 	unsigned int  owner_change_timeout;
 
@@ -188,48 +188,48 @@ static const GtkTargetEntry target_table[] = {
  */
 #define CHOWN_CHGRP_TIMEOUT			300 /* milliseconds */
 
-static void directory_contents_value_field_update (NautilusPropertiesWindow *window);
-static void file_changed_callback                 (NautilusFile       *file,
+static void directory_contents_value_field_update (NemoPropertiesWindow *window);
+static void file_changed_callback                 (NemoFile       *file,
 						   gpointer            user_data);
-static void permission_button_update              (NautilusPropertiesWindow *window,
+static void permission_button_update              (NemoPropertiesWindow *window,
 						   GtkToggleButton    *button);
-static void permission_combo_update               (NautilusPropertiesWindow *window,
+static void permission_combo_update               (NemoPropertiesWindow *window,
 						   GtkComboBox        *combo);
-static void value_field_update                    (NautilusPropertiesWindow *window,
+static void value_field_update                    (NemoPropertiesWindow *window,
 						   GtkLabel           *field);
-static void properties_window_update              (NautilusPropertiesWindow *window,
+static void properties_window_update              (NemoPropertiesWindow *window,
 						   GList              *files);
-static void is_directory_ready_callback           (NautilusFile       *file,
+static void is_directory_ready_callback           (NemoFile       *file,
 						   gpointer            data);
-static void cancel_group_change_callback          (NautilusPropertiesWindow *window);
-static void cancel_owner_change_callback          (NautilusPropertiesWindow *window);
+static void cancel_group_change_callback          (NemoPropertiesWindow *window);
+static void cancel_owner_change_callback          (NemoPropertiesWindow *window);
 static void parent_widget_destroyed_callback      (GtkWidget          *widget,
 						   gpointer            callback_data);
 static void select_image_button_callback          (GtkWidget          *widget,
-						   NautilusPropertiesWindow *properties_window);
+						   NemoPropertiesWindow *properties_window);
 static void set_icon                              (const char         *icon_path,
-						   NautilusPropertiesWindow *properties_window);
+						   NemoPropertiesWindow *properties_window);
 static void remove_pending                        (StartupData        *data,
 						   gboolean            cancel_call_when_ready,
 						   gboolean            cancel_timed_wait,
 						   gboolean            cancel_destroy_handler);
-static void append_extension_pages                (NautilusPropertiesWindow *window);
+static void append_extension_pages                (NemoPropertiesWindow *window);
 
-static gboolean name_field_focus_out              (NautilusEntry *name_field,
+static gboolean name_field_focus_out              (NemoEntry *name_field,
 						   GdkEventFocus *event,
 						   gpointer callback_data);
-static void name_field_activate                   (NautilusEntry *name_field,
+static void name_field_activate                   (NemoEntry *name_field,
 						   gpointer callback_data);
 static GtkLabel *attach_ellipsizing_value_label   (GtkGrid *grid,
 						   GtkWidget *sibling,
 						   const char *initial_text);
 						   
-static GtkWidget* create_pie_widget 		  (NautilusPropertiesWindow *window);
+static GtkWidget* create_pie_widget 		  (NemoPropertiesWindow *window);
 
-G_DEFINE_TYPE (NautilusPropertiesWindow, nautilus_properties_window, GTK_TYPE_DIALOG);
+G_DEFINE_TYPE (NemoPropertiesWindow, nemo_properties_window, GTK_TYPE_DIALOG);
 
 static gboolean
-is_multi_file_window (NautilusPropertiesWindow *window)
+is_multi_file_window (NemoPropertiesWindow *window)
 {
 	GList *l;
 	int count;
@@ -237,7 +237,7 @@ is_multi_file_window (NautilusPropertiesWindow *window)
 	count = 0;
 	
 	for (l = window->details->original_files; l != NULL; l = l->next) {
-		if (!nautilus_file_is_gone (NAUTILUS_FILE (l->data))) {			
+		if (!nemo_file_is_gone (NEMO_FILE (l->data))) {			
 			count++;
 			if (count > 1) {
 				return TRUE;
@@ -249,7 +249,7 @@ is_multi_file_window (NautilusPropertiesWindow *window)
 }
 
 static int
-get_not_gone_original_file_count (NautilusPropertiesWindow *window)
+get_not_gone_original_file_count (NemoPropertiesWindow *window)
 {
 	GList *l;
 	int count;
@@ -257,7 +257,7 @@ get_not_gone_original_file_count (NautilusPropertiesWindow *window)
 	count = 0;
 
 	for (l = window->details->original_files; l != NULL; l = l->next) {
-		if (!nautilus_file_is_gone (NAUTILUS_FILE (l->data))) {
+		if (!nemo_file_is_gone (NEMO_FILE (l->data))) {
 			count++;
 		}
 	}
@@ -265,8 +265,8 @@ get_not_gone_original_file_count (NautilusPropertiesWindow *window)
 	return count;
 }
 
-static NautilusFile *
-get_original_file (NautilusPropertiesWindow *window) 
+static NemoFile *
+get_original_file (NemoPropertiesWindow *window) 
 {
 	g_return_val_if_fail (!is_multi_file_window (window), NULL);
 
@@ -274,35 +274,35 @@ get_original_file (NautilusPropertiesWindow *window)
 		return NULL;
 	}
 
-	return NAUTILUS_FILE (window->details->original_files->data);
+	return NEMO_FILE (window->details->original_files->data);
 }
 
-static NautilusFile *
-get_target_file_for_original_file (NautilusFile *file)
+static NemoFile *
+get_target_file_for_original_file (NemoFile *file)
 {
-	NautilusFile *target_file;
+	NemoFile *target_file;
 	GFile *location;
 	char *uri_to_display;
-	NautilusDesktopLink *link;
+	NemoDesktopLink *link;
 
 	target_file = NULL;
-	if (NAUTILUS_IS_DESKTOP_ICON_FILE (file)) {
-		link = nautilus_desktop_icon_file_get_link (NAUTILUS_DESKTOP_ICON_FILE (file));
+	if (NEMO_IS_DESKTOP_ICON_FILE (file)) {
+		link = nemo_desktop_icon_file_get_link (NEMO_DESKTOP_ICON_FILE (file));
 
 		if (link != NULL) {
 			/* map to linked URI for these types of links */
-			location = nautilus_desktop_link_get_activation_location (link);
+			location = nemo_desktop_link_get_activation_location (link);
 			if (location) {
-				target_file = nautilus_file_get (location);
+				target_file = nemo_file_get (location);
 				g_object_unref (location);
 			}
 			
 			g_object_unref (link);
 		}
         } else {
-		uri_to_display = nautilus_file_get_activation_uri (file);
+		uri_to_display = nemo_file_get_activation_uri (file);
 		if (uri_to_display != NULL) {
-			target_file = nautilus_file_get_by_uri (uri_to_display);
+			target_file = nemo_file_get_by_uri (uri_to_display);
 			g_free (uri_to_display);
 		}
 	}
@@ -312,14 +312,14 @@ get_target_file_for_original_file (NautilusFile *file)
 	}
 
 	/* Ref passed-in file here since we've decided to use it. */
-	nautilus_file_ref (file);
+	nemo_file_ref (file);
 	return file;
 }
 
-static NautilusFile *
-get_target_file (NautilusPropertiesWindow *window)
+static NemoFile *
+get_target_file (NemoPropertiesWindow *window)
 {
-	return NAUTILUS_FILE (window->details->target_files->data);
+	return NEMO_FILE (window->details->target_files->data);
 }
 
 static void
@@ -351,23 +351,23 @@ add_prompt_and_separator (GtkWidget *vbox, const char *prompt_text)
 }
 
 static void
-get_image_for_properties_window (NautilusPropertiesWindow *window,
+get_image_for_properties_window (NemoPropertiesWindow *window,
 				 char **icon_name,
 				 GdkPixbuf **icon_pixbuf)
 {
-	NautilusIconInfo *icon, *new_icon;
+	NemoIconInfo *icon, *new_icon;
 	GList *l;
 	
 	icon = NULL;
 	for (l = window->details->original_files; l != NULL; l = l->next) {
-		NautilusFile *file;
+		NemoFile *file;
 		
-		file = NAUTILUS_FILE (l->data);
+		file = NEMO_FILE (l->data);
 		
 		if (!icon) {
-			icon = nautilus_file_get_icon (file, NAUTILUS_ICON_SIZE_STANDARD, NAUTILUS_FILE_ICON_FLAGS_USE_THUMBNAILS | NAUTILUS_FILE_ICON_FLAGS_IGNORE_VISITING);
+			icon = nemo_file_get_icon (file, NEMO_ICON_SIZE_STANDARD, NEMO_FILE_ICON_FLAGS_USE_THUMBNAILS | NEMO_FILE_ICON_FLAGS_IGNORE_VISITING);
 		} else {
-			new_icon = nautilus_file_get_icon (file, NAUTILUS_ICON_SIZE_STANDARD, NAUTILUS_FILE_ICON_FLAGS_USE_THUMBNAILS | NAUTILUS_FILE_ICON_FLAGS_IGNORE_VISITING);
+			new_icon = nemo_file_get_icon (file, NEMO_ICON_SIZE_STANDARD, NEMO_FILE_ICON_FLAGS_USE_THUMBNAILS | NEMO_FILE_ICON_FLAGS_IGNORE_VISITING);
 			if (!new_icon || new_icon != icon) {
 				g_object_unref (icon);
 				g_object_unref (new_icon);
@@ -379,15 +379,15 @@ get_image_for_properties_window (NautilusPropertiesWindow *window,
 	}
 
 	if (!icon) {
-		icon = nautilus_icon_info_lookup_from_name ("text-x-generic", NAUTILUS_ICON_SIZE_STANDARD);
+		icon = nemo_icon_info_lookup_from_name ("text-x-generic", NEMO_ICON_SIZE_STANDARD);
 	}
 
 	if (icon_name != NULL) {
-		*icon_name = g_strdup (nautilus_icon_info_get_used_name (icon));
+		*icon_name = g_strdup (nemo_icon_info_get_used_name (icon));
 	}
 
 	if (icon_pixbuf != NULL) {
-		*icon_pixbuf = nautilus_icon_info_get_pixbuf_at_size (icon, NAUTILUS_ICON_SIZE_STANDARD);
+		*icon_pixbuf = nemo_icon_info_get_pixbuf_at_size (icon, NEMO_ICON_SIZE_STANDARD);
 	}
 
 	g_object_unref (icon);
@@ -397,7 +397,7 @@ get_image_for_properties_window (NautilusPropertiesWindow *window,
 static void
 update_properties_window_icon (GtkImage *image)
 {
-	NautilusPropertiesWindow *window;
+	NemoPropertiesWindow *window;
 	GdkPixbuf *pixbuf;
 	char *name;
 
@@ -441,27 +441,27 @@ uri_is_local_image (const char *uri)
 
 
 static void
-reset_icon (NautilusPropertiesWindow *properties_window)
+reset_icon (NemoPropertiesWindow *properties_window)
 {
 	GList *l;
 
 	for (l = properties_window->details->original_files; l != NULL; l = l->next) {
-		NautilusFile *file;
+		NemoFile *file;
 		
-		file = NAUTILUS_FILE (l->data);
+		file = NEMO_FILE (l->data);
 		
-		nautilus_file_set_metadata (file,
-					    NAUTILUS_METADATA_KEY_ICON_SCALE,
+		nemo_file_set_metadata (file,
+					    NEMO_METADATA_KEY_ICON_SCALE,
 					    NULL, NULL);
-		nautilus_file_set_metadata (file,
-					    NAUTILUS_METADATA_KEY_CUSTOM_ICON,
+		nemo_file_set_metadata (file,
+					    NEMO_METADATA_KEY_CUSTOM_ICON,
 					    NULL, NULL);
 	}
 }
 
 
 static void  
-nautilus_properties_window_drag_data_received (GtkWidget *widget, GdkDragContext *context,
+nemo_properties_window_drag_data_received (GtkWidget *widget, GdkDragContext *context,
 					       int x, int y,
 					       GtkSelectionData *selection_data,
 					       guint info, guint time)
@@ -485,7 +485,7 @@ nautilus_properties_window_drag_data_received (GtkWidget *widget, GdkDragContext
 			 window);
 	} else {		
 		if (uri_is_local_image (uris[0])) {			
-			set_icon (uris[0], NAUTILUS_PROPERTIES_WINDOW (window));
+			set_icon (uris[0], NEMO_PROPERTIES_WINDOW (window));
 		} else {
 			GFile *f;
 
@@ -509,7 +509,7 @@ nautilus_properties_window_drag_data_received (GtkWidget *widget, GdkDragContext
 }
 
 static GtkWidget *
-create_image_widget (NautilusPropertiesWindow *window,
+create_image_widget (NemoPropertiesWindow *window,
 		     gboolean is_customizable)
 {
  	GtkWidget *button;
@@ -533,7 +533,7 @@ create_image_widget (NautilusPropertiesWindow *window,
 				   GDK_ACTION_COPY | GDK_ACTION_MOVE);
 
 		g_signal_connect (image, "drag_data_received",
-				  G_CALLBACK (nautilus_properties_window_drag_data_received), NULL);
+				  G_CALLBACK (nemo_properties_window_drag_data_received), NULL);
 		g_signal_connect (button, "clicked",
 				  G_CALLBACK (select_image_button_callback), window);
 	}
@@ -551,7 +551,7 @@ create_image_widget (NautilusPropertiesWindow *window,
 }
 
 static void
-set_name_field (NautilusPropertiesWindow *window,
+set_name_field (NemoPropertiesWindow *window,
 		const gchar *original_name,
 		const gchar *name)
 {
@@ -564,8 +564,8 @@ set_name_field (NautilusPropertiesWindow *window,
 	 * 3) Creating label (potentially replacing entry)
 	 * 4) Creating entry (potentially replacing label)
 	 */
-	use_label = is_multi_file_window (window) || !nautilus_file_can_rename (get_original_file (window));
-	new_widget = !window->details->name_field || (use_label ? NAUTILUS_IS_ENTRY (window->details->name_field) : GTK_IS_LABEL (window->details->name_field));
+	use_label = is_multi_file_window (window) || !nemo_file_can_rename (get_original_file (window));
+	new_widget = !window->details->name_field || (use_label ? NEMO_IS_ENTRY (window->details->name_field) : GTK_IS_LABEL (window->details->name_field));
 
 	if (new_widget) {
 		if (window->details->name_field) {
@@ -578,7 +578,7 @@ set_name_field (NautilusPropertiesWindow *window,
 								 GTK_WIDGET (window->details->name_label),
 								 name));
 		} else {
-			window->details->name_field = nautilus_entry_new ();
+			window->details->name_field = nemo_entry_new ();
 			gtk_entry_set_text (GTK_ENTRY (window->details->name_field), name);
 			gtk_widget_show (window->details->name_field);
 
@@ -590,15 +590,15 @@ set_name_field (NautilusPropertiesWindow *window,
 			/* FIXME bugzilla.gnome.org 42151:
 			 * With this (and one place elsewhere in this file, not sure which is the
 			 * trouble-causer) code in place, bug 2151 happens (crash on quit). Since
-			 * we've removed Undo from Nautilus for now, I'm just ifdeffing out this
+			 * we've removed Undo from Nemo for now, I'm just ifdeffing out this
 			 * code rather than trying to fix 2151 now. Note that it might be possible
 			 * to fix 2151 without making Undo actually work, it's just not worth the
 			 * trouble.
 			 */
 #ifdef UNDO_ENABLED
 			/* Set up name field for undo */
-			nautilus_undo_set_up_nautilus_entry_for_undo ( NAUTILUS_ENTRY (window->details->name_field));
-			nautilus_undo_editable_set_undo_key (GTK_EDITABLE (window->details->name_field), TRUE);
+			nemo_undo_set_up_nemo_entry_for_undo ( NEMO_ENTRY (window->details->name_field));
+			nemo_undo_editable_set_undo_key (GTK_EDITABLE (window->details->name_field), TRUE);
 #endif
 
 			g_signal_connect_object (window->details->name_field, "focus_out_event",
@@ -629,9 +629,9 @@ set_name_field (NautilusPropertiesWindow *window,
 }
 
 static void
-update_name_field (NautilusPropertiesWindow *window)
+update_name_field (NemoPropertiesWindow *window)
 {
-	NautilusFile *file;
+	NemoFile *file;
 
 	gtk_label_set_text_with_mnemonic (window->details->name_label,
 					  ngettext ("_Name:", "_Names:",
@@ -649,15 +649,15 @@ update_name_field (NautilusPropertiesWindow *window)
 		first = TRUE;
 
 		for (l = window->details->target_files; l != NULL; l = l->next) {
-			file = NAUTILUS_FILE (l->data);
+			file = NEMO_FILE (l->data);
 
-			if (!nautilus_file_is_gone (file)) {
+			if (!nemo_file_is_gone (file)) {
 				if (!first) {
 					g_string_append (str, ", ");
 				} 
 				first = FALSE;
 				
-				name = nautilus_file_get_display_name (file);
+				name = nemo_file_get_display_name (file);
 				g_string_append (str, name);
 				g_free (name);
 			}
@@ -670,10 +670,10 @@ update_name_field (NautilusPropertiesWindow *window)
 
 		file = get_original_file (window);
 
-		if (file == NULL || nautilus_file_is_gone (file)) {
+		if (file == NULL || nemo_file_is_gone (file)) {
 			current_name = g_strdup ("");
 		} else {
-			current_name = nautilus_file_get_display_name (file);
+			current_name = nemo_file_get_display_name (file);
 		}
 
 		/* If the file name has changed since the original name was stored,
@@ -700,7 +700,7 @@ update_name_field (NautilusPropertiesWindow *window)
 }
 
 static void
-name_field_restore_original_name (NautilusEntry *name_field)
+name_field_restore_original_name (NemoEntry *name_field)
 {
 	const char *original_name;
 	char *displayed_name;
@@ -717,26 +717,26 @@ name_field_restore_original_name (NautilusEntry *name_field)
 	if (strcmp (original_name, displayed_name) != 0) {
 		gtk_entry_set_text (GTK_ENTRY (name_field), original_name);
 	}
-	nautilus_entry_select_all (name_field);
+	nemo_entry_select_all (name_field);
 
 	g_free (displayed_name);
 }
 
 static void
-rename_callback (NautilusFile *file, GFile *res_loc, GError *error, gpointer callback_data)
+rename_callback (NemoFile *file, GFile *res_loc, GError *error, gpointer callback_data)
 {
-	NautilusPropertiesWindow *window;
+	NemoPropertiesWindow *window;
 
-	window = NAUTILUS_PROPERTIES_WINDOW (callback_data);
+	window = NEMO_PROPERTIES_WINDOW (callback_data);
 
 	/* Complain to user if rename failed. */
 	if (error != NULL) {
-		nautilus_report_error_renaming_file (file, 
+		nemo_report_error_renaming_file (file, 
 						     window->details->pending_name, 
 						     error,
 						     GTK_WINDOW (window));
 		if (window->details->name_field != NULL) {
-			name_field_restore_original_name (NAUTILUS_ENTRY (window->details->name_field));
+			name_field_restore_original_name (NEMO_ENTRY (window->details->name_field));
 		}
 	}
 
@@ -744,20 +744,20 @@ rename_callback (NautilusFile *file, GFile *res_loc, GError *error, gpointer cal
 }
 
 static void
-set_pending_name (NautilusPropertiesWindow *window, const char *name)
+set_pending_name (NemoPropertiesWindow *window, const char *name)
 {
 	g_free (window->details->pending_name);
 	window->details->pending_name = g_strdup (name);
 }
 
 static void
-name_field_done_editing (NautilusEntry *name_field, NautilusPropertiesWindow *window)
+name_field_done_editing (NemoEntry *name_field, NemoPropertiesWindow *window)
 {
-	NautilusFile *file;
+	NemoFile *file;
 	char *new_name;
 	const char *original_name;
 	
-	g_return_if_fail (NAUTILUS_IS_ENTRY (name_field));
+	g_return_if_fail (NEMO_IS_ENTRY (name_field));
 
 	/* Don't apply if the dialog has more than one file */
 	if (is_multi_file_window (window)) {
@@ -769,7 +769,7 @@ name_field_done_editing (NautilusEntry *name_field, NautilusPropertiesWindow *wi
 	/* This gets called when the window is closed, which might be
 	 * caused by the file having been deleted.
 	 */
-	if (file == NULL || nautilus_file_is_gone  (file)) {
+	if (file == NULL || nemo_file_is_gone  (file)) {
 		return;
 	}
 
@@ -777,7 +777,7 @@ name_field_done_editing (NautilusEntry *name_field, NautilusPropertiesWindow *wi
 
 	/* Special case: silently revert text if new text is empty. */
 	if (strlen (new_name) == 0) {
-		name_field_restore_original_name (NAUTILUS_ENTRY (name_field));
+		name_field_restore_original_name (NEMO_ENTRY (name_field));
 	} else {
 		original_name = (const char *) g_object_get_data (G_OBJECT (window->details->name_field),
 								  "original_name");
@@ -787,7 +787,7 @@ name_field_done_editing (NautilusEntry *name_field, NautilusPropertiesWindow *wi
 		if (strcmp (new_name, original_name) != 0) {		
 			set_pending_name (window, new_name);
 			g_object_ref (window);
-			nautilus_file_rename (file, new_name,
+			nemo_file_rename (file, new_name,
 					      rename_callback, window);
 		}
 	}
@@ -796,36 +796,36 @@ name_field_done_editing (NautilusEntry *name_field, NautilusPropertiesWindow *wi
 }
 
 static gboolean
-name_field_focus_out (NautilusEntry *name_field,
+name_field_focus_out (NemoEntry *name_field,
 		      GdkEventFocus *event,
 		      gpointer callback_data)
 {
-	g_assert (NAUTILUS_IS_PROPERTIES_WINDOW (callback_data));
+	g_assert (NEMO_IS_PROPERTIES_WINDOW (callback_data));
 
 	if (gtk_widget_get_sensitive (GTK_WIDGET (name_field))) {
-		name_field_done_editing (name_field, NAUTILUS_PROPERTIES_WINDOW (callback_data));
+		name_field_done_editing (name_field, NEMO_PROPERTIES_WINDOW (callback_data));
 	}
 
 	return FALSE;
 }
 
 static void
-name_field_activate (NautilusEntry *name_field, gpointer callback_data)
+name_field_activate (NemoEntry *name_field, gpointer callback_data)
 {
-	g_assert (NAUTILUS_IS_ENTRY (name_field));
-	g_assert (NAUTILUS_IS_PROPERTIES_WINDOW (callback_data));
+	g_assert (NEMO_IS_ENTRY (name_field));
+	g_assert (NEMO_IS_PROPERTIES_WINDOW (callback_data));
 
 	/* Accept changes. */
-	name_field_done_editing (name_field, NAUTILUS_PROPERTIES_WINDOW (callback_data));
+	name_field_done_editing (name_field, NEMO_PROPERTIES_WINDOW (callback_data));
 
-	nautilus_entry_select_all_at_idle (name_field);
+	nemo_entry_select_all_at_idle (name_field);
 }
 
 static void
-update_properties_window_title (NautilusPropertiesWindow *window)
+update_properties_window_title (NemoPropertiesWindow *window)
 {
 	char *name, *title;
-	NautilusFile *file;
+	NemoFile *file;
 
 	g_return_if_fail (GTK_IS_WINDOW (window));
 
@@ -836,7 +836,7 @@ update_properties_window_title (NautilusPropertiesWindow *window)
 
 		if (file != NULL) {
 			g_free (title);
-			name = nautilus_file_get_display_name (file);
+			name = nemo_file_get_display_name (file);
 			title = g_strdup_printf (_("%s Properties"), name);
 			g_free (name);
 		}
@@ -848,7 +848,7 @@ update_properties_window_title (NautilusPropertiesWindow *window)
 }
 
 static void
-clear_extension_pages (NautilusPropertiesWindow *window)
+clear_extension_pages (NemoPropertiesWindow *window)
 {
 	int i;
 	int num_pages;
@@ -871,21 +871,21 @@ clear_extension_pages (NautilusPropertiesWindow *window)
 }
 
 static void
-refresh_extension_pages (NautilusPropertiesWindow *window)
+refresh_extension_pages (NemoPropertiesWindow *window)
 {
 	clear_extension_pages (window);
 	append_extension_pages (window);	
 }
 
 static void
-remove_from_dialog (NautilusPropertiesWindow *window,
-		    NautilusFile *file)
+remove_from_dialog (NemoPropertiesWindow *window,
+		    NemoFile *file)
 {
 	int index;
 	GList *original_link;
 	GList *target_link;
-	NautilusFile *original_file;
-	NautilusFile *target_file;
+	NemoFile *original_file;
+	NemoFile *target_file;
 
 	index = g_list_index (window->details->target_files, file);
 	if (index == -1) {
@@ -898,8 +898,8 @@ remove_from_dialog (NautilusPropertiesWindow *window,
 
 	g_return_if_fail (original_link && target_link);
 
-	original_file = NAUTILUS_FILE (original_link->data);
-	target_file = NAUTILUS_FILE (target_link->data);
+	original_file = NEMO_FILE (original_link->data);
+	target_file = NEMO_FILE (target_link->data);
 	
 	window->details->original_files = g_list_remove_link (window->details->original_files, original_link);
 	g_list_free (original_link);
@@ -916,11 +916,11 @@ remove_from_dialog (NautilusPropertiesWindow *window,
 					      G_CALLBACK (file_changed_callback),
 					      window);
 
-	nautilus_file_monitor_remove (original_file, &window->details->original_files);
-	nautilus_file_monitor_remove (target_file, &window->details->target_files);
+	nemo_file_monitor_remove (original_file, &window->details->original_files);
+	nemo_file_monitor_remove (target_file, &window->details->target_files);
 
-	nautilus_file_unref (original_file);
-	nautilus_file_unref (target_file);
+	nemo_file_unref (original_file);
+	nemo_file_unref (target_file);
 	
 }
 
@@ -939,27 +939,27 @@ mime_list_equal (GList *a, GList *b)
 }
 
 static GList *
-get_mime_list (NautilusPropertiesWindow *window)
+get_mime_list (NemoPropertiesWindow *window)
 {
 	GList *ret;
 	GList *l;
 	
 	ret = NULL;
 	for (l = window->details->target_files; l != NULL; l = l->next) {
-		ret = g_list_append (ret, nautilus_file_get_mime_type (NAUTILUS_FILE (l->data)));
+		ret = g_list_append (ret, nemo_file_get_mime_type (NEMO_FILE (l->data)));
 	}
 	ret = g_list_reverse (ret);
 	return ret;
 }
 
 static void
-properties_window_update (NautilusPropertiesWindow *window, 
+properties_window_update (NemoPropertiesWindow *window, 
 			  GList *files)
 {
 	GList *l;
 	GList *mime_list;
 	GList *tmp;
-	NautilusFile *changed_file;
+	NemoFile *changed_file;
 	gboolean dirty_original = FALSE;
 	gboolean dirty_target = FALSE;
 
@@ -969,9 +969,9 @@ properties_window_update (NautilusPropertiesWindow *window,
 	}
 
 	for (tmp = files; tmp != NULL; tmp = tmp->next) {
-		changed_file = NAUTILUS_FILE (tmp->data);
+		changed_file = NEMO_FILE (tmp->data);
 
-		if (changed_file && nautilus_file_is_gone (changed_file)) {
+		if (changed_file && nemo_file_is_gone (changed_file)) {
 			/* Remove the file from the property dialog */
 			remove_from_dialog (window, changed_file);
 			changed_file = NULL;
@@ -1032,9 +1032,9 @@ properties_window_update (NautilusPropertiesWindow *window,
 static gboolean
 update_files_callback (gpointer data)
 {
- 	NautilusPropertiesWindow *window;
+ 	NemoPropertiesWindow *window;
  
- 	window = NAUTILUS_PROPERTIES_WINDOW (data);
+ 	window = NEMO_PROPERTIES_WINDOW (data);
  
 	window->details->update_files_timeout_id = 0;
 
@@ -1044,7 +1044,7 @@ update_files_callback (gpointer data)
 		/* Close the window if no files are left */
 		gtk_widget_destroy (GTK_WIDGET (window));
 	} else {
-		nautilus_file_list_free (window->details->changed_files);
+		nemo_file_list_free (window->details->changed_files);
 		window->details->changed_files = NULL;
 	}
 	
@@ -1052,9 +1052,9 @@ update_files_callback (gpointer data)
  }
 
 static void
-schedule_files_update (NautilusPropertiesWindow *window)
+schedule_files_update (NemoPropertiesWindow *window)
  {
- 	g_assert (NAUTILUS_IS_PROPERTIES_WINDOW (window));
+ 	g_assert (NEMO_IS_PROPERTIES_WINDOW (window));
  
 	if (window->details->update_files_timeout_id == 0) {
 		window->details->update_files_timeout_id
@@ -1075,19 +1075,19 @@ file_list_attributes_identical (GList *file_list, const char *attribute_name)
 	identical = TRUE;
 	
 	for (l = file_list; l != NULL; l = l->next) {
-		NautilusFile *file;
+		NemoFile *file;
 
-		file = NAUTILUS_FILE (l->data);
+		file = NEMO_FILE (l->data);
 	
-		if (nautilus_file_is_gone (file)) {
+		if (nemo_file_is_gone (file)) {
 			continue;
 		}
 
 		if (first_attr == NULL) {
-			first_attr = nautilus_file_get_string_attribute_with_default (file, attribute_name);
+			first_attr = nemo_file_get_string_attribute_with_default (file, attribute_name);
 		} else {
 			char *attr;
-			attr = nautilus_file_get_string_attribute_with_default (file, attribute_name);
+			attr = nemo_file_get_string_attribute_with_default (file, attribute_name);
 			if (strcmp (attr, first_attr)) {
 				identical = FALSE;
 				g_free (attr);
@@ -1110,11 +1110,11 @@ file_list_get_string_attribute (GList *file_list,
 		GList *l;
 		
 		for (l = file_list; l != NULL; l = l->next) {
-			NautilusFile *file;
+			NemoFile *file;
 			
-			file = NAUTILUS_FILE (l->data);
-			if (!nautilus_file_is_gone (file)) {
-				return nautilus_file_get_string_attribute_with_default
+			file = NEMO_FILE (l->data);
+			if (!nemo_file_is_gone (file)) {
+				return nemo_file_get_string_attribute_with_default
 					(file, 
 					 attribute_name);
 			}
@@ -1131,7 +1131,7 @@ file_list_all_directories (GList *file_list)
 {
 	GList *l;
 	for (l = file_list; l != NULL; l = l->next) {
-		if (!nautilus_file_is_directory (NAUTILUS_FILE (l->data))) {
+		if (!nemo_file_is_directory (NEMO_FILE (l->data))) {
 			return FALSE;
 		}
 	}
@@ -1171,7 +1171,7 @@ value_field_update_internal (GtkLabel *label,
 }
 
 static void
-value_field_update (NautilusPropertiesWindow *window, GtkLabel *label)
+value_field_update (NemoPropertiesWindow *window, GtkLabel *label)
 {
 	gboolean use_original;
 
@@ -1247,7 +1247,7 @@ attach_ellipsizing_value_label (GtkGrid *grid,
 }
 
 static GtkWidget*
-attach_value_field_internal (NautilusPropertiesWindow *window,
+attach_value_field_internal (NemoPropertiesWindow *window,
 			     GtkGrid *grid,
 			     GtkWidget *sibling,
 			     const char *file_attribute_name,
@@ -1278,7 +1278,7 @@ attach_value_field_internal (NautilusPropertiesWindow *window,
 }			     
 
 static GtkWidget*
-attach_value_field (NautilusPropertiesWindow *window,
+attach_value_field (NemoPropertiesWindow *window,
 		    GtkGrid *grid,
 		    GtkWidget *sibling,
 		    const char *file_attribute_name,
@@ -1294,7 +1294,7 @@ attach_value_field (NautilusPropertiesWindow *window,
 }
 
 static GtkWidget*
-attach_ellipsizing_value_field (NautilusPropertiesWindow *window,
+attach_ellipsizing_value_field (NemoPropertiesWindow *window,
 				GtkGrid *grid,
 				GtkWidget *sibling,
 		    		const char *file_attribute_name,
@@ -1310,14 +1310,14 @@ attach_ellipsizing_value_field (NautilusPropertiesWindow *window,
 }
 
 static void
-group_change_callback (NautilusFile *file,
+group_change_callback (NemoFile *file,
 		       GFile *res_loc,
 		       GError *error,
-		       NautilusPropertiesWindow *window)
+		       NemoPropertiesWindow *window)
 {
 	char *group;
 
-	g_assert (NAUTILUS_IS_PROPERTIES_WINDOW (window));
+	g_assert (NEMO_IS_PROPERTIES_WINDOW (window));
 	g_assert (window->details->group_change_file == file);
 
 	group = window->details->group_change_group;
@@ -1325,9 +1325,9 @@ group_change_callback (NautilusFile *file,
 
 	/* Report the error if it's an error. */
 	eel_timed_wait_stop ((EelCancelCallback) cancel_group_change_callback, window);
-	nautilus_report_error_setting_group (file, error, GTK_WINDOW (window));
+	nemo_report_error_setting_group (file, error, GTK_WINDOW (window));
 
-	nautilus_file_unref (file);
+	nemo_file_unref (file);
 	g_free (group);
 
 	window->details->group_change_file = NULL;
@@ -1336,21 +1336,21 @@ group_change_callback (NautilusFile *file,
 }
 
 static void
-cancel_group_change_callback (NautilusPropertiesWindow *window)
+cancel_group_change_callback (NemoPropertiesWindow *window)
 {
-	NautilusFile *file;
+	NemoFile *file;
 	char *group;
 
 	file = window->details->group_change_file;
-	g_assert (NAUTILUS_IS_FILE (file));
+	g_assert (NEMO_IS_FILE (file));
 
 	group = window->details->group_change_group;
 	g_assert (group != NULL);
 
-	nautilus_file_cancel (file, (NautilusFileOperationCallback) group_change_callback, window);
+	nemo_file_cancel (file, (NemoFileOperationCallback) group_change_callback, window);
 
 	g_free (group);
-	nautilus_file_unref (file);
+	nemo_file_unref (file);
 
 	window->details->group_change_file = NULL;
 	window->details->group_change_group = NULL;
@@ -1358,15 +1358,15 @@ cancel_group_change_callback (NautilusPropertiesWindow *window)
 }
 
 static gboolean
-schedule_group_change_timeout (NautilusPropertiesWindow *window)
+schedule_group_change_timeout (NemoPropertiesWindow *window)
 {
-	NautilusFile *file;
+	NemoFile *file;
 	char *group;
 
-	g_assert (NAUTILUS_IS_PROPERTIES_WINDOW (window));
+	g_assert (NEMO_IS_PROPERTIES_WINDOW (window));
 
 	file = window->details->group_change_file;
-	g_assert (NAUTILUS_IS_FILE (file));
+	g_assert (NEMO_IS_FILE (file));
 
 	group = window->details->group_change_group;
 	g_assert (group != NULL);
@@ -1377,25 +1377,25 @@ schedule_group_change_timeout (NautilusPropertiesWindow *window)
 		 _("Cancel Group Change?"),
 		 GTK_WINDOW (window));
 
-	nautilus_file_set_group
+	nemo_file_set_group
 		(file,  group,
-		 (NautilusFileOperationCallback) group_change_callback, window);
+		 (NemoFileOperationCallback) group_change_callback, window);
 
 	window->details->group_change_timeout = 0;
 	return FALSE;
 }
 
 static void
-schedule_group_change (NautilusPropertiesWindow *window,
-		       NautilusFile       *file,
+schedule_group_change (NemoPropertiesWindow *window,
+		       NemoFile       *file,
 		       const char         *group)
 {
-	g_assert (NAUTILUS_IS_PROPERTIES_WINDOW (window));
+	g_assert (NEMO_IS_PROPERTIES_WINDOW (window));
 	g_assert (window->details->group_change_group == NULL);
 	g_assert (window->details->group_change_file == NULL);
-	g_assert (NAUTILUS_IS_FILE (file));
+	g_assert (NEMO_IS_FILE (file));
 
-	window->details->group_change_file = nautilus_file_ref (file);
+	window->details->group_change_file = nemo_file_ref (file);
 	window->details->group_change_group = g_strdup (group);
 	g_object_ref (G_OBJECT (window));
 	window->details->group_change_timeout =
@@ -1405,12 +1405,12 @@ schedule_group_change (NautilusPropertiesWindow *window,
 }
 
 static void
-unschedule_or_cancel_group_change (NautilusPropertiesWindow *window)
+unschedule_or_cancel_group_change (NemoPropertiesWindow *window)
 {
-	NautilusFile *file;
+	NemoFile *file;
 	char *group;
 
-	g_assert (NAUTILUS_IS_PROPERTIES_WINDOW (window));
+	g_assert (NEMO_IS_PROPERTIES_WINDOW (window));
 
 	file = window->details->group_change_file;
 	group = window->details->group_change_group;
@@ -1419,15 +1419,15 @@ unschedule_or_cancel_group_change (NautilusPropertiesWindow *window)
 		  (file != NULL && group != NULL));
 
 	if (file != NULL) {
-		g_assert (NAUTILUS_IS_FILE (file));
+		g_assert (NEMO_IS_FILE (file));
 
 		if (window->details->group_change_timeout == 0) {
-			nautilus_file_cancel (file,
-					      (NautilusFileOperationCallback) group_change_callback, window);
+			nemo_file_cancel (file,
+					      (NemoFileOperationCallback) group_change_callback, window);
 			eel_timed_wait_stop ((EelCancelCallback) cancel_group_change_callback, window);
 		}
 
-		nautilus_file_unref (file);
+		nemo_file_unref (file);
 		g_free (group);
 
 		window->details->group_change_file = NULL;
@@ -1443,21 +1443,21 @@ unschedule_or_cancel_group_change (NautilusPropertiesWindow *window)
 }
 
 static void
-changed_group_callback (GtkComboBox *combo_box, NautilusFile *file)
+changed_group_callback (GtkComboBox *combo_box, NemoFile *file)
 {
-	NautilusPropertiesWindow *window;
+	NemoPropertiesWindow *window;
 	char *group;
 	char *cur_group;
 
 	g_assert (GTK_IS_COMBO_BOX (combo_box));
-	g_assert (NAUTILUS_IS_FILE (file));
+	g_assert (NEMO_IS_FILE (file));
 
 	group = gtk_combo_box_text_get_active_text (GTK_COMBO_BOX_TEXT (combo_box));
-	cur_group = nautilus_file_get_group_name (file);
+	cur_group = nemo_file_get_group_name (file);
 
 	if (group != NULL && strcmp (group, cur_group) != 0) {
 		/* Try to change file group. If this fails, complain to user. */
-		window = NAUTILUS_PROPERTIES_WINDOW (gtk_widget_get_ancestor (GTK_WIDGET (combo_box), GTK_TYPE_WINDOW));
+		window = NEMO_PROPERTIES_WINDOW (gtk_widget_get_ancestor (GTK_WIDGET (combo_box), GTK_TYPE_WINDOW));
 
 		unschedule_or_cancel_group_change (window);
 		schedule_group_change (window, file, group);
@@ -1574,7 +1574,7 @@ tree_model_get_entry_index (GtkTreeModel *model,
 
 
 static void
-synch_groups_combo_box (GtkComboBox *combo_box, NautilusFile *file)
+synch_groups_combo_box (GtkComboBox *combo_box, NemoFile *file)
 {
 	GList *groups;
 	GList *node;
@@ -1586,13 +1586,13 @@ synch_groups_combo_box (GtkComboBox *combo_box, NautilusFile *file)
 	int current_group_index;
 
 	g_assert (GTK_IS_COMBO_BOX (combo_box));
-	g_assert (NAUTILUS_IS_FILE (file));
+	g_assert (NEMO_IS_FILE (file));
 
-	if (nautilus_file_is_gone (file)) {
+	if (nemo_file_is_gone (file)) {
 		return;
 	}
 
-	groups = nautilus_file_get_settable_group_names (file);
+	groups = nemo_file_get_settable_group_names (file);
 
 	model = gtk_combo_box_get_model (combo_box);
 	store = GTK_LIST_STORE (model);
@@ -1611,7 +1611,7 @@ synch_groups_combo_box (GtkComboBox *combo_box, NautilusFile *file)
 		}
 	}
 
-	current_group_name = nautilus_file_get_group_name (file);
+	current_group_name = nemo_file_get_group_name (file);
 	current_group_index = tree_model_get_entry_index (model, 0, current_group_name);
 
 	/* If current group wasn't in list, we prepend it (with a separator). 
@@ -1704,7 +1704,7 @@ attach_combo_box (GtkGrid *grid,
 static GtkComboBox*
 attach_group_combo_box (GtkGrid *grid,
 			GtkWidget *sibling,
-		        NautilusFile *file)
+		        NemoFile *file)
 {
 	GtkComboBox *combo_box;
 
@@ -1718,21 +1718,21 @@ attach_group_combo_box (GtkGrid *grid,
 				 combo_box, G_CONNECT_SWAPPED);
 	g_signal_connect_data (combo_box, "changed",
 			       G_CALLBACK (changed_group_callback),
-			       nautilus_file_ref (file),
-			       (GClosureNotify)nautilus_file_unref, 0);
+			       nemo_file_ref (file),
+			       (GClosureNotify)nemo_file_unref, 0);
 
 	return combo_box;
 }	
 
 static void
-owner_change_callback (NautilusFile *file,
+owner_change_callback (NemoFile *file,
                        GFile 	    *result_location,
 		       GError        *error,
-		       NautilusPropertiesWindow *window)
+		       NemoPropertiesWindow *window)
 {
 	char *owner;
 
-	g_assert (NAUTILUS_IS_PROPERTIES_WINDOW (window));
+	g_assert (NEMO_IS_PROPERTIES_WINDOW (window));
 	g_assert (window->details->owner_change_file == file);
 
 	owner = window->details->owner_change_owner;
@@ -1740,9 +1740,9 @@ owner_change_callback (NautilusFile *file,
 
 	/* Report the error if it's an error. */
 	eel_timed_wait_stop ((EelCancelCallback) cancel_owner_change_callback, window);
-	nautilus_report_error_setting_owner (file, error, GTK_WINDOW (window));
+	nemo_report_error_setting_owner (file, error, GTK_WINDOW (window));
 
-	nautilus_file_unref (file);
+	nemo_file_unref (file);
 	g_free (owner);
 
 	window->details->owner_change_file = NULL;
@@ -1751,20 +1751,20 @@ owner_change_callback (NautilusFile *file,
 }
 
 static void
-cancel_owner_change_callback (NautilusPropertiesWindow *window)
+cancel_owner_change_callback (NemoPropertiesWindow *window)
 {
-	NautilusFile *file;
+	NemoFile *file;
 	char *owner;
 
 	file = window->details->owner_change_file;
-	g_assert (NAUTILUS_IS_FILE (file));
+	g_assert (NEMO_IS_FILE (file));
 
 	owner = window->details->owner_change_owner;
 	g_assert (owner != NULL);
 
-	nautilus_file_cancel (file, (NautilusFileOperationCallback) owner_change_callback, window);
+	nemo_file_cancel (file, (NemoFileOperationCallback) owner_change_callback, window);
 
-	nautilus_file_unref (file);
+	nemo_file_unref (file);
 	g_free (owner);
 
 	window->details->owner_change_file = NULL;
@@ -1773,15 +1773,15 @@ cancel_owner_change_callback (NautilusPropertiesWindow *window)
 }
 
 static gboolean
-schedule_owner_change_timeout (NautilusPropertiesWindow *window)
+schedule_owner_change_timeout (NemoPropertiesWindow *window)
 {
-	NautilusFile *file;
+	NemoFile *file;
 	char *owner;
 
-	g_assert (NAUTILUS_IS_PROPERTIES_WINDOW (window));
+	g_assert (NEMO_IS_PROPERTIES_WINDOW (window));
 
 	file = window->details->owner_change_file;
-	g_assert (NAUTILUS_IS_FILE (file));
+	g_assert (NEMO_IS_FILE (file));
 
 	owner = window->details->owner_change_owner;
 	g_assert (owner != NULL);
@@ -1792,25 +1792,25 @@ schedule_owner_change_timeout (NautilusPropertiesWindow *window)
 		 _("Cancel Owner Change?"),
 		 GTK_WINDOW (window));
 
-	nautilus_file_set_owner
+	nemo_file_set_owner
 		(file,  owner,
-		 (NautilusFileOperationCallback) owner_change_callback, window);
+		 (NemoFileOperationCallback) owner_change_callback, window);
 
 	window->details->owner_change_timeout = 0;
 	return FALSE;
 }
 
 static void
-schedule_owner_change (NautilusPropertiesWindow *window,
-		       NautilusFile       *file,
+schedule_owner_change (NemoPropertiesWindow *window,
+		       NemoFile       *file,
 		       const char         *owner)
 {
-	g_assert (NAUTILUS_IS_PROPERTIES_WINDOW (window));
+	g_assert (NEMO_IS_PROPERTIES_WINDOW (window));
 	g_assert (window->details->owner_change_owner == NULL);
 	g_assert (window->details->owner_change_file == NULL);
-	g_assert (NAUTILUS_IS_FILE (file));
+	g_assert (NEMO_IS_FILE (file));
 
-	window->details->owner_change_file = nautilus_file_ref (file);
+	window->details->owner_change_file = nemo_file_ref (file);
 	window->details->owner_change_owner = g_strdup (owner);
 	g_object_ref (G_OBJECT (window));
 	window->details->owner_change_timeout =
@@ -1820,12 +1820,12 @@ schedule_owner_change (NautilusPropertiesWindow *window,
 }
 
 static void
-unschedule_or_cancel_owner_change (NautilusPropertiesWindow *window)
+unschedule_or_cancel_owner_change (NemoPropertiesWindow *window)
 {
-	NautilusFile *file;
+	NemoFile *file;
 	char *owner;
 
-	g_assert (NAUTILUS_IS_PROPERTIES_WINDOW (window));
+	g_assert (NEMO_IS_PROPERTIES_WINDOW (window));
 
 	file = window->details->owner_change_file;
 	owner = window->details->owner_change_owner;
@@ -1834,15 +1834,15 @@ unschedule_or_cancel_owner_change (NautilusPropertiesWindow *window)
 		  (file != NULL && owner != NULL));
 
 	if (file != NULL) {
-		g_assert (NAUTILUS_IS_FILE (file));
+		g_assert (NEMO_IS_FILE (file));
 
 		if (window->details->owner_change_timeout == 0) {
-			nautilus_file_cancel (file,
-					      (NautilusFileOperationCallback) owner_change_callback, window);
+			nemo_file_cancel (file,
+					      (NemoFileOperationCallback) owner_change_callback, window);
 			eel_timed_wait_stop ((EelCancelCallback) cancel_owner_change_callback, window);
 		}
 
-		nautilus_file_unref (file);
+		nemo_file_unref (file);
 		g_free (owner);
 
 		window->details->owner_change_file = NULL;
@@ -1858,16 +1858,16 @@ unschedule_or_cancel_owner_change (NautilusPropertiesWindow *window)
 }
 
 static void
-changed_owner_callback (GtkComboBox *combo_box, NautilusFile* file)
+changed_owner_callback (GtkComboBox *combo_box, NemoFile* file)
 {
-	NautilusPropertiesWindow *window;
+	NemoPropertiesWindow *window;
 	char *owner_text;
 	char **name_array;
 	char *new_owner;
 	char *cur_owner;
 
 	g_assert (GTK_IS_COMBO_BOX (combo_box));
-	g_assert (NAUTILUS_IS_FILE (file));
+	g_assert (NEMO_IS_FILE (file));
 
 	owner_text = combo_box_get_active_entry (combo_box, 0);
         if (! owner_text)
@@ -1875,11 +1875,11 @@ changed_owner_callback (GtkComboBox *combo_box, NautilusFile* file)
     	name_array = g_strsplit (owner_text, " - ", 2);
 	new_owner = name_array[0];
 	g_free (owner_text);
-	cur_owner = nautilus_file_get_owner_name (file);
+	cur_owner = nemo_file_get_owner_name (file);
 
 	if (strcmp (new_owner, cur_owner) != 0) {
 		/* Try to change file owner. If this fails, complain to user. */
-		window = NAUTILUS_PROPERTIES_WINDOW (gtk_widget_get_ancestor (GTK_WIDGET (combo_box), GTK_TYPE_WINDOW));
+		window = NEMO_PROPERTIES_WINDOW (gtk_widget_get_ancestor (GTK_WIDGET (combo_box), GTK_TYPE_WINDOW));
 
 		unschedule_or_cancel_owner_change (window);
 		schedule_owner_change (window, file, new_owner);
@@ -1889,7 +1889,7 @@ changed_owner_callback (GtkComboBox *combo_box, NautilusFile* file)
 }
 
 static void
-synch_user_menu (GtkComboBox *combo_box, NautilusFile *file)
+synch_user_menu (GtkComboBox *combo_box, NemoFile *file)
 {
 	GList *users;
 	GList *node;
@@ -1904,13 +1904,13 @@ synch_user_menu (GtkComboBox *combo_box, NautilusFile *file)
 	char *combo_text;
 
 	g_assert (GTK_IS_COMBO_BOX (combo_box));
-	g_assert (NAUTILUS_IS_FILE (file));
+	g_assert (NEMO_IS_FILE (file));
 
-	if (nautilus_file_is_gone (file)) {
+	if (nemo_file_is_gone (file)) {
 		return;
 	}
 
-	users = nautilus_get_user_names ();
+	users = nemo_get_user_names ();
 
 	model = gtk_combo_box_get_model (combo_box);
 	store = GTK_LIST_STORE (model);
@@ -1944,7 +1944,7 @@ synch_user_menu (GtkComboBox *combo_box, NautilusFile *file)
 		}
 	}
 
-	owner_name = nautilus_file_get_string_attribute (file, "owner");
+	owner_name = nemo_file_get_string_attribute (file, "owner");
 	owner_index = tree_model_get_entry_index (model, 0, owner_name);
 
 	/* If owner wasn't in list, we prepend it (with a separator). 
@@ -1988,7 +1988,7 @@ synch_user_menu (GtkComboBox *combo_box, NautilusFile *file)
 static GtkComboBox*
 attach_owner_combo_box (GtkGrid *grid,
 		        GtkWidget *sibling,
-		        NautilusFile *file)
+		        NemoFile *file)
 {
 	GtkComboBox *combo_box;
 
@@ -2002,27 +2002,27 @@ attach_owner_combo_box (GtkGrid *grid,
 				 combo_box, G_CONNECT_SWAPPED);	
 	g_signal_connect_data (combo_box, "changed",
 			       G_CALLBACK (changed_owner_callback),
-			       nautilus_file_ref (file),
-			       (GClosureNotify)nautilus_file_unref, 0);
+			       nemo_file_ref (file),
+			       (GClosureNotify)nemo_file_unref, 0);
 
 	return combo_box;
 }
 
 static gboolean
-file_has_prefix (NautilusFile *file,
+file_has_prefix (NemoFile *file,
 		 GList *prefix_candidates)
 {
 	GList *p;
 	GFile *location, *candidate_location;
 
-	location = nautilus_file_get_location (file);
+	location = nemo_file_get_location (file);
 
 	for (p = prefix_candidates; p != NULL; p = p->next) {
 		if (file == p->data) {
 			continue;
 		}
 
-		candidate_location = nautilus_file_get_location (NAUTILUS_FILE (p->data));
+		candidate_location = nemo_file_get_location (NEMO_FILE (p->data));
 		if (g_file_has_prefix (location, candidate_location)) {
 			g_object_unref (location);
 			g_object_unref (candidate_location);
@@ -2037,9 +2037,9 @@ file_has_prefix (NautilusFile *file,
 }
 
 static void
-directory_contents_value_field_update (NautilusPropertiesWindow *window)
+directory_contents_value_field_update (NemoPropertiesWindow *window)
 {
-	NautilusRequestStatus file_status, status;
+	NemoRequestStatus file_status, status;
 	char *text, *temp;
 	guint directory_count;
 	guint file_count;
@@ -2047,29 +2047,29 @@ directory_contents_value_field_update (NautilusPropertiesWindow *window)
 	guint unreadable_directory_count;
 	goffset total_size;
 	gboolean used_two_lines;
-	NautilusFile *file;
+	NemoFile *file;
 	GList *l;
 	guint file_unreadable;
 	goffset file_size;
 
-	g_assert (NAUTILUS_IS_PROPERTIES_WINDOW (window));
+	g_assert (NEMO_IS_PROPERTIES_WINDOW (window));
 
-	status = NAUTILUS_REQUEST_DONE;
-	file_status = NAUTILUS_REQUEST_NOT_STARTED;
+	status = NEMO_REQUEST_DONE;
+	file_status = NEMO_REQUEST_NOT_STARTED;
 	total_count = window->details->total_count;
 	total_size = window->details->total_size;
 	unreadable_directory_count = FALSE;
 
 	for (l = window->details->target_files; l; l = l->next) {
-		file = NAUTILUS_FILE (l->data);
+		file = NEMO_FILE (l->data);
 
 		if (file_has_prefix (file, window->details->target_files)) {
 			/* don't count nested files twice */
 			continue;
 		}
 
-		if (nautilus_file_is_directory (file)) {
-			file_status = nautilus_file_get_deep_counts (file, 
+		if (nemo_file_is_directory (file)) {
+			file_status = nemo_file_get_deep_counts (file, 
 					 &directory_count,
 					 &file_count, 
 					 &file_unreadable,
@@ -2082,12 +2082,12 @@ directory_contents_value_field_update (NautilusPropertiesWindow *window)
 				unreadable_directory_count = TRUE;
 			}
 			
-			if (file_status != NAUTILUS_REQUEST_DONE) {
+			if (file_status != NEMO_REQUEST_DONE) {
 				status = file_status;
 			}
 		} else {
 			++total_count;
-			total_size += nautilus_file_get_size (file);
+			total_size += nemo_file_get_size (file);
 		}
 	}
 	
@@ -2096,7 +2096,7 @@ directory_contents_value_field_update (NautilusPropertiesWindow *window)
 	 * But still display the new total, since it might have changed.
 	 */
 	if (window->details->deep_count_finished &&
-	    status != NAUTILUS_REQUEST_DONE) {
+	    status != NEMO_REQUEST_DONE) {
 		return;
 	}
 
@@ -2105,7 +2105,7 @@ directory_contents_value_field_update (NautilusPropertiesWindow *window)
 	
 	if (total_count == 0) {
 		switch (status) {
-		case NAUTILUS_REQUEST_DONE:
+		case NEMO_REQUEST_DONE:
 			if (unreadable_directory_count == 0) {
 				text = g_strdup (_("nothing"));
 			} else {
@@ -2155,7 +2155,7 @@ directory_contents_value_field_update (NautilusPropertiesWindow *window)
 			    text);
 	g_free (text);
 
-	if (status == NAUTILUS_REQUEST_DONE) {
+	if (status == NEMO_REQUEST_DONE) {
 		window->details->deep_count_finished = TRUE;
 	}
 }
@@ -2163,9 +2163,9 @@ directory_contents_value_field_update (NautilusPropertiesWindow *window)
 static gboolean
 update_directory_contents_callback (gpointer data)
 {
-	NautilusPropertiesWindow *window;
+	NemoPropertiesWindow *window;
 
-	window = NAUTILUS_PROPERTIES_WINDOW (data);
+	window = NEMO_PROPERTIES_WINDOW (data);
 
 	window->details->update_directory_contents_timeout_id = 0;
 	directory_contents_value_field_update (window);
@@ -2174,9 +2174,9 @@ update_directory_contents_callback (gpointer data)
 }
 
 static void
-schedule_directory_contents_update (NautilusPropertiesWindow *window)
+schedule_directory_contents_update (NemoPropertiesWindow *window)
 {
-	g_assert (NAUTILUS_IS_PROPERTIES_WINDOW (window));
+	g_assert (NEMO_IS_PROPERTIES_WINDOW (window));
 
 	if (window->details->update_directory_contents_timeout_id == 0) {
 		window->details->update_directory_contents_timeout_id
@@ -2187,13 +2187,13 @@ schedule_directory_contents_update (NautilusPropertiesWindow *window)
 }
 
 static GtkLabel *
-attach_directory_contents_value_field (NautilusPropertiesWindow *window,
+attach_directory_contents_value_field (NemoPropertiesWindow *window,
 				       GtkGrid *grid,
 				       GtkWidget *sibling)
 {
 	GtkLabel *value_field;
 	GList *l;
-	NautilusFile *file;
+	NemoFile *file;
 
 	value_field = attach_value_label (grid, sibling, "");
 
@@ -2206,8 +2206,8 @@ attach_directory_contents_value_field (NautilusPropertiesWindow *window,
 	directory_contents_value_field_update (window);
  
 	for (l = window->details->target_files; l; l = l->next) {
-		file = NAUTILUS_FILE (l->data);
-		nautilus_file_recompute_deep_counts (file);
+		file = NEMO_FILE (l->data);
+		nemo_file_recompute_deep_counts (file);
 		
 		g_signal_connect_object (file,
 					 "updated_deep_count_in_progress",
@@ -2229,7 +2229,7 @@ attach_title_field (GtkGrid *grid,
 	"\xE2\x80\x92"
 
 static void
-append_title_value_pair (NautilusPropertiesWindow *window,
+append_title_value_pair (NemoPropertiesWindow *window,
 			 GtkGrid *grid,
 			 const char *title, 
  			 const char *file_attribute_name,
@@ -2248,7 +2248,7 @@ append_title_value_pair (NautilusPropertiesWindow *window,
 }
 
 static void
-append_title_and_ellipsizing_value (NautilusPropertiesWindow *window,
+append_title_and_ellipsizing_value (NemoPropertiesWindow *window,
 				    GtkGrid *grid,
 				    const char *title,
 				    const char *file_attribute_name,
@@ -2268,7 +2268,7 @@ append_title_and_ellipsizing_value (NautilusPropertiesWindow *window,
 }
 
 static void
-append_directory_contents_fields (NautilusPropertiesWindow *window,
+append_directory_contents_fields (NemoPropertiesWindow *window,
 				  GtkGrid *grid)
 {
 	GtkLabel *title_field, *value_field;
@@ -2364,12 +2364,12 @@ create_grid_with_standard_properties (void)
 }
 
 static gboolean
-is_merged_trash_directory (NautilusFile *file) 
+is_merged_trash_directory (NemoFile *file) 
 {
 	char *file_uri;
 	gboolean result;
 
-	file_uri = nautilus_file_get_uri (file);
+	file_uri = nemo_file_get_uri (file);
 	result = strcmp (file_uri, "trash:///") == 0;
 	g_free (file_uri);
 
@@ -2377,12 +2377,12 @@ is_merged_trash_directory (NautilusFile *file)
 }
 
 static gboolean
-is_computer_directory (NautilusFile *file)
+is_computer_directory (NemoFile *file)
 {
 	char *file_uri;
 	gboolean result;
 	
-	file_uri = nautilus_file_get_uri (file);
+	file_uri = nemo_file_get_uri (file);
 	result = strcmp (file_uri, "computer:///") == 0;
 	g_free (file_uri);
 	
@@ -2390,12 +2390,12 @@ is_computer_directory (NautilusFile *file)
 }
 
 static gboolean
-is_network_directory (NautilusFile *file)
+is_network_directory (NemoFile *file)
 {
 	char *file_uri;
 	gboolean result;
 	
-	file_uri = nautilus_file_get_uri (file);
+	file_uri = nemo_file_get_uri (file);
 	result = strcmp (file_uri, "network:///") == 0;
 	g_free (file_uri);
 	
@@ -2403,12 +2403,12 @@ is_network_directory (NautilusFile *file)
 }
 
 static gboolean
-is_burn_directory (NautilusFile *file)
+is_burn_directory (NemoFile *file)
 {
 	char *file_uri;
 	gboolean result;
 	
-	file_uri = nautilus_file_get_uri (file);
+	file_uri = nemo_file_get_uri (file);
 	result = strcmp (file_uri, "burn:///") == 0;
 	g_free (file_uri);
 	
@@ -2416,7 +2416,7 @@ is_burn_directory (NautilusFile *file)
 }
 
 static gboolean
-should_show_custom_icon_buttons (NautilusPropertiesWindow *window) 
+should_show_custom_icon_buttons (NemoPropertiesWindow *window) 
 {
 	if (is_multi_file_window (window)) {
 		return FALSE;
@@ -2426,7 +2426,7 @@ should_show_custom_icon_buttons (NautilusPropertiesWindow *window)
 }
 
 static gboolean
-should_show_file_type (NautilusPropertiesWindow *window) 
+should_show_file_type (NemoPropertiesWindow *window) 
 {
 	if (!is_multi_file_window (window) 
 	    && (is_merged_trash_directory (get_target_file (window)) ||
@@ -2441,7 +2441,7 @@ should_show_file_type (NautilusPropertiesWindow *window)
 }
 
 static gboolean
-should_show_location_info (NautilusPropertiesWindow *window) 
+should_show_location_info (NemoPropertiesWindow *window) 
 {
 	if (!is_multi_file_window (window) 
 	    && (is_merged_trash_directory (get_target_file (window)) ||
@@ -2455,7 +2455,7 @@ should_show_location_info (NautilusPropertiesWindow *window)
 }
 
 static gboolean
-should_show_accessed_date (NautilusPropertiesWindow *window) 
+should_show_accessed_date (NemoPropertiesWindow *window) 
 {
 	/* Accessed date for directory seems useless. If we some
 	 * day decide that it is useful, we should separately
@@ -2469,10 +2469,10 @@ should_show_accessed_date (NautilusPropertiesWindow *window)
 }
 
 static gboolean
-should_show_link_target (NautilusPropertiesWindow *window)
+should_show_link_target (NemoPropertiesWindow *window)
 {
 	if (!is_multi_file_window (window)
-	    && nautilus_file_is_symbolic_link (get_target_file (window))) {
+	    && nemo_file_is_symbolic_link (get_target_file (window))) {
 		return TRUE;
 	}
 
@@ -2480,7 +2480,7 @@ should_show_link_target (NautilusPropertiesWindow *window)
 }
 
 static gboolean
-should_show_free_space (NautilusPropertiesWindow *window)
+should_show_free_space (NemoPropertiesWindow *window)
 {
 
 	if (!is_multi_file_window (window)
@@ -2499,9 +2499,9 @@ should_show_free_space (NautilusPropertiesWindow *window)
 }
 
 static gboolean
-should_show_volume_usage (NautilusPropertiesWindow *window)
+should_show_volume_usage (NemoPropertiesWindow *window)
 {
-	NautilusFile 		*file;
+	NemoFile 		*file;
 	gboolean 		success = FALSE;
 	
 	if (is_multi_file_window (window)) {
@@ -2514,7 +2514,7 @@ should_show_volume_usage (NautilusPropertiesWindow *window)
 		return FALSE;
 	}
 
-	if (nautilus_file_can_unmount (file)) {
+	if (nemo_file_can_unmount (file)) {
 		return TRUE;
 	}
 
@@ -2529,7 +2529,7 @@ paint_used_legend (GtkWidget *widget,
 		   cairo_t *cr,
 		   gpointer data)
 {
-	NautilusPropertiesWindow *window;
+	NemoPropertiesWindow *window;
 	gint width, height;
 	GtkAllocation allocation;
 
@@ -2538,7 +2538,7 @@ paint_used_legend (GtkWidget *widget,
   	width  = allocation.width;
   	height = allocation.height;
   	
-	window = NAUTILUS_PROPERTIES_WINDOW (data);
+	window = NEMO_PROPERTIES_WINDOW (data);
 
 	cairo_rectangle  (cr,
 			  2,
@@ -2557,11 +2557,11 @@ static void
 paint_free_legend (GtkWidget *widget,
 		   cairo_t *cr, gpointer data)
 {
-	NautilusPropertiesWindow *window;
+	NemoPropertiesWindow *window;
 	gint width, height;
 	GtkAllocation allocation;
 
-	window = NAUTILUS_PROPERTIES_WINDOW (data);
+	window = NEMO_PROPERTIES_WINDOW (data);
 	gtk_widget_get_allocation (widget, &allocation);
 	
   	width  = allocation.width;
@@ -2586,7 +2586,7 @@ paint_pie_chart (GtkWidget *widget,
 		 gpointer data)
 {
   	
-  	NautilusPropertiesWindow *window;
+  	NemoPropertiesWindow *window;
 	gint width, height;
 	double free, used;
 	double angle1, angle2, split, xc, yc, radius;
@@ -2594,7 +2594,7 @@ paint_pie_chart (GtkWidget *widget,
 	GtkStyleContext *notebook_ctx;
 	GdkRGBA bg_color;
 
-	window = NAUTILUS_PROPERTIES_WINDOW (data);
+	window = NEMO_PROPERTIES_WINDOW (data);
 	gtk_widget_get_allocation (widget, &allocation);
 
 	width  = allocation.width;
@@ -2859,9 +2859,9 @@ _pie_style_shade (GdkRGBA *a,
 
 
 static GtkWidget* 
-create_pie_widget (NautilusPropertiesWindow *window)
+create_pie_widget (NemoPropertiesWindow *window)
 {
-	NautilusFile		*file;
+	NemoFile		*file;
 	GtkGrid                 *grid;
 	GtkStyleContext		*style;
 	GtkWidget 		*pie_canvas;
@@ -2885,7 +2885,7 @@ create_pie_widget (NautilusPropertiesWindow *window)
 	
 	file = get_original_file (window);
 	
-	uri = nautilus_file_get_activation_uri (file);
+	uri = nemo_file_get_activation_uri (file);
 	
 	grid = GTK_GRID (gtk_grid_new ());
 	gtk_container_set_border_width (GTK_CONTAINER (grid), 5);
@@ -2976,17 +2976,17 @@ create_pie_widget (NautilusPropertiesWindow *window)
 }
 
 static GtkWidget*
-create_volume_usage_widget (NautilusPropertiesWindow *window)
+create_volume_usage_widget (NemoPropertiesWindow *window)
 {
 	GtkWidget *piewidget;
 	gchar *uri;
-	NautilusFile *file;
+	NemoFile *file;
 	GFile *location;
 	GFileInfo *info;
 	
 	file = get_original_file (window);
 	
-	uri = nautilus_file_get_activation_uri (file);
+	uri = nemo_file_get_activation_uri (file);
 
 	location = g_file_new_for_uri (uri);
 	info = g_file_query_filesystem_info (location, "filesystem::*", NULL, NULL);
@@ -3011,7 +3011,7 @@ create_volume_usage_widget (NautilusPropertiesWindow *window)
 }
 
 static void
-create_basic_page (NautilusPropertiesWindow *window)
+create_basic_page (NemoPropertiesWindow *window)
 {
 	GtkGrid *grid;
 	GtkWidget *icon_aligner;
@@ -3020,7 +3020,7 @@ create_basic_page (NautilusPropertiesWindow *window)
 	GtkWidget *hbox, *vbox;
 
 	hbox = create_page_with_hbox (window->details->notebook, _("Basic"),
-				      "help:gnome-help/nautilus-file-properties-basic");
+				      "help:ubuntu-help/nemo-file-properties-basic");
 	
 	/* Icon pixmap */
 
@@ -3054,19 +3054,19 @@ create_basic_page (NautilusPropertiesWindow *window)
 	update_name_field (window);
 
 	/* Start with name field selected, if it's an entry. */
-	if (NAUTILUS_IS_ENTRY (window->details->name_field)) {
-		nautilus_entry_select_all (NAUTILUS_ENTRY (window->details->name_field));
+	if (NEMO_IS_ENTRY (window->details->name_field)) {
+		nemo_entry_select_all (NEMO_ENTRY (window->details->name_field));
 		gtk_widget_grab_focus (GTK_WIDGET (window->details->name_field));
 	}
 
-	if (nautilus_desktop_item_properties_should_show (window->details->target_files)) {
+	if (nemo_desktop_item_properties_should_show (window->details->target_files)) {
 		GtkSizeGroup *label_size_group;
 		GtkWidget *box;
 
 		label_size_group = gtk_size_group_new (GTK_SIZE_GROUP_HORIZONTAL);
 		gtk_size_group_add_widget (label_size_group,
 					   GTK_WIDGET (window->details->name_label));
-		box = nautilus_desktop_item_properties_make_box (label_size_group,
+		box = nemo_desktop_item_properties_make_box (label_size_group,
 								 window->details->target_files);
 
 		gtk_grid_attach_next_to (window->details->basic_grid, box, 
@@ -3091,7 +3091,7 @@ create_basic_page (NautilusPropertiesWindow *window)
 	}
 
 	if (is_multi_file_window (window) ||
-	    nautilus_file_is_directory (get_target_file (window))) {
+	    nemo_file_is_directory (get_target_file (window))) {
 		append_directory_contents_fields (window, grid);
 	} else {
 		append_title_value_pair (window, grid, _("Size:"), 
@@ -3146,14 +3146,14 @@ create_basic_page (NautilusPropertiesWindow *window)
 }
 
 static gboolean 
-files_has_directory (NautilusPropertiesWindow *window)
+files_has_directory (NemoPropertiesWindow *window)
 {
 	GList *l;
 
 	for (l = window->details->target_files; l != NULL; l = l->next) {
-		NautilusFile *file;
-		file = NAUTILUS_FILE (l->data);
-		if (nautilus_file_is_directory (file)) {
+		NemoFile *file;
+		file = NEMO_FILE (l->data);
+		if (nemo_file_is_directory (file)) {
 			return TRUE;
 		}
 		
@@ -3163,16 +3163,16 @@ files_has_directory (NautilusPropertiesWindow *window)
 }
 
 static gboolean 
-files_has_changable_permissions_directory (NautilusPropertiesWindow *window)
+files_has_changable_permissions_directory (NemoPropertiesWindow *window)
 {
 	GList *l;
 
 	for (l = window->details->target_files; l != NULL; l = l->next) {
-		NautilusFile *file;
-		file = NAUTILUS_FILE (l->data);
-		if (nautilus_file_is_directory (file) &&
-		    nautilus_file_can_get_permissions (file) &&
-		    nautilus_file_can_set_permissions (file)) {
+		NemoFile *file;
+		file = NEMO_FILE (l->data);
+		if (nemo_file_is_directory (file) &&
+		    nemo_file_can_get_permissions (file) &&
+		    nemo_file_can_set_permissions (file)) {
 			return TRUE;
 		}
 		
@@ -3183,14 +3183,14 @@ files_has_changable_permissions_directory (NautilusPropertiesWindow *window)
 
 
 static gboolean 
-files_has_file (NautilusPropertiesWindow *window)
+files_has_file (NemoPropertiesWindow *window)
 {
 	GList *l;
 
 	for (l = window->details->target_files; l != NULL; l = l->next) {
-		NautilusFile *file;
-		file = NAUTILUS_FILE (l->data);
-		if (!nautilus_file_is_directory (file)) {
+		NemoFile *file;
+		file = NEMO_FILE (l->data);
+		if (!nemo_file_is_directory (file)) {
 			return TRUE;
 		}
 		
@@ -3200,7 +3200,7 @@ files_has_file (NautilusPropertiesWindow *window)
 }
 
 static void
-start_long_operation (NautilusPropertiesWindow *window)
+start_long_operation (NemoPropertiesWindow *window)
 {
 	if (window->details->long_operation_underway == 0) {
 		/* start long operation */
@@ -3214,7 +3214,7 @@ start_long_operation (NautilusPropertiesWindow *window)
 }
 
 static void
-end_long_operation (NautilusPropertiesWindow *window)
+end_long_operation (NemoPropertiesWindow *window)
 {
 	if (gtk_widget_get_window (GTK_WIDGET (window)) != NULL &&
 	    window->details->long_operation_underway == 1) {
@@ -3225,25 +3225,25 @@ end_long_operation (NautilusPropertiesWindow *window)
 }
 
 static void
-permission_change_callback (NautilusFile *file,
+permission_change_callback (NemoFile *file,
 			    GFile *res_loc,
 			    GError *error,
 			    gpointer callback_data)
 {
-	NautilusPropertiesWindow *window;
+	NemoPropertiesWindow *window;
 	g_assert (callback_data != NULL);
 
-	window = NAUTILUS_PROPERTIES_WINDOW (callback_data);
+	window = NEMO_PROPERTIES_WINDOW (callback_data);
 	end_long_operation (window);
 	
 	/* Report the error if it's an error. */
-	nautilus_report_error_setting_permissions (file, error, NULL);
+	nemo_report_error_setting_permissions (file, error, NULL);
 
 	g_object_unref (window);
 }
 
 static void
-update_permissions (NautilusPropertiesWindow *window,
+update_permissions (NemoPropertiesWindow *window,
 		    guint32 vfs_new_perm,
 		    guint32 vfs_mask,
 		    gboolean is_folder,
@@ -3253,22 +3253,22 @@ update_permissions (NautilusPropertiesWindow *window,
 	GList *l;
 	
 	for (l = window->details->target_files; l != NULL; l = l->next) {
-		NautilusFile *file;
+		NemoFile *file;
 		guint32 permissions;
 
-		file = NAUTILUS_FILE (l->data);
+		file = NEMO_FILE (l->data);
 
-		if (!nautilus_file_can_get_permissions (file)) {
+		if (!nemo_file_can_get_permissions (file)) {
 			continue;
 		}
 	
 		if (!apply_to_both_folder_and_dir &&
-		    ((nautilus_file_is_directory (file) && !is_folder) ||
-		     (!nautilus_file_is_directory (file) && is_folder))) {
+		    ((nemo_file_is_directory (file) && !is_folder) ||
+		     (!nemo_file_is_directory (file) && is_folder))) {
 			continue;
 		}
 
-		permissions = nautilus_file_get_permissions (file);
+		permissions = nemo_file_get_permissions (file);
 		if (use_original) {
 			gpointer ptr;
 			if (g_hash_table_lookup_extended (window->details->initial_permissions,
@@ -3281,7 +3281,7 @@ update_permissions (NautilusPropertiesWindow *window,
 
 		start_long_operation (window);
 		g_object_ref (window);
-		nautilus_file_set_permissions
+		nemo_file_set_permissions
 			(file, permissions,
 			 permission_change_callback,
 			 window);
@@ -3289,7 +3289,7 @@ update_permissions (NautilusPropertiesWindow *window,
 }
 
 static gboolean
-initial_permission_state_consistent (NautilusPropertiesWindow *window,
+initial_permission_state_consistent (NemoPropertiesWindow *window,
 				     guint32 mask,
 				     gboolean is_folder,
 				     gboolean both_folder_and_dir)
@@ -3301,14 +3301,14 @@ initial_permission_state_consistent (NautilusPropertiesWindow *window,
 	first = TRUE;
 	first_permissions = 0;
 	for (l = window->details->target_files; l != NULL; l = l->next) {
-		NautilusFile *file;
+		NemoFile *file;
 		guint32 permissions;
 
 		file = l->data;
 		
 		if (!both_folder_and_dir &&
-		    ((nautilus_file_is_directory (file) && !is_folder) ||
-		     (!nautilus_file_is_directory (file) && is_folder))) {
+		    ((nemo_file_is_directory (file) && !is_folder) ||
+		     (!nemo_file_is_directory (file) && is_folder))) {
 			continue;
 		}
 		
@@ -3335,7 +3335,7 @@ initial_permission_state_consistent (NautilusPropertiesWindow *window,
 
 static void
 permission_button_toggled (GtkToggleButton *button, 
-			   NautilusPropertiesWindow *window)
+			   NemoPropertiesWindow *window)
 {
 	gboolean is_folder, is_special;
 	guint32 permission_mask;
@@ -3390,7 +3390,7 @@ permission_button_toggled (GtkToggleButton *button,
 }
 
 static void
-permission_button_update (NautilusPropertiesWindow *window,
+permission_button_update (NemoPropertiesWindow *window,
 			  GtkToggleButton *button)
 {
 	GList *l;
@@ -3423,24 +3423,24 @@ permission_button_update (NautilusPropertiesWindow *window,
 	all_cannot_set = TRUE;
 	no_match = TRUE;
 	for (l = window->details->target_files; l != NULL; l = l->next) {
-		NautilusFile *file;
+		NemoFile *file;
 		guint32 file_permissions;
 
-		file = NAUTILUS_FILE (l->data);
+		file = NEMO_FILE (l->data);
 
-		if (!nautilus_file_can_get_permissions (file)) {
+		if (!nemo_file_can_get_permissions (file)) {
 			continue;
 		}
 
 		if (!is_special &&
-		    ((nautilus_file_is_directory (file) && !is_folder) ||
-		     (!nautilus_file_is_directory (file) && is_folder))) {
+		    ((nemo_file_is_directory (file) && !is_folder) ||
+		     (!nemo_file_is_directory (file) && is_folder))) {
 			continue;
 		}
 
 		no_match = FALSE;
 		
-		file_permissions = nautilus_file_get_permissions (file);
+		file_permissions = nemo_file_get_permissions (file);
 
 		if ((file_permissions & button_permission) == button_permission) {
 			all_unset = FALSE;
@@ -3451,7 +3451,7 @@ permission_button_update (NautilusPropertiesWindow *window,
 			all_set = FALSE;
 		}
 
-		if (nautilus_file_can_set_permissions (file)) {
+		if (nemo_file_can_set_permissions (file)) {
 			all_cannot_set = FALSE;
 		}
 	}
@@ -3481,7 +3481,7 @@ permission_button_update (NautilusPropertiesWindow *window,
 }
 
 static void
-set_up_permissions_checkbox (NautilusPropertiesWindow *window,
+set_up_permissions_checkbox (NemoPropertiesWindow *window,
 			     GtkWidget *check_button, 
 			     guint32 permission,
 			     gboolean is_folder)
@@ -3505,7 +3505,7 @@ set_up_permissions_checkbox (NautilusPropertiesWindow *window,
 }
 
 static GtkWidget *
-add_permissions_checkbox_with_label (NautilusPropertiesWindow *window,
+add_permissions_checkbox_with_label (NemoPropertiesWindow *window,
 				     GtkGrid *grid,
 				     GtkWidget *sibling,
 				     const char *label,
@@ -3541,7 +3541,7 @@ add_permissions_checkbox_with_label (NautilusPropertiesWindow *window,
 }
 
 static GtkWidget *
-add_permissions_checkbox (NautilusPropertiesWindow *window,
+add_permissions_checkbox (NemoPropertiesWindow *window,
 			  GtkGrid *grid,
 			  GtkWidget *sibling,
 			  CheckboxType type,
@@ -3645,7 +3645,7 @@ permission_from_vfs (PermissionType type, guint32 vfs_perm)
 }
 
 static void
-permission_combo_changed (GtkWidget *combo, NautilusPropertiesWindow *window)
+permission_combo_changed (GtkWidget *combo, NemoPropertiesWindow *window)
 {
 	GtkTreeIter iter;
 	GtkTreeModel *model;
@@ -3706,7 +3706,7 @@ permission_combo_add_multiple_choice (GtkComboBox *combo, GtkTreeIter *iter)
 }
 
 static void
-permission_combo_update (NautilusPropertiesWindow *window,
+permission_combo_update (NemoPropertiesWindow *window,
 			 GtkComboBox *combo)
 {
 	PermissionType type;
@@ -3748,26 +3748,26 @@ permission_combo_update (NautilusPropertiesWindow *window,
 	all_file_cannot_set = TRUE;
 	
 	for (l = window->details->target_files; l != NULL; l = l->next) {
-		NautilusFile *file;
+		NemoFile *file;
 		guint32 file_permissions;
 
-		file = NAUTILUS_FILE (l->data);
+		file = NEMO_FILE (l->data);
 
-		if (!nautilus_file_can_get_permissions (file)) {
+		if (!nemo_file_can_get_permissions (file)) {
 			continue;
 		}
 
-		if (nautilus_file_is_directory (file)) {
+		if (nemo_file_is_directory (file)) {
 			mask = PERMISSION_READ|PERMISSION_WRITE|PERMISSION_EXEC;
 		} else {
 			mask = PERMISSION_READ|PERMISSION_WRITE;
 		}
 		
-		file_permissions = nautilus_file_get_permissions (file);
+		file_permissions = nemo_file_get_permissions (file);
 
 		perm = permission_from_vfs (type, file_permissions) & mask;
 
-		if (nautilus_file_is_directory (file)) {
+		if (nemo_file_is_directory (file)) {
 			if (no_dirs) {
 				all_dir_perm = perm;
 				no_dirs = FALSE;
@@ -3775,7 +3775,7 @@ permission_combo_update (NautilusPropertiesWindow *window,
 				all_dir_same = FALSE;
 			}
 			
-			if (nautilus_file_can_set_permissions (file)) {
+			if (nemo_file_can_set_permissions (file)) {
 				all_dir_cannot_set = FALSE;
 			}
 		} else {
@@ -3786,7 +3786,7 @@ permission_combo_update (NautilusPropertiesWindow *window,
 				all_file_same = FALSE;
 			}
 			
-			if (nautilus_file_can_set_permissions (file)) {
+			if (nemo_file_can_set_permissions (file)) {
 				all_file_cannot_set = FALSE;
 			}
 		}
@@ -3886,7 +3886,7 @@ permission_combo_update (NautilusPropertiesWindow *window,
 }
 
 static void
-add_permissions_combo_box (NautilusPropertiesWindow *window, GtkGrid *grid,
+add_permissions_combo_box (NemoPropertiesWindow *window, GtkGrid *grid,
 			   PermissionType type, gboolean is_folder,
 			   gboolean short_label)
 {
@@ -3961,7 +3961,7 @@ add_permissions_combo_box (NautilusPropertiesWindow *window, GtkGrid *grid,
 
 
 static GtkWidget *
-append_special_execution_checkbox (NautilusPropertiesWindow *window,
+append_special_execution_checkbox (NemoPropertiesWindow *window,
 				   GtkGrid *grid,
 				   GtkWidget *sibling,
 				   const char *label_text,
@@ -3992,7 +3992,7 @@ append_special_execution_checkbox (NautilusPropertiesWindow *window,
 }
 
 static void
-append_special_execution_flags (NautilusPropertiesWindow *window, GtkGrid *grid)
+append_special_execution_flags (NemoPropertiesWindow *window, GtkGrid *grid)
 {
 	GtkWidget *title;
 
@@ -4009,11 +4009,11 @@ all_can_get_permissions (GList *file_list)
 {
 	GList *l;
 	for (l = file_list; l != NULL; l = l->next) {
-		NautilusFile *file;
+		NemoFile *file;
 		
-		file = NAUTILUS_FILE (l->data);
+		file = NEMO_FILE (l->data);
 		
-		if (!nautilus_file_can_get_permissions (file)) {
+		if (!nemo_file_can_get_permissions (file)) {
 			return FALSE;
 		}
 	}
@@ -4026,11 +4026,11 @@ all_can_set_permissions (GList *file_list)
 {
 	GList *l;
 	for (l = file_list; l != NULL; l = l->next) {
-		NautilusFile *file;
+		NemoFile *file;
 		
-		file = NAUTILUS_FILE (l->data);
+		file = NEMO_FILE (l->data);
 
-		if (!nautilus_file_can_set_permissions (file)) {
+		if (!nemo_file_can_set_permissions (file)) {
 			return FALSE;
 		}
 	}
@@ -4049,11 +4049,11 @@ get_initial_permissions (GList *file_list)
 	
 	for (l = file_list; l != NULL; l = l->next) {
 		guint32 permissions;
-		NautilusFile *file;
+		NemoFile *file;
 		
-		file = NAUTILUS_FILE (l->data);
+		file = NEMO_FILE (l->data);
 		
-		permissions = nautilus_file_get_permissions (file);
+		permissions = nemo_file_get_permissions (file);
 		g_hash_table_insert (ret, file,
 				     GINT_TO_POINTER (permissions));
 	}
@@ -4062,7 +4062,7 @@ get_initial_permissions (GList *file_list)
 }
 
 static void
-create_simple_permissions (NautilusPropertiesWindow *window, GtkGrid *page_grid)
+create_simple_permissions (NemoPropertiesWindow *window, GtkGrid *page_grid)
 {
 	gboolean has_file, has_directory;
 	GtkLabel *group_label;
@@ -4075,7 +4075,7 @@ create_simple_permissions (NautilusPropertiesWindow *window, GtkGrid *page_grid)
 	has_file = files_has_file (window);
 	has_directory = files_has_directory (window);
 
-	if (!is_multi_file_window (window) && nautilus_file_can_set_owner (get_target_file (window))) {
+	if (!is_multi_file_window (window) && nemo_file_can_set_owner (get_target_file (window))) {
 		owner_label = attach_title_field (page_grid, _("_Owner:"));
 		/* Combo box in this case. */
 		owner_combo_box = attach_owner_combo_box (page_grid,
@@ -4105,7 +4105,7 @@ create_simple_permissions (NautilusPropertiesWindow *window, GtkGrid *page_grid)
 
 	append_blank_slim_row (page_grid);
 
-	if (!is_multi_file_window (window) && nautilus_file_can_set_group (get_target_file (window))) {
+	if (!is_multi_file_window (window) && nemo_file_can_set_group (get_target_file (window))) {
 		group_label = attach_title_field (page_grid, _("_Group:"));
 
 		/* Combo box in this case. */
@@ -4163,7 +4163,7 @@ create_simple_permissions (NautilusPropertiesWindow *window, GtkGrid *page_grid)
 }
 
 static void
-create_permission_checkboxes (NautilusPropertiesWindow *window,
+create_permission_checkboxes (NemoPropertiesWindow *window,
 			      GtkGrid *page_grid,
 			      gboolean is_folder)
 {
@@ -4258,7 +4258,7 @@ create_permission_checkboxes (NautilusPropertiesWindow *window,
 }
 
 static void
-create_advanced_permissions (NautilusPropertiesWindow *window, GtkGrid *page_grid)
+create_advanced_permissions (NemoPropertiesWindow *window, GtkGrid *page_grid)
 {
 	GtkLabel *group_label;
 	GtkLabel *owner_label;
@@ -4266,7 +4266,7 @@ create_advanced_permissions (NautilusPropertiesWindow *window, GtkGrid *page_gri
 	GtkComboBox *owner_combo_box;
 	gboolean has_directory, has_file;
 
-	if (!is_multi_file_window (window) && nautilus_file_can_set_owner (get_target_file (window))) {
+	if (!is_multi_file_window (window) && nemo_file_can_set_owner (get_target_file (window))) {
 		
 		owner_label  = attach_title_field (page_grid, _("_Owner:"));
 		/* Combo box in this case. */
@@ -4289,7 +4289,7 @@ create_advanced_permissions (NautilusPropertiesWindow *window, GtkGrid *page_gri
 		gtk_label_set_mnemonic_widget (owner_label, value);
 	}
 	
-	if (!is_multi_file_window (window) && nautilus_file_can_set_group (get_target_file (window))) {
+	if (!is_multi_file_window (window) && nemo_file_can_set_group (get_target_file (window))) {
 		group_label = attach_title_field (page_grid, _("_Group:"));
 
 		/* Combo box in this case. */
@@ -4340,9 +4340,9 @@ static void
 set_recursive_permissions_done (gboolean success,
 				gpointer callback_data)
 {
-	NautilusPropertiesWindow *window;
+	NemoPropertiesWindow *window;
 
-	window = NAUTILUS_PROPERTIES_WINDOW (callback_data);
+	window = NEMO_PROPERTIES_WINDOW (callback_data);
 	end_long_operation (window);
 
 	g_object_unref (window);
@@ -4351,7 +4351,7 @@ set_recursive_permissions_done (gboolean success,
 
 static void
 apply_recursive_clicked (GtkWidget *recursive_button,
-			 NautilusPropertiesWindow *window)
+			 NemoPropertiesWindow *window)
 {
 	guint32 file_permission, file_permission_mask;
 	guint32 dir_permission, dir_permission_mask;
@@ -4434,17 +4434,17 @@ apply_recursive_clicked (GtkWidget *recursive_button,
 	}
 
 	for (l = window->details->target_files; l != NULL; l = l->next) {
-		NautilusFile *file;
+		NemoFile *file;
 		char *uri;
 
-		file = NAUTILUS_FILE (l->data);
+		file = NEMO_FILE (l->data);
 
-		if (nautilus_file_is_directory (file) &&
-		    nautilus_file_can_set_permissions (file)) {
-			uri = nautilus_file_get_uri (file);
+		if (nemo_file_is_directory (file) &&
+		    nemo_file_can_set_permissions (file)) {
+			uri = nemo_file_get_uri (file);
 			start_long_operation (window);
 			g_object_ref (window);
-			nautilus_file_set_permissions_recursive (uri,
+			nemo_file_set_permissions_recursive (uri,
 								 file_permission,
 								 file_permission_mask,
 								 dir_permission,
@@ -4457,7 +4457,7 @@ apply_recursive_clicked (GtkWidget *recursive_button,
 }
 
 static void
-create_permissions_page (NautilusPropertiesWindow *window)
+create_permissions_page (NemoPropertiesWindow *window)
 {
 	GtkWidget *vbox, *button, *hbox;
 	GtkGrid *page_grid;
@@ -4466,7 +4466,7 @@ create_permissions_page (NautilusPropertiesWindow *window)
 
 	vbox = create_page_with_vbox (window->details->notebook,
 				      _("Permissions"),
-				      "help:gnome-help/nautilus-file-properties-permissions");
+				      "help:ubuntu-help/nemo-file-properties-permissions");
 
 	file_list = window->details->original_files;
 
@@ -4489,7 +4489,7 @@ create_permissions_page (NautilusPropertiesWindow *window)
 				    GTK_WIDGET (page_grid), 
 				    TRUE, TRUE, 0);
 
-		if (g_settings_get_boolean (nautilus_preferences, NAUTILUS_PREFERENCES_SHOW_ADVANCED_PERMISSIONS)) {
+		if (g_settings_get_boolean (nemo_preferences, NEMO_PREFERENCES_SHOW_ADVANCED_PERMISSIONS)) {
 			create_advanced_permissions (window, page_grid);
 		} else {
 			create_simple_permissions (window, page_grid);
@@ -4525,7 +4525,7 @@ create_permissions_page (NautilusPropertiesWindow *window)
 		}
 	} else {
 		if (!is_multi_file_window (window)) {
-			file_name = nautilus_file_get_display_name (get_target_file (window));
+			file_name = nemo_file_get_display_name (get_target_file (window));
 			prompt_text = g_strdup_printf (_("The permissions of \"%s\" could not be determined."), file_name);
 			g_free (file_name);
 		} else {
@@ -4538,29 +4538,29 @@ create_permissions_page (NautilusPropertiesWindow *window)
 }
 
 static void
-append_extension_pages (NautilusPropertiesWindow *window)
+append_extension_pages (NemoPropertiesWindow *window)
 {
 	GList *providers;
 	GList *p;
 	
- 	providers = nautilus_module_get_extensions_for_type (NAUTILUS_TYPE_PROPERTY_PAGE_PROVIDER);
+ 	providers = nemo_module_get_extensions_for_type (NEMO_TYPE_PROPERTY_PAGE_PROVIDER);
 	
 	for (p = providers; p != NULL; p = p->next) {
-		NautilusPropertyPageProvider *provider;
+		NemoPropertyPageProvider *provider;
 		GList *pages;
 		GList *l;
 
-		provider = NAUTILUS_PROPERTY_PAGE_PROVIDER (p->data);
+		provider = NEMO_PROPERTY_PAGE_PROVIDER (p->data);
 		
-		pages = nautilus_property_page_provider_get_pages 
+		pages = nemo_property_page_provider_get_pages 
 			(provider, window->details->original_files);
 		
 		for (l = pages; l != NULL; l = l->next) {
-			NautilusPropertyPage *page;
+			NemoPropertyPage *page;
 			GtkWidget *page_widget;
 			GtkWidget *label;
 			
-			page = NAUTILUS_PROPERTY_PAGE (l->data);
+			page = NEMO_PROPERTY_PAGE (l->data);
 
 			g_object_get (G_OBJECT (page), 
 				      "page", &page_widget, "label", &label, 
@@ -4582,13 +4582,13 @@ append_extension_pages (NautilusPropertiesWindow *window)
 		g_list_free (pages);
 	}
 
-	nautilus_module_extension_list_free (providers);
+	nemo_module_extension_list_free (providers);
 }
 
 static gboolean
-should_show_permissions (NautilusPropertiesWindow *window) 
+should_show_permissions (NemoPropertiesWindow *window) 
 {
-	NautilusFile *file;
+	NemoFile *file;
 
 	file = get_target_file (window);
 
@@ -4614,7 +4614,7 @@ get_pending_key (GList *file_list)
 	
 	uris = NULL;
 	for (l = file_list; l != NULL; l = l->next) {
-		uris = g_list_prepend (uris, nautilus_file_get_uri (NAUTILUS_FILE (l->data)));
+		uris = g_list_prepend (uris, nemo_file_get_uri (NEMO_FILE (l->data)));
 	}
 	uris = g_list_sort (uris, (GCompareFunc)strcmp);
 
@@ -4643,8 +4643,8 @@ startup_data_new (GList *original_files,
 	GList *l;
 
 	data = g_new0 (StartupData, 1);
-	data->original_files = nautilus_file_list_copy (original_files);
-	data->target_files = nautilus_file_list_copy (target_files);
+	data->original_files = nemo_file_list_copy (original_files);
+	data->target_files = nemo_file_list_copy (target_files);
 	data->parent_widget = parent_widget;
 	data->startup_id = g_strdup (startup_id);
 	data->pending_key = g_strdup (pending_key);
@@ -4661,8 +4661,8 @@ startup_data_new (GList *original_files,
 static void
 startup_data_free (StartupData *data)
 {
-	nautilus_file_list_free (data->original_files);
-	nautilus_file_list_free (data->target_files);
+	nemo_file_list_free (data->original_files);
+	nemo_file_list_free (data->target_files);
 	g_hash_table_destroy (data->pending_files);
 	g_free (data->pending_key);
 	g_free (data->startup_id);
@@ -4670,12 +4670,12 @@ startup_data_free (StartupData *data)
 }
 
 static void
-file_changed_callback (NautilusFile *file, gpointer user_data)
+file_changed_callback (NemoFile *file, gpointer user_data)
 {
-	NautilusPropertiesWindow *window = NAUTILUS_PROPERTIES_WINDOW (user_data);
+	NemoPropertiesWindow *window = NEMO_PROPERTIES_WINDOW (user_data);
 
 	if (!g_list_find (window->details->changed_files, file)) {
-		nautilus_file_ref (file);
+		nemo_file_ref (file);
 		window->details->changed_files = g_list_prepend (window->details->changed_files, file);
 		
 		schedule_files_update (window);
@@ -4683,11 +4683,11 @@ file_changed_callback (NautilusFile *file, gpointer user_data)
 }
 
 static gboolean
-is_a_special_file (NautilusFile *file)
+is_a_special_file (NemoFile *file)
 {
 	if (file == NULL ||
-	    NAUTILUS_IS_DESKTOP_ICON_FILE (file) ||
-	    nautilus_file_is_nautilus_link (file) ||
+	    NEMO_IS_DESKTOP_ICON_FILE (file) ||
+	    nemo_file_is_nemo_link (file) ||
 	    is_merged_trash_directory (file) ||
 	    is_computer_directory (file)) {
 		return TRUE;
@@ -4696,9 +4696,9 @@ is_a_special_file (NautilusFile *file)
 }
 
 static gboolean
-should_show_open_with (NautilusPropertiesWindow *window)
+should_show_open_with (NemoPropertiesWindow *window)
 {
-	NautilusFile *file;
+	NemoFile *file;
 
 	/* Don't show open with tab for desktop special icons (trash, etc)
 	 * or desktop files. We don't get the open-with menu for these anyway.
@@ -4716,8 +4716,8 @@ should_show_open_with (NautilusPropertiesWindow *window)
 			GList *l;
 			
 			for (l = window->details->original_files; l; l = l->next) {
-				file = NAUTILUS_FILE (l->data);
-				if (nautilus_file_is_directory (file) ||
+				file = NEMO_FILE (l->data);
+				if (nemo_file_is_directory (file) ||
 				    is_a_special_file (file)) {
 					return FALSE;
 				}
@@ -4725,7 +4725,7 @@ should_show_open_with (NautilusPropertiesWindow *window)
 		}		
 	} else {
 		file = get_original_file (window);
-		if (nautilus_file_is_directory (file) ||
+		if (nemo_file_is_directory (file) ||
 		    is_a_special_file (file)) {
 			return FALSE;
 		}
@@ -4734,17 +4734,17 @@ should_show_open_with (NautilusPropertiesWindow *window)
 }
 
 static void
-create_open_with_page (NautilusPropertiesWindow *window)
+create_open_with_page (NemoPropertiesWindow *window)
 {
 	GtkWidget *vbox;
 	char *mime_type;
 	char *uri = NULL;
 	GList *uris = NULL;
 
-	mime_type = nautilus_file_get_mime_type (get_target_file (window));
+	mime_type = nemo_file_get_mime_type (get_target_file (window));
 
 	if (!is_multi_file_window (window)) {
-		uri = nautilus_file_get_uri (get_target_file (window));
+		uri = nemo_file_get_uri (get_target_file (window));
 		if (uri == NULL) {
 			return;
 		}
@@ -4755,30 +4755,30 @@ create_open_with_page (NautilusPropertiesWindow *window)
 		}
 	}
 
-	vbox = nautilus_mime_application_chooser_new (uri, uris, mime_type);
+	vbox = nemo_mime_application_chooser_new (uri, uris, mime_type);
 
 	gtk_widget_show (vbox);
 	g_free (mime_type);
 
-	g_object_set_data_full (G_OBJECT (vbox), "help-uri", g_strdup ("help:gnome-help/files-open"), g_free);
+	g_object_set_data_full (G_OBJECT (vbox), "help-uri", g_strdup ("help:ubuntu-help/files-open"), g_free);
 	gtk_notebook_append_page (window->details->notebook, 
 				  vbox, gtk_label_new (_("Open With")));
 }
 
 
-static NautilusPropertiesWindow *
+static NemoPropertiesWindow *
 create_properties_window (StartupData *startup_data)
 {
-	NautilusPropertiesWindow *window;
+	NemoPropertiesWindow *window;
 	GList *l;
 
-	window = NAUTILUS_PROPERTIES_WINDOW (gtk_widget_new (NAUTILUS_TYPE_PROPERTIES_WINDOW, NULL));
+	window = NEMO_PROPERTIES_WINDOW (gtk_widget_new (NEMO_TYPE_PROPERTIES_WINDOW, NULL));
 
-	window->details->original_files = nautilus_file_list_copy (startup_data->original_files);
+	window->details->original_files = nemo_file_list_copy (startup_data->original_files);
 	
-	window->details->target_files = nautilus_file_list_copy (startup_data->target_files);
+	window->details->target_files = nemo_file_list_copy (startup_data->target_files);
 
-	gtk_window_set_wmclass (GTK_WINDOW (window), "file_properties", "Nautilus");
+	gtk_window_set_wmclass (GTK_WINDOW (window), "file_properties", "Nemo");
 
 	if (startup_data->parent_widget) {
 		gtk_window_set_screen (GTK_WINDOW (window),
@@ -4800,38 +4800,38 @@ create_properties_window (StartupData *startup_data)
 	 */
 
 	for (l = window->details->original_files; l != NULL; l = l->next) {
-		NautilusFile *file;
-		NautilusFileAttributes attributes;
+		NemoFile *file;
+		NemoFileAttributes attributes;
 
-		file = NAUTILUS_FILE (l->data);
+		file = NEMO_FILE (l->data);
 
 		attributes =
-			NAUTILUS_FILE_ATTRIBUTES_FOR_ICON |
-			NAUTILUS_FILE_ATTRIBUTE_INFO |
-			NAUTILUS_FILE_ATTRIBUTE_LINK_INFO;
+			NEMO_FILE_ATTRIBUTES_FOR_ICON |
+			NEMO_FILE_ATTRIBUTE_INFO |
+			NEMO_FILE_ATTRIBUTE_LINK_INFO;
 
-		nautilus_file_monitor_add (file,
+		nemo_file_monitor_add (file,
 					   &window->details->original_files, 
 					   attributes);	
 	}
 	
 	for (l = window->details->target_files; l != NULL; l = l->next) {
-		NautilusFile *file;
-		NautilusFileAttributes attributes;
+		NemoFile *file;
+		NemoFileAttributes attributes;
 
-		file = NAUTILUS_FILE (l->data);
+		file = NEMO_FILE (l->data);
 		
 		attributes = 0;
-		if (nautilus_file_is_directory (file)) {
-			attributes |= NAUTILUS_FILE_ATTRIBUTE_DEEP_COUNTS;
+		if (nemo_file_is_directory (file)) {
+			attributes |= NEMO_FILE_ATTRIBUTE_DEEP_COUNTS;
 		}
 		
-		attributes |= NAUTILUS_FILE_ATTRIBUTE_INFO;
-		nautilus_file_monitor_add (file, &window->details->target_files, attributes);
+		attributes |= NEMO_FILE_ATTRIBUTE_INFO;
+		nemo_file_monitor_add (file, &window->details->target_files, attributes);
 	}	
 		
 	for (l = window->details->target_files; l != NULL; l = l->next) {
-		g_signal_connect_object (NAUTILUS_FILE (l->data),
+		g_signal_connect_object (NEMO_FILE (l->data),
 					 "changed",
 					 G_CALLBACK (file_changed_callback),
 					 G_OBJECT (window),
@@ -4839,7 +4839,7 @@ create_properties_window (StartupData *startup_data)
 	}
 
 	for (l = window->details->original_files; l != NULL; l = l->next) {
-		g_signal_connect_object (NAUTILUS_FILE (l->data),
+		g_signal_connect_object (NEMO_FILE (l->data),
 					 "changed",
 					 G_CALLBACK (file_changed_callback),
 					 G_OBJECT (window),
@@ -4893,9 +4893,9 @@ get_target_file_list (GList *original_files)
 	ret = NULL;
 	
 	for (l = original_files; l != NULL; l = l->next) {
-		NautilusFile *target;
+		NemoFile *target;
 		
-		target = get_target_file_for_original_file (NAUTILUS_FILE (l->data));
+		target = get_target_file_for_original_file (NEMO_FILE (l->data));
 		
 		ret = g_list_prepend (ret, target);
 	}
@@ -4906,7 +4906,7 @@ get_target_file_list (GList *original_files)
 }
 
 static void
-add_window (NautilusPropertiesWindow *window)
+add_window (NemoPropertiesWindow *window)
 {
 	if (!is_multi_file_window (window)) {
 		g_hash_table_insert (windows,
@@ -4918,7 +4918,7 @@ add_window (NautilusPropertiesWindow *window)
 }
 
 static void
-remove_window (NautilusPropertiesWindow *window)
+remove_window (NemoPropertiesWindow *window)
 {
 	gpointer key;
 
@@ -4957,8 +4957,8 @@ cancel_call_when_ready_callback (gpointer key,
 				 gpointer value,
 				 gpointer user_data)
 {
-	nautilus_file_cancel_call_when_ready 
-		(NAUTILUS_FILE (key), 
+	nemo_file_cancel_call_when_ready 
+		(NEMO_FILE (key), 
 		 is_directory_ready_callback, 
 		 user_data);
 }
@@ -4991,7 +4991,7 @@ remove_pending (StartupData *startup_data,
 }
 
 static void
-is_directory_ready_callback (NautilusFile *file,
+is_directory_ready_callback (NemoFile *file,
 			     gpointer data)
 {
 	StartupData *startup_data;
@@ -5001,7 +5001,7 @@ is_directory_ready_callback (NautilusFile *file,
 	g_hash_table_remove (startup_data->pending_files, file);
 
 	if (g_hash_table_size (startup_data->pending_files) == 0) {
-		NautilusPropertiesWindow *new_window;
+		NemoPropertiesWindow *new_window;
 		
 		new_window = create_properties_window (startup_data);
 		
@@ -5015,7 +5015,7 @@ is_directory_ready_callback (NautilusFile *file,
 
 
 void
-nautilus_properties_window_present (GList       *original_files,
+nemo_properties_window_present (GList       *original_files,
 				    GtkWidget   *parent_widget,
 				    const gchar *startup_id) 
 {
@@ -5067,7 +5067,7 @@ nautilus_properties_window_present (GList       *original_files,
 					 parent_widget,
 					 startup_id);
 
-	nautilus_file_list_free (target_files);
+	nemo_file_list_free (target_files);
 	g_free(pending_key);
 
 	/* Wait until we can tell whether it's a directory before showing, since
@@ -5091,9 +5091,9 @@ nautilus_properties_window_present (GList       *original_files,
 
 	for (l = startup_data->target_files; l != NULL; l = next) {
 		next = l->next;
-		nautilus_file_call_when_ready
-			(NAUTILUS_FILE (l->data),
-			 NAUTILUS_FILE_ATTRIBUTE_INFO,
+		nemo_file_call_when_ready
+			(NEMO_FILE (l->data),
+			 NEMO_FILE_ATTRIBUTE_INFO,
 			 is_directory_ready_callback,
 			 startup_data);
 	}
@@ -5104,7 +5104,7 @@ real_response (GtkDialog *dialog,
 	       int        response)
 {
 	GError *error = NULL;
-	NautilusPropertiesWindow *window = NAUTILUS_PROPERTIES_WINDOW (dialog);
+	NemoPropertiesWindow *window = NEMO_PROPERTIES_WINDOW (dialog);
 	GtkWidget *curpage;
 	const char *helpuri;
 
@@ -5114,7 +5114,7 @@ real_response (GtkDialog *dialog,
 						     gtk_notebook_get_current_page (window->details->notebook));
 		helpuri = g_object_get_data (G_OBJECT (curpage), "help-uri");
 		gtk_show_uri (gtk_window_get_screen (GTK_WINDOW (dialog)),
-			      helpuri ? helpuri : "help:gnome-help/files",
+			      helpuri ? helpuri : "help:ubuntu-help/files",
 			      gtk_get_current_event_time (),
 			      &error);
 		if (error != NULL) {
@@ -5139,26 +5139,26 @@ real_response (GtkDialog *dialog,
 static void
 real_destroy (GtkWidget *object)
 {
-	NautilusPropertiesWindow *window;
+	NemoPropertiesWindow *window;
 	GList *l;
 
-	window = NAUTILUS_PROPERTIES_WINDOW (object);
+	window = NEMO_PROPERTIES_WINDOW (object);
 
 	remove_window (window);
 
 	for (l = window->details->original_files; l != NULL; l = l->next) {
-		nautilus_file_monitor_remove (NAUTILUS_FILE (l->data), &window->details->original_files);
+		nemo_file_monitor_remove (NEMO_FILE (l->data), &window->details->original_files);
 	}
-	nautilus_file_list_free (window->details->original_files);
+	nemo_file_list_free (window->details->original_files);
 	window->details->original_files = NULL;
 	
 	for (l = window->details->target_files; l != NULL; l = l->next) {
-		nautilus_file_monitor_remove (NAUTILUS_FILE (l->data), &window->details->target_files);
+		nemo_file_monitor_remove (NEMO_FILE (l->data), &window->details->target_files);
 	}
-	nautilus_file_list_free (window->details->target_files);
+	nemo_file_list_free (window->details->target_files);
 	window->details->target_files = NULL;
 
-	nautilus_file_list_free (window->details->changed_files);
+	nemo_file_list_free (window->details->changed_files);
 	window->details->changed_files = NULL;
  
 	window->details->name_field = NULL;
@@ -5187,21 +5187,21 @@ real_destroy (GtkWidget *object)
 		window->details->update_files_timeout_id = 0;
 	}
 
-	GTK_WIDGET_CLASS (nautilus_properties_window_parent_class)->destroy (object);
+	GTK_WIDGET_CLASS (nemo_properties_window_parent_class)->destroy (object);
 }
 
 static void
 real_finalize (GObject *object)
 {
-	NautilusPropertiesWindow *window;
+	NemoPropertiesWindow *window;
 
-	window = NAUTILUS_PROPERTIES_WINDOW (object);
+	window = NEMO_PROPERTIES_WINDOW (object);
 
 	g_list_free_full (window->details->mime_list, g_free);
 
 	g_free (window->details->pending_name);
 
-	G_OBJECT_CLASS (nautilus_properties_window_parent_class)->finalize (object);
+	G_OBJECT_CLASS (nemo_properties_window_parent_class)->finalize (object);
 }
 
 /* converts
@@ -5241,15 +5241,15 @@ make_relative_uri_from_full (const char *uri,
 
 /* icon selection callback to set the image of the file object to the selected file */
 static void
-set_icon (const char* icon_uri, NautilusPropertiesWindow *properties_window)
+set_icon (const char* icon_uri, NemoPropertiesWindow *properties_window)
 {
-	NautilusFile *file;
+	NemoFile *file;
 	char *file_uri;
 	char *icon_path;
 	char *real_icon_uri;
 
 	g_assert (icon_uri != NULL);
-	g_assert (NAUTILUS_IS_PROPERTIES_WINDOW (properties_window));
+	g_assert (NEMO_IS_PROPERTIES_WINDOW (properties_window));
 
 	icon_path = g_filename_from_uri (icon_uri, NULL, NULL);
 	/* we don't allow remote URIs */
@@ -5257,15 +5257,15 @@ set_icon (const char* icon_uri, NautilusPropertiesWindow *properties_window)
 		GList *l;
 
 		for (l = properties_window->details->original_files; l != NULL; l = l->next) {
-			file = NAUTILUS_FILE (l->data);
+			file = NEMO_FILE (l->data);
 
-			file_uri = nautilus_file_get_uri (file);
+			file_uri = nemo_file_get_uri (file);
 
-			if (nautilus_file_is_mime_type (file, "application/x-desktop")) {
-				if (nautilus_link_local_set_icon (file_uri, icon_path)) {
-					nautilus_file_invalidate_attributes (file,
-									     NAUTILUS_FILE_ATTRIBUTE_INFO |
-									     NAUTILUS_FILE_ATTRIBUTE_LINK_INFO);
+			if (nemo_file_is_mime_type (file, "application/x-desktop")) {
+				if (nemo_link_local_set_icon (file_uri, icon_path)) {
+					nemo_file_invalidate_attributes (file,
+									     NEMO_FILE_ATTRIBUTE_INFO |
+									     NEMO_FILE_ATTRIBUTE_LINK_INFO);
 				}
 			} else {
 				real_icon_uri = make_relative_uri_from_full (icon_uri, file_uri);
@@ -5273,8 +5273,8 @@ set_icon (const char* icon_uri, NautilusPropertiesWindow *properties_window)
 					real_icon_uri = g_strdup (icon_uri);
 				}
 			
-				nautilus_file_set_metadata (file, NAUTILUS_METADATA_KEY_CUSTOM_ICON, NULL, real_icon_uri);
-				nautilus_file_set_metadata (file, NAUTILUS_METADATA_KEY_ICON_SCALE, NULL, NULL);
+				nemo_file_set_metadata (file, NEMO_METADATA_KEY_CUSTOM_ICON, NULL, real_icon_uri);
+				nemo_file_set_metadata (file, NEMO_METADATA_KEY_ICON_SCALE, NULL, NULL);
 
 				g_free (real_icon_uri);
 			}
@@ -5288,7 +5288,7 @@ set_icon (const char* icon_uri, NautilusPropertiesWindow *properties_window)
 
 static void
 update_preview_callback (GtkFileChooser *icon_chooser,
-			 NautilusPropertiesWindow *window)
+			 NemoPropertiesWindow *window)
 {
 	GtkWidget *preview_widget;
 	GdkPixbuf *pixbuf, *scaled_pixbuf;
@@ -5333,7 +5333,7 @@ update_preview_callback (GtkFileChooser *icon_chooser,
 static void
 custom_icon_file_chooser_response_cb (GtkDialog *dialog,
 				      gint response,
-				      NautilusPropertiesWindow *window)
+				      NemoPropertiesWindow *window)
 {
 	char *uri;
 
@@ -5357,17 +5357,17 @@ custom_icon_file_chooser_response_cb (GtkDialog *dialog,
 
 static void
 select_image_button_callback (GtkWidget *widget,
-			      NautilusPropertiesWindow *window)
+			      NemoPropertiesWindow *window)
 {
 	GtkWidget *dialog, *preview;
 	GtkFileFilter *filter;
 	GList *l;
-	NautilusFile *file;
+	NemoFile *file;
 	char *uri;
 	char *image_path;
 	gboolean revert_is_sensitive;
 
-	g_assert (NAUTILUS_IS_PROPERTIES_WINDOW (window));
+	g_assert (NEMO_IS_PROPERTIES_WINDOW (window));
 
 	dialog = window->details->icon_chooser;
 
@@ -5402,10 +5402,10 @@ select_image_button_callback (GtkWidget *widget,
 
 	/* it's likely that the user wants to pick an icon that is inside a local directory */
 	if (g_list_length (window->details->original_files) == 1) {
-		file = NAUTILUS_FILE (window->details->original_files->data);
+		file = NEMO_FILE (window->details->original_files->data);
 
-		if (nautilus_file_is_directory (file)) {
-			uri = nautilus_file_get_uri (file);
+		if (nemo_file_is_directory (file)) {
+			uri = nemo_file_get_uri (file);
 
 			image_path = g_filename_from_uri (uri, NULL, NULL);
 			if (image_path != NULL) {
@@ -5419,8 +5419,8 @@ select_image_button_callback (GtkWidget *widget,
 
 	revert_is_sensitive = FALSE;
 	for (l = window->details->original_files; l != NULL; l = l->next) {
-		file = NAUTILUS_FILE (l->data);
-		image_path = nautilus_file_get_metadata (file, NAUTILUS_METADATA_KEY_CUSTOM_ICON, NULL);
+		file = NEMO_FILE (l->data);
+		image_path = nemo_file_get_metadata (file, NEMO_METADATA_KEY_CUSTOM_ICON, NULL);
 		revert_is_sensitive = (image_path != NULL);
 		g_free (image_path);
 
@@ -5436,7 +5436,7 @@ select_image_button_callback (GtkWidget *widget,
 }
 
 static void
-nautilus_properties_window_class_init (NautilusPropertiesWindowClass *class)
+nemo_properties_window_class_init (NemoPropertiesWindowClass *class)
 {
 	GtkBindingSet *binding_set;
 
@@ -5448,12 +5448,12 @@ nautilus_properties_window_class_init (NautilusPropertiesWindowClass *class)
 	gtk_binding_entry_add_signal (binding_set, GDK_KEY_Escape, 0,
 				      "close", 0);
 
-	g_type_class_add_private (class, sizeof (NautilusPropertiesWindowDetails));
+	g_type_class_add_private (class, sizeof (NemoPropertiesWindowDetails));
 }
 
 static void
-nautilus_properties_window_init (NautilusPropertiesWindow *window)
+nemo_properties_window_init (NemoPropertiesWindow *window)
 {
-	window->details = G_TYPE_INSTANCE_GET_PRIVATE (window, NAUTILUS_TYPE_PROPERTIES_WINDOW,
-						       NautilusPropertiesWindowDetails);
+	window->details = G_TYPE_INSTANCE_GET_PRIVATE (window, NEMO_TYPE_PROPERTIES_WINDOW,
+						       NemoPropertiesWindowDetails);
 }

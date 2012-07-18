@@ -1,5 +1,5 @@
 /*
- *  nautilus-menu.h - Menus exported by NautilusMenuProvider objects.
+ *  nemo-menu.h - Menus exported by NemoMenuProvider objects.
  *
  *  Copyright (C) 2005 Raffaele Sandrini
  *  Copyright (C) 2003 Novell, Inc.
@@ -23,85 +23,85 @@
  *
  */
 
-#ifndef NAUTILUS_MENU_H
-#define NAUTILUS_MENU_H
+#ifndef NEMO_MENU_H
+#define NEMO_MENU_H
 
 #include <glib-object.h>
-#include "nautilus-extension-types.h"
+#include "nemo-extension-types.h"
 
 
 G_BEGIN_DECLS
 
-/* NautilusMenu defines */
-#define NAUTILUS_TYPE_MENU         (nautilus_menu_get_type ())
-#define NAUTILUS_MENU(o)           (G_TYPE_CHECK_INSTANCE_CAST ((o), NAUTILUS_TYPE_MENU, NautilusMenu))
-#define NAUTILUS_MENU_CLASS(k)     (G_TYPE_CHECK_CLASS_CAST((k), NAUTILUS_TYPE_MENU, NautilusMenuClass))
-#define NAUTILUS_IS_MENU(o)        (G_TYPE_CHECK_INSTANCE_TYPE ((o), NAUTILUS_TYPE_MENU))
-#define NAUTILUS_IS_MENU_CLASS(k)  (G_TYPE_CHECK_CLASS_TYPE ((k), NAUTILUS_TYPE_MENU))
-#define NAUTILUS_MENU_GET_CLASS(o) (G_TYPE_INSTANCE_GET_CLASS ((o), NAUTILUS_TYPE_MENU, NautilusMenuClass))
-/* NautilusMenuItem defines */
-#define NAUTILUS_TYPE_MENU_ITEM            (nautilus_menu_item_get_type())
-#define NAUTILUS_MENU_ITEM(obj)            (G_TYPE_CHECK_INSTANCE_CAST ((obj), NAUTILUS_TYPE_MENU_ITEM, NautilusMenuItem))
-#define NAUTILUS_MENU_ITEM_CLASS(klass)    (G_TYPE_CHECK_CLASS_CAST ((klass), NAUTILUS_TYPE_MENU_ITEM, NautilusMenuItemClass))
-#define NAUTILUS_MENU_IS_ITEM(obj)         (G_TYPE_CHECK_INSTANCE_TYPE ((obj), NAUTILUS_TYPE_MENU_ITEM))
-#define NAUTILUS_MENU_IS_ITEM_CLASS(klass) (G_TYPE_CHECK_CLASS_TYPE ((obj), NAUTILUS_TYPE_MENU_ITEM))
-#define NAUTILUS_MENU_ITEM_GET_CLASS(obj)  (G_TYPE_INSTANCE_GET_CLASS((obj), NAUTILUS_TYPE_MENU_ITEM, NautilusMenuItemClass))
+/* NemoMenu defines */
+#define NEMO_TYPE_MENU         (nemo_menu_get_type ())
+#define NEMO_MENU(o)           (G_TYPE_CHECK_INSTANCE_CAST ((o), NEMO_TYPE_MENU, NemoMenu))
+#define NEMO_MENU_CLASS(k)     (G_TYPE_CHECK_CLASS_CAST((k), NEMO_TYPE_MENU, NemoMenuClass))
+#define NEMO_IS_MENU(o)        (G_TYPE_CHECK_INSTANCE_TYPE ((o), NEMO_TYPE_MENU))
+#define NEMO_IS_MENU_CLASS(k)  (G_TYPE_CHECK_CLASS_TYPE ((k), NEMO_TYPE_MENU))
+#define NEMO_MENU_GET_CLASS(o) (G_TYPE_INSTANCE_GET_CLASS ((o), NEMO_TYPE_MENU, NemoMenuClass))
+/* NemoMenuItem defines */
+#define NEMO_TYPE_MENU_ITEM            (nemo_menu_item_get_type())
+#define NEMO_MENU_ITEM(obj)            (G_TYPE_CHECK_INSTANCE_CAST ((obj), NEMO_TYPE_MENU_ITEM, NemoMenuItem))
+#define NEMO_MENU_ITEM_CLASS(klass)    (G_TYPE_CHECK_CLASS_CAST ((klass), NEMO_TYPE_MENU_ITEM, NemoMenuItemClass))
+#define NEMO_MENU_IS_ITEM(obj)         (G_TYPE_CHECK_INSTANCE_TYPE ((obj), NEMO_TYPE_MENU_ITEM))
+#define NEMO_MENU_IS_ITEM_CLASS(klass) (G_TYPE_CHECK_CLASS_TYPE ((obj), NEMO_TYPE_MENU_ITEM))
+#define NEMO_MENU_ITEM_GET_CLASS(obj)  (G_TYPE_INSTANCE_GET_CLASS((obj), NEMO_TYPE_MENU_ITEM, NemoMenuItemClass))
 
 
-/* NautilusMenu types */
-typedef struct _NautilusMenu		NautilusMenu;
-typedef struct _NautilusMenuPrivate	NautilusMenuPrivate;
-typedef struct _NautilusMenuClass	NautilusMenuClass;
-/* NautilusMenuItem types */
-typedef struct _NautilusMenuItem        NautilusMenuItem;
-typedef struct _NautilusMenuItemDetails NautilusMenuItemDetails;
-typedef struct _NautilusMenuItemClass   NautilusMenuItemClass;
+/* NemoMenu types */
+typedef struct _NemoMenu		NemoMenu;
+typedef struct _NemoMenuPrivate	NemoMenuPrivate;
+typedef struct _NemoMenuClass	NemoMenuClass;
+/* NemoMenuItem types */
+typedef struct _NemoMenuItem        NemoMenuItem;
+typedef struct _NemoMenuItemDetails NemoMenuItemDetails;
+typedef struct _NemoMenuItemClass   NemoMenuItemClass;
 
 
-/* NautilusMenu structs */
-struct _NautilusMenu {
+/* NemoMenu structs */
+struct _NemoMenu {
 	GObject parent;
-	NautilusMenuPrivate *priv;
+	NemoMenuPrivate *priv;
 };
 
-struct _NautilusMenuClass {
+struct _NemoMenuClass {
 	GObjectClass parent_class;
 };
 
-/* NautilusMenuItem structs */
-struct _NautilusMenuItem {
+/* NemoMenuItem structs */
+struct _NemoMenuItem {
 	GObject parent;
 
-	NautilusMenuItemDetails *details;
+	NemoMenuItemDetails *details;
 };
 
-struct _NautilusMenuItemClass {
+struct _NemoMenuItemClass {
 	GObjectClass parent;
 
-	void (*activate) (NautilusMenuItem *item);
+	void (*activate) (NemoMenuItem *item);
 };
 
 
-/* NautilusMenu methods */
-GType		nautilus_menu_get_type	(void);
-NautilusMenu *	nautilus_menu_new	(void);
+/* NemoMenu methods */
+GType		nemo_menu_get_type	(void);
+NemoMenu *	nemo_menu_new	(void);
 
-void	nautilus_menu_append_item	(NautilusMenu      *menu,
-					 NautilusMenuItem  *item);
-GList*	nautilus_menu_get_items		(NautilusMenu *menu);
-void	nautilus_menu_item_list_free	(GList *item_list);
+void	nemo_menu_append_item	(NemoMenu      *menu,
+					 NemoMenuItem  *item);
+GList*	nemo_menu_get_items		(NemoMenu *menu);
+void	nemo_menu_item_list_free	(GList *item_list);
 
-/* NautilusMenuItem methods */
-GType             nautilus_menu_item_get_type      (void);
-NautilusMenuItem *nautilus_menu_item_new           (const char       *name,
+/* NemoMenuItem methods */
+GType             nemo_menu_item_get_type      (void);
+NemoMenuItem *nemo_menu_item_new           (const char       *name,
 						    const char       *label,
 						    const char       *tip,
 						    const char       *icon);
 
-void              nautilus_menu_item_activate      (NautilusMenuItem *item);
-void              nautilus_menu_item_set_submenu   (NautilusMenuItem *item,
-						    NautilusMenu     *menu);
-/* NautilusMenuItem has the following properties:
+void              nemo_menu_item_activate      (NemoMenuItem *item);
+void              nemo_menu_item_set_submenu   (NemoMenuItem *item,
+						    NemoMenu     *menu);
+/* NemoMenuItem has the following properties:
  *   name (string)        - the identifier for the menu item
  *   label (string)       - the user-visible label of the menu item
  *   tip (string)         - the tooltip of the menu item 
@@ -109,9 +109,9 @@ void              nautilus_menu_item_set_submenu   (NautilusMenuItem *item,
  *   sensitive (boolean)  - whether the menu item is sensitive or not
  *   priority (boolean)   - used for toolbar items, whether to show priority
  *                          text.
- *   menu (NautilusMenu)  - The menu belonging to this item. May be null.
+ *   menu (NemoMenu)  - The menu belonging to this item. May be null.
  */
 
 G_END_DECLS
 
-#endif /* NAUTILUS_MENU_H */
+#endif /* NEMO_MENU_H */

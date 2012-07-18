@@ -1,16 +1,16 @@
 /* -*- Mode: C; indent-tabs-mode: t; c-basic-offset: 8; tab-width: 8 -*- */
 
 /*
- * Nautilus
+ * Nemo
  *
  * Copyright (C) 2005 Red Hat, Inc.
  *
- * Nautilus is free software; you can redistribute it and/or
+ * Nemo is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
  * published by the Free Software Foundation; either version 2 of the
  * License, or (at your option) any later version.
  *
- * Nautilus is distributed in the hope that it will be useful,
+ * Nemo is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
  * General Public License for more details.
@@ -23,18 +23,18 @@
 
 #include <config.h>
 #include <gio/gio.h>
-#include "nautilus-connect-server-dialog.h"
-#include <libnautilus-private/nautilus-global-preferences.h>
+#include "nemo-connect-server-dialog.h"
+#include <libnemo-private/nemo-global-preferences.h>
 
 /* This file contains the glue for the calls from the connect to server dialog
- * to the main nautilus binary. A different version of this glue is in
- * nautilus-connect-server-dialog-main.c for the standalone version.
+ * to the main nemo binary. A different version of this glue is in
+ * nemo-connect-server-dialog-main.c for the standalone version.
  */
 
 static GSimpleAsyncResult *display_location_res = NULL;
 
 static void
-window_go_to_cb (NautilusWindow *window,
+window_go_to_cb (NemoWindow *window,
 		 GError *error,
 		 gpointer user_data)
 {
@@ -49,7 +49,7 @@ window_go_to_cb (NautilusWindow *window,
 }
 
 gboolean
-nautilus_connect_server_dialog_display_location_finish (NautilusConnectServerDialog *self,
+nemo_connect_server_dialog_display_location_finish (NemoConnectServerDialog *self,
 							GAsyncResult *res,
 							GError **error)
 {
@@ -61,12 +61,12 @@ nautilus_connect_server_dialog_display_location_finish (NautilusConnectServerDia
 }
 
 void
-nautilus_connect_server_dialog_display_location_async (NautilusConnectServerDialog *self,
+nemo_connect_server_dialog_display_location_async (NemoConnectServerDialog *self,
 						       GFile *location,
 						       GAsyncReadyCallback callback,
 						       gpointer user_data)
 {
-	NautilusWindow *window;
+	NemoWindow *window;
 	GtkWidget *widget;
 
 	widget = GTK_WIDGET (self);
@@ -74,11 +74,11 @@ nautilus_connect_server_dialog_display_location_async (NautilusConnectServerDial
 	display_location_res =
 		g_simple_async_result_new (G_OBJECT (self),
 					   callback, user_data,
-					   nautilus_connect_server_dialog_display_location_async);
+					   nemo_connect_server_dialog_display_location_async);
 
-	window = nautilus_application_create_window (nautilus_application_get_singleton (),
+	window = nemo_application_create_window (nemo_application_get_singleton (),
 						     gtk_widget_get_screen (widget));
 
-	nautilus_window_go_to_full (window, location,
+	nemo_window_go_to_full (window, location,
 				    window_go_to_cb, self);
 }

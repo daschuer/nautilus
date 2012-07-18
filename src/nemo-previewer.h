@@ -1,14 +1,14 @@
 /*
- * nautilus-previewer: nautilus previewer DBus wrapper
+ * nemo-previewer: nemo previewer DBus wrapper
  *
  * Copyright (C) 2011, Red Hat, Inc.
  *
- * Nautilus is free software; you can redistribute it and/or
+ * Nemo is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
  * published by the Free Software Foundation; either version 2 of the
  * License, or (at your option) any later version.
  *
- * Nautilus is distributed in the hope that it will be useful,
+ * Nemo is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
  * General Public License for more details.
@@ -21,47 +21,47 @@
  *
  */
 
-#ifndef __NAUTILUS_PREVIEWER_H__
-#define __NAUTILUS_PREVIEWER_H__
+#ifndef __NEMO_PREVIEWER_H__
+#define __NEMO_PREVIEWER_H__
 
 #include <glib-object.h>
 
 G_BEGIN_DECLS
 
-#define NAUTILUS_TYPE_PREVIEWER nautilus_previewer_get_type()
-#define NAUTILUS_PREVIEWER(obj) \
-  (G_TYPE_CHECK_INSTANCE_CAST ((obj), NAUTILUS_TYPE_PREVIEWER, NautilusPreviewer))
-#define NAUTILUS_PREVIEWER_CLASS(klass) \
-  (G_TYPE_CHECK_CLASS_CAST ((klass), NAUTILUS_TYPE_PREVIEWER, NautilusPreviewerClass))
-#define NAUTILUS_IS_PREVIEWER(obj) \
-  (G_TYPE_CHECK_INSTANCE_TYPE ((obj), NAUTILUS_TYPE_PREVIEWER))
-#define NAUTILUS_IS_PREVIEWER_CLASS(klass) \
-  (G_TYPE_CHECK_CLASS_TYPE ((klass), NAUTILUS_TYPE_PREVIEWER))
-#define NAUTILUS_PREVIEWER_GET_CLASS(obj) \
-  (G_TYPE_INSTANCE_GET_CLASS ((obj), NAUTILUS_TYPE_PREVIEWER, NautilusPreviewerClass))
+#define NEMO_TYPE_PREVIEWER nemo_previewer_get_type()
+#define NEMO_PREVIEWER(obj) \
+  (G_TYPE_CHECK_INSTANCE_CAST ((obj), NEMO_TYPE_PREVIEWER, NemoPreviewer))
+#define NEMO_PREVIEWER_CLASS(klass) \
+  (G_TYPE_CHECK_CLASS_CAST ((klass), NEMO_TYPE_PREVIEWER, NemoPreviewerClass))
+#define NEMO_IS_PREVIEWER(obj) \
+  (G_TYPE_CHECK_INSTANCE_TYPE ((obj), NEMO_TYPE_PREVIEWER))
+#define NEMO_IS_PREVIEWER_CLASS(klass) \
+  (G_TYPE_CHECK_CLASS_TYPE ((klass), NEMO_TYPE_PREVIEWER))
+#define NEMO_PREVIEWER_GET_CLASS(obj) \
+  (G_TYPE_INSTANCE_GET_CLASS ((obj), NEMO_TYPE_PREVIEWER, NemoPreviewerClass))
 
-typedef struct _NautilusPreviewerPriv NautilusPreviewerPriv;
+typedef struct _NemoPreviewerPriv NemoPreviewerPriv;
 
 typedef struct {
   GObject parent;
 
   /* private */
-  NautilusPreviewerPriv *priv;
-} NautilusPreviewer;
+  NemoPreviewerPriv *priv;
+} NemoPreviewer;
 
 typedef struct {
   GObjectClass parent_class;
-} NautilusPreviewerClass;
+} NemoPreviewerClass;
 
-GType nautilus_previewer_get_type (void);
+GType nemo_previewer_get_type (void);
 
-NautilusPreviewer *nautilus_previewer_get_singleton (void);
-void nautilus_previewer_call_show_file (NautilusPreviewer *previewer,
+NemoPreviewer *nemo_previewer_get_singleton (void);
+void nemo_previewer_call_show_file (NemoPreviewer *previewer,
                                         const gchar *uri,
                                         guint xid,
 					gboolean close_if_already_visible);
-void nautilus_previewer_call_close (NautilusPreviewer *previewer);
+void nemo_previewer_call_close (NemoPreviewer *previewer);
 
 G_END_DECLS
 
-#endif /* __NAUTILUS_PREVIEWER_H__ */
+#endif /* __NEMO_PREVIEWER_H__ */

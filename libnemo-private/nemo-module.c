@@ -1,6 +1,6 @@
 /* -*- Mode: C; indent-tabs-mode: t; c-basic-offset: 8; tab-width: 8 -*- */
 /*
- *  nautilus-module.h - Interface to nautilus extensions
+ *  nemo-module.h - Interface to nemo extensions
  * 
  *  Copyright (C) 2003 Novell, Inc.
  *
@@ -23,21 +23,21 @@
  */
 
 #include <config.h>
-#include "nautilus-module.h"
+#include "nemo-module.h"
 
 #include <eel/eel-debug.h>
 #include <gmodule.h>
 
-#define NAUTILUS_TYPE_MODULE    	(nautilus_module_get_type ())
-#define NAUTILUS_MODULE(obj)		(G_TYPE_CHECK_INSTANCE_CAST ((obj), NAUTILUS_TYPE_MODULE, NautilusModule))
-#define NAUTILUS_MODULE_CLASS(klass)	(G_TYPE_CHECK_CLASS_CAST ((klass), NAUTILUS_TYPE_MODULE, NautilusModule))
-#define NAUTILUS_IS_MODULE(obj)		(G_TYPE_CHECK_INSTANCE_TYPE ((obj), NAUTILUS_TYPE_MODULE))
-#define NAUTILUS_IS_MODULE_CLASS(klass)	(G_TYPE_CLASS_CHECK_CLASS_TYPE ((klass), NAUTILUS_TYPE_MODULE))
+#define NEMO_TYPE_MODULE    	(nemo_module_get_type ())
+#define NEMO_MODULE(obj)		(G_TYPE_CHECK_INSTANCE_CAST ((obj), NEMO_TYPE_MODULE, NemoModule))
+#define NEMO_MODULE_CLASS(klass)	(G_TYPE_CHECK_CLASS_CAST ((klass), NEMO_TYPE_MODULE, NemoModule))
+#define NEMO_IS_MODULE(obj)		(G_TYPE_CHECK_INSTANCE_TYPE ((obj), NEMO_TYPE_MODULE))
+#define NEMO_IS_MODULE_CLASS(klass)	(G_TYPE_CLASS_CHECK_CLASS_TYPE ((klass), NEMO_TYPE_MODULE))
 
-typedef struct _NautilusModule        NautilusModule;
-typedef struct _NautilusModuleClass   NautilusModuleClass;
+typedef struct _NemoModule        NemoModule;
+typedef struct _NemoModuleClass   NemoModuleClass;
 
-struct _NautilusModule {
+struct _NemoModule {
 	GTypeModule parent;
 
 	GModule *library;
@@ -52,15 +52,15 @@ struct _NautilusModule {
 
 };
 
-struct _NautilusModuleClass {
+struct _NemoModuleClass {
 	GTypeModuleClass parent;	
 };
 
 static GList *module_objects = NULL;
 
-static GType nautilus_module_get_type (void);
+static GType nemo_module_get_type (void);
 
-G_DEFINE_TYPE (NautilusModule, nautilus_module, G_TYPE_TYPE_MODULE);
+G_DEFINE_TYPE (NemoModule, nemo_module, G_TYPE_TYPE_MODULE);
 
 static gboolean
 module_pulls_in_orbit (GModule *module)
@@ -74,11 +74,11 @@ module_pulls_in_orbit (GModule *module)
 }
 
 static gboolean
-nautilus_module_load (GTypeModule *gmodule)
+nemo_module_load (GTypeModule *gmodule)
 {
-	NautilusModule *module;
+	NemoModule *module;
 	
-	module = NAUTILUS_MODULE (gmodule);
+	module = NEMO_MODULE (gmodule);
 	
 	module->library = g_module_open (module->path, G_MODULE_BIND_LAZY | G_MODULE_BIND_LOCAL);
 
@@ -89,7 +89,7 @@ nautilus_module_load (GTypeModule *gmodule)
 
 	/* ORBit installs atexit() handlers, which would get unloaded together
 	 * with the module now that the main process doesn't depend on GConf anymore,
-	 * causing nautilus to sefgault at exit.
+	 * causing nemo to sefgault at exit.
 	 * If we detect that an extension would pull in ORBit, we make the
 	 * module resident to prevent that.
 	 */
@@ -98,13 +98,13 @@ nautilus_module_load (GTypeModule *gmodule)
         }
 
 	if (!g_module_symbol (module->library,
-			      "nautilus_module_initialize",
+			      "nemo_module_initialize",
 			      (gpointer *)&module->initialize) ||
 	    !g_module_symbol (module->library,
-			      "nautilus_module_shutdown",
+			      "nemo_module_shutdown",
 			      (gpointer *)&module->shutdown) ||
 	    !g_module_symbol (module->library,
-			      "nautilus_module_list_types",
+			      "nemo_module_list_types",
 			      (gpointer *)&module->list_types)) {
 
 		g_warning ("%s", g_module_error ());
@@ -119,11 +119,11 @@ nautilus_module_load (GTypeModule *gmodule)
 }
 
 static void
-nautilus_module_unload (GTypeModule *gmodule)
+nemo_module_unload (GTypeModule *gmodule)
 {
-	NautilusModule *module;
+	NemoModule *module;
 	
-	module = NAUTILUS_MODULE (gmodule);
+	module = NEMO_MODULE (gmodule);
 	
 	module->shutdown ();
 	
@@ -135,28 +135,28 @@ nautilus_module_unload (GTypeModule *gmodule)
 }
 
 static void
-nautilus_module_finalize (GObject *object)
+nemo_module_finalize (GObject *object)
 {
-	NautilusModule *module;
+	NemoModule *module;
 	
-	module = NAUTILUS_MODULE (object);
+	module = NEMO_MODULE (object);
 
 	g_free (module->path);
 	
-	G_OBJECT_CLASS (nautilus_module_parent_class)->finalize (object);
+	G_OBJECT_CLASS (nemo_module_parent_class)->finalize (object);
 }
 
 static void
-nautilus_module_init (NautilusModule *module)
+nemo_module_init (NemoModule *module)
 {
 }
 
 static void
-nautilus_module_class_init (NautilusModuleClass *class)
+nemo_module_class_init (NemoModuleClass *class)
 {
-	G_OBJECT_CLASS (class)->finalize = nautilus_module_finalize;
-	G_TYPE_MODULE_CLASS (class)->load = nautilus_module_load;
-	G_TYPE_MODULE_CLASS (class)->unload = nautilus_module_unload;
+	G_OBJECT_CLASS (class)->finalize = nemo_module_finalize;
+	G_TYPE_MODULE_CLASS (class)->load = nemo_module_load;
+	G_TYPE_MODULE_CLASS (class)->unload = nemo_module_unload;
 }
 
 static void
@@ -166,7 +166,7 @@ module_object_weak_notify (gpointer user_data, GObject *object)
 }
 
 static void
-add_module_objects (NautilusModule *module)
+add_module_objects (NemoModule *module)
 {
 	const GType *types;
 	int num_types;
@@ -178,16 +178,16 @@ add_module_objects (NautilusModule *module)
 		if (types[i] == 0) { /* Work around broken extensions */
 			break;
 		}
-		nautilus_module_add_type (types[i]);
+		nemo_module_add_type (types[i]);
 	}
 }
 
-static NautilusModule *
-nautilus_module_load_file (const char *filename)
+static NemoModule *
+nemo_module_load_file (const char *filename)
 {
-	NautilusModule *module;
+	NemoModule *module;
 	
-	module = g_object_new (NAUTILUS_TYPE_MODULE, NULL);
+	module = g_object_new (NEMO_TYPE_MODULE, NULL);
 	module->path = g_strdup (filename);
 	
 	if (g_type_module_use (G_TYPE_MODULE (module))) {
@@ -217,7 +217,7 @@ load_module_dir (const char *dirname)
 				filename = g_build_filename (dirname, 
 							     name, 
 							     NULL);
-				nautilus_module_load_file (filename);
+				nemo_module_load_file (filename);
 				g_free (filename);
 			}
 		}
@@ -240,21 +240,21 @@ free_module_objects (void)
 }
 
 void
-nautilus_module_setup (void)
+nemo_module_setup (void)
 {
 	static gboolean initialized = FALSE;
 
 	if (!initialized) {
 		initialized = TRUE;
 		
-		load_module_dir (NAUTILUS_EXTENSIONDIR);
+		load_module_dir (NEMO_EXTENSIONDIR);
 
 		eel_debug_call_at_shutdown (free_module_objects);
 	}
 }
 
 GList *
-nautilus_module_get_extensions_for_type (GType type)
+nemo_module_get_extensions_for_type (GType type)
 {
 	GList *l;
 	GList *ret = NULL;
@@ -271,7 +271,7 @@ nautilus_module_get_extensions_for_type (GType type)
 }
 
 void
-nautilus_module_extension_list_free (GList *extensions)
+nemo_module_extension_list_free (GList *extensions)
 {
 	GList *l, *next;
 	
@@ -283,7 +283,7 @@ nautilus_module_extension_list_free (GList *extensions)
 }
 
 void   
-nautilus_module_add_type (GType type)
+nemo_module_add_type (GType type)
 {
 	GObject *object;
 	

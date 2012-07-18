@@ -1,6 +1,6 @@
 /* -*- Mode: C; indent-tabs-mode: t; c-basic-offset: 8; tab-width: 8 -*-
 
-   nautilus-desktop-link-monitor.c: singleton thatn manages the links
+   nemo-desktop-link-monitor.c: singleton thatn manages the links
     
    Copyright (C) 2003 Red Hat, Inc.
   
@@ -23,12 +23,12 @@
 */
 
 #include <config.h>
-#include "nautilus-desktop-link-monitor.h"
-#include "nautilus-desktop-link.h"
-#include "nautilus-desktop-icon-file.h"
-#include "nautilus-directory.h"
-#include "nautilus-desktop-directory.h"
-#include "nautilus-global-preferences.h"
+#include "nemo-desktop-link-monitor.h"
+#include "nemo-desktop-link.h"
+#include "nemo-desktop-icon-file.h"
+#include "nemo-directory.h"
+#include "nemo-desktop-directory.h"
+#include "nemo-global-preferences.h"
 
 #include <eel/eel-debug.h>
 #include <eel/eel-vfs-extensions.h>
@@ -36,17 +36,17 @@
 #include <gtk/gtk.h>
 #include <glib/gi18n.h>
 #include <gio/gio.h>
-#include <libnautilus-private/nautilus-trash-monitor.h>
+#include <libnemo-private/nemo-trash-monitor.h>
 #include <string.h>
 
-struct NautilusDesktopLinkMonitorDetails {
+struct NemoDesktopLinkMonitorDetails {
 	GVolumeMonitor *volume_monitor;
-	NautilusDirectory *desktop_dir;
+	NemoDirectory *desktop_dir;
 	
-	NautilusDesktopLink *home_link;
-	NautilusDesktopLink *computer_link;
-	NautilusDesktopLink *trash_link;
-	NautilusDesktopLink *network_link;
+	NemoDesktopLink *home_link;
+	NemoDesktopLink *computer_link;
+	NemoDesktopLink *trash_link;
+	NemoDesktopLink *network_link;
 
 	gulong mount_id;
 	gulong unmount_id;
@@ -55,9 +55,9 @@ struct NautilusDesktopLinkMonitorDetails {
 	GList *mount_links;
 };
 
-G_DEFINE_TYPE (NautilusDesktopLinkMonitor, nautilus_desktop_link_monitor, G_TYPE_OBJECT);
+G_DEFINE_TYPE (NemoDesktopLinkMonitor, nemo_desktop_link_monitor, G_TYPE_OBJECT);
 
-static NautilusDesktopLinkMonitor *the_link_monitor = NULL;
+static NemoDesktopLinkMonitor *the_link_monitor = NULL;
 
 static void
 destroy_desktop_link_monitor (void)
@@ -67,11 +67,11 @@ destroy_desktop_link_monitor (void)
 	}
 }
 
-NautilusDesktopLinkMonitor *
-nautilus_desktop_link_monitor_get (void)
+NemoDesktopLinkMonitor *
+nemo_desktop_link_monitor_get (void)
 {
 	if (the_link_monitor == NULL) {
-		g_object_new (NAUTILUS_TYPE_DESKTOP_LINK_MONITOR, NULL);
+		g_object_new (NEMO_TYPE_DESKTOP_LINK_MONITOR, NULL);
 		eel_debug_call_at_shutdown (destroy_desktop_link_monitor);
 	}
 	return the_link_monitor;
@@ -79,16 +79,16 @@ nautilus_desktop_link_monitor_get (void)
 
 static void
 volume_delete_dialog (GtkWidget *parent_view,
-                      NautilusDesktopLink *link)
+                      NemoDesktopLink *link)
 {
 	GMount *mount;
 	char *dialog_str;
 	char *display_name;
 
-	mount = nautilus_desktop_link_get_mount (link);
+	mount = nemo_desktop_link_get_mount (link);
 
 	if (mount != NULL) {
-		display_name = nautilus_desktop_link_get_display_name (link);
+		display_name = nemo_desktop_link_get_display_name (link);
 		dialog_str = g_strdup_printf (_("You cannot move the volume \"%s\" to the trash."),
 					      display_name);
 		g_free (display_name);
@@ -119,15 +119,15 @@ volume_delete_dialog (GtkWidget *parent_view,
 }
 
 void
-nautilus_desktop_link_monitor_delete_link (NautilusDesktopLinkMonitor *monitor,
-					   NautilusDesktopLink *link,
+nemo_desktop_link_monitor_delete_link (NemoDesktopLinkMonitor *monitor,
+					   NemoDesktopLink *link,
 					   GtkWidget *parent_view)
 {
-	switch (nautilus_desktop_link_get_link_type (link)) {
-	case NAUTILUS_DESKTOP_LINK_HOME:
-	case NAUTILUS_DESKTOP_LINK_COMPUTER:
-	case NAUTILUS_DESKTOP_LINK_TRASH:
-	case NAUTILUS_DESKTOP_LINK_NETWORK:
+	switch (nemo_desktop_link_get_link_type (link)) {
+	case NEMO_DESKTOP_LINK_HOME:
+	case NEMO_DESKTOP_LINK_COMPUTER:
+	case NEMO_DESKTOP_LINK_TRASH:
+	case NEMO_DESKTOP_LINK_NETWORK:
 		/* just ignore. We don't allow you to delete these */
 		break;
 	default:
@@ -137,7 +137,7 @@ nautilus_desktop_link_monitor_delete_link (NautilusDesktopLinkMonitor *monitor,
 }
 
 static gboolean
-volume_file_name_used (NautilusDesktopLinkMonitor *monitor,
+volume_file_name_used (NemoDesktopLinkMonitor *monitor,
 		       const char *name)
 {
 	GList *l;
@@ -145,7 +145,7 @@ volume_file_name_used (NautilusDesktopLinkMonitor *monitor,
 	gboolean same;
 
 	for (l = monitor->details->mount_links; l != NULL; l = l->next) {
-		other_name = nautilus_desktop_link_get_file_name (l->data);
+		other_name = nemo_desktop_link_get_file_name (l->data);
 		same = strcmp (name, other_name) == 0;
 		g_free (other_name);
 
@@ -158,7 +158,7 @@ volume_file_name_used (NautilusDesktopLinkMonitor *monitor,
 }
 
 char *
-nautilus_desktop_link_monitor_make_filename_unique (NautilusDesktopLinkMonitor *monitor,
+nemo_desktop_link_monitor_make_filename_unique (NemoDesktopLinkMonitor *monitor,
 						    const char *filename)
 {
 	char *unique_name;
@@ -174,7 +174,7 @@ nautilus_desktop_link_monitor_make_filename_unique (NautilusDesktopLinkMonitor *
 }
 
 static gboolean
-has_mount (NautilusDesktopLinkMonitor *monitor,
+has_mount (NemoDesktopLinkMonitor *monitor,
 	   GMount                     *mount)
 {
 	gboolean ret;
@@ -184,7 +184,7 @@ has_mount (NautilusDesktopLinkMonitor *monitor,
 	ret = FALSE;
 
 	for (l = monitor->details->mount_links; l != NULL; l = l->next) {
-		other_mount = nautilus_desktop_link_get_mount (l->data);
+		other_mount = nemo_desktop_link_get_mount (l->data);
 		if (mount == other_mount) {
 			g_object_unref (other_mount);
 			ret = TRUE;
@@ -197,33 +197,33 @@ has_mount (NautilusDesktopLinkMonitor *monitor,
 }
 
 static void
-create_mount_link (NautilusDesktopLinkMonitor *monitor,
+create_mount_link (NemoDesktopLinkMonitor *monitor,
 		   GMount *mount)
 {
-	NautilusDesktopLink *link;
+	NemoDesktopLink *link;
 
 	if (has_mount (monitor, mount))
 		return;
 
 	if ((!g_mount_is_shadowed (mount)) &&
-	    g_settings_get_boolean (nautilus_desktop_preferences,
-				    NAUTILUS_PREFERENCES_DESKTOP_VOLUMES_VISIBLE)) {
-		link = nautilus_desktop_link_new_from_mount (mount);
+	    g_settings_get_boolean (nemo_desktop_preferences,
+				    NEMO_PREFERENCES_DESKTOP_VOLUMES_VISIBLE)) {
+		link = nemo_desktop_link_new_from_mount (mount);
 		monitor->details->mount_links = g_list_prepend (monitor->details->mount_links, link);
 	}
 }
 
 static void
-remove_mount_link (NautilusDesktopLinkMonitor *monitor,
+remove_mount_link (NemoDesktopLinkMonitor *monitor,
 		   GMount *mount)
 {
 	GList *l;
-	NautilusDesktopLink *link;
+	NemoDesktopLink *link;
 	GMount *other_mount;
 
 	link = NULL;
 	for (l = monitor->details->mount_links; l != NULL; l = l->next) {
-		other_mount = nautilus_desktop_link_get_mount (l->data);
+		other_mount = nemo_desktop_link_get_mount (l->data);
 		if (mount == other_mount) {
 			g_object_unref (other_mount);
 			link = l->data;
@@ -243,7 +243,7 @@ remove_mount_link (NautilusDesktopLinkMonitor *monitor,
 static void
 mount_added_callback (GVolumeMonitor *volume_monitor,
 		      GMount *mount, 
-		      NautilusDesktopLinkMonitor *monitor)
+		      NemoDesktopLinkMonitor *monitor)
 {
 	create_mount_link (monitor, mount);
 }
@@ -252,7 +252,7 @@ mount_added_callback (GVolumeMonitor *volume_monitor,
 static void
 mount_removed_callback (GVolumeMonitor *volume_monitor,
 			GMount *mount, 
-			NautilusDesktopLinkMonitor *monitor)
+			NemoDesktopLinkMonitor *monitor)
 {
 	remove_mount_link (monitor, mount);
 }
@@ -260,7 +260,7 @@ mount_removed_callback (GVolumeMonitor *volume_monitor,
 static void
 mount_changed_callback (GVolumeMonitor *volume_monitor,
 			GMount *mount, 
-			NautilusDesktopLinkMonitor *monitor)
+			NemoDesktopLinkMonitor *monitor)
 {
 	/* TODO: update the mount with other details */
 
@@ -270,14 +270,14 @@ mount_changed_callback (GVolumeMonitor *volume_monitor,
 	}}
 
 static void
-update_link_visibility (NautilusDesktopLinkMonitor *monitor,
-			NautilusDesktopLink       **link_ref,
-			NautilusDesktopLinkType     link_type,
+update_link_visibility (NemoDesktopLinkMonitor *monitor,
+			NemoDesktopLink       **link_ref,
+			NemoDesktopLinkType     link_type,
 			const char                 *preference_key)
 {
-	if (g_settings_get_boolean (nautilus_desktop_preferences, preference_key)) {
+	if (g_settings_get_boolean (nemo_desktop_preferences, preference_key)) {
 		if (*link_ref == NULL) {
-			*link_ref = nautilus_desktop_link_new (link_type);
+			*link_ref = nemo_desktop_link_new (link_type);
 		}
 	} else {
 		if (*link_ref != NULL) {
@@ -290,65 +290,65 @@ update_link_visibility (NautilusDesktopLinkMonitor *monitor,
 static void
 desktop_home_visible_changed (gpointer callback_data)
 {
-	NautilusDesktopLinkMonitor *monitor;
+	NemoDesktopLinkMonitor *monitor;
 
-	monitor = NAUTILUS_DESKTOP_LINK_MONITOR (callback_data);
+	monitor = NEMO_DESKTOP_LINK_MONITOR (callback_data);
 
-	update_link_visibility (NAUTILUS_DESKTOP_LINK_MONITOR (monitor),
+	update_link_visibility (NEMO_DESKTOP_LINK_MONITOR (monitor),
 				&monitor->details->home_link,
-				NAUTILUS_DESKTOP_LINK_HOME,
-				NAUTILUS_PREFERENCES_DESKTOP_HOME_VISIBLE);
+				NEMO_DESKTOP_LINK_HOME,
+				NEMO_PREFERENCES_DESKTOP_HOME_VISIBLE);
 }
 
 static void
 desktop_computer_visible_changed (gpointer callback_data)
 {
-	NautilusDesktopLinkMonitor *monitor;
+	NemoDesktopLinkMonitor *monitor;
 
-	monitor = NAUTILUS_DESKTOP_LINK_MONITOR (callback_data);
+	monitor = NEMO_DESKTOP_LINK_MONITOR (callback_data);
 
-	update_link_visibility (NAUTILUS_DESKTOP_LINK_MONITOR (callback_data),
+	update_link_visibility (NEMO_DESKTOP_LINK_MONITOR (callback_data),
 				&monitor->details->computer_link,
-				NAUTILUS_DESKTOP_LINK_COMPUTER,
-				NAUTILUS_PREFERENCES_DESKTOP_COMPUTER_VISIBLE);
+				NEMO_DESKTOP_LINK_COMPUTER,
+				NEMO_PREFERENCES_DESKTOP_COMPUTER_VISIBLE);
 }
 
 static void
 desktop_trash_visible_changed (gpointer callback_data)
 {
-	NautilusDesktopLinkMonitor *monitor;
+	NemoDesktopLinkMonitor *monitor;
 
-	monitor = NAUTILUS_DESKTOP_LINK_MONITOR (callback_data);
+	monitor = NEMO_DESKTOP_LINK_MONITOR (callback_data);
 
-	update_link_visibility (NAUTILUS_DESKTOP_LINK_MONITOR (callback_data),
+	update_link_visibility (NEMO_DESKTOP_LINK_MONITOR (callback_data),
 				&monitor->details->trash_link,
-				NAUTILUS_DESKTOP_LINK_TRASH,
-				NAUTILUS_PREFERENCES_DESKTOP_TRASH_VISIBLE);
+				NEMO_DESKTOP_LINK_TRASH,
+				NEMO_PREFERENCES_DESKTOP_TRASH_VISIBLE);
 }
 
 static void
 desktop_network_visible_changed (gpointer callback_data)
 {
-	NautilusDesktopLinkMonitor *monitor;
+	NemoDesktopLinkMonitor *monitor;
 
-	monitor = NAUTILUS_DESKTOP_LINK_MONITOR (callback_data);
+	monitor = NEMO_DESKTOP_LINK_MONITOR (callback_data);
 
-	update_link_visibility (NAUTILUS_DESKTOP_LINK_MONITOR (callback_data),
+	update_link_visibility (NEMO_DESKTOP_LINK_MONITOR (callback_data),
 				&monitor->details->network_link,
-				NAUTILUS_DESKTOP_LINK_NETWORK,
-				NAUTILUS_PREFERENCES_DESKTOP_NETWORK_VISIBLE);
+				NEMO_DESKTOP_LINK_NETWORK,
+				NEMO_PREFERENCES_DESKTOP_NETWORK_VISIBLE);
 }
 
 static void
 desktop_volumes_visible_changed (gpointer callback_data)
 {
-	NautilusDesktopLinkMonitor *monitor;
+	NemoDesktopLinkMonitor *monitor;
 	GList *l, *mounts;
 
-	monitor = NAUTILUS_DESKTOP_LINK_MONITOR (callback_data);
+	monitor = NEMO_DESKTOP_LINK_MONITOR (callback_data);
 
-	if (g_settings_get_boolean (nautilus_desktop_preferences,
-				    NAUTILUS_PREFERENCES_DESKTOP_VOLUMES_VISIBLE)) {
+	if (g_settings_get_boolean (nemo_desktop_preferences,
+				    NEMO_PREFERENCES_DESKTOP_VOLUMES_VISIBLE)) {
 		if (monitor->details->mount_links == NULL) {
 			mounts = g_volume_monitor_get_mounts (monitor->details->volume_monitor);
 			for (l = mounts; l != NULL; l = l->next) {
@@ -365,20 +365,20 @@ desktop_volumes_visible_changed (gpointer callback_data)
 }
 
 static void
-create_link_and_add_preference (NautilusDesktopLink   **link_ref,
-				NautilusDesktopLinkType link_type,
+create_link_and_add_preference (NemoDesktopLink   **link_ref,
+				NemoDesktopLinkType link_type,
 				const char             *preference_key,
 				GCallback               callback,
 				gpointer                callback_data)
 {
 	char *detailed_signal;
 
-	if (g_settings_get_boolean (nautilus_desktop_preferences, preference_key)) {
-		*link_ref = nautilus_desktop_link_new (link_type);
+	if (g_settings_get_boolean (nemo_desktop_preferences, preference_key)) {
+		*link_ref = nemo_desktop_link_new (link_type);
 	}
 
 	detailed_signal = g_strconcat ("changed::", preference_key, NULL);
-	g_signal_connect_swapped (nautilus_desktop_preferences,
+	g_signal_connect_swapped (nemo_desktop_preferences,
 				  detailed_signal,
 				  callback, callback_data);
 
@@ -386,43 +386,43 @@ create_link_and_add_preference (NautilusDesktopLink   **link_ref,
 }
 
 static void
-nautilus_desktop_link_monitor_init (NautilusDesktopLinkMonitor *monitor)
+nemo_desktop_link_monitor_init (NemoDesktopLinkMonitor *monitor)
 {
 	GList *l, *mounts;
 	GMount *mount;
 
-	monitor->details = G_TYPE_INSTANCE_GET_PRIVATE (monitor, NAUTILUS_TYPE_DESKTOP_LINK_MONITOR,
-							NautilusDesktopLinkMonitorDetails);
+	monitor->details = G_TYPE_INSTANCE_GET_PRIVATE (monitor, NEMO_TYPE_DESKTOP_LINK_MONITOR,
+							NemoDesktopLinkMonitorDetails);
 
 	the_link_monitor = monitor;
 	monitor->details->volume_monitor = g_volume_monitor_get ();
 
 	/* We keep around a ref to the desktop dir */
-	monitor->details->desktop_dir = nautilus_directory_get_by_uri (EEL_DESKTOP_URI);
+	monitor->details->desktop_dir = nemo_directory_get_by_uri (EEL_DESKTOP_URI);
 
 	/* Default links */
 
 	create_link_and_add_preference (&monitor->details->home_link,
-					NAUTILUS_DESKTOP_LINK_HOME,
-					NAUTILUS_PREFERENCES_DESKTOP_HOME_VISIBLE,
+					NEMO_DESKTOP_LINK_HOME,
+					NEMO_PREFERENCES_DESKTOP_HOME_VISIBLE,
 					G_CALLBACK (desktop_home_visible_changed),
 					monitor);
 
 	create_link_and_add_preference (&monitor->details->computer_link,
-					NAUTILUS_DESKTOP_LINK_COMPUTER,
-					NAUTILUS_PREFERENCES_DESKTOP_COMPUTER_VISIBLE,
+					NEMO_DESKTOP_LINK_COMPUTER,
+					NEMO_PREFERENCES_DESKTOP_COMPUTER_VISIBLE,
 					G_CALLBACK (desktop_computer_visible_changed),
 					monitor);
 
 	create_link_and_add_preference (&monitor->details->trash_link,
-					NAUTILUS_DESKTOP_LINK_TRASH,
-					NAUTILUS_PREFERENCES_DESKTOP_TRASH_VISIBLE,
+					NEMO_DESKTOP_LINK_TRASH,
+					NEMO_PREFERENCES_DESKTOP_TRASH_VISIBLE,
 					G_CALLBACK (desktop_trash_visible_changed),
 					monitor);
 
 	create_link_and_add_preference (&monitor->details->network_link,
-					NAUTILUS_DESKTOP_LINK_NETWORK,
-					NAUTILUS_PREFERENCES_DESKTOP_NETWORK_VISIBLE,
+					NEMO_DESKTOP_LINK_NETWORK,
+					NEMO_PREFERENCES_DESKTOP_NETWORK_VISIBLE,
 					G_CALLBACK (desktop_network_visible_changed),
 					monitor);
 
@@ -436,8 +436,8 @@ nautilus_desktop_link_monitor_init (NautilusDesktopLinkMonitor *monitor)
 	}
 	g_list_free (mounts);
 
-	g_signal_connect_swapped (nautilus_desktop_preferences,
-				  "changed::" NAUTILUS_PREFERENCES_DESKTOP_VOLUMES_VISIBLE,
+	g_signal_connect_swapped (nemo_desktop_preferences,
+				  "changed::" NEMO_PREFERENCES_DESKTOP_VOLUMES_VISIBLE,
 				  G_CALLBACK (desktop_volumes_visible_changed),
 				  monitor);
 
@@ -454,7 +454,7 @@ nautilus_desktop_link_monitor_init (NautilusDesktopLinkMonitor *monitor)
 }
 
 static void
-remove_link_and_preference (NautilusDesktopLink   **link_ref,
+remove_link_and_preference (NemoDesktopLink   **link_ref,
 			    const char             *preference_key,
 			    GCallback               callback,
 			    gpointer                callback_data)
@@ -464,38 +464,38 @@ remove_link_and_preference (NautilusDesktopLink   **link_ref,
 		*link_ref = NULL;
 	}
 
-	g_signal_handlers_disconnect_by_func (nautilus_desktop_preferences,
+	g_signal_handlers_disconnect_by_func (nemo_desktop_preferences,
 					      callback, callback_data);
 }
 
 static void
 desktop_link_monitor_finalize (GObject *object)
 {
-	NautilusDesktopLinkMonitor *monitor;
+	NemoDesktopLinkMonitor *monitor;
 
-	monitor = NAUTILUS_DESKTOP_LINK_MONITOR (object);
+	monitor = NEMO_DESKTOP_LINK_MONITOR (object);
 
 	g_object_unref (monitor->details->volume_monitor);
 
 	/* Default links */
 
 	remove_link_and_preference (&monitor->details->home_link,
-				    NAUTILUS_PREFERENCES_DESKTOP_HOME_VISIBLE,
+				    NEMO_PREFERENCES_DESKTOP_HOME_VISIBLE,
 				    G_CALLBACK (desktop_home_visible_changed),
 				    monitor);
 
 	remove_link_and_preference (&monitor->details->computer_link,
-				    NAUTILUS_PREFERENCES_DESKTOP_COMPUTER_VISIBLE,
+				    NEMO_PREFERENCES_DESKTOP_COMPUTER_VISIBLE,
 				    G_CALLBACK (desktop_computer_visible_changed),
 				    monitor);
 
 	remove_link_and_preference (&monitor->details->trash_link,
-				    NAUTILUS_PREFERENCES_DESKTOP_TRASH_VISIBLE,
+				    NEMO_PREFERENCES_DESKTOP_TRASH_VISIBLE,
 				    G_CALLBACK (desktop_trash_visible_changed),
 				    monitor);
 
 	remove_link_and_preference (&monitor->details->network_link,
-				    NAUTILUS_PREFERENCES_DESKTOP_NETWORK_VISIBLE,
+				    NEMO_PREFERENCES_DESKTOP_NETWORK_VISIBLE,
 				    G_CALLBACK (desktop_network_visible_changed),
 				    monitor);
 
@@ -505,10 +505,10 @@ desktop_link_monitor_finalize (GObject *object)
 	g_list_free (monitor->details->mount_links);
 	monitor->details->mount_links = NULL;
 
-	nautilus_directory_unref (monitor->details->desktop_dir);
+	nemo_directory_unref (monitor->details->desktop_dir);
 	monitor->details->desktop_dir = NULL;
 
-	g_signal_handlers_disconnect_by_func (nautilus_desktop_preferences,
+	g_signal_handlers_disconnect_by_func (nemo_desktop_preferences,
 					      desktop_volumes_visible_changed,
 					      monitor);
 
@@ -522,16 +522,16 @@ desktop_link_monitor_finalize (GObject *object)
 		g_source_remove (monitor->details->changed_id);
 	}
 
-	G_OBJECT_CLASS (nautilus_desktop_link_monitor_parent_class)->finalize (object);
+	G_OBJECT_CLASS (nemo_desktop_link_monitor_parent_class)->finalize (object);
 }
 
 static void
-nautilus_desktop_link_monitor_class_init (NautilusDesktopLinkMonitorClass *klass)
+nemo_desktop_link_monitor_class_init (NemoDesktopLinkMonitorClass *klass)
 {
 	GObjectClass *object_class;
 
 	object_class = G_OBJECT_CLASS (klass);
 	object_class->finalize = desktop_link_monitor_finalize;
 
-	g_type_class_add_private (klass, sizeof (NautilusDesktopLinkMonitorDetails));
+	g_type_class_add_private (klass, sizeof (NemoDesktopLinkMonitorDetails));
 }

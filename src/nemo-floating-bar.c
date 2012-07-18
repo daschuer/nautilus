@@ -1,6 +1,6 @@
 /* -*- Mode: C; indent-tabs-mode: t; c-basic-offset: 8; tab-width: 8 -*- */
 
-/* Nautilus - Floating status bar.
+/* Nemo - Floating status bar.
  *
  * Copyright (C) 2011 Red Hat Inc.
  *
@@ -25,9 +25,9 @@
 
 #include <config.h>
 
-#include "nautilus-floating-bar.h"
+#include "nemo-floating-bar.h"
 
-struct _NautilusFloatingBarDetails {
+struct _NemoFloatingBarDetails {
 	gchar *label;
 
 	GtkWidget *label_widget;
@@ -50,12 +50,12 @@ enum {
 static GParamSpec *properties[NUM_PROPERTIES] = { NULL, };
 static guint signals[NUM_SIGNALS] = { 0, };
 
-G_DEFINE_TYPE (NautilusFloatingBar, nautilus_floating_bar,
+G_DEFINE_TYPE (NemoFloatingBar, nemo_floating_bar,
                GTK_TYPE_BOX);
 
 static void
 action_button_clicked_cb (GtkButton *button,
-			  NautilusFloatingBar *self)
+			  NemoFloatingBar *self)
 {
 	gint action_id;
 
@@ -66,22 +66,22 @@ action_button_clicked_cb (GtkButton *button,
 }
 
 static void
-nautilus_floating_bar_finalize (GObject *obj)
+nemo_floating_bar_finalize (GObject *obj)
 {
-	NautilusFloatingBar *self = NAUTILUS_FLOATING_BAR (obj);
+	NemoFloatingBar *self = NEMO_FLOATING_BAR (obj);
 
 	g_free (self->priv->label);
 
-	G_OBJECT_CLASS (nautilus_floating_bar_parent_class)->finalize (obj);
+	G_OBJECT_CLASS (nemo_floating_bar_parent_class)->finalize (obj);
 }
 
 static void
-nautilus_floating_bar_get_property (GObject *object,
+nemo_floating_bar_get_property (GObject *object,
 				    guint property_id,
 				    GValue *value,
 				    GParamSpec *pspec)
 {
-	NautilusFloatingBar *self = NAUTILUS_FLOATING_BAR (object);
+	NemoFloatingBar *self = NEMO_FLOATING_BAR (object);
 
 	switch (property_id) {
 	case PROP_LABEL:
@@ -97,19 +97,19 @@ nautilus_floating_bar_get_property (GObject *object,
 }
 
 static void
-nautilus_floating_bar_set_property (GObject *object,
+nemo_floating_bar_set_property (GObject *object,
 				    guint property_id,
 				    const GValue *value,
 				    GParamSpec *pspec)
 {
-	NautilusFloatingBar *self = NAUTILUS_FLOATING_BAR (object);
+	NemoFloatingBar *self = NEMO_FLOATING_BAR (object);
 
 	switch (property_id) {
 	case PROP_LABEL:
-		nautilus_floating_bar_set_label (self, g_value_get_string (value));
+		nemo_floating_bar_set_label (self, g_value_get_string (value));
 		break;
 	case PROP_SHOW_SPINNER:
-		nautilus_floating_bar_set_show_spinner (self, g_value_get_boolean (value));
+		nemo_floating_bar_set_show_spinner (self, g_value_get_boolean (value));
 		break;
 	default:
 		G_OBJECT_WARN_INVALID_PROPERTY_ID (object, property_id, pspec);
@@ -118,7 +118,7 @@ nautilus_floating_bar_set_property (GObject *object,
 }
 
 static void
-update_label (NautilusFloatingBar *self)
+update_label (NemoFloatingBar *self)
 {
 	gtk_label_set_text (GTK_LABEL (self->priv->label_widget), self->priv->label);
 }
@@ -134,7 +134,7 @@ overlay_enter_notify_cb (GtkWidget        *parent,
 		return FALSE;
 	}
 
-	if (NAUTILUS_FLOATING_BAR (widget)->priv->is_interactive) {
+	if (NEMO_FLOATING_BAR (widget)->priv->is_interactive) {
 		return FALSE;
 	}
 
@@ -150,7 +150,7 @@ overlay_enter_notify_cb (GtkWidget        *parent,
 }
 
 static void
-nautilus_floating_bar_parent_set (GtkWidget *widget,
+nemo_floating_bar_parent_set (GtkWidget *widget,
 				  GtkWidget *old_parent)
 {
 	GtkWidget *parent;
@@ -169,11 +169,11 @@ nautilus_floating_bar_parent_set (GtkWidget *widget,
 }
 
 static void
-nautilus_floating_bar_show (GtkWidget *widget)
+nemo_floating_bar_show (GtkWidget *widget)
 {
-	NautilusFloatingBar *self = NAUTILUS_FLOATING_BAR (widget);
+	NemoFloatingBar *self = NEMO_FLOATING_BAR (widget);
 
-	GTK_WIDGET_CLASS (nautilus_floating_bar_parent_class)->show (widget);
+	GTK_WIDGET_CLASS (nemo_floating_bar_parent_class)->show (widget);
 
 	if (self->priv->show_spinner) {
 		gtk_spinner_start (GTK_SPINNER (self->priv->spinner));
@@ -181,17 +181,17 @@ nautilus_floating_bar_show (GtkWidget *widget)
 }
 
 static void
-nautilus_floating_bar_hide (GtkWidget *widget)
+nemo_floating_bar_hide (GtkWidget *widget)
 {
-	NautilusFloatingBar *self = NAUTILUS_FLOATING_BAR (widget);
+	NemoFloatingBar *self = NEMO_FLOATING_BAR (widget);
 
-	GTK_WIDGET_CLASS (nautilus_floating_bar_parent_class)->hide (widget);
+	GTK_WIDGET_CLASS (nemo_floating_bar_parent_class)->hide (widget);
 
 	gtk_spinner_stop (GTK_SPINNER (self->priv->spinner));
 }
 
 static gboolean
-nautilus_floating_bar_draw (GtkWidget *widget,
+nemo_floating_bar_draw (GtkWidget *widget,
 			    cairo_t *cr)
 {
 	GtkStyleContext *context;
@@ -211,16 +211,16 @@ nautilus_floating_bar_draw (GtkWidget *widget,
 
 	gtk_style_context_restore (context);
 
-	return GTK_WIDGET_CLASS (nautilus_floating_bar_parent_class)->draw (widget, cr);;
+	return GTK_WIDGET_CLASS (nemo_floating_bar_parent_class)->draw (widget, cr);;
 }
 
 static void
-nautilus_floating_bar_constructed (GObject *obj)
+nemo_floating_bar_constructed (GObject *obj)
 {
-	NautilusFloatingBar *self = NAUTILUS_FLOATING_BAR (obj);
+	NemoFloatingBar *self = NEMO_FLOATING_BAR (obj);
 	GtkWidget *w, *box;
 
-	G_OBJECT_CLASS (nautilus_floating_bar_parent_class)->constructed (obj);
+	G_OBJECT_CLASS (nemo_floating_bar_parent_class)->constructed (obj);
 
 	box = GTK_WIDGET (obj);
 
@@ -246,32 +246,32 @@ nautilus_floating_bar_constructed (GObject *obj)
 }
 
 static void
-nautilus_floating_bar_init (NautilusFloatingBar *self)
+nemo_floating_bar_init (NemoFloatingBar *self)
 {
 	GtkStyleContext *context;
 
-	self->priv = G_TYPE_INSTANCE_GET_PRIVATE (self, NAUTILUS_TYPE_FLOATING_BAR,
-						  NautilusFloatingBarDetails);
+	self->priv = G_TYPE_INSTANCE_GET_PRIVATE (self, NEMO_TYPE_FLOATING_BAR,
+						  NemoFloatingBarDetails);
 
 	context = gtk_widget_get_style_context (GTK_WIDGET (self));
 	gtk_style_context_add_class (context, "floating-bar");
 }
 
 static void
-nautilus_floating_bar_class_init (NautilusFloatingBarClass *klass)
+nemo_floating_bar_class_init (NemoFloatingBarClass *klass)
 {
 	GObjectClass *oclass = G_OBJECT_CLASS (klass);
 	GtkWidgetClass *wclass = GTK_WIDGET_CLASS (klass);
 
-	oclass->constructed = nautilus_floating_bar_constructed;
-	oclass->set_property = nautilus_floating_bar_set_property;
-	oclass->get_property = nautilus_floating_bar_get_property;
-	oclass->finalize = nautilus_floating_bar_finalize;
+	oclass->constructed = nemo_floating_bar_constructed;
+	oclass->set_property = nemo_floating_bar_set_property;
+	oclass->get_property = nemo_floating_bar_get_property;
+	oclass->finalize = nemo_floating_bar_finalize;
 
-	wclass->draw = nautilus_floating_bar_draw;
-	wclass->show = nautilus_floating_bar_show;
-	wclass->hide = nautilus_floating_bar_hide;
-	wclass->parent_set = nautilus_floating_bar_parent_set;
+	wclass->draw = nemo_floating_bar_draw;
+	wclass->show = nemo_floating_bar_show;
+	wclass->hide = nemo_floating_bar_hide;
+	wclass->parent_set = nemo_floating_bar_parent_set;
 
 	properties[PROP_LABEL] =
 		g_param_spec_string ("label",
@@ -295,12 +295,12 @@ nautilus_floating_bar_class_init (NautilusFloatingBarClass *klass)
 			      G_TYPE_NONE, 1,
 			      G_TYPE_INT);
 
-	g_type_class_add_private (klass, sizeof (NautilusFloatingBarDetails));
+	g_type_class_add_private (klass, sizeof (NemoFloatingBarDetails));
 	g_object_class_install_properties (oclass, NUM_PROPERTIES, properties);
 }
 
 void
-nautilus_floating_bar_set_label (NautilusFloatingBar *self,
+nemo_floating_bar_set_label (NemoFloatingBar *self,
 				 const gchar *label)
 {
 	if (g_strcmp0 (self->priv->label, label) != 0) {
@@ -314,7 +314,7 @@ nautilus_floating_bar_set_label (NautilusFloatingBar *self,
 }
 
 void
-nautilus_floating_bar_set_show_spinner (NautilusFloatingBar *self,
+nemo_floating_bar_set_show_spinner (NemoFloatingBar *self,
 					gboolean show_spinner)
 {
 	if (self->priv->show_spinner != show_spinner) {
@@ -327,10 +327,10 @@ nautilus_floating_bar_set_show_spinner (NautilusFloatingBar *self,
 }
 
 GtkWidget *
-nautilus_floating_bar_new (const gchar *label,
+nemo_floating_bar_new (const gchar *label,
 			   gboolean show_spinner)
 {
-	return g_object_new (NAUTILUS_TYPE_FLOATING_BAR,
+	return g_object_new (NEMO_TYPE_FLOATING_BAR,
 			     "label", label,
 			     "show-spinner", show_spinner,
 			     "orientation", GTK_ORIENTATION_HORIZONTAL,
@@ -339,7 +339,7 @@ nautilus_floating_bar_new (const gchar *label,
 }
 
 void
-nautilus_floating_bar_add_action (NautilusFloatingBar *self,
+nemo_floating_bar_add_action (NemoFloatingBar *self,
 				  const gchar *stock_id,
 				  gint action_id)
 {
@@ -363,7 +363,7 @@ nautilus_floating_bar_add_action (NautilusFloatingBar *self,
 }
 
 void
-nautilus_floating_bar_cleanup_actions (NautilusFloatingBar *self)
+nemo_floating_bar_cleanup_actions (NemoFloatingBar *self)
 {
 	GtkWidget *widget;
 	GList *children, *l;

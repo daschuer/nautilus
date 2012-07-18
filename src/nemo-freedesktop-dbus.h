@@ -1,12 +1,12 @@
 /*
- * nautilus-freedesktop-dbus: Implementation for the org.freedesktop DBus file-management interfaces
+ * nemo-freedesktop-dbus: Implementation for the org.freedesktop DBus file-management interfaces
  *
- * Nautilus is free software; you can redistribute it and/or
+ * Nemo is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
  * published by the Free Software Foundation; either version 2 of the
  * License, or (at your option) any later version.
  *
- * Nautilus is distributed in the hope that it will be useful,
+ * Nemo is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
  * General Public License for more details.
@@ -20,12 +20,12 @@
  */
 
 
-#ifndef __NAUTILUS_FREEDESKTOP_DBUS_H__
-#define __NAUTILUS_FREEDESKTOP_DBUS_H__
+#ifndef __NEMO_FREEDESKTOP_DBUS_H__
+#define __NEMO_FREEDESKTOP_DBUS_H__
 
-#include "nautilus-application.h"
+#include "nemo-application.h"
 
-void nautilus_freedesktop_dbus_start (NautilusApplication *app);
-void nautilus_freedesktop_dbus_stop (void);
+void nemo_freedesktop_dbus_start (NemoApplication *app);
+void nemo_freedesktop_dbus_stop (void);
 
-#endif /* __NAUTILUS_FREEDESKTOP_DBUS_H__ */
+#endif /* __NEMO_FREEDESKTOP_DBUS_H__ */

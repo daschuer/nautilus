@@ -2,12 +2,12 @@
 /*
  * Copyright (C) 2005 Mr Jamie McCracken
  *
- * Nautilus is free software; you can redistribute it and/or
+ * Nemo is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
  * published by the Free Software Foundation; either version 2 of the
  * License, or (at your option) any later version.
  *
- * Nautilus is distributed in the hope that it will be useful,
+ * Nemo is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
  * General Public License for more details.
@@ -22,7 +22,7 @@
  */
 
 #include <config.h>
-#include "nautilus-search-engine-tracker.h"
+#include "nemo-search-engine-tracker.h"
 #include <gmodule.h>
 #include <string.h>
 #include <gio/gio.h>
@@ -36,30 +36,30 @@
  */
 #undef FTS_MATCHING
 
-struct NautilusSearchEngineTrackerDetails {
+struct NemoSearchEngineTrackerDetails {
 	TrackerSparqlConnection *connection;
-	NautilusQuery *query;
+	NemoQuery *query;
 
 	gboolean       query_pending;
 	GCancellable  *cancellable;
 };
 
-G_DEFINE_TYPE (NautilusSearchEngineTracker,
-	       nautilus_search_engine_tracker,
-	       NAUTILUS_TYPE_SEARCH_ENGINE);
+G_DEFINE_TYPE (NemoSearchEngineTracker,
+	       nemo_search_engine_tracker,
+	       NEMO_TYPE_SEARCH_ENGINE);
 
 static void
 finalize (GObject *object)
 {
-	NautilusSearchEngineTracker *tracker;
+	NemoSearchEngineTracker *tracker;
 
-	tracker = NAUTILUS_SEARCH_ENGINE_TRACKER (object);
+	tracker = NEMO_SEARCH_ENGINE_TRACKER (object);
 
 	g_clear_object (&tracker->details->query);
 	g_clear_object (&tracker->details->cancellable);
 	g_clear_object (&tracker->details->connection);
 
-	G_OBJECT_CLASS (nautilus_search_engine_tracker_parent_class)->finalize (object);
+	G_OBJECT_CLASS (nemo_search_engine_tracker_parent_class)->finalize (object);
 }
 
 
@@ -84,7 +84,7 @@ static void cursor_callback (GObject      *object,
 			     gpointer      user_data);
 
 static void
-cursor_next (NautilusSearchEngineTracker *tracker,
+cursor_next (NemoSearchEngineTracker *tracker,
              TrackerSparqlCursor    *cursor)
 {
 	tracker_sparql_cursor_next_async (cursor,
@@ -98,20 +98,20 @@ cursor_callback (GObject      *object,
                  GAsyncResult *result,
                  gpointer      user_data)
 {
-	NautilusSearchEngineTracker *tracker;
+	NemoSearchEngineTracker *tracker;
 	GError *error = NULL;
 	TrackerSparqlCursor *cursor;
 	GList *hits;
 	gboolean success;
 
-	tracker = NAUTILUS_SEARCH_ENGINE_TRACKER (user_data);
+	tracker = NEMO_SEARCH_ENGINE_TRACKER (user_data);
 
 	cursor = TRACKER_SPARQL_CURSOR (object);
 	success = tracker_sparql_cursor_next_finish (cursor, result, &error);
 
 	if (error) {
 		tracker->details->query_pending = FALSE;
-		nautilus_search_engine_error (NAUTILUS_SEARCH_ENGINE (tracker), error->message);
+		nemo_search_engine_error (NEMO_SEARCH_ENGINE (tracker), error->message);
 		g_error_free (error);
 		g_object_unref (cursor);
 
@@ -120,7 +120,7 @@ cursor_callback (GObject      *object,
 
 	if (!success) {
 		tracker->details->query_pending = FALSE;
-		nautilus_search_engine_finished (NAUTILUS_SEARCH_ENGINE (tracker));
+		nemo_search_engine_finished (NEMO_SEARCH_ENGINE (tracker));
 		g_object_unref (cursor);
 
 		return;
@@ -128,7 +128,7 @@ cursor_callback (GObject      *object,
 
 	/* We iterate result by result, not n at a time. */
 	hits = g_list_append (NULL, (gchar*) tracker_sparql_cursor_get_string (cursor, 0, NULL));
-	nautilus_search_engine_hits_added (NAUTILUS_SEARCH_ENGINE (tracker), hits);
+	nemo_search_engine_hits_added (NEMO_SEARCH_ENGINE (tracker), hits);
 	g_list_free (hits);
 
 	/* Get next */
@@ -140,12 +140,12 @@ query_callback (GObject      *object,
                 GAsyncResult *result,
                 gpointer      user_data)
 {
-	NautilusSearchEngineTracker *tracker;
+	NemoSearchEngineTracker *tracker;
 	TrackerSparqlConnection *connection;
 	TrackerSparqlCursor *cursor;
 	GError *error = NULL;
 
-	tracker = NAUTILUS_SEARCH_ENGINE_TRACKER (user_data);
+	tracker = NEMO_SEARCH_ENGINE_TRACKER (user_data);
 
 	connection = TRACKER_SPARQL_CONNECTION (object);
 	cursor = tracker_sparql_connection_query_finish (connection,
@@ -154,14 +154,14 @@ query_callback (GObject      *object,
 
 	if (error) {
 		tracker->details->query_pending = FALSE;
-		nautilus_search_engine_error (NAUTILUS_SEARCH_ENGINE (tracker), error->message);
+		nemo_search_engine_error (NEMO_SEARCH_ENGINE (tracker), error->message);
 		g_error_free (error);
 		return;
 	}
 
 	if (!cursor) {
 		tracker->details->query_pending = FALSE;
-		nautilus_search_engine_finished (NAUTILUS_SEARCH_ENGINE (tracker));
+		nemo_search_engine_finished (NEMO_SEARCH_ENGINE (tracker));
 		return;
 	}
 
@@ -169,15 +169,15 @@ query_callback (GObject      *object,
 }
 
 static void
-nautilus_search_engine_tracker_start (NautilusSearchEngine *engine)
+nemo_search_engine_tracker_start (NemoSearchEngine *engine)
 {
-	NautilusSearchEngineTracker *tracker;
+	NemoSearchEngineTracker *tracker;
 	gchar	*search_text, *location_uri;
 	GString *sparql;
 	GList *mimetypes, *l;
 	gint mime_count;
 
-	tracker = NAUTILUS_SEARCH_ENGINE_TRACKER (engine);
+	tracker = NEMO_SEARCH_ENGINE_TRACKER (engine);
 
 	if (tracker->details->query_pending) {
 		return;
@@ -189,9 +189,9 @@ nautilus_search_engine_tracker_start (NautilusSearchEngine *engine)
 
 	g_cancellable_reset (tracker->details->cancellable);
 
-	search_text = nautilus_query_get_text (tracker->details->query);
-	location_uri = nautilus_query_get_location (tracker->details->query);
-	mimetypes = nautilus_query_get_mime_types (tracker->details->query);
+	search_text = nemo_query_get_text (tracker->details->query);
+	location_uri = nemo_query_get_location (tracker->details->query);
+	mimetypes = nemo_query_get_mime_types (tracker->details->query);
 
 	mime_count = g_list_length (mimetypes);
 
@@ -301,11 +301,11 @@ nautilus_search_engine_tracker_start (NautilusSearchEngine *engine)
 }
 
 static void
-nautilus_search_engine_tracker_stop (NautilusSearchEngine *engine)
+nemo_search_engine_tracker_stop (NemoSearchEngine *engine)
 {
-	NautilusSearchEngineTracker *tracker;
+	NemoSearchEngineTracker *tracker;
 
-	tracker = NAUTILUS_SEARCH_ENGINE_TRACKER (engine);
+	tracker = NEMO_SEARCH_ENGINE_TRACKER (engine);
 	
 	if (tracker->details->query && tracker->details->query_pending) {
 		g_cancellable_cancel (tracker->details->cancellable);
@@ -314,11 +314,11 @@ nautilus_search_engine_tracker_stop (NautilusSearchEngine *engine)
 }
 
 static void
-nautilus_search_engine_tracker_set_query (NautilusSearchEngine *engine, NautilusQuery *query)
+nemo_search_engine_tracker_set_query (NemoSearchEngine *engine, NemoQuery *query)
 {
-	NautilusSearchEngineTracker *tracker;
+	NemoSearchEngineTracker *tracker;
 
-	tracker = NAUTILUS_SEARCH_ENGINE_TRACKER (engine);
+	tracker = NEMO_SEARCH_ENGINE_TRACKER (engine);
 
 	if (query) {
 		g_object_ref (query);
@@ -332,34 +332,34 @@ nautilus_search_engine_tracker_set_query (NautilusSearchEngine *engine, Nautilus
 }
 
 static void
-nautilus_search_engine_tracker_class_init (NautilusSearchEngineTrackerClass *class)
+nemo_search_engine_tracker_class_init (NemoSearchEngineTrackerClass *class)
 {
 	GObjectClass *gobject_class;
-	NautilusSearchEngineClass *engine_class;
+	NemoSearchEngineClass *engine_class;
 
 	gobject_class = G_OBJECT_CLASS (class);
 	gobject_class->finalize = finalize;
 
-	engine_class = NAUTILUS_SEARCH_ENGINE_CLASS (class);
-	engine_class->set_query = nautilus_search_engine_tracker_set_query;
-	engine_class->start = nautilus_search_engine_tracker_start;
-	engine_class->stop = nautilus_search_engine_tracker_stop;
+	engine_class = NEMO_SEARCH_ENGINE_CLASS (class);
+	engine_class->set_query = nemo_search_engine_tracker_set_query;
+	engine_class->start = nemo_search_engine_tracker_start;
+	engine_class->stop = nemo_search_engine_tracker_stop;
 
-	g_type_class_add_private (class, sizeof (NautilusSearchEngineTrackerDetails));
+	g_type_class_add_private (class, sizeof (NemoSearchEngineTrackerDetails));
 }
 
 static void
-nautilus_search_engine_tracker_init (NautilusSearchEngineTracker *engine)
+nemo_search_engine_tracker_init (NemoSearchEngineTracker *engine)
 {
-	engine->details = G_TYPE_INSTANCE_GET_PRIVATE (engine, NAUTILUS_TYPE_SEARCH_ENGINE_TRACKER,
-						       NautilusSearchEngineTrackerDetails);
+	engine->details = G_TYPE_INSTANCE_GET_PRIVATE (engine, NEMO_TYPE_SEARCH_ENGINE_TRACKER,
+						       NemoSearchEngineTrackerDetails);
 }
 
 
-NautilusSearchEngine *
-nautilus_search_engine_tracker_new (void)
+NemoSearchEngine *
+nemo_search_engine_tracker_new (void)
 {
-	NautilusSearchEngineTracker *engine;
+	NemoSearchEngineTracker *engine;
 	TrackerSparqlConnection *connection;
 	GError *error = NULL;
 
@@ -371,9 +371,9 @@ nautilus_search_engine_tracker_new (void)
 		return NULL;
 	}
 
-	engine = g_object_new (NAUTILUS_TYPE_SEARCH_ENGINE_TRACKER, NULL);
+	engine = g_object_new (NEMO_TYPE_SEARCH_ENGINE_TRACKER, NULL);
 	engine->details->connection = connection;
 	engine->details->cancellable = g_cancellable_new ();
 
-	return NAUTILUS_SEARCH_ENGINE (engine);
+	return NEMO_SEARCH_ENGINE (engine);
 }

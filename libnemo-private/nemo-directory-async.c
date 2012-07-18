@@ -1,6 +1,6 @@
 /* -*- Mode: C; indent-tabs-mode: t; c-basic-offset: 8; tab-width: 8 -*-
 
-   nautilus-directory-async.c: Nautilus directory model state machine.
+   nemo-directory-async.c: Nemo directory model state machine.
  
    Copyright (C) 1999, 2000, 2001 Eazel, Inc.
   
@@ -24,14 +24,14 @@
 
 #include <config.h>
 
-#include "nautilus-directory-notify.h"
-#include "nautilus-directory-private.h"
-#include "nautilus-file-attributes.h"
-#include "nautilus-file-private.h"
-#include "nautilus-file-utilities.h"
-#include "nautilus-signaller.h"
-#include "nautilus-global-preferences.h"
-#include "nautilus-link.h"
+#include "nemo-directory-notify.h"
+#include "nemo-directory-private.h"
+#include "nemo-file-attributes.h"
+#include "nemo-file-private.h"
+#include "nemo-file-utilities.h"
+#include "nemo-signaller.h"
+#include "nemo-global-preferences.h"
+#include "nemo-link.h"
 #include <eel/eel-glib-extensions.h>
 #include <gtk/gtk.h>
 #include <libxml/parser.h>
@@ -59,76 +59,76 @@
 #define MAX_ASYNC_JOBS 10
 
 struct TopLeftTextReadState {
-	NautilusDirectory *directory;
-	NautilusFile *file;
+	NemoDirectory *directory;
+	NemoFile *file;
 	gboolean large;
 	GCancellable *cancellable;
 };
 
 struct LinkInfoReadState {
-	NautilusDirectory *directory;
+	NemoDirectory *directory;
 	GCancellable *cancellable;
-	NautilusFile *file;
+	NemoFile *file;
 };
 
 struct ThumbnailState {
-	NautilusDirectory *directory;
+	NemoDirectory *directory;
 	GCancellable *cancellable;
-	NautilusFile *file;
+	NemoFile *file;
 	gboolean trying_original;
 	gboolean tried_original;
 };
 
 struct MountState {
-	NautilusDirectory *directory;
+	NemoDirectory *directory;
 	GCancellable *cancellable;
-	NautilusFile *file;
+	NemoFile *file;
 };
 
 struct FilesystemInfoState {
-	NautilusDirectory *directory;
+	NemoDirectory *directory;
 	GCancellable *cancellable;
-	NautilusFile *file;
+	NemoFile *file;
 };
 
 struct DirectoryLoadState {
-	NautilusDirectory *directory;
+	NemoDirectory *directory;
 	GCancellable *cancellable;
 	GFileEnumerator *enumerator;
 	GHashTable *load_mime_list_hash;
-	NautilusFile *load_directory_file;
+	NemoFile *load_directory_file;
 	int load_file_count;
 };
 
 struct MimeListState {
-	NautilusDirectory *directory;
-	NautilusFile *mime_list_file;
+	NemoDirectory *directory;
+	NemoFile *mime_list_file;
 	GCancellable *cancellable;
 	GFileEnumerator *enumerator;
 	GHashTable *mime_list_hash;
 };
 
 struct GetInfoState {
-	NautilusDirectory *directory;
+	NemoDirectory *directory;
 	GCancellable *cancellable;
 };
 
 struct NewFilesState {
-	NautilusDirectory *directory;
+	NemoDirectory *directory;
 	GCancellable *cancellable;
 	int count;
 };
 
 struct DirectoryCountState {
-	NautilusDirectory *directory;
-	NautilusFile *count_file;
+	NemoDirectory *directory;
+	NemoFile *count_file;
 	GCancellable *cancellable;
 	GFileEnumerator *enumerator;
 	int file_count;
 };
 
 struct DeepCountState {
-	NautilusDirectory *directory;
+	NemoDirectory *directory;
 	GCancellable *cancellable;
 	GFileEnumerator *enumerator;
 	GFile *deep_count_location;
@@ -139,10 +139,10 @@ struct DeepCountState {
 
 
 typedef struct {
-	NautilusFile *file; /* Which file, NULL means all. */
+	NemoFile *file; /* Which file, NULL means all. */
 	union {
-		NautilusDirectoryCallback directory;
-		NautilusFileCallback file;
+		NemoDirectoryCallback directory;
+		NemoFileCallback file;
 	} callback;
 	gpointer callback_data;
 	Request request;
@@ -154,21 +154,21 @@ typedef struct {
 } ReadyCallback;
 
 typedef struct {
-	NautilusFile *file; /* Which file, NULL means all. */
+	NemoFile *file; /* Which file, NULL means all. */
 	gboolean monitor_hidden_files; /* defines whether "all" includes hidden files */
 	gconstpointer client;
 	Request request;
 } Monitor;
 
 typedef struct {
-	NautilusDirectory *directory;
-	NautilusInfoProvider *provider;
-	NautilusOperationHandle *handle;
-	NautilusOperationResult result;
+	NemoDirectory *directory;
+	NemoInfoProvider *provider;
+	NemoOperationHandle *handle;
+	NemoOperationResult result;
 } InfoProviderResponse;
 
 typedef gboolean (* RequestCheck) (Request);
-typedef gboolean (* FileCheck) (NautilusFile *);
+typedef gboolean (* FileCheck) (NemoFile *);
 
 /* Current number of async. jobs. */
 static int async_job_count;
@@ -183,35 +183,35 @@ static char *kde_trash_dir_name = NULL;
 /* Forward declarations for functions that need them. */
 static void     deep_count_load                               (DeepCountState         *state,
 							       GFile                  *location);
-static gboolean request_is_satisfied                          (NautilusDirectory      *directory,
-							       NautilusFile           *file,
+static gboolean request_is_satisfied                          (NemoDirectory      *directory,
+							       NemoFile           *file,
 							       Request                 request);
-static void     cancel_loading_attributes                     (NautilusDirectory      *directory,
-							       NautilusFileAttributes  file_attributes);
-static void     add_all_files_to_work_queue                   (NautilusDirectory      *directory);
-static void     link_info_done                                (NautilusDirectory      *directory,
-							       NautilusFile           *file,
+static void     cancel_loading_attributes                     (NemoDirectory      *directory,
+							       NemoFileAttributes  file_attributes);
+static void     add_all_files_to_work_queue                   (NemoDirectory      *directory);
+static void     link_info_done                                (NemoDirectory      *directory,
+							       NemoFile           *file,
 							       const char             *uri,
 							       const char             *name,
 							       GIcon                  *icon,
 							       gboolean                is_launcher,
 							       gboolean                is_foreign);
-static void     move_file_to_low_priority_queue               (NautilusDirectory      *directory,
-							       NautilusFile           *file);
-static void     move_file_to_extension_queue                  (NautilusDirectory      *directory,
-							       NautilusFile           *file);
-static void     nautilus_directory_invalidate_file_attributes (NautilusDirectory      *directory,
-							       NautilusFileAttributes  file_attributes);
+static void     move_file_to_low_priority_queue               (NemoDirectory      *directory,
+							       NemoFile           *file);
+static void     move_file_to_extension_queue                  (NemoDirectory      *directory,
+							       NemoFile           *file);
+static void     nemo_directory_invalidate_file_attributes (NemoDirectory      *directory,
+							       NemoFileAttributes  file_attributes);
 
 void
-nautilus_set_kde_trash_name (const char *trash_dir)
+nemo_set_kde_trash_name (const char *trash_dir)
 {
 	g_free (kde_trash_dir_name);
 	kde_trash_dir_name = g_strdup (trash_dir);
 }
 
 /* Some helpers for case-insensitive strings.
- * Move to nautilus-glib-extensions?
+ * Move to nemo-glib-extensions?
  */
 
 static gboolean
@@ -302,7 +302,7 @@ request_counter_remove_request (RequestCounter counter,
 
 #if 0
 static void
-nautilus_directory_verify_request_counts (NautilusDirectory *directory)
+nemo_directory_verify_request_counts (NemoDirectory *directory)
 {
 	GList *l;
 	RequestCounter counters;
@@ -347,7 +347,7 @@ nautilus_directory_verify_request_counts (NautilusDirectory *directory)
  * number of requests is unbounded.
  */
 static gboolean
-async_job_start (NautilusDirectory *directory,
+async_job_start (NemoDirectory *directory,
 		 const char *job)
 {
 #ifdef DEBUG_ASYNC_JOBS
@@ -379,7 +379,7 @@ async_job_start (NautilusDirectory *directory,
 		if (async_jobs == NULL) {
 			async_jobs = g_hash_table_new (g_str_hash, g_str_equal);
 		}
-		uri = nautilus_directory_get_uri (directory);
+		uri = nemo_directory_get_uri (directory);
 		key = g_strconcat (uri, ": ", job, NULL);
 		if (g_hash_table_lookup (async_jobs, key) != NULL) {
 			g_warning ("same job twice: %s in %s",
@@ -396,7 +396,7 @@ async_job_start (NautilusDirectory *directory,
 
 /* End a job. */
 static void
-async_job_end (NautilusDirectory *directory,
+async_job_end (NemoDirectory *directory,
 	       const char *job)
 {
 #ifdef DEBUG_ASYNC_JOBS
@@ -413,7 +413,7 @@ async_job_end (NautilusDirectory *directory,
 #ifdef DEBUG_ASYNC_JOBS
 	{
 		char *uri;
-		uri = nautilus_directory_get_uri (directory);
+		uri = nemo_directory_get_uri (directory);
 		g_assert (async_jobs != NULL);
 		key = g_strconcat (uri, ": ", job, NULL);
 		if (!g_hash_table_lookup_extended (async_jobs, key, &table_key, &value)) {
@@ -477,14 +477,14 @@ async_job_wake_up (void)
 			break;
 		}
 		g_hash_table_remove (waiting_directories, value);
-		nautilus_directory_async_state_changed
-			(NAUTILUS_DIRECTORY (value));
+		nemo_directory_async_state_changed
+			(NEMO_DIRECTORY (value));
 	}
 	already_waking_up = FALSE;
 }
 
 static void
-directory_count_cancel (NautilusDirectory *directory)
+directory_count_cancel (NemoDirectory *directory)
 {
 	if (directory->details->count_in_progress != NULL) {
 		g_cancellable_cancel (directory->details->count_in_progress->cancellable);
@@ -492,14 +492,14 @@ directory_count_cancel (NautilusDirectory *directory)
 }
 
 static void
-deep_count_cancel (NautilusDirectory *directory)
+deep_count_cancel (NemoDirectory *directory)
 {
 	if (directory->details->deep_count_in_progress != NULL) {
-		g_assert (NAUTILUS_IS_FILE (directory->details->deep_count_file));
+		g_assert (NEMO_IS_FILE (directory->details->deep_count_file));
 		
 		g_cancellable_cancel (directory->details->deep_count_in_progress->cancellable);
 
-		directory->details->deep_count_file->details->deep_counts_status = NAUTILUS_REQUEST_NOT_STARTED;
+		directory->details->deep_count_file->details->deep_counts_status = NEMO_REQUEST_NOT_STARTED;
 
 		directory->details->deep_count_in_progress->directory = NULL;
 		directory->details->deep_count_in_progress = NULL;
@@ -510,7 +510,7 @@ deep_count_cancel (NautilusDirectory *directory)
 }
 
 static void
-mime_list_cancel (NautilusDirectory *directory)
+mime_list_cancel (NemoDirectory *directory)
 {
 	if (directory->details->mime_list_in_progress != NULL) {
 		g_cancellable_cancel (directory->details->mime_list_in_progress->cancellable);
@@ -518,7 +518,7 @@ mime_list_cancel (NautilusDirectory *directory)
 }
 
 static void
-top_left_cancel (NautilusDirectory *directory)
+top_left_cancel (NemoDirectory *directory)
 {
 	if (directory->details->top_left_read_state != NULL) {
 		g_cancellable_cancel (directory->details->top_left_read_state->cancellable);
@@ -530,7 +530,7 @@ top_left_cancel (NautilusDirectory *directory)
 }
 
 static void
-link_info_cancel (NautilusDirectory *directory)
+link_info_cancel (NemoDirectory *directory)
 {
 	if (directory->details->link_info_read_state != NULL) {
 		g_cancellable_cancel (directory->details->link_info_read_state->cancellable);
@@ -541,7 +541,7 @@ link_info_cancel (NautilusDirectory *directory)
 }
 
 static void
-thumbnail_cancel (NautilusDirectory *directory)
+thumbnail_cancel (NemoDirectory *directory)
 {
 	if (directory->details->thumbnail_state != NULL) {
 		g_cancellable_cancel (directory->details->thumbnail_state->cancellable);
@@ -552,7 +552,7 @@ thumbnail_cancel (NautilusDirectory *directory)
 }
 
 static void
-mount_cancel (NautilusDirectory *directory)
+mount_cancel (NemoDirectory *directory)
 {
 	if (directory->details->mount_state != NULL) {
 		g_cancellable_cancel (directory->details->mount_state->cancellable);
@@ -563,7 +563,7 @@ mount_cancel (NautilusDirectory *directory)
 }
 
 static void
-file_info_cancel (NautilusDirectory *directory)
+file_info_cancel (NemoDirectory *directory)
 {
 	if (directory->details->get_info_in_progress != NULL) {
 		g_cancellable_cancel (directory->details->get_info_in_progress->cancellable);
@@ -576,7 +576,7 @@ file_info_cancel (NautilusDirectory *directory)
 }
 
 static void
-new_files_cancel (NautilusDirectory *directory)
+new_files_cancel (NemoDirectory *directory)
 {
 	GList *l;
 	NewFilesState *state;
@@ -620,8 +620,8 @@ monitor_key_compare (gconstpointer a,
 }
 
 static GList *
-find_monitor (NautilusDirectory *directory,
-	      NautilusFile *file,
+find_monitor (NemoDirectory *directory,
+	      NemoFile *file,
 	      gconstpointer client)
 {
 	Monitor monitor;
@@ -635,7 +635,7 @@ find_monitor (NautilusDirectory *directory,
 }
 
 static void
-remove_monitor_link (NautilusDirectory *directory,
+remove_monitor_link (NemoDirectory *directory,
 		     GList *link)
 {
 	Monitor *monitor;
@@ -652,65 +652,65 @@ remove_monitor_link (NautilusDirectory *directory,
 }
 
 static void
-remove_monitor (NautilusDirectory *directory,
-		NautilusFile *file,
+remove_monitor (NemoDirectory *directory,
+		NemoFile *file,
 		gconstpointer client)
 {
 	remove_monitor_link (directory, find_monitor (directory, file, client));
 }
 
 Request
-nautilus_directory_set_up_request (NautilusFileAttributes file_attributes)
+nemo_directory_set_up_request (NemoFileAttributes file_attributes)
 {
 	Request request;
 
 	request = 0;
 	
-	if ((file_attributes & NAUTILUS_FILE_ATTRIBUTE_DIRECTORY_ITEM_COUNT) != 0) {
+	if ((file_attributes & NEMO_FILE_ATTRIBUTE_DIRECTORY_ITEM_COUNT) != 0) {
 		REQUEST_SET_TYPE (request, REQUEST_DIRECTORY_COUNT);
 	}
 	
-	if ((file_attributes & NAUTILUS_FILE_ATTRIBUTE_DEEP_COUNTS) != 0) {
+	if ((file_attributes & NEMO_FILE_ATTRIBUTE_DEEP_COUNTS) != 0) {
 		REQUEST_SET_TYPE (request, REQUEST_DEEP_COUNT);
 	}
 
-	if ((file_attributes & NAUTILUS_FILE_ATTRIBUTE_DIRECTORY_ITEM_MIME_TYPES) != 0) {
+	if ((file_attributes & NEMO_FILE_ATTRIBUTE_DIRECTORY_ITEM_MIME_TYPES) != 0) {
 		REQUEST_SET_TYPE (request, REQUEST_MIME_LIST);
 	}
-	if ((file_attributes & NAUTILUS_FILE_ATTRIBUTE_INFO) != 0) {
+	if ((file_attributes & NEMO_FILE_ATTRIBUTE_INFO) != 0) {
 		REQUEST_SET_TYPE (request, REQUEST_FILE_INFO);
 	}
 	
-	if (file_attributes & NAUTILUS_FILE_ATTRIBUTE_LINK_INFO) {
+	if (file_attributes & NEMO_FILE_ATTRIBUTE_LINK_INFO) {
 		REQUEST_SET_TYPE (request, REQUEST_FILE_INFO);
 		REQUEST_SET_TYPE (request, REQUEST_LINK_INFO);
 	}
 	
-	if (file_attributes & NAUTILUS_FILE_ATTRIBUTE_TOP_LEFT_TEXT) {
+	if (file_attributes & NEMO_FILE_ATTRIBUTE_TOP_LEFT_TEXT) {
 		REQUEST_SET_TYPE (request, REQUEST_TOP_LEFT_TEXT);
 		REQUEST_SET_TYPE (request, REQUEST_FILE_INFO);
 	}
 	
-	if (file_attributes & NAUTILUS_FILE_ATTRIBUTE_LARGE_TOP_LEFT_TEXT) {
+	if (file_attributes & NEMO_FILE_ATTRIBUTE_LARGE_TOP_LEFT_TEXT) {
 		REQUEST_SET_TYPE (request, REQUEST_LARGE_TOP_LEFT_TEXT);
 		REQUEST_SET_TYPE (request, REQUEST_FILE_INFO);
 	}
 
-	if ((file_attributes & NAUTILUS_FILE_ATTRIBUTE_EXTENSION_INFO) != 0) {
+	if ((file_attributes & NEMO_FILE_ATTRIBUTE_EXTENSION_INFO) != 0) {
 		REQUEST_SET_TYPE (request, REQUEST_EXTENSION_INFO);
 	}
 
-	if (file_attributes & NAUTILUS_FILE_ATTRIBUTE_THUMBNAIL) {
+	if (file_attributes & NEMO_FILE_ATTRIBUTE_THUMBNAIL) {
 		REQUEST_SET_TYPE (request, REQUEST_THUMBNAIL);
 		REQUEST_SET_TYPE (request, REQUEST_FILE_INFO);
 	}
 
-	if (file_attributes & NAUTILUS_FILE_ATTRIBUTE_MOUNT) {
+	if (file_attributes & NEMO_FILE_ATTRIBUTE_MOUNT) {
 		REQUEST_SET_TYPE (request, REQUEST_MOUNT);
 		REQUEST_SET_TYPE (request, REQUEST_FILE_INFO);
 	}
 
-	if (file_attributes & NAUTILUS_FILE_ATTRIBUTE_FILESYSTEM_INFO) {
+	if (file_attributes & NEMO_FILE_ATTRIBUTE_FILESYSTEM_INFO) {
 		REQUEST_SET_TYPE (request, REQUEST_FILESYSTEM_INFO);
 	}
 
@@ -718,33 +718,33 @@ nautilus_directory_set_up_request (NautilusFileAttributes file_attributes)
 }
 
 static void
-mime_db_changed_callback (GObject *ignore, NautilusDirectory *dir)
+mime_db_changed_callback (GObject *ignore, NemoDirectory *dir)
 {
-	NautilusFileAttributes attrs;
+	NemoFileAttributes attrs;
 
 	g_assert (dir != NULL);
 	g_assert (dir->details != NULL);
 
-	attrs = NAUTILUS_FILE_ATTRIBUTE_INFO |
-		NAUTILUS_FILE_ATTRIBUTE_LINK_INFO |
-		NAUTILUS_FILE_ATTRIBUTE_DIRECTORY_ITEM_MIME_TYPES;
+	attrs = NEMO_FILE_ATTRIBUTE_INFO |
+		NEMO_FILE_ATTRIBUTE_LINK_INFO |
+		NEMO_FILE_ATTRIBUTE_DIRECTORY_ITEM_MIME_TYPES;
 
-	nautilus_directory_force_reload_internal (dir, attrs);
+	nemo_directory_force_reload_internal (dir, attrs);
 }
 
 void
-nautilus_directory_monitor_add_internal (NautilusDirectory *directory,
-					 NautilusFile *file,
+nemo_directory_monitor_add_internal (NemoDirectory *directory,
+					 NemoFile *file,
 					 gconstpointer client,
 					 gboolean monitor_hidden_files,
-					 NautilusFileAttributes file_attributes,
-					 NautilusDirectoryCallback callback,
+					 NemoFileAttributes file_attributes,
+					 NemoDirectoryCallback callback,
 					 gpointer callback_data)
 {
 	Monitor *monitor;
 	GList *file_list;
 		
-	g_assert (NAUTILUS_IS_DIRECTORY (directory));
+	g_assert (NEMO_IS_DIRECTORY (directory));
 
 	/* Replace any current monitor for this client/file pair. */
 	remove_monitor (directory, file, client);
@@ -754,7 +754,7 @@ nautilus_directory_monitor_add_internal (NautilusDirectory *directory,
 	monitor->file = file;
 	monitor->monitor_hidden_files = monitor_hidden_files;
 	monitor->client = client;
-	monitor->request = nautilus_directory_set_up_request (file_attributes);
+	monitor->request = nemo_directory_set_up_request (file_attributes);
 
 	if (file == NULL) {
 		REQUEST_SET_TYPE (monitor->request, REQUEST_FILE_LIST);
@@ -765,46 +765,46 @@ nautilus_directory_monitor_add_internal (NautilusDirectory *directory,
 				     monitor->request);
 
 	if (callback != NULL) {
-		file_list = nautilus_directory_get_file_list (directory);
+		file_list = nemo_directory_get_file_list (directory);
 		(* callback) (directory, file_list, callback_data);
-		nautilus_file_list_free (file_list);
+		nemo_file_list_free (file_list);
 	}
 	
 	/* Start the "real" monitoring (FAM or whatever). */
 	/* We always monitor the whole directory since in practice
-	 * nautilus almost always shows the whole directory anyway, and
+	 * nemo almost always shows the whole directory anyway, and
 	 * it allows us to avoid one file monitor per file in a directory.
 	 */
 	if (directory->details->monitor == NULL) {
-		directory->details->monitor = nautilus_monitor_directory (directory->details->location);
+		directory->details->monitor = nemo_monitor_directory (directory->details->location);
 	}
 	
 
 	if (REQUEST_WANTS_TYPE (monitor->request, REQUEST_FILE_INFO) &&
 	    directory->details->mime_db_monitor == 0) {
 		directory->details->mime_db_monitor =
-			g_signal_connect_object (nautilus_signaller_get_current (),
+			g_signal_connect_object (nemo_signaller_get_current (),
 						 "mime_data_changed",
 						 G_CALLBACK (mime_db_changed_callback), directory, 0);
 	}
 
 	/* Put the monitor file or all the files on the work queue. */
 	if (file != NULL) {
-		nautilus_directory_add_file_to_work_queue (directory, file);
+		nemo_directory_add_file_to_work_queue (directory, file);
 	} else {
 		add_all_files_to_work_queue (directory);
 	}
 
 	/* Kick off I/O. */
-	nautilus_directory_async_state_changed (directory);
+	nemo_directory_async_state_changed (directory);
 }
 
 static void
-set_file_unconfirmed (NautilusFile *file, gboolean unconfirmed)
+set_file_unconfirmed (NemoFile *file, gboolean unconfirmed)
 {
-	NautilusDirectory *directory;
+	NemoDirectory *directory;
 
-	g_assert (NAUTILUS_IS_FILE (file));
+	g_assert (NEMO_IS_FILE (file));
 	g_assert (unconfirmed == FALSE || unconfirmed == TRUE);
 
 	if (file->details->unconfirmed == unconfirmed) {
@@ -825,18 +825,18 @@ static gboolean show_hidden_files = TRUE;
 static void
 show_hidden_files_changed_callback (gpointer callback_data)
 {
-	show_hidden_files = g_settings_get_boolean (nautilus_preferences, NAUTILUS_PREFERENCES_SHOW_HIDDEN_FILES);
+	show_hidden_files = g_settings_get_boolean (nemo_preferences, NEMO_PREFERENCES_SHOW_HIDDEN_FILES);
 }
 
 static gboolean
-should_skip_file (NautilusDirectory *directory, GFileInfo *info)
+should_skip_file (NemoDirectory *directory, GFileInfo *info)
 {
 	static gboolean show_hidden_files_changed_callback_installed = FALSE;
 
 	/* Add the callback once for the life of our process */
 	if (!show_hidden_files_changed_callback_installed) {
-		g_signal_connect_swapped (nautilus_preferences,
-					  "changed::" NAUTILUS_PREFERENCES_SHOW_HIDDEN_FILES,
+		g_signal_connect_swapped (nemo_preferences,
+					  "changed::" NEMO_PREFERENCES_SHOW_HIDDEN_FILES,
 					  G_CALLBACK(show_hidden_files_changed_callback),
 					  NULL);
 
@@ -861,18 +861,18 @@ should_skip_file (NautilusDirectory *directory, GFileInfo *info)
 static gboolean
 dequeue_pending_idle_callback (gpointer callback_data)
 {
-	NautilusDirectory *directory;
+	NemoDirectory *directory;
 	GList *pending_file_info;
 	GList *node, *next;
-	NautilusFile *file;
+	NemoFile *file;
 	GList *changed_files, *added_files;
 	GFileInfo *file_info;
 	const char *mimetype, *name;
 	DirectoryLoadState *dir_load_state;
 
-	directory = NAUTILUS_DIRECTORY (callback_data);
+	directory = NEMO_DIRECTORY (callback_data);
 
-	nautilus_directory_ref (directory);
+	nemo_directory_ref (directory);
 
 	directory->details->dequeue_pending_idle_id = 0;
 
@@ -881,8 +881,8 @@ dequeue_pending_idle_callback (gpointer callback_data)
 	directory->details->pending_file_info = NULL;
 
 	/* If we are no longer monitoring, then throw away these. */
-	if (!nautilus_directory_is_file_list_monitored (directory)) {
-		nautilus_directory_async_state_changed (directory);
+	if (!nemo_directory_is_file_list_monitored (directory)) {
+		nemo_directory_async_state_changed (directory);
 		goto drain;
 	}
 
@@ -891,7 +891,7 @@ dequeue_pending_idle_callback (gpointer callback_data)
 
 	dir_load_state = directory->details->directory_load_in_progress;
 	
-	/* Build a list of NautilusFile objects. */
+	/* Build a list of NemoFile objects. */
 	for (node = pending_file_info; node != NULL; node = node->next) {
 		file_info = node->data;
 
@@ -917,28 +917,28 @@ dequeue_pending_idle_callback (gpointer callback_data)
 		}
 		
 		/* check if the file already exists */
-		file = nautilus_directory_find_file_by_name (directory, name);
+		file = nemo_directory_find_file_by_name (directory, name);
 		if (file != NULL) {
 			/* file already exists in dir, check if we still need to
 			 *  emit file_added or if it changed */
 			set_file_unconfirmed (file, FALSE);
 			if (!file->details->is_added) {
 				/* We consider this newly added even if its in the list.
-				 * This can happen if someone called nautilus_file_get_by_uri()
+				 * This can happen if someone called nemo_file_get_by_uri()
 				 * on a file in the folder before the add signal was
 				 * emitted */
-				nautilus_file_ref (file);
+				nemo_file_ref (file);
 				file->details->is_added = TRUE;
 				added_files = g_list_prepend (added_files, file);
-			} else if (nautilus_file_update_info (file, file_info)) {
+			} else if (nemo_file_update_info (file, file_info)) {
 				/* File changed, notify about the change. */
-				nautilus_file_ref (file);
+				nemo_file_ref (file);
 				changed_files = g_list_prepend (changed_files, file);
 			}
 		} else {
-			/* new file, create a nautilus file object and add it to the list */
-			file = nautilus_file_new_from_info (directory, file_info);
-			nautilus_directory_add_file (directory, file);			
+			/* new file, create a nemo file object and add it to the list */
+			file = nemo_file_new_from_info (directory, file_info);
+			nemo_directory_add_file (directory, file);			
 			file->details->is_added = TRUE;
 			added_files = g_list_prepend (added_files, file);
 		}
@@ -950,28 +950,28 @@ dequeue_pending_idle_callback (gpointer callback_data)
 	if (directory->details->directory_loaded) {
 		for (node = directory->details->file_list;
 		     node != NULL; node = next) {
-			file = NAUTILUS_FILE (node->data);
+			file = NEMO_FILE (node->data);
 			next = node->next;
 
 			if (file->details->unconfirmed) {
-				nautilus_file_ref (file);
+				nemo_file_ref (file);
 				changed_files = g_list_prepend (changed_files, file);
 				
-				nautilus_file_mark_gone (file);
+				nemo_file_mark_gone (file);
 			}
 		}
 	}
 
 	/* Send the changed and added signals. */
-	nautilus_directory_emit_change_signals (directory, changed_files);
-	nautilus_file_list_free (changed_files);
-	nautilus_directory_emit_files_added (directory, added_files);
-	nautilus_file_list_free (added_files);
+	nemo_directory_emit_change_signals (directory, changed_files);
+	nemo_file_list_free (changed_files);
+	nemo_directory_emit_files_added (directory, added_files);
+	nemo_file_list_free (added_files);
 
 	if (directory->details->directory_loaded &&
 	    !directory->details->directory_loaded_sent_notification) {
 		/* Send the done_loading signal. */
-		nautilus_directory_emit_done_loading (directory);
+		nemo_directory_emit_done_loading (directory);
 
 		if (dir_load_state) {
 			file = dir_load_state->load_directory_file;
@@ -986,10 +986,10 @@ dequeue_pending_idle_callback (gpointer callback_data)
 			file->details->mime_list = istr_set_get_as_list
 				(dir_load_state->load_mime_list_hash);
 
-			nautilus_file_changed (file);
+			nemo_file_changed (file);
 		}
 		
-		nautilus_directory_async_state_changed (directory);
+		nemo_directory_async_state_changed (directory);
 
 		directory->details->directory_loaded_sent_notification = TRUE;
 	}
@@ -998,14 +998,14 @@ dequeue_pending_idle_callback (gpointer callback_data)
 	g_list_free_full (pending_file_info, g_object_unref);
 
 	/* Get the state machine running again. */
-	nautilus_directory_async_state_changed (directory);
+	nemo_directory_async_state_changed (directory);
 
-	nautilus_directory_unref (directory);
+	nemo_directory_unref (directory);
 	return FALSE;
 }
 
 void
-nautilus_directory_schedule_dequeue_pending (NautilusDirectory *directory)
+nemo_directory_schedule_dequeue_pending (NemoDirectory *directory)
 {
 	if (directory->details->dequeue_pending_idle_id == 0) {
 		directory->details->dequeue_pending_idle_id
@@ -1014,7 +1014,7 @@ nautilus_directory_schedule_dequeue_pending (NautilusDirectory *directory)
 }
 
 static void
-directory_load_one (NautilusDirectory *directory,
+directory_load_one (NemoDirectory *directory,
 		    GFileInfo *info)
 {
 	if (info == NULL) {
@@ -1024,7 +1024,7 @@ directory_load_one (NautilusDirectory *directory,
 	if (g_file_info_get_name (info) == NULL) {
 		char *uri;
 
-		uri = nautilus_directory_get_uri (directory);
+		uri = nemo_directory_get_uri (directory);
 		g_warning ("Got GFileInfo with NULL name in %s, ignoring. This shouldn't happen unless the gvfs backend is broken.\n", uri);
 		g_free (uri);
 		
@@ -1035,13 +1035,13 @@ directory_load_one (NautilusDirectory *directory,
 	g_object_ref (info);
 	directory->details->pending_file_info
 		= g_list_prepend (directory->details->pending_file_info, info);
-	nautilus_directory_schedule_dequeue_pending (directory);
+	nemo_directory_schedule_dequeue_pending (directory);
 }
 
 static void
-directory_load_cancel (NautilusDirectory *directory)
+directory_load_cancel (NemoDirectory *directory)
 {
-	NautilusFile *file;
+	NemoFile *file;
 	DirectoryLoadState *state;
 
 	state = directory->details->directory_load_in_progress;
@@ -1049,7 +1049,7 @@ directory_load_cancel (NautilusDirectory *directory)
 		file = state->load_directory_file;
 		file->details->loading_directory = FALSE;
 		if (file->details->directory != directory) {
-			nautilus_directory_async_state_changed (file->details->directory);
+			nemo_directory_async_state_changed (file->details->directory);
 		}
 		
 		g_cancellable_cancel (state->cancellable);
@@ -1066,7 +1066,7 @@ remove_callback (gpointer key, gpointer value, gpointer user_data)
 }
 
 static void
-file_list_cancel (NautilusDirectory *directory)
+file_list_cancel (NemoDirectory *directory)
 {
 	directory_load_cancel (directory);
 	
@@ -1086,7 +1086,7 @@ file_list_cancel (NautilusDirectory *directory)
 }
 
 static void
-directory_load_done (NautilusDirectory *directory,
+directory_load_done (NemoDirectory *directory,
 		     GError *error)
 {
 	GList *node;
@@ -1103,10 +1103,10 @@ directory_load_done (NautilusDirectory *directory,
 		 */
 		for (node = directory->details->file_list;
 		     node != NULL; node = node->next) {
-			set_file_unconfirmed (NAUTILUS_FILE (node->data), FALSE);
+			set_file_unconfirmed (NEMO_FILE (node->data), FALSE);
 		}
 
-		nautilus_directory_emit_load_error (directory, error);
+		nemo_directory_emit_load_error (directory, error);
 	}
 
 	/* Call the idle function right away. */
@@ -1119,36 +1119,36 @@ directory_load_done (NautilusDirectory *directory,
 }
 
 void
-nautilus_directory_monitor_remove_internal (NautilusDirectory *directory,
-					    NautilusFile *file,
+nemo_directory_monitor_remove_internal (NemoDirectory *directory,
+					    NemoFile *file,
 					    gconstpointer client)
 {
-	g_assert (NAUTILUS_IS_DIRECTORY (directory));
-	g_assert (file == NULL || NAUTILUS_IS_FILE (file));
+	g_assert (NEMO_IS_DIRECTORY (directory));
+	g_assert (file == NULL || NEMO_IS_FILE (file));
 	g_assert (client != NULL);
 
 	remove_monitor (directory, file, client);
 
 	if (directory->details->monitor != NULL
 	    && directory->details->monitor_list == NULL) {
-		nautilus_monitor_cancel (directory->details->monitor);
+		nemo_monitor_cancel (directory->details->monitor);
 		directory->details->monitor = NULL;
 	}
 
 	/* XXX - do we need to remove anything from the work queue? */
 
-	nautilus_directory_async_state_changed (directory);
+	nemo_directory_async_state_changed (directory);
 }
 
 FileMonitors *
-nautilus_directory_remove_file_monitors (NautilusDirectory *directory,
-					 NautilusFile *file)
+nemo_directory_remove_file_monitors (NemoDirectory *directory,
+					 NemoFile *file)
 {
 	GList *result, **list, *node, *next;
 	Monitor *monitor;
 
-	g_assert (NAUTILUS_IS_DIRECTORY (directory));
-	g_assert (NAUTILUS_IS_FILE (file));
+	g_assert (NEMO_IS_DIRECTORY (directory));
+	g_assert (NEMO_IS_FILE (file));
 	g_assert (file->details->directory == directory);
 
 	result = NULL;
@@ -1168,22 +1168,22 @@ nautilus_directory_remove_file_monitors (NautilusDirectory *directory,
 
 	/* XXX - do we need to remove anything from the work queue? */
 
-	nautilus_directory_async_state_changed (directory);
+	nemo_directory_async_state_changed (directory);
 
 	return (FileMonitors *) result;
 }
 
 void
-nautilus_directory_add_file_monitors (NautilusDirectory *directory,
-				      NautilusFile *file,
+nemo_directory_add_file_monitors (NemoDirectory *directory,
+				      NemoFile *file,
 				      FileMonitors *monitors)
 {
 	GList **list;
 	GList *l;
 	Monitor *monitor;
 
-	g_assert (NAUTILUS_IS_DIRECTORY (directory));
-	g_assert (NAUTILUS_IS_FILE (file));
+	g_assert (NEMO_IS_DIRECTORY (directory));
+	g_assert (NEMO_IS_FILE (file));
 	g_assert (file->details->directory == directory);
 
 	if (monitors == NULL) {
@@ -1199,9 +1199,9 @@ nautilus_directory_add_file_monitors (NautilusDirectory *directory,
 	list = &directory->details->monitor_list;
 	*list = g_list_concat (*list, (GList *) monitors);
 
-	nautilus_directory_add_file_to_work_queue (directory, file);
+	nemo_directory_add_file_to_work_queue (directory, file);
 
-	nautilus_directory_async_state_changed (directory);
+	nemo_directory_async_state_changed (directory);
 }
 
 static int
@@ -1264,7 +1264,7 @@ ready_callback_key_compare_only_active (gconstpointer a, gconstpointer b)
 }
 
 static void
-ready_callback_call (NautilusDirectory *directory,
+ready_callback_call (NemoDirectory *directory,
 		     const ReadyCallback *callback)
 {
 	GList *file_list;
@@ -1280,7 +1280,7 @@ ready_callback_call (NautilusDirectory *directory,
 		    !REQUEST_WANTS_TYPE (callback->request, REQUEST_FILE_LIST)) {
 			file_list = NULL;
 		} else {
-			file_list = nautilus_directory_get_file_list (directory);
+			file_list = nemo_directory_get_file_list (directory);
 		}
 
 		/* Pass back the file list if the user was waiting for it. */
@@ -1288,23 +1288,23 @@ ready_callback_call (NautilusDirectory *directory,
 						  file_list,
 						  callback->callback_data);
 
-		nautilus_file_list_free (file_list);
+		nemo_file_list_free (file_list);
 	}
 }
 
 void
-nautilus_directory_call_when_ready_internal (NautilusDirectory *directory,
-					     NautilusFile *file,
-					     NautilusFileAttributes file_attributes,
+nemo_directory_call_when_ready_internal (NemoDirectory *directory,
+					     NemoFile *file,
+					     NemoFileAttributes file_attributes,
 					     gboolean wait_for_file_list,
-					     NautilusDirectoryCallback directory_callback,
-					     NautilusFileCallback file_callback,
+					     NemoDirectoryCallback directory_callback,
+					     NemoFileCallback file_callback,
 					     gpointer callback_data)
 {
 	ReadyCallback callback;
 
-	g_assert (directory == NULL || NAUTILUS_IS_DIRECTORY (directory));
-	g_assert (file == NULL || NAUTILUS_IS_FILE (file));
+	g_assert (directory == NULL || NEMO_IS_DIRECTORY (directory));
+	g_assert (file == NULL || NEMO_IS_FILE (file));
 	g_assert (file != NULL || directory_callback != NULL);
 
 	/* Construct a callback object. */
@@ -1316,7 +1316,7 @@ nautilus_directory_call_when_ready_internal (NautilusDirectory *directory,
 		callback.callback.file = file_callback;
 	}
 	callback.callback_data = callback_data;
-	callback.request = nautilus_directory_set_up_request (file_attributes);
+	callback.request = nemo_directory_set_up_request (file_attributes);
 	if (wait_for_file_list) {
 		REQUEST_SET_TYPE (callback.request, REQUEST_FILE_LIST);
 	}
@@ -1347,29 +1347,29 @@ nautilus_directory_call_when_ready_internal (NautilusDirectory *directory,
 
 	/* Put the callback file or all the files on the work queue. */
 	if (file != NULL) {
-		nautilus_directory_add_file_to_work_queue (directory, file);
+		nemo_directory_add_file_to_work_queue (directory, file);
 	} else {
 		add_all_files_to_work_queue (directory);
 	}
 
-	nautilus_directory_async_state_changed (directory);
+	nemo_directory_async_state_changed (directory);
 }
 
 gboolean      
-nautilus_directory_check_if_ready_internal (NautilusDirectory *directory,
-					    NautilusFile *file,
-					    NautilusFileAttributes file_attributes)
+nemo_directory_check_if_ready_internal (NemoDirectory *directory,
+					    NemoFile *file,
+					    NemoFileAttributes file_attributes)
 {
 	Request request;
 
-	g_assert (NAUTILUS_IS_DIRECTORY (directory));
+	g_assert (NEMO_IS_DIRECTORY (directory));
 
-	request = nautilus_directory_set_up_request (file_attributes);
+	request = nemo_directory_set_up_request (file_attributes);
 	return request_is_satisfied (directory, file, request);
 }
 
 static void
-remove_callback_link_keep_data (NautilusDirectory *directory,
+remove_callback_link_keep_data (NemoDirectory *directory,
 				GList *link)
 {
 	ReadyCallback *callback;
@@ -1385,7 +1385,7 @@ remove_callback_link_keep_data (NautilusDirectory *directory,
 }
 
 static void
-remove_callback_link (NautilusDirectory *directory,
+remove_callback_link (NemoDirectory *directory,
 		      GList *link)
 {
 	ReadyCallback *callback;
@@ -1396,10 +1396,10 @@ remove_callback_link (NautilusDirectory *directory,
 }
 
 void
-nautilus_directory_cancel_callback_internal (NautilusDirectory *directory,
-					     NautilusFile *file,
-					     NautilusDirectoryCallback directory_callback,
-					     NautilusFileCallback file_callback,
+nemo_directory_cancel_callback_internal (NemoDirectory *directory,
+					     NemoFile *file,
+					     NemoDirectoryCallback directory_callback,
+					     NemoFileCallback file_callback,
 					     gpointer callback_data)
 {
 	ReadyCallback callback;
@@ -1409,8 +1409,8 @@ nautilus_directory_cancel_callback_internal (NautilusDirectory *directory,
 		return;
 	}
 
-	g_assert (NAUTILUS_IS_DIRECTORY (directory));
-	g_assert (file == NULL || NAUTILUS_IS_FILE (file));
+	g_assert (NEMO_IS_DIRECTORY (directory));
+	g_assert (file == NULL || NEMO_IS_FILE (file));
 	g_assert (file != NULL || directory_callback != NULL);
 	g_assert (file == NULL || file_callback != NULL);
 
@@ -1431,7 +1431,7 @@ nautilus_directory_cancel_callback_internal (NautilusDirectory *directory,
 		if (node != NULL) {
 			remove_callback_link (directory, node);
 			
-			nautilus_directory_async_state_changed (directory);
+			nemo_directory_async_state_changed (directory);
 		}
 	} while (node != NULL);
 }
@@ -1458,7 +1458,7 @@ new_files_callback (GObject *source_object,
 		    GAsyncResult *res,
 		    gpointer user_data)
 {
-	NautilusDirectory *directory;
+	NemoDirectory *directory;
 	GFileInfo *info;
 	NewFilesState *state;
 
@@ -1470,7 +1470,7 @@ new_files_callback (GObject *source_object,
 		return;
 	}
 	
-	directory = nautilus_directory_ref (state->directory);
+	directory = nemo_directory_ref (state->directory);
 	
 	/* Queue up the new file. */
 	info = g_file_query_info_finish (G_FILE (source_object), res, NULL);
@@ -1481,11 +1481,11 @@ new_files_callback (GObject *source_object,
 
 	new_files_state_unref (state);
 
-	nautilus_directory_unref (directory);
+	nemo_directory_unref (directory);
 }
 
 void
-nautilus_directory_get_info_for_new_files (NautilusDirectory *directory,
+nemo_directory_get_info_for_new_files (NemoDirectory *directory,
 					   GList *location_list)
 {
 	NewFilesState *state;
@@ -1507,7 +1507,7 @@ nautilus_directory_get_info_for_new_files (NautilusDirectory *directory,
 		state->count++;
 		
 		g_file_query_info_async (location,
-					 NAUTILUS_FILE_DEFAULT_ATTRIBUTES,
+					 NEMO_FILE_DEFAULT_ATTRIBUTES,
 					 0,
 					 G_PRIORITY_DEFAULT,
 					 state->cancellable,
@@ -1520,9 +1520,9 @@ nautilus_directory_get_info_for_new_files (NautilusDirectory *directory,
 }
 
 void
-nautilus_async_destroying_file (NautilusFile *file)
+nemo_async_destroying_file (NemoFile *file)
 {
-	NautilusDirectory *directory;
+	NemoDirectory *directory;
 	gboolean changed;
 	GList *node, *next;
 	ReadyCallback *callback;
@@ -1615,78 +1615,78 @@ nautilus_async_destroying_file (NautilusFile *file)
 	
 	/* Let the directory take care of the rest. */
 	if (changed) {
-		nautilus_directory_async_state_changed (directory);
+		nemo_directory_async_state_changed (directory);
 	}
 }
 
 static gboolean
-lacks_directory_count (NautilusFile *file)
+lacks_directory_count (NemoFile *file)
 {
 	return !file->details->directory_count_is_up_to_date
-		&& nautilus_file_should_show_directory_item_count (file);
+		&& nemo_file_should_show_directory_item_count (file);
 }
 
 static gboolean
-should_get_directory_count_now (NautilusFile *file)
+should_get_directory_count_now (NemoFile *file)
 {
 	return lacks_directory_count (file)
 		&& !file->details->loading_directory;
 }
 
 static gboolean
-lacks_top_left (NautilusFile *file)
+lacks_top_left (NemoFile *file)
 {
 	return file->details->file_info_is_up_to_date &&
 		!file->details->top_left_text_is_up_to_date 
-		&& nautilus_file_should_get_top_left_text (file);
+		&& nemo_file_should_get_top_left_text (file);
 }
 
 static gboolean
-lacks_large_top_left (NautilusFile *file)
+lacks_large_top_left (NemoFile *file)
 {
 	return file->details->file_info_is_up_to_date &&
 		(!file->details->top_left_text_is_up_to_date ||
 		 file->details->got_large_top_left_text != file->details->got_top_left_text)
-		&& nautilus_file_should_get_top_left_text (file);
+		&& nemo_file_should_get_top_left_text (file);
 }
 static gboolean
-lacks_info (NautilusFile *file)
+lacks_info (NemoFile *file)
 {
 	return !file->details->file_info_is_up_to_date
 		&& !file->details->is_gone;
 }
 
 static gboolean
-lacks_filesystem_info (NautilusFile *file)
+lacks_filesystem_info (NemoFile *file)
 {
 	return !file->details->filesystem_info_is_up_to_date;
 }
 
 static gboolean
-lacks_deep_count (NautilusFile *file)
+lacks_deep_count (NemoFile *file)
 {
-	return file->details->deep_counts_status != NAUTILUS_REQUEST_DONE;
+	return file->details->deep_counts_status != NEMO_REQUEST_DONE;
 }
 
 static gboolean
-lacks_mime_list (NautilusFile *file)
+lacks_mime_list (NemoFile *file)
 {
 	return !file->details->mime_list_is_up_to_date;
 }
 
 static gboolean
-should_get_mime_list (NautilusFile *file)
+should_get_mime_list (NemoFile *file)
 {
 	return lacks_mime_list (file)
 		&& !file->details->loading_directory;
 }
 
 static gboolean
-lacks_link_info (NautilusFile *file)
+lacks_link_info (NemoFile *file)
 {
 	if (file->details->file_info_is_up_to_date && 
 	    !file->details->link_info_is_up_to_date) {
-		if (nautilus_file_is_nautilus_link (file)) {
+		if (nemo_file_is_nemo_link (file)) {
 			return TRUE;
 		} else {
 			link_info_done (file->details->directory, file, NULL, NULL, NULL, FALSE, FALSE);
@@ -1698,21 +1698,21 @@ lacks_link_info (NautilusFile *file)
 }
 
 static gboolean
-lacks_extension_info (NautilusFile *file)
+lacks_extension_info (NemoFile *file)
 {
 	return file->details->pending_info_providers != NULL;
 }
 
 static gboolean
-lacks_thumbnail (NautilusFile *file)
+lacks_thumbnail (NemoFile *file)
 {
-	return nautilus_file_should_show_thumbnail (file) &&
+	return nemo_file_should_show_thumbnail (file) &&
 		file->details->thumbnail_path != NULL &&
 		!file->details->thumbnail_is_up_to_date;
 }
 
 static gboolean
-lacks_mount (NautilusFile *file)
+lacks_mount (NemoFile *file)
 {
 	return (!file->details->mount_is_up_to_date &&
 		(
@@ -1721,7 +1721,7 @@ lacks_mount (NautilusFile *file)
 		 
 		 /* The toplevel directory of something */
 		 (file->details->type == G_FILE_TYPE_DIRECTORY &&
-		  nautilus_file_is_self_owned (file)) ||
+		  nemo_file_is_self_owned (file)) ||
 		 
 		 /* Mountable, could be a mountpoint */
 		 (file->details->type == G_FILE_TYPE_MOUNTABLE)
@@ -1731,7 +1731,7 @@ lacks_mount (NautilusFile *file)
 }
 
 static gboolean
-has_problem (NautilusDirectory *directory, NautilusFile *file, FileCheck problem)
+has_problem (NemoDirectory *directory, NemoFile *file, FileCheck problem)
 {
 	GList *node;
 
@@ -1749,8 +1749,8 @@ has_problem (NautilusDirectory *directory, NautilusFile *file, FileCheck problem
 }
 
 static gboolean
-request_is_satisfied (NautilusDirectory *directory,
-		      NautilusFile *file,
+request_is_satisfied (NemoDirectory *directory,
+		      NemoFile *file,
 		      Request request)
 {
 	if (REQUEST_WANTS_TYPE (request, REQUEST_FILE_LIST) &&
@@ -1825,14 +1825,14 @@ request_is_satisfied (NautilusDirectory *directory,
 static gboolean
 call_ready_callbacks_at_idle (gpointer callback_data)
 {
-	NautilusDirectory *directory;
+	NemoDirectory *directory;
 	GList *node, *next;
 	ReadyCallback *callback;
 
-	directory = NAUTILUS_DIRECTORY (callback_data);
+	directory = NEMO_DIRECTORY (callback_data);
 	directory->details->call_ready_idle_id = 0;
 
-	nautilus_directory_ref (directory);
+	nemo_directory_ref (directory);
 	
 	callback = NULL;
 	while (1) {
@@ -1858,15 +1858,15 @@ call_ready_callbacks_at_idle (gpointer callback_data)
 		g_free (callback);
 	}
 
-	nautilus_directory_async_state_changed (directory);
+	nemo_directory_async_state_changed (directory);
 
-	nautilus_directory_unref (directory);
+	nemo_directory_unref (directory);
 	
 	return FALSE;
 }
 
 static void
-schedule_call_ready_callbacks (NautilusDirectory *directory)
+schedule_call_ready_callbacks (NemoDirectory *directory)
 {
 	if (directory->details->call_ready_idle_id == 0) {
 		directory->details->call_ready_idle_id
@@ -1878,7 +1878,7 @@ schedule_call_ready_callbacks (NautilusDirectory *directory)
  * calls them at idle time, unless they are removed
  * before then */
 static gboolean
-call_ready_callbacks (NautilusDirectory *directory)
+call_ready_callbacks (NemoDirectory *directory)
 {
 	gboolean found_any;
 	GList *node, *next;
@@ -1906,8 +1906,8 @@ call_ready_callbacks (NautilusDirectory *directory)
 }
 
 gboolean
-nautilus_directory_has_active_request_for_file (NautilusDirectory *directory,
-						NautilusFile *file)
+nemo_directory_has_active_request_for_file (NemoDirectory *directory,
+						NemoFile *file)
 {
 	GList *node;
 	ReadyCallback *callback;
@@ -1937,7 +1937,7 @@ nautilus_directory_has_active_request_for_file (NautilusDirectory *directory,
 
 /* This checks if there's a request for monitoring the file list. */
 gboolean
-nautilus_directory_is_anyone_monitoring_file_list (NautilusDirectory *directory)
+nemo_directory_is_anyone_monitoring_file_list (NemoDirectory *directory)
 {
 	if (directory->details->call_when_ready_counters[REQUEST_FILE_LIST] > 0) {
 		return TRUE;
@@ -1952,16 +1952,16 @@ nautilus_directory_is_anyone_monitoring_file_list (NautilusDirectory *directory)
 
 /* This checks if the file list being monitored. */
 gboolean
-nautilus_directory_is_file_list_monitored (NautilusDirectory *directory) 
+nemo_directory_is_file_list_monitored (NemoDirectory *directory) 
 {
 	return directory->details->file_list_monitored;
 }
 
 static void
-mark_all_files_unconfirmed (NautilusDirectory *directory)
+mark_all_files_unconfirmed (NemoDirectory *directory)
 {
 	GList *node;
-	NautilusFile *file;
+	NemoFile *file;
 
 	for (node = directory->details->file_list; node != NULL; node = node->next) {
 		file = node->data;
@@ -1970,7 +1970,7 @@ mark_all_files_unconfirmed (NautilusDirectory *directory)
 }
 
 static void
-read_dot_hidden_file (NautilusDirectory *directory)
+read_dot_hidden_file (NemoDirectory *directory)
 {
 	gsize file_size;
 	char *file_contents;
@@ -2055,7 +2055,7 @@ directory_load_state_free (DirectoryLoadState *state)
 	if (state->load_mime_list_hash != NULL) {
 		istr_set_destroy (state->load_mime_list_hash);
 	}
-	nautilus_file_unref (state->load_directory_file);
+	nemo_file_unref (state->load_directory_file);
 	g_object_unref (state->cancellable);
 	g_free (state);
 }
@@ -2066,7 +2066,7 @@ more_files_callback (GObject *source_object,
 		     gpointer user_data)
 {
 	DirectoryLoadState *state;
-	NautilusDirectory *directory;
+	NemoDirectory *directory;
 	GError *error;
 	GList *files, *l;
 	GFileInfo *info;
@@ -2079,7 +2079,7 @@ more_files_callback (GObject *source_object,
 		return;
 	}
 
-	directory = nautilus_directory_ref (state->directory);
+	directory = nemo_directory_ref (state->directory);
 
 	g_assert (directory->details->directory_load_in_progress != NULL);
 	g_assert (directory->details->directory_load_in_progress == state);
@@ -2106,7 +2106,7 @@ more_files_callback (GObject *source_object,
 						    state);
 	}
 
-	nautilus_directory_unref (directory);
+	nemo_directory_unref (directory);
 
 	if (error) {
 		g_error_free (error);
@@ -2155,14 +2155,14 @@ enumerate_children_callback (GObject *source_object,
 
 /* Start monitoring the file list if it isn't already. */
 static void
-start_monitoring_file_list (NautilusDirectory *directory)
+start_monitoring_file_list (NemoDirectory *directory)
 {
 	DirectoryLoadState *state;
 	
 	if (!directory->details->file_list_monitored) {
 		g_assert (!directory->details->directory_load_in_progress);
 		directory->details->file_list_monitored = TRUE;
-		nautilus_file_list_ref (directory->details->file_list);
+		nemo_file_list_ref (directory->details->file_list);
 	}
 
 	if (directory->details->directory_loaded  ||
@@ -2184,13 +2184,13 @@ start_monitoring_file_list (NautilusDirectory *directory)
 	
 	g_assert (directory->details->location != NULL);
         state->load_directory_file =
-		nautilus_directory_get_corresponding_file (directory);
+		nemo_directory_get_corresponding_file (directory);
 	state->load_directory_file->details->loading_directory = TRUE;
 
 	read_dot_hidden_file (directory);
 	
 	/* Hack to work around kde trash dir */
-	if (kde_trash_dir_name != NULL && nautilus_directory_is_desktop_directory (directory)) {
+	if (kde_trash_dir_name != NULL && nemo_directory_is_desktop_directory (directory)) {
 		char *fn;
 
 		if (directory->details->hidden_file_hash == NULL) {
@@ -2211,7 +2211,7 @@ start_monitoring_file_list (NautilusDirectory *directory)
 	directory->details->directory_load_in_progress = state;
 	
 	g_file_enumerate_children_async (directory->details->location,
-					 NAUTILUS_FILE_DEFAULT_ATTRIBUTES,
+					 NEMO_FILE_DEFAULT_ATTRIBUTES,
 					 0, /* flags */
 					 G_PRIORITY_DEFAULT, /* prio */
 					 state->cancellable,
@@ -2221,7 +2221,7 @@ start_monitoring_file_list (NautilusDirectory *directory)
 
 /* Stop monitoring the file list if it is being monitored. */
 void
-nautilus_directory_stop_monitoring_file_list (NautilusDirectory *directory)
+nemo_directory_stop_monitoring_file_list (NemoDirectory *directory)
 {
 	if (!directory->details->file_list_monitored) {
 		g_assert (directory->details->directory_load_in_progress == NULL);
@@ -2230,29 +2230,29 @@ nautilus_directory_stop_monitoring_file_list (NautilusDirectory *directory)
 
 	directory->details->file_list_monitored = FALSE;
 	file_list_cancel (directory);
-	nautilus_file_list_unref (directory->details->file_list);
+	nemo_file_list_unref (directory->details->file_list);
 	directory->details->directory_loaded = FALSE;
 }
 
 static void
-file_list_start_or_stop (NautilusDirectory *directory)
+file_list_start_or_stop (NemoDirectory *directory)
 {
-	if (nautilus_directory_is_anyone_monitoring_file_list (directory)) {
+	if (nemo_directory_is_anyone_monitoring_file_list (directory)) {
 		start_monitoring_file_list (directory);
 	} else {
-		nautilus_directory_stop_monitoring_file_list (directory);
+		nemo_directory_stop_monitoring_file_list (directory);
 	}
 }
 
 void
-nautilus_file_invalidate_count_and_mime_list (NautilusFile *file)
+nemo_file_invalidate_count_and_mime_list (NemoFile *file)
 {
-	NautilusFileAttributes attributes;
+	NemoFileAttributes attributes;
 	
-	attributes = NAUTILUS_FILE_ATTRIBUTE_DIRECTORY_ITEM_COUNT |
-		NAUTILUS_FILE_ATTRIBUTE_DIRECTORY_ITEM_MIME_TYPES;
+	attributes = NEMO_FILE_ATTRIBUTE_DIRECTORY_ITEM_COUNT |
+		NEMO_FILE_ATTRIBUTE_DIRECTORY_ITEM_MIME_TYPES;
 	
-	nautilus_file_invalidate_attributes (file, attributes);
+	nemo_file_invalidate_attributes (file, attributes);
 }
 
 
@@ -2263,58 +2263,58 @@ nautilus_file_invalidate_count_and_mime_list (NautilusFile *file)
  * deliberately does not take filtering into account.
  */
 void
-nautilus_directory_invalidate_count_and_mime_list (NautilusDirectory *directory)
+nemo_directory_invalidate_count_and_mime_list (NemoDirectory *directory)
 {
-	NautilusFile *file;
+	NemoFile *file;
 
-	file = nautilus_directory_get_existing_corresponding_file (directory);
+	file = nemo_directory_get_existing_corresponding_file (directory);
 	if (file != NULL) {
-		nautilus_file_invalidate_count_and_mime_list (file);
+		nemo_file_invalidate_count_and_mime_list (file);
 	}
 	
-	nautilus_file_unref (file);
+	nemo_file_unref (file);
 }
 
 static void
-nautilus_directory_invalidate_file_attributes (NautilusDirectory      *directory,
-					       NautilusFileAttributes  file_attributes)
+nemo_directory_invalidate_file_attributes (NemoDirectory      *directory,
+					       NemoFileAttributes  file_attributes)
 {
 	GList *node;
 
 	cancel_loading_attributes (directory, file_attributes);
 
 	for (node = directory->details->file_list; node != NULL; node = node->next) {
-		nautilus_file_invalidate_attributes_internal (NAUTILUS_FILE (node->data),
+		nemo_file_invalidate_attributes_internal (NEMO_FILE (node->data),
 							      file_attributes);
 	}
 
 	if (directory->details->as_file != NULL) {
-		nautilus_file_invalidate_attributes_internal (directory->details->as_file,
+		nemo_file_invalidate_attributes_internal (directory->details->as_file,
 							      file_attributes);
 	}
 }
 
 void
-nautilus_directory_force_reload_internal (NautilusDirectory     *directory,
-					  NautilusFileAttributes file_attributes)
+nemo_directory_force_reload_internal (NemoDirectory     *directory,
+					  NemoFileAttributes file_attributes)
 {
 	/* invalidate attributes that are getting reloaded for all files */
-	nautilus_directory_invalidate_file_attributes (directory, file_attributes);
+	nemo_directory_invalidate_file_attributes (directory, file_attributes);
 
 	/* Start a new directory load. */
 	file_list_cancel (directory);
 	directory->details->directory_loaded = FALSE;
 
 	/* Start a new directory count. */
-	nautilus_directory_invalidate_count_and_mime_list (directory);
+	nemo_directory_invalidate_count_and_mime_list (directory);
 
 	add_all_files_to_work_queue (directory);
-	nautilus_directory_async_state_changed (directory);
+	nemo_directory_async_state_changed (directory);
 }
 
 static gboolean
 monitor_includes_file (const Monitor *monitor,
-		       NautilusFile *file)
+		       NemoFile *file)
 {
 	if (monitor->file == file) {
 		return TRUE;
@@ -2325,17 +2325,17 @@ monitor_includes_file (const Monitor *monitor,
 	if (file == file->details->directory->details->as_file) {
 		return FALSE;
 	}
-	return nautilus_file_should_show (file,
+	return nemo_file_should_show (file,
 					  monitor->monitor_hidden_files,
 					  TRUE);
 }
 
 static gboolean
-is_needy (NautilusFile *file,
+is_needy (NemoFile *file,
 	  FileCheck check_missing,
 	  RequestType request_type_wanted)
 {
-	NautilusDirectory *directory;
+	NemoDirectory *directory;
 	GList *node;
 	ReadyCallback *callback;
 	Monitor *monitor;
@@ -2377,14 +2377,14 @@ is_needy (NautilusFile *file,
 }
 
 static void
-directory_count_stop (NautilusDirectory *directory)
+directory_count_stop (NemoDirectory *directory)
 {
-	NautilusFile *file;
+	NemoFile *file;
 
 	if (directory->details->count_in_progress != NULL) {
 		file = directory->details->count_in_progress->count_file;
 		if (file != NULL) {
-			g_assert (NAUTILUS_IS_FILE (file));
+			g_assert (NEMO_IS_FILE (file));
 			g_assert (file->details->directory == directory);
 			if (is_needy (file,
 				      should_get_directory_count_now,
@@ -2416,12 +2416,12 @@ count_non_skipped_files (GList *list)
 }
 
 static void
-count_children_done (NautilusDirectory *directory,
-		     NautilusFile *count_file,
+count_children_done (NemoDirectory *directory,
+		     NemoFile *count_file,
 		     gboolean succeeded,
 		     int count)
 {
-	g_assert (NAUTILUS_IS_FILE (count_file));
+	g_assert (NEMO_IS_FILE (count_file));
 
 	count_file->details->directory_count_is_up_to_date = TRUE;
 
@@ -2440,11 +2440,11 @@ count_children_done (NautilusDirectory *directory,
 	/* Send file-changed even if count failed, so interested parties can
 	 * distinguish between unknowable and not-yet-known cases.
 	 */
-	nautilus_file_changed (count_file);
+	nemo_file_changed (count_file);
 
 	/* Start up the next one. */
 	async_job_end (directory, "directory count");
-	nautilus_directory_async_state_changed (directory);
+	nemo_directory_async_state_changed (directory);
 }
 
 static void
@@ -2458,7 +2458,7 @@ directory_count_state_free (DirectoryCountState *state)
 		g_object_unref (state->enumerator);
 	}
 	g_object_unref (state->cancellable);
-	nautilus_directory_unref (state->directory);
+	nemo_directory_unref (state->directory);
 	g_free (state);
 }
 
@@ -2468,7 +2468,7 @@ count_more_files_callback (GObject *source_object,
 			   gpointer user_data)
 {
 	DirectoryCountState *state;
-	NautilusDirectory *directory;
+	NemoDirectory *directory;
 	GError *error;
 	GList *files;
 
@@ -2480,7 +2480,7 @@ count_more_files_callback (GObject *source_object,
 		directory->details->count_in_progress = NULL;
 
 		async_job_end (directory, "directory count");
-		nautilus_directory_async_state_changed (directory);
+		nemo_directory_async_state_changed (directory);
 		
 		directory_count_state_free (state);
 
@@ -2523,7 +2523,7 @@ count_children_callback (GObject *source_object,
 {
 	DirectoryCountState *state;
 	GFileEnumerator *enumerator;
-	NautilusDirectory *directory;
+	NemoDirectory *directory;
 	GError *error;
 
 	state = user_data;
@@ -2534,7 +2534,7 @@ count_children_callback (GObject *source_object,
 		directory->details->count_in_progress = NULL;
 
 		async_job_end (directory, "directory count");
-		nautilus_directory_async_state_changed (directory);
+		nemo_directory_async_state_changed (directory);
 		
 		directory_count_state_free (state);
 
@@ -2564,8 +2564,8 @@ count_children_callback (GObject *source_object,
 }
 
 static void
-directory_count_start (NautilusDirectory *directory,
-		       NautilusFile *file,
+directory_count_start (NemoDirectory *directory,
+		       NemoFile *file,
 		       gboolean *doing_io)
 {
 	DirectoryCountState *state;
@@ -2583,12 +2583,12 @@ directory_count_start (NautilusDirectory *directory,
 	}
 	*doing_io = TRUE;
 
-	if (!nautilus_file_is_directory (file)) {
+	if (!nemo_file_is_directory (file)) {
 		file->details->directory_count_is_up_to_date = TRUE;
 		file->details->directory_count_failed = FALSE;
 		file->details->got_directory_count = FALSE;
 		
-		nautilus_directory_async_state_changed (directory);
+		nemo_directory_async_state_changed (directory);
 		return;
 	}
 
@@ -2599,12 +2599,12 @@ directory_count_start (NautilusDirectory *directory,
 	/* Start counting. */
 	state = g_new0 (DirectoryCountState, 1);
 	state->count_file = file;
-	state->directory = nautilus_directory_ref (directory);
+	state->directory = nemo_directory_ref (directory);
 	state->cancellable = g_cancellable_new ();
 	
 	directory->details->count_in_progress = state;
 	
-	location = nautilus_file_get_location (file);
+	location = nemo_file_get_location (file);
 #ifdef DEBUG_LOAD_DIRECTORY		
 	{
 		char *uri;
@@ -2663,7 +2663,7 @@ static void
 deep_count_one (DeepCountState *state,
 		GFileInfo *info)
 {
-	NautilusFile *file;
+	NemoFile *file;
 	GFile *subdir;
 	gboolean is_seen_inode;
 
@@ -2721,8 +2721,8 @@ static void
 deep_count_next_dir (DeepCountState *state)
 {
 	GFile *location;
-	NautilusFile *file;
-	NautilusDirectory *directory;
+	NemoFile *file;
+	NemoDirectory *directory;
 	gboolean done;
 
 	directory = state->directory;
@@ -2741,19 +2741,19 @@ deep_count_next_dir (DeepCountState *state)
 		deep_count_load (state, location);
 		g_object_unref (location);
 	} else {
-		file->details->deep_counts_status = NAUTILUS_REQUEST_DONE;
+		file->details->deep_counts_status = NEMO_REQUEST_DONE;
 		directory->details->deep_count_file = NULL;
 		directory->details->deep_count_in_progress = NULL;
 		deep_count_state_free (state);
 		done = TRUE;
 	}
 	
-	nautilus_file_updated_deep_count_in_progress (file);
+	nemo_file_updated_deep_count_in_progress (file);
 
 	if (done) {
-		nautilus_file_changed (file);
+		nemo_file_changed (file);
 		async_job_end (directory, "deep count");
-		nautilus_directory_async_state_changed (directory);
+		nemo_directory_async_state_changed (directory);
 	}
 }
 
@@ -2763,7 +2763,7 @@ deep_count_more_files_callback (GObject *source_object,
 				gpointer user_data)
 {
 	DeepCountState *state;
-	NautilusDirectory *directory;
+	NemoDirectory *directory;
 	GList *files, *l;
 	GFileInfo *info;
 
@@ -2775,7 +2775,7 @@ deep_count_more_files_callback (GObject *source_object,
 		return;
 	}
 
-	directory = nautilus_directory_ref (state->directory);
+	directory = nemo_directory_ref (state->directory);
 	
 	g_assert (directory->details->deep_count_in_progress != NULL);
 	g_assert (directory->details->deep_count_in_progress == state);
@@ -2806,7 +2806,7 @@ deep_count_more_files_callback (GObject *source_object,
 
 	g_list_free (files);
 
-	nautilus_directory_unref (directory);
+	nemo_directory_unref (directory);
 }
 
 static void
@@ -2816,7 +2816,7 @@ deep_count_callback (GObject *source_object,
 {
 	DeepCountState *state;
 	GFileEnumerator *enumerator;
-	NautilusFile *file;
+	NemoFile *file;
 
 	state = user_data;
 
@@ -2869,14 +2869,14 @@ deep_count_load (DeepCountState *state, GFile *location)
 }
 
 static void
-deep_count_stop (NautilusDirectory *directory)
+deep_count_stop (NemoDirectory *directory)
 {
-	NautilusFile *file;
+	NemoFile *file;
 
 	if (directory->details->deep_count_in_progress != NULL) {
 		file = directory->details->deep_count_file;
 		if (file != NULL) {
-			g_assert (NAUTILUS_IS_FILE (file));
+			g_assert (NEMO_IS_FILE (file));
 			g_assert (file->details->directory == directory);
 			if (is_needy (file,
 				      lacks_deep_count,
@@ -2891,8 +2891,8 @@ deep_count_stop (NautilusDirectory *directory)
 }
 
 static void
-deep_count_start (NautilusDirectory *directory,
-		  NautilusFile *file,
+deep_count_start (NemoDirectory *directory,
+		  NemoFile *file,
 		  gboolean *doing_io)
 {
 	GFile *location;
@@ -2910,10 +2910,10 @@ deep_count_start (NautilusDirectory *directory,
 	}
 	*doing_io = TRUE;
 
-	if (!nautilus_file_is_directory (file)) {
-		file->details->deep_counts_status = NAUTILUS_REQUEST_DONE;
+	if (!nemo_file_is_directory (file)) {
+		file->details->deep_counts_status = NEMO_REQUEST_DONE;
 
-		nautilus_directory_async_state_changed (directory);
+		nemo_directory_async_state_changed (directory);
 		return;
 	}
 
@@ -2922,7 +2922,7 @@ deep_count_start (NautilusDirectory *directory,
 	}
 
 	/* Start counting. */
-	file->details->deep_counts_status = NAUTILUS_REQUEST_IN_PROGRESS;
+	file->details->deep_counts_status = NEMO_REQUEST_IN_PROGRESS;
 	file->details->deep_directory_count = 0;
 	file->details->deep_file_count = 0;
 	file->details->deep_unreadable_count = 0;
@@ -2936,20 +2936,20 @@ deep_count_start (NautilusDirectory *directory,
 
 	directory->details->deep_count_in_progress = state;
 	
-	location = nautilus_file_get_location (file);
+	location = nemo_file_get_location (file);
 	deep_count_load (state, location);
 	g_object_unref (location);
 }
 
 static void
-mime_list_stop (NautilusDirectory *directory)
+mime_list_stop (NemoDirectory *directory)
 {
-	NautilusFile *file;
+	NemoFile *file;
 
 	if (directory->details->mime_list_in_progress != NULL) {
 		file = directory->details->mime_list_in_progress->mime_list_file;
 		if (file != NULL) {
-			g_assert (NAUTILUS_IS_FILE (file));
+			g_assert (NEMO_IS_FILE (file));
 			g_assert (file->details->directory == directory);
 			if (is_needy (file,
 				      should_get_mime_list,
@@ -2975,7 +2975,7 @@ mime_list_state_free (MimeListState *state)
 	}
 	g_object_unref (state->cancellable);
 	istr_set_destroy (state->mime_list_hash);
-	nautilus_directory_unref (state->directory);
+	nemo_directory_unref (state->directory);
 	g_free (state);
 }
 
@@ -2983,8 +2983,8 @@ mime_list_state_free (MimeListState *state)
 static void
 mime_list_done (MimeListState *state, gboolean success)
 {
-	NautilusFile *file;
-	NautilusDirectory *directory;
+	NemoFile *file;
+	NemoDirectory *directory;
 
 	directory = state->directory;
 	g_assert (directory != NULL);
@@ -3006,11 +3006,11 @@ mime_list_done (MimeListState *state, gboolean success)
 	 * failed, so interested parties can distinguish between
 	 * unknowable and not-yet-known cases.
 	 */
-	nautilus_file_changed (file);
+	nemo_file_changed (file);
 
 	/* Start up the next one. */
 	async_job_end (directory, "MIME list");
-	nautilus_directory_async_state_changed (directory);
+	nemo_directory_async_state_changed (directory);
 }
 
 static void
@@ -3036,7 +3036,7 @@ mime_list_callback (GObject *source_object,
 		    gpointer user_data)
 {
 	MimeListState *state;
-	NautilusDirectory *directory;
+	NemoDirectory *directory;
 	GError *error;
 	GList *files, *l;
 	GFileInfo *info;
@@ -3049,7 +3049,7 @@ mime_list_callback (GObject *source_object,
 		directory->details->mime_list_in_progress = NULL;
 
 		async_job_end (directory, "MIME list");
-		nautilus_directory_async_state_changed (directory);
+		nemo_directory_async_state_changed (directory);
 		
 		mime_list_state_free (state);
 
@@ -3095,7 +3095,7 @@ list_mime_enum_callback (GObject *source_object,
 {
 	MimeListState *state;
 	GFileEnumerator *enumerator;
-	NautilusDirectory *directory;
+	NemoDirectory *directory;
 	GError *error;
 
 	state = user_data;
@@ -3106,7 +3106,7 @@ list_mime_enum_callback (GObject *source_object,
 		directory->details->mime_list_in_progress = NULL;
 
 		async_job_end (directory, "MIME list");
-		nautilus_directory_async_state_changed (directory);
+		nemo_directory_async_state_changed (directory);
 		
 		mime_list_state_free (state);
 
@@ -3134,8 +3134,8 @@ list_mime_enum_callback (GObject *source_object,
 }
 
 static void
-mime_list_start (NautilusDirectory *directory,
-		 NautilusFile *file,
+mime_list_start (NemoDirectory *directory,
+		 NemoFile *file,
 		 gboolean *doing_io)
 {
 	MimeListState *state;
@@ -3156,13 +3156,13 @@ mime_list_start (NautilusDirectory *directory,
 	}
 	*doing_io = TRUE;
 
-	if (!nautilus_file_is_directory (file)) {
+	if (!nemo_file_is_directory (file)) {
 		g_list_free (file->details->mime_list);
 		file->details->mime_list_failed = FALSE;
 		file->details->got_mime_list = FALSE;
 		file->details->mime_list_is_up_to_date = TRUE;
 
-		nautilus_directory_async_state_changed (directory);
+		nemo_directory_async_state_changed (directory);
 		return;
 	}
 
@@ -3173,13 +3173,13 @@ mime_list_start (NautilusDirectory *directory,
 
 	state = g_new0 (MimeListState, 1);
 	state->mime_list_file = file;
-	state->directory = nautilus_directory_ref (directory);
+	state->directory = nemo_directory_ref (directory);
 	state->cancellable = g_cancellable_new ();
 	state->mime_list_hash = istr_set_new ();
 
 	directory->details->mime_list_in_progress = state;
 
-	location = nautilus_file_get_location (file);
+	location = nemo_file_get_location (file);
 #ifdef DEBUG_LOAD_DIRECTORY		
 	{
 		char *uri;
@@ -3200,14 +3200,14 @@ mime_list_start (NautilusDirectory *directory,
 }
 
 static void
-top_left_stop (NautilusDirectory *directory)
+top_left_stop (NemoDirectory *directory)
 {
-	NautilusFile *file;
+	NemoFile *file;
 
 	if (directory->details->top_left_read_state != NULL) {
 		file = directory->details->top_left_read_state->file;
 		if (file != NULL) {
-			g_assert (NAUTILUS_IS_FILE (file));
+			g_assert (NEMO_IS_FILE (file));
 			g_assert (file->details->directory == directory);
 			if (is_needy (file,
 				      lacks_top_left,
@@ -3237,8 +3237,8 @@ top_left_read_callback (GObject *source_object,
 			gpointer callback_data)
 {
 	TopLeftTextReadState *state;
-	NautilusDirectory *directory;
-	NautilusFileDetails *file_details;
+	NemoDirectory *directory;
+	NemoFileDetails *file_details;
 	gsize file_size;
 	char *file_contents;
 
@@ -3250,7 +3250,7 @@ top_left_read_callback (GObject *source_object,
 		return;
 	}
 	
-	directory = nautilus_directory_ref (state->directory);
+	directory = nemo_directory_ref (state->directory);
 	
 	file_details = state->file->details;
 
@@ -3261,7 +3261,7 @@ top_left_read_callback (GObject *source_object,
 						 res,
 						 &file_contents, &file_size,
 						 NULL, NULL)) {
-		file_details->top_left_text = nautilus_extract_top_left_text (file_contents, state->large, file_size);
+		file_details->top_left_text = nemo_extract_top_left_text (file_contents, state->large, file_size);
 		file_details->got_top_left_text = TRUE;
 		file_details->got_large_top_left_text = state->large;
 		g_free (file_contents);
@@ -3271,16 +3271,16 @@ top_left_read_callback (GObject *source_object,
 		file_details->got_large_top_left_text = FALSE;
 	}
 
-	nautilus_file_changed (state->file);
+	nemo_file_changed (state->file);
 
 	directory->details->top_left_read_state = NULL;
 	async_job_end (directory, "top left");
 
 	top_left_read_state_free (state);
 	
-	nautilus_directory_async_state_changed (directory);
+	nemo_directory_async_state_changed (directory);
 
-	nautilus_directory_unref (directory);
+	nemo_directory_unref (directory);
 }
 
 static int
@@ -3306,17 +3306,17 @@ top_left_read_more_callback (const char *file_contents,
 
 	/* Stop reading when we have enough. */
 	if (state->large) {
-		return bytes_read < NAUTILUS_FILE_LARGE_TOP_LEFT_TEXT_MAXIMUM_BYTES &&
-			count_lines (file_contents, bytes_read) <= NAUTILUS_FILE_LARGE_TOP_LEFT_TEXT_MAXIMUM_LINES;
+		return bytes_read < NEMO_FILE_LARGE_TOP_LEFT_TEXT_MAXIMUM_BYTES &&
+			count_lines (file_contents, bytes_read) <= NEMO_FILE_LARGE_TOP_LEFT_TEXT_MAXIMUM_LINES;
 	} else {
-		return bytes_read < NAUTILUS_FILE_TOP_LEFT_TEXT_MAXIMUM_BYTES &&
-			count_lines (file_contents, bytes_read) <= NAUTILUS_FILE_TOP_LEFT_TEXT_MAXIMUM_LINES;
+		return bytes_read < NEMO_FILE_TOP_LEFT_TEXT_MAXIMUM_BYTES &&
+			count_lines (file_contents, bytes_read) <= NEMO_FILE_TOP_LEFT_TEXT_MAXIMUM_LINES;
 	}
 }
 
 static void
-top_left_start (NautilusDirectory *directory,
-		NautilusFile *file,
+top_left_start (NemoDirectory *directory,
+		NemoFile *file,
 		gboolean *doing_io)
 {
 	GFile *location;
@@ -3345,14 +3345,14 @@ top_left_start (NautilusDirectory *directory,
 	}
 	*doing_io = TRUE;
 
-	if (!nautilus_file_contains_text (file)) {
+	if (!nemo_file_contains_text (file)) {
 		g_free (file->details->top_left_text);
 		file->details->top_left_text = NULL;
 		file->details->got_top_left_text = FALSE;
 		file->details->got_large_top_left_text = FALSE;
 		file->details->top_left_text_is_up_to_date = TRUE;
 
-		nautilus_directory_async_state_changed (directory);
+		nemo_directory_async_state_changed (directory);
 		return;
 	}
 
@@ -3369,7 +3369,7 @@ top_left_start (NautilusDirectory *directory,
 
 	directory->details->top_left_read_state = state;
 
-	location = nautilus_file_get_location (file);
+	location = nemo_file_get_location (file);
 	g_file_load_partial_contents_async (location,
 					    state->cancellable,
 					    top_left_read_more_callback,
@@ -3390,8 +3390,8 @@ query_info_callback (GObject *source_object,
 		     GAsyncResult *res,
 		     gpointer user_data)
 {
-	NautilusDirectory *directory;
-	NautilusFile *get_info_file;
+	NemoDirectory *directory;
+	NemoFile *get_info_file;
 	GFileInfo *info;
 	GetInfoState *state;
 	GError *error;
@@ -3404,10 +3404,10 @@ query_info_callback (GObject *source_object,
 		return;
 	}
 	
-	directory = nautilus_directory_ref (state->directory);
+	directory = nemo_directory_ref (state->directory);
 
 	get_info_file = directory->details->get_info_file;
-	g_assert (NAUTILUS_IS_FILE (get_info_file));
+	g_assert (NEMO_IS_FILE (get_info_file));
 
 	directory->details->get_info_file = NULL;
 	directory->details->get_info_in_progress = NULL;
@@ -3416,7 +3416,7 @@ query_info_callback (GObject *source_object,
 	 * mark the file gone below, but we need to keep a ref at
 	 * least long enough to send the change notification. 
 	 */
-	nautilus_file_ref (get_info_file);
+	nemo_file_ref (get_info_file);
 
 	error = NULL;
 	info = g_file_query_info_finish (G_FILE (source_object), res, &error);
@@ -3424,37 +3424,37 @@ query_info_callback (GObject *source_object,
 	if (info == NULL) {
 		if (error->domain == G_IO_ERROR && error->code == G_IO_ERROR_NOT_FOUND) {
 			/* mark file as gone */
-			nautilus_file_mark_gone (get_info_file);
+			nemo_file_mark_gone (get_info_file);
 		}
 		get_info_file->details->file_info_is_up_to_date = TRUE;
-		nautilus_file_clear_info (get_info_file);
+		nemo_file_clear_info (get_info_file);
 		get_info_file->details->get_info_failed = TRUE;
 		get_info_file->details->get_info_error = error;
 	} else {
-		nautilus_file_update_info (get_info_file, info);
+		nemo_file_update_info (get_info_file, info);
 		g_object_unref (info);
 	}
 
-	nautilus_file_changed (get_info_file);
-	nautilus_file_unref (get_info_file);
+	nemo_file_changed (get_info_file);
+	nemo_file_unref (get_info_file);
 
 	async_job_end (directory, "file info");
-	nautilus_directory_async_state_changed (directory);
+	nemo_directory_async_state_changed (directory);
 
-	nautilus_directory_unref (directory);
+	nemo_directory_unref (directory);
 
 	get_info_state_free (state);
 }
 
 static void
-file_info_stop (NautilusDirectory *directory)
+file_info_stop (NemoDirectory *directory)
 {
-	NautilusFile *file;
+	NemoFile *file;
 
 	if (directory->details->get_info_in_progress != NULL) {
 		file = directory->details->get_info_file;
 		if (file != NULL) {
-			g_assert (NAUTILUS_IS_FILE (file));
+			g_assert (NEMO_IS_FILE (file));
 			g_assert (file->details->directory == directory);
 			if (is_needy (file, lacks_info, REQUEST_FILE_INFO)) {
 				return;
@@ -3467,8 +3467,8 @@ file_info_stop (NautilusDirectory *directory)
 }
 
 static void
-file_info_start (NautilusDirectory *directory,
-		 NautilusFile *file,
+file_info_start (NemoDirectory *directory,
+		 NemoFile *file,
 		 gboolean *doing_io)
 {
 	GFile *location;
@@ -3503,9 +3503,9 @@ file_info_start (NautilusDirectory *directory,
 
 	directory->details->get_info_in_progress = state;
 	
-	location = nautilus_file_get_location (file);
+	location = nemo_file_get_location (file);
 	g_file_query_info_async (location,
-				 NAUTILUS_FILE_DEFAULT_ATTRIBUTES,
+				 NEMO_FILE_DEFAULT_ATTRIBUTES,
 				 0,
 				 G_PRIORITY_DEFAULT,
 				 state->cancellable, query_info_callback, state);
@@ -3513,7 +3513,7 @@ file_info_start (NautilusDirectory *directory,
 }
 
 static gboolean
-is_link_trusted (NautilusFile *file,
+is_link_trusted (NemoFile *file,
 		 gboolean is_launcher)
 {
 	GFile *location;
@@ -3523,15 +3523,15 @@ is_link_trusted (NautilusFile *file,
 		return TRUE;
 	}
 	
-	if (nautilus_file_can_execute (file)) {
+	if (nemo_file_can_execute (file)) {
 		return TRUE;
 	}
 
 	res = FALSE;
 	
-	if (nautilus_file_is_local (file)) {
-		location = nautilus_file_get_location (file);
-		res = nautilus_is_in_system_dir (location);
+	if (nemo_file_is_local (file)) {
+		location = nemo_file_get_location (file);
+		res = nemo_is_in_system_dir (location);
 		g_object_unref (location);
 	}
 	
@@ -3539,8 +3539,8 @@ is_link_trusted (NautilusFile *file,
 }
 
 static void
-link_info_done (NautilusDirectory *directory,
-		NautilusFile *file,
+link_info_done (NemoDirectory *directory,
+		NemoFile *file,
 		const char *uri,
 		const char *name, 
 		GIcon *icon,
@@ -3554,9 +3554,9 @@ link_info_done (NautilusDirectory *directory,
 	is_trusted = is_link_trusted (file, is_launcher);
 
 	if (is_trusted) {
-		nautilus_file_set_display_name (file, name, name, TRUE);
+		nemo_file_set_display_name (file, name, name, TRUE);
 	} else {
-		nautilus_file_set_display_name (file, NULL, NULL, TRUE);
+		nemo_file_set_display_name (file, NULL, NULL, TRUE);
 	}
 	
 	file->details->got_link_info = TRUE;
@@ -3575,19 +3575,19 @@ link_info_done (NautilusDirectory *directory,
 	file->details->is_foreign_link = is_foreign;
 	file->details->is_trusted_link = is_trusted;
 	
-	nautilus_directory_async_state_changed (directory);
+	nemo_directory_async_state_changed (directory);
 }
 
 static void
-link_info_stop (NautilusDirectory *directory)
+link_info_stop (NemoDirectory *directory)
 {
-	NautilusFile *file;
+	NemoFile *file;
 
 	if (directory->details->link_info_read_state != NULL) {
 		file = directory->details->link_info_read_state->file;
 
 		if (file != NULL) {
-			g_assert (NAUTILUS_IS_FILE (file));
+			g_assert (NEMO_IS_FILE (file));
 			g_assert (file->details->directory == directory);
 			if (is_needy (file,
 				      lacks_link_info,
@@ -3602,8 +3602,8 @@ link_info_stop (NautilusDirectory *directory)
 }
 
 static void
-link_info_got_data (NautilusDirectory *directory,
-		    NautilusFile *file,
+link_info_got_data (NemoDirectory *directory,
+		    NemoFile *file,
 		    gboolean result,
 		    goffset bytes_read,
 		    char *file_contents)
@@ -3613,7 +3613,7 @@ link_info_got_data (NautilusDirectory *directory,
 	gboolean is_launcher;
 	gboolean is_foreign;
 
-	nautilus_directory_ref (directory);
+	nemo_directory_ref (directory);
 
 	uri = NULL;
 	name = NULL;
@@ -3621,20 +3621,20 @@ link_info_got_data (NautilusDirectory *directory,
 	is_launcher = FALSE;
 	is_foreign = FALSE;
 	
-	/* Handle the case where we read the Nautilus link. */
+	/* Handle the case where we read the Nemo link. */
 	if (result) {
-		link_uri = nautilus_file_get_uri (file);
-		nautilus_link_get_link_info_given_file_contents (file_contents, bytes_read, link_uri,
+		link_uri = nemo_file_get_uri (file);
+		nemo_link_get_link_info_given_file_contents (file_contents, bytes_read, link_uri,
 								 &uri, &name, &icon, &is_launcher, &is_foreign);
 		g_free (link_uri);
 	} else {
 		/* FIXME bugzilla.gnome.org 42433: We should report this error to the user. */
 	}
 
-	nautilus_file_ref (file);
+	nemo_file_ref (file);
 	link_info_done (directory, file, uri, name, icon, is_launcher, is_foreign);
-	nautilus_file_changed (file);
-	nautilus_file_unref (file);
+	nemo_file_changed (file);
+	nemo_file_unref (file);
 	
 	g_free (uri);
 	g_free (name);
@@ -3643,7 +3643,7 @@ link_info_got_data (NautilusDirectory *directory,
 		g_object_unref (icon);
 	}
 
-	nautilus_directory_unref (directory);
+	nemo_directory_unref (directory);
 }
 
 static void
@@ -3654,7 +3654,7 @@ link_info_read_state_free (LinkInfoReadState *state)
 }
 
 static void
-link_info_nautilus_link_read_callback (GObject *source_object,
+link_info_nemo_link_read_callback (GObject *source_object,
 				       GAsyncResult *res,
 				       gpointer user_data)
 {
@@ -3662,7 +3662,7 @@ link_info_nautilus_link_read_callback (GObject *source_object,
 	gsize file_size;
 	char *file_contents;
 	gboolean result;
-	NautilusDirectory *directory;
+	NemoDirectory *directory;
 
 	state = user_data;
 
@@ -3672,7 +3672,7 @@ link_info_nautilus_link_read_callback (GObject *source_object,
 		return;
 	}
 
-	directory = nautilus_directory_ref (state->directory);
+	directory = nemo_directory_ref (state->directory);
 
 	result = g_file_load_contents_finish (G_FILE (source_object),
 					      res,
@@ -3690,16 +3690,16 @@ link_info_nautilus_link_read_callback (GObject *source_object,
 	
 	link_info_read_state_free (state);
 	
-	nautilus_directory_unref (directory);
+	nemo_directory_unref (directory);
 }
 
 static void
-link_info_start (NautilusDirectory *directory,
-		 NautilusFile *file,
+link_info_start (NemoDirectory *directory,
+		 NemoFile *file,
 		 gboolean *doing_io)
 {
 	GFile *location;
-	gboolean nautilus_style_link;
+	gboolean nemo_style_link;
 	LinkInfoReadState *state;
 	
 	if (directory->details->link_info_read_state != NULL) {
@@ -3715,11 +3715,11 @@ link_info_start (NautilusDirectory *directory,
 	*doing_io = TRUE;
 
 	/* Figure out if it is a link. */
-	nautilus_style_link = nautilus_file_is_nautilus_link (file);
-	location = nautilus_file_get_location (file);
+	nemo_style_link = nemo_file_is_nemo_link (file);
+	location = nemo_file_get_location (file);
 	
 	/* If it's not a link we are done. If it is, we need to read it. */
-	if (!nautilus_style_link) {
+	if (!nemo_style_link) {
 		link_info_done (directory, file, NULL, NULL, NULL, FALSE, FALSE);
 	} else {
 		if (!async_job_start (directory, "link info")) {
@@ -3736,15 +3736,15 @@ link_info_start (NautilusDirectory *directory,
 
 		g_file_load_contents_async (location,
 					    state->cancellable,
-					    link_info_nautilus_link_read_callback,
+					    link_info_nemo_link_read_callback,
 					    state);
 	}
 	g_object_unref (location);
 }
 
 static void
-thumbnail_done (NautilusDirectory *directory,
-		NautilusFile *file,
+thumbnail_done (NemoDirectory *directory,
+		NemoFile *file,
 		GdkPixbuf *pixbuf,
 		gboolean tried_original)
 {
@@ -3777,19 +3777,19 @@ thumbnail_done (NautilusDirectory *directory,
 		}
 	}
 	
-	nautilus_directory_async_state_changed (directory);
+	nemo_directory_async_state_changed (directory);
 }
 
 static void
-thumbnail_stop (NautilusDirectory *directory)
+thumbnail_stop (NemoDirectory *directory)
 {
-	NautilusFile *file;
+	NemoFile *file;
 
 	if (directory->details->thumbnail_state != NULL) {
 		file = directory->details->thumbnail_state->file;
 
 		if (file != NULL) {
-			g_assert (NAUTILUS_IS_FILE (file));
+			g_assert (NEMO_IS_FILE (file));
 			g_assert (file->details->directory == directory);
 			if (is_needy (file,
 				      lacks_thumbnail,
@@ -3804,23 +3804,23 @@ thumbnail_stop (NautilusDirectory *directory)
 }
 
 static void
-thumbnail_got_pixbuf (NautilusDirectory *directory,
-		      NautilusFile *file,
+thumbnail_got_pixbuf (NemoDirectory *directory,
+		      NemoFile *file,
 		      GdkPixbuf *pixbuf,
 		      gboolean tried_original)
 {
-	nautilus_directory_ref (directory);
+	nemo_directory_ref (directory);
 
-	nautilus_file_ref (file);
+	nemo_file_ref (file);
 	thumbnail_done (directory, file, pixbuf, tried_original);
-	nautilus_file_changed (file);
-	nautilus_file_unref (file);
+	nemo_file_changed (file);
+	nemo_file_unref (file);
 	
 	if (pixbuf) {
 		g_object_unref (pixbuf);
 	}
 
-	nautilus_directory_unref (directory);
+	nemo_directory_unref (directory);
 }
 
 static void
@@ -3844,8 +3844,8 @@ thumbnail_loader_size_prepared (GdkPixbufLoader *loader,
 
 	aspect_ratio = ((double) width) / height;
 
-	/* cf. nautilus_file_get_icon() */
-	max_thumbnail_size = NAUTILUS_ICON_SIZE_LARGEST * cached_thumbnail_size / NAUTILUS_ICON_SIZE_STANDARD;
+	/* cf. nemo_file_get_icon() */
+	max_thumbnail_size = NEMO_ICON_SIZE_LARGEST * cached_thumbnail_size / NEMO_ICON_SIZE_STANDARD;
 	if (MAX (width, height) > max_thumbnail_size) {
 		if (width > height) {
 			width = max_thumbnail_size;
@@ -3908,7 +3908,7 @@ thumbnail_read_callback (GObject *source_object,
 	gsize file_size;
 	char *file_contents;
 	gboolean result;
-	NautilusDirectory *directory;
+	NemoDirectory *directory;
 	GdkPixbuf *pixbuf;
 	GFile *location;
 
@@ -3920,7 +3920,7 @@ thumbnail_read_callback (GObject *source_object,
 		return;
 	}
 
-	directory = nautilus_directory_ref (state->directory);
+	directory = nemo_directory_ref (state->directory);
 
 	result = g_file_load_contents_finish (G_FILE (source_object),
 					      res,
@@ -3951,12 +3951,12 @@ thumbnail_read_callback (GObject *source_object,
 		thumbnail_state_free (state);
 	}
 	
-	nautilus_directory_unref (directory);
+	nemo_directory_unref (directory);
 }
 
 static void
-thumbnail_start (NautilusDirectory *directory,
-		 NautilusFile *file,
+thumbnail_start (NemoDirectory *directory,
+		 NemoFile *file,
 		 gboolean *doing_io)
 {
 	GFile *location;
@@ -3986,7 +3986,7 @@ thumbnail_start (NautilusDirectory *directory,
 	if (file->details->thumbnail_wants_original) {
 		state->tried_original = TRUE;
 		state->trying_original = TRUE;
-		location = nautilus_file_get_location (file);
+		location = nemo_file_get_location (file);
 	} else {
 		location = g_file_new_for_path (file->details->thumbnail_path);
 	}
@@ -4001,15 +4001,15 @@ thumbnail_start (NautilusDirectory *directory,
 }
 
 static void
-mount_stop (NautilusDirectory *directory)
+mount_stop (NemoDirectory *directory)
 {
-	NautilusFile *file;
+	NemoFile *file;
 
 	if (directory->details->mount_state != NULL) {
 		file = directory->details->mount_state->file;
 
 		if (file != NULL) {
-			g_assert (NAUTILUS_IS_FILE (file));
+			g_assert (NEMO_IS_FILE (file));
 			g_assert (file->details->directory == directory);
 			if (is_needy (file,
 				      lacks_mount,
@@ -4033,25 +4033,25 @@ mount_state_free (MountState *state)
 static void
 got_mount (MountState *state, GMount *mount)
 {
-	NautilusDirectory *directory;
-	NautilusFile *file;
+	NemoDirectory *directory;
+	NemoFile *file;
 	
-	directory = nautilus_directory_ref (state->directory);
+	directory = nemo_directory_ref (state->directory);
 
 	state->directory->details->mount_state = NULL;
 	async_job_end (state->directory, "mount");
 	
-	file = nautilus_file_ref (state->file);
+	file = nemo_file_ref (state->file);
 
 	file->details->mount_is_up_to_date = TRUE;
-	nautilus_file_set_mount (file, mount);
+	nemo_file_set_mount (file, mount);
 
-	nautilus_directory_async_state_changed (directory);
-	nautilus_file_changed (file);
+	nemo_directory_async_state_changed (directory);
+	nemo_file_changed (file);
 	
-	nautilus_file_unref (file);
+	nemo_file_unref (file);
 	
-	nautilus_directory_unref (directory);
+	nemo_directory_unref (directory);
 	
 	mount_state_free (state);
 
@@ -4078,7 +4078,7 @@ find_enclosing_mount_callback (GObject *source_object,
 
 	if (mount) {
 		root = g_mount_get_root (mount);
-		location = nautilus_file_get_location (state->file);
+		location = nemo_file_get_location (state->file);
 		if (!g_file_equal (location, root)) {
 			g_object_unref (mount);
 			mount = NULL;
@@ -4130,8 +4130,8 @@ get_mount_at (GFile *target)
 }
 
 static void
-mount_start (NautilusDirectory *directory,
-	     NautilusFile *file,
+mount_start (NemoDirectory *directory,
+	     NemoFile *file,
 	     gboolean *doing_io)
 {
 	GFile *location;
@@ -4158,7 +4158,7 @@ mount_start (NautilusDirectory *directory,
 	state->file = file;
 	state->cancellable = g_cancellable_new ();
 
-	location = nautilus_file_get_location (file);
+	location = nemo_file_get_location (file);
 	
 	directory->details->mount_state = state;
 
@@ -4167,7 +4167,7 @@ mount_start (NautilusDirectory *directory,
 		GMount *mount;
 
 		mount = NULL;
-		target = nautilus_file_get_activation_location (file);
+		target = nemo_file_get_activation_location (file);
 		if (target != NULL) {
 			mount = get_mount_at (target);
 			g_object_unref (target);
@@ -4189,7 +4189,7 @@ mount_start (NautilusDirectory *directory,
 }
 
 static void
-filesystem_info_cancel (NautilusDirectory *directory)
+filesystem_info_cancel (NemoDirectory *directory)
 {
 	if (directory->details->filesystem_info_state != NULL) {
 		g_cancellable_cancel (directory->details->filesystem_info_state->cancellable);
@@ -4200,15 +4200,15 @@ filesystem_info_cancel (NautilusDirectory *directory)
 }
 
 static void
-filesystem_info_stop (NautilusDirectory *directory)
+filesystem_info_stop (NemoDirectory *directory)
 {
-	NautilusFile *file;
+	NemoFile *file;
 
 	if (directory->details->filesystem_info_state != NULL) {
 		file = directory->details->filesystem_info_state->file;
 
 		if (file != NULL) {
-			g_assert (NAUTILUS_IS_FILE (file));
+			g_assert (NEMO_IS_FILE (file));
 			g_assert (file->details->directory == directory);
 			if (is_needy (file,
 				      lacks_filesystem_info,
@@ -4232,17 +4232,17 @@ filesystem_info_state_free (FilesystemInfoState *state)
 static void
 got_filesystem_info (FilesystemInfoState *state, GFileInfo *info)
 {
-	NautilusDirectory *directory;
-	NautilusFile *file;
+	NemoDirectory *directory;
+	NemoFile *file;
 
 	/* careful here, info may be NULL */
 
-	directory = nautilus_directory_ref (state->directory);
+	directory = nemo_directory_ref (state->directory);
 
 	state->directory->details->filesystem_info_state = NULL;
 	async_job_end (state->directory, "filesystem info");
 	
-	file = nautilus_file_ref (state->file);
+	file = nemo_file_ref (state->file);
 
 	file->details->filesystem_info_is_up_to_date = TRUE;
 	if (info != NULL) {
@@ -4252,12 +4252,12 @@ got_filesystem_info (FilesystemInfoState *state, GFileInfo *info)
 			g_file_info_get_attribute_boolean (info, G_FILE_ATTRIBUTE_FILESYSTEM_READONLY);
 	}
 	
-	nautilus_directory_async_state_changed (directory);
-	nautilus_file_changed (file);
+	nemo_directory_async_state_changed (directory);
+	nemo_file_changed (file);
 	
-	nautilus_file_unref (file);
+	nemo_file_unref (file);
 	
-	nautilus_directory_unref (directory);
+	nemo_directory_unref (directory);
 	
 	filesystem_info_state_free (state);
 }
@@ -4287,8 +4287,8 @@ query_filesystem_info_callback (GObject *source_object,
 }
 
 static void
-filesystem_info_start (NautilusDirectory *directory,
-		       NautilusFile *file,
+filesystem_info_start (NemoDirectory *directory,
+		       NemoFile *file,
 		       gboolean *doing_io)
 {
 	GFile *location;
@@ -4315,7 +4315,7 @@ filesystem_info_start (NautilusDirectory *directory,
 	state->file = file;
 	state->cancellable = g_cancellable_new ();
 
-	location = nautilus_file_get_location (file);
+	location = nemo_file_get_location (file);
 	
 	directory->details->filesystem_info_state = state;
 
@@ -4330,13 +4330,13 @@ filesystem_info_start (NautilusDirectory *directory,
 }
 
 static void
-extension_info_cancel (NautilusDirectory *directory)
+extension_info_cancel (NemoDirectory *directory)
 {
 	if (directory->details->extension_info_in_progress != NULL) {
 		if (directory->details->extension_info_idle) {
 			g_source_remove (directory->details->extension_info_idle);
 		} else {
-			nautilus_info_provider_cancel_update 
+			nemo_info_provider_cancel_update 
 				(directory->details->extension_info_provider,
 				 directory->details->extension_info_in_progress);
 		}
@@ -4351,14 +4351,14 @@ extension_info_cancel (NautilusDirectory *directory)
 }
 	
 static void
-extension_info_stop (NautilusDirectory *directory)
+extension_info_stop (NemoDirectory *directory)
 {
 	if (directory->details->extension_info_in_progress != NULL) {
-		NautilusFile *file;
+		NemoFile *file;
 
 		file = directory->details->extension_info_file;
 		if (file != NULL) {
-			g_assert (NAUTILUS_IS_FILE (file));
+			g_assert (NEMO_IS_FILE (file));
 			g_assert (file->details->directory == directory);
 			if (is_needy (file, lacks_extension_info, REQUEST_EXTENSION_INFO)) {
 				return;
@@ -4371,19 +4371,19 @@ extension_info_stop (NautilusDirectory *directory)
 }
 
 static void
-finish_info_provider (NautilusDirectory *directory,
-		      NautilusFile *file,
-		      NautilusInfoProvider *provider)
+finish_info_provider (NemoDirectory *directory,
+		      NemoFile *file,
+		      NemoInfoProvider *provider)
 {
 	file->details->pending_info_providers = 
 		g_list_remove  (file->details->pending_info_providers,
 				provider);
 	g_object_unref (provider);
 
-	nautilus_directory_async_state_changed (directory);
+	nemo_directory_async_state_changed (directory);
 
 	if (file->details->pending_info_providers == NULL) {
-		nautilus_file_info_providers_done (file);
+		nemo_file_info_providers_done (file);
 	}
 }
 
@@ -4392,16 +4392,16 @@ static gboolean
 info_provider_idle_callback (gpointer user_data)
 {
 	InfoProviderResponse *response;
-	NautilusDirectory *directory;
+	NemoDirectory *directory;
 
 	response = user_data;
 	directory = response->directory;
 
 	if (response->handle != directory->details->extension_info_in_progress
 	    || response->provider != directory->details->extension_info_provider) {
-		g_warning ("Unexpected plugin response.  This probably indicates a bug in a Nautilus extension: handle=%p", response->handle);
+		g_warning ("Unexpected plugin response.  This probably indicates a bug in a Nemo extension: handle=%p", response->handle);
 	} else {
-		NautilusFile *file;
+		NemoFile *file;
 		async_job_end (directory, "extension info");
 
 		file = directory->details->extension_info_file;
@@ -4418,9 +4418,9 @@ info_provider_idle_callback (gpointer user_data)
 }
 
 static void
-info_provider_callback (NautilusInfoProvider *provider,
-			NautilusOperationHandle *handle,
-			NautilusOperationResult result,
+info_provider_callback (NemoInfoProvider *provider,
+			NemoOperationHandle *handle,
+			NemoOperationResult result,
 			gpointer user_data)
 {
 	InfoProviderResponse *response;
@@ -4429,7 +4429,7 @@ info_provider_callback (NautilusInfoProvider *provider,
 	response->provider = provider;
 	response->handle = handle;
 	response->result = result;
-	response->directory = NAUTILUS_DIRECTORY (user_data);
+	response->directory = NEMO_DIRECTORY (user_data);
 
 	response->directory->details->extension_info_idle =
 		g_idle_add_full (G_PRIORITY_DEFAULT_IDLE,
@@ -4438,13 +4438,13 @@ info_provider_callback (NautilusInfoProvider *provider,
 }
 
 static void
-extension_info_start (NautilusDirectory *directory,
-		      NautilusFile *file,
+extension_info_start (NemoDirectory *directory,
+		      NemoFile *file,
 		      gboolean *doing_io)
 {
-	NautilusInfoProvider *provider;
-	NautilusOperationResult result;
-	NautilusOperationHandle *handle;
+	NemoInfoProvider *provider;
+	NemoOperationResult result;
+	NemoOperationHandle *handle;
 	GClosure *update_complete;
 
 	if (directory->details->extension_info_in_progress != NULL) {
@@ -4469,16 +4469,16 @@ extension_info_start (NautilusDirectory *directory,
 	g_closure_set_marshal (update_complete,
 			       g_cclosure_marshal_generic);
 			       
-	result = nautilus_info_provider_update_file_info
+	result = nemo_info_provider_update_file_info
 		(provider, 
-		 NAUTILUS_FILE_INFO (file), 
+		 NEMO_FILE_INFO (file), 
 		 update_complete, 
 		 &handle);
 
 	g_closure_unref (update_complete);
 
-	if (result == NAUTILUS_OPERATION_COMPLETE ||
-	    result == NAUTILUS_OPERATION_FAILED) {
+	if (result == NEMO_OPERATION_COMPLETE ||
+	    result == NEMO_OPERATION_FAILED) {
 		finish_info_provider (directory, file, provider);
 		async_job_end (directory, "extension info");
 	} else {
@@ -4489,9 +4489,9 @@ extension_info_start (NautilusDirectory *directory,
 }
 
 static void
-start_or_stop_io (NautilusDirectory *directory)
+start_or_stop_io (NemoDirectory *directory)
 {
-	NautilusFile *file;
+	NemoFile *file;
 	gboolean doing_io;
 
 	/* Start or stop reading files. */
@@ -4511,8 +4511,8 @@ start_or_stop_io (NautilusDirectory *directory)
 
 	doing_io = FALSE;
 	/* Take files that are all done off the queue. */
-	while (!nautilus_file_queue_is_empty (directory->details->high_priority_queue)) {
-		file = nautilus_file_queue_head (directory->details->high_priority_queue);
+	while (!nemo_file_queue_is_empty (directory->details->high_priority_queue)) {
+		file = nemo_file_queue_head (directory->details->high_priority_queue);
 
 		/* Start getting attributes if possible */
 		file_info_start (directory, file, &doing_io);
@@ -4526,8 +4526,8 @@ start_or_stop_io (NautilusDirectory *directory)
 	}
 
 	/* High priority queue must be empty */
-	while (!nautilus_file_queue_is_empty (directory->details->low_priority_queue)) {
-		file = nautilus_file_queue_head (directory->details->low_priority_queue);
+	while (!nemo_file_queue_is_empty (directory->details->low_priority_queue)) {
+		file = nemo_file_queue_head (directory->details->low_priority_queue);
 
 		/* Start getting attributes if possible */
 		mount_start (directory, file, &doing_io);
@@ -4546,8 +4546,8 @@ start_or_stop_io (NautilusDirectory *directory)
 	}
 
 	/* Low priority queue must be empty */
-	while (!nautilus_file_queue_is_empty (directory->details->extension_queue)) {
-		file = nautilus_file_queue_head (directory->details->extension_queue);
+	while (!nemo_file_queue_is_empty (directory->details->extension_queue)) {
+		file = nemo_file_queue_head (directory->details->extension_queue);
 
 		/* Start getting attributes if possible */
 		extension_info_start (directory, file, &doing_io);
@@ -4555,7 +4555,7 @@ start_or_stop_io (NautilusDirectory *directory)
 			return;
 		}
 
-		nautilus_directory_remove_file_from_work_queue (directory, file);
+		nemo_directory_remove_file_from_work_queue (directory, file);
 	}
 }
 
@@ -4563,7 +4563,7 @@ start_or_stop_io (NautilusDirectory *directory)
  * or when some I/O is completed.
  */
 void
-nautilus_directory_async_state_changed (NautilusDirectory *directory)
+nemo_directory_async_state_changed (NemoDirectory *directory)
 {
 	/* Check if any callbacks are satisfied and call them if they
 	 * are. Do this last so that any changes done in start or stop
@@ -4578,7 +4578,7 @@ nautilus_directory_async_state_changed (NautilusDirectory *directory)
 		return;
 	}
 	directory->details->in_async_service_loop = TRUE;
-	nautilus_directory_ref (directory);
+	nemo_directory_ref (directory);
 	do {
 		directory->details->state_changed = FALSE;
 		start_or_stop_io (directory);
@@ -4587,14 +4587,14 @@ nautilus_directory_async_state_changed (NautilusDirectory *directory)
 		}
 	} while (directory->details->state_changed);
 	directory->details->in_async_service_loop = FALSE;
-	nautilus_directory_unref (directory);
+	nemo_directory_unref (directory);
 
 	/* Check if any directories should wake up. */
 	async_job_wake_up ();
 }
 
 void
-nautilus_directory_cancel (NautilusDirectory *directory)
+nemo_directory_cancel (NemoDirectory *directory)
 {
 	/* Arbitrary order (kept alphabetical). */
 	deep_count_cancel (directory);
@@ -4620,8 +4620,8 @@ nautilus_directory_cancel (NautilusDirectory *directory)
 }
 
 static void
-cancel_directory_count_for_file (NautilusDirectory *directory,
-				 NautilusFile      *file)
+cancel_directory_count_for_file (NemoDirectory *directory,
+				 NemoFile      *file)
 {
 	if (directory->details->count_in_progress != NULL &&
 	    directory->details->count_in_progress->count_file == file) {
@@ -4630,8 +4630,8 @@ cancel_directory_count_for_file (NautilusDirectory *directory,
 }
 
 static void
-cancel_deep_counts_for_file (NautilusDirectory *directory,
-			     NautilusFile      *file)
+cancel_deep_counts_for_file (NemoDirectory *directory,
+			     NemoFile      *file)
 {
 	if (directory->details->deep_count_file == file) {
 		deep_count_cancel (directory);
@@ -4639,8 +4639,8 @@ cancel_deep_counts_for_file (NautilusDirectory *directory,
 }
 
 static void
-cancel_mime_list_for_file (NautilusDirectory *directory,
-			   NautilusFile      *file)
+cancel_mime_list_for_file (NemoDirectory *directory,
+			   NemoFile      *file)
 {
 	if (directory->details->mime_list_in_progress != NULL &&
 	    directory->details->mime_list_in_progress->mime_list_file == file) {
@@ -4649,8 +4649,8 @@ cancel_mime_list_for_file (NautilusDirectory *directory,
 }
 
 static void
-cancel_top_left_text_for_file (NautilusDirectory *directory,
-			       NautilusFile      *file)
+cancel_top_left_text_for_file (NemoDirectory *directory,
+			       NemoFile      *file)
 {
 	if (directory->details->top_left_read_state != NULL &&
 	    directory->details->top_left_read_state->file == file) {
@@ -4659,8 +4659,8 @@ cancel_top_left_text_for_file (NautilusDirectory *directory,
 }
 
 static void
-cancel_file_info_for_file (NautilusDirectory *directory,
-			   NautilusFile      *file)
+cancel_file_info_for_file (NemoDirectory *directory,
+			   NemoFile      *file)
 {
 	if (directory->details->get_info_file == file) {
 		file_info_cancel (directory);
@@ -4668,8 +4668,8 @@ cancel_file_info_for_file (NautilusDirectory *directory,
 }
 
 static void
-cancel_thumbnail_for_file (NautilusDirectory *directory,
-			   NautilusFile      *file)
+cancel_thumbnail_for_file (NemoDirectory *directory,
+			   NemoFile      *file)
 {
 	if (directory->details->thumbnail_state != NULL &&
 	    directory->details->thumbnail_state->file == file) {
@@ -4678,8 +4678,8 @@ cancel_thumbnail_for_file (NautilusDirectory *directory,
 }
 
 static void
-cancel_mount_for_file (NautilusDirectory *directory,
-			   NautilusFile      *file)
+cancel_mount_for_file (NemoDirectory *directory,
+			   NemoFile      *file)
 {
 	if (directory->details->mount_state != NULL &&
 	    directory->details->mount_state->file == file) {
@@ -4688,8 +4688,8 @@ cancel_mount_for_file (NautilusDirectory *directory,
 }
 
 static void
-cancel_filesystem_info_for_file (NautilusDirectory *directory,
-				 NautilusFile      *file)
+cancel_filesystem_info_for_file (NemoDirectory *directory,
+				 NemoFile      *file)
 {
 	if (directory->details->filesystem_info_state != NULL &&
 	    directory->details->filesystem_info_state->file == file) {
@@ -4698,8 +4698,8 @@ cancel_filesystem_info_for_file (NautilusDirectory *directory,
 }
 
 static void
-cancel_link_info_for_file (NautilusDirectory *directory,
-			   NautilusFile      *file)
+cancel_link_info_for_file (NemoDirectory *directory,
+			   NemoFile      *file)
 {
 	if (directory->details->link_info_read_state != NULL &&
 	    directory->details->link_info_read_state->file == file) {
@@ -4709,12 +4709,12 @@ cancel_link_info_for_file (NautilusDirectory *directory,
 
 
 static void
-cancel_loading_attributes (NautilusDirectory *directory,
-			   NautilusFileAttributes file_attributes)
+cancel_loading_attributes (NemoDirectory *directory,
+			   NemoFileAttributes file_attributes)
 {
 	Request request;
 	
-	request = nautilus_directory_set_up_request (file_attributes);
+	request = nemo_directory_set_up_request (file_attributes);
 
 	if (REQUEST_WANTS_TYPE (request, REQUEST_DIRECTORY_COUNT)) {
 		directory_count_cancel (directory);
@@ -4750,19 +4750,19 @@ cancel_loading_attributes (NautilusDirectory *directory,
 		mount_cancel (directory);
 	}
 	
-	nautilus_directory_async_state_changed (directory);
+	nemo_directory_async_state_changed (directory);
 }
 
 void
-nautilus_directory_cancel_loading_file_attributes (NautilusDirectory      *directory,
-						   NautilusFile           *file,
-						   NautilusFileAttributes  file_attributes)
+nemo_directory_cancel_loading_file_attributes (NemoDirectory      *directory,
+						   NemoFile           *file,
+						   NemoFileAttributes  file_attributes)
 {
 	Request request;
 	
-	nautilus_directory_remove_file_from_work_queue (directory, file);
+	nemo_directory_remove_file_from_work_queue (directory, file);
 
-	request = nautilus_directory_set_up_request (file_attributes);
+	request = nemo_directory_set_up_request (file_attributes);
 
 	if (REQUEST_WANTS_TYPE (request, REQUEST_DIRECTORY_COUNT)) {
 		cancel_directory_count_for_file (directory, file);
@@ -4792,64 +4792,64 @@ nautilus_directory_cancel_loading_file_attributes (NautilusDirectory      *direc
 		cancel_mount_for_file (directory, file);
 	}
 
-	nautilus_directory_async_state_changed (directory);
+	nemo_directory_async_state_changed (directory);
 }
 
 void
-nautilus_directory_add_file_to_work_queue (NautilusDirectory *directory,
-					   NautilusFile *file)
+nemo_directory_add_file_to_work_queue (NemoDirectory *directory,
+					   NemoFile *file)
 {
 	g_return_if_fail (file->details->directory == directory);
 
-	nautilus_file_queue_enqueue (directory->details->high_priority_queue,
+	nemo_file_queue_enqueue (directory->details->high_priority_queue,
 				     file);
 }
 
 
 static void
-add_all_files_to_work_queue (NautilusDirectory *directory)
+add_all_files_to_work_queue (NemoDirectory *directory)
 {
 	GList *node;
-	NautilusFile *file;
+	NemoFile *file;
 	
 	for (node = directory->details->file_list; node != NULL; node = node->next) {
-		file = NAUTILUS_FILE (node->data);
+		file = NEMO_FILE (node->data);
 
-		nautilus_directory_add_file_to_work_queue (directory, file);
+		nemo_directory_add_file_to_work_queue (directory, file);
 	}
 }
 
 void
-nautilus_directory_remove_file_from_work_queue (NautilusDirectory *directory,
-						NautilusFile *file)
+nemo_directory_remove_file_from_work_queue (NemoDirectory *directory,
+						NemoFile *file)
 {
-	nautilus_file_queue_remove (directory->details->high_priority_queue,
+	nemo_file_queue_remove (directory->details->high_priority_queue,
 				    file);
-	nautilus_file_queue_remove (directory->details->low_priority_queue,
+	nemo_file_queue_remove (directory->details->low_priority_queue,
 				    file);
-	nautilus_file_queue_remove (directory->details->extension_queue,
+	nemo_file_queue_remove (directory->details->extension_queue,
 				    file);
 }
 
 
 static void
-move_file_to_low_priority_queue (NautilusDirectory *directory,
-				 NautilusFile *file)
+move_file_to_low_priority_queue (NemoDirectory *directory,
+				 NemoFile *file)
 {
 	/* Must add before removing to avoid ref underflow */
-	nautilus_file_queue_enqueue (directory->details->low_priority_queue,
+	nemo_file_queue_enqueue (directory->details->low_priority_queue,
 				     file);
-	nautilus_file_queue_remove (directory->details->high_priority_queue,
+	nemo_file_queue_remove (directory->details->high_priority_queue,
 				    file);
 }
 
 static void
-move_file_to_extension_queue (NautilusDirectory *directory,
-			      NautilusFile *file)
+move_file_to_extension_queue (NemoDirectory *directory,
+			      NemoFile *file)
 {
 	/* Must add before removing to avoid ref underflow */
-	nautilus_file_queue_enqueue (directory->details->extension_queue,
+	nemo_file_queue_enqueue (directory->details->extension_queue,
 				     file);
-	nautilus_file_queue_remove (directory->details->low_priority_queue,
+	nemo_file_queue_remove (directory->details->low_priority_queue,
 				    file);
 }

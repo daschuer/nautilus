@@ -1,6 +1,6 @@
 /* -*- Mode: C; indent-tabs-mode: t; c-basic-offset: 8; tab-width: 8 -*- */
 
-/* nautilus-icon-dnd.h - Drag & drop handling for the icon container widget.
+/* nemo-icon-dnd.h - Drag & drop handling for the icon container widget.
 
    Copyright (C) 1999, 2000 Free Software Foundation
    Copyright (C) 2000 Eazel, Inc.
@@ -25,32 +25,32 @@
 	    Andy Hertzfeld <andy@eazel.com>
 */
 
-#ifndef NAUTILUS_ICON_DND_H
-#define NAUTILUS_ICON_DND_H
+#ifndef NEMO_ICON_DND_H
+#define NEMO_ICON_DND_H
 
-#include <libnautilus-private/nautilus-icon-container.h>
-#include <libnautilus-private/nautilus-dnd.h>
+#include <libnemo-private/nemo-icon-container.h>
+#include <libnemo-private/nemo-dnd.h>
 
 /* DnD-related information. */
 typedef struct {
 	/* inherited drag info context */
-	NautilusDragInfo drag_info;
+	NemoDragInfo drag_info;
 
 	gboolean highlighted;
 	
 	/* Shadow for the icons being dragged.  */
 	EelCanvasItem *shadow;
-} NautilusIconDndInfo;
+} NemoIconDndInfo;
 
 
-void   nautilus_icon_dnd_init                  (NautilusIconContainer *container);
-void   nautilus_icon_dnd_fini                  (NautilusIconContainer *container);
-void   nautilus_icon_dnd_begin_drag            (NautilusIconContainer *container,
+void   nemo_icon_dnd_init                  (NemoIconContainer *container);
+void   nemo_icon_dnd_fini                  (NemoIconContainer *container);
+void   nemo_icon_dnd_begin_drag            (NemoIconContainer *container,
 						GdkDragAction          actions,
 						gint                   button,
 						GdkEventMotion        *event,
 						int                    start_x,
 						int                    start_y);
-void   nautilus_icon_dnd_end_drag              (NautilusIconContainer *container);
+void   nemo_icon_dnd_end_drag              (NemoIconContainer *container);
 
-#endif /* NAUTILUS_ICON_DND_H */
+#endif /* NEMO_ICON_DND_H */

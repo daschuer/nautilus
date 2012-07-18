@@ -1,6 +1,6 @@
 /*
- *  nautilus-property-page.h - Property pages exported by 
- *                             NautilusPropertyProvider objects.
+ *  nemo-property-page.h - Property pages exported by 
+ *                             NemoPropertyProvider objects.
  *
  *  Copyright (C) 2003 Novell, Inc.
  *
@@ -23,9 +23,9 @@
  */
 
 #include <config.h>
-#include "nautilus-property-page.h"
+#include "nemo-property-page.h"
 
-#include "nautilus-extension-i18n.h"
+#include "nemo-extension-i18n.h"
 
 enum {
 	PROP_0,
@@ -35,7 +35,7 @@ enum {
 	LAST_PROP
 };
 
-struct _NautilusPropertyPageDetails {
+struct _NemoPropertyPageDetails {
 	char *name;
 	GtkWidget *label;
 	GtkWidget *page;	
@@ -44,28 +44,28 @@ struct _NautilusPropertyPageDetails {
 static GObjectClass *parent_class = NULL;
 
 /**
- * nautilus_property_page_new:
+ * nemo_property_page_new:
  * @name: the identifier for the property page
  * @label: the user-visible label of the property page
  * @page: the property page to display
  *
- * Creates a new #NautilusPropertyPage from page_widget.
+ * Creates a new #NemoPropertyPage from page_widget.
  *
- * Returns: a newly created #NautilusPropertyPage
+ * Returns: a newly created #NemoPropertyPage
  */
-NautilusPropertyPage *
-nautilus_property_page_new (const char *name,
+NemoPropertyPage *
+nemo_property_page_new (const char *name,
 			    GtkWidget *label,
 			    GtkWidget *page_widget)
 {
-	NautilusPropertyPage *page;
+	NemoPropertyPage *page;
 	
 	g_return_val_if_fail (name != NULL, NULL);
 	g_return_val_if_fail (label != NULL && GTK_IS_WIDGET (label), NULL);
 	g_return_val_if_fail (page_widget != NULL && GTK_IS_WIDGET (page_widget), 
 			      NULL);
 
-	page = g_object_new (NAUTILUS_TYPE_PROPERTY_PAGE,
+	page = g_object_new (NEMO_TYPE_PROPERTY_PAGE,
 			     "name", name,
 			     "label", label,
 			     "page", page_widget,
@@ -75,14 +75,14 @@ nautilus_property_page_new (const char *name,
 }
 
 static void
-nautilus_property_page_get_property (GObject *object,
+nemo_property_page_get_property (GObject *object,
 				     guint param_id,
 				     GValue *value,
 				     GParamSpec *pspec)
 {
-	NautilusPropertyPage *page;
+	NemoPropertyPage *page;
 	
-	page = NAUTILUS_PROPERTY_PAGE (object);
+	page = NEMO_PROPERTY_PAGE (object);
 	
 	switch (param_id) {
 	case PROP_NAME :
@@ -101,14 +101,14 @@ nautilus_property_page_get_property (GObject *object,
 }
 
 static void
-nautilus_property_page_set_property (GObject *object,
+nemo_property_page_set_property (GObject *object,
 				 guint param_id,
 				 const GValue *value,
 				 GParamSpec *pspec)
 {
-	NautilusPropertyPage *page;
+	NemoPropertyPage *page;
 	
-	page = NAUTILUS_PROPERTY_PAGE (object);
+	page = NEMO_PROPERTY_PAGE (object);
 
 	switch (param_id) {
 	case PROP_NAME :
@@ -139,11 +139,11 @@ nautilus_property_page_set_property (GObject *object,
 }
 
 static void
-nautilus_property_page_dispose (GObject *object)
+nemo_property_page_dispose (GObject *object)
 {
-	NautilusPropertyPage *page;
+	NemoPropertyPage *page;
 	
-	page = NAUTILUS_PROPERTY_PAGE (object);
+	page = NEMO_PROPERTY_PAGE (object);
 	
 	if (page->details->label) {
 		g_object_unref (page->details->label);
@@ -156,11 +156,11 @@ nautilus_property_page_dispose (GObject *object)
 }
 
 static void
-nautilus_property_page_finalize (GObject *object)
+nemo_property_page_finalize (GObject *object)
 {
-	NautilusPropertyPage *page;
+	NemoPropertyPage *page;
 	
-	page = NAUTILUS_PROPERTY_PAGE (object);
+	page = NEMO_PROPERTY_PAGE (object);
 
 	g_free (page->details->name);
 
@@ -170,20 +170,20 @@ nautilus_property_page_finalize (GObject *object)
 }
 
 static void
-nautilus_property_page_instance_init (NautilusPropertyPage *page)
+nemo_property_page_instance_init (NemoPropertyPage *page)
 {
-	page->details = g_new0 (NautilusPropertyPageDetails, 1);
+	page->details = g_new0 (NemoPropertyPageDetails, 1);
 }
 
 static void
-nautilus_property_page_class_init (NautilusPropertyPageClass *class)
+nemo_property_page_class_init (NemoPropertyPageClass *class)
 {
 	parent_class = g_type_class_peek_parent (class);
 	
-	G_OBJECT_CLASS (class)->finalize = nautilus_property_page_finalize;
-	G_OBJECT_CLASS (class)->dispose = nautilus_property_page_dispose;
-	G_OBJECT_CLASS (class)->get_property = nautilus_property_page_get_property;
-	G_OBJECT_CLASS (class)->set_property = nautilus_property_page_set_property;
+	G_OBJECT_CLASS (class)->finalize = nemo_property_page_finalize;
+	G_OBJECT_CLASS (class)->dispose = nemo_property_page_dispose;
+	G_OBJECT_CLASS (class)->get_property = nemo_property_page_get_property;
+	G_OBJECT_CLASS (class)->set_property = nemo_property_page_set_property;
 
 	g_object_class_install_property (G_OBJECT_CLASS (class),
 					 PROP_NAME,
@@ -209,26 +209,26 @@ nautilus_property_page_class_init (NautilusPropertyPageClass *class)
 }
 
 GType 
-nautilus_property_page_get_type (void)
+nemo_property_page_get_type (void)
 {
 	static GType type = 0;
 	
 	if (!type) {
 		const GTypeInfo info = {
-			sizeof (NautilusPropertyPageClass),
+			sizeof (NemoPropertyPageClass),
 			NULL,
 			NULL,
-			(GClassInitFunc)nautilus_property_page_class_init,
+			(GClassInitFunc)nemo_property_page_class_init,
 			NULL,
 			NULL,
-			sizeof (NautilusPropertyPage),
+			sizeof (NemoPropertyPage),
 			0,
-			(GInstanceInitFunc)nautilus_property_page_instance_init
+			(GInstanceInitFunc)nemo_property_page_instance_init
 		};
 		
 		type = g_type_register_static 
 			(G_TYPE_OBJECT, 
-			 "NautilusPropertyPage",
+			 "NemoPropertyPage",
 			 &info, 0);
 	}
 

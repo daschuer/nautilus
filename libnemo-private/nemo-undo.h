@@ -1,6 +1,6 @@
 /* -*- Mode: C; indent-tabs-mode: t; c-basic-offset: 8; tab-width: 8 -*- */
 
-/* nautilus-undo.h - public interface for objects that implement
+/* nemo-undo.h - public interface for objects that implement
  *                   undoable actions -- works across components
  *
  * Copyright (C) 2000 Eazel, Inc.
@@ -23,16 +23,16 @@
  * Author: Darin Adler <darin@bentspoon.com>
  */
 
-#ifndef NAUTILUS_UNDO_H
-#define NAUTILUS_UNDO_H
+#ifndef NEMO_UNDO_H
+#define NEMO_UNDO_H
 
 #include <glib-object.h>
 
-typedef struct _NautilusUndoTransaction NautilusUndoTransaction;
+typedef struct _NemoUndoTransaction NemoUndoTransaction;
 
 
 /* The basic undoable operation. */
-typedef void (* NautilusUndoCallback) (GObject *target, gpointer callback_data);
+typedef void (* NemoUndoCallback) (GObject *target, gpointer callback_data);
 
 /* Recipe for undo of a bit of work on an object.
  * Create these atoms when you want to register more
@@ -40,14 +40,14 @@ typedef void (* NautilusUndoCallback) (GObject *target, gpointer callback_data);
  */
 typedef struct {
 	GObject *target;
-	NautilusUndoCallback callback;
+	NemoUndoCallback callback;
 	gpointer callback_data;
 	GDestroyNotify callback_data_destroy_notify;
-} NautilusUndoAtom;
+} NemoUndoAtom;
 
 /* Registering something that can be undone. */
-void nautilus_undo_register              (GObject              *target,
-					  NautilusUndoCallback  callback,
+void nemo_undo_register              (GObject              *target,
+					  NemoUndoCallback  callback,
 					  gpointer              callback_data,
 					  GDestroyNotify        callback_data_destroy_notify,
 					  const char           *operation_name,
@@ -55,22 +55,22 @@ void nautilus_undo_register              (GObject              *target,
 					  const char           *undo_menu_item_hint,
 					  const char           *redo_menu_item_label,
 					  const char           *redo_menu_item_hint);
-void nautilus_undo_register_full         (GList                *atoms,
+void nemo_undo_register_full         (GList                *atoms,
 					  GObject              *undo_manager_search_start_object,
 					  const char           *operation_name,
 					  const char           *undo_menu_item_label,
 					  const char           *undo_menu_item_hint,
 					  const char           *redo_menu_item_label,
 					  const char           *redo_menu_item_hint);
-void nautilus_undo_unregister            (GObject              *target);
+void nemo_undo_unregister            (GObject              *target);
 
 /* Performing an undo explicitly. Only for use by objects "out in the field".
  * The menu bar itself uses a richer API in the undo manager.
  */
-void nautilus_undo                       (GObject              *undo_manager_search_start_object);
+void nemo_undo                       (GObject              *undo_manager_search_start_object);
 
 /* Connecting an undo manager. */
-void nautilus_undo_share_undo_manager    (GObject              *destination_object,
+void nemo_undo_share_undo_manager    (GObject              *destination_object,
 					  GObject              *source_object);
 
-#endif /* NAUTILUS_UNDO_H */
+#endif /* NEMO_UNDO_H */

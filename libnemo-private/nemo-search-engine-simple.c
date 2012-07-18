@@ -2,12 +2,12 @@
 /*
  * Copyright (C) 2005 Red Hat, Inc
  *
- * Nautilus is free software; you can redistribute it and/or
+ * Nemo is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
  * published by the Free Software Foundation; either version 2 of the
  * License, or (at your option) any later version.
  *
- * Nautilus is distributed in the hope that it will be useful,
+ * Nemo is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
  * General Public License for more details.
@@ -22,7 +22,7 @@
  */
 
 #include <config.h>
-#include "nautilus-search-engine-simple.h"
+#include "nemo-search-engine-simple.h"
 
 #include <string.h>
 #include <glib.h>
@@ -31,7 +31,7 @@
 #define BATCH_SIZE 500
 
 typedef struct {
-	NautilusSearchEngineSimple *engine;
+	NemoSearchEngineSimple *engine;
 	GCancellable *cancellable;
 
 	GList *mime_types;
@@ -47,35 +47,35 @@ typedef struct {
 } SearchThreadData;
 
 
-struct NautilusSearchEngineSimpleDetails {
-	NautilusQuery *query;
+struct NemoSearchEngineSimpleDetails {
+	NemoQuery *query;
 
 	SearchThreadData *active_search;
 	
 	gboolean query_finished;
 };
 
-G_DEFINE_TYPE (NautilusSearchEngineSimple, nautilus_search_engine_simple,
-	       NAUTILUS_TYPE_SEARCH_ENGINE);
+G_DEFINE_TYPE (NemoSearchEngineSimple, nemo_search_engine_simple,
+	       NEMO_TYPE_SEARCH_ENGINE);
 
 static void
 finalize (GObject *object)
 {
-	NautilusSearchEngineSimple *simple;
+	NemoSearchEngineSimple *simple;
 
-	simple = NAUTILUS_SEARCH_ENGINE_SIMPLE (object);
+	simple = NEMO_SEARCH_ENGINE_SIMPLE (object);
 	
 	if (simple->details->query) {
 		g_object_unref (simple->details->query);
 		simple->details->query = NULL;
 	}
 
-	G_OBJECT_CLASS (nautilus_search_engine_simple_parent_class)->finalize (object);
+	G_OBJECT_CLASS (nemo_search_engine_simple_parent_class)->finalize (object);
 }
 
 static SearchThreadData *
-search_thread_data_new (NautilusSearchEngineSimple *engine,
-			NautilusQuery *query)
+search_thread_data_new (NemoSearchEngineSimple *engine,
+			NemoQuery *query)
 {
 	SearchThreadData *data;
 	char *text, *lower, *normalized, *uri;
@@ -86,7 +86,7 @@ search_thread_data_new (NautilusSearchEngineSimple *engine,
 	data->engine = engine;
 	data->directories = g_queue_new ();
 	data->visited = g_hash_table_new_full (g_str_hash, g_str_equal, g_free, NULL);
-	uri = nautilus_query_get_location (query);
+	uri = nemo_query_get_location (query);
 	location = NULL;
 	if (uri != NULL) {
 		location = g_file_new_for_uri (uri);
@@ -97,7 +97,7 @@ search_thread_data_new (NautilusSearchEngineSimple *engine,
 	}
 	g_queue_push_tail (data->directories, location);
 	
-	text = nautilus_query_get_text (query);
+	text = nemo_query_get_text (query);
 	normalized = g_utf8_normalize (text, -1, G_NORMALIZE_NFD);
 	lower = g_utf8_strdown (normalized, -1);
 	data->words = g_strsplit (lower, " ", -1);
@@ -105,7 +105,7 @@ search_thread_data_new (NautilusSearchEngineSimple *engine,
 	g_free (lower);
 	g_free (normalized);
 
-	data->mime_types = nautilus_query_get_mime_types (query);
+	data->mime_types = nemo_query_get_mime_types (query);
 
 	data->cancellable = g_cancellable_new ();
 	
@@ -134,7 +134,7 @@ search_thread_done_idle (gpointer user_data)
 	data = user_data;
 
 	if (!g_cancellable_is_cancelled (data->cancellable)) {
-		nautilus_search_engine_finished (NAUTILUS_SEARCH_ENGINE (data->engine));
+		nemo_search_engine_finished (NEMO_SEARCH_ENGINE (data->engine));
 		data->engine->details->active_search = NULL;
 	}
 	
@@ -157,7 +157,7 @@ search_thread_add_hits_idle (gpointer user_data)
 	hits = user_data;
 
 	if (!g_cancellable_is_cancelled (hits->thread_data->cancellable)) {
-		nautilus_search_engine_hits_added (NAUTILUS_SEARCH_ENGINE (hits->thread_data->engine),
+		nemo_search_engine_hits_added (NEMO_SEARCH_ENGINE (hits->thread_data->engine),
 						   hits->uris);
 	}
 
@@ -323,13 +323,13 @@ search_thread_func (gpointer user_data)
 }
 
 static void
-nautilus_search_engine_simple_start (NautilusSearchEngine *engine)
+nemo_search_engine_simple_start (NemoSearchEngine *engine)
 {
-	NautilusSearchEngineSimple *simple;
+	NemoSearchEngineSimple *simple;
 	SearchThreadData *data;
 	GThread *thread;
 	
-	simple = NAUTILUS_SEARCH_ENGINE_SIMPLE (engine);
+	simple = NEMO_SEARCH_ENGINE_SIMPLE (engine);
 
 	if (simple->details->active_search != NULL) {
 		return;
@@ -341,18 +341,18 @@ nautilus_search_engine_simple_start (NautilusSearchEngine *engine)
 	
 	data = search_thread_data_new (simple, simple->details->query);
 
-	thread = g_thread_new ("nautilus-search-simple", search_thread_func, data);
+	thread = g_thread_new ("nemo-search-simple", search_thread_func, data);
 	simple->details->active_search = data;
 
 	g_thread_unref (thread);
 }
 
 static void
-nautilus_search_engine_simple_stop (NautilusSearchEngine *engine)
+nemo_search_engine_simple_stop (NemoSearchEngine *engine)
 {
-	NautilusSearchEngineSimple *simple;
+	NemoSearchEngineSimple *simple;
 
-	simple = NAUTILUS_SEARCH_ENGINE_SIMPLE (engine);
+	simple = NEMO_SEARCH_ENGINE_SIMPLE (engine);
 
 	if (simple->details->active_search != NULL) {
 		g_cancellable_cancel (simple->details->active_search->cancellable);
@@ -361,11 +361,11 @@ nautilus_search_engine_simple_stop (NautilusSearchEngine *engine)
 }
 
 static void
-nautilus_search_engine_simple_set_query (NautilusSearchEngine *engine, NautilusQuery *query)
+nemo_search_engine_simple_set_query (NemoSearchEngine *engine, NemoQuery *query)
 {
-	NautilusSearchEngineSimple *simple;
+	NemoSearchEngineSimple *simple;
 
-	simple = NAUTILUS_SEARCH_ENGINE_SIMPLE (engine);
+	simple = NEMO_SEARCH_ENGINE_SIMPLE (engine);
 
 	if (query) {
 		g_object_ref (query);
@@ -379,35 +379,35 @@ nautilus_search_engine_simple_set_query (NautilusSearchEngine *engine, NautilusQ
 }
 
 static void
-nautilus_search_engine_simple_class_init (NautilusSearchEngineSimpleClass *class)
+nemo_search_engine_simple_class_init (NemoSearchEngineSimpleClass *class)
 {
 	GObjectClass *gobject_class;
-	NautilusSearchEngineClass *engine_class;
+	NemoSearchEngineClass *engine_class;
 
 	gobject_class = G_OBJECT_CLASS (class);
 	gobject_class->finalize = finalize;
 
-	engine_class = NAUTILUS_SEARCH_ENGINE_CLASS (class);
-	engine_class->set_query = nautilus_search_engine_simple_set_query;
-	engine_class->start = nautilus_search_engine_simple_start;
-	engine_class->stop = nautilus_search_engine_simple_stop;
+	engine_class = NEMO_SEARCH_ENGINE_CLASS (class);
+	engine_class->set_query = nemo_search_engine_simple_set_query;
+	engine_class->start = nemo_search_engine_simple_start;
+	engine_class->stop = nemo_search_engine_simple_stop;
 
-	g_type_class_add_private (class, sizeof (NautilusSearchEngineSimpleDetails));
+	g_type_class_add_private (class, sizeof (NemoSearchEngineSimpleDetails));
 }
 
 static void
-nautilus_search_engine_simple_init (NautilusSearchEngineSimple *engine)
+nemo_search_engine_simple_init (NemoSearchEngineSimple *engine)
 {
-	engine->details = G_TYPE_INSTANCE_GET_PRIVATE (engine, NAUTILUS_TYPE_SEARCH_ENGINE_SIMPLE,
-						       NautilusSearchEngineSimpleDetails);
+	engine->details = G_TYPE_INSTANCE_GET_PRIVATE (engine, NEMO_TYPE_SEARCH_ENGINE_SIMPLE,
+						       NemoSearchEngineSimpleDetails);
 }
 
-NautilusSearchEngine *
-nautilus_search_engine_simple_new (void)
+NemoSearchEngine *
+nemo_search_engine_simple_new (void)
 {
-	NautilusSearchEngine *engine;
+	NemoSearchEngine *engine;
 
-	engine = g_object_new (NAUTILUS_TYPE_SEARCH_ENGINE_SIMPLE, NULL);
+	engine = g_object_new (NEMO_TYPE_SEARCH_ENGINE_SIMPLE, NULL);
 
 	return engine;
 }

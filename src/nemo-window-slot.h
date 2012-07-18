@@ -1,6 +1,6 @@
 /* -*- Mode: C; indent-tabs-mode: t; c-basic-offset: 8; tab-width: 8 -*-
 
-   nautilus-window-slot.h: Nautilus window slot
+   nemo-window-slot.h: Nemo window slot
  
    Copyright (C) 2008 Free Software Foundation, Inc.
   
@@ -22,46 +22,46 @@
    Author: Christian Neumair <cneumair@gnome.org>
 */
 
-#ifndef NAUTILUS_WINDOW_SLOT_H
-#define NAUTILUS_WINDOW_SLOT_H
+#ifndef NEMO_WINDOW_SLOT_H
+#define NEMO_WINDOW_SLOT_H
 
-#include "nautilus-view.h"
-#include "nautilus-window-types.h"
-#include "nautilus-query-editor.h"
+#include "nemo-view.h"
+#include "nemo-window-types.h"
+#include "nemo-query-editor.h"
 
-#define NAUTILUS_TYPE_WINDOW_SLOT	 (nautilus_window_slot_get_type())
-#define NAUTILUS_WINDOW_SLOT_CLASS(k)     (G_TYPE_CHECK_CLASS_CAST((k), NAUTILUS_TYPE_WINDOW_SLOT, NautilusWindowSlotClass))
-#define NAUTILUS_WINDOW_SLOT(obj)	 (G_TYPE_CHECK_INSTANCE_CAST ((obj), NAUTILUS_TYPE_WINDOW_SLOT, NautilusWindowSlot))
-#define NAUTILUS_IS_WINDOW_SLOT(obj)      (G_TYPE_CHECK_INSTANCE_TYPE ((obj), NAUTILUS_TYPE_WINDOW_SLOT))
-#define NAUTILUS_IS_WINDOW_SLOT_CLASS(k)  (G_TYPE_CHECK_CLASS_TYPE ((k), NAUTILUS_TYPE_WINDOW_SLOT))
-#define NAUTILUS_WINDOW_SLOT_GET_CLASS(o) (G_TYPE_INSTANCE_GET_CLASS ((o), NAUTILUS_TYPE_WINDOW_SLOT, NautilusWindowSlotClass))
+#define NEMO_TYPE_WINDOW_SLOT	 (nemo_window_slot_get_type())
+#define NEMO_WINDOW_SLOT_CLASS(k)     (G_TYPE_CHECK_CLASS_CAST((k), NEMO_TYPE_WINDOW_SLOT, NemoWindowSlotClass))
+#define NEMO_WINDOW_SLOT(obj)	 (G_TYPE_CHECK_INSTANCE_CAST ((obj), NEMO_TYPE_WINDOW_SLOT, NemoWindowSlot))
+#define NEMO_IS_WINDOW_SLOT(obj)      (G_TYPE_CHECK_INSTANCE_TYPE ((obj), NEMO_TYPE_WINDOW_SLOT))
+#define NEMO_IS_WINDOW_SLOT_CLASS(k)  (G_TYPE_CHECK_CLASS_TYPE ((k), NEMO_TYPE_WINDOW_SLOT))
+#define NEMO_WINDOW_SLOT_GET_CLASS(o) (G_TYPE_INSTANCE_GET_CLASS ((o), NEMO_TYPE_WINDOW_SLOT, NemoWindowSlotClass))
 
 typedef enum {
-	NAUTILUS_LOCATION_CHANGE_STANDARD,
-	NAUTILUS_LOCATION_CHANGE_BACK,
-	NAUTILUS_LOCATION_CHANGE_FORWARD,
-	NAUTILUS_LOCATION_CHANGE_RELOAD
-} NautilusLocationChangeType;
+	NEMO_LOCATION_CHANGE_STANDARD,
+	NEMO_LOCATION_CHANGE_BACK,
+	NEMO_LOCATION_CHANGE_FORWARD,
+	NEMO_LOCATION_CHANGE_RELOAD
+} NemoLocationChangeType;
 
-struct NautilusWindowSlotClass {
+struct NemoWindowSlotClass {
 	GtkBoxClass parent_class;
 
-	/* wrapped NautilusWindowInfo signals, for overloading */
-	void (* active)   (NautilusWindowSlot *slot);
-	void (* inactive) (NautilusWindowSlot *slot);
+	/* wrapped NemoWindowInfo signals, for overloading */
+	void (* active)   (NemoWindowSlot *slot);
+	void (* inactive) (NemoWindowSlot *slot);
 };
 
-/* Each NautilusWindowSlot corresponds to
+/* Each NemoWindowSlot corresponds to
  * a location in the window for displaying
- * a NautilusView.
+ * a NemoView.
  *
  * For navigation windows, this would be a
  * tab, while spatial windows only have one slot.
  */
-struct NautilusWindowSlot {
+struct NemoWindowSlot {
 	GtkBox parent;
 
-	NautilusWindowPane *pane;
+	NemoWindowPane *pane;
 
 	/* slot contains
  	 *  1) an event box containing extra_location_widgets
@@ -75,37 +75,37 @@ struct NautilusWindowSlot {
 	guint set_status_timeout_id;
 	guint loading_timeout_id;
 
-	NautilusView *content_view;
-	NautilusView *new_content_view;
+	NemoView *content_view;
+	NemoView *new_content_view;
 
 	/* Information about bookmarks */
-	NautilusBookmark *current_location_bookmark;
-	NautilusBookmark *last_location_bookmark;
+	NemoBookmark *current_location_bookmark;
+	NemoBookmark *last_location_bookmark;
 
 	/* Current location. */
 	GFile *location;
 	char *title;
 	char *status_text;
 
-	NautilusFile *viewed_file;
+	NemoFile *viewed_file;
 	gboolean viewed_file_seen;
 	gboolean viewed_file_in_trash;
 
 	gboolean allow_stop;
 
-	NautilusQueryEditor *query_editor;
+	NemoQueryEditor *query_editor;
 
 	/* New location. */
-	NautilusLocationChangeType location_change_type;
+	NemoLocationChangeType location_change_type;
 	guint location_change_distance;
 	GFile *pending_location;
 	char *pending_scroll_to;
 	GList *pending_selection;
-	NautilusFile *determine_view_file;
+	NemoFile *determine_view_file;
 	GCancellable *mount_cancellable;
 	GError *mount_error;
 	gboolean tried_mount;
-	NautilusWindowGoToCallback open_callback;
+	NemoWindowGoToCallback open_callback;
 	gpointer open_callback_user_data;
 
 	GCancellable *find_mount_cancellable;
@@ -113,82 +113,82 @@ struct NautilusWindowSlot {
 	gboolean visible;
 
 	/* Back/Forward chain, and history list. 
-	 * The data in these lists are NautilusBookmark pointers. 
+	 * The data in these lists are NemoBookmark pointers. 
 	 */
 	GList *back_list, *forward_list;
 };
 
-GType   nautilus_window_slot_get_type (void);
+GType   nemo_window_slot_get_type (void);
 
-NautilusWindowSlot * nautilus_window_slot_new (NautilusWindowPane *pane);
+NemoWindowSlot * nemo_window_slot_new (NemoWindowPane *pane);
 
-void    nautilus_window_slot_update_title		   (NautilusWindowSlot *slot);
-void    nautilus_window_slot_update_icon		   (NautilusWindowSlot *slot);
-void    nautilus_window_slot_update_query_editor	   (NautilusWindowSlot *slot);
+void    nemo_window_slot_update_title		   (NemoWindowSlot *slot);
+void    nemo_window_slot_update_icon		   (NemoWindowSlot *slot);
+void    nemo_window_slot_update_query_editor	   (NemoWindowSlot *slot);
 
-GFile * nautilus_window_slot_get_location		   (NautilusWindowSlot *slot);
-char *  nautilus_window_slot_get_location_uri		   (NautilusWindowSlot *slot);
+GFile * nemo_window_slot_get_location		   (NemoWindowSlot *slot);
+char *  nemo_window_slot_get_location_uri		   (NemoWindowSlot *slot);
 
-void    nautilus_window_slot_reload			   (NautilusWindowSlot *slot);
+void    nemo_window_slot_reload			   (NemoWindowSlot *slot);
 
-void nautilus_window_slot_open_location_full (NautilusWindowSlot *slot,
+void nemo_window_slot_open_location_full (NemoWindowSlot *slot,
 					      GFile *location,
-					      NautilusWindowOpenFlags flags,
-					      GList *new_selection, /* NautilusFile list */
-					      NautilusWindowGoToCallback callback,
+					      NemoWindowOpenFlags flags,
+					      GList *new_selection, /* NemoFile list */
+					      NemoWindowGoToCallback callback,
 					      gpointer user_data);
 
 /* convenience wrapper without callback/user_data */
-#define nautilus_window_slot_open_location(slot, location, flags, new_selection)\
-	nautilus_window_slot_open_location_full(slot, location, flags, new_selection, NULL, NULL)
+#define nemo_window_slot_open_location(slot, location, flags, new_selection)\
+	nemo_window_slot_open_location_full(slot, location, flags, new_selection, NULL, NULL)
 
 /* these are wrappers that always open according to current mode */
-#define nautilus_window_slot_go_to(slot, location, new_tab) \
-	nautilus_window_slot_open_location(slot, location, \
-					   (new_tab ? NAUTILUS_WINDOW_OPEN_FLAG_NEW_TAB : 0), \
+#define nemo_window_slot_go_to(slot, location, new_tab) \
+	nemo_window_slot_open_location(slot, location, \
+					   (new_tab ? NEMO_WINDOW_OPEN_FLAG_NEW_TAB : 0), \
 					   NULL)
-#define nautilus_window_slot_go_to_full(slot, location, new_tab, callback, user_data) \
-	nautilus_window_slot_open_location_full(slot, location, \
-						(new_tab ? NAUTILUS_WINDOW_OPEN_FLAG_NEW_TAB : 0), \
+#define nemo_window_slot_go_to_full(slot, location, new_tab, callback, user_data) \
+	nemo_window_slot_open_location_full(slot, location, \
+						(new_tab ? NEMO_WINDOW_OPEN_FLAG_NEW_TAB : 0), \
 						NULL, callback, user_data)
 
-void			nautilus_window_slot_stop_loading	      (NautilusWindowSlot	*slot);
+void			nemo_window_slot_stop_loading	      (NemoWindowSlot	*slot);
 
-void			nautilus_window_slot_set_content_view	      (NautilusWindowSlot	*slot,
+void			nemo_window_slot_set_content_view	      (NemoWindowSlot	*slot,
 								       const char		*id);
-const char	       *nautilus_window_slot_get_content_view_id      (NautilusWindowSlot	*slot);
-gboolean		nautilus_window_slot_content_view_matches_iid (NautilusWindowSlot	*slot,
+const char	       *nemo_window_slot_get_content_view_id      (NemoWindowSlot	*slot);
+gboolean		nemo_window_slot_content_view_matches_iid (NemoWindowSlot	*slot,
 								       const char		*iid);
 
-void    nautilus_window_slot_go_home			   (NautilusWindowSlot *slot,
+void    nemo_window_slot_go_home			   (NemoWindowSlot *slot,
 							    gboolean            new_tab);
-void    nautilus_window_slot_go_up                         (NautilusWindowSlot *slot,
+void    nemo_window_slot_go_up                         (NemoWindowSlot *slot,
 							    gboolean close_behind,
 							    gboolean new_tab);
 
-void    nautilus_window_slot_set_content_view_widget	   (NautilusWindowSlot *slot,
-							    NautilusView       *content_view);
-void    nautilus_window_slot_set_viewed_file		   (NautilusWindowSlot *slot,
-							    NautilusFile      *file);
-void    nautilus_window_slot_set_allow_stop		   (NautilusWindowSlot *slot,
+void    nemo_window_slot_set_content_view_widget	   (NemoWindowSlot *slot,
+							    NemoView       *content_view);
+void    nemo_window_slot_set_viewed_file		   (NemoWindowSlot *slot,
+							    NemoFile      *file);
+void    nemo_window_slot_set_allow_stop		   (NemoWindowSlot *slot,
 							    gboolean	    allow_stop);
-void    nautilus_window_slot_set_status			   (NautilusWindowSlot *slot,
+void    nemo_window_slot_set_status			   (NemoWindowSlot *slot,
 							    const char	 *status,
 							    const char   *short_status);
 
-void    nautilus_window_slot_add_extra_location_widget     (NautilusWindowSlot *slot,
+void    nemo_window_slot_add_extra_location_widget     (NemoWindowSlot *slot,
 							    GtkWidget       *widget);
-void    nautilus_window_slot_remove_extra_location_widgets (NautilusWindowSlot *slot);
+void    nemo_window_slot_remove_extra_location_widgets (NemoWindowSlot *slot);
 
-NautilusView * nautilus_window_slot_get_current_view     (NautilusWindowSlot *slot);
-char           * nautilus_window_slot_get_current_uri      (NautilusWindowSlot *slot);
-NautilusWindow * nautilus_window_slot_get_window           (NautilusWindowSlot *slot);
-void           nautilus_window_slot_make_hosting_pane_active (NautilusWindowSlot *slot);
+NemoView * nemo_window_slot_get_current_view     (NemoWindowSlot *slot);
+char           * nemo_window_slot_get_current_uri      (NemoWindowSlot *slot);
+NemoWindow * nemo_window_slot_get_window           (NemoWindowSlot *slot);
+void           nemo_window_slot_make_hosting_pane_active (NemoWindowSlot *slot);
 
-gboolean nautilus_window_slot_should_close_with_mount (NautilusWindowSlot *slot,
+gboolean nemo_window_slot_should_close_with_mount (NemoWindowSlot *slot,
 						       GMount *mount);
 
-void nautilus_window_slot_clear_forward_list (NautilusWindowSlot *slot);
-void nautilus_window_slot_clear_back_list    (NautilusWindowSlot *slot);
+void nemo_window_slot_clear_forward_list (NemoWindowSlot *slot);
+void nemo_window_slot_clear_back_list    (NemoWindowSlot *slot);
 
-#endif /* NAUTILUS_WINDOW_SLOT_H */
+#endif /* NEMO_WINDOW_SLOT_H */

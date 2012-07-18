@@ -5,11 +5,11 @@ public_icons_themes = \
 	$(NULL)
 
 public_icons = \
-	hicolor_apps_16x16_nautilus.png \
-	hicolor_apps_22x22_nautilus.png \
-	hicolor_apps_24x24_nautilus.png \
-	hicolor_apps_32x32_nautilus.png \
-	hicolor_apps_scalable_nautilus.svg \
+	hicolor_apps_16x16_nemo.png \
+	hicolor_apps_22x22_nemo.png \
+	hicolor_apps_24x24_nemo.png \
+	hicolor_apps_32x32_nemo.png \
+	hicolor_apps_scalable_nemo.svg \
 	$(NULL)
 
 private_icons = \
@@ -19,9 +19,9 @@ private_icons = \
 	$(NULL)
 
 noinst_DATA = \
-	hicolor_apps_16x16_nautilus.svg \
-	hicolor_apps_22x22_nautilus.svg \
-	hicolor_apps_32x32_nautilus.svg \
+	hicolor_apps_16x16_nemo.svg \
+	hicolor_apps_22x22_nemo.svg \
+	hicolor_apps_32x32_nemo.svg \
 	$(NULL)
 
 EXTRA_DIST = \

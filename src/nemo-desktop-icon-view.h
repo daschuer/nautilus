@@ -22,37 +22,37 @@
    Authors: Mike Engber <engber@eazel.com>
 */
 
-#ifndef NAUTILUS_DESKTOP_ICON_VIEW_H
-#define NAUTILUS_DESKTOP_ICON_VIEW_H
+#ifndef NEMO_DESKTOP_ICON_VIEW_H
+#define NEMO_DESKTOP_ICON_VIEW_H
 
-#include "nautilus-icon-view.h"
+#include "nemo-icon-view.h"
 
-#define NAUTILUS_TYPE_DESKTOP_ICON_VIEW nautilus_desktop_icon_view_get_type()
-#define NAUTILUS_DESKTOP_ICON_VIEW(obj) \
-  (G_TYPE_CHECK_INSTANCE_CAST ((obj), NAUTILUS_TYPE_DESKTOP_ICON_VIEW, NautilusDesktopIconView))
-#define NAUTILUS_DESKTOP_ICON_VIEW_CLASS(klass) \
-  (G_TYPE_CHECK_CLASS_CAST ((klass), NAUTILUS_TYPE_DESKTOP_ICON_VIEW, NautilusDesktopIconViewClass))
-#define NAUTILUS_IS_DESKTOP_ICON_VIEW(obj) \
-  (G_TYPE_CHECK_INSTANCE_TYPE ((obj), NAUTILUS_TYPE_DESKTOP_ICON_VIEW))
-#define NAUTILUS_IS_DESKTOP_ICON_VIEW_CLASS(klass) \
-  (G_TYPE_CHECK_CLASS_TYPE ((klass), NAUTILUS_TYPE_DESKTOP_ICON_VIEW))
-#define NAUTILUS_DESKTOP_ICON_VIEW_GET_CLASS(obj) \
-  (G_TYPE_INSTANCE_GET_CLASS ((obj), NAUTILUS_TYPE_DESKTOP_ICON_VIEW, NautilusDesktopIconViewClass))
+#define NEMO_TYPE_DESKTOP_ICON_VIEW nemo_desktop_icon_view_get_type()
+#define NEMO_DESKTOP_ICON_VIEW(obj) \
+  (G_TYPE_CHECK_INSTANCE_CAST ((obj), NEMO_TYPE_DESKTOP_ICON_VIEW, NemoDesktopIconView))
+#define NEMO_DESKTOP_ICON_VIEW_CLASS(klass) \
+  (G_TYPE_CHECK_CLASS_CAST ((klass), NEMO_TYPE_DESKTOP_ICON_VIEW, NemoDesktopIconViewClass))
+#define NEMO_IS_DESKTOP_ICON_VIEW(obj) \
+  (G_TYPE_CHECK_INSTANCE_TYPE ((obj), NEMO_TYPE_DESKTOP_ICON_VIEW))
+#define NEMO_IS_DESKTOP_ICON_VIEW_CLASS(klass) \
+  (G_TYPE_CHECK_CLASS_TYPE ((klass), NEMO_TYPE_DESKTOP_ICON_VIEW))
+#define NEMO_DESKTOP_ICON_VIEW_GET_CLASS(obj) \
+  (G_TYPE_INSTANCE_GET_CLASS ((obj), NEMO_TYPE_DESKTOP_ICON_VIEW, NemoDesktopIconViewClass))
 
-#define NAUTILUS_DESKTOP_ICON_VIEW_ID "OAFIID:Nautilus_File_Manager_Desktop_Icon_View"
+#define NEMO_DESKTOP_ICON_VIEW_ID "OAFIID:Nemo_File_Manager_Desktop_Icon_View"
 
-typedef struct NautilusDesktopIconViewDetails NautilusDesktopIconViewDetails;
+typedef struct NemoDesktopIconViewDetails NemoDesktopIconViewDetails;
 typedef struct {
-	NautilusIconView parent;
-	NautilusDesktopIconViewDetails *details;
-} NautilusDesktopIconView;
+	NemoIconView parent;
+	NemoDesktopIconViewDetails *details;
+} NemoDesktopIconView;
 
 typedef struct {
-	NautilusIconViewClass parent_class;
-} NautilusDesktopIconViewClass;
+	NemoIconViewClass parent_class;
+} NemoDesktopIconViewClass;
 
 /* GObject support */
-GType   nautilus_desktop_icon_view_get_type (void);
-void nautilus_desktop_icon_view_register (void);
+GType   nemo_desktop_icon_view_get_type (void);
+void nemo_desktop_icon_view_register (void);
 
-#endif /* NAUTILUS_DESKTOP_ICON_VIEW_H */
+#endif /* NEMO_DESKTOP_ICON_VIEW_H */

@@ -1,6 +1,6 @@
 /* -*- Mode: C; indent-tabs-mode: t; c-basic-offset: 8; tab-width: 8 -*- */
 
-/* nautilus-column-utilities.h - Utilities related to column specifications
+/* nemo-column-utilities.h - Utilities related to column specifications
 
    Copyright (C) 2004 Novell, Inc.
 
@@ -23,13 +23,13 @@
 */
 
 #include <config.h>
-#include "nautilus-column-utilities.h"
+#include "nemo-column-utilities.h"
 
 #include <string.h>
 #include <eel/eel-glib-extensions.h>
 #include <glib/gi18n.h>
-#include <libnautilus-extension/nautilus-column-provider.h>
-#include <libnautilus-private/nautilus-module.h>
+#include <libnemo-extension/nemo-column-provider.h>
+#include <libnemo-private/nemo-module.h>
 
 static GList *
 get_builtin_columns (void)
@@ -37,14 +37,14 @@ get_builtin_columns (void)
 	GList *columns;
 
 	columns = g_list_append (NULL,
-				 g_object_new (NAUTILUS_TYPE_COLUMN,
+				 g_object_new (NEMO_TYPE_COLUMN,
 					       "name", "name",
 					       "attribute", "name",
 					       "label", _("Name"),
 					       "description", _("The name and icon of the file."),
 					       NULL));
 	columns = g_list_append (columns,
-				 g_object_new (NAUTILUS_TYPE_COLUMN,
+				 g_object_new (NEMO_TYPE_COLUMN,
 					       "name", "size",
 					       "attribute", "size",
 					       "label", _("Size"),
@@ -52,14 +52,14 @@ get_builtin_columns (void)
 					       "xalign", 1.0,
 					       NULL));
 	columns = g_list_append (columns,
-				 g_object_new (NAUTILUS_TYPE_COLUMN,
+				 g_object_new (NEMO_TYPE_COLUMN,
 					       "name", "type",
 					       "attribute", "type",
 					       "label", _("Type"),
 					       "description", _("The type of the file."),
 					       NULL));
 	columns = g_list_append (columns,
-				 g_object_new (NAUTILUS_TYPE_COLUMN,
+				 g_object_new (NEMO_TYPE_COLUMN,
 					       "name", "date_modified",
 					       "attribute", "date_modified",
 					       "label", _("Date Modified"),
@@ -67,7 +67,7 @@ get_builtin_columns (void)
 					       NULL));
 
 	columns = g_list_append (columns,
-				 g_object_new (NAUTILUS_TYPE_COLUMN,
+				 g_object_new (NEMO_TYPE_COLUMN,
 					       "name", "date_accessed",
 					       "attribute", "date_accessed",
 					       "label", _("Date Accessed"),
@@ -75,7 +75,7 @@ get_builtin_columns (void)
 					       NULL));
 
 	columns = g_list_append (columns,
-				 g_object_new (NAUTILUS_TYPE_COLUMN,
+				 g_object_new (NEMO_TYPE_COLUMN,
 					       "name", "owner",
 					       "attribute", "owner",
 					       "label", _("Owner"),
@@ -83,7 +83,7 @@ get_builtin_columns (void)
 					       NULL));
 
 	columns = g_list_append (columns,
-				 g_object_new (NAUTILUS_TYPE_COLUMN,
+				 g_object_new (NEMO_TYPE_COLUMN,
 					       "name", "group",
 					       "attribute", "group",
 					       "label", _("Group"),
@@ -91,7 +91,7 @@ get_builtin_columns (void)
 					       NULL));
 
 	columns = g_list_append (columns,
-				 g_object_new (NAUTILUS_TYPE_COLUMN,
+				 g_object_new (NEMO_TYPE_COLUMN,
 					       "name", "permissions",
 					       "attribute", "permissions",
 					       "label", _("Permissions"),
@@ -99,7 +99,7 @@ get_builtin_columns (void)
 					       NULL));
 
 	columns = g_list_append (columns,
-				 g_object_new (NAUTILUS_TYPE_COLUMN,
+				 g_object_new (NEMO_TYPE_COLUMN,
 					       "name", "octal_permissions",
 					       "attribute", "octal_permissions",
 					       "label", _("Octal Permissions"),
@@ -107,7 +107,7 @@ get_builtin_columns (void)
 					       NULL));
 
 	columns = g_list_append (columns,
-				 g_object_new (NAUTILUS_TYPE_COLUMN,
+				 g_object_new (NEMO_TYPE_COLUMN,
 					       "name", "mime_type",
 					       "attribute", "mime_type",
 					       "label", _("MIME Type"),
@@ -115,7 +115,7 @@ get_builtin_columns (void)
 					       NULL));
 #ifdef HAVE_SELINUX
 	columns = g_list_append (columns,
-				 g_object_new (NAUTILUS_TYPE_COLUMN,
+				 g_object_new (NEMO_TYPE_COLUMN,
 					       "name", "selinux_context",
 					       "attribute", "selinux_context",
 					       "label", _("SELinux Context"),
@@ -123,7 +123,7 @@ get_builtin_columns (void)
 					       NULL));
 #endif
 	columns = g_list_append (columns,
-				 g_object_new (NAUTILUS_TYPE_COLUMN,
+				 g_object_new (NEMO_TYPE_COLUMN,
 					       "name", "where",
 					       "attribute", "where",
 					       "label", _("Location"),
@@ -140,20 +140,20 @@ get_extension_columns (void)
 	GList *providers;
 	GList *l;
 	
-	providers = nautilus_module_get_extensions_for_type (NAUTILUS_TYPE_COLUMN_PROVIDER);
+	providers = nemo_module_get_extensions_for_type (NEMO_TYPE_COLUMN_PROVIDER);
 	
 	columns = NULL;
 	
 	for (l = providers; l != NULL; l = l->next) {
-		NautilusColumnProvider *provider;
+		NemoColumnProvider *provider;
 		GList *provider_columns;
 		
-		provider = NAUTILUS_COLUMN_PROVIDER (l->data);
-		provider_columns = nautilus_column_provider_get_columns (provider);
+		provider = NEMO_COLUMN_PROVIDER (l->data);
+		provider_columns = nemo_column_provider_get_columns (provider);
 		columns = g_list_concat (columns, provider_columns);
 	}
 
-	nautilus_module_extension_list_free (providers);
+	nemo_module_extension_list_free (providers);
 
 	return columns;
 }
@@ -165,14 +165,14 @@ get_trash_columns (void)
 
 	if (columns == NULL) {
 		columns = g_list_append (columns,
-					 g_object_new (NAUTILUS_TYPE_COLUMN,
+					 g_object_new (NEMO_TYPE_COLUMN,
 						       "name", "trashed_on",
 						       "attribute", "trashed_on",
 						       "label", _("Trashed On"),
 						       "description", _("Date when file was moved to the Trash"),
 						       NULL));
 		columns = g_list_append (columns,
-			                 g_object_new (NAUTILUS_TYPE_COLUMN,
+			                 g_object_new (NEMO_TYPE_COLUMN,
 			                               "name", "trash_orig_path",
 			                               "attribute", "trash_orig_path",
 			                               "label", _("Original Location"),
@@ -180,11 +180,11 @@ get_trash_columns (void)
 			                               NULL));
 	}
 
-	return nautilus_column_list_copy (columns);
+	return nemo_column_list_copy (columns);
 }
 
 GList *
-nautilus_get_common_columns (void)
+nemo_get_common_columns (void)
 {
 	static GList *columns = NULL;
 
@@ -193,28 +193,28 @@ nautilus_get_common_columns (void)
 		                         get_extension_columns ());
 	}
 
-	return nautilus_column_list_copy (columns);
+	return nemo_column_list_copy (columns);
 }
 
 GList *
-nautilus_get_all_columns (void)
+nemo_get_all_columns (void)
 {
 	GList *columns = NULL;
 
-	columns = g_list_concat (nautilus_get_common_columns (),
+	columns = g_list_concat (nemo_get_common_columns (),
 	                         get_trash_columns ());
 
 	return columns;
 }
 
 GList *
-nautilus_get_columns_for_file (NautilusFile *file)
+nemo_get_columns_for_file (NemoFile *file)
 {
 	GList *columns;
 
-	columns = nautilus_get_common_columns ();
+	columns = nemo_get_common_columns ();
 
-	if (file != NULL && nautilus_file_is_in_trash (file)) {
+	if (file != NULL && nemo_file_is_in_trash (file)) {
 		columns = g_list_concat (columns,
 		                         get_trash_columns ());
 	}
@@ -223,7 +223,7 @@ nautilus_get_columns_for_file (NautilusFile *file)
 }
 
 GList *
-nautilus_column_list_copy (GList *columns) 
+nemo_column_list_copy (GList *columns) 
 {
 	GList *ret;
 	GList *l;
@@ -238,7 +238,7 @@ nautilus_column_list_copy (GList *columns)
 }
 
 void
-nautilus_column_list_free (GList *columns)
+nemo_column_list_free (GList *columns)
 {
 	GList *l;
 	
@@ -263,7 +263,7 @@ strv_index (char **strv, const char *str)
 }
 
 static int
-column_compare (NautilusColumn *a, NautilusColumn *b, char **column_order)
+column_compare (NemoColumn *a, NemoColumn *b, char **column_order)
 {
 	int index_a;
 	int index_b;
@@ -299,7 +299,7 @@ column_compare (NautilusColumn *a, NautilusColumn *b, char **column_order)
 }
 
 GList *
-nautilus_sort_columns (GList  *columns, 
+nemo_sort_columns (GList  *columns, 
 		       char  **column_order)
 {
 	if (!column_order) {

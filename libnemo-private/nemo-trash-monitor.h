@@ -1,7 +1,7 @@
 /* -*- Mode: C; indent-tabs-mode: t; c-basic-offset: 8; tab-width: 8 -*- */
 
 /* 
-   nautilus-trash-monitor.h: Nautilus trash state watcher.
+   nemo-trash-monitor.h: Nemo trash state watcher.
  
    Copyright (C) 2000 Eazel, Inc.
   
@@ -23,46 +23,46 @@
    Author: Pavel Cisler <pavel@eazel.com>
 */
 
-#ifndef NAUTILUS_TRASH_MONITOR_H
-#define NAUTILUS_TRASH_MONITOR_H
+#ifndef NEMO_TRASH_MONITOR_H
+#define NEMO_TRASH_MONITOR_H
 
 #include <gtk/gtk.h>
 #include <gio/gio.h>
 
-typedef struct NautilusTrashMonitor NautilusTrashMonitor;
-typedef struct NautilusTrashMonitorClass NautilusTrashMonitorClass;
-typedef struct NautilusTrashMonitorDetails NautilusTrashMonitorDetails;
+typedef struct NemoTrashMonitor NemoTrashMonitor;
+typedef struct NemoTrashMonitorClass NemoTrashMonitorClass;
+typedef struct NemoTrashMonitorDetails NemoTrashMonitorDetails;
 
-#define NAUTILUS_TYPE_TRASH_MONITOR nautilus_trash_monitor_get_type()
-#define NAUTILUS_TRASH_MONITOR(obj) \
-  (G_TYPE_CHECK_INSTANCE_CAST ((obj), NAUTILUS_TYPE_TRASH_MONITOR, NautilusTrashMonitor))
-#define NAUTILUS_TRASH_MONITOR_CLASS(klass) \
-  (G_TYPE_CHECK_CLASS_CAST ((klass), NAUTILUS_TYPE_TRASH_MONITOR, NautilusTrashMonitorClass))
-#define NAUTILUS_IS_TRASH_MONITOR(obj) \
-  (G_TYPE_CHECK_INSTANCE_TYPE ((obj), NAUTILUS_TYPE_TRASH_MONITOR))
-#define NAUTILUS_IS_TRASH_MONITOR_CLASS(klass) \
-  (G_TYPE_CHECK_CLASS_TYPE ((klass), NAUTILUS_TYPE_TRASH_MONITOR))
-#define NAUTILUS_TRASH_MONITOR_GET_CLASS(obj) \
-  (G_TYPE_INSTANCE_GET_CLASS ((obj), NAUTILUS_TYPE_TRASH_MONITOR, NautilusTrashMonitorClass))
+#define NEMO_TYPE_TRASH_MONITOR nemo_trash_monitor_get_type()
+#define NEMO_TRASH_MONITOR(obj) \
+  (G_TYPE_CHECK_INSTANCE_CAST ((obj), NEMO_TYPE_TRASH_MONITOR, NemoTrashMonitor))
+#define NEMO_TRASH_MONITOR_CLASS(klass) \
+  (G_TYPE_CHECK_CLASS_CAST ((klass), NEMO_TYPE_TRASH_MONITOR, NemoTrashMonitorClass))
+#define NEMO_IS_TRASH_MONITOR(obj) \
+  (G_TYPE_CHECK_INSTANCE_TYPE ((obj), NEMO_TYPE_TRASH_MONITOR))
+#define NEMO_IS_TRASH_MONITOR_CLASS(klass) \
+  (G_TYPE_CHECK_CLASS_TYPE ((klass), NEMO_TYPE_TRASH_MONITOR))
+#define NEMO_TRASH_MONITOR_GET_CLASS(obj) \
+  (G_TYPE_INSTANCE_GET_CLASS ((obj), NEMO_TYPE_TRASH_MONITOR, NemoTrashMonitorClass))
 
-struct NautilusTrashMonitor {
+struct NemoTrashMonitor {
 	GObject object;
-	NautilusTrashMonitorDetails *details;
+	NemoTrashMonitorDetails *details;
 };
 
-struct NautilusTrashMonitorClass {
+struct NemoTrashMonitorClass {
 	GObjectClass parent_class;
 
-	void (* trash_state_changed)		(NautilusTrashMonitor 	*trash_monitor,
+	void (* trash_state_changed)		(NemoTrashMonitor 	*trash_monitor,
 				      		 gboolean 		 new_state);
 };
 
-GType			nautilus_trash_monitor_get_type				(void);
+GType			nemo_trash_monitor_get_type				(void);
 
-NautilusTrashMonitor   *nautilus_trash_monitor_get 				(void);
-gboolean		nautilus_trash_monitor_is_empty 			(void);
-GIcon                  *nautilus_trash_monitor_get_icon                         (void);
+NemoTrashMonitor   *nemo_trash_monitor_get 				(void);
+gboolean		nemo_trash_monitor_is_empty 			(void);
+GIcon                  *nemo_trash_monitor_get_icon                         (void);
 
-void		        nautilus_trash_monitor_add_new_trash_directories        (void);
+void		        nemo_trash_monitor_add_new_trash_directories        (void);
 
 #endif

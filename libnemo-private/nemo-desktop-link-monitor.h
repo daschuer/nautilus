@@ -1,6 +1,6 @@
 /* -*- Mode: C; indent-tabs-mode: t; c-basic-offset: 8; tab-width: 8 -*-
 
-   nautilus-desktop-link-monitor.h: singleton that manages the desktop links
+   nemo-desktop-link-monitor.h: singleton that manages the desktop links
     
    Copyright (C) 2003 Red Hat, Inc.
   
@@ -22,44 +22,44 @@
    Author: Alexander Larsson <alexl@redhat.com>
 */
 
-#ifndef NAUTILUS_DESKTOP_LINK_MONITOR_H
-#define NAUTILUS_DESKTOP_LINK_MONITOR_H
+#ifndef NEMO_DESKTOP_LINK_MONITOR_H
+#define NEMO_DESKTOP_LINK_MONITOR_H
 
 #include <gtk/gtk.h>
-#include <libnautilus-private/nautilus-desktop-link.h>
+#include <libnemo-private/nemo-desktop-link.h>
 
-#define NAUTILUS_TYPE_DESKTOP_LINK_MONITOR nautilus_desktop_link_monitor_get_type()
-#define NAUTILUS_DESKTOP_LINK_MONITOR(obj) \
-  (G_TYPE_CHECK_INSTANCE_CAST ((obj), NAUTILUS_TYPE_DESKTOP_LINK_MONITOR, NautilusDesktopLinkMonitor))
-#define NAUTILUS_DESKTOP_LINK_MONITOR_CLASS(klass) \
-  (G_TYPE_CHECK_CLASS_CAST ((klass), NAUTILUS_TYPE_DESKTOP_LINK_MONITOR, NautilusDesktopLinkMonitorClass))
-#define NAUTILUS_IS_DESKTOP_LINK_MONITOR(obj) \
-  (G_TYPE_CHECK_INSTANCE_TYPE ((obj), NAUTILUS_TYPE_DESKTOP_LINK_MONITOR))
-#define NAUTILUS_IS_DESKTOP_LINK_MONITOR_CLASS(klass) \
-  (G_TYPE_CHECK_CLASS_TYPE ((klass), NAUTILUS_TYPE_DESKTOP_LINK_MONITOR))
-#define NAUTILUS_DESKTOP_LINK_MONITOR_GET_CLASS(obj) \
-  (G_TYPE_INSTANCE_GET_CLASS ((obj), NAUTILUS_TYPE_DESKTOP_LINK_MONITOR, NautilusDesktopLinkMonitorClass))
+#define NEMO_TYPE_DESKTOP_LINK_MONITOR nemo_desktop_link_monitor_get_type()
+#define NEMO_DESKTOP_LINK_MONITOR(obj) \
+  (G_TYPE_CHECK_INSTANCE_CAST ((obj), NEMO_TYPE_DESKTOP_LINK_MONITOR, NemoDesktopLinkMonitor))
+#define NEMO_DESKTOP_LINK_MONITOR_CLASS(klass) \
+  (G_TYPE_CHECK_CLASS_CAST ((klass), NEMO_TYPE_DESKTOP_LINK_MONITOR, NemoDesktopLinkMonitorClass))
+#define NEMO_IS_DESKTOP_LINK_MONITOR(obj) \
+  (G_TYPE_CHECK_INSTANCE_TYPE ((obj), NEMO_TYPE_DESKTOP_LINK_MONITOR))
+#define NEMO_IS_DESKTOP_LINK_MONITOR_CLASS(klass) \
+  (G_TYPE_CHECK_CLASS_TYPE ((klass), NEMO_TYPE_DESKTOP_LINK_MONITOR))
+#define NEMO_DESKTOP_LINK_MONITOR_GET_CLASS(obj) \
+  (G_TYPE_INSTANCE_GET_CLASS ((obj), NEMO_TYPE_DESKTOP_LINK_MONITOR, NemoDesktopLinkMonitorClass))
 
-typedef struct NautilusDesktopLinkMonitorDetails NautilusDesktopLinkMonitorDetails;
+typedef struct NemoDesktopLinkMonitorDetails NemoDesktopLinkMonitorDetails;
 
 typedef struct {
 	GObject parent_slot;
-	NautilusDesktopLinkMonitorDetails *details;
-} NautilusDesktopLinkMonitor;
+	NemoDesktopLinkMonitorDetails *details;
+} NemoDesktopLinkMonitor;
 
 typedef struct {
 	GObjectClass parent_slot;
-} NautilusDesktopLinkMonitorClass;
+} NemoDesktopLinkMonitorClass;
 
-GType   nautilus_desktop_link_monitor_get_type (void);
+GType   nemo_desktop_link_monitor_get_type (void);
 
-NautilusDesktopLinkMonitor *   nautilus_desktop_link_monitor_get (void);
-void nautilus_desktop_link_monitor_delete_link (NautilusDesktopLinkMonitor *monitor,
-						NautilusDesktopLink *link,
+NemoDesktopLinkMonitor *   nemo_desktop_link_monitor_get (void);
+void nemo_desktop_link_monitor_delete_link (NemoDesktopLinkMonitor *monitor,
+						NemoDesktopLink *link,
 						GtkWidget *parent_view);
 
-/* Used by nautilus-desktop-link.c */
-char * nautilus_desktop_link_monitor_make_filename_unique (NautilusDesktopLinkMonitor *monitor,
+/* Used by nemo-desktop-link.c */
+char * nemo_desktop_link_monitor_make_filename_unique (NemoDesktopLinkMonitor *monitor,
 							   const char *filename);
 
-#endif /* NAUTILUS_DESKTOP_LINK_MONITOR_H */
+#endif /* NEMO_DESKTOP_LINK_MONITOR_H */

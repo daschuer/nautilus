@@ -2,12 +2,12 @@
 /*
  * Copyright (C) 2005 Novell, Inc.
  *
- * Nautilus is free software; you can redistribute it and/or
+ * Nemo is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
  * published by the Free Software Foundation; either version 2 of the
  * License, or (at your option) any later version.
  *
- * Nautilus is distributed in the hope that it will be useful,
+ * Nemo is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
  * General Public License for more details.
@@ -22,15 +22,15 @@
  */
 
 #include <config.h>
-#include "nautilus-search-bar.h"
+#include "nemo-search-bar.h"
 
-#include <libnautilus-private/nautilus-icon-info.h>
+#include <libnemo-private/nemo-icon-info.h>
 
 #include <glib/gi18n.h>
 #include <gdk/gdkkeysyms.h>
 #include <gtk/gtk.h>
 
-struct NautilusSearchBarDetails {
+struct NemoSearchBarDetails {
 	GtkWidget *entry;
 	gboolean entry_borrowed;
 };
@@ -43,10 +43,10 @@ enum {
 
 static guint signals[LAST_SIGNAL];
 
-G_DEFINE_TYPE (NautilusSearchBar, nautilus_search_bar, GTK_TYPE_BOX);
+G_DEFINE_TYPE (NemoSearchBar, nemo_search_bar, GTK_TYPE_BOX);
 
 static gboolean
-nautilus_search_bar_draw (GtkWidget *widget,
+nemo_search_bar_draw (GtkWidget *widget,
 			  cairo_t *cr)
 {
 	GtkStyleContext *context;
@@ -66,25 +66,25 @@ nautilus_search_bar_draw (GtkWidget *widget,
 
 	gtk_style_context_restore (context);
 
-	GTK_WIDGET_CLASS (nautilus_search_bar_parent_class)->draw (widget, cr);
+	GTK_WIDGET_CLASS (nemo_search_bar_parent_class)->draw (widget, cr);
 
 	return FALSE;
 }
 
 static void
-nautilus_search_bar_class_init (NautilusSearchBarClass *class)
+nemo_search_bar_class_init (NemoSearchBarClass *class)
 {
 	GtkBindingSet *binding_set;
 	GtkWidgetClass *wclass;
 
 	wclass = GTK_WIDGET_CLASS (class);
-	wclass->draw = nautilus_search_bar_draw;
+	wclass->draw = nemo_search_bar_draw;
 
 	signals[ACTIVATE] =
 		g_signal_new ("activate",
 			      G_TYPE_FROM_CLASS (class),
 			      G_SIGNAL_RUN_LAST,
-			      G_STRUCT_OFFSET (NautilusSearchBarClass, activate),
+			      G_STRUCT_OFFSET (NemoSearchBarClass, activate),
 			      NULL, NULL,
 			      g_cclosure_marshal_VOID__VOID,
 			      G_TYPE_NONE, 0);
@@ -93,7 +93,7 @@ nautilus_search_bar_class_init (NautilusSearchBarClass *class)
 		g_signal_new ("cancel",
 			      G_TYPE_FROM_CLASS (class),
 			      G_SIGNAL_RUN_LAST | G_SIGNAL_ACTION,
-			      G_STRUCT_OFFSET (NautilusSearchBarClass, cancel),
+			      G_STRUCT_OFFSET (NemoSearchBarClass, cancel),
 			      NULL, NULL,
 			      g_cclosure_marshal_VOID__VOID,
 			      G_TYPE_NONE, 0);
@@ -101,11 +101,11 @@ nautilus_search_bar_class_init (NautilusSearchBarClass *class)
 	binding_set = gtk_binding_set_by_class (class);
 	gtk_binding_entry_add_signal (binding_set, GDK_KEY_Escape, 0, "cancel", 0);
 
-	g_type_class_add_private (class, sizeof (NautilusSearchBarDetails));
+	g_type_class_add_private (class, sizeof (NemoSearchBarDetails));
 }
 
 static gboolean
-entry_has_text (NautilusSearchBar *bar)
+entry_has_text (NemoSearchBar *bar)
 {
        const char *text;
 
@@ -118,13 +118,13 @@ static void
 entry_icon_release_cb (GtkEntry *entry,
 		       GtkEntryIconPosition position,
 		       GdkEvent *event,
-		       NautilusSearchBar *bar)
+		       NemoSearchBar *bar)
 {
 	g_signal_emit_by_name (entry, "activate", 0);
 }
 
 static void
-entry_activate_cb (GtkWidget *entry, NautilusSearchBar *bar)
+entry_activate_cb (GtkWidget *entry, NemoSearchBar *bar)
 {
        if (entry_has_text (bar) && !bar->details->entry_borrowed) {
                g_signal_emit (bar, signals[ACTIVATE], 0);
@@ -132,20 +132,20 @@ entry_activate_cb (GtkWidget *entry, NautilusSearchBar *bar)
 }
 
 static void
-nautilus_search_bar_init (NautilusSearchBar *bar)
+nemo_search_bar_init (NemoSearchBar *bar)
 {
 	GtkWidget *label;
 	GtkWidget *align;
 
 	bar->details =
-		G_TYPE_INSTANCE_GET_PRIVATE (bar, NAUTILUS_TYPE_SEARCH_BAR,
-					     NautilusSearchBarDetails);
+		G_TYPE_INSTANCE_GET_PRIVATE (bar, NEMO_TYPE_SEARCH_BAR,
+					     NemoSearchBarDetails);
 
 	gtk_widget_set_redraw_on_allocate (GTK_WIDGET (bar), TRUE);
 
 	label = gtk_label_new (_("Search:"));
 	gtk_style_context_add_class (gtk_widget_get_style_context (label),
-				     "nautilus-cluebar-label");
+				     "nemo-cluebar-label");
 	gtk_widget_show (label);
 
 	gtk_box_pack_start (GTK_BOX (bar), label, FALSE, FALSE, 0);
@@ -175,13 +175,13 @@ nautilus_search_bar_init (NautilusSearchBar *bar)
 }
 
 GtkWidget *
-nautilus_search_bar_get_entry (NautilusSearchBar *bar)
+nemo_search_bar_get_entry (NemoSearchBar *bar)
 {
 	return bar->details->entry;
 }
 
 GtkWidget *
-nautilus_search_bar_borrow_entry (NautilusSearchBar *bar)
+nemo_search_bar_borrow_entry (NemoSearchBar *bar)
 {
 	GtkBindingSet *binding_set;
 	
@@ -193,7 +193,7 @@ nautilus_search_bar_borrow_entry (NautilusSearchBar *bar)
 }
 
 void
-nautilus_search_bar_return_entry (NautilusSearchBar *bar)
+nemo_search_bar_return_entry (NemoSearchBar *bar)
 {
 	GtkBindingSet *binding_set;
 	
@@ -204,11 +204,11 @@ nautilus_search_bar_return_entry (NautilusSearchBar *bar)
 }
 
 GtkWidget *
-nautilus_search_bar_new (void)
+nemo_search_bar_new (void)
 {
 	GtkWidget *bar;
 
-	bar = g_object_new (NAUTILUS_TYPE_SEARCH_BAR,
+	bar = g_object_new (NEMO_TYPE_SEARCH_BAR,
 			    "orientation", GTK_ORIENTATION_HORIZONTAL,
 			    "spacing", 6,
 			    NULL);
@@ -216,11 +216,11 @@ nautilus_search_bar_new (void)
 	return bar;
 }
 
-NautilusQuery *
-nautilus_search_bar_get_query (NautilusSearchBar *bar)
+NemoQuery *
+nemo_search_bar_get_query (NemoSearchBar *bar)
 {
 	const char *query_text;
-	NautilusQuery *query;
+	NemoQuery *query;
 
 	query_text = gtk_entry_get_text (GTK_ENTRY (bar->details->entry));
 
@@ -229,20 +229,20 @@ nautilus_search_bar_get_query (NautilusSearchBar *bar)
 		return NULL;
 	}
 	
-	query = nautilus_query_new ();
-	nautilus_query_set_text (query, query_text);
+	query = nemo_query_new ();
+	nemo_query_set_text (query, query_text);
 
 	return query;
 }
 
 void
-nautilus_search_bar_grab_focus (NautilusSearchBar *bar)
+nemo_search_bar_grab_focus (NemoSearchBar *bar)
 {
 	gtk_widget_grab_focus (bar->details->entry);
 }
 
 void
-nautilus_search_bar_clear (NautilusSearchBar *bar)
+nemo_search_bar_clear (NemoSearchBar *bar)
 {
 	gtk_entry_set_text (GTK_ENTRY (bar->details->entry), "");
 }

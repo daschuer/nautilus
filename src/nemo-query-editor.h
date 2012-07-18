@@ -2,12 +2,12 @@
 /*
  * Copyright (C) 2005 Red Hat, Inc.
  *
- * Nautilus is free software; you can redistribute it and/or
+ * Nemo is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
  * published by the Free Software Foundation; either version 2 of the
  * License, or (at your option) any later version.
  *
- * Nautilus is distributed in the hope that it will be useful,
+ * Nemo is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
  * General Public License for more details.
@@ -21,60 +21,60 @@
  *
  */
 
-#ifndef NAUTILUS_QUERY_EDITOR_H
-#define NAUTILUS_QUERY_EDITOR_H
+#ifndef NEMO_QUERY_EDITOR_H
+#define NEMO_QUERY_EDITOR_H
 
 #include <gtk/gtk.h>
 
-#include <libnautilus-private/nautilus-query.h>
+#include <libnemo-private/nemo-query.h>
 
-#include "nautilus-search-bar.h"
+#include "nemo-search-bar.h"
 
-#define NAUTILUS_TYPE_QUERY_EDITOR nautilus_query_editor_get_type()
-#define NAUTILUS_QUERY_EDITOR(obj) \
-  (G_TYPE_CHECK_INSTANCE_CAST ((obj), NAUTILUS_TYPE_QUERY_EDITOR, NautilusQueryEditor))
-#define NAUTILUS_QUERY_EDITOR_CLASS(klass) \
-  (G_TYPE_CHECK_CLASS_CAST ((klass), NAUTILUS_TYPE_QUERY_EDITOR, NautilusQueryEditorClass))
-#define NAUTILUS_IS_QUERY_EDITOR(obj) \
-  (G_TYPE_CHECK_INSTANCE_TYPE ((obj), NAUTILUS_TYPE_QUERY_EDITOR))
-#define NAUTILUS_IS_QUERY_EDITOR_CLASS(klass) \
-  (G_TYPE_CHECK_CLASS_TYPE ((klass), NAUTILUS_TYPE_QUERY_EDITOR))
-#define NAUTILUS_QUERY_EDITOR_GET_CLASS(obj) \
-  (G_TYPE_INSTANCE_GET_CLASS ((obj), NAUTILUS_TYPE_QUERY_EDITOR, NautilusQueryEditorClass))
+#define NEMO_TYPE_QUERY_EDITOR nemo_query_editor_get_type()
+#define NEMO_QUERY_EDITOR(obj) \
+  (G_TYPE_CHECK_INSTANCE_CAST ((obj), NEMO_TYPE_QUERY_EDITOR, NemoQueryEditor))
+#define NEMO_QUERY_EDITOR_CLASS(klass) \
+  (G_TYPE_CHECK_CLASS_CAST ((klass), NEMO_TYPE_QUERY_EDITOR, NemoQueryEditorClass))
+#define NEMO_IS_QUERY_EDITOR(obj) \
+  (G_TYPE_CHECK_INSTANCE_TYPE ((obj), NEMO_TYPE_QUERY_EDITOR))
+#define NEMO_IS_QUERY_EDITOR_CLASS(klass) \
+  (G_TYPE_CHECK_CLASS_TYPE ((klass), NEMO_TYPE_QUERY_EDITOR))
+#define NEMO_QUERY_EDITOR_GET_CLASS(obj) \
+  (G_TYPE_INSTANCE_GET_CLASS ((obj), NEMO_TYPE_QUERY_EDITOR, NemoQueryEditorClass))
 
-typedef struct NautilusQueryEditorDetails NautilusQueryEditorDetails;
+typedef struct NemoQueryEditorDetails NemoQueryEditorDetails;
 
-typedef struct NautilusQueryEditor {
+typedef struct NemoQueryEditor {
 	GtkBox parent;
-	NautilusQueryEditorDetails *details;
-} NautilusQueryEditor;
+	NemoQueryEditorDetails *details;
+} NemoQueryEditor;
 
 typedef struct {
 	GtkBoxClass parent_class;
 
-	void (* changed) (NautilusQueryEditor  *editor,
-			  NautilusQuery        *query,
+	void (* changed) (NemoQueryEditor  *editor,
+			  NemoQuery        *query,
 			  gboolean              reload);
-	void (* cancel)   (NautilusQueryEditor *editor);
-} NautilusQueryEditorClass;
+	void (* cancel)   (NemoQueryEditor *editor);
+} NemoQueryEditorClass;
 
-#include "nautilus-window-slot.h"
+#include "nemo-window-slot.h"
 
-GType      nautilus_query_editor_get_type     	   (void);
-GtkWidget* nautilus_query_editor_new          	   (gboolean start_hidden);
-GtkWidget* nautilus_query_editor_new_with_bar      (gboolean start_hidden,
+GType      nemo_query_editor_get_type     	   (void);
+GtkWidget* nemo_query_editor_new          	   (gboolean start_hidden);
+GtkWidget* nemo_query_editor_new_with_bar      (gboolean start_hidden,
 						    gboolean start_attached,
-						    NautilusSearchBar *bar,
-						    NautilusWindowSlot *slot);
-void       nautilus_query_editor_set_default_query (NautilusQueryEditor *editor);
+						    NemoSearchBar *bar,
+						    NemoWindowSlot *slot);
+void       nemo_query_editor_set_default_query (NemoQueryEditor *editor);
 
-void	   nautilus_query_editor_grab_focus (NautilusQueryEditor *editor);
-void       nautilus_query_editor_clear_query (NautilusQueryEditor *editor);
+void	   nemo_query_editor_grab_focus (NemoQueryEditor *editor);
+void       nemo_query_editor_clear_query (NemoQueryEditor *editor);
 
-NautilusQuery *nautilus_query_editor_get_query   (NautilusQueryEditor *editor);
-void           nautilus_query_editor_set_query   (NautilusQueryEditor *editor,
-						  NautilusQuery       *query);
-void           nautilus_query_editor_set_visible (NautilusQueryEditor *editor,
+NemoQuery *nemo_query_editor_get_query   (NemoQueryEditor *editor);
+void           nemo_query_editor_set_query   (NemoQueryEditor *editor,
+						  NemoQuery       *query);
+void           nemo_query_editor_set_visible (NemoQueryEditor *editor,
 						  gboolean             visible);
 
-#endif /* NAUTILUS_QUERY_EDITOR_H */
+#endif /* NEMO_QUERY_EDITOR_H */

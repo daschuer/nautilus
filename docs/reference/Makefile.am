@@ -1,1 +1,1 @@
-SUBDIRS = libnautilus-extension
+SUBDIRS = libnemo-extension

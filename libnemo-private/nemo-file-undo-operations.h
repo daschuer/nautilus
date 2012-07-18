@@ -1,6 +1,6 @@
 /* -*- Mode: C; indent-tabs-mode: t; c-basic-offset: 8; tab-width: 8 -*- */
 
-/* nautilus-file-undo-operations.h - Manages undo/redo of file operations
+/* nemo-file-undo-operations.h - Manages undo/redo of file operations
  *
  * Copyright (C) 2007-2011 Amos Brocco
  * Copyright (C) 2010 Red Hat, Inc.
@@ -25,272 +25,272 @@
  *
  */
 
-#ifndef __NAUTILUS_FILE_UNDO_OPERATIONS_H__
-#define __NAUTILUS_FILE_UNDO_OPERATIONS_H__
+#ifndef __NEMO_FILE_UNDO_OPERATIONS_H__
+#define __NEMO_FILE_UNDO_OPERATIONS_H__
 
 #include <gio/gio.h>
 #include <gtk/gtk.h>
 
 typedef enum {
-	NAUTILUS_FILE_UNDO_OP_COPY,
-	NAUTILUS_FILE_UNDO_OP_DUPLICATE,
-	NAUTILUS_FILE_UNDO_OP_MOVE,
-	NAUTILUS_FILE_UNDO_OP_RENAME,
-	NAUTILUS_FILE_UNDO_OP_CREATE_EMPTY_FILE,
-	NAUTILUS_FILE_UNDO_OP_CREATE_FILE_FROM_TEMPLATE,
-	NAUTILUS_FILE_UNDO_OP_CREATE_FOLDER,
-	NAUTILUS_FILE_UNDO_OP_MOVE_TO_TRASH,
-	NAUTILUS_FILE_UNDO_OP_RESTORE_FROM_TRASH,
-	NAUTILUS_FILE_UNDO_OP_CREATE_LINK,
-	NAUTILUS_FILE_UNDO_OP_RECURSIVE_SET_PERMISSIONS,
-	NAUTILUS_FILE_UNDO_OP_SET_PERMISSIONS,
-	NAUTILUS_FILE_UNDO_OP_CHANGE_GROUP,
-	NAUTILUS_FILE_UNDO_OP_CHANGE_OWNER,
-	NAUTILUS_FILE_UNDO_OP_NUM_TYPES,
-} NautilusFileUndoOp;
+	NEMO_FILE_UNDO_OP_COPY,
+	NEMO_FILE_UNDO_OP_DUPLICATE,
+	NEMO_FILE_UNDO_OP_MOVE,
+	NEMO_FILE_UNDO_OP_RENAME,
+	NEMO_FILE_UNDO_OP_CREATE_EMPTY_FILE,
+	NEMO_FILE_UNDO_OP_CREATE_FILE_FROM_TEMPLATE,
+	NEMO_FILE_UNDO_OP_CREATE_FOLDER,
+	NEMO_FILE_UNDO_OP_MOVE_TO_TRASH,
+	NEMO_FILE_UNDO_OP_RESTORE_FROM_TRASH,
+	NEMO_FILE_UNDO_OP_CREATE_LINK,
+	NEMO_FILE_UNDO_OP_RECURSIVE_SET_PERMISSIONS,
+	NEMO_FILE_UNDO_OP_SET_PERMISSIONS,
+	NEMO_FILE_UNDO_OP_CHANGE_GROUP,
+	NEMO_FILE_UNDO_OP_CHANGE_OWNER,
+	NEMO_FILE_UNDO_OP_NUM_TYPES,
+} NemoFileUndoOp;
 
-#define NAUTILUS_TYPE_FILE_UNDO_INFO         (nautilus_file_undo_info_get_type ())
-#define NAUTILUS_FILE_UNDO_INFO(o)           (G_TYPE_CHECK_INSTANCE_CAST ((o), NAUTILUS_TYPE_FILE_UNDO_INFO, NautilusFileUndoInfo))
-#define NAUTILUS_FILE_UNDO_INFO_CLASS(k)     (G_TYPE_CHECK_CLASS_CAST((k), NAUTILUS_TYPE_FILE_UNDO_INFO, NautilusFileUndoInfoClass))
-#define NAUTILUS_IS_FILE_UNDO_INFO(o)        (G_TYPE_CHECK_INSTANCE_TYPE ((o), NAUTILUS_TYPE_FILE_UNDO_INFO))
-#define NAUTILUS_IS_FILE_UNDO_INFO_CLASS(k)  (G_TYPE_CHECK_CLASS_TYPE ((k), NAUTILUS_TYPE_FILE_UNDO_INFO))
-#define NAUTILUS_FILE_UNDO_INFO_GET_CLASS(o) (G_TYPE_INSTANCE_GET_CLASS ((o), NAUTILUS_TYPE_FILE_UNDO_INFO, NautilusFileUndoInfoClass))
+#define NEMO_TYPE_FILE_UNDO_INFO         (nemo_file_undo_info_get_type ())
+#define NEMO_FILE_UNDO_INFO(o)           (G_TYPE_CHECK_INSTANCE_CAST ((o), NEMO_TYPE_FILE_UNDO_INFO, NemoFileUndoInfo))
+#define NEMO_FILE_UNDO_INFO_CLASS(k)     (G_TYPE_CHECK_CLASS_CAST((k), NEMO_TYPE_FILE_UNDO_INFO, NemoFileUndoInfoClass))
+#define NEMO_IS_FILE_UNDO_INFO(o)        (G_TYPE_CHECK_INSTANCE_TYPE ((o), NEMO_TYPE_FILE_UNDO_INFO))
+#define NEMO_IS_FILE_UNDO_INFO_CLASS(k)  (G_TYPE_CHECK_CLASS_TYPE ((k), NEMO_TYPE_FILE_UNDO_INFO))
+#define NEMO_FILE_UNDO_INFO_GET_CLASS(o) (G_TYPE_INSTANCE_GET_CLASS ((o), NEMO_TYPE_FILE_UNDO_INFO, NemoFileUndoInfoClass))
 
-typedef struct _NautilusFileUndoInfo      NautilusFileUndoInfo;
-typedef struct _NautilusFileUndoInfoClass NautilusFileUndoInfoClass;
-typedef struct _NautilusFileUndoInfoDetails NautilusFileUndoInfoDetails;
+typedef struct _NemoFileUndoInfo      NemoFileUndoInfo;
+typedef struct _NemoFileUndoInfoClass NemoFileUndoInfoClass;
+typedef struct _NemoFileUndoInfoDetails NemoFileUndoInfoDetails;
 
-struct _NautilusFileUndoInfo {
+struct _NemoFileUndoInfo {
 	GObject parent;
-	NautilusFileUndoInfoDetails *priv;
+	NemoFileUndoInfoDetails *priv;
 };
 
-struct _NautilusFileUndoInfoClass {
+struct _NemoFileUndoInfoClass {
 	GObjectClass parent_class;
 
-	void (* undo_func) (NautilusFileUndoInfo *self,
+	void (* undo_func) (NemoFileUndoInfo *self,
 			    GtkWindow            *parent_window);
-	void (* redo_func) (NautilusFileUndoInfo *self,
+	void (* redo_func) (NemoFileUndoInfo *self,
 			    GtkWindow            *parent_window);
 
-	void (* strings_func) (NautilusFileUndoInfo *self,
+	void (* strings_func) (NemoFileUndoInfo *self,
 			       gchar **undo_label,
 			       gchar **undo_description,
 			       gchar **redo_label,
 			       gchar **redo_description);
 };
 
-GType nautilus_file_undo_info_get_type (void) G_GNUC_CONST;
+GType nemo_file_undo_info_get_type (void) G_GNUC_CONST;
 
-void nautilus_file_undo_info_apply_async (NautilusFileUndoInfo *self,
+void nemo_file_undo_info_apply_async (NemoFileUndoInfo *self,
 					  gboolean undo,
 					  GtkWindow *parent_window,
 					  GAsyncReadyCallback callback,
 					  gpointer user_data);
-gboolean nautilus_file_undo_info_apply_finish (NautilusFileUndoInfo *self,
+gboolean nemo_file_undo_info_apply_finish (NemoFileUndoInfo *self,
 					       GAsyncResult *res,
 					       gboolean *user_cancel,
 					       GError **error);
 
-void nautilus_file_undo_info_get_strings (NautilusFileUndoInfo *self,
+void nemo_file_undo_info_get_strings (NemoFileUndoInfo *self,
 					  gchar **undo_label,
 					  gchar **undo_description,
 					  gchar **redo_label,
 					  gchar **redo_description);
 
 /* copy/move/duplicate/link/restore from trash */
-#define NAUTILUS_TYPE_FILE_UNDO_INFO_EXT         (nautilus_file_undo_info_ext_get_type ())
-#define NAUTILUS_FILE_UNDO_INFO_EXT(o)           (G_TYPE_CHECK_INSTANCE_CAST ((o), NAUTILUS_TYPE_FILE_UNDO_INFO_EXT, NautilusFileUndoInfoExt))
-#define NAUTILUS_FILE_UNDO_INFO_EXT_CLASS(k)     (G_TYPE_CHECK_CLASS_CAST((k), NAUTILUS_TYPE_FILE_UNDO_INFO_EXT, NautilusFileUndoInfoExtClass))
-#define NAUTILUS_IS_FILE_UNDO_INFO_EXT(o)        (G_TYPE_CHECK_INSTANCE_TYPE ((o), NAUTILUS_TYPE_FILE_UNDO_INFO_EXT))
-#define NAUTILUS_IS_FILE_UNDO_INFO_EXT_CLASS(k)  (G_TYPE_CHECK_CLASS_TYPE ((k), NAUTILUS_TYPE_FILE_UNDO_INFO_EXT))
-#define NAUTILUS_FILE_UNDO_INFO_EXT_GET_CLASS(o) (G_TYPE_INSTANCE_GET_CLASS ((o), NAUTILUS_TYPE_FILE_UNDO_INFO_EXT, NautilusFileUndoInfoExtClass))
+#define NEMO_TYPE_FILE_UNDO_INFO_EXT         (nemo_file_undo_info_ext_get_type ())
+#define NEMO_FILE_UNDO_INFO_EXT(o)           (G_TYPE_CHECK_INSTANCE_CAST ((o), NEMO_TYPE_FILE_UNDO_INFO_EXT, NemoFileUndoInfoExt))
+#define NEMO_FILE_UNDO_INFO_EXT_CLASS(k)     (G_TYPE_CHECK_CLASS_CAST((k), NEMO_TYPE_FILE_UNDO_INFO_EXT, NemoFileUndoInfoExtClass))
+#define NEMO_IS_FILE_UNDO_INFO_EXT(o)        (G_TYPE_CHECK_INSTANCE_TYPE ((o), NEMO_TYPE_FILE_UNDO_INFO_EXT))
+#define NEMO_IS_FILE_UNDO_INFO_EXT_CLASS(k)  (G_TYPE_CHECK_CLASS_TYPE ((k), NEMO_TYPE_FILE_UNDO_INFO_EXT))
+#define NEMO_FILE_UNDO_INFO_EXT_GET_CLASS(o) (G_TYPE_INSTANCE_GET_CLASS ((o), NEMO_TYPE_FILE_UNDO_INFO_EXT, NemoFileUndoInfoExtClass))
 
-typedef struct _NautilusFileUndoInfoExt      NautilusFileUndoInfoExt;
-typedef struct _NautilusFileUndoInfoExtClass NautilusFileUndoInfoExtClass;
-typedef struct _NautilusFileUndoInfoExtDetails NautilusFileUndoInfoExtDetails;
+typedef struct _NemoFileUndoInfoExt      NemoFileUndoInfoExt;
+typedef struct _NemoFileUndoInfoExtClass NemoFileUndoInfoExtClass;
+typedef struct _NemoFileUndoInfoExtDetails NemoFileUndoInfoExtDetails;
 
-struct _NautilusFileUndoInfoExt {
-	NautilusFileUndoInfo parent;
-	NautilusFileUndoInfoExtDetails *priv;
+struct _NemoFileUndoInfoExt {
+	NemoFileUndoInfo parent;
+	NemoFileUndoInfoExtDetails *priv;
 };
 
-struct _NautilusFileUndoInfoExtClass {
-	NautilusFileUndoInfoClass parent_class;
+struct _NemoFileUndoInfoExtClass {
+	NemoFileUndoInfoClass parent_class;
 };
 
-GType nautilus_file_undo_info_ext_get_type (void) G_GNUC_CONST;
-NautilusFileUndoInfo *nautilus_file_undo_info_ext_new (NautilusFileUndoOp op_type,
+GType nemo_file_undo_info_ext_get_type (void) G_GNUC_CONST;
+NemoFileUndoInfo *nemo_file_undo_info_ext_new (NemoFileUndoOp op_type,
 						       gint item_count,
 						       GFile *src_dir,
 						       GFile *target_dir);
-void nautilus_file_undo_info_ext_add_origin_target_pair (NautilusFileUndoInfoExt *self,
+void nemo_file_undo_info_ext_add_origin_target_pair (NemoFileUndoInfoExt *self,
 							 GFile                   *origin,
 							 GFile                   *target);
 
 /* create new file/folder */
-#define NAUTILUS_TYPE_FILE_UNDO_INFO_CREATE         (nautilus_file_undo_info_create_get_type ())
-#define NAUTILUS_FILE_UNDO_INFO_CREATE(o)           (G_TYPE_CHECK_INSTANCE_CAST ((o), NAUTILUS_TYPE_FILE_UNDO_INFO_CREATE, NautilusFileUndoInfoCreate))
-#define NAUTILUS_FILE_UNDO_INFO_CREATE_CLASS(k)     (G_TYPE_CHECK_CLASS_CAST((k), NAUTILUS_TYPE_FILE_UNDO_INFO_CREATE, NautilusFileUndoInfoCreateClass))
-#define NAUTILUS_IS_FILE_UNDO_INFO_CREATE(o)        (G_TYPE_CHECK_INSTANCE_TYPE ((o), NAUTILUS_TYPE_FILE_UNDO_INFO_CREATE))
-#define NAUTILUS_IS_FILE_UNDO_INFO_CREATE_CLASS(k)  (G_TYPE_CHECK_CLASS_TYPE ((k), NAUTILUS_TYPE_FILE_UNDO_INFO_CREATE))
-#define NAUTILUS_FILE_UNDO_INFO_CREATE_GET_CLASS(o) (G_TYPE_INSTANCE_GET_CLASS ((o), NAUTILUS_TYPE_FILE_UNDO_INFO_CREATE, NautilusFileUndoInfoCreateClass))
+#define NEMO_TYPE_FILE_UNDO_INFO_CREATE         (nemo_file_undo_info_create_get_type ())
+#define NEMO_FILE_UNDO_INFO_CREATE(o)           (G_TYPE_CHECK_INSTANCE_CAST ((o), NEMO_TYPE_FILE_UNDO_INFO_CREATE, NemoFileUndoInfoCreate))
+#define NEMO_FILE_UNDO_INFO_CREATE_CLASS(k)     (G_TYPE_CHECK_CLASS_CAST((k), NEMO_TYPE_FILE_UNDO_INFO_CREATE, NemoFileUndoInfoCreateClass))
+#define NEMO_IS_FILE_UNDO_INFO_CREATE(o)        (G_TYPE_CHECK_INSTANCE_TYPE ((o), NEMO_TYPE_FILE_UNDO_INFO_CREATE))
+#define NEMO_IS_FILE_UNDO_INFO_CREATE_CLASS(k)  (G_TYPE_CHECK_CLASS_TYPE ((k), NEMO_TYPE_FILE_UNDO_INFO_CREATE))
+#define NEMO_FILE_UNDO_INFO_CREATE_GET_CLASS(o) (G_TYPE_INSTANCE_GET_CLASS ((o), NEMO_TYPE_FILE_UNDO_INFO_CREATE, NemoFileUndoInfoCreateClass))
 
-typedef struct _NautilusFileUndoInfoCreate      NautilusFileUndoInfoCreate;
-typedef struct _NautilusFileUndoInfoCreateClass NautilusFileUndoInfoCreateClass;
-typedef struct _NautilusFileUndoInfoCreateDetails NautilusFileUndoInfoCreateDetails;
+typedef struct _NemoFileUndoInfoCreate      NemoFileUndoInfoCreate;
+typedef struct _NemoFileUndoInfoCreateClass NemoFileUndoInfoCreateClass;
+typedef struct _NemoFileUndoInfoCreateDetails NemoFileUndoInfoCreateDetails;
 
-struct _NautilusFileUndoInfoCreate {
-	NautilusFileUndoInfo parent;
-	NautilusFileUndoInfoCreateDetails *priv;
+struct _NemoFileUndoInfoCreate {
+	NemoFileUndoInfo parent;
+	NemoFileUndoInfoCreateDetails *priv;
 };
 
-struct _NautilusFileUndoInfoCreateClass {
-	NautilusFileUndoInfoClass parent_class;
+struct _NemoFileUndoInfoCreateClass {
+	NemoFileUndoInfoClass parent_class;
 };
 
-GType nautilus_file_undo_info_create_get_type (void) G_GNUC_CONST;
-NautilusFileUndoInfo *nautilus_file_undo_info_create_new (NautilusFileUndoOp op_type);
-void nautilus_file_undo_info_create_set_data (NautilusFileUndoInfoCreate *self,
+GType nemo_file_undo_info_create_get_type (void) G_GNUC_CONST;
+NemoFileUndoInfo *nemo_file_undo_info_create_new (NemoFileUndoOp op_type);
+void nemo_file_undo_info_create_set_data (NemoFileUndoInfoCreate *self,
 					      GFile                      *file,
 					      const char                 *template,
 					      gint                        length);
 
 /* rename */
-#define NAUTILUS_TYPE_FILE_UNDO_INFO_RENAME         (nautilus_file_undo_info_rename_get_type ())
-#define NAUTILUS_FILE_UNDO_INFO_RENAME(o)           (G_TYPE_CHECK_INSTANCE_CAST ((o), NAUTILUS_TYPE_FILE_UNDO_INFO_RENAME, NautilusFileUndoInfoRename))
-#define NAUTILUS_FILE_UNDO_INFO_RENAME_CLASS(k)     (G_TYPE_CHECK_CLASS_CAST((k), NAUTILUS_TYPE_FILE_UNDO_INFO_RENAME, NautilusFileUndoInfoRenameClass))
-#define NAUTILUS_IS_FILE_UNDO_INFO_RENAME(o)        (G_TYPE_CHECK_INSTANCE_TYPE ((o), NAUTILUS_TYPE_FILE_UNDO_INFO_RENAME))
-#define NAUTILUS_IS_FILE_UNDO_INFO_RENAME_CLASS(k)  (G_TYPE_CHECK_CLASS_TYPE ((k), NAUTILUS_TYPE_FILE_UNDO_INFO_RENAME))
-#define NAUTILUS_FILE_UNDO_INFO_RENAME_GET_CLASS(o) (G_TYPE_INSTANCE_GET_CLASS ((o), NAUTILUS_TYPE_FILE_UNDO_INFO_RENAME, NautilusFileUndoInfoRenameClass))
+#define NEMO_TYPE_FILE_UNDO_INFO_RENAME         (nemo_file_undo_info_rename_get_type ())
+#define NEMO_FILE_UNDO_INFO_RENAME(o)           (G_TYPE_CHECK_INSTANCE_CAST ((o), NEMO_TYPE_FILE_UNDO_INFO_RENAME, NemoFileUndoInfoRename))
+#define NEMO_FILE_UNDO_INFO_RENAME_CLASS(k)     (G_TYPE_CHECK_CLASS_CAST((k), NEMO_TYPE_FILE_UNDO_INFO_RENAME, NemoFileUndoInfoRenameClass))
+#define NEMO_IS_FILE_UNDO_INFO_RENAME(o)        (G_TYPE_CHECK_INSTANCE_TYPE ((o), NEMO_TYPE_FILE_UNDO_INFO_RENAME))
+#define NEMO_IS_FILE_UNDO_INFO_RENAME_CLASS(k)  (G_TYPE_CHECK_CLASS_TYPE ((k), NEMO_TYPE_FILE_UNDO_INFO_RENAME))
+#define NEMO_FILE_UNDO_INFO_RENAME_GET_CLASS(o) (G_TYPE_INSTANCE_GET_CLASS ((o), NEMO_TYPE_FILE_UNDO_INFO_RENAME, NemoFileUndoInfoRenameClass))
 
-typedef struct _NautilusFileUndoInfoRename      NautilusFileUndoInfoRename;
-typedef struct _NautilusFileUndoInfoRenameClass NautilusFileUndoInfoRenameClass;
-typedef struct _NautilusFileUndoInfoRenameDetails NautilusFileUndoInfoRenameDetails;
+typedef struct _NemoFileUndoInfoRename      NemoFileUndoInfoRename;
+typedef struct _NemoFileUndoInfoRenameClass NemoFileUndoInfoRenameClass;
+typedef struct _NemoFileUndoInfoRenameDetails NemoFileUndoInfoRenameDetails;
 
-struct _NautilusFileUndoInfoRename {
-	NautilusFileUndoInfo parent;
-	NautilusFileUndoInfoRenameDetails *priv;
+struct _NemoFileUndoInfoRename {
+	NemoFileUndoInfo parent;
+	NemoFileUndoInfoRenameDetails *priv;
 };
 
-struct _NautilusFileUndoInfoRenameClass {
-	NautilusFileUndoInfoClass parent_class;
+struct _NemoFileUndoInfoRenameClass {
+	NemoFileUndoInfoClass parent_class;
 };
 
-GType nautilus_file_undo_info_rename_get_type (void) G_GNUC_CONST;
-NautilusFileUndoInfo *nautilus_file_undo_info_rename_new (void);
-void nautilus_file_undo_info_rename_set_data (NautilusFileUndoInfoRename *self,
+GType nemo_file_undo_info_rename_get_type (void) G_GNUC_CONST;
+NemoFileUndoInfo *nemo_file_undo_info_rename_new (void);
+void nemo_file_undo_info_rename_set_data (NemoFileUndoInfoRename *self,
 					      GFile                      *old_file,
 					      GFile                      *new_file);
 
 /* trash */
-#define NAUTILUS_TYPE_FILE_UNDO_INFO_TRASH         (nautilus_file_undo_info_trash_get_type ())
-#define NAUTILUS_FILE_UNDO_INFO_TRASH(o)           (G_TYPE_CHECK_INSTANCE_CAST ((o), NAUTILUS_TYPE_FILE_UNDO_INFO_TRASH, NautilusFileUndoInfoTrash))
-#define NAUTILUS_FILE_UNDO_INFO_TRASH_CLASS(k)     (G_TYPE_CHECK_CLASS_CAST((k), NAUTILUS_TYPE_FILE_UNDO_INFO_TRASH, NautilusFileUndoInfoTrashClass))
-#define NAUTILUS_IS_FILE_UNDO_INFO_TRASH(o)        (G_TYPE_CHECK_INSTANCE_TYPE ((o), NAUTILUS_TYPE_FILE_UNDO_INFO_TRASH))
-#define NAUTILUS_IS_FILE_UNDO_INFO_TRASH_CLASS(k)  (G_TYPE_CHECK_CLASS_TYPE ((k), NAUTILUS_TYPE_FILE_UNDO_INFO_TRASH))
-#define NAUTILUS_FILE_UNDO_INFO_TRASH_GET_CLASS(o) (G_TYPE_INSTANCE_GET_CLASS ((o), NAUTILUS_TYPE_FILE_UNDO_INFO_TRASH, NautilusFileUndoInfoTrashClass))
+#define NEMO_TYPE_FILE_UNDO_INFO_TRASH         (nemo_file_undo_info_trash_get_type ())
+#define NEMO_FILE_UNDO_INFO_TRASH(o)           (G_TYPE_CHECK_INSTANCE_CAST ((o), NEMO_TYPE_FILE_UNDO_INFO_TRASH, NemoFileUndoInfoTrash))
+#define NEMO_FILE_UNDO_INFO_TRASH_CLASS(k)     (G_TYPE_CHECK_CLASS_CAST((k), NEMO_TYPE_FILE_UNDO_INFO_TRASH, NemoFileUndoInfoTrashClass))
+#define NEMO_IS_FILE_UNDO_INFO_TRASH(o)        (G_TYPE_CHECK_INSTANCE_TYPE ((o), NEMO_TYPE_FILE_UNDO_INFO_TRASH))
+#define NEMO_IS_FILE_UNDO_INFO_TRASH_CLASS(k)  (G_TYPE_CHECK_CLASS_TYPE ((k), NEMO_TYPE_FILE_UNDO_INFO_TRASH))
+#define NEMO_FILE_UNDO_INFO_TRASH_GET_CLASS(o) (G_TYPE_INSTANCE_GET_CLASS ((o), NEMO_TYPE_FILE_UNDO_INFO_TRASH, NemoFileUndoInfoTrashClass))
 
-typedef struct _NautilusFileUndoInfoTrash      NautilusFileUndoInfoTrash;
-typedef struct _NautilusFileUndoInfoTrashClass NautilusFileUndoInfoTrashClass;
-typedef struct _NautilusFileUndoInfoTrashDetails NautilusFileUndoInfoTrashDetails;
+typedef struct _NemoFileUndoInfoTrash      NemoFileUndoInfoTrash;
+typedef struct _NemoFileUndoInfoTrashClass NemoFileUndoInfoTrashClass;
+typedef struct _NemoFileUndoInfoTrashDetails NemoFileUndoInfoTrashDetails;
 
-struct _NautilusFileUndoInfoTrash {
-	NautilusFileUndoInfo parent;
-	NautilusFileUndoInfoTrashDetails *priv;
+struct _NemoFileUndoInfoTrash {
+	NemoFileUndoInfo parent;
+	NemoFileUndoInfoTrashDetails *priv;
 };
 
-struct _NautilusFileUndoInfoTrashClass {
-	NautilusFileUndoInfoClass parent_class;
+struct _NemoFileUndoInfoTrashClass {
+	NemoFileUndoInfoClass parent_class;
 };
 
-GType nautilus_file_undo_info_trash_get_type (void) G_GNUC_CONST;
-NautilusFileUndoInfo *nautilus_file_undo_info_trash_new (gint item_count);
-void nautilus_file_undo_info_trash_add_file (NautilusFileUndoInfoTrash *self,
+GType nemo_file_undo_info_trash_get_type (void) G_GNUC_CONST;
+NemoFileUndoInfo *nemo_file_undo_info_trash_new (gint item_count);
+void nemo_file_undo_info_trash_add_file (NemoFileUndoInfoTrash *self,
 					     GFile                     *file);
 
 /* recursive permissions */
-#define NAUTILUS_TYPE_FILE_UNDO_INFO_REC_PERMISSIONS         (nautilus_file_undo_info_rec_permissions_get_type ())
-#define NAUTILUS_FILE_UNDO_INFO_REC_PERMISSIONS(o)           (G_TYPE_CHECK_INSTANCE_CAST ((o), NAUTILUS_TYPE_FILE_UNDO_INFO_REC_PERMISSIONS, NautilusFileUndoInfoRecPermissions))
-#define NAUTILUS_FILE_UNDO_INFO_REC_PERMISSIONS_CLASS(k)     (G_TYPE_CHECK_CLASS_CAST((k), NAUTILUS_TYPE_FILE_UNDO_INFO_REC_PERMISSIONS, NautilusFileUndoInfoRecPermissionsClass))
-#define NAUTILUS_IS_FILE_UNDO_INFO_REC_PERMISSIONS(o)        (G_TYPE_CHECK_INSTANCE_TYPE ((o), NAUTILUS_TYPE_FILE_UNDO_INFO_REC_PERMISSIONS))
-#define NAUTILUS_IS_FILE_UNDO_INFO_REC_PERMISSIONS_CLASS(k)  (G_TYPE_CHECK_CLASS_TYPE ((k), NAUTILUS_TYPE_FILE_UNDO_INFO_REC_PERMISSIONS))
-#define NAUTILUS_FILE_UNDO_INFO_REC_PERMISSIONS_GET_CLASS(o) (G_TYPE_INSTANCE_GET_CLASS ((o), NAUTILUS_TYPE_FILE_UNDO_INFO_REC_PERMISSIONS, NautilusFileUndoInfoRecPermissionsClass))
+#define NEMO_TYPE_FILE_UNDO_INFO_REC_PERMISSIONS         (nemo_file_undo_info_rec_permissions_get_type ())
+#define NEMO_FILE_UNDO_INFO_REC_PERMISSIONS(o)           (G_TYPE_CHECK_INSTANCE_CAST ((o), NEMO_TYPE_FILE_UNDO_INFO_REC_PERMISSIONS, NemoFileUndoInfoRecPermissions))
+#define NEMO_FILE_UNDO_INFO_REC_PERMISSIONS_CLASS(k)     (G_TYPE_CHECK_CLASS_CAST((k), NEMO_TYPE_FILE_UNDO_INFO_REC_PERMISSIONS, NemoFileUndoInfoRecPermissionsClass))
+#define NEMO_IS_FILE_UNDO_INFO_REC_PERMISSIONS(o)        (G_TYPE_CHECK_INSTANCE_TYPE ((o), NEMO_TYPE_FILE_UNDO_INFO_REC_PERMISSIONS))
+#define NEMO_IS_FILE_UNDO_INFO_REC_PERMISSIONS_CLASS(k)  (G_TYPE_CHECK_CLASS_TYPE ((k), NEMO_TYPE_FILE_UNDO_INFO_REC_PERMISSIONS))
+#define NEMO_FILE_UNDO_INFO_REC_PERMISSIONS_GET_CLASS(o) (G_TYPE_INSTANCE_GET_CLASS ((o), NEMO_TYPE_FILE_UNDO_INFO_REC_PERMISSIONS, NemoFileUndoInfoRecPermissionsClass))
 
-typedef struct _NautilusFileUndoInfoRecPermissions      NautilusFileUndoInfoRecPermissions;
-typedef struct _NautilusFileUndoInfoRecPermissionsClass NautilusFileUndoInfoRecPermissionsClass;
-typedef struct _NautilusFileUndoInfoRecPermissionsDetails NautilusFileUndoInfoRecPermissionsDetails;
+typedef struct _NemoFileUndoInfoRecPermissions      NemoFileUndoInfoRecPermissions;
+typedef struct _NemoFileUndoInfoRecPermissionsClass NemoFileUndoInfoRecPermissionsClass;
+typedef struct _NemoFileUndoInfoRecPermissionsDetails NemoFileUndoInfoRecPermissionsDetails;
 
-struct _NautilusFileUndoInfoRecPermissions {
-	NautilusFileUndoInfo parent;
-	NautilusFileUndoInfoRecPermissionsDetails *priv;
+struct _NemoFileUndoInfoRecPermissions {
+	NemoFileUndoInfo parent;
+	NemoFileUndoInfoRecPermissionsDetails *priv;
 };
 
-struct _NautilusFileUndoInfoRecPermissionsClass {
-	NautilusFileUndoInfoClass parent_class;
+struct _NemoFileUndoInfoRecPermissionsClass {
+	NemoFileUndoInfoClass parent_class;
 };
 
-GType nautilus_file_undo_info_rec_permissions_get_type (void) G_GNUC_CONST;
-NautilusFileUndoInfo *nautilus_file_undo_info_rec_permissions_new (GFile   *dest,
+GType nemo_file_undo_info_rec_permissions_get_type (void) G_GNUC_CONST;
+NemoFileUndoInfo *nemo_file_undo_info_rec_permissions_new (GFile   *dest,
 								   guint32 file_permissions,
 								   guint32 file_mask,
 								   guint32 dir_permissions,
 								   guint32 dir_mask);
-void nautilus_file_undo_info_rec_permissions_add_file (NautilusFileUndoInfoRecPermissions *self,
+void nemo_file_undo_info_rec_permissions_add_file (NemoFileUndoInfoRecPermissions *self,
 						       GFile                              *file,
 						       guint32                             permission);
 
 /* single file change permissions */
-#define NAUTILUS_TYPE_FILE_UNDO_INFO_PERMISSIONS         (nautilus_file_undo_info_permissions_get_type ())
-#define NAUTILUS_FILE_UNDO_INFO_PERMISSIONS(o)           (G_TYPE_CHECK_INSTANCE_CAST ((o), NAUTILUS_TYPE_FILE_UNDO_INFO_PERMISSIONS, NautilusFileUndoInfoPermissions))
-#define NAUTILUS_FILE_UNDO_INFO_PERMISSIONS_CLASS(k)     (G_TYPE_CHECK_CLASS_CAST((k), NAUTILUS_TYPE_FILE_UNDO_INFO_PERMISSIONS, NautilusFileUndoInfoPermissionsClass))
-#define NAUTILUS_IS_FILE_UNDO_INFO_PERMISSIONS(o)        (G_TYPE_CHECK_INSTANCE_TYPE ((o), NAUTILUS_TYPE_FILE_UNDO_INFO_PERMISSIONS))
-#define NAUTILUS_IS_FILE_UNDO_INFO_PERMISSIONS_CLASS(k)  (G_TYPE_CHECK_CLASS_TYPE ((k), NAUTILUS_TYPE_FILE_UNDO_INFO_PERMISSIONS))
-#define NAUTILUS_FILE_UNDO_INFO_PERMISSIONS_GET_CLASS(o) (G_TYPE_INSTANCE_GET_CLASS ((o), NAUTILUS_TYPE_FILE_UNDO_INFO_PERMISSIONS, NautilusFileUndoInfoPermissionsClass))
+#define NEMO_TYPE_FILE_UNDO_INFO_PERMISSIONS         (nemo_file_undo_info_permissions_get_type ())
+#define NEMO_FILE_UNDO_INFO_PERMISSIONS(o)           (G_TYPE_CHECK_INSTANCE_CAST ((o), NEMO_TYPE_FILE_UNDO_INFO_PERMISSIONS, NemoFileUndoInfoPermissions))
+#define NEMO_FILE_UNDO_INFO_PERMISSIONS_CLASS(k)     (G_TYPE_CHECK_CLASS_CAST((k), NEMO_TYPE_FILE_UNDO_INFO_PERMISSIONS, NemoFileUndoInfoPermissionsClass))
+#define NEMO_IS_FILE_UNDO_INFO_PERMISSIONS(o)        (G_TYPE_CHECK_INSTANCE_TYPE ((o), NEMO_TYPE_FILE_UNDO_INFO_PERMISSIONS))
+#define NEMO_IS_FILE_UNDO_INFO_PERMISSIONS_CLASS(k)  (G_TYPE_CHECK_CLASS_TYPE ((k), NEMO_TYPE_FILE_UNDO_INFO_PERMISSIONS))
+#define NEMO_FILE_UNDO_INFO_PERMISSIONS_GET_CLASS(o) (G_TYPE_INSTANCE_GET_CLASS ((o), NEMO_TYPE_FILE_UNDO_INFO_PERMISSIONS, NemoFileUndoInfoPermissionsClass))
 
-typedef struct _NautilusFileUndoInfoPermissions      NautilusFileUndoInfoPermissions;
-typedef struct _NautilusFileUndoInfoPermissionsClass NautilusFileUndoInfoPermissionsClass;
-typedef struct _NautilusFileUndoInfoPermissionsDetails NautilusFileUndoInfoPermissionsDetails;
+typedef struct _NemoFileUndoInfoPermissions      NemoFileUndoInfoPermissions;
+typedef struct _NemoFileUndoInfoPermissionsClass NemoFileUndoInfoPermissionsClass;
+typedef struct _NemoFileUndoInfoPermissionsDetails NemoFileUndoInfoPermissionsDetails;
 
-struct _NautilusFileUndoInfoPermissions {
-	NautilusFileUndoInfo parent;
-	NautilusFileUndoInfoPermissionsDetails *priv;
+struct _NemoFileUndoInfoPermissions {
+	NemoFileUndoInfo parent;
+	NemoFileUndoInfoPermissionsDetails *priv;
 };
 
-struct _NautilusFileUndoInfoPermissionsClass {
-	NautilusFileUndoInfoClass parent_class;
+struct _NemoFileUndoInfoPermissionsClass {
+	NemoFileUndoInfoClass parent_class;
 };
 
-GType nautilus_file_undo_info_permissions_get_type (void) G_GNUC_CONST;
-NautilusFileUndoInfo *nautilus_file_undo_info_permissions_new (GFile   *file,
+GType nemo_file_undo_info_permissions_get_type (void) G_GNUC_CONST;
+NemoFileUndoInfo *nemo_file_undo_info_permissions_new (GFile   *file,
 							       guint32  current_permissions,
 							       guint32  new_permissions);
 
 /* group and owner change */
-#define NAUTILUS_TYPE_FILE_UNDO_INFO_OWNERSHIP         (nautilus_file_undo_info_ownership_get_type ())
-#define NAUTILUS_FILE_UNDO_INFO_OWNERSHIP(o)           (G_TYPE_CHECK_INSTANCE_CAST ((o), NAUTILUS_TYPE_FILE_UNDO_INFO_OWNERSHIP, NautilusFileUndoInfoOwnership))
-#define NAUTILUS_FILE_UNDO_INFO_OWNERSHIP_CLASS(k)     (G_TYPE_CHECK_CLASS_CAST((k), NAUTILUS_TYPE_FILE_UNDO_INFO_OWNERSHIP, NautilusFileUndoInfoOwnershipClass))
-#define NAUTILUS_IS_FILE_UNDO_INFO_OWNERSHIP(o)        (G_TYPE_CHECK_INSTANCE_TYPE ((o), NAUTILUS_TYPE_FILE_UNDO_INFO_OWNERSHIP))
-#define NAUTILUS_IS_FILE_UNDO_INFO_OWNERSHIP_CLASS(k)  (G_TYPE_CHECK_CLASS_TYPE ((k), NAUTILUS_TYPE_FILE_UNDO_INFO_OWNERSHIP))
-#define NAUTILUS_FILE_UNDO_INFO_OWNERSHIP_GET_CLASS(o) (G_TYPE_INSTANCE_GET_CLASS ((o), NAUTILUS_TYPE_FILE_UNDO_INFO_OWNERSHIP, NautilusFileUndoInfoOwnershipClass))
+#define NEMO_TYPE_FILE_UNDO_INFO_OWNERSHIP         (nemo_file_undo_info_ownership_get_type ())
+#define NEMO_FILE_UNDO_INFO_OWNERSHIP(o)           (G_TYPE_CHECK_INSTANCE_CAST ((o), NEMO_TYPE_FILE_UNDO_INFO_OWNERSHIP, NemoFileUndoInfoOwnership))
+#define NEMO_FILE_UNDO_INFO_OWNERSHIP_CLASS(k)     (G_TYPE_CHECK_CLASS_CAST((k), NEMO_TYPE_FILE_UNDO_INFO_OWNERSHIP, NemoFileUndoInfoOwnershipClass))
+#define NEMO_IS_FILE_UNDO_INFO_OWNERSHIP(o)        (G_TYPE_CHECK_INSTANCE_TYPE ((o), NEMO_TYPE_FILE_UNDO_INFO_OWNERSHIP))
+#define NEMO_IS_FILE_UNDO_INFO_OWNERSHIP_CLASS(k)  (G_TYPE_CHECK_CLASS_TYPE ((k), NEMO_TYPE_FILE_UNDO_INFO_OWNERSHIP))
+#define NEMO_FILE_UNDO_INFO_OWNERSHIP_GET_CLASS(o) (G_TYPE_INSTANCE_GET_CLASS ((o), NEMO_TYPE_FILE_UNDO_INFO_OWNERSHIP, NemoFileUndoInfoOwnershipClass))
 
-typedef struct _NautilusFileUndoInfoOwnership      NautilusFileUndoInfoOwnership;
-typedef struct _NautilusFileUndoInfoOwnershipClass NautilusFileUndoInfoOwnershipClass;
-typedef struct _NautilusFileUndoInfoOwnershipDetails NautilusFileUndoInfoOwnershipDetails;
+typedef struct _NemoFileUndoInfoOwnership      NemoFileUndoInfoOwnership;
+typedef struct _NemoFileUndoInfoOwnershipClass NemoFileUndoInfoOwnershipClass;
+typedef struct _NemoFileUndoInfoOwnershipDetails NemoFileUndoInfoOwnershipDetails;
 
-struct _NautilusFileUndoInfoOwnership {
-	NautilusFileUndoInfo parent;
-	NautilusFileUndoInfoOwnershipDetails *priv;
+struct _NemoFileUndoInfoOwnership {
+	NemoFileUndoInfo parent;
+	NemoFileUndoInfoOwnershipDetails *priv;
 };
 
-struct _NautilusFileUndoInfoOwnershipClass {
-	NautilusFileUndoInfoClass parent_class;
+struct _NemoFileUndoInfoOwnershipClass {
+	NemoFileUndoInfoClass parent_class;
 };
 
-GType nautilus_file_undo_info_ownership_get_type (void) G_GNUC_CONST;
-NautilusFileUndoInfo *nautilus_file_undo_info_ownership_new (NautilusFileUndoOp  op_type,
+GType nemo_file_undo_info_ownership_get_type (void) G_GNUC_CONST;
+NemoFileUndoInfo *nemo_file_undo_info_ownership_new (NemoFileUndoOp  op_type,
 							     GFile              *file,
 							     const char         *current_data,
 							     const char         *new_data);
 
-#endif /* __NAUTILUS_FILE_UNDO_OPERATIONS_H__ */
+#endif /* __NEMO_FILE_UNDO_OPERATIONS_H__ */

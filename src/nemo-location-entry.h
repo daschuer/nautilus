@@ -1,16 +1,16 @@
 /* -*- Mode: C; indent-tabs-mode: t; c-basic-offset: 8; tab-width: 8 -*- */
 
 /*
- * Nautilus
+ * Nemo
  *
  * Copyright (C) 2000 Eazel, Inc.
  *
- * Nautilus is free software; you can redistribute it and/or
+ * Nemo is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
  * published by the Free Software Foundation; either version 2 of the
  * License, or (at your option) any later version.
  *
- * Nautilus is distributed in the hope that it will be useful,
+ * Nemo is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
  * General Public License for more details.
@@ -24,46 +24,46 @@
  *         Ettore Perazzoli <ettore@gnu.org>
  */
 
-#ifndef NAUTILUS_LOCATION_ENTRY_H
-#define NAUTILUS_LOCATION_ENTRY_H
+#ifndef NEMO_LOCATION_ENTRY_H
+#define NEMO_LOCATION_ENTRY_H
 
-#include <libnautilus-private/nautilus-entry.h>
+#include <libnemo-private/nemo-entry.h>
 
-#define NAUTILUS_TYPE_LOCATION_ENTRY nautilus_location_entry_get_type()
-#define NAUTILUS_LOCATION_ENTRY(obj) \
-  (G_TYPE_CHECK_INSTANCE_CAST ((obj), NAUTILUS_TYPE_LOCATION_ENTRY, NautilusLocationEntry))
-#define NAUTILUS_LOCATION_ENTRY_CLASS(klass) \
-  (G_TYPE_CHECK_CLASS_CAST ((klass), NAUTILUS_TYPE_LOCATION_ENTRY, NautilusLocationEntryClass))
-#define NAUTILUS_IS_LOCATION_ENTRY(obj) \
-  (G_TYPE_CHECK_INSTANCE_TYPE ((obj), NAUTILUS_TYPE_LOCATION_ENTRY))
-#define NAUTILUS_IS_LOCATION_ENTRY_CLASS(klass) \
-  (G_TYPE_CHECK_CLASS_TYPE ((klass), NAUTILUS_TYPE_LOCATION_ENTRY))
-#define NAUTILUS_LOCATION_ENTRY_GET_CLASS(obj) \
-  (G_TYPE_INSTANCE_GET_CLASS ((obj), NAUTILUS_TYPE_LOCATION_ENTRY, NautilusLocationEntryClass))
+#define NEMO_TYPE_LOCATION_ENTRY nemo_location_entry_get_type()
+#define NEMO_LOCATION_ENTRY(obj) \
+  (G_TYPE_CHECK_INSTANCE_CAST ((obj), NEMO_TYPE_LOCATION_ENTRY, NemoLocationEntry))
+#define NEMO_LOCATION_ENTRY_CLASS(klass) \
+  (G_TYPE_CHECK_CLASS_CAST ((klass), NEMO_TYPE_LOCATION_ENTRY, NemoLocationEntryClass))
+#define NEMO_IS_LOCATION_ENTRY(obj) \
+  (G_TYPE_CHECK_INSTANCE_TYPE ((obj), NEMO_TYPE_LOCATION_ENTRY))
+#define NEMO_IS_LOCATION_ENTRY_CLASS(klass) \
+  (G_TYPE_CHECK_CLASS_TYPE ((klass), NEMO_TYPE_LOCATION_ENTRY))
+#define NEMO_LOCATION_ENTRY_GET_CLASS(obj) \
+  (G_TYPE_INSTANCE_GET_CLASS ((obj), NEMO_TYPE_LOCATION_ENTRY, NemoLocationEntryClass))
 
-typedef struct NautilusLocationEntryDetails NautilusLocationEntryDetails;
+typedef struct NemoLocationEntryDetails NemoLocationEntryDetails;
 
-typedef struct NautilusLocationEntry {
-	NautilusEntry parent;
-	NautilusLocationEntryDetails *details;
-} NautilusLocationEntry;
+typedef struct NemoLocationEntry {
+	NemoEntry parent;
+	NemoLocationEntryDetails *details;
+} NemoLocationEntry;
 
 typedef struct {
-	NautilusEntryClass parent_class;
-} NautilusLocationEntryClass;
+	NemoEntryClass parent_class;
+} NemoLocationEntryClass;
 
 typedef enum {
-	NAUTILUS_LOCATION_ENTRY_ACTION_GOTO,
-	NAUTILUS_LOCATION_ENTRY_ACTION_CLEAR
-} NautilusLocationEntryAction;
+	NEMO_LOCATION_ENTRY_ACTION_GOTO,
+	NEMO_LOCATION_ENTRY_ACTION_CLEAR
+} NemoLocationEntryAction;
 
-GType      nautilus_location_entry_get_type     	(void);
-GtkWidget* nautilus_location_entry_new          	(void);
-void       nautilus_location_entry_set_special_text     (NautilusLocationEntry *entry,
+GType      nemo_location_entry_get_type     	(void);
+GtkWidget* nemo_location_entry_new          	(void);
+void       nemo_location_entry_set_special_text     (NemoLocationEntry *entry,
 							 const char            *special_text);
-void       nautilus_location_entry_set_secondary_action (NautilusLocationEntry *entry,
-							 NautilusLocationEntryAction secondary_action);
-void       nautilus_location_entry_update_current_location (NautilusLocationEntry *entry,
+void       nemo_location_entry_set_secondary_action (NemoLocationEntry *entry,
+							 NemoLocationEntryAction secondary_action);
+void       nemo_location_entry_update_current_location (NemoLocationEntry *entry,
 							    const char *path);
 
-#endif /* NAUTILUS_LOCATION_ENTRY_H */
+#endif /* NEMO_LOCATION_ENTRY_H */

@@ -1,6 +1,6 @@
 /* -*- Mode: C; indent-tabs-mode: t; c-basic-offset: 8; tab-width: 8 -*-
 
-   nautilus-monitor.c: file and directory change monitoring for nautilus
+   nemo-monitor.c: file and directory change monitoring for nemo
  
    Copyright (C) 2000, 2001 Eazel, Inc.
   
@@ -25,18 +25,18 @@
 */
 
 #include <config.h>
-#include "nautilus-monitor.h"
-#include "nautilus-file-changes-queue.h"
-#include "nautilus-file-utilities.h"
+#include "nemo-monitor.h"
+#include "nemo-file-changes-queue.h"
+#include "nemo-file-utilities.h"
 
 #include <gio/gio.h>
 
-struct NautilusMonitor {
+struct NemoMonitor {
 	GFileMonitor *monitor;
 };
 
 gboolean
-nautilus_monitor_active (void)
+nemo_monitor_active (void)
 {
 	static gboolean tried_monitor = FALSE;
 	static gboolean monitor_success;
@@ -64,7 +64,7 @@ static gboolean call_consume_changes_idle_id = 0;
 static gboolean
 call_consume_changes_idle_cb (gpointer not_used)
 {
-	nautilus_file_changes_consume_changes (TRUE);
+	nemo_file_changes_consume_changes (TRUE);
 	call_consume_changes_idle_id = 0;
 	return FALSE;
 }
@@ -91,13 +91,13 @@ dir_changed (GFileMonitor* monitor,
 		break;
 	case G_FILE_MONITOR_EVENT_ATTRIBUTE_CHANGED:
 	case G_FILE_MONITOR_EVENT_CHANGES_DONE_HINT:
-		nautilus_file_changes_queue_file_changed (child);
+		nemo_file_changes_queue_file_changed (child);
 		break;
 	case G_FILE_MONITOR_EVENT_DELETED:
-		nautilus_file_changes_queue_file_removed (child);
+		nemo_file_changes_queue_file_removed (child);
 		break;
 	case G_FILE_MONITOR_EVENT_CREATED:
-		nautilus_file_changes_queue_file_added (child);
+		nemo_file_changes_queue_file_added (child);
 		break;
 		
 	case G_FILE_MONITOR_EVENT_PRE_UNMOUNT:
@@ -117,15 +117,15 @@ dir_changed (GFileMonitor* monitor,
 	}
 }
  
-NautilusMonitor *
-nautilus_monitor_directory (GFile *location)
+NemoMonitor *
+nemo_monitor_directory (GFile *location)
 {
 	GFileMonitor *dir_monitor;
-	NautilusMonitor *ret;
+	NemoMonitor *ret;
 
 	dir_monitor = g_file_monitor_directory (location, G_FILE_MONITOR_WATCH_MOUNTS, NULL, NULL);
 
-	ret = g_new0 (NautilusMonitor, 1);
+	ret = g_new0 (NemoMonitor, 1);
 	ret->monitor = dir_monitor;
 
 	if (ret->monitor) {
@@ -137,7 +137,7 @@ nautilus_monitor_directory (GFile *location)
 }
 
 void 
-nautilus_monitor_cancel (NautilusMonitor *monitor)
+nemo_monitor_cancel (NemoMonitor *monitor)
 {
 	if (monitor->monitor != NULL) {
 		g_signal_handlers_disconnect_by_func (monitor->monitor, dir_changed, monitor);

@@ -1,5 +1,5 @@
-#ifndef NAUTILUS_EXTENSION_I18N_H
-#define NAUTILUS_EXTENSION_I18N_H
+#ifndef NEMO_EXTENSION_I18N_H
+#define NEMO_EXTENSION_I18N_H
  
 #include "config.h"
  

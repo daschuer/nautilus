@@ -1,34 +1,34 @@
 <schemalist>
-  <enum id="org.gnome.nautilus.SpeedTradeoff">
+  <enum id="org.gnome.nemo.SpeedTradeoff">
     <value nick="always" value="0"/>
     <value nick="local-only" value="1"/>
     <value nick="never" value="2"/>
   </enum>
 
-  <enum id="org.gnome.nautilus.ClickPolicy">
+  <enum id="org.gnome.nemo.ClickPolicy">
     <value nick="single" value="0"/>
     <value nick="double" value="1"/>
   </enum>
 
-  <enum id="org.gnome.nautilus.ActivationChoice">
+  <enum id="org.gnome.nemo.ActivationChoice">
     <value nick="launch" value="0"/>
     <value nick="display" value="1"/>
     <value nick="ask" value="2"/>
   </enum>
 
-  <enum id="org.gnome.nautilus.FolderView">
+  <enum id="org.gnome.nemo.FolderView">
     <value nick="icon-view" value="0"/>
     <value nick="compact-view" value="1"/>
     <value nick="list-view" value="2"/>
   </enum>
 
-  <enum id="org.gnome.nautilus.DateFormat">
+  <enum id="org.gnome.nemo.DateFormat">
     <value nick="locale" value="0"/>
     <value nick="iso" value="1"/>
     <value nick="informal" value="2"/>
   </enum>
 
-  <enum id="org.gnome.nautilus.SortOrder">
+  <enum id="org.gnome.nemo.SortOrder">
     <value nick="manually" value="0"/>
     <value nick="name" value="1"/>
     <value nick="size" value="2"/>
@@ -38,7 +38,7 @@
     <value nick="trash-time" value="6"/>
   </enum>
 
-  <enum id="org.gnome.nautilus.ZoomLevel">
+  <enum id="org.gnome.nemo.ZoomLevel">
     <value nick="smallest" value="0"/>
     <value nick="smaller" value="1"/>
     <value nick="small" value="2"/>
@@ -48,23 +48,23 @@
     <value nick="largest" value="6"/>
   </enum>
 
-  <enum id="org.gnome.nautilus.TabPosition">
+  <enum id="org.gnome.nemo.TabPosition">
     <value nick="after-current-tab" value="0"/>
     <value nick="end" value="1"/>
   </enum>
 
-  <schema id="org.gnome.nautilus" path="/org/gnome/nautilus/" gettext-domain="nautilus">
-    <child name="preferences" schema="org.gnome.nautilus.preferences"/>
-    <child name="icon-view" schema="org.gnome.nautilus.icon-view"/>
-    <child name="compact-view" schema="org.gnome.nautilus.compact-view"/>
-    <child name="list-view" schema="org.gnome.nautilus.list-view"/>
-    <child name="sidebar-panels" schema="org.gnome.nautilus.sidebar-panels"/>
-    <child name="desktop" schema="org.gnome.nautilus.desktop"/>
-    <child name="window-state" schema="org.gnome.nautilus.window-state"/>
+  <schema id="org.gnome.nemo" path="/org/gnome/nemo/" gettext-domain="nemo">
+    <child name="preferences" schema="org.gnome.nemo.preferences"/>
+    <child name="icon-view" schema="org.gnome.nemo.icon-view"/>
+    <child name="compact-view" schema="org.gnome.nemo.compact-view"/>
+    <child name="list-view" schema="org.gnome.nemo.list-view"/>
+    <child name="sidebar-panels" schema="org.gnome.nemo.sidebar-panels"/>
+    <child name="desktop" schema="org.gnome.nemo.desktop"/>
+    <child name="window-state" schema="org.gnome.nemo.window-state"/>
   </schema>
 
-  <schema id="org.gnome.nautilus.preferences" path="/org/gnome/nautilus/preferences/" gettext-domain="nautilus">
-    <key name="tabs-open-position" enum="org.gnome.nautilus.TabPosition">
+  <schema id="org.gnome.nemo.preferences" path="/org/gnome/nemo/preferences/" gettext-domain="nemo">
+    <key name="tabs-open-position" enum="org.gnome.nemo.TabPosition">
       <aliases>
 	<alias value='after_current_tab' target='after-current-tab'/>
       </aliases>
@@ -74,42 +74,42 @@
     </key>
     <key name="always-use-browser" type="b">
       <default>true</default>
-      <_summary>Enables the classic Nautilus behavior, where all windows are browsers</_summary>
-      <_description>If set to true, then all Nautilus windows will be browser windows. This is how Nautilus used to behave before version 2.6, and some people prefer this behavior.</_description>
+      <_summary>Enables the classic Nemo behavior, where all windows are browsers</_summary>
+      <_description>If set to true, then all Nemo windows will be browser windows. This is how Nemo used to behave before version 2.6, and some people prefer this behavior.</_description>
     </key>
     <key name="always-use-location-entry" type="b">
       <default>false</default>
       <_summary>Always use the location entry, instead of the pathbar</_summary>
-      <_description>If set to true, then Nautilus browser windows will always use a textual input entry for the location toolbar, instead of the pathbar.</_description>
+      <_description>If set to true, then Nemo browser windows will always use a textual input entry for the location toolbar, instead of the pathbar.</_description>
     </key>
     <key name="confirm-trash" type="b">
       <default>true</default>
       <_summary>Whether to ask for confirmation when deleting files, or emptying Trash</_summary>
-      <_description>If set to true, then Nautilus will ask for confirmation when  you attempt to delete files, or empty the Trash.</_description>
+      <_description>If set to true, then Nemo will ask for confirmation when  you attempt to delete files, or empty the Trash.</_description>
     </key>
     <key name="enable-delete" type="b">
       <default>false</default>
       <_summary>Whether to enable immediate deletion</_summary>
-      <_description>If set to true, then Nautilus will have a feature allowing you to delete a file immediately and in-place, instead of moving it  to the trash. This feature can be dangerous, so use caution.</_description>
+      <_description>If set to true, then Nemo will have a feature allowing you to delete a file immediately and in-place, instead of moving it  to the trash. This feature can be dangerous, so use caution.</_description>
     </key>
-    <key name="show-icon-text" enum="org.gnome.nautilus.SpeedTradeoff">
+    <key name="show-icon-text" enum="org.gnome.nemo.SpeedTradeoff">
       <aliases><alias value='local_only' target='local-only'/></aliases>
       <default>'local-only'</default>
       <_summary>When to show preview text in icons</_summary>
       <_description>Speed tradeoff for when to show a preview of text file contents in the file's icon. If set to "always" then always show previews,  even if the folder is on a remote server. If set to "local-only" then only show previews for local file systems. If set to "never" then never bother to read preview data.</_description>
     </key>
-    <key name="show-directory-item-counts"  enum="org.gnome.nautilus.SpeedTradeoff">
+    <key name="show-directory-item-counts"  enum="org.gnome.nemo.SpeedTradeoff">
       <aliases><alias value='local_only' target='local-only'/></aliases>
       <default>'local-only'</default>
       <_summary>When to show number of items in a folder</_summary>
       <_description>Speed tradeoff for when to show the number of items in a  folder. If set to "always" then always show item counts,  even if the folder is on a remote server.  If set to "local-only" then only show counts for local file systems. If set to "never" then never bother to compute item counts.</_description>
     </key>
-    <key name="click-policy" enum="org.gnome.nautilus.ClickPolicy">
+    <key name="click-policy" enum="org.gnome.nemo.ClickPolicy">
       <default>'double'</default>
       <_summary>Type of click used to launch/open files</_summary>
       <_description>Possible values are "single" to launch files on a single click,  or "double" to launch them on a double click.</_description>
     </key>
-    <key name="executable-text-activation" enum="org.gnome.nautilus.ActivationChoice">
+    <key name="executable-text-activation" enum="org.gnome.nemo.ActivationChoice">
       <default>'ask'</default>
       <_summary>What to do with executable text files when activated</_summary>
       <_description>What to do with executable text files when they are activated (single or double clicked). Possible values are "launch" to launch them as programs, "ask" to ask what to do via a dialog, and "display" to display them as text files.</_description>
@@ -121,8 +121,8 @@
     </key>
     <key name="mouse-use-extra-buttons" type="b">
       <default>true</default>
-      <_summary>Use extra mouse button events in Nautilus' browser window</_summary>
-      <_description>For users with mice that have "Forward" and "Back" buttons, this key will determine if any action is taken inside of Nautilus when either is pressed.</_description>
+      <_summary>Use extra mouse button events in Nemo' browser window</_summary>
+      <_description>For users with mice that have "Forward" and "Back" buttons, this key will determine if any action is taken inside of Nemo when either is pressed.</_description>
     </key>
     <key name="mouse-forward-button" type="i">
       <default>9</default>
@@ -134,7 +134,7 @@
       <_summary>Mouse button to activate the "Back" command in browser window</_summary>
       <_description>For users with mice that have buttons for "Forward" and "Back", this key will set which button activates the "Back" command in a browser window. Possible values range between 6 and 14.</_description>
     </key>
-    <key name="show-image-thumbnails" enum="org.gnome.nautilus.SpeedTradeoff">
+    <key name="show-image-thumbnails" enum="org.gnome.nemo.SpeedTradeoff">
       <aliases><alias value='local_only' target='local-only'/></aliases>
       <default>'local-only'</default>
       <_summary>When to show thumbnails of image files</_summary>
@@ -148,14 +148,14 @@
     <key name="show-advanced-permissions" type="b">
       <default>false</default>
       <_summary>Show advanced permissions in the file property dialog</_summary>
-      <_description>If set to true, then Nautilus lets you edit and display file permissions in a more unix-like way, accessing some more esoteric options.</_description>
+      <_description>If set to true, then Nemo lets you edit and display file permissions in a more unix-like way, accessing some more esoteric options.</_description>
     </key>
     <key name="sort-directories-first" type="b">
       <default>true</default>
       <_summary>Show folders first in windows</_summary>
-      <_description>If set to true, then Nautilus shows folders prior to showing files in the icon and list views.</_description>
+      <_description>If set to true, then Nemo shows folders prior to showing files in the icon and list views.</_description>
     </key>
-    <key name="default-sort-order" enum="org.gnome.nautilus.SortOrder">
+    <key name="default-sort-order" enum="org.gnome.nemo.SortOrder">
       <aliases>
 	<alias value='modification_date' target='mtime'/>
       </aliases>
@@ -170,10 +170,10 @@
     </key>
     <key name="desktop-is-home-dir" type="b">
       <default>false</default>
-      <_summary>Nautilus uses the users home folder as the desktop</_summary>
-      <_description>If set to true, then Nautilus will use the user's home folder as the desktop.  If it is false, then it will use ~/Desktop as the desktop.</_description>
+      <_summary>Nemo uses the users home folder as the desktop</_summary>
+      <_description>If set to true, then Nemo will use the user's home folder as the desktop.  If it is false, then it will use ~/Desktop as the desktop.</_description>
     </key>
-    <key name="default-folder-viewer" enum="org.gnome.nautilus.FolderView">
+    <key name="default-folder-viewer" enum="org.gnome.nemo.FolderView">
       <aliases>
         <alias value='icon_view' target='icon-view'/>
         <alias value='compact_view' target='compact-view'/>
@@ -183,7 +183,7 @@
       <_summary>Default folder viewer</_summary>
       <_description>When a folder is visited this viewer is used unless you have selected another view for that particular folder. Possible values are "list-view", "icon-view" and "compact-view".</_description>
     </key>
-    <key name="date-format" enum="org.gnome.nautilus.DateFormat">
+    <key name="date-format" enum="org.gnome.nemo.DateFormat">
       <default>'locale'</default>
       <_summary>Date Format</_summary>
       <_description>The format of file dates. Possible values are "locale", "iso", and "informal".</_description>
@@ -196,11 +196,11 @@
     <key name="bulk-rename-tool" type="ay">
       <default>[]</default>
       <_summary>Bulk rename utility</_summary>
-      <_description>If set, Nautilus will append URIs of selected files and treat the result as a command line for bulk renaming. Bulk rename applications can register themselves in this key by setting the key to a space-separated string of their executable name and any command line options. If the executable name is not set to a full path, it will be searched for in the search path.</_description>
+      <_description>If set, Nemo will append URIs of selected files and treat the result as a command line for bulk renaming. Bulk rename applications can register themselves in this key by setting the key to a space-separated string of their executable name and any command line options. If the executable name is not set to a full path, it will be searched for in the search path.</_description>
     </key>
   </schema>
 
-  <schema id="org.gnome.nautilus.icon-view" path="/org/gnome/nautilus/icon-view/" gettext-domain="nautilus">
+  <schema id="org.gnome.nemo.icon-view" path="/org/gnome/nemo/icon-view/" gettext-domain="nemo">
     <key name="captions" type="as">
       <default>[ 'none', 'size', 'date_modified' ]</default>
       <_summary>List of possible captions on icons</_summary>
@@ -215,7 +215,7 @@
       <_summary>Put labels beside icons</_summary>
       <_description>If true, labels will be placed beside icons rather than underneath them.</_description>
     </key>
-    <key name="default-zoom-level" enum="org.gnome.nautilus.ZoomLevel">
+    <key name="default-zoom-level" enum="org.gnome.nemo.ZoomLevel">
       <default>'standard'</default>
       <_summary>Default icon zoom level</_summary>
       <_description>Default zoom level used by the icon view.</_description>
@@ -250,8 +250,8 @@
     </key>
   </schema>
 
-  <schema id="org.gnome.nautilus.compact-view" path="/org/gnome/nautilus/compact-view/" gettext-domain="nautilus">
-    <key name="default-zoom-level" enum="org.gnome.nautilus.ZoomLevel">
+  <schema id="org.gnome.nemo.compact-view" path="/org/gnome/nemo/compact-view/" gettext-domain="nemo">
+    <key name="default-zoom-level" enum="org.gnome.nemo.ZoomLevel">
       <default>'standard'</default>
       <_summary>Default compact view zoom level</_summary>
       <_description>Default zoom level used by the compact view.</_description>
@@ -263,8 +263,8 @@
     </key>
   </schema>
 
-  <schema id="org.gnome.nautilus.list-view" path="/org/gnome/nautilus/list-view/" gettext-domain="nautilus">
-    <key name="default-zoom-level" enum="org.gnome.nautilus.ZoomLevel">
+  <schema id="org.gnome.nemo.list-view" path="/org/gnome/nemo/list-view/" gettext-domain="nemo">
+    <key name="default-zoom-level" enum="org.gnome.nemo.ZoomLevel">
       <default>'smaller'</default>
       <_summary>Default list zoom level</_summary>
       <_description>Default zoom level used by the list view.</_description>
@@ -281,19 +281,19 @@
     </key>
   </schema>
 
-  <schema id="org.gnome.nautilus.sidebar-panels" path="/org/gnome/nautilus/sidebar-panels/" gettext-domain="nautilus">
-    <child name="tree" schema="org.gnome.nautilus.sidebar-panels.tree"/>
+  <schema id="org.gnome.nemo.sidebar-panels" path="/org/gnome/nemo/sidebar-panels/" gettext-domain="nemo">
+    <child name="tree" schema="org.gnome.nemo.sidebar-panels.tree"/>
   </schema>
 
-  <schema id="org.gnome.nautilus.sidebar-panels.tree" path="/org/gnome/nautilus/sidebar-panels/tree/" gettext-domain="nautilus">
+  <schema id="org.gnome.nemo.sidebar-panels.tree" path="/org/gnome/nemo/sidebar-panels/tree/" gettext-domain="nemo">
     <key name="show-only-directories" type="b">
       <default>true</default>
       <_summary>Only show folders in the tree side pane</_summary>
-      <_description>If set to true, Nautilus will only show folders in the tree side pane. Otherwise it will show both folders and files.</_description>
+      <_description>If set to true, Nemo will only show folders in the tree side pane. Otherwise it will show both folders and files.</_description>
     </key>
   </schema>
 
-  <schema id="org.gnome.nautilus.desktop" path="/org/gnome/nautilus/desktop/" gettext-domain="nautilus">
+  <schema id="org.gnome.nemo.desktop" path="/org/gnome/nemo/desktop/" gettext-domain="nemo">
     <key name="font" type="s">
       <default l10n="messages" context="desktop-font">''</default>
       <_summary>Desktop font</_summary>
@@ -352,11 +352,11 @@
     <key name="background-fade" type="b">
       <default>true</default>
       <_summary>Fade the background on change</_summary>
-      <_description>If set to true, then Nautilus will use a fade effect to change the desktop background.</_description>
+      <_description>If set to true, then Nemo will use a fade effect to change the desktop background.</_description>
     </key>
   </schema>
 
-  <schema id="org.gnome.nautilus.window-state" path="/org/gnome/nautilus/window-state/" gettext-domain="nautilus">
+  <schema id="org.gnome.nemo.window-state" path="/org/gnome/nemo/window-state/" gettext-domain="nemo">
     <key name="geometry" type="s">
       <default>''</default>
       <_summary>The geometry string for a navigation window.</_summary>
@@ -398,8 +398,8 @@
 	<choice value='tree'/>
       </choices>
       <aliases>
-	<alias value='NautilusPlacesSidebar' target='places'/>
-	<alias value='NautilusTreeSidebar' target='tree'/>
+	<alias value='NemoPlacesSidebar' target='places'/>
+	<alias value='NemoTreeSidebar' target='tree'/>
       </aliases>
       <default>'places'</default>
       <_summary>Side pane view</_summary>

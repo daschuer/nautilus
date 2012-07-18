@@ -1,9 +1,9 @@
-# Nautiluse eesti tõlge.
-# Estonian translation of Nautilus.
+# Nemoe eesti tõlge.
+# Estonian translation of Nemo.
 #
 # Copyright (C) 2002–2006 Free Software Foundation, Inc.
 # Copyright (C) 2007–2011 The GNOME Project.
-# This file is distributed under the same license as the nautilus package.
+# This file is distributed under the same license as the nemo package.
 #
 # Lauri Kasvandik <lauri.kasvandik mail ee>, 2002.
 # Ilmar Kerm <ikerm hot ee>, 2002.
@@ -19,9 +19,9 @@
 #
 msgid ""
 msgstr ""
-"Project-Id-Version: nautilus MASTER\n"
+"Project-Id-Version: nemo MASTER\n"
 "Report-Msgid-Bugs-To: http://bugzilla.gnome.org/enter_bug.cgi?"
-"product=nautilus&keywords=I18N+L10N&component=Internationalization (i18n)\n"
+"product=nemo&keywords=I18N+L10N&component=Internationalization (i18n)\n"
 "POT-Creation-Date: 2012-02-20 21:38+0000\n"
 "PO-Revision-Date: 2012-02-22 13:48+0200\n"
 "Last-Translator: Mattias Põldaru <mahfiaz@gmail.com>\n"
@@ -304,7 +304,7 @@ msgstr "Töölauafaili nime pole võimalik muuta"
 #. * the specifiers from the C standard, not extensions.
 #. * These include "%" followed by one of
 #. * "aAbBcdHIjmMpSUwWxXyYZ". There are two extensions
-#. * in the Nautilus version of strftime that can be
+#. * in the Nemo version of strftime that can be
 #. * used (and match GNU extensions). Putting a "-"
 #. * between the "%" and any numeric directive will turn
 #. * off zero padding, and putting a "_" there will use
@@ -1493,7 +1493,7 @@ msgstr "Ettevalmistamine"
 msgid "Search"
 msgstr "Otsing"
 
-# Nautiluses saki peal, %s on loomulikult otsingusõne.
+# Nemoes saki peal, %s on loomulikult otsingusõne.
 #, c-format
 msgid "Search for \"%s\""
 msgstr "\"%s\" otsing"
@@ -1525,25 +1525,25 @@ msgstr ""
 "käesoleva kaardi järele. Kui väärtuseks on \"end\", siis paigutatakse uued "
 "kaardid kaartide nimekirja lõppu."
 
-msgid "Enables the classic Nautilus behavior, where all windows are browsers"
-msgstr "Nautiluse klassikalise käitumise lubamine, kus kõik aknad on sirvijad"
+msgid "Enables the classic Nemo behavior, where all windows are browsers"
+msgstr "Nemoe klassikalise käitumise lubamine, kus kõik aknad on sirvijad"
 
 msgid ""
-"If set to true, then all Nautilus windows will be browser windows. This is "
-"how Nautilus used to behave before version 2.6, and some people prefer this "
+"If set to true, then all Nemo windows will be browser windows. This is "
+"how Nemo used to behave before version 2.6, and some people prefer this "
 "behavior."
 msgstr ""
-"Kui märgitud, näitab Nautilus kõiki aknaid sirvijana. Nii toimis Nautilus "
+"Kui märgitud, näitab Nemo kõiki aknaid sirvijana. Nii toimis Nemo "
 "enne versiooni 2.6 ning osa kasutajaid eelistab seda võimalust."
 
 msgid "Always use the location entry, instead of the pathbar"
 msgstr "Rajariba asemel alati asukohakirje kasutamine"
 
 msgid ""
-"If set to true, then Nautilus browser windows will always use a textual "
+"If set to true, then Nemo browser windows will always use a textual "
 "input entry for the location toolbar, instead of the pathbar."
 msgstr ""
-"Kui märgitud, siis Nautiluse sirvimisaknad kasutavad asukoha tööribal "
+"Kui märgitud, siis Nemoe sirvimisaknad kasutavad asukoha tööribal "
 "rajariba asemel alati tekstilist sisendit."
 
 msgid "Whether to ask for confirmation when deleting files, or emptying Trash"
@@ -1552,23 +1552,23 @@ msgstr ""
 "mitte"
 
 msgid ""
-"If set to true, then Nautilus will ask for confirmation when you attempt to "
+"If set to true, then Nemo will ask for confirmation when you attempt to "
 "delete files, or empty the Trash."
 msgstr ""
-"Kui märgitud, siis Nautilus küsib enne failide kustutamist või prügikasti "
+"Kui märgitud, siis Nemo küsib enne failide kustutamist või prügikasti "
 "tühjendamist kinnitust."
 
 msgid "Whether to enable immediate deletion"
 msgstr "Kas kohene kustutamine on lubatud"
 
-# "Kui tõene, väljub Nautilus, kui kõik aknad suletakse. See on vaikimisi säte. "
+# "Kui tõene, väljub Nemo, kui kõik aknad suletakse. See on vaikimisi säte. "
 # "Kui see pole tõene, "
 msgid ""
-"If set to true, then Nautilus will have a feature allowing you to delete a "
+"If set to true, then Nemo will have a feature allowing you to delete a "
 "file immediately and in-place, instead of moving it to the trash. This "
 "feature can be dangerous, so use caution."
 msgstr ""
-"Kui märgitud, siis lubab Nautilus faile kustutada ilma neid prügikasti "
+"Kui märgitud, siis lubab Nemo faile kustutada ilma neid prügikasti "
 "viskamata. See omadus võib olla ohtlik ja seda tuleks kasutada "
 "ettevaatlikult."
 
@@ -1637,16 +1637,16 @@ msgstr ""
 "Kas tundmatute mime-tüüpide avamisel tuleb sobiva rakenduse leidmiseks "
 "näidata pakipaigaldaja dialoogi või mitte."
 
-msgid "Use extra mouse button events in Nautilus' browser window"
-msgstr "Nautiluse aknas kasutatakse hiire lisanuppe"
+msgid "Use extra mouse button events in Nemo' browser window"
+msgstr "Nemoe aknas kasutatakse hiire lisanuppe"
 
 msgid ""
 "For users with mice that have \"Forward\" and \"Back\" buttons, this key "
-"will determine if any action is taken inside of Nautilus when either is "
+"will determine if any action is taken inside of Nemo when either is "
 "pressed."
 msgstr ""
 "Mõnel hiirel on \"Edasi\" ja \"Tagasi\" nupud. See võti määrab, mida teeb "
-"Nautilus nende nuppude vajutamisel."
+"Nemo nende nuppude vajutamisel."
 
 msgid "Mouse button to activate the \"Forward\" command in browser window"
 msgstr "Hiirenupp, millega aktiveeritakse brauseriaknas käsk \"Edasi\""
@@ -1704,20 +1704,20 @@ msgid "Show advanced permissions in the file property dialog"
 msgstr "Laiendatud pääsuõiguste näitamine faili omaduste dialoogis"
 
 msgid ""
-"If set to true, then Nautilus lets you edit and display file permissions in "
+"If set to true, then Nemo lets you edit and display file permissions in "
 "a more unix-like way, accessing some more esoteric options."
 msgstr ""
-"Kui märgitud, siis Nautilus võimaldab failieelistuste dialoogis redigeerida "
+"Kui märgitud, siis Nemo võimaldab failieelistuste dialoogis redigeerida "
 "faili pääsuõigusi UNIX-i moodi, koos mõningate esoteeriliste valikutega."
 
 msgid "Show folders first in windows"
 msgstr "Akendes kataloogide esimesena näitamine"
 
 msgid ""
-"If set to true, then Nautilus shows folders prior to showing files in the "
+"If set to true, then Nemo shows folders prior to showing files in the "
 "icon and list views."
 msgstr ""
-"Kui märgitud, siis Nautilus näitab ikooni- ja nimekirjavaates katalooge "
+"Kui märgitud, siis Nemo näitab ikooni- ja nimekirjavaates katalooge "
 "failidest eespool."
 
 msgid "Default sort order"
@@ -1746,14 +1746,14 @@ msgstr ""
 "\"-ni. Kui sorditakse suuruse alusel, siis kasvava järjestuse asemel "
 "sorditakse kahanevas järjestuses."
 
-msgid "Nautilus uses the users home folder as the desktop"
-msgstr "Nautilus kasutab kodukataloogi kui töölauda"
+msgid "Nemo uses the users home folder as the desktop"
+msgstr "Nemo kasutab kodukataloogi kui töölauda"
 
 msgid ""
-"If set to true, then Nautilus will use the user's home folder as the "
+"If set to true, then Nemo will use the user's home folder as the "
 "desktop. If it is false, then it will use ~/Desktop as the desktop."
 msgstr ""
-"Kui märgitud, kasutab Nautilus kasutaja kodukataloogi kui töölauda. Kui "
+"Kui märgitud, kasutab Nemo kasutaja kodukataloogi kui töölauda. Kui "
 "valik on aktiveerimata, kasutatakse töölauana kataloogi ~/Desktop."
 
 msgid "Default folder viewer"
@@ -1795,13 +1795,13 @@ msgid "Bulk rename utility"
 msgstr "Nimede hulgimuutmise utiliit"
 
 msgid ""
-"If set, Nautilus will append URIs of selected files and treat the result as "
+"If set, Nemo will append URIs of selected files and treat the result as "
 "a command line for bulk renaming. Bulk rename applications can register "
 "themselves in this key by setting the key to a space-separated string of "
 "their executable name and any command line options. If the executable name "
 "is not set to a full path, it will be searched for in the search path."
 msgstr ""
-"Kui määratud, siis kasutab Nautilus vailitud failide URI-sid käsureal "
+"Kui määratud, siis kasutab Nemo vailitud failide URI-sid käsureal "
 "failinimede hulgimuutmisel. Nimede hulgimuutmise rakendused saavad end selle "
 "võtme abil registreerida, kui määravad võtme väärtuseks tühikutega eraldatud "
 "stringi, milles on käivitatava programmifaili nimi ja käsureavõtmed. Kui "
@@ -1918,11 +1918,11 @@ msgid "Only show folders in the tree side pane"
 msgstr "Külgpaani puuvaates kuvatakse ainult katalooge"
 
 msgid ""
-"If set to true, Nautilus will only show folders in the tree side pane. "
+"If set to true, Nemo will only show folders in the tree side pane. "
 "Otherwise it will show both folders and files."
 msgstr ""
-"Kui märgitud, näitab Nautilus külgpaanis ainult katalooge. Vastasel juhul "
-"näitab Nautilus katalooge ja faile."
+"Kui märgitud, näitab Nemo külgpaanis ainult katalooge. Vastasel juhul "
+"näitab Nemo katalooge ja faile."
 
 msgid "Desktop font"
 msgstr "Töölaua kirjatüüp"
@@ -2026,9 +2026,9 @@ msgid "Fade the background on change"
 msgstr "Tausta sujuv vahetamine"
 
 msgid ""
-"If set to true, then Nautilus will use a fade effect to change the desktop "
+"If set to true, then Nemo will use a fade effect to change the desktop "
 "background."
-msgstr "Kui märgitud, vahetab Nautilus töölaua tausta sujuva üleminekuga."
+msgstr "Kui märgitud, vahetab Nemo töölaua tausta sujuva üleminekuga."
 
 msgid "The geometry string for a navigation window."
 msgstr "Navigeerimisakna geomeetriastring."
@@ -2091,33 +2091,33 @@ msgid "Send files by mail, instant message..."
 msgstr "Failide saatmine e-postiga, välksõnumiga..."
 
 #, c-format
-msgid "Nautilus could not create the required folder \"%s\"."
-msgstr "Nautilusel pole võimalik kataloogi \"%s\" luua."
+msgid "Nemo could not create the required folder \"%s\"."
+msgstr "Nemoel pole võimalik kataloogi \"%s\" luua."
 
 msgid ""
-"Before running Nautilus, please create the following folder, or set "
-"permissions such that Nautilus can create it."
+"Before running Nemo, please create the following folder, or set "
+"permissions such that Nemo can create it."
 msgstr ""
-"Enne Nautiluse käivitamist loo palun järgnev kataloog või säti pääsuõigused "
-"selliselt, et Nautilus saaks vajalikud kataloogid luua."
+"Enne Nemoe käivitamist loo palun järgnev kataloog või säti pääsuõigused "
+"selliselt, et Nemo saaks vajalikud kataloogid luua."
 
 #, c-format
-msgid "Nautilus could not create the following required folders: %s."
-msgstr "Nautilusel pole võimalik luua järgmisi vajalikke katalooge: %s."
+msgid "Nemo could not create the following required folders: %s."
+msgstr "Nemoel pole võimalik luua järgmisi vajalikke katalooge: %s."
 
 msgid ""
-"Before running Nautilus, please create these folders, or set permissions "
-"such that Nautilus can create them."
+"Before running Nemo, please create these folders, or set permissions "
+"such that Nemo can create them."
 msgstr ""
-"Enne Nautiluse käivitamist loo palun järgnevad kataloogid või säti "
-"pääsuõigused selliselt, et Nautilus saaks vajalikud kataloogid luua."
+"Enne Nemoe käivitamist loo palun järgnevad kataloogid või säti "
+"pääsuõigused selliselt, et Nemo saaks vajalikud kataloogid luua."
 
 msgid ""
-"Nautilus 3.0 deprecated this directory and tried migrating this "
-"configuration to ~/.config/nautilus"
+"Nemo 3.0 deprecated this directory and tried migrating this "
+"configuration to ~/.config/nemo"
 msgstr ""
-"Nautilusega 3.0 muutus see kataloog aegunuks ning seadistused püüti "
-"kohandada kausta ~/.config/nautilus"
+"Nemoega 3.0 muutus see kataloog aegunuks ning seadistused püüti "
+"kohandada kausta ~/.config/nemo"
 
 msgid "--check cannot be used with other options."
 msgstr "--check võtit pole võimalik kasutada koos teiste võtmetega."
@@ -2148,8 +2148,8 @@ msgid ""
 "dialog)."
 msgstr "Töölaua tausta ei hallata (eirab eelistuste aknas valitud sätteid)."
 
-msgid "Quit Nautilus."
-msgstr "Nautilusest väljumine."
+msgid "Quit Nemo."
+msgstr "Nemoest väljumine."
 
 msgid "[URI...]"
 msgstr "[URI...]"
@@ -3741,25 +3741,25 @@ msgid ""
 "names. When executed from a remote folder (e.g. a folder showing web or ftp "
 "content), scripts will be passed no parameters.\n"
 "\n"
-"In all cases, the following environment variables will be set by Nautilus, "
+"In all cases, the following environment variables will be set by Nemo, "
 "which the scripts may use:\n"
 "\n"
-"NAUTILUS_SCRIPT_SELECTED_FILE_PATHS: newline-delimited paths for selected "
+"NEMO_SCRIPT_SELECTED_FILE_PATHS: newline-delimited paths for selected "
 "files (only if local)\n"
 "\n"
-"NAUTILUS_SCRIPT_SELECTED_URIS: newline-delimited URIs for selected files\n"
+"NEMO_SCRIPT_SELECTED_URIS: newline-delimited URIs for selected files\n"
 "\n"
-"NAUTILUS_SCRIPT_CURRENT_URI: URI for current location\n"
+"NEMO_SCRIPT_CURRENT_URI: URI for current location\n"
 "\n"
-"NAUTILUS_SCRIPT_WINDOW_GEOMETRY: position and size of current window\n"
+"NEMO_SCRIPT_WINDOW_GEOMETRY: position and size of current window\n"
 "\n"
-"NAUTILUS_SCRIPT_NEXT_PANE_SELECTED_FILE_PATHS: newline-delimited paths for "
+"NEMO_SCRIPT_NEXT_PANE_SELECTED_FILE_PATHS: newline-delimited paths for "
 "selected files in the inactive pane of a split-view window (only if local)\n"
 "\n"
-"NAUTILUS_SCRIPT_NEXT_PANE_SELECTED_URIS: newline-delimited URIs for selected "
+"NEMO_SCRIPT_NEXT_PANE_SELECTED_URIS: newline-delimited URIs for selected "
 "files in the inactive pane of a split-view window\n"
 "\n"
-"NAUTILUS_SCRIPT_NEXT_PANE_CURRENT_URI: URI for current location in the "
+"NEMO_SCRIPT_NEXT_PANE_CURRENT_URI: URI for current location in the "
 "inactive pane of a split-view window"
 msgstr ""
 "Kõik selles kataloogis olevad käivitatavad failid ilmuvad Skriptide "
@@ -3769,27 +3769,27 @@ msgstr ""
 "nimed. Võrgukataloogist (näiteks veebi või ftp sisu näitavast kataloogist) "
 "käivitamisel skriptile parameetreid ei edastata.\n"
 "\n"
-"Kõikide ülalkirjeldatud juhtumite korral edastab Nautilus skriptile "
+"Kõikide ülalkirjeldatud juhtumite korral edastab Nemo skriptile "
 "järgnevad keskkonnamuutujad:\n"
 "\n"
-"NAUTILUS_SCRIPT_SELECTED_FILE_PATHS: valitud failide reavahetustega "
+"NEMO_SCRIPT_SELECTED_FILE_PATHS: valitud failide reavahetustega "
 "eraldatud rajad (kui need on kohalikud)\n"
 "\n"
-"NAUTILUS_SCRIPT_SELECTED_URIS: valitud failide reavahetustega eraldatud URI-"
+"NEMO_SCRIPT_SELECTED_URIS: valitud failide reavahetustega eraldatud URI-"
 "d\n"
 "\n"
-"NAUTILUS_SCRIPT_CURRENT_URI: käesoleva asukoha URI\n"
+"NEMO_SCRIPT_CURRENT_URI: käesoleva asukoha URI\n"
 "\n"
-"NAUTILUS_SCRIPT_WINDOW_GEOMETRY: käesoleva akna suurus ja asukoht\n"
+"NEMO_SCRIPT_WINDOW_GEOMETRY: käesoleva akna suurus ja asukoht\n"
 "\n"
-"NAUTILUS_SCRIPT_NEXT_PANE_SELECTED_FILE_PATHS: jagatud vaate mitteaktiivsel "
+"NEMO_SCRIPT_NEXT_PANE_SELECTED_FILE_PATHS: jagatud vaate mitteaktiivsel "
 "paneelil valitud failide reavahetustega eraldatud rajad (kui need on "
 "kohalikud)\n"
 "\n"
-"NAUTILUS_SCRIPT_NEXT_PANE_SELECTED_URIS: jagatud vaate mitteaktiivsel "
+"NEMO_SCRIPT_NEXT_PANE_SELECTED_URIS: jagatud vaate mitteaktiivsel "
 "paneelil valitud failide reavahetustega eraldatud URI-d\n"
 "\n"
-"NAUTILUS_SCRIPT_NEXT_PANE_CURRENT_URI: jagatud vaate mitteaktiivse paneeli "
+"NEMO_SCRIPT_NEXT_PANE_CURRENT_URI: jagatud vaate mitteaktiivse paneeli "
 "käesoleva asukoha URI"
 
 #, c-format
@@ -4393,16 +4393,16 @@ msgid "%s - File Browser"
 msgstr "%s - Failisirvija"
 
 #. Set initial window title
-msgid "Nautilus"
-msgstr "Nautilus"
+msgid "Nemo"
+msgstr "Nemo"
 
 # Näidatakse otsimise ajal kollasel pisikesel ribal, tegevusnimi peaks õige olema.
 msgid "Searching..."
 msgstr "Otsimine..."
 
-msgid "Nautilus has no installed viewer capable of displaying the folder."
+msgid "Nemo has no installed viewer capable of displaying the folder."
 msgstr ""
-"Nautilusele ei ole paigaldatud vaatlemisprogrammi, millega saaks seda "
+"Nemoele ei ole paigaldatud vaatlemisprogrammi, millega saaks seda "
 "kataloogi kuvada."
 
 msgid "The location is not a folder."
@@ -4416,11 +4416,11 @@ msgid "Please check the spelling and try again."
 msgstr "Palun kontrolli õigekirja ja proovi uuesti."
 
 #, c-format
-msgid "Nautilus cannot handle \"%s\" locations."
-msgstr "Nautilusel pole võimalik \"%s\" asukohti käsitleda."
+msgid "Nemo cannot handle \"%s\" locations."
+msgstr "Nemoel pole võimalik \"%s\" asukohti käsitleda."
 
-msgid "Nautilus cannot handle this kind of location."
-msgstr "Nautilusel pole võimalik seda liiki asukohta käsitleda."
+msgid "Nemo cannot handle this kind of location."
+msgstr "Nemoel pole võimalik seda liiki asukohta käsitleda."
 
 msgid "Unable to mount the location."
 msgstr "Asukohta pole võimalik külge haakida."
@@ -4450,33 +4450,33 @@ msgstr ""
 "Palun vali mõni teine vaataja ja proovi uuesti."
 
 msgid ""
-"Nautilus is free software; you can redistribute it and/or modify it under "
+"Nemo is free software; you can redistribute it and/or modify it under "
 "the terms of the GNU General Public License as published by the Free "
 "Software Foundation; either version 2 of the License, or (at your option) "
 "any later version."
 msgstr ""
-"Nautilus on vaba tarkvara. Te võite seda edasi levitada ja/või muuta "
+"Nemo on vaba tarkvara. Te võite seda edasi levitada ja/või muuta "
 "vastavalt GNU Üldise Avaliku Litsentsi tingimustele, nagu need on Vaba "
 "Tarkvara Fondi poolt avaldatud; kas Litsentsi versioon number 2 või "
 "(vastavalt Teie valikule) ükskõik milline hilisem versioon."
 
 msgid ""
-"Nautilus is distributed in the hope that it will be useful, but WITHOUT ANY "
+"Nemo is distributed in the hope that it will be useful, but WITHOUT ANY "
 "WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS "
 "FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more "
 "details."
 msgstr ""
-"Nautilust levitatakse lootuses, et see on kasulik, kuid ILMA IGASUGUSE "
+"Nemot levitatakse lootuses, et see on kasulik, kuid ILMA IGASUGUSE "
 "GARANTIITA; isegi KESKMISE/TAVALISE KVALITEEDI GARANTIITA või SOBIVUSELE "
 "TEATUD KINDLAKS EESMÄRGIKS. Üksikasjade suhtes vaata GNU Üldist Avalikku "
 "Litsentsi."
 
 msgid ""
 "You should have received a copy of the GNU General Public License along with "
-"Nautilus; if not, write to the Free Software Foundation, Inc., 51 Franklin "
+"Nemo; if not, write to the Free Software Foundation, Inc., 51 Franklin "
 "Street, Fifth Floor, Boston, MA 02110-1301 USA"
 msgstr ""
-"Koos Nautilusega oleks sa pidanud saama ka koopia GNU Üldisest Avalikust "
+"Koos Nemoega oleks sa pidanud saama ka koopia GNU Üldisest Avalikust "
 "Litsentsist; juhul kui sa seda ei saanud, siis kirjuta aadressil Free "
 "Software Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA "
 "02110-1301 USA"
@@ -4484,14 +4484,14 @@ msgstr ""
 #. Translators: these two strings here indicate the copyright time span,
 #. * e.g. 1999-2011.
 #.
-msgid "Copyright © %Id–%Id The Nautilus authors"
-msgstr "Autoriõigused © %Id–%Id Nautiluse autorid"
+msgid "Copyright © %Id–%Id The Nemo authors"
+msgstr "Autoriõigused © %Id–%Id Nemoe autorid"
 
 msgid ""
-"Nautilus lets you organize files and folders, both on your computer and "
+"Nemo lets you organize files and folders, both on your computer and "
 "online."
 msgstr ""
-"Nautiluse abil saab korras hoida nii enda arvutis kui internetis olevaid "
+"Nemoe abil saab korras hoida nii enda arvutis kui internetis olevaid "
 "faile ja kaustu."
 
 #. Translators should localize the following string
@@ -4509,8 +4509,8 @@ msgstr ""
 "Ivar Smolin <okul linux ee>, 2005–2011.\n"
 "Mattias Põldaru <mahfiaz gmail com>, 2009–2012."
 
-msgid "Nautilus Web Site"
-msgstr "Nautiluse veebisait"
+msgid "Nemo Web Site"
+msgstr "Nemoe veebisait"
 
 #. name, stock id, label
 msgid "_File"
@@ -4540,8 +4540,8 @@ msgstr "Sulgeb selle kataloogi"
 msgid "Prefere_nces"
 msgstr "_Eelistused"
 
-msgid "Edit Nautilus preferences"
-msgstr "Nautiluse eelistuste muutmine"
+msgid "Edit Nemo preferences"
+msgstr "Nemoe eelistuste muutmine"
 
 msgid "Undo the last text change"
 msgstr "Tühista viimane tekstimuutus"
@@ -4572,8 +4572,8 @@ msgid "_All Topics"
 msgstr "_Kõik teemad"
 
 #. tooltip
-msgid "Display Nautilus help"
-msgstr "Nautiluse abiteabe kuvamine"
+msgid "Display Nemo help"
+msgstr "Nemoe abiteabe kuvamine"
 
 #. name, stock id
 #. label, accelerator
@@ -4621,11 +4621,11 @@ msgstr ""
 #. name, stock id
 #. label, accelerator
 msgid "_About"
-msgstr "Nautilusest _lähemalt"
+msgstr "Nemoest _lähemalt"
 
 #. tooltip
-msgid "Display credits for the creators of Nautilus"
-msgstr "Teabe kuvamine Nautiluse autorite ja tõlkijate kohta"
+msgid "Display credits for the creators of Nemo"
+msgstr "Teabe kuvamine Nemoe autorite ja tõlkijate kohta"
 
 #. name, stock id
 #. label, accelerator
@@ -4716,15 +4716,15 @@ msgstr "_Kaardid"
 msgid "New _Window"
 msgstr "_Uus aken"
 
-msgid "Open another Nautilus window for the displayed location"
-msgstr "Näidatava asukoha jaoks Nautiluse uue akna avamine"
+msgid "Open another Nemo window for the displayed location"
+msgstr "Näidatava asukoha jaoks Nemoe uue akna avamine"
 
 #. name, stock id, label
 msgid "New _Tab"
 msgstr "_Uus kaart"
 
 msgid "Open another tab for the displayed location"
-msgstr "Näidatava asukoha jaoks Nautiluse uue kaardi avamine"
+msgstr "Näidatava asukoha jaoks Nemoe uue kaardi avamine"
 
 #. name, stock id, label
 msgid "Close _All Windows"

@@ -1,17 +1,17 @@
 /* -*- Mode: C; tab-width: 8; indent-tabs-mode: nil; c-basic-offset: 8 -*- */
 
 /*
- *  Nautilus
+ *  Nemo
  *
  *  Copyright (C) 1999, 2000 Red Hat, Inc.
  *  Copyright (C) 1999, 2000, 2001 Eazel, Inc.
  *
- *  Nautilus is free software; you can redistribute it and/or
+ *  Nemo is free software; you can redistribute it and/or
  *  modify it under the terms of the GNU General Public License as
  *  published by the Free Software Foundation; either version 2 of the
  *  License, or (at your option) any later version.
  *
- *  Nautilus is distributed in the hope that it will be useful,
+ *  Nemo is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
  *  General Public License for more details.
@@ -25,19 +25,19 @@
  *
  */
 
-#ifndef NAUTILUS_WINDOW_PRIVATE_H
-#define NAUTILUS_WINDOW_PRIVATE_H
+#ifndef NEMO_WINDOW_PRIVATE_H
+#define NEMO_WINDOW_PRIVATE_H
 
-#include "nautilus-window.h"
-#include "nautilus-window-slot.h"
-#include "nautilus-window-pane.h"
-#include "nautilus-navigation-state.h"
-#include "nautilus-bookmark-list.h"
+#include "nemo-window.h"
+#include "nemo-window-slot.h"
+#include "nemo-window-pane.h"
+#include "nemo-navigation-state.h"
+#include "nemo-bookmark-list.h"
 
-#include <libnautilus-private/nautilus-directory.h>
+#include <libnemo-private/nemo-directory.h>
 
 /* FIXME bugzilla.gnome.org 42575: Migrate more fields into here. */
-struct NautilusWindowDetails
+struct NemoWindowDetails
 {
         GtkWidget *statusbar;
         GtkWidget *menubar;
@@ -52,9 +52,9 @@ struct NautilusWindowDetails
 
         GtkActionGroup *bookmarks_action_group;
         guint bookmarks_merge_id;
-        NautilusBookmarkList *bookmark_list;
+        NemoBookmarkList *bookmark_list;
 
-	NautilusWindowShowHiddenFilesMode show_hidden_files_mode;
+	NemoWindowShowHiddenFilesMode show_hidden_files_mode;
 
 	/* View As menu */
 	GList *short_list_viewers;
@@ -77,10 +77,10 @@ struct NautilusWindowDetails
          * Both of them may never be NULL.
          */
         GList *panes;
-        NautilusWindowPane *active_pane;
+        NemoWindowPane *active_pane;
 
         GtkWidget *content_paned;
-        NautilusNavigationState *nav_state;
+        NemoNavigationState *nav_state;
         
         /* Side Pane */
         int side_pane_width;
@@ -105,63 +105,63 @@ struct NautilusWindowDetails
 };
 
 /* window geometry */
-/* Min values are very small, and a Nautilus window at this tiny size is *almost*
+/* Min values are very small, and a Nemo window at this tiny size is *almost*
  * completely unusable. However, if all the extra bits (sidebar, location bar, etc)
  * are turned off, you can see an icon or two at this size. See bug 5946.
  */
 
-#define NAUTILUS_WINDOW_MIN_WIDTH		200
-#define NAUTILUS_WINDOW_MIN_HEIGHT		200
-#define NAUTILUS_WINDOW_DEFAULT_WIDTH		800
-#define NAUTILUS_WINDOW_DEFAULT_HEIGHT		550
+#define NEMO_WINDOW_MIN_WIDTH		200
+#define NEMO_WINDOW_MIN_HEIGHT		200
+#define NEMO_WINDOW_DEFAULT_WIDTH		800
+#define NEMO_WINDOW_DEFAULT_HEIGHT		550
 
-typedef void (*NautilusBookmarkFailedCallback) (NautilusWindow *window,
-                                                NautilusBookmark *bookmark);
+typedef void (*NemoBookmarkFailedCallback) (NemoWindow *window,
+                                                NemoBookmark *bookmark);
 
-void               nautilus_window_load_view_as_menus                    (NautilusWindow    *window);
-void               nautilus_window_load_extension_menus                  (NautilusWindow    *window);
-NautilusWindowPane *nautilus_window_get_next_pane                        (NautilusWindow *window);
-void               nautilus_menus_append_bookmark_to_menu                (NautilusWindow    *window, 
-                                                                          NautilusBookmark  *bookmark, 
+void               nemo_window_load_view_as_menus                    (NemoWindow    *window);
+void               nemo_window_load_extension_menus                  (NemoWindow    *window);
+NemoWindowPane *nemo_window_get_next_pane                        (NemoWindow *window);
+void               nemo_menus_append_bookmark_to_menu                (NemoWindow    *window, 
+                                                                          NemoBookmark  *bookmark, 
                                                                           const char        *parent_path,
                                                                           const char        *parent_id,
                                                                           guint              index_in_parent,
                                                                           GtkActionGroup    *action_group,
                                                                           guint              merge_id,
                                                                           GCallback          refresh_callback,
-                                                                          NautilusBookmarkFailedCallback failed_callback);
+                                                                          NemoBookmarkFailedCallback failed_callback);
 
-NautilusWindowSlot *nautilus_window_get_slot_for_view                    (NautilusWindow *window,
-									  NautilusView   *view);
+NemoWindowSlot *nemo_window_get_slot_for_view                    (NemoWindow *window,
+									  NemoView   *view);
 
-void                 nautilus_window_set_active_slot                     (NautilusWindow    *window,
-									  NautilusWindowSlot *slot);
-void                 nautilus_window_set_active_pane                     (NautilusWindow *window,
-                                                                          NautilusWindowPane *new_pane);
-NautilusWindowPane * nautilus_window_get_active_pane                     (NautilusWindow *window);
+void                 nemo_window_set_active_slot                     (NemoWindow    *window,
+									  NemoWindowSlot *slot);
+void                 nemo_window_set_active_pane                     (NemoWindow *window,
+                                                                          NemoWindowPane *new_pane);
+NemoWindowPane * nemo_window_get_active_pane                     (NemoWindow *window);
 
 
 /* sync window GUI with current slot. Used when changing slots,
  * and when updating the slot state.
  */
-void nautilus_window_sync_status           (NautilusWindow *window);
-void nautilus_window_sync_allow_stop       (NautilusWindow *window,
-					    NautilusWindowSlot *slot);
-void nautilus_window_sync_title            (NautilusWindow *window,
-					    NautilusWindowSlot *slot);
-void nautilus_window_sync_zoom_widgets     (NautilusWindow *window);
-void nautilus_window_sync_up_button        (NautilusWindow *window);
+void nemo_window_sync_status           (NemoWindow *window);
+void nemo_window_sync_allow_stop       (NemoWindow *window,
+					    NemoWindowSlot *slot);
+void nemo_window_sync_title            (NemoWindow *window,
+					    NemoWindowSlot *slot);
+void nemo_window_sync_zoom_widgets     (NemoWindow *window);
+void nemo_window_sync_up_button        (NemoWindow *window);
 
 /* window menus */
-GtkActionGroup *nautilus_window_create_toolbar_action_group (NautilusWindow *window);
-void               nautilus_window_initialize_actions                    (NautilusWindow    *window);
-void               nautilus_window_initialize_menus                      (NautilusWindow    *window);
-void               nautilus_window_finalize_menus                        (NautilusWindow    *window);
+GtkActionGroup *nemo_window_create_toolbar_action_group (NemoWindow *window);
+void               nemo_window_initialize_actions                    (NemoWindow    *window);
+void               nemo_window_initialize_menus                      (NemoWindow    *window);
+void               nemo_window_finalize_menus                        (NemoWindow    *window);
 
-void               nautilus_window_update_show_hide_menu_items           (NautilusWindow     *window);
+void               nemo_window_update_show_hide_menu_items           (NemoWindow     *window);
 
 /* window toolbar */
-void               nautilus_window_close_pane                            (NautilusWindow    *window,
-                                                                          NautilusWindowPane *pane);
+void               nemo_window_close_pane                            (NemoWindow    *window,
+                                                                          NemoWindowPane *pane);
 
-#endif /* NAUTILUS_WINDOW_PRIVATE_H */
+#endif /* NEMO_WINDOW_PRIVATE_H */

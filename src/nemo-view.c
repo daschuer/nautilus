@@ -1,6 +1,6 @@
 /* -*- Mode: C; indent-tabs-mode: t; c-basic-offset: 8; tab-width: 8 -*- */
 
-/* nautilus-view.c
+/* nemo-view.c
  *
  * Copyright (C) 1999, 2000  Free Software Foundation
  * Copyright (C) 2000, 2001  Eazel, Inc.
@@ -29,15 +29,15 @@
 
 #include <config.h>
 
-#include "nautilus-view.h"
+#include "nemo-view.h"
 
-#include "nautilus-actions.h"
-#include "nautilus-desktop-icon-view.h"
-#include "nautilus-error-reporting.h"
-#include "nautilus-list-view.h"
-#include "nautilus-mime-actions.h"
-#include "nautilus-previewer.h"
-#include "nautilus-properties-window.h"
+#include "nemo-actions.h"
+#include "nemo-desktop-icon-view.h"
+#include "nemo-error-reporting.h"
+#include "nemo-list-view.h"
+#include "nemo-mime-actions.h"
+#include "nemo-previewer.h"
+#include "nemo-properties-window.h"
 
 #include <gdk/gdkx.h>
 #include <gdk/gdkkeysyms.h>
@@ -54,34 +54,34 @@
 #include <eel/eel-string.h>
 #include <eel/eel-vfs-extensions.h>
 
-#include <libnautilus-extension/nautilus-menu-provider.h>
-#include <libnautilus-private/nautilus-clipboard.h>
-#include <libnautilus-private/nautilus-clipboard-monitor.h>
-#include <libnautilus-private/nautilus-desktop-icon-file.h>
-#include <libnautilus-private/nautilus-desktop-directory.h>
-#include <libnautilus-private/nautilus-search-directory.h>
-#include <libnautilus-private/nautilus-directory.h>
-#include <libnautilus-private/nautilus-dnd.h>
-#include <libnautilus-private/nautilus-file-attributes.h>
-#include <libnautilus-private/nautilus-file-changes-queue.h>
-#include <libnautilus-private/nautilus-file-dnd.h>
-#include <libnautilus-private/nautilus-file-operations.h>
-#include <libnautilus-private/nautilus-file-utilities.h>
-#include <libnautilus-private/nautilus-file-private.h>
-#include <libnautilus-private/nautilus-global-preferences.h>
-#include <libnautilus-private/nautilus-link.h>
-#include <libnautilus-private/nautilus-metadata.h>
-#include <libnautilus-private/nautilus-recent.h>
-#include <libnautilus-private/nautilus-module.h>
-#include <libnautilus-private/nautilus-program-choosing.h>
-#include <libnautilus-private/nautilus-trash-monitor.h>
-#include <libnautilus-private/nautilus-ui-utilities.h>
-#include <libnautilus-private/nautilus-signaller.h>
-#include <libnautilus-private/nautilus-icon-names.h>
-#include <libnautilus-private/nautilus-file-undo-manager.h>
+#include <libnemo-extension/nemo-menu-provider.h>
+#include <libnemo-private/nemo-clipboard.h>
+#include <libnemo-private/nemo-clipboard-monitor.h>
+#include <libnemo-private/nemo-desktop-icon-file.h>
+#include <libnemo-private/nemo-desktop-directory.h>
+#include <libnemo-private/nemo-search-directory.h>
+#include <libnemo-private/nemo-directory.h>
+#include <libnemo-private/nemo-dnd.h>
+#include <libnemo-private/nemo-file-attributes.h>
+#include <libnemo-private/nemo-file-changes-queue.h>
+#include <libnemo-private/nemo-file-dnd.h>
+#include <libnemo-private/nemo-file-operations.h>
+#include <libnemo-private/nemo-file-utilities.h>
+#include <libnemo-private/nemo-file-private.h>
+#include <libnemo-private/nemo-global-preferences.h>
+#include <libnemo-private/nemo-link.h>
+#include <libnemo-private/nemo-metadata.h>
+#include <libnemo-private/nemo-recent.h>
+#include <libnemo-private/nemo-module.h>
+#include <libnemo-private/nemo-program-choosing.h>
+#include <libnemo-private/nemo-trash-monitor.h>
+#include <libnemo-private/nemo-ui-utilities.h>
+#include <libnemo-private/nemo-signaller.h>
+#include <libnemo-private/nemo-icon-names.h>
+#include <libnemo-private/nemo-file-undo-manager.h>
 
-#define DEBUG_FLAG NAUTILUS_DEBUG_DIRECTORY_VIEW
-#include <libnautilus-private/nautilus-debug.h>
+#define DEBUG_FLAG NEMO_DEBUG_DIRECTORY_VIEW
+#include <libnemo-private/nemo-debug.h>
 
 /* Minimum starting update inverval */
 #define UPDATE_INTERVAL_MIN 100
@@ -101,25 +101,25 @@
 
 #define MAX_QUEUED_UPDATES 500
 
-#define NAUTILUS_VIEW_MENU_PATH_APPLICATIONS_SUBMENU_PLACEHOLDER  "/MenuBar/File/Open Placeholder/Open With/Applications Placeholder"
-#define NAUTILUS_VIEW_MENU_PATH_APPLICATIONS_PLACEHOLDER    	  "/MenuBar/File/Open Placeholder/Applications Placeholder"
-#define NAUTILUS_VIEW_MENU_PATH_SCRIPTS_PLACEHOLDER               "/MenuBar/File/Open Placeholder/Scripts/Scripts Placeholder"
-#define NAUTILUS_VIEW_MENU_PATH_EXTENSION_ACTIONS_PLACEHOLDER     "/MenuBar/Edit/Extension Actions"
-#define NAUTILUS_VIEW_MENU_PATH_NEW_DOCUMENTS_PLACEHOLDER  	  "/MenuBar/File/New Items Placeholder/New Documents/New Documents Placeholder"
-#define NAUTILUS_VIEW_MENU_PATH_OPEN				  "/MenuBar/File/Open Placeholder/Open"
+#define NEMO_VIEW_MENU_PATH_APPLICATIONS_SUBMENU_PLACEHOLDER  "/MenuBar/File/Open Placeholder/Open With/Applications Placeholder"
+#define NEMO_VIEW_MENU_PATH_APPLICATIONS_PLACEHOLDER    	  "/MenuBar/File/Open Placeholder/Applications Placeholder"
+#define NEMO_VIEW_MENU_PATH_SCRIPTS_PLACEHOLDER               "/MenuBar/File/Open Placeholder/Scripts/Scripts Placeholder"
+#define NEMO_VIEW_MENU_PATH_EXTENSION_ACTIONS_PLACEHOLDER     "/MenuBar/Edit/Extension Actions"
+#define NEMO_VIEW_MENU_PATH_NEW_DOCUMENTS_PLACEHOLDER  	  "/MenuBar/File/New Items Placeholder/New Documents/New Documents Placeholder"
+#define NEMO_VIEW_MENU_PATH_OPEN				  "/MenuBar/File/Open Placeholder/Open"
 
-#define NAUTILUS_VIEW_POPUP_PATH_SELECTION			  "/selection"
-#define NAUTILUS_VIEW_POPUP_PATH_APPLICATIONS_SUBMENU_PLACEHOLDER "/selection/Open Placeholder/Open With/Applications Placeholder"
-#define NAUTILUS_VIEW_POPUP_PATH_APPLICATIONS_PLACEHOLDER    	  "/selection/Open Placeholder/Applications Placeholder"
-#define NAUTILUS_VIEW_POPUP_PATH_SCRIPTS_PLACEHOLDER    	  "/selection/Open Placeholder/Scripts/Scripts Placeholder"
-#define NAUTILUS_VIEW_POPUP_PATH_EXTENSION_ACTIONS		  "/selection/Extension Actions"
-#define NAUTILUS_VIEW_POPUP_PATH_OPEN				  "/selection/Open Placeholder/Open"
+#define NEMO_VIEW_POPUP_PATH_SELECTION			  "/selection"
+#define NEMO_VIEW_POPUP_PATH_APPLICATIONS_SUBMENU_PLACEHOLDER "/selection/Open Placeholder/Open With/Applications Placeholder"
+#define NEMO_VIEW_POPUP_PATH_APPLICATIONS_PLACEHOLDER    	  "/selection/Open Placeholder/Applications Placeholder"
+#define NEMO_VIEW_POPUP_PATH_SCRIPTS_PLACEHOLDER    	  "/selection/Open Placeholder/Scripts/Scripts Placeholder"
+#define NEMO_VIEW_POPUP_PATH_EXTENSION_ACTIONS		  "/selection/Extension Actions"
+#define NEMO_VIEW_POPUP_PATH_OPEN				  "/selection/Open Placeholder/Open"
 
-#define NAUTILUS_VIEW_POPUP_PATH_BACKGROUND			  "/background"
-#define NAUTILUS_VIEW_POPUP_PATH_BACKGROUND_SCRIPTS_PLACEHOLDER	  "/background/Before Zoom Items/New Object Items/Scripts/Scripts Placeholder"
-#define NAUTILUS_VIEW_POPUP_PATH_BACKGROUND_NEW_DOCUMENTS_PLACEHOLDER "/background/Before Zoom Items/New Object Items/New Documents/New Documents Placeholder"
+#define NEMO_VIEW_POPUP_PATH_BACKGROUND			  "/background"
+#define NEMO_VIEW_POPUP_PATH_BACKGROUND_SCRIPTS_PLACEHOLDER	  "/background/Before Zoom Items/New Object Items/Scripts/Scripts Placeholder"
+#define NEMO_VIEW_POPUP_PATH_BACKGROUND_NEW_DOCUMENTS_PLACEHOLDER "/background/Before Zoom Items/New Object Items/New Documents/New Documents Placeholder"
 
-#define NAUTILUS_VIEW_POPUP_PATH_LOCATION			  "/location"
+#define NEMO_VIEW_POPUP_PATH_LOCATION			  "/location"
 
 #define MAX_MENU_LEVELS 5
 #define TEMPLATE_LIMIT 30
@@ -156,13 +156,13 @@ static GdkAtom copied_files_atom;
 static char *scripts_directory_uri = NULL;
 static int scripts_directory_uri_length;
 
-struct NautilusViewDetails
+struct NemoViewDetails
 {
-	NautilusWindow *window;
-	NautilusWindowSlot *slot;
-	NautilusDirectory *model;
-	NautilusFile *directory_as_file;
-	NautilusFile *location_popup_directory_as_file;
+	NemoWindow *window;
+	NemoWindowSlot *slot;
+	NemoDirectory *model;
+	NemoFile *directory_as_file;
+	NemoFile *location_popup_directory_as_file;
 	GdkEventButton *location_popup_event;
 	GtkActionGroup *dir_action_group;
 	guint dir_merge_id;
@@ -213,7 +213,7 @@ struct NautilusViewDetails
 	gboolean active;
 
 	/* loading indicates whether this view has begun loading a directory.
-	 * This flag should need not be set inside subclasses. NautilusView automatically
+	 * This flag should need not be set inside subclasses. NemoView automatically
 	 * sets 'loading' to TRUE before it begins loading a directory's contents and to FALSE
 	 * after it finishes loading the directory and its view.
 	 */
@@ -259,92 +259,92 @@ struct NautilusViewDetails
 };
 
 typedef struct {
-	NautilusFile *file;
-	NautilusDirectory *directory;
+	NemoFile *file;
+	NemoDirectory *directory;
 } FileAndDirectory;
 
 /* forward declarations */
 
 static gboolean display_selection_info_idle_callback           (gpointer              data);
-static void     nautilus_view_duplicate_selection              (NautilusView      *view,
+static void     nemo_view_duplicate_selection              (NemoView      *view,
 							        GList                *files,
 							        GArray               *item_locations);
-static void     nautilus_view_create_links_for_files           (NautilusView      *view,
+static void     nemo_view_create_links_for_files           (NemoView      *view,
 							        GList                *files,
 							        GArray               *item_locations);
 static void     trash_or_delete_files                          (GtkWindow            *parent_window,
 								const GList          *files,
 								gboolean              delete_if_all_already_in_trash,
-								NautilusView      *view);
-static void     load_directory                                 (NautilusView      *view,
-								NautilusDirectory    *directory);
-static void     nautilus_view_merge_menus                      (NautilusView      *view);
-static void     nautilus_view_unmerge_menus                    (NautilusView      *view);
-static void     nautilus_view_init_show_hidden_files           (NautilusView      *view);
-static void     clipboard_changed_callback                     (NautilusClipboardMonitor *monitor,
-								NautilusView      *view);
+								NemoView      *view);
+static void     load_directory                                 (NemoView      *view,
+								NemoDirectory    *directory);
+static void     nemo_view_merge_menus                      (NemoView      *view);
+static void     nemo_view_unmerge_menus                    (NemoView      *view);
+static void     nemo_view_init_show_hidden_files           (NemoView      *view);
+static void     clipboard_changed_callback                     (NemoClipboardMonitor *monitor,
+								NemoView      *view);
 static void     open_one_in_new_window                         (gpointer              data,
 								gpointer              callback_data);
-static void     schedule_update_menus                          (NautilusView      *view);
+static void     schedule_update_menus                          (NemoView      *view);
 static void     schedule_update_menus_callback                 (gpointer              callback_data);
-static void     remove_update_menus_timeout_callback           (NautilusView      *view);
-static void     schedule_update_status                          (NautilusView      *view);
-static void     remove_update_status_idle_callback             (NautilusView *view); 
-static void     reset_update_interval                          (NautilusView      *view);
-static void     schedule_idle_display_of_pending_files         (NautilusView      *view);
-static void     unschedule_display_of_pending_files            (NautilusView      *view);
-static void     disconnect_model_handlers                      (NautilusView      *view);
-static void     metadata_for_directory_as_file_ready_callback  (NautilusFile         *file,
+static void     remove_update_menus_timeout_callback           (NemoView      *view);
+static void     schedule_update_status                          (NemoView      *view);
+static void     remove_update_status_idle_callback             (NemoView *view); 
+static void     reset_update_interval                          (NemoView      *view);
+static void     schedule_idle_display_of_pending_files         (NemoView      *view);
+static void     unschedule_display_of_pending_files            (NemoView      *view);
+static void     disconnect_model_handlers                      (NemoView      *view);
+static void     metadata_for_directory_as_file_ready_callback  (NemoFile         *file,
 								gpointer              callback_data);
-static void     metadata_for_files_in_directory_ready_callback (NautilusDirectory    *directory,
+static void     metadata_for_files_in_directory_ready_callback (NemoDirectory    *directory,
 								GList                *files,
 								gpointer              callback_data);
-static void     nautilus_view_trash_state_changed_callback     (NautilusTrashMonitor *trash,
+static void     nemo_view_trash_state_changed_callback     (NemoTrashMonitor *trash,
 							        gboolean              state,
 							        gpointer              callback_data);
-static void     nautilus_view_select_file                      (NautilusView      *view,
-							        NautilusFile         *file);
+static void     nemo_view_select_file                      (NemoView      *view,
+							        NemoFile         *file);
 
-static void     update_templates_directory                     (NautilusView *view);
-static void     user_dirs_changed                              (NautilusView *view);
+static void     update_templates_directory                     (NemoView *view);
+static void     user_dirs_changed                              (NemoView *view);
 
 static gboolean file_list_all_are_folders                      (GList *file_list);
 
-static void unschedule_pop_up_location_context_menu (NautilusView *view);
+static void unschedule_pop_up_location_context_menu (NemoView *view);
 
-G_DEFINE_TYPE (NautilusView, nautilus_view, GTK_TYPE_SCROLLED_WINDOW);
-#define parent_class nautilus_view_parent_class
+G_DEFINE_TYPE (NemoView, nemo_view, GTK_TYPE_SCROLLED_WINDOW);
+#define parent_class nemo_view_parent_class
 
 /* virtual methods (public and non-public) */
 
 /**
- * nautilus_view_merge_menus:
+ * nemo_view_merge_menus:
  * 
  * Add this view's menus to the window's menu bar.
- * @view: NautilusView in question.
+ * @view: NemoView in question.
  */
 static void
-nautilus_view_merge_menus (NautilusView *view)
+nemo_view_merge_menus (NemoView *view)
 {
-	g_return_if_fail (NAUTILUS_IS_VIEW (view));
+	g_return_if_fail (NEMO_IS_VIEW (view));
 
-	NAUTILUS_VIEW_CLASS (G_OBJECT_GET_CLASS (view))->merge_menus (view);
+	NEMO_VIEW_CLASS (G_OBJECT_GET_CLASS (view))->merge_menus (view);
 }
 
 static void
-nautilus_view_unmerge_menus (NautilusView *view)
+nemo_view_unmerge_menus (NemoView *view)
 {
-	g_return_if_fail (NAUTILUS_IS_VIEW (view));
+	g_return_if_fail (NEMO_IS_VIEW (view));
 
-	NAUTILUS_VIEW_CLASS (G_OBJECT_GET_CLASS (view))->unmerge_menus (view);}
+	NEMO_VIEW_CLASS (G_OBJECT_GET_CLASS (view))->unmerge_menus (view);}
 
 static char *
-real_get_backing_uri (NautilusView *view)
+real_get_backing_uri (NemoView *view)
 {
-	NautilusDirectory *directory;
+	NemoDirectory *directory;
 	char *uri;
        
-	g_return_val_if_fail (NAUTILUS_IS_VIEW (view), NULL);
+	g_return_val_if_fail (NEMO_IS_VIEW (view), NULL);
 
 	if (view->details->model == NULL) {
 		return NULL;
@@ -352,342 +352,342 @@ real_get_backing_uri (NautilusView *view)
        
 	directory = view->details->model;
        
-	if (NAUTILUS_IS_DESKTOP_DIRECTORY (directory)) {
-		directory = nautilus_desktop_directory_get_real_directory (NAUTILUS_DESKTOP_DIRECTORY (directory));
+	if (NEMO_IS_DESKTOP_DIRECTORY (directory)) {
+		directory = nemo_desktop_directory_get_real_directory (NEMO_DESKTOP_DIRECTORY (directory));
 	} else {
-		nautilus_directory_ref (directory);
+		nemo_directory_ref (directory);
 	}
        
-	uri = nautilus_directory_get_uri (directory);
+	uri = nemo_directory_get_uri (directory);
 
-	nautilus_directory_unref (directory);
+	nemo_directory_unref (directory);
 
 	return uri;
 }
 
 /**
  *
- * nautilus_view_get_backing_uri:
+ * nemo_view_get_backing_uri:
  *
  * Returns the URI for the target location of new directory, new file, new
  * link and paste operations.
  */
 
 char *
-nautilus_view_get_backing_uri (NautilusView *view)
+nemo_view_get_backing_uri (NemoView *view)
 {
-	g_return_val_if_fail (NAUTILUS_IS_VIEW (view), NULL);
+	g_return_val_if_fail (NEMO_IS_VIEW (view), NULL);
 
-	return NAUTILUS_VIEW_CLASS (G_OBJECT_GET_CLASS (view))->get_backing_uri (view);
+	return NEMO_VIEW_CLASS (G_OBJECT_GET_CLASS (view))->get_backing_uri (view);
 }
 
 /**
- * nautilus_view_select_all:
+ * nemo_view_select_all:
  *
  * select all the items in the view
  * 
  **/
 static void
-nautilus_view_select_all (NautilusView *view)
+nemo_view_select_all (NemoView *view)
 {
-	g_return_if_fail (NAUTILUS_IS_VIEW (view));
+	g_return_if_fail (NEMO_IS_VIEW (view));
 
-	NAUTILUS_VIEW_CLASS (G_OBJECT_GET_CLASS (view))->select_all (view);
+	NEMO_VIEW_CLASS (G_OBJECT_GET_CLASS (view))->select_all (view);
 }
 
 static void
-nautilus_view_call_set_selection (NautilusView *view, GList *selection)
+nemo_view_call_set_selection (NemoView *view, GList *selection)
 {
-	g_return_if_fail (NAUTILUS_IS_VIEW (view));
+	g_return_if_fail (NEMO_IS_VIEW (view));
 
-	NAUTILUS_VIEW_CLASS (G_OBJECT_GET_CLASS (view))->set_selection (view, selection);
+	NEMO_VIEW_CLASS (G_OBJECT_GET_CLASS (view))->set_selection (view, selection);
 }
 
 static GList *
-nautilus_view_get_selection_for_file_transfer (NautilusView *view)
+nemo_view_get_selection_for_file_transfer (NemoView *view)
 {
-	g_return_val_if_fail (NAUTILUS_IS_VIEW (view), NULL);
+	g_return_val_if_fail (NEMO_IS_VIEW (view), NULL);
 
-	return NAUTILUS_VIEW_CLASS (G_OBJECT_GET_CLASS (view))->get_selection_for_file_transfer (view);
+	return NEMO_VIEW_CLASS (G_OBJECT_GET_CLASS (view))->get_selection_for_file_transfer (view);
 }
 
 /**
- * nautilus_view_get_selected_icon_locations:
+ * nemo_view_get_selected_icon_locations:
  *
  * return an array of locations of selected icons if available
  * Return value: GArray of GdkPoints
  * 
  **/
 static GArray *
-nautilus_view_get_selected_icon_locations (NautilusView *view)
+nemo_view_get_selected_icon_locations (NemoView *view)
 {
-	g_return_val_if_fail (NAUTILUS_IS_VIEW (view), NULL);
+	g_return_val_if_fail (NEMO_IS_VIEW (view), NULL);
 
-	return NAUTILUS_VIEW_CLASS (G_OBJECT_GET_CLASS (view))->get_selected_icon_locations (view);
+	return NEMO_VIEW_CLASS (G_OBJECT_GET_CLASS (view))->get_selected_icon_locations (view);
 }
 
 static void
-nautilus_view_invert_selection (NautilusView *view)
+nemo_view_invert_selection (NemoView *view)
 {
-	g_return_if_fail (NAUTILUS_IS_VIEW (view));
+	g_return_if_fail (NEMO_IS_VIEW (view));
 
-	NAUTILUS_VIEW_CLASS (G_OBJECT_GET_CLASS (view))->invert_selection (view);
+	NEMO_VIEW_CLASS (G_OBJECT_GET_CLASS (view))->invert_selection (view);
 }
 
 /**
- * nautilus_view_reveal_selection:
+ * nemo_view_reveal_selection:
  *
  * Scroll as necessary to reveal the selected items.
  **/
 static void
-nautilus_view_reveal_selection (NautilusView *view)
+nemo_view_reveal_selection (NemoView *view)
 {
-	g_return_if_fail (NAUTILUS_IS_VIEW (view));
+	g_return_if_fail (NEMO_IS_VIEW (view));
 
-	NAUTILUS_VIEW_CLASS (G_OBJECT_GET_CLASS (view))->reveal_selection (view);
+	NEMO_VIEW_CLASS (G_OBJECT_GET_CLASS (view))->reveal_selection (view);
 }
 
 /**
- * nautilus_view_reset_to_defaults:
+ * nemo_view_reset_to_defaults:
  *
  * set sorting order, zoom level, etc. to match defaults
  * 
  **/
 static void
-nautilus_view_reset_to_defaults (NautilusView *view)
+nemo_view_reset_to_defaults (NemoView *view)
 {
-	NautilusWindowShowHiddenFilesMode mode;
+	NemoWindowShowHiddenFilesMode mode;
 
-	g_return_if_fail (NAUTILUS_IS_VIEW (view));
+	g_return_if_fail (NEMO_IS_VIEW (view));
 
-	NAUTILUS_VIEW_CLASS (G_OBJECT_GET_CLASS (view))->reset_to_defaults (view);
+	NEMO_VIEW_CLASS (G_OBJECT_GET_CLASS (view))->reset_to_defaults (view);
 
-	mode = nautilus_window_get_hidden_files_mode (view->details->window);
-	if (mode != NAUTILUS_WINDOW_SHOW_HIDDEN_FILES_DEFAULT) {
-		nautilus_window_set_hidden_files_mode (view->details->window,
-						       NAUTILUS_WINDOW_SHOW_HIDDEN_FILES_DEFAULT);
+	mode = nemo_window_get_hidden_files_mode (view->details->window);
+	if (mode != NEMO_WINDOW_SHOW_HIDDEN_FILES_DEFAULT) {
+		nemo_window_set_hidden_files_mode (view->details->window,
+						       NEMO_WINDOW_SHOW_HIDDEN_FILES_DEFAULT);
 	}
 }
 
 static gboolean
-nautilus_view_using_manual_layout (NautilusView  *view)
+nemo_view_using_manual_layout (NemoView  *view)
 {
-	g_return_val_if_fail (NAUTILUS_IS_VIEW (view), FALSE);
+	g_return_val_if_fail (NEMO_IS_VIEW (view), FALSE);
 
-	return 	NAUTILUS_VIEW_CLASS (G_OBJECT_GET_CLASS (view))->using_manual_layout (view);
+	return 	NEMO_VIEW_CLASS (G_OBJECT_GET_CLASS (view))->using_manual_layout (view);
 }
 
 static guint
-nautilus_view_get_item_count (NautilusView *view)
+nemo_view_get_item_count (NemoView *view)
 {
-	g_return_val_if_fail (NAUTILUS_IS_VIEW (view), 0);
+	g_return_val_if_fail (NEMO_IS_VIEW (view), 0);
 
-	return 	NAUTILUS_VIEW_CLASS (G_OBJECT_GET_CLASS (view))->get_item_count (view);
+	return 	NEMO_VIEW_CLASS (G_OBJECT_GET_CLASS (view))->get_item_count (view);
 }
 
 /**
- * nautilus_view_can_rename_file
+ * nemo_view_can_rename_file
  *
  * Determine whether a file can be renamed.
- * @file: A NautilusFile
+ * @file: A NemoFile
  * 
  * Return value: TRUE if @file can be renamed, FALSE otherwise.
  * 
  **/
 static gboolean
-nautilus_view_can_rename_file (NautilusView *view, NautilusFile *file)
+nemo_view_can_rename_file (NemoView *view, NemoFile *file)
 {
-	return 	NAUTILUS_VIEW_CLASS (G_OBJECT_GET_CLASS (view))->can_rename_file (view, file);
+	return 	NEMO_VIEW_CLASS (G_OBJECT_GET_CLASS (view))->can_rename_file (view, file);
 }
 
 static gboolean
-nautilus_view_is_read_only (NautilusView *view)
+nemo_view_is_read_only (NemoView *view)
 {
-	g_return_val_if_fail (NAUTILUS_IS_VIEW (view), FALSE);
+	g_return_val_if_fail (NEMO_IS_VIEW (view), FALSE);
 
-	return 	NAUTILUS_VIEW_CLASS (G_OBJECT_GET_CLASS (view))->is_read_only (view);
+	return 	NEMO_VIEW_CLASS (G_OBJECT_GET_CLASS (view))->is_read_only (view);
 }
 
 static gboolean
-showing_trash_directory (NautilusView *view)
+showing_trash_directory (NemoView *view)
 {
-	NautilusFile *file;
+	NemoFile *file;
 
-	file = nautilus_view_get_directory_as_file (view);
+	file = nemo_view_get_directory_as_file (view);
 	if (file != NULL) {
-		return nautilus_file_is_in_trash (file);
+		return nemo_file_is_in_trash (file);
 	}
 	return FALSE;
 }
 
 static gboolean
-nautilus_view_supports_creating_files (NautilusView *view)
+nemo_view_supports_creating_files (NemoView *view)
 {
-	g_return_val_if_fail (NAUTILUS_IS_VIEW (view), FALSE);
+	g_return_val_if_fail (NEMO_IS_VIEW (view), FALSE);
 
-	return !nautilus_view_is_read_only (view) && !showing_trash_directory (view);
+	return !nemo_view_is_read_only (view) && !showing_trash_directory (view);
 }
 
 static gboolean
-nautilus_view_is_empty (NautilusView *view)
+nemo_view_is_empty (NemoView *view)
 {
-	g_return_val_if_fail (NAUTILUS_IS_VIEW (view), FALSE);
+	g_return_val_if_fail (NEMO_IS_VIEW (view), FALSE);
 
-	return 	NAUTILUS_VIEW_CLASS (G_OBJECT_GET_CLASS (view))->is_empty (view);
+	return 	NEMO_VIEW_CLASS (G_OBJECT_GET_CLASS (view))->is_empty (view);
 }
 
 /**
- * nautilus_view_bump_zoom_level:
+ * nemo_view_bump_zoom_level:
  *
  * bump the current zoom level by invoking the relevant subclass through the slot
  * 
  **/
 void
-nautilus_view_bump_zoom_level (NautilusView *view,
+nemo_view_bump_zoom_level (NemoView *view,
 			       int zoom_increment)
 {
-	g_return_if_fail (NAUTILUS_IS_VIEW (view));
+	g_return_if_fail (NEMO_IS_VIEW (view));
 
-	if (!nautilus_view_supports_zooming (view)) {
+	if (!nemo_view_supports_zooming (view)) {
 		return;
 	}
 
-	NAUTILUS_VIEW_CLASS (G_OBJECT_GET_CLASS (view))->bump_zoom_level (view, zoom_increment);
+	NEMO_VIEW_CLASS (G_OBJECT_GET_CLASS (view))->bump_zoom_level (view, zoom_increment);
 }
 
 /**
- * nautilus_view_zoom_to_level:
+ * nemo_view_zoom_to_level:
  *
  * Set the current zoom level by invoking the relevant subclass through the slot
  * 
  **/
 void
-nautilus_view_zoom_to_level (NautilusView *view,
-			     NautilusZoomLevel zoom_level)
+nemo_view_zoom_to_level (NemoView *view,
+			     NemoZoomLevel zoom_level)
 {
-	g_return_if_fail (NAUTILUS_IS_VIEW (view));
+	g_return_if_fail (NEMO_IS_VIEW (view));
 
-	if (!nautilus_view_supports_zooming (view)) {
+	if (!nemo_view_supports_zooming (view)) {
 		return;
 	}
 
-	NAUTILUS_VIEW_CLASS (G_OBJECT_GET_CLASS (view))->zoom_to_level (view, zoom_level);
+	NEMO_VIEW_CLASS (G_OBJECT_GET_CLASS (view))->zoom_to_level (view, zoom_level);
 }
 
-NautilusZoomLevel
-nautilus_view_get_zoom_level (NautilusView *view)
+NemoZoomLevel
+nemo_view_get_zoom_level (NemoView *view)
 {
-	g_return_val_if_fail (NAUTILUS_IS_VIEW (view), NAUTILUS_ZOOM_LEVEL_STANDARD);
+	g_return_val_if_fail (NEMO_IS_VIEW (view), NEMO_ZOOM_LEVEL_STANDARD);
 
-	if (!nautilus_view_supports_zooming (view)) {
-		return NAUTILUS_ZOOM_LEVEL_STANDARD;
+	if (!nemo_view_supports_zooming (view)) {
+		return NEMO_ZOOM_LEVEL_STANDARD;
 	}
 
-	return NAUTILUS_VIEW_CLASS (G_OBJECT_GET_CLASS (view))->get_zoom_level (view);
+	return NEMO_VIEW_CLASS (G_OBJECT_GET_CLASS (view))->get_zoom_level (view);
 }
 
 /**
- * nautilus_view_can_zoom_in:
+ * nemo_view_can_zoom_in:
  *
  * Determine whether the view can be zoomed any closer.
- * @view: The zoomable NautilusView.
+ * @view: The zoomable NemoView.
  * 
  * Return value: TRUE if @view can be zoomed any closer, FALSE otherwise.
  * 
  **/
 gboolean
-nautilus_view_can_zoom_in (NautilusView *view)
+nemo_view_can_zoom_in (NemoView *view)
 {
-	g_return_val_if_fail (NAUTILUS_IS_VIEW (view), FALSE);
+	g_return_val_if_fail (NEMO_IS_VIEW (view), FALSE);
 
-	if (!nautilus_view_supports_zooming (view)) {
+	if (!nemo_view_supports_zooming (view)) {
 		return FALSE;
 	}
 
-	return NAUTILUS_VIEW_CLASS (G_OBJECT_GET_CLASS (view))->can_zoom_in (view);
+	return NEMO_VIEW_CLASS (G_OBJECT_GET_CLASS (view))->can_zoom_in (view);
 }
 
 /**
- * nautilus_view_can_zoom_out:
+ * nemo_view_can_zoom_out:
  *
  * Determine whether the view can be zoomed any further away.
- * @view: The zoomable NautilusView.
+ * @view: The zoomable NemoView.
  * 
  * Return value: TRUE if @view can be zoomed any further away, FALSE otherwise.
  * 
  **/
 gboolean
-nautilus_view_can_zoom_out (NautilusView *view)
+nemo_view_can_zoom_out (NemoView *view)
 {
-	g_return_val_if_fail (NAUTILUS_IS_VIEW (view), FALSE);
+	g_return_val_if_fail (NEMO_IS_VIEW (view), FALSE);
 
-	if (!nautilus_view_supports_zooming (view)) {
+	if (!nemo_view_supports_zooming (view)) {
 		return FALSE;
 	}
 
-	return NAUTILUS_VIEW_CLASS (G_OBJECT_GET_CLASS (view))->can_zoom_out (view);
+	return NEMO_VIEW_CLASS (G_OBJECT_GET_CLASS (view))->can_zoom_out (view);
 }
 
 gboolean
-nautilus_view_supports_zooming (NautilusView *view)
+nemo_view_supports_zooming (NemoView *view)
 {
-	g_return_val_if_fail (NAUTILUS_IS_VIEW (view), FALSE);
+	g_return_val_if_fail (NEMO_IS_VIEW (view), FALSE);
 
 	return view->details->supports_zooming;
 }
 
 /**
- * nautilus_view_restore_default_zoom_level:
+ * nemo_view_restore_default_zoom_level:
  *
  * restore to the default zoom level by invoking the relevant subclass through the slot
  * 
  **/
 void
-nautilus_view_restore_default_zoom_level (NautilusView *view)
+nemo_view_restore_default_zoom_level (NemoView *view)
 {
-	g_return_if_fail (NAUTILUS_IS_VIEW (view));
+	g_return_if_fail (NEMO_IS_VIEW (view));
 
-	if (!nautilus_view_supports_zooming (view)) {
+	if (!nemo_view_supports_zooming (view)) {
 		return;
 	}
 
-	NAUTILUS_VIEW_CLASS (G_OBJECT_GET_CLASS (view))->restore_default_zoom_level (view);
+	NEMO_VIEW_CLASS (G_OBJECT_GET_CLASS (view))->restore_default_zoom_level (view);
 }
 
 const char *
-nautilus_view_get_view_id (NautilusView *view)
+nemo_view_get_view_id (NemoView *view)
 {
-	return NAUTILUS_VIEW_CLASS (G_OBJECT_GET_CLASS (view))->get_view_id (view);
+	return NEMO_VIEW_CLASS (G_OBJECT_GET_CLASS (view))->get_view_id (view);
 }
 
 char *
-nautilus_view_get_first_visible_file (NautilusView *view)
+nemo_view_get_first_visible_file (NemoView *view)
 {
-	return NAUTILUS_VIEW_CLASS (G_OBJECT_GET_CLASS (view))->get_first_visible_file (view);
+	return NEMO_VIEW_CLASS (G_OBJECT_GET_CLASS (view))->get_first_visible_file (view);
 }
 
 void
-nautilus_view_scroll_to_file (NautilusView *view,
+nemo_view_scroll_to_file (NemoView *view,
 			      const char *uri)
 {
-	NAUTILUS_VIEW_CLASS (G_OBJECT_GET_CLASS (view))->scroll_to_file (view, uri);
+	NEMO_VIEW_CLASS (G_OBJECT_GET_CLASS (view))->scroll_to_file (view, uri);
 }
 
 char **
-nautilus_view_get_emblem_names_to_exclude (NautilusView *view)
+nemo_view_get_emblem_names_to_exclude (NemoView *view)
 {
 	char **excludes;
 	int i;
 	
-	g_assert (NAUTILUS_IS_VIEW (view));
+	g_assert (NEMO_IS_VIEW (view));
 
 	excludes = g_new (char *, 3);
 	
 	i = 0;
-	excludes[i++] = g_strdup (NAUTILUS_FILE_EMBLEM_NAME_TRASH);
+	excludes[i++] = g_strdup (NEMO_FILE_EMBLEM_NAME_TRASH);
 
-	if (!nautilus_file_can_write (view->details->directory_as_file)) {
-		excludes[i++] = g_strdup (NAUTILUS_FILE_EMBLEM_NAME_CANT_WRITE);
+	if (!nemo_file_can_write (view->details->directory_as_file)) {
+		excludes[i++] = g_strdup (NEMO_FILE_EMBLEM_NAME_CANT_WRITE);
 	}
 
 	excludes[i++] = NULL;
@@ -696,41 +696,41 @@ nautilus_view_get_emblem_names_to_exclude (NautilusView *view)
 }
 
 /**
- * nautilus_view_get_selection:
+ * nemo_view_get_selection:
  *
- * Get a list of NautilusFile pointers that represents the
+ * Get a list of NemoFile pointers that represents the
  * currently-selected items in this view. Subclasses must override
  * the signal handler for the 'get_selection' signal. Callers are
  * responsible for g_free-ing the list (but not its data).
- * @view: NautilusView whose selected items are of interest.
+ * @view: NemoView whose selected items are of interest.
  * 
- * Return value: GList of NautilusFile pointers representing the selection.
+ * Return value: GList of NemoFile pointers representing the selection.
  * 
  **/
 GList *
-nautilus_view_get_selection (NautilusView *view)
+nemo_view_get_selection (NemoView *view)
 {
-	g_return_val_if_fail (NAUTILUS_IS_VIEW (view), NULL);
+	g_return_val_if_fail (NEMO_IS_VIEW (view), NULL);
 
-	return NAUTILUS_VIEW_CLASS (G_OBJECT_GET_CLASS (view))->get_selection (view);
+	return NEMO_VIEW_CLASS (G_OBJECT_GET_CLASS (view))->get_selection (view);
 }
 
 /**
- * nautilus_view_update_menus:
+ * nemo_view_update_menus:
  * 
  * Update the sensitivity and wording of dynamic menu items.
- * @view: NautilusView in question.
+ * @view: NemoView in question.
  */
 void
-nautilus_view_update_menus (NautilusView *view)
+nemo_view_update_menus (NemoView *view)
 {
-	g_return_if_fail (NAUTILUS_IS_VIEW (view));
+	g_return_if_fail (NEMO_IS_VIEW (view));
 
 	if (!view->details->active) {
 		return;
 	}
 
-	NAUTILUS_VIEW_CLASS (G_OBJECT_GET_CLASS (view))->update_menus (view);
+	NEMO_VIEW_CLASS (G_OBJECT_GET_CLASS (view))->update_menus (view);
 
 	view->details->menu_states_untrustworthy = FALSE;
 }
@@ -738,29 +738,29 @@ nautilus_view_update_menus (NautilusView *view)
 typedef struct {
 	GAppInfo *application;
 	GList *files;
-	NautilusView *directory_view;
+	NemoView *directory_view;
 } ApplicationLaunchParameters;
 
 typedef struct {
-	NautilusFile *file;
-	NautilusView *directory_view;
+	NemoFile *file;
+	NemoView *directory_view;
 } ScriptLaunchParameters;
 
 typedef struct {
-	NautilusFile *file;
-	NautilusView *directory_view;
+	NemoFile *file;
+	NemoView *directory_view;
 } CreateTemplateParameters;
 
 static ApplicationLaunchParameters *
 application_launch_parameters_new (GAppInfo *application,
 			      	   GList *files,
-			           NautilusView *directory_view)
+			           NemoView *directory_view)
 {
 	ApplicationLaunchParameters *result;
 
 	result = g_new0 (ApplicationLaunchParameters, 1);
 	result->application = g_object_ref (application);
-	result->files = nautilus_file_list_copy (files);
+	result->files = nemo_file_list_copy (files);
 
 	if (directory_view != NULL) {
 		g_object_ref (directory_view);
@@ -774,7 +774,7 @@ static void
 application_launch_parameters_free (ApplicationLaunchParameters *parameters)
 {
 	g_object_unref (parameters->application);
-	nautilus_file_list_free (parameters->files);
+	nemo_file_list_free (parameters->files);
 
 	if (parameters->directory_view != NULL) {
 		g_object_unref (parameters->directory_view);
@@ -792,14 +792,14 @@ file_and_directory_list_to_files (GList *fad_list)
 	res = NULL;
 	for (l = fad_list; l != NULL; l = l->next) {
 		fad = l->data;
-		res = g_list_prepend (res, nautilus_file_ref (fad->file));
+		res = g_list_prepend (res, nemo_file_ref (fad->file));
 	}
 	return g_list_reverse (res);
 }
 
 
 static GList *
-file_and_directory_list_from_files (NautilusDirectory *directory, GList *files)
+file_and_directory_list_from_files (NemoDirectory *directory, GList *files)
 {
 	GList *res, *l;
 	FileAndDirectory *fad;
@@ -807,8 +807,8 @@ file_and_directory_list_from_files (NautilusDirectory *directory, GList *files)
 	res = NULL;
 	for (l = files; l != NULL; l = l->next) {
 		fad = g_new0 (FileAndDirectory, 1);
-		fad->directory = nautilus_directory_ref (directory);
-		fad->file = nautilus_file_ref (l->data);
+		fad->directory = nemo_directory_ref (directory);
+		fad->file = nemo_file_ref (l->data);
 		res = g_list_prepend (res, fad);
 	}
 	return g_list_reverse (res);
@@ -817,8 +817,8 @@ file_and_directory_list_from_files (NautilusDirectory *directory, GList *files)
 static void
 file_and_directory_free (FileAndDirectory *fad)
 {
-	nautilus_directory_unref (fad->directory);
-	nautilus_file_unref (fad->file);
+	nemo_directory_unref (fad->directory);
+	nemo_file_unref (fad->file);
 	g_free (fad);
 }
 
@@ -860,15 +860,15 @@ file_and_directory_hash  (gconstpointer  v)
 
 
 static ScriptLaunchParameters *
-script_launch_parameters_new (NautilusFile *file,
-			      NautilusView *directory_view)
+script_launch_parameters_new (NemoFile *file,
+			      NemoView *directory_view)
 {
 	ScriptLaunchParameters *result;
 
 	result = g_new0 (ScriptLaunchParameters, 1);
 	g_object_ref (directory_view);
 	result->directory_view = directory_view;
-	nautilus_file_ref (file);
+	nemo_file_ref (file);
 	result->file = file;
 
 	return result;
@@ -878,20 +878,20 @@ static void
 script_launch_parameters_free (ScriptLaunchParameters *parameters)
 {
 	g_object_unref (parameters->directory_view);
-	nautilus_file_unref (parameters->file);
+	nemo_file_unref (parameters->file);
 	g_free (parameters);
 }			      
 
 static CreateTemplateParameters *
-create_template_parameters_new (NautilusFile *file,
-				NautilusView *directory_view)
+create_template_parameters_new (NemoFile *file,
+				NemoView *directory_view)
 {
 	CreateTemplateParameters *result;
 
 	result = g_new0 (CreateTemplateParameters, 1);
 	g_object_ref (directory_view);
 	result->directory_view = directory_view;
-	nautilus_file_ref (file);
+	nemo_file_ref (file);
 	result->file = file;
 
 	return result;
@@ -901,20 +901,20 @@ static void
 create_templates_parameters_free (CreateTemplateParameters *parameters)
 {
 	g_object_unref (parameters->directory_view);
-	nautilus_file_unref (parameters->file);
+	nemo_file_unref (parameters->file);
 	g_free (parameters);
 }			      
 
-NautilusWindow *
-nautilus_view_get_nautilus_window (NautilusView  *view)
+NemoWindow *
+nemo_view_get_nemo_window (NemoView  *view)
 {
 	g_assert (view->details->window != NULL);
 
 	return view->details->window;
 }
 
-NautilusWindowSlot *
-nautilus_view_get_nautilus_window_slot (NautilusView  *view)
+NemoWindowSlot *
+nemo_view_get_nemo_window_slot (NemoView  *view)
 {
 	g_assert (view->details->slot != NULL);
 
@@ -926,11 +926,11 @@ nautilus_view_get_nautilus_window_slot (NautilusView  *view)
  * GtkWindow cannot be determined. Primarily used for parenting dialogs.
  */
 static GtkWindow *
-nautilus_view_get_containing_window (NautilusView *view)
+nemo_view_get_containing_window (NemoView *view)
 {
 	GtkWidget *window;
 
-	g_assert (NAUTILUS_IS_VIEW (view));
+	g_assert (NEMO_IS_VIEW (view));
 	
 	window = gtk_widget_get_ancestor (GTK_WIDGET (view), GTK_TYPE_WINDOW);
 	if (window == NULL) {
@@ -941,7 +941,7 @@ nautilus_view_get_containing_window (NautilusView *view)
 }
 
 static gboolean
-nautilus_view_confirm_multiple (GtkWindow *parent_window,
+nemo_view_confirm_multiple (GtkWindow *parent_window,
 				int count,
 				gboolean tabs)
 {
@@ -974,7 +974,7 @@ nautilus_view_confirm_multiple (GtkWindow *parent_window,
 }
 
 static gboolean
-selection_contains_one_item_in_menu_callback (NautilusView *view, GList *selection)
+selection_contains_one_item_in_menu_callback (NemoView *view, GList *selection)
 {
 	if (eel_g_list_exactly_one_item (selection)) {
 		return TRUE;
@@ -993,7 +993,7 @@ selection_contains_one_item_in_menu_callback (NautilusView *view, GList *selecti
 }
 
 static gboolean
-selection_not_empty_in_menu_callback (NautilusView *view, GList *selection)
+selection_not_empty_in_menu_callback (NemoView *view, GList *selection)
 {
 	if (selection != NULL) {
 		return TRUE;
@@ -1011,15 +1011,15 @@ selection_not_empty_in_menu_callback (NautilusView *view, GList *selection)
 }
 
 static char *
-get_view_directory (NautilusView *view)
+get_view_directory (NemoView *view)
 {
 	char *uri, *path;
 	GFile *f;
 	
-	uri = nautilus_directory_get_uri (view->details->model);
+	uri = nemo_directory_get_uri (view->details->model);
 	if (eel_uri_is_desktop (uri)) {
 		g_free (uri);
-		uri = nautilus_get_desktop_directory_uri ();
+		uri = nemo_get_desktop_directory_uri ();
 		
 	}
 	f = g_file_new_for_uri (uri);
@@ -1031,33 +1031,33 @@ get_view_directory (NautilusView *view)
 }
 
 void
-nautilus_view_preview_files (NautilusView *view,
+nemo_view_preview_files (NemoView *view,
 			     GList *files,
 			     GArray *locations)
 {
-	NautilusPreviewer *previewer;
+	NemoPreviewer *previewer;
 	gchar *uri;
 	guint xid;
 	GtkWidget *toplevel;
 
-	previewer = nautilus_previewer_get_singleton ();
-	uri = nautilus_file_get_uri (files->data);
+	previewer = nemo_previewer_get_singleton ();
+	uri = nemo_file_get_uri (files->data);
 	toplevel = gtk_widget_get_toplevel (GTK_WIDGET (view));
 
 	xid = gdk_x11_window_get_xid (gtk_widget_get_window (toplevel));
-	nautilus_previewer_call_show_file (previewer, uri, xid, TRUE);
+	nemo_previewer_call_show_file (previewer, uri, xid, TRUE);
 }
 
 void
-nautilus_view_activate_files (NautilusView *view,
+nemo_view_activate_files (NemoView *view,
 			      GList *files,
-			      NautilusWindowOpenFlags flags,
+			      NemoWindowOpenFlags flags,
 			      gboolean confirm_multiple)
 {
 	char *path;
 
 	path = get_view_directory (view);
-	nautilus_mime_activate_files (nautilus_view_get_containing_window (view),
+	nemo_mime_activate_files (nemo_view_get_containing_window (view),
 				      view->details->slot,
 				      files,
 				      path,
@@ -1068,14 +1068,14 @@ nautilus_view_activate_files (NautilusView *view,
 }
 
 static void
-nautilus_view_activate_file (NautilusView *view,
-			     NautilusFile *file,
-			     NautilusWindowOpenFlags flags)
+nemo_view_activate_file (NemoView *view,
+			     NemoFile *file,
+			     NemoWindowOpenFlags flags)
 {
 	char *path;
 
 	path = get_view_directory (view);
-	nautilus_mime_activate_file (nautilus_view_get_containing_window (view),
+	nemo_mime_activate_file (nemo_view_get_containing_window (view),
 				     view->details->slot,
 				     file,
 				     path,
@@ -1089,16 +1089,16 @@ action_open_callback (GtkAction *action,
 		      gpointer callback_data)
 {
 	GList *selection;
-	NautilusView *view;
+	NemoView *view;
 
-	view = NAUTILUS_VIEW (callback_data);
+	view = NEMO_VIEW (callback_data);
 
-	selection = nautilus_view_get_selection (view);
-	nautilus_view_activate_files (view,
+	selection = nemo_view_get_selection (view);
+	nemo_view_activate_files (view,
 				      selection,
 				      0,
 				      TRUE);
-	nautilus_file_list_free (selection);
+	nemo_file_list_free (selection);
 }
 
 static void
@@ -1106,16 +1106,16 @@ action_open_close_parent_callback (GtkAction *action,
 				   gpointer callback_data)
 {
 	GList *selection;
-	NautilusView *view;
+	NemoView *view;
 
-	view = NAUTILUS_VIEW (callback_data);
+	view = NEMO_VIEW (callback_data);
 
-	selection = nautilus_view_get_selection (view);
-	nautilus_view_activate_files (view,
+	selection = nemo_view_get_selection (view);
+	nemo_view_activate_files (view,
 				      selection,
-				      NAUTILUS_WINDOW_OPEN_FLAG_CLOSE_BEHIND,
+				      NEMO_WINDOW_OPEN_FLAG_CLOSE_BEHIND,
 				      TRUE);
-	nautilus_file_list_free (selection);
+	nemo_file_list_free (selection);
 }
 
 
@@ -1123,43 +1123,43 @@ static void
 action_open_alternate_callback (GtkAction *action,
 				gpointer callback_data)
 {
-	NautilusView *view;
+	NemoView *view;
 	GList *selection;
 	GtkWindow *window;
 
-	view = NAUTILUS_VIEW (callback_data);
-	selection = nautilus_view_get_selection (view);
+	view = NEMO_VIEW (callback_data);
+	selection = nemo_view_get_selection (view);
 
-	window = nautilus_view_get_containing_window (view);
+	window = nemo_view_get_containing_window (view);
 
-	if (nautilus_view_confirm_multiple (window, g_list_length (selection), FALSE)) {
+	if (nemo_view_confirm_multiple (window, g_list_length (selection), FALSE)) {
 		g_list_foreach (selection, open_one_in_new_window, view);
 	}
 
-	nautilus_file_list_free (selection);
+	nemo_file_list_free (selection);
 }
 
 static void
 action_open_new_tab_callback (GtkAction *action,
 			      gpointer callback_data)
 {
-	NautilusView *view;
+	NemoView *view;
 	GList *selection;
 	GtkWindow *window;
 
-	view = NAUTILUS_VIEW (callback_data);
-	selection = nautilus_view_get_selection (view);
+	view = NEMO_VIEW (callback_data);
+	selection = nemo_view_get_selection (view);
 
-	window = nautilus_view_get_containing_window (view);
+	window = nemo_view_get_containing_window (view);
 
-	if (nautilus_view_confirm_multiple (window, g_list_length (selection), TRUE)) {
-		nautilus_view_activate_files (view,
+	if (nemo_view_confirm_multiple (window, g_list_length (selection), TRUE)) {
+		nemo_view_activate_files (view,
 					      selection,
-					      NAUTILUS_WINDOW_OPEN_FLAG_NEW_TAB,
+					      NEMO_WINDOW_OPEN_FLAG_NEW_TAB,
 					      FALSE);
 	}
 
-	nautilus_file_list_free (selection);
+	nemo_file_list_free (selection);
 }
 
 static void
@@ -1168,7 +1168,7 @@ app_chooser_dialog_response_cb (GtkDialog *dialog,
 				gpointer user_data)
 {
 	GtkWindow *parent_window;
-	NautilusFile *file;
+	NemoFile *file;
 	GAppInfo *info;
 	GList files;
 
@@ -1182,31 +1182,31 @@ app_chooser_dialog_response_cb (GtkDialog *dialog,
 	info = gtk_app_chooser_get_app_info (GTK_APP_CHOOSER (dialog));
 	file = g_object_get_data (G_OBJECT (dialog), "directory-view:file");
 
-	g_signal_emit_by_name (nautilus_signaller_get_current (), "mime_data_changed");
+	g_signal_emit_by_name (nemo_signaller_get_current (), "mime_data_changed");
 
 	files.next = NULL;
 	files.prev = NULL;
 	files.data = file;
-	nautilus_launch_application (info, &files, parent_window);
+	nemo_launch_application (info, &files, parent_window);
 
 	gtk_widget_destroy (GTK_WIDGET (dialog));
 	g_object_unref (info);
 }
 
 static void
-choose_program (NautilusView *view,
-		NautilusFile *file)
+choose_program (NemoView *view,
+		NemoFile *file)
 {
 	GtkWidget *dialog;
 	GFile *location;
 	GtkWindow *parent_window;
 
-	g_assert (NAUTILUS_IS_VIEW (view));
-	g_assert (NAUTILUS_IS_FILE (file));
+	g_assert (NEMO_IS_VIEW (view));
+	g_assert (NEMO_IS_FILE (file));
 
-	nautilus_file_ref (file);
-	location = nautilus_file_get_location (file);
-	parent_window = nautilus_view_get_containing_window (view);
+	nemo_file_ref (file);
+	location = nemo_file_get_location (file);
+	parent_window = nemo_view_get_containing_window (view);
 
 	dialog = gtk_app_chooser_dialog_new (parent_window, 0,
 					     location);
@@ -1221,36 +1221,36 @@ choose_program (NautilusView *view,
 				 parent_window, 0);
 
 	g_object_unref (location);
-	nautilus_file_unref (file);	
+	nemo_file_unref (file);	
 }
 
 static void
-open_with_other_program (NautilusView *view)
+open_with_other_program (NemoView *view)
 {
         GList *selection;
 
-	g_assert (NAUTILUS_IS_VIEW (view));
+	g_assert (NEMO_IS_VIEW (view));
 
-       	selection = nautilus_view_get_selection (view);
+       	selection = nemo_view_get_selection (view);
 
 	if (selection_contains_one_item_in_menu_callback (view, selection)) {
-		choose_program (view, NAUTILUS_FILE (selection->data));
+		choose_program (view, NEMO_FILE (selection->data));
 	}
 
-	nautilus_file_list_free (selection);
+	nemo_file_list_free (selection);
 }
 
 static void
 action_other_application_callback (GtkAction *action,
 				   gpointer callback_data)
 {
-	g_assert (NAUTILUS_IS_VIEW (callback_data));
+	g_assert (NEMO_IS_VIEW (callback_data));
 
-	open_with_other_program (NAUTILUS_VIEW (callback_data));
+	open_with_other_program (NEMO_VIEW (callback_data));
 }
 
 static void
-trash_or_delete_selected_files (NautilusView *view)
+trash_or_delete_selected_files (NemoView *view)
 {
         GList *selection;
 
@@ -1259,22 +1259,22 @@ trash_or_delete_selected_files (NautilusView *view)
 	 * was already removed (but the view doesn't know about it yet).
 	 */
 	if (!view->details->selection_was_removed) {
-		selection = nautilus_view_get_selection_for_file_transfer (view);
-		trash_or_delete_files (nautilus_view_get_containing_window (view),
+		selection = nemo_view_get_selection_for_file_transfer (view);
+		trash_or_delete_files (nemo_view_get_containing_window (view),
 				       selection, TRUE,
 				       view);
-		nautilus_file_list_free (selection);
+		nemo_file_list_free (selection);
 		view->details->selection_was_removed = TRUE;
 	}
 }
 
 static gboolean
-real_trash (NautilusView *view)
+real_trash (NemoView *view)
 {
 	GtkAction *action;
 
 	action = gtk_action_group_get_action (view->details->dir_action_group,
-					      NAUTILUS_ACTION_TRASH);
+					      NEMO_ACTION_TRASH);
 	if (gtk_action_get_sensitive (action) &&
 	    gtk_action_get_visible (action)) {
 		trash_or_delete_selected_files (view);
@@ -1287,17 +1287,17 @@ static void
 action_trash_callback (GtkAction *action,
 		       gpointer callback_data)
 {
-        trash_or_delete_selected_files (NAUTILUS_VIEW (callback_data));
+        trash_or_delete_selected_files (NEMO_VIEW (callback_data));
 }
 
 static void
-delete_selected_files (NautilusView *view)
+delete_selected_files (NemoView *view)
 {
         GList *selection;
 	GList *node;
 	GList *locations;
 
-	selection = nautilus_view_get_selection_for_file_transfer (view);
+	selection = nemo_view_get_selection_for_file_transfer (view);
 	if (selection == NULL) {
 		return;
 	}
@@ -1305,47 +1305,47 @@ delete_selected_files (NautilusView *view)
 	locations = NULL;
 	for (node = selection; node != NULL; node = node->next) {
 		locations = g_list_prepend (locations,
-					    nautilus_file_get_location ((NautilusFile *) node->data));
+					    nemo_file_get_location ((NemoFile *) node->data));
 	}
 	locations = g_list_reverse (locations);
 
-	nautilus_file_operations_delete (locations, nautilus_view_get_containing_window (view), NULL, NULL);
+	nemo_file_operations_delete (locations, nemo_view_get_containing_window (view), NULL, NULL);
 
 	g_list_free_full (locations, g_object_unref);
-        nautilus_file_list_free (selection);
+        nemo_file_list_free (selection);
 }
 
 static void
 action_delete_callback (GtkAction *action,
 			gpointer callback_data)
 {
-        delete_selected_files (NAUTILUS_VIEW (callback_data));
+        delete_selected_files (NEMO_VIEW (callback_data));
 }
 
 static void
 action_restore_from_trash_callback (GtkAction *action,
 				    gpointer callback_data)
 {
-	NautilusView *view;
+	NemoView *view;
 	GList *selection;
 
-	view = NAUTILUS_VIEW (callback_data);
+	view = NEMO_VIEW (callback_data);
 
-	selection = nautilus_view_get_selection_for_file_transfer (view);
-	nautilus_restore_files_from_trash (selection,
-					   nautilus_view_get_containing_window (view));
+	selection = nemo_view_get_selection_for_file_transfer (view);
+	nemo_restore_files_from_trash (selection,
+					   nemo_view_get_containing_window (view));
 
-	nautilus_file_list_free (selection);
+	nemo_file_list_free (selection);
 
 }
 
 static gboolean
-real_delete (NautilusView *view)
+real_delete (NemoView *view)
 {
 	GtkAction *action;
 
 	action = gtk_action_group_get_action (view->details->dir_action_group,
-					      NAUTILUS_ACTION_DELETE);
+					      NEMO_ACTION_DELETE);
 	if (gtk_action_get_sensitive (action) &&
 	    gtk_action_get_visible (action)) {
 		delete_selected_files (view);
@@ -1358,12 +1358,12 @@ static void
 action_duplicate_callback (GtkAction *action,
 			   gpointer callback_data)
 {
-        NautilusView *view;
+        NemoView *view;
         GList *selection;
         GArray *selected_item_locations;
  
-        view = NAUTILUS_VIEW (callback_data);
-	selection = nautilus_view_get_selection_for_file_transfer (view);
+        view = NEMO_VIEW (callback_data);
+	selection = nemo_view_get_selection_for_file_transfer (view);
 	if (selection_not_empty_in_menu_callback (view, selection)) {
 		/* FIXME bugzilla.gnome.org 45061:
 		 * should change things here so that we use a get_icon_locations (view, selection).
@@ -1371,76 +1371,76 @@ action_duplicate_callback (GtkAction *action,
 		 * the time we go and retrieve the icon positions, relying on the selection
 		 * staying intact to ensure the right sequence and count of positions is fragile.
 		 */
-		selected_item_locations = nautilus_view_get_selected_icon_locations (view);
-	        nautilus_view_duplicate_selection (view, selection, selected_item_locations);
+		selected_item_locations = nemo_view_get_selected_icon_locations (view);
+	        nemo_view_duplicate_selection (view, selection, selected_item_locations);
 	        g_array_free (selected_item_locations, TRUE);
 	}
 
-        nautilus_file_list_free (selection);
+        nemo_file_list_free (selection);
 }
 
 static void
 action_create_link_callback (GtkAction *action,
 			     gpointer callback_data)
 {
-        NautilusView *view;
+        NemoView *view;
         GList *selection;
         GArray *selected_item_locations;
         
-        g_assert (NAUTILUS_IS_VIEW (callback_data));
+        g_assert (NEMO_IS_VIEW (callback_data));
 
-        view = NAUTILUS_VIEW (callback_data);
-	selection = nautilus_view_get_selection (view);
+        view = NEMO_VIEW (callback_data);
+	selection = nemo_view_get_selection (view);
 	if (selection_not_empty_in_menu_callback (view, selection)) {
-		selected_item_locations = nautilus_view_get_selected_icon_locations (view);
-	        nautilus_view_create_links_for_files (view, selection, selected_item_locations);
+		selected_item_locations = nemo_view_get_selected_icon_locations (view);
+	        nemo_view_create_links_for_files (view, selection, selected_item_locations);
 	        g_array_free (selected_item_locations, TRUE);
 	}
 
-        nautilus_file_list_free (selection);
+        nemo_file_list_free (selection);
 }
 
 static void
 action_select_all_callback (GtkAction *action, 
 			    gpointer callback_data)
 {
-	g_assert (NAUTILUS_IS_VIEW (callback_data));
+	g_assert (NEMO_IS_VIEW (callback_data));
 
-	nautilus_view_select_all (callback_data);
+	nemo_view_select_all (callback_data);
 }
 
 static void
 action_invert_selection_callback (GtkAction *action,
 				  gpointer callback_data)
 {
-	g_assert (NAUTILUS_IS_VIEW (callback_data));
+	g_assert (NEMO_IS_VIEW (callback_data));
 
-	nautilus_view_invert_selection (callback_data);
+	nemo_view_invert_selection (callback_data);
 }
 
 static void
 pattern_select_response_cb (GtkWidget *dialog, int response, gpointer user_data)
 {
-	NautilusView *view;
-	NautilusDirectory *directory;
+	NemoView *view;
+	NemoDirectory *directory;
 	GtkWidget *entry;
 	GList *selection;
 	GError *error;
 
-	view = NAUTILUS_VIEW (user_data);
+	view = NEMO_VIEW (user_data);
 
 	switch (response) {
 	case GTK_RESPONSE_OK :
 		entry = g_object_get_data (G_OBJECT (dialog), "entry");
-		directory = nautilus_view_get_model (view);
-		selection = nautilus_directory_match_pattern (directory,
+		directory = nemo_view_get_model (view);
+		selection = nemo_directory_match_pattern (directory,
 							      gtk_entry_get_text (GTK_ENTRY (entry)));
 			
 		if (selection) {
-			nautilus_view_call_set_selection (view, selection);
-			nautilus_file_list_free (selection);
+			nemo_view_call_set_selection (view, selection);
+			nemo_file_list_free (selection);
 
-			nautilus_view_reveal_selection(view);
+			nemo_view_reveal_selection(view);
 		}
 		/* fall through */
 	case GTK_RESPONSE_NONE :
@@ -1451,7 +1451,7 @@ pattern_select_response_cb (GtkWidget *dialog, int response, gpointer user_data)
 	case GTK_RESPONSE_HELP :
 		error = NULL;
 		gtk_show_uri (gtk_window_get_screen (GTK_WINDOW (dialog)),
-			      "help:gnome-help/files-select",
+			      "help:ubuntu-help/files-select",
 			      gtk_get_current_event_time (), &error);
 		if (error) {
 			eel_show_error_dialog (_("There was an error displaying help."), error->message,
@@ -1465,7 +1465,7 @@ pattern_select_response_cb (GtkWidget *dialog, int response, gpointer user_data)
 }
 
 static void
-select_pattern (NautilusView *view)
+select_pattern (NemoView *view)
 {
 	GtkWidget *dialog;
 	GtkWidget *label;
@@ -1475,7 +1475,7 @@ select_pattern (NautilusView *view)
 	char *example_pattern;
 
 	dialog = gtk_dialog_new_with_buttons (_("Select Items Matching"),
-					      nautilus_view_get_containing_window (view),
+					      nemo_view_get_containing_window (view),
 					      GTK_DIALOG_DESTROY_WITH_PARENT,
 					      GTK_STOCK_HELP,
 					      GTK_RESPONSE_HELP,
@@ -1532,7 +1532,7 @@ static void
 action_select_pattern_callback (GtkAction *action, 
 				gpointer callback_data)
 {
-	g_assert (NAUTILUS_IS_VIEW (callback_data));
+	g_assert (NEMO_IS_VIEW (callback_data));
 
 	select_pattern(callback_data);
 }
@@ -1541,36 +1541,36 @@ static void
 action_reset_to_defaults_callback (GtkAction *action, 
 				   gpointer callback_data)
 {
-	g_assert (NAUTILUS_IS_VIEW (callback_data));
+	g_assert (NEMO_IS_VIEW (callback_data));
 
-	nautilus_view_reset_to_defaults (callback_data);
+	nemo_view_reset_to_defaults (callback_data);
 }
 
 
 static void
-hidden_files_mode_changed (NautilusWindow *window,
+hidden_files_mode_changed (NemoWindow *window,
 			   gpointer callback_data)
 {
-	NautilusView *directory_view;
+	NemoView *directory_view;
 
-	directory_view = NAUTILUS_VIEW (callback_data);
+	directory_view = NEMO_VIEW (callback_data);
 
-	nautilus_view_init_show_hidden_files (directory_view);
+	nemo_view_init_show_hidden_files (directory_view);
 }
 
 static void
 action_save_search_callback (GtkAction *action,
 			     gpointer callback_data)
 {                
-	NautilusSearchDirectory *search;
-	NautilusView	*directory_view;
+	NemoSearchDirectory *search;
+	NemoView	*directory_view;
 	
-        directory_view = NAUTILUS_VIEW (callback_data);
+        directory_view = NEMO_VIEW (callback_data);
 
 	if (directory_view->details->model &&
-	    NAUTILUS_IS_SEARCH_DIRECTORY (directory_view->details->model)) {
-		search = NAUTILUS_SEARCH_DIRECTORY (directory_view->details->model);
-		nautilus_search_directory_save_search (search);
+	    NEMO_IS_SEARCH_DIRECTORY (directory_view->details->model)) {
+		search = NEMO_SEARCH_DIRECTORY (directory_view->details->model);
+		nemo_search_directory_save_search (search);
 
 		/* Save search is disabled */
 		schedule_update_menus (directory_view);
@@ -1595,21 +1595,21 @@ static void
 action_save_search_as_callback (GtkAction *action,
 				gpointer callback_data)
 {
-	NautilusView	*directory_view;
-	NautilusSearchDirectory *search;
+	NemoView	*directory_view;
+	NemoSearchDirectory *search;
 	GtkWidget *dialog, *grid, *label, *entry, *chooser, *save_button;
 	const char *entry_text;
 	char *filename, *filename_utf8, *dirname, *path, *uri;
 	GFile *location;
 	
-        directory_view = NAUTILUS_VIEW (callback_data);
+        directory_view = NEMO_VIEW (callback_data);
 
 	if (directory_view->details->model &&
-	    NAUTILUS_IS_SEARCH_DIRECTORY (directory_view->details->model)) {
-		search = NAUTILUS_SEARCH_DIRECTORY (directory_view->details->model);
+	    NEMO_IS_SEARCH_DIRECTORY (directory_view->details->model)) {
+		search = NEMO_SEARCH_DIRECTORY (directory_view->details->model);
 		
 		dialog = gtk_dialog_new_with_buttons (_("Save Search as"),
-						      nautilus_view_get_containing_window (directory_view),
+						      nemo_view_get_containing_window (directory_view),
 						      0,
 						      GTK_STOCK_CANCEL, GTK_RESPONSE_CANCEL,
 						      NULL);
@@ -1668,10 +1668,10 @@ action_save_search_as_callback (GtkAction *action,
 		
 		if (gtk_dialog_run (GTK_DIALOG (dialog)) == GTK_RESPONSE_OK) {
 			entry_text = gtk_entry_get_text (GTK_ENTRY (entry));
-			if (g_str_has_suffix (entry_text, NAUTILUS_SAVED_SEARCH_EXTENSION)) {
+			if (g_str_has_suffix (entry_text, NEMO_SAVED_SEARCH_EXTENSION)) {
 				filename_utf8 = g_strdup (entry_text);
 			} else {
-				filename_utf8 = g_strconcat (entry_text, NAUTILUS_SAVED_SEARCH_EXTENSION, NULL);
+				filename_utf8 = g_strconcat (entry_text, NEMO_SAVED_SEARCH_EXTENSION, NULL);
 			}
 
 			filename = g_filename_from_utf8 (filename_utf8, -1, NULL, NULL, NULL);
@@ -1686,11 +1686,11 @@ action_save_search_as_callback (GtkAction *action,
 			uri = g_filename_to_uri (path, NULL, NULL);
 			g_free (path);
 			
-			nautilus_search_directory_save_to_file (search, uri);
+			nemo_search_directory_save_to_file (search, uri);
 			location = g_file_new_for_uri (uri);
-			nautilus_file_changes_queue_file_added (location);
+			nemo_file_changes_queue_file_added (location);
 			g_object_unref (location);
-			nautilus_file_changes_consume_changes (TRUE);
+			nemo_file_changes_consume_changes (TRUE);
 			g_free (uri);
 		}
 		
@@ -1703,29 +1703,29 @@ static void
 action_empty_trash_callback (GtkAction *action,
 			     gpointer callback_data)
 {                
-        g_assert (NAUTILUS_IS_VIEW (callback_data));
+        g_assert (NEMO_IS_VIEW (callback_data));
 
-	nautilus_file_operations_empty_trash (GTK_WIDGET (callback_data));
+	nemo_file_operations_empty_trash (GTK_WIDGET (callback_data));
 }
 
 typedef struct {
-	NautilusView *view;
-	NautilusFile *new_file;
+	NemoView *view;
+	NemoFile *new_file;
 } RenameData;
 
 static gboolean
 delayed_rename_file_hack_callback (RenameData *data)
 {
-	NautilusView *view;
-	NautilusFile *new_file;
+	NemoView *view;
+	NemoFile *new_file;
 
 	view = data->view;
 	new_file = data->new_file;
 
 	if (view->details->window != NULL &&
 	    view->details->active) {
-		NAUTILUS_VIEW_CLASS (G_OBJECT_GET_CLASS (view))->start_renaming_file (view, new_file, FALSE);
-		nautilus_view_reveal_selection (view);
+		NEMO_VIEW_CLASS (G_OBJECT_GET_CLASS (view))->start_renaming_file (view, new_file, FALSE);
+		nemo_view_reveal_selection (view);
 	}
 
 	return FALSE;
@@ -1735,13 +1735,13 @@ static void
 delayed_rename_file_hack_removed (RenameData *data)
 {
 	g_object_unref (data->view);
-	nautilus_file_unref (data->new_file);
+	nemo_file_unref (data->new_file);
 	g_free (data);
 }
 
 
 static void
-rename_file (NautilusView *view, NautilusFile *new_file)
+rename_file (NemoView *view, NemoFile *new_file)
 {
 	RenameData *data;
 
@@ -1755,12 +1755,12 @@ rename_file (NautilusView *view, NautilusFile *new_file)
 	   to load the slow mimetype for the file, which leads to a
 	   file_changed. So, before we delay we select the row.
 	*/
-	if (NAUTILUS_IS_LIST_VIEW (view)) {
-		nautilus_view_select_file (view, new_file);
+	if (NEMO_IS_LIST_VIEW (view)) {
+		nemo_view_select_file (view, new_file);
 		
 		data = g_new (RenameData, 1);
 		data->view = g_object_ref (view);
-		data->new_file = nautilus_file_ref (new_file);
+		data->new_file = nemo_file_ref (new_file);
 		if (view->details->delayed_rename_file_id != 0) {
 			g_source_remove (view->details->delayed_rename_file_id);
 		}
@@ -1773,19 +1773,19 @@ rename_file (NautilusView *view, NautilusFile *new_file)
 	}
 
 	/* no need to select because start_renaming_file selects
-	 * nautilus_view_select_file (view, new_file);
+	 * nemo_view_select_file (view, new_file);
 	 */
-	NAUTILUS_VIEW_CLASS (G_OBJECT_GET_CLASS (view))->start_renaming_file (view, new_file, FALSE);
-	nautilus_view_reveal_selection (view);
+	NEMO_VIEW_CLASS (G_OBJECT_GET_CLASS (view))->start_renaming_file (view, new_file, FALSE);
+	nemo_view_reveal_selection (view);
 }
 
 static void
-reveal_newly_added_folder (NautilusView *view, NautilusFile *new_file,
-			   NautilusDirectory *directory, GFile *target_location)
+reveal_newly_added_folder (NemoView *view, NemoFile *new_file,
+			   NemoDirectory *directory, GFile *target_location)
 {
 	GFile *location;
 
-	location = nautilus_file_get_location (new_file);
+	location = nemo_file_get_location (new_file);
 	if (g_file_equal (location, target_location)) {
 		g_signal_handlers_disconnect_by_func (view,
 						      G_CALLBACK (reveal_newly_added_folder),
@@ -1796,20 +1796,20 @@ reveal_newly_added_folder (NautilusView *view, NautilusFile *new_file,
 }
 
 typedef struct {
-	NautilusView *directory_view;
+	NemoView *directory_view;
 	GHashTable *added_locations;
 } NewFolderData;
 
 
 static void
-track_newly_added_locations (NautilusView *view, NautilusFile *new_file,
-			     NautilusDirectory *directory, gpointer user_data)
+track_newly_added_locations (NemoView *view, NemoFile *new_file,
+			     NemoDirectory *directory, gpointer user_data)
 {
 	NewFolderData *data;
 
 	data = user_data;
 
-	g_hash_table_insert (data->added_locations, nautilus_file_get_location (new_file), NULL);
+	g_hash_table_insert (data->added_locations, nemo_file_get_location (new_file), NULL);
 }
 
 static void
@@ -1817,8 +1817,8 @@ new_folder_done (GFile *new_folder,
 		 gboolean success,
 		 gpointer user_data)
 {
-	NautilusView *directory_view;
-	NautilusFile *file;
+	NemoView *directory_view;
+	NemoFile *file;
 	char screen_string[32];
 	GdkScreen *screen;
 	NewFolderData *data;
@@ -1843,9 +1843,9 @@ new_folder_done (GFile *new_folder,
 	g_snprintf (screen_string, sizeof (screen_string), "%d", gdk_screen_get_number (screen));
 
 	
-	file = nautilus_file_get (new_folder);
-	nautilus_file_set_metadata
-		(file, NAUTILUS_METADATA_KEY_SCREEN,
+	file = nemo_file_get (new_folder);
+	nemo_file_set_metadata
+		(file, NEMO_METADATA_KEY_SCREEN,
 		 NULL,
 		 screen_string);
 
@@ -1864,7 +1864,7 @@ new_folder_done (GFile *new_folder,
 				       (GClosureNotify)g_object_unref,
 				       G_CONNECT_AFTER);
 	}
-	nautilus_file_unref (file);
+	nemo_file_unref (file);
 
  fail:
 	g_hash_table_destroy (data->added_locations);
@@ -1874,7 +1874,7 @@ new_folder_done (GFile *new_folder,
 
 
 static NewFolderData *
-new_folder_data_new (NautilusView *directory_view)
+new_folder_data_new (NemoView *directory_view)
 {
 	NewFolderData *data;
 
@@ -1888,14 +1888,14 @@ new_folder_data_new (NautilusView *directory_view)
 }
 
 static GdkPoint *
-context_menu_to_file_operation_position (NautilusView *view)
+context_menu_to_file_operation_position (NemoView *view)
 {
-	g_return_val_if_fail (NAUTILUS_IS_VIEW (view), NULL);
+	g_return_val_if_fail (NEMO_IS_VIEW (view), NULL);
 
-	if (nautilus_view_using_manual_layout (view)
+	if (nemo_view_using_manual_layout (view)
 	    && view->details->context_menu_position.x >= 0
 	    && view->details->context_menu_position.y >= 0) {
-		NAUTILUS_VIEW_CLASS (G_OBJECT_GET_CLASS (view))->widget_to_file_operation_position
+		NEMO_VIEW_CLASS (G_OBJECT_GET_CLASS (view))->widget_to_file_operation_position
 			(view, &view->details->context_menu_position);
 		return &view->details->context_menu_position;
 	} else {
@@ -1904,7 +1904,7 @@ context_menu_to_file_operation_position (NautilusView *view)
 }
 
 static void
-nautilus_view_new_folder (NautilusView *directory_view)
+nemo_view_new_folder (NemoView *directory_view)
 {
 	char *parent_uri;
 	NewFolderData *data;
@@ -1921,8 +1921,8 @@ nautilus_view_new_folder (NautilusView *directory_view)
 
 	pos = context_menu_to_file_operation_position (directory_view);
 
-	parent_uri = nautilus_view_get_backing_uri (directory_view);
-	nautilus_file_operations_new_folder (GTK_WIDGET (directory_view),
+	parent_uri = nemo_view_get_backing_uri (directory_view);
+	nemo_file_operations_new_folder (GTK_WIDGET (directory_view),
 					     pos, parent_uri,
 					     new_folder_done, data);
 
@@ -1930,7 +1930,7 @@ nautilus_view_new_folder (NautilusView *directory_view)
 }
 
 static NewFolderData *
-setup_new_folder_data (NautilusView *directory_view)
+setup_new_folder_data (NemoView *directory_view)
 {
 	NewFolderData *data;
 
@@ -1947,7 +1947,7 @@ setup_new_folder_data (NautilusView *directory_view)
 }
 
 void
-nautilus_view_new_file_with_initial_contents (NautilusView *view,
+nemo_view_new_file_with_initial_contents (NemoView *view,
 					      const char *parent_uri,
 					      const char *filename,
 					      const char *initial_contents,
@@ -1964,16 +1964,16 @@ nautilus_view_new_file_with_initial_contents (NautilusView *view,
 		pos = context_menu_to_file_operation_position (view);
 	}
 
-	nautilus_file_operations_new_file (GTK_WIDGET (view),
+	nemo_file_operations_new_file (GTK_WIDGET (view),
 					   pos, parent_uri, filename,
 					   initial_contents, length,
 					   new_folder_done, data);
 }
 
 static void
-nautilus_view_new_file (NautilusView *directory_view,
+nemo_view_new_file (NemoView *directory_view,
 			const char *parent_uri,
-			NautilusFile *source)
+			NemoFile *source)
 {
 	GdkPoint *pos;
 	NewFolderData *data;
@@ -1982,12 +1982,12 @@ nautilus_view_new_file (NautilusView *directory_view,
 
 	container_uri = NULL;
 	if (parent_uri == NULL) {
-		container_uri = nautilus_view_get_backing_uri (directory_view);
+		container_uri = nemo_view_get_backing_uri (directory_view);
 		g_assert (container_uri != NULL);
 	}
 
 	if (source == NULL) {
-		nautilus_view_new_file_with_initial_contents (directory_view,
+		nemo_view_new_file_with_initial_contents (directory_view,
 							      parent_uri != NULL ? parent_uri : container_uri,
 							      NULL,
 							      NULL,
@@ -1997,15 +1997,15 @@ nautilus_view_new_file (NautilusView *directory_view,
 		return;
 	}
 
-	g_return_if_fail (nautilus_file_is_local (source));
+	g_return_if_fail (nemo_file_is_local (source));
 
 	pos = context_menu_to_file_operation_position (directory_view);
 
 	data = setup_new_folder_data (directory_view);
 
-	source_uri = nautilus_file_get_uri (source);
+	source_uri = nemo_file_get_uri (source);
 
-	nautilus_file_operations_new_file_from_template (GTK_WIDGET (directory_view),
+	nemo_file_operations_new_file_from_template (GTK_WIDGET (directory_view),
 							 pos,
 							 parent_uri != NULL ? parent_uri : container_uri,
 							 NULL,
@@ -2020,63 +2020,63 @@ static void
 action_new_folder_callback (GtkAction *action,
 			    gpointer callback_data)
 {                
-        g_assert (NAUTILUS_IS_VIEW (callback_data));
+        g_assert (NEMO_IS_VIEW (callback_data));
 
-	nautilus_view_new_folder (NAUTILUS_VIEW (callback_data));
+	nemo_view_new_folder (NEMO_VIEW (callback_data));
 }
 
 static void
 action_new_empty_file_callback (GtkAction *action,
 				gpointer callback_data)
 {                
-        g_assert (NAUTILUS_IS_VIEW (callback_data));
+        g_assert (NEMO_IS_VIEW (callback_data));
 
-	nautilus_view_new_file (NAUTILUS_VIEW (callback_data), NULL, NULL);
+	nemo_view_new_file (NEMO_VIEW (callback_data), NULL, NULL);
 }
 
 static void
 action_properties_callback (GtkAction *action,
 			    gpointer callback_data)
 {
-        NautilusView *view;
+        NemoView *view;
         GList *selection;
 	GList *files;
         
-        g_assert (NAUTILUS_IS_VIEW (callback_data));
+        g_assert (NEMO_IS_VIEW (callback_data));
 
-        view = NAUTILUS_VIEW (callback_data);
-	selection = nautilus_view_get_selection (view);
+        view = NEMO_VIEW (callback_data);
+	selection = nemo_view_get_selection (view);
 	if (g_list_length (selection) == 0) {
 		if (view->details->directory_as_file != NULL) {
-			files = g_list_append (NULL, nautilus_file_ref (view->details->directory_as_file));
+			files = g_list_append (NULL, nemo_file_ref (view->details->directory_as_file));
 
-			nautilus_properties_window_present (files, GTK_WIDGET (view), NULL);
+			nemo_properties_window_present (files, GTK_WIDGET (view), NULL);
 
-			nautilus_file_list_free (files);
+			nemo_file_list_free (files);
 		}
 	} else {
-		nautilus_properties_window_present (selection, GTK_WIDGET (view), NULL);
+		nemo_properties_window_present (selection, GTK_WIDGET (view), NULL);
 	}
-        nautilus_file_list_free (selection);
+        nemo_file_list_free (selection);
 }
 
 static void
 action_location_properties_callback (GtkAction *action,
 				     gpointer   callback_data)
 {
-	NautilusView *view;
+	NemoView *view;
 	GList           *files;
 
-	g_assert (NAUTILUS_IS_VIEW (callback_data));
+	g_assert (NEMO_IS_VIEW (callback_data));
 
-	view = NAUTILUS_VIEW (callback_data);
-	g_assert (NAUTILUS_IS_FILE (view->details->location_popup_directory_as_file));
+	view = NEMO_VIEW (callback_data);
+	g_assert (NEMO_IS_FILE (view->details->location_popup_directory_as_file));
 
-	files = g_list_append (NULL, nautilus_file_ref (view->details->location_popup_directory_as_file));
+	files = g_list_append (NULL, nemo_file_ref (view->details->location_popup_directory_as_file));
 
-	nautilus_properties_window_present (files, GTK_WIDGET (view), NULL);
+	nemo_properties_window_present (files, GTK_WIDGET (view), NULL);
 
-	nautilus_file_list_free (files);
+	nemo_file_list_free (files);
 }
 
 static gboolean
@@ -2088,7 +2088,7 @@ all_files_in_trash (GList *files)
 	g_return_val_if_fail (files != NULL, FALSE);
 
 	for (node = files; node != NULL; node = node->next) {
-		if (!nautilus_file_is_in_trash (NAUTILUS_FILE (node->data))) {
+		if (!nemo_file_is_in_trash (NEMO_FILE (node->data))) {
 			return FALSE;
 		}
 	}
@@ -2097,7 +2097,7 @@ all_files_in_trash (GList *files)
 }
 
 static gboolean
-all_selected_items_in_trash (NautilusView *view)
+all_selected_items_in_trash (NemoView *view)
 {
 	GList *selection;
 	gboolean result;
@@ -2106,9 +2106,9 @@ all_selected_items_in_trash (NautilusView *view)
 	 * check that parent directory. Otherwise we have to inspect
 	 * each selected item.
 	 */
-	selection = nautilus_view_get_selection (view);
+	selection = nemo_view_get_selection (view);
 	result = (selection == NULL) ? FALSE : all_files_in_trash (selection);
-	nautilus_file_list_free (selection);
+	nemo_file_list_free (selection);
 
 	return result;
 }
@@ -2116,15 +2116,15 @@ all_selected_items_in_trash (NautilusView *view)
 static void
 click_policy_changed_callback (gpointer callback_data)
 {
-	NautilusView *view;
+	NemoView *view;
 
-	view = NAUTILUS_VIEW (callback_data);
+	view = NEMO_VIEW (callback_data);
 
-	NAUTILUS_VIEW_CLASS (G_OBJECT_GET_CLASS (view))->click_policy_changed (view);
+	NEMO_VIEW_CLASS (G_OBJECT_GET_CLASS (view))->click_policy_changed (view);
 }
 
 gboolean
-nautilus_view_should_sort_directories_first (NautilusView *view)
+nemo_view_should_sort_directories_first (NemoView *view)
 {
 	return view->details->sort_directories_first;
 }
@@ -2132,17 +2132,17 @@ nautilus_view_should_sort_directories_first (NautilusView *view)
 static void
 sort_directories_first_changed_callback (gpointer callback_data)
 {
-	NautilusView *view;
+	NemoView *view;
 	gboolean preference_value;
 
-	view = NAUTILUS_VIEW (callback_data);
+	view = NEMO_VIEW (callback_data);
 
 	preference_value =
-		g_settings_get_boolean (nautilus_preferences, NAUTILUS_PREFERENCES_SORT_DIRECTORIES_FIRST);
+		g_settings_get_boolean (nemo_preferences, NEMO_PREFERENCES_SORT_DIRECTORIES_FIRST);
 
 	if (preference_value != view->details->sort_directories_first) {
 		view->details->sort_directories_first = preference_value;
-		return NAUTILUS_VIEW_CLASS (G_OBJECT_GET_CLASS (view))->sort_directories_first_changed (view);
+		return NEMO_VIEW_CLASS (G_OBJECT_GET_CLASS (view))->sort_directories_first_changed (view);
 	}
 }
 
@@ -2160,12 +2160,12 @@ set_up_scripts_directory_global (void)
 
 	if (override) {
 		scripts_directory_path = g_build_filename (override,
-							   "nautilus-scripts",
+							   "nemo-scripts",
 							   NULL);
 	} else {
 		scripts_directory_path = g_build_filename (g_get_home_dir (),
 							   ".gnome2",
-							   "nautilus-scripts",
+							   "nemo-scripts",
 							   NULL);
 	}
 
@@ -2180,13 +2180,13 @@ set_up_scripts_directory_global (void)
 }
 
 static void
-scripts_added_or_changed_callback (NautilusDirectory *directory,
+scripts_added_or_changed_callback (NemoDirectory *directory,
 				   GList *files,
 				   gpointer callback_data)
 {
-	NautilusView *view;
+	NemoView *view;
 
-	view = NAUTILUS_VIEW (callback_data);
+	view = NEMO_VIEW (callback_data);
 
 	view->details->scripts_invalid = TRUE;
 	if (view->details->active) {
@@ -2195,13 +2195,13 @@ scripts_added_or_changed_callback (NautilusDirectory *directory,
 }
 
 static void
-templates_added_or_changed_callback (NautilusDirectory *directory,
+templates_added_or_changed_callback (NemoDirectory *directory,
 				     GList *files,
 				     gpointer callback_data)
 {
-	NautilusView *view;
+	NemoView *view;
 
-	view = NAUTILUS_VIEW (callback_data);
+	view = NEMO_VIEW (callback_data);
 
 	view->details->templates_invalid = TRUE;
 	if (view->details->active) {
@@ -2210,24 +2210,24 @@ templates_added_or_changed_callback (NautilusDirectory *directory,
 }
 
 static void
-add_directory_to_directory_list (NautilusView *view,
-				 NautilusDirectory *directory,
+add_directory_to_directory_list (NemoView *view,
+				 NemoDirectory *directory,
 				 GList **directory_list,
 				 GCallback changed_callback)
 {
-	NautilusFileAttributes attributes;
+	NemoFileAttributes attributes;
 
 	if (g_list_find (*directory_list, directory) == NULL) {
-		nautilus_directory_ref (directory);
+		nemo_directory_ref (directory);
 
 		attributes =
-			NAUTILUS_FILE_ATTRIBUTES_FOR_ICON |
-			NAUTILUS_FILE_ATTRIBUTE_INFO |
-			NAUTILUS_FILE_ATTRIBUTE_DIRECTORY_ITEM_COUNT;
+			NEMO_FILE_ATTRIBUTES_FOR_ICON |
+			NEMO_FILE_ATTRIBUTE_INFO |
+			NEMO_FILE_ATTRIBUTE_DIRECTORY_ITEM_COUNT;
 
-		nautilus_directory_file_monitor_add (directory, directory_list,
+		nemo_directory_file_monitor_add (directory, directory_list,
 						     FALSE, attributes,
-						     (NautilusDirectoryCallback)changed_callback, view);
+						     (NemoDirectoryCallback)changed_callback, view);
 
 		g_signal_connect_object (directory, "files_added",
 					 G_CALLBACK (changed_callback), view, 0);
@@ -2239,8 +2239,8 @@ add_directory_to_directory_list (NautilusView *view,
 }
 
 static void
-remove_directory_from_directory_list (NautilusView *view,
-				      NautilusDirectory *directory,
+remove_directory_from_directory_list (NemoView *view,
+				      NemoDirectory *directory,
 				      GList **directory_list,
 				      GCallback changed_callback)
 {
@@ -2250,15 +2250,15 @@ remove_directory_from_directory_list (NautilusView *view,
 					      G_CALLBACK (changed_callback),
 					      view);
 
-	nautilus_directory_file_monitor_remove (directory, directory_list);
+	nemo_directory_file_monitor_remove (directory, directory_list);
 
-	nautilus_directory_unref (directory);
+	nemo_directory_unref (directory);
 }
 
 
 static void
-add_directory_to_scripts_directory_list (NautilusView *view,
-					 NautilusDirectory *directory)
+add_directory_to_scripts_directory_list (NemoView *view,
+					 NemoDirectory *directory)
 {
 	add_directory_to_directory_list (view, directory,
 					 &view->details->scripts_directory_list,
@@ -2266,8 +2266,8 @@ add_directory_to_scripts_directory_list (NautilusView *view,
 }
 
 static void
-remove_directory_from_scripts_directory_list (NautilusView *view,
-					      NautilusDirectory *directory)
+remove_directory_from_scripts_directory_list (NemoView *view,
+					      NemoDirectory *directory)
 {
 	remove_directory_from_directory_list (view, directory,
 					      &view->details->scripts_directory_list,
@@ -2275,8 +2275,8 @@ remove_directory_from_scripts_directory_list (NautilusView *view,
 }
 
 static void
-add_directory_to_templates_directory_list (NautilusView *view,
-					   NautilusDirectory *directory)
+add_directory_to_templates_directory_list (NemoView *view,
+					   NemoDirectory *directory)
 {
 	add_directory_to_directory_list (view, directory,
 					 &view->details->templates_directory_list,
@@ -2284,8 +2284,8 @@ add_directory_to_templates_directory_list (NautilusView *view,
 }
 
 static void
-remove_directory_from_templates_directory_list (NautilusView *view,
-						NautilusDirectory *directory)
+remove_directory_from_templates_directory_list (NemoView *view,
+						NemoDirectory *directory)
 {
 	remove_directory_from_directory_list (view, directory,
 					      &view->details->templates_directory_list,
@@ -2293,8 +2293,8 @@ remove_directory_from_templates_directory_list (NautilusView *view,
 }
 
 static void
-slot_active (NautilusWindowSlot *slot,
-	     NautilusView *view)
+slot_active (NemoWindowSlot *slot,
+	     NemoView *view)
 {
 	if (view->details->active) {
 		return;
@@ -2302,13 +2302,13 @@ slot_active (NautilusWindowSlot *slot,
 
 	view->details->active = TRUE;
 
-	nautilus_view_merge_menus (view);
+	nemo_view_merge_menus (view);
 	schedule_update_menus (view);
 }
 
 static void
-slot_inactive (NautilusWindowSlot *slot,
-	       NautilusView *view)
+slot_inactive (NemoWindowSlot *slot,
+	       NemoView *view)
 {
 	if (!view->details->active) {
 		return;
@@ -2316,12 +2316,12 @@ slot_inactive (NautilusWindowSlot *slot,
 
 	view->details->active = FALSE;
 
-	nautilus_view_unmerge_menus (view);
+	nemo_view_unmerge_menus (view);
 	remove_update_menus_timeout_callback (view);
 }
 
 void
-nautilus_view_grab_focus (NautilusView *view)
+nemo_view_grab_focus (NemoView *view)
 {
 	/* focus the child of the scrolled window if it exists */
 	GtkWidget *child;
@@ -2332,24 +2332,24 @@ nautilus_view_grab_focus (NautilusView *view)
 }
 
 int
-nautilus_view_get_selection_count (NautilusView *view)
+nemo_view_get_selection_count (NemoView *view)
 {
 	/* FIXME: This could be faster if we special cased it in subclasses */
 	GList *files;
 	int len;
 
-	files = nautilus_view_get_selection (NAUTILUS_VIEW (view));
+	files = nemo_view_get_selection (NEMO_VIEW (view));
 	len = g_list_length (files);
-	nautilus_file_list_free (files);
+	nemo_file_list_free (files);
 	
 	return len;
 }
 
 static void
-update_undo_actions (NautilusView *view)
+update_undo_actions (NemoView *view)
 {
-	NautilusFileUndoInfo *info;
-	NautilusFileUndoManagerState undo_state;
+	NemoFileUndoInfo *info;
+	NemoFileUndoManagerState undo_state;
 	GtkAction *action;
 	const gchar *label, *tooltip;
 	gboolean available, is_undo;
@@ -2362,12 +2362,12 @@ update_undo_actions (NautilusView *view)
 	undo_active = FALSE;
 	redo_active = FALSE;
 
-	info = nautilus_file_undo_manager_get_action ();
-	undo_state = nautilus_file_undo_manager_get_state ();
+	info = nemo_file_undo_manager_get_action ();
+	undo_state = nemo_file_undo_manager_get_state ();
 
 	if (info != NULL && 
-	    (undo_state > NAUTILUS_FILE_UNDO_MANAGER_STATE_NONE)) {
-		is_undo = (undo_state == NAUTILUS_FILE_UNDO_MANAGER_STATE_UNDO);
+	    (undo_state > NEMO_FILE_UNDO_MANAGER_STATE_NONE)) {
+		is_undo = (undo_state == NEMO_FILE_UNDO_MANAGER_STATE_UNDO);
 
 		if (is_undo) {
 			undo_active = TRUE;
@@ -2375,7 +2375,7 @@ update_undo_actions (NautilusView *view)
 			redo_active = TRUE;
 		}
 
-		nautilus_file_undo_info_get_strings (info,
+		nemo_file_undo_info_get_strings (info,
 						     &undo_label, &undo_description,
 						     &redo_label, &redo_description);
 	}
@@ -2425,28 +2425,28 @@ update_undo_actions (NautilusView *view)
 }
 
 static void
-undo_manager_changed_cb (NautilusFileUndoManager* manager,
-			 NautilusView *view)
+undo_manager_changed_cb (NemoFileUndoManager* manager,
+			 NemoView *view)
 {
 	update_undo_actions (view);
 }
 
 void
-nautilus_view_set_selection (NautilusView *nautilus_view,
+nemo_view_set_selection (NemoView *nemo_view,
 			     GList *selection)
 {
-	NautilusView *view;
+	NemoView *view;
 
-	view = NAUTILUS_VIEW (nautilus_view);
+	view = NEMO_VIEW (nemo_view);
 
 	if (!view->details->loading) {
 		/* If we aren't still loading, set the selection right now,
 		 * and reveal the new selection.
 		 */
 		view->details->selection_change_is_due_to_shell = TRUE;
-		nautilus_view_call_set_selection (view, selection);
+		nemo_view_call_set_selection (view, selection);
 		view->details->selection_change_is_due_to_shell = FALSE;
-		nautilus_view_reveal_selection (view);
+		nemo_view_reveal_selection (view);
 	} else {
 		/* If we are still loading, set the list of pending URIs instead.
 		 * done_loading() will eventually select the pending URIs and reveal them.
@@ -2461,7 +2461,7 @@ static char *
 get_bulk_rename_tool ()
 {
 	char *bulk_rename_tool;
-	g_settings_get (nautilus_preferences, NAUTILUS_PREFERENCES_BULK_RENAME_TOOL, "^ay", &bulk_rename_tool);
+	g_settings_get (nemo_preferences, NEMO_PREFERENCES_BULK_RENAME_TOOL, "^ay", &bulk_rename_tool);
 	return g_strstrip (bulk_rename_tool);
 }
 
@@ -2478,16 +2478,16 @@ have_bulk_rename_tool ()
 }
 
 static void
-nautilus_view_init (NautilusView *view)
+nemo_view_init (NemoView *view)
 {
 	AtkObject *atk_object;
-	NautilusDirectory *scripts_directory;
-	NautilusDirectory *templates_directory;
+	NemoDirectory *scripts_directory;
+	NemoDirectory *templates_directory;
 	char *templates_uri;
-	NautilusFileUndoManager* manager;
+	NemoFileUndoManager* manager;
 
-	view->details = G_TYPE_INSTANCE_GET_PRIVATE (view, NAUTILUS_TYPE_VIEW,
-						     NautilusViewDetails);
+	view->details = G_TYPE_INSTANCE_GET_PRIVATE (view, NEMO_TYPE_VIEW,
+						     NemoViewDetails);
 
 	/* Default to true; desktop-icon-view sets to false */
 	view->details->show_foreign_files = TRUE;
@@ -2509,61 +2509,61 @@ nautilus_view_init (NautilusView *view)
 					      GTK_JUNCTION_TOP | GTK_JUNCTION_LEFT);
 
 	if (set_up_scripts_directory_global ()) {
-		scripts_directory = nautilus_directory_get_by_uri (scripts_directory_uri);
+		scripts_directory = nemo_directory_get_by_uri (scripts_directory_uri);
 		add_directory_to_scripts_directory_list (view, scripts_directory);
-		nautilus_directory_unref (scripts_directory);
+		nemo_directory_unref (scripts_directory);
 	} else {
 		g_warning ("Ignoring scripts directory, it may be a broken link\n");
 	}
 
-	if (nautilus_should_use_templates_directory ()) {
-		templates_uri = nautilus_get_templates_directory_uri ();
-		templates_directory = nautilus_directory_get_by_uri (templates_uri);
+	if (nemo_should_use_templates_directory ()) {
+		templates_uri = nemo_get_templates_directory_uri ();
+		templates_directory = nemo_directory_get_by_uri (templates_uri);
 		g_free (templates_uri);
 		add_directory_to_templates_directory_list (view, templates_directory);
-		nautilus_directory_unref (templates_directory);
+		nemo_directory_unref (templates_directory);
 	}
 	update_templates_directory (view);
-	g_signal_connect_object (nautilus_signaller_get_current (),
+	g_signal_connect_object (nemo_signaller_get_current (),
 				 "user_dirs_changed",
 				 G_CALLBACK (user_dirs_changed),
 				 view, G_CONNECT_SWAPPED);
 
 	view->details->sort_directories_first =
-		g_settings_get_boolean (nautilus_preferences, NAUTILUS_PREFERENCES_SORT_DIRECTORIES_FIRST);
+		g_settings_get_boolean (nemo_preferences, NEMO_PREFERENCES_SORT_DIRECTORIES_FIRST);
 
-	g_signal_connect_object (nautilus_trash_monitor_get (), "trash_state_changed",
-				 G_CALLBACK (nautilus_view_trash_state_changed_callback), view, 0);
+	g_signal_connect_object (nemo_trash_monitor_get (), "trash_state_changed",
+				 G_CALLBACK (nemo_view_trash_state_changed_callback), view, 0);
 
 	/* React to clipboard changes */
-	g_signal_connect_object (nautilus_clipboard_monitor_get (), "clipboard_changed",
+	g_signal_connect_object (nemo_clipboard_monitor_get (), "clipboard_changed",
 				 G_CALLBACK (clipboard_changed_callback), view, 0);
 
 	/* Register to menu provider extension signal managing menu updates */
-	g_signal_connect_object (nautilus_signaller_get_current (), "popup_menu_changed",
-				 G_CALLBACK (nautilus_view_update_menus), view, G_CONNECT_SWAPPED);
+	g_signal_connect_object (nemo_signaller_get_current (), "popup_menu_changed",
+				 G_CALLBACK (nemo_view_update_menus), view, G_CONNECT_SWAPPED);
 
 	gtk_widget_show (GTK_WIDGET (view));
 
-	g_signal_connect_swapped (nautilus_preferences,
-				  "changed::" NAUTILUS_PREFERENCES_ENABLE_DELETE,
+	g_signal_connect_swapped (nemo_preferences,
+				  "changed::" NEMO_PREFERENCES_ENABLE_DELETE,
 				  G_CALLBACK (schedule_update_menus_callback), view);
-	g_signal_connect_swapped (nautilus_preferences,
-				  "changed::" NAUTILUS_PREFERENCES_CLICK_POLICY,
+	g_signal_connect_swapped (nemo_preferences,
+				  "changed::" NEMO_PREFERENCES_CLICK_POLICY,
 				  G_CALLBACK(click_policy_changed_callback),
 				  view);
-	g_signal_connect_swapped (nautilus_preferences,
-				  "changed::" NAUTILUS_PREFERENCES_SORT_DIRECTORIES_FIRST, 
+	g_signal_connect_swapped (nemo_preferences,
+				  "changed::" NEMO_PREFERENCES_SORT_DIRECTORIES_FIRST, 
 				  G_CALLBACK(sort_directories_first_changed_callback), view);
 	g_signal_connect_swapped (gnome_lockdown_preferences,
-				  "changed::" NAUTILUS_PREFERENCES_LOCKDOWN_COMMAND_LINE,
+				  "changed::" NEMO_PREFERENCES_LOCKDOWN_COMMAND_LINE,
 				  G_CALLBACK (schedule_update_menus), view);
 
-	g_signal_connect_swapped (nautilus_window_state,
-				  "changed::" NAUTILUS_WINDOW_STATE_START_WITH_STATUS_BAR,
-				  G_CALLBACK (nautilus_view_display_selection_info), view);
+	g_signal_connect_swapped (nemo_window_state,
+				  "changed::" NEMO_WINDOW_STATE_START_WITH_STATUS_BAR,
+				  G_CALLBACK (nemo_view_display_selection_info), view);
 				  
-	manager = nautilus_file_undo_manager_get ();
+	manager = nemo_file_undo_manager_get ();
 	g_signal_connect_object (manager, "undo-changed",
 				 G_CALLBACK (undo_manager_changed_cb), view, 0);				  
 
@@ -2574,7 +2574,7 @@ nautilus_view_init (NautilusView *view)
 }
 
 static void
-real_unmerge_menus (NautilusView *view)
+real_unmerge_menus (NemoView *view)
 {
 	GtkUIManager *ui_manager;
 
@@ -2582,42 +2582,42 @@ real_unmerge_menus (NautilusView *view)
 		return;
 	}
 
-	ui_manager = nautilus_window_get_ui_manager (view->details->window);
+	ui_manager = nemo_window_get_ui_manager (view->details->window);
 
-	nautilus_ui_unmerge_ui (ui_manager,
+	nemo_ui_unmerge_ui (ui_manager,
 				&view->details->dir_merge_id,
 				&view->details->dir_action_group);
-	nautilus_ui_unmerge_ui (ui_manager,
+	nemo_ui_unmerge_ui (ui_manager,
 				&view->details->extensions_menu_merge_id,
 				&view->details->extensions_menu_action_group);
-	nautilus_ui_unmerge_ui (ui_manager,
+	nemo_ui_unmerge_ui (ui_manager,
 				&view->details->open_with_merge_id,
 				&view->details->open_with_action_group);
-	nautilus_ui_unmerge_ui (ui_manager,
+	nemo_ui_unmerge_ui (ui_manager,
 				&view->details->scripts_merge_id,
 				&view->details->scripts_action_group);
-	nautilus_ui_unmerge_ui (ui_manager,
+	nemo_ui_unmerge_ui (ui_manager,
 				&view->details->templates_merge_id,
 				&view->details->templates_action_group);
 }
 
 static void
-nautilus_view_destroy (GtkWidget *object)
+nemo_view_destroy (GtkWidget *object)
 {
-	NautilusView *view;
+	NemoView *view;
 	GList *node, *next;
 
-	view = NAUTILUS_VIEW (object);
+	view = NEMO_VIEW (object);
 
 	disconnect_model_handlers (view);
 
-	nautilus_view_unmerge_menus (view);
+	nemo_view_unmerge_menus (view);
 	
 	/* We don't own the window, so no unref */
 	view->details->slot = NULL;
 	view->details->window = NULL;
 	
-	nautilus_view_stop_loading (view);
+	nemo_view_stop_loading (view);
 
 	for (node = view->details->scripts_directory_list; node != NULL; node = next) {
 		next = node->next;
@@ -2630,7 +2630,7 @@ nautilus_view_destroy (GtkWidget *object)
 	}
 
 	while (view->details->subdirectory_list != NULL) {
-		nautilus_view_remove_subdirectory (view,
+		nemo_view_remove_subdirectory (view,
 						   view->details->subdirectory_list->data);
 	}
 
@@ -2653,33 +2653,33 @@ nautilus_view_destroy (GtkWidget *object)
 	}
 
 	if (view->details->model) {
-		nautilus_directory_unref (view->details->model);
+		nemo_directory_unref (view->details->model);
 		view->details->model = NULL;
 	}
 	
 	if (view->details->directory_as_file) {
-		nautilus_file_unref (view->details->directory_as_file);
+		nemo_file_unref (view->details->directory_as_file);
 		view->details->directory_as_file = NULL;
 	}
 
-	GTK_WIDGET_CLASS (nautilus_view_parent_class)->destroy (object);
+	GTK_WIDGET_CLASS (nemo_view_parent_class)->destroy (object);
 }
 
 static void
-nautilus_view_finalize (GObject *object)
+nemo_view_finalize (GObject *object)
 {
-	NautilusView *view;
+	NemoView *view;
 
-	view = NAUTILUS_VIEW (object);
+	view = NEMO_VIEW (object);
 
-	g_signal_handlers_disconnect_by_func (nautilus_preferences,
+	g_signal_handlers_disconnect_by_func (nemo_preferences,
 					      schedule_update_menus_callback, view);
-	g_signal_handlers_disconnect_by_func (nautilus_preferences,
+	g_signal_handlers_disconnect_by_func (nemo_preferences,
 					      click_policy_changed_callback, view);
-	g_signal_handlers_disconnect_by_func (nautilus_preferences,
+	g_signal_handlers_disconnect_by_func (nemo_preferences,
 					      sort_directories_first_changed_callback, view);
-	g_signal_handlers_disconnect_by_func (nautilus_window_state,
-					      nautilus_view_display_selection_info, view);
+	g_signal_handlers_disconnect_by_func (nemo_window_state,
+					      nemo_view_display_selection_info, view);
 
 	g_signal_handlers_disconnect_by_func (gnome_lockdown_preferences,
 					      schedule_update_menus, view);
@@ -2691,18 +2691,18 @@ nautilus_view_finalize (GObject *object)
 
 	g_hash_table_destroy (view->details->non_ready_files);
 
-	G_OBJECT_CLASS (nautilus_view_parent_class)->finalize (object);
+	G_OBJECT_CLASS (nemo_view_parent_class)->finalize (object);
 }
 
 /**
- * nautilus_view_display_selection_info:
+ * nemo_view_display_selection_info:
  *
  * Display information about the current selection, and notify the view frame of the changed selection.
- * @view: NautilusView for which to display selection info.
+ * @view: NemoView for which to display selection info.
  *
  **/
 void
-nautilus_view_display_selection_info (NautilusView *view)
+nemo_view_display_selection_info (NemoView *view)
 {
 	GList *selection;
 	goffset non_folder_size;
@@ -2719,11 +2719,11 @@ nautilus_view_display_selection_info (NautilusView *view)
 	char *view_status_string;
 	char *free_space_str;
 	char *obj_selected_free_space_str;
-	NautilusFile *file;
+	NemoFile *file;
 
-	g_return_if_fail (NAUTILUS_IS_VIEW (view));
+	g_return_if_fail (NEMO_IS_VIEW (view));
 
-	selection = nautilus_view_get_selection (view);
+	selection = nemo_view_get_selection (view);
 	
 	folder_item_count_known = TRUE;
 	folder_count = 0;
@@ -2742,27 +2742,27 @@ nautilus_view_display_selection_info (NautilusView *view)
 	
 	for (p = selection; p != NULL; p = p->next) {
 		file = p->data;
-		if (nautilus_file_is_directory (file)) {
+		if (nemo_file_is_directory (file)) {
 			folder_count++;
-			if (nautilus_file_get_directory_item_count (file, &file_item_count, NULL)) {
+			if (nemo_file_get_directory_item_count (file, &file_item_count, NULL)) {
 				folder_item_count += file_item_count;
 			} else {
 				folder_item_count_known = FALSE;
 			}
 		} else {
 			non_folder_count++;
-			if (!nautilus_file_can_get_size (file)) {
+			if (!nemo_file_can_get_size (file)) {
 				non_folder_size_known = TRUE;
-				non_folder_size += nautilus_file_get_size (file);
+				non_folder_size += nemo_file_get_size (file);
 			}
 		}
 
 		if (first_item_name == NULL) {
-			first_item_name = nautilus_file_get_display_name (file);
+			first_item_name = nemo_file_get_display_name (file);
 		}
 	}
 	
-	nautilus_file_list_free (selection);
+	nemo_file_list_free (selection);
 	
 	/* Break out cases for localization's sake. But note that there are still pieces
 	 * being assembled in a particular order, which may be a problem for some localizers.
@@ -2843,7 +2843,7 @@ nautilus_view_display_selection_info (NautilusView *view)
 		}
 	}
 
-	free_space_str = nautilus_file_get_volume_free_space (view->details->directory_as_file);
+	free_space_str = nemo_file_get_volume_free_space (view->details->directory_as_file);
 	if (free_space_str != NULL) {
 		obj_selected_free_space_str = g_strdup_printf (_("Free space: %s"), free_space_str);
 	}
@@ -2851,7 +2851,7 @@ nautilus_view_display_selection_info (NautilusView *view)
 		char *item_count_str;
 		guint item_count;
 
-		item_count = nautilus_view_get_item_count (view);
+		item_count = nemo_view_get_item_count (view);
 		
 		item_count_str = g_strdup_printf (ngettext ("%'u item", "%'u items", item_count), item_count);
 
@@ -2936,7 +2936,7 @@ nautilus_view_display_selection_info (NautilusView *view)
 		status_string = g_strdup (view_status_string);
 	}
 
-	nautilus_window_slot_set_status (view->details->slot,
+	nemo_window_slot_set_status (view->details->slot,
 					 status_string,
 					 view_status_string);
 
@@ -2945,7 +2945,7 @@ nautilus_view_display_selection_info (NautilusView *view)
 }
 
 static void
-nautilus_view_send_selection_change (NautilusView *view)
+nemo_view_send_selection_change (NemoView *view)
 {
 	g_signal_emit (view, signals[SELECTION_CHANGED], 0);
 
@@ -2953,34 +2953,34 @@ nautilus_view_send_selection_change (NautilusView *view)
 }
 
 void
-nautilus_view_load_location (NautilusView *nautilus_view,
+nemo_view_load_location (NemoView *nemo_view,
 			     GFile        *location)
 {
-	NautilusDirectory *directory;
-	NautilusView *directory_view;
+	NemoDirectory *directory;
+	NemoView *directory_view;
 
-	directory_view = NAUTILUS_VIEW (nautilus_view);
+	directory_view = NEMO_VIEW (nemo_view);
 
-	directory = nautilus_directory_get (location);
+	directory = nemo_directory_get (location);
 	load_directory (directory_view, directory);
-	nautilus_directory_unref (directory);
+	nemo_directory_unref (directory);
 }
 
 static gboolean
 reveal_selection_idle_callback (gpointer data)
 {
-	NautilusView *view;
+	NemoView *view;
 	
-	view = NAUTILUS_VIEW (data);
+	view = NEMO_VIEW (data);
 
 	view->details->reveal_selection_idle_id = 0;
-	nautilus_view_reveal_selection (view);
+	nemo_view_reveal_selection (view);
 
 	return FALSE;
 }
 
 static void
-done_loading (NautilusView *view,
+done_loading (NemoView *view,
 	      gboolean all_files_seen)
 {
 	GList *selection;
@@ -2990,11 +2990,11 @@ done_loading (NautilusView *view,
 	}
 
 	/* This can be called during destruction, in which case there
-	 * is no NautilusWindow any more.
+	 * is no NemoWindow any more.
 	 */
 	if (view->details->window != NULL) {
 		if (all_files_seen) {
-			nautilus_window_report_load_complete (view->details->window, NAUTILUS_VIEW (view));
+			nemo_window_report_load_complete (view->details->window, NEMO_VIEW (view));
 		}
 
 		schedule_update_menus (view);
@@ -3006,10 +3006,10 @@ done_loading (NautilusView *view,
 			view->details->pending_selection = NULL;
 
 			view->details->selection_change_is_due_to_shell = TRUE;
-			nautilus_view_call_set_selection (view, selection);
+			nemo_view_call_set_selection (view, selection);
 			view->details->selection_change_is_due_to_shell = FALSE;
 
-			if (NAUTILUS_IS_LIST_VIEW (view)) {
+			if (NEMO_IS_LIST_VIEW (view)) {
 				/* HACK: We should be able to directly call reveal_selection here,
 				 * but at this point the GtkTreeView hasn't allocated the new nodes
 				 * yet, and it has a bug in the scroll calculation dealing with this
@@ -3023,11 +3023,11 @@ done_loading (NautilusView *view,
 				view->details->reveal_selection_idle_id = 
 					g_idle_add (reveal_selection_idle_callback, view);
 			} else {
-				nautilus_view_reveal_selection (view);
+				nemo_view_reveal_selection (view);
 			}
 		}
 		g_list_free_full (selection, g_object_unref);
-		nautilus_view_display_selection_info (view);
+		nemo_view_display_selection_info (view);
 	}
 
 	g_signal_emit (view, signals[END_LOADING], 0, all_files_seen);
@@ -3045,7 +3045,7 @@ static void
 debuting_files_data_free (DebutingFilesData *data)
 {
 	g_hash_table_unref (data->debuting_files);
-	nautilus_file_list_free (data->added_files);
+	nemo_file_list_free (data->added_files);
 	g_free (data);
 }
  
@@ -3054,22 +3054,22 @@ debuting_files_data_free (DebutingFilesData *data)
  * it selects and reveals them all.
  */
 static void
-debuting_files_add_file_callback (NautilusView *view,
-				  NautilusFile *new_file,
-				  NautilusDirectory *directory,
+debuting_files_add_file_callback (NemoView *view,
+				  NemoFile *new_file,
+				  NemoDirectory *directory,
 				  DebutingFilesData *data)
 {
 	GFile *location;
 
-	location = nautilus_file_get_location (new_file);
+	location = nemo_file_get_location (new_file);
 
 	if (g_hash_table_remove (data->debuting_files, location)) {
-		nautilus_file_ref (new_file);
+		nemo_file_ref (new_file);
 		data->added_files = g_list_prepend (data->added_files, new_file);
 
 		if (g_hash_table_size (data->debuting_files) == 0) {
-			nautilus_view_call_set_selection (view, data->added_files);
-			nautilus_view_reveal_selection (view);
+			nemo_view_call_set_selection (view, data->added_files);
+			nemo_view_reveal_selection (view);
 			g_signal_handlers_disconnect_by_func (view,
 							      G_CALLBACK (debuting_files_add_file_callback),
 							      data);
@@ -3081,7 +3081,7 @@ debuting_files_add_file_callback (NautilusView *view,
 
 typedef struct {
 	GList		*added_files;
-	NautilusView *directory_view;
+	NemoView *directory_view;
 } CopyMoveDoneData;
 
 static void
@@ -3090,27 +3090,27 @@ copy_move_done_data_free (CopyMoveDoneData *data)
 	g_assert (data != NULL);
 	
 	eel_remove_weak_pointer (&data->directory_view);
-	nautilus_file_list_free (data->added_files);
+	nemo_file_list_free (data->added_files);
 	g_free (data);
 }
 
 static void
-pre_copy_move_add_file_callback (NautilusView *view,
-				 NautilusFile *new_file,
-				 NautilusDirectory *directory,
+pre_copy_move_add_file_callback (NemoView *view,
+				 NemoFile *new_file,
+				 NemoDirectory *directory,
 				 CopyMoveDoneData *data)
 {
-	nautilus_file_ref (new_file);
+	nemo_file_ref (new_file);
 	data->added_files = g_list_prepend (data->added_files, new_file);
 }
 
-/* This needs to be called prior to nautilus_file_operations_copy_move.
+/* This needs to be called prior to nemo_file_operations_copy_move.
  * It hooks up a signal handler to catch any icons that get added before
  * the copy_done_callback is invoked. The return value should  be passed
  * as the data for uri_copy_move_done_callback.
  */
 static CopyMoveDoneData *
-pre_copy_move (NautilusView *directory_view)
+pre_copy_move (NemoView *directory_view)
 {
 	CopyMoveDoneData *copy_move_done_data;
 
@@ -3138,7 +3138,7 @@ copy_move_done_partition_func (gpointer data, gpointer callback_data)
  	GFile *location;
  	gboolean result;
  	
-	location = nautilus_file_get_location (NAUTILUS_FILE (data));
+	location = nemo_file_get_location (NEMO_FILE (data));
 	result = g_hash_table_remove ((GHashTable *) callback_data, location);
 	g_object_unref (location);
 
@@ -3161,7 +3161,7 @@ remove_not_really_moved_files (gpointer key,
 	
 	added_files = callback_data;
 	*added_files = g_list_prepend (*added_files,
-				       nautilus_file_get (loc));
+				       nemo_file_get (loc));
 	return TRUE;
 }
 
@@ -3178,7 +3178,7 @@ copy_move_done_callback (GHashTable *debuting_files,
 			 gboolean success,
 			 gpointer data)
 {
-	NautilusView  *directory_view;
+	NemoView  *directory_view;
 	CopyMoveDoneData *copy_move_done_data;
 	DebutingFilesData  *debuting_files_data;
 
@@ -3186,7 +3186,7 @@ copy_move_done_callback (GHashTable *debuting_files,
 	directory_view = copy_move_done_data->directory_view;
 
 	if (directory_view != NULL) {
-		g_assert (NAUTILUS_IS_VIEW (directory_view));
+		g_assert (NEMO_IS_VIEW (directory_view));
 	
 		debuting_files_data = g_new (DebutingFilesData, 1);
 		debuting_files_data->debuting_files = g_hash_table_ref (debuting_files);
@@ -3216,9 +3216,9 @@ copy_move_done_callback (GHashTable *debuting_files,
 		if (g_hash_table_size (debuting_files) == 0) {
 			/* on the off-chance that all the icons have already been added */
 			if (debuting_files_data->added_files != NULL) {
-				nautilus_view_call_set_selection (directory_view,
+				nemo_view_call_set_selection (directory_view,
 								  debuting_files_data->added_files);
-				nautilus_view_reveal_selection (directory_view);
+				nemo_view_reveal_selection (directory_view);
 			}
 			debuting_files_data_free (debuting_files_data);
 		} else {
@@ -3241,37 +3241,37 @@ copy_move_done_callback (GHashTable *debuting_files,
 }
 
 static gboolean
-view_file_still_belongs (NautilusView *view,
-			 NautilusFile *file,
-			 NautilusDirectory *directory)
+view_file_still_belongs (NemoView *view,
+			 NemoFile *file,
+			 NemoDirectory *directory)
 {
 	if (view->details->model != directory &&
 	    g_list_find (view->details->subdirectory_list, directory) == NULL) {
 		return FALSE;
 	}
 	
-	return nautilus_directory_contains_file (directory, file);
+	return nemo_directory_contains_file (directory, file);
 }
 
 static gboolean
-still_should_show_file (NautilusView *view, NautilusFile *file, NautilusDirectory *directory)
+still_should_show_file (NemoView *view, NemoFile *file, NemoDirectory *directory)
 {
-	return nautilus_view_should_show_file (view, file) &&
+	return nemo_view_should_show_file (view, file) &&
 		view_file_still_belongs (view, file, directory);
 }
 
 static gboolean
-ready_to_load (NautilusFile *file)
+ready_to_load (NemoFile *file)
 {
-	return nautilus_file_check_if_ready (file,
-					     NAUTILUS_FILE_ATTRIBUTES_FOR_ICON);
+	return nemo_file_check_if_ready (file,
+					     NEMO_FILE_ATTRIBUTES_FOR_ICON);
 }
 
 static int
 compare_files_cover (gconstpointer a, gconstpointer b, gpointer callback_data)
 {
 	const FileAndDirectory *fad1, *fad2;
-	NautilusView *view;
+	NemoView *view;
 	
 	view = callback_data;
 	fad1 = a; fad2 = b;
@@ -3281,11 +3281,11 @@ compare_files_cover (gconstpointer a, gconstpointer b, gpointer callback_data)
 	} else if (fad1->directory > fad2->directory) {
 		return 1;
 	} else {
-		return NAUTILUS_VIEW_CLASS (G_OBJECT_GET_CLASS (view))->compare_files (view, fad1->file, fad2->file);
+		return NEMO_VIEW_CLASS (G_OBJECT_GET_CLASS (view))->compare_files (view, fad1->file, fad2->file);
 	}
 }
 static void
-sort_files (NautilusView *view, GList **list)
+sort_files (NemoView *view, GList **list)
 {
 	*list = g_list_sort_with_data (*list, compare_files_cover, view);
 	
@@ -3297,7 +3297,7 @@ sort_files (NautilusView *view, GList **list)
  * Sort the old_*_files lists if anything was added to them.
  */
 static void
-process_new_files (NautilusView *view)
+process_new_files (NemoView *view)
 {
 	GList *new_added_files, *new_changed_files, *old_added_files, *old_changed_files;
 	GHashTable *non_ready_files;
@@ -3322,7 +3322,7 @@ process_new_files (NautilusView *view)
 		next = node->next;
 		pending = (FileAndDirectory *)node->data;
 		in_non_ready = g_hash_table_lookup (non_ready_files, pending) != NULL;
-		if (nautilus_view_should_show_file (view, pending->file)) {
+		if (nemo_view_should_show_file (view, pending->file)) {
 			if (ready_to_load (pending->file)) {
 				if (in_non_ready) {
 					g_hash_table_remove (non_ready_files, pending);
@@ -3354,7 +3354,7 @@ process_new_files (NautilusView *view)
 					new_changed_files = g_list_delete_link (new_changed_files, node);
 					old_added_files = g_list_prepend (old_added_files, pending);
 				}
-			} else if (nautilus_view_should_show_file (view, pending->file)) {
+			} else if (nemo_view_should_show_file (view, pending->file)) {
 				new_changed_files = g_list_delete_link (new_changed_files, node);
 				old_changed_files = g_list_prepend (old_changed_files, pending);
 			}
@@ -3379,7 +3379,7 @@ process_new_files (NautilusView *view)
 }
 
 static void
-process_old_files (NautilusView *view)
+process_old_files (NemoView *view)
 {
 	GList *files_added, *files_changed, *node;
 	FileAndDirectory *pending;
@@ -3411,12 +3411,12 @@ process_old_files (NautilusView *view)
 		g_signal_emit (view, signals[END_FILE_CHANGES], 0);
 
 		if (files_changed != NULL) {
-			selection = nautilus_view_get_selection (view);
+			selection = nemo_view_get_selection (view);
 			files = file_and_directory_list_to_files (files_changed);
 			send_selection_change = eel_g_lists_sort_and_check_for_intersection
 				(&files, &selection);
-			nautilus_file_list_free (files);
-			nautilus_file_list_free (selection);
+			nemo_file_list_free (files);
+			nemo_file_list_free (selection);
 		}
 		
 		file_and_directory_list_free (view->details->old_added_files);
@@ -3430,12 +3430,12 @@ process_old_files (NautilusView *view)
 		/* Send a selection change since some file names could
 		 * have changed.
 		 */
-		nautilus_view_send_selection_change (view);
+		nemo_view_send_selection_change (view);
 	}
 }
 
 static void
-display_pending_files (NautilusView *view)
+display_pending_files (NemoView *view)
 {
 
 	/* Don't dispatch any updates while the view is frozen. */
@@ -3447,14 +3447,14 @@ display_pending_files (NautilusView *view)
 	process_old_files (view);
 
 	if (view->details->model != NULL
-	    && nautilus_directory_are_all_files_seen (view->details->model)
+	    && nemo_directory_are_all_files_seen (view->details->model)
 	    && g_hash_table_size (view->details->non_ready_files) == 0) {
 		done_loading (view, TRUE);
 	}
 }
 
 void
-nautilus_view_freeze_updates (NautilusView *view)
+nemo_view_freeze_updates (NemoView *view)
 {
 	view->details->updates_frozen = TRUE;
 	view->details->updates_queued = 0;
@@ -3462,7 +3462,7 @@ nautilus_view_freeze_updates (NautilusView *view)
 }
 
 void
-nautilus_view_unfreeze_updates (NautilusView *view)
+nemo_view_unfreeze_updates (NemoView *view)
 {
 	view->details->updates_frozen = FALSE;
 
@@ -3479,16 +3479,16 @@ nautilus_view_unfreeze_updates (NautilusView *view)
 static gboolean
 display_selection_info_idle_callback (gpointer data)
 {
-	NautilusView *view;
+	NemoView *view;
 	
-	view = NAUTILUS_VIEW (data);
+	view = NEMO_VIEW (data);
 
 	g_object_ref (G_OBJECT (view));
 
 	view->details->display_selection_idle_id = 0;
-	nautilus_view_display_selection_info (view);
+	nemo_view_display_selection_info (view);
 	if (view->details->send_selection_change_to_shell) {
-		nautilus_view_send_selection_change (view);
+		nemo_view_send_selection_change (view);
 	}
 
 	g_object_unref (G_OBJECT (view));
@@ -3497,7 +3497,7 @@ display_selection_info_idle_callback (gpointer data)
 }
 
 static void
-remove_update_menus_timeout_callback (NautilusView *view) 
+remove_update_menus_timeout_callback (NemoView *view) 
 {
 	if (view->details->update_menus_timeout_id != 0) {
 		g_source_remove (view->details->update_menus_timeout_id);
@@ -3506,27 +3506,27 @@ remove_update_menus_timeout_callback (NautilusView *view)
 }
 
 static void
-update_menus_if_pending (NautilusView *view)
+update_menus_if_pending (NemoView *view)
 {
 	if (!view->details->menu_states_untrustworthy) {
 		return;
 	}
 
 	remove_update_menus_timeout_callback (view);
-	nautilus_view_update_menus (view);
+	nemo_view_update_menus (view);
 }
 
 static gboolean
 update_menus_timeout_callback (gpointer data)
 {
-	NautilusView *view;
+	NemoView *view;
 
-	view = NAUTILUS_VIEW (data);
+	view = NEMO_VIEW (data);
 
 	g_object_ref (G_OBJECT (view));
 
 	view->details->update_menus_timeout_id = 0;
-	nautilus_view_update_menus (view);
+	nemo_view_update_menus (view);
 
 	g_object_unref (G_OBJECT (view));
 
@@ -3536,9 +3536,9 @@ update_menus_timeout_callback (gpointer data)
 static gboolean
 display_pending_callback (gpointer data)
 {
-	NautilusView *view;
+	NemoView *view;
 
-	view = NAUTILUS_VIEW (data);
+	view = NEMO_VIEW (data);
 
 	g_object_ref (G_OBJECT (view));
 
@@ -3552,7 +3552,7 @@ display_pending_callback (gpointer data)
 }
 
 static void
-schedule_idle_display_of_pending_files (NautilusView *view)
+schedule_idle_display_of_pending_files (NemoView *view)
 {
 	/* Get rid of a pending source as it might be a timeout */
 	unschedule_display_of_pending_files (view);
@@ -3566,7 +3566,7 @@ schedule_idle_display_of_pending_files (NautilusView *view)
 }
 
 static void
-schedule_timeout_display_of_pending_files (NautilusView *view, guint interval)
+schedule_timeout_display_of_pending_files (NemoView *view, guint interval)
 {
  	/* No need to schedule an update if there's already one pending. */
 	if (view->details->display_pending_source_id != 0) {
@@ -3578,7 +3578,7 @@ schedule_timeout_display_of_pending_files (NautilusView *view, guint interval)
 }
 
 static void
-unschedule_display_of_pending_files (NautilusView *view)
+unschedule_display_of_pending_files (NemoView *view)
 {
 	/* Get rid of source if it's active. */
 	if (view->details->display_pending_source_id != 0) {
@@ -3588,8 +3588,8 @@ unschedule_display_of_pending_files (NautilusView *view)
 }
 
 static void
-queue_pending_files (NautilusView *view,
-		     NautilusDirectory *directory,
+queue_pending_files (NemoView *view,
+		     NemoDirectory *directory,
 		     GList *files,
 		     GList **pending_list)
 {
@@ -3618,13 +3618,13 @@ queue_pending_files (NautilusView *view,
 	*pending_list = g_list_concat (file_and_directory_list_from_files (directory, files),
 				       *pending_list);
 
-	if (! view->details->loading || nautilus_directory_are_all_files_seen (directory)) {
+	if (! view->details->loading || nemo_directory_are_all_files_seen (directory)) {
 		schedule_timeout_display_of_pending_files (view, view->details->update_interval);
 	}
 }
 
 static void
-remove_changes_timeout_callback (NautilusView *view) 
+remove_changes_timeout_callback (NemoView *view) 
 {
 	if (view->details->changes_timeout_id != 0) {
 		g_source_remove (view->details->changes_timeout_id);
@@ -3633,7 +3633,7 @@ remove_changes_timeout_callback (NautilusView *view)
 }
 
 static void
-reset_update_interval (NautilusView *view)
+reset_update_interval (NemoView *view)
 {
 	view->details->update_interval = UPDATE_INTERVAL_MIN;
 	remove_changes_timeout_callback (view);
@@ -3649,9 +3649,9 @@ changes_timeout_callback (gpointer data)
 	gint64 now;
 	gint64 time_delta;
 	gboolean ret;
-	NautilusView *view;
+	NemoView *view;
 
-	view = NAUTILUS_VIEW (data);
+	view = NEMO_VIEW (data);
 
 	g_object_ref (G_OBJECT (view));
 
@@ -3677,7 +3677,7 @@ changes_timeout_callback (gpointer data)
 }
 
 static void
-schedule_changes (NautilusView *view)
+schedule_changes (NemoView *view)
 {
 	/* Remember when the change was queued */
 	view->details->last_queued = eel_get_system_time();
@@ -3693,18 +3693,18 @@ schedule_changes (NautilusView *view)
 }
 
 static void
-files_added_callback (NautilusDirectory *directory,
+files_added_callback (NemoDirectory *directory,
 		      GList *files,
 		      gpointer callback_data)
 {
-	NautilusView *view;
+	NemoView *view;
 	GtkWindow *window;
 	char *uri;
 
-	view = NAUTILUS_VIEW (callback_data);
+	view = NEMO_VIEW (callback_data);
 
-	window = nautilus_view_get_containing_window (view);
-	uri = nautilus_view_get_uri (view);
+	window = nemo_view_get_containing_window (view);
+	uri = nemo_view_get_uri (view);
 	DEBUG_FILES (files, "Files added in window %p: %s",
 		     window, uri ? uri : "(no directory)");
 	g_free (uri);
@@ -3718,18 +3718,18 @@ files_added_callback (NautilusDirectory *directory,
 }
 
 static void
-files_changed_callback (NautilusDirectory *directory,
+files_changed_callback (NemoDirectory *directory,
 			GList *files,
 			gpointer callback_data)
 {
-	NautilusView *view;
+	NemoView *view;
 	GtkWindow *window;
 	char *uri;
 	
-	view = NAUTILUS_VIEW (callback_data);
+	view = NEMO_VIEW (callback_data);
 
-	window = nautilus_view_get_containing_window (view);
-	uri = nautilus_view_get_uri (view);
+	window = nemo_view_get_containing_window (view);
+	uri = nemo_view_get_uri (view);
 	DEBUG_FILES (files, "Files changed in window %p: %s",
 		     window, uri ? uri : "(no directory)");
 	g_free (uri);
@@ -3748,12 +3748,12 @@ files_changed_callback (NautilusDirectory *directory,
 }
 
 static void
-done_loading_callback (NautilusDirectory *directory,
+done_loading_callback (NemoDirectory *directory,
 		       gpointer callback_data)
 {
-	NautilusView *view;
+	NemoView *view;
 
-	view = NAUTILUS_VIEW (callback_data);
+	view = NEMO_VIEW (callback_data);
 	
 	process_new_files (view);
 	if (g_hash_table_size (view->details->non_ready_files) == 0) {
@@ -3767,18 +3767,18 @@ done_loading_callback (NautilusDirectory *directory,
 }
 
 static void
-load_error_callback (NautilusDirectory *directory,
+load_error_callback (NemoDirectory *directory,
 		     GError *error,
 		     gpointer callback_data)
 {
-	NautilusView *view;
+	NemoView *view;
 
-	view = NAUTILUS_VIEW (callback_data);
+	view = NEMO_VIEW (callback_data);
 
 	/* FIXME: By doing a stop, we discard some pending files. Is
 	 * that OK?
 	 */
-	nautilus_view_stop_loading (view);
+	nemo_view_stop_loading (view);
 
 	/* Emit a signal to tell subclasses that a load error has
 	 * occurred, so they can handle it in the UI.
@@ -3788,42 +3788,42 @@ load_error_callback (NautilusDirectory *directory,
 }
 
 static void
-real_load_error (NautilusView *view, GError *error)
+real_load_error (NemoView *view, GError *error)
 {
 	/* Report only one error per failed directory load (from the UI
-	 * point of view, not from the NautilusDirectory point of view).
+	 * point of view, not from the NemoDirectory point of view).
 	 * Otherwise you can get multiple identical errors caused by 
 	 * unrelated code that just happens to try to iterate this
 	 * directory.
 	 */
 	if (!view->details->reported_load_error) {
-		nautilus_report_error_loading_directory 
-			(nautilus_view_get_directory_as_file (view),
+		nemo_report_error_loading_directory 
+			(nemo_view_get_directory_as_file (view),
 			 error,
-			 nautilus_view_get_containing_window (view));
+			 nemo_view_get_containing_window (view));
 	}
 	view->details->reported_load_error = TRUE;
 }
 
 void
-nautilus_view_add_subdirectory (NautilusView  *view,
-				NautilusDirectory*directory)
+nemo_view_add_subdirectory (NemoView  *view,
+				NemoDirectory*directory)
 {
-	NautilusFileAttributes attributes;
+	NemoFileAttributes attributes;
 
 	g_assert (!g_list_find (view->details->subdirectory_list, directory));
 	
-	nautilus_directory_ref (directory);
+	nemo_directory_ref (directory);
 
 	attributes =
-		NAUTILUS_FILE_ATTRIBUTES_FOR_ICON |
-		NAUTILUS_FILE_ATTRIBUTE_DIRECTORY_ITEM_COUNT |
-		NAUTILUS_FILE_ATTRIBUTE_INFO |
-		NAUTILUS_FILE_ATTRIBUTE_LINK_INFO |
-		NAUTILUS_FILE_ATTRIBUTE_MOUNT |
-		NAUTILUS_FILE_ATTRIBUTE_EXTENSION_INFO;
+		NEMO_FILE_ATTRIBUTES_FOR_ICON |
+		NEMO_FILE_ATTRIBUTE_DIRECTORY_ITEM_COUNT |
+		NEMO_FILE_ATTRIBUTE_INFO |
+		NEMO_FILE_ATTRIBUTE_LINK_INFO |
+		NEMO_FILE_ATTRIBUTE_MOUNT |
+		NEMO_FILE_ATTRIBUTE_EXTENSION_INFO;
 
-	nautilus_directory_file_monitor_add (directory,
+	nemo_directory_file_monitor_add (directory,
 					     &view->details->model,
 					     view->details->show_hidden_files,
 					     attributes,
@@ -3841,8 +3841,8 @@ nautilus_view_add_subdirectory (NautilusView  *view,
 }
 
 void
-nautilus_view_remove_subdirectory (NautilusView  *view,
-				   NautilusDirectory*directory)
+nemo_view_remove_subdirectory (NemoView  *view,
+				   NemoDirectory*directory)
 {
 	g_assert (g_list_find (view->details->subdirectory_list, directory));
 	
@@ -3856,56 +3856,56 @@ nautilus_view_remove_subdirectory (NautilusView  *view,
 					      G_CALLBACK (files_changed_callback),
 					      view);
 
-	nautilus_directory_file_monitor_remove (directory, &view->details->model);
+	nemo_directory_file_monitor_remove (directory, &view->details->model);
 
-	nautilus_directory_unref (directory);
+	nemo_directory_unref (directory);
 }
 
 /**
- * nautilus_view_get_loading:
- * @view: an #NautilusView.
+ * nemo_view_get_loading:
+ * @view: an #NemoView.
  *
  * Return value: #gboolean inicating whether @view is currently loaded.
  * 
  **/
 gboolean
-nautilus_view_get_loading (NautilusView *view)
+nemo_view_get_loading (NemoView *view)
 {
-	g_return_val_if_fail (NAUTILUS_IS_VIEW (view), FALSE);
+	g_return_val_if_fail (NEMO_IS_VIEW (view), FALSE);
 
 	return view->details->loading;
 }
 
 GtkUIManager *
-nautilus_view_get_ui_manager (NautilusView  *view)
+nemo_view_get_ui_manager (NemoView  *view)
 {
 	if (view->details->window == NULL) {
 		return NULL;
 	}
-	return nautilus_window_get_ui_manager (view->details->window);	
+	return nemo_window_get_ui_manager (view->details->window);	
 }
 
 /**
- * nautilus_view_get_model:
+ * nemo_view_get_model:
  *
- * Get the model for this NautilusView.
- * @view: NautilusView of interest.
+ * Get the model for this NemoView.
+ * @view: NemoView of interest.
  * 
- * Return value: NautilusDirectory for this view.
+ * Return value: NemoDirectory for this view.
  * 
  **/
-NautilusDirectory *
-nautilus_view_get_model (NautilusView *view)
+NemoDirectory *
+nemo_view_get_model (NemoView *view)
 {
-	g_return_val_if_fail (NAUTILUS_IS_VIEW (view), NULL);
+	g_return_val_if_fail (NEMO_IS_VIEW (view), NULL);
 
 	return view->details->model;
 }
 
 GdkAtom
-nautilus_view_get_copied_files_atom (NautilusView *view)
+nemo_view_get_copied_files_atom (NemoView *view)
 {
-	g_return_val_if_fail (NAUTILUS_IS_VIEW (view), GDK_NONE);
+	g_return_val_if_fail (NEMO_IS_VIEW (view), GDK_NONE);
 	
 	return copied_files_atom;
 }
@@ -3913,15 +3913,15 @@ nautilus_view_get_copied_files_atom (NautilusView *view)
 static void
 prepend_uri_one (gpointer data, gpointer callback_data)
 {
-	NautilusFile *file;
+	NemoFile *file;
 	GList **result;
 	
-	g_assert (NAUTILUS_IS_FILE (data));
+	g_assert (NEMO_IS_FILE (data));
 	g_assert (callback_data != NULL);
 
 	result = (GList **) callback_data;
-	file = (NautilusFile *) data;
-	*result = g_list_prepend (*result, nautilus_file_get_uri (file));
+	file = (NemoFile *) data;
+	*result = g_list_prepend (*result, nemo_file_get_uri (file));
 }
 
 static void
@@ -3941,7 +3941,7 @@ offset_drop_points (GArray *relative_item_points,
 }
 
 static void
-nautilus_view_create_links_for_files (NautilusView *view, GList *files,
+nemo_view_create_links_for_files (NemoView *view, GList *files,
 				      GArray *relative_item_points)
 {
 	GList *uris;
@@ -3950,7 +3950,7 @@ nautilus_view_create_links_for_files (NautilusView *view, GList *files,
 	g_assert (relative_item_points->len == 0
 		  || g_list_length (files) == relative_item_points->len);
 	
-        g_assert (NAUTILUS_IS_VIEW (view));
+        g_assert (NEMO_IS_VIEW (view));
         g_assert (files != NULL);
 
 	/* create a list of URIs */
@@ -3968,21 +3968,21 @@ nautilus_view_create_links_for_files (NautilusView *view, GList *files,
 			    DUPLICATE_VERTICAL_ICON_OFFSET);
 
         copy_move_done_data = pre_copy_move (view);
-	dir_uri = nautilus_view_get_backing_uri (view);
-	nautilus_file_operations_copy_move (uris, relative_item_points, dir_uri, GDK_ACTION_LINK, 
+	dir_uri = nemo_view_get_backing_uri (view);
+	nemo_file_operations_copy_move (uris, relative_item_points, dir_uri, GDK_ACTION_LINK, 
 					    GTK_WIDGET (view), copy_move_done_callback, copy_move_done_data);
 	g_free (dir_uri);
 	g_list_free_full (uris, g_free);
 }
 
 static void
-nautilus_view_duplicate_selection (NautilusView *view, GList *files,
+nemo_view_duplicate_selection (NemoView *view, GList *files,
 				   GArray *relative_item_points)
 {
 	GList *uris;
 	CopyMoveDoneData *copy_move_done_data;
 
-        g_assert (NAUTILUS_IS_VIEW (view));
+        g_assert (NEMO_IS_VIEW (view));
         g_assert (files != NULL);
 	g_assert (g_list_length (files) == relative_item_points->len
 		  || relative_item_points->len == 0);
@@ -4002,7 +4002,7 @@ nautilus_view_duplicate_selection (NautilusView *view, GList *files,
 			    DUPLICATE_VERTICAL_ICON_OFFSET);
 
         copy_move_done_data = pre_copy_move (view);
-	nautilus_file_operations_copy_move (uris, relative_item_points, NULL, GDK_ACTION_COPY,
+	nemo_file_operations_copy_move (uris, relative_item_points, NULL, GDK_ACTION_COPY,
 					    GTK_WIDGET (view), copy_move_done_callback, copy_move_done_data);
 	g_list_free_full (uris, g_free);
 }
@@ -4011,33 +4011,33 @@ nautilus_view_duplicate_selection (NautilusView *view, GList *files,
  * 
  * Return TRUE if one of our special links is in the selection.
  * Special links include the following: 
- *	 NAUTILUS_DESKTOP_LINK_TRASH, NAUTILUS_DESKTOP_LINK_HOME, NAUTILUS_DESKTOP_LINK_MOUNT
+ *	 NEMO_DESKTOP_LINK_TRASH, NEMO_DESKTOP_LINK_HOME, NEMO_DESKTOP_LINK_MOUNT
  */
  
 static gboolean
-special_link_in_selection (NautilusView *view)
+special_link_in_selection (NemoView *view)
 {
 	gboolean saw_link;
 	GList *selection, *node;
-	NautilusFile *file;
+	NemoFile *file;
 
-	g_return_val_if_fail (NAUTILUS_IS_VIEW (view), FALSE);
+	g_return_val_if_fail (NEMO_IS_VIEW (view), FALSE);
 
 	saw_link = FALSE;
 
-	selection = nautilus_view_get_selection (NAUTILUS_VIEW (view));
+	selection = nemo_view_get_selection (NEMO_VIEW (view));
 
 	for (node = selection; node != NULL; node = node->next) {
-		file = NAUTILUS_FILE (node->data);
+		file = NEMO_FILE (node->data);
 
-		saw_link = NAUTILUS_IS_DESKTOP_ICON_FILE (file);
+		saw_link = NEMO_IS_DESKTOP_ICON_FILE (file);
 		
 		if (saw_link) {
 			break;
 		}
 	}
 	
-	nautilus_file_list_free (selection);
+	nemo_file_list_free (selection);
 	
 	return saw_link;
 }
@@ -4048,31 +4048,31 @@ special_link_in_selection (NautilusView *view)
  */
  
 static gboolean
-desktop_or_home_dir_in_selection (NautilusView *view)
+desktop_or_home_dir_in_selection (NemoView *view)
 {
 	gboolean saw_desktop_or_home_dir;
 	GList *selection, *node;
-	NautilusFile *file;
+	NemoFile *file;
 
-	g_return_val_if_fail (NAUTILUS_IS_VIEW (view), FALSE);
+	g_return_val_if_fail (NEMO_IS_VIEW (view), FALSE);
 
 	saw_desktop_or_home_dir = FALSE;
 
-	selection = nautilus_view_get_selection (NAUTILUS_VIEW (view));
+	selection = nemo_view_get_selection (NEMO_VIEW (view));
 
 	for (node = selection; node != NULL; node = node->next) {
-		file = NAUTILUS_FILE (node->data);
+		file = NEMO_FILE (node->data);
 
 		saw_desktop_or_home_dir =
-			nautilus_file_is_home (file)
-			|| nautilus_file_is_desktop_directory (file);
+			nemo_file_is_home (file)
+			|| nemo_file_is_desktop_directory (file);
 		
 		if (saw_desktop_or_home_dir) {
 			break;
 		}
 	}
 	
-	nautilus_file_list_free (selection);
+	nemo_file_list_free (selection);
 	
 	return saw_desktop_or_home_dir;
 }
@@ -4080,7 +4080,7 @@ desktop_or_home_dir_in_selection (NautilusView *view)
 static void
 trash_or_delete_done_cb (GHashTable *debuting_uris,
 			 gboolean user_cancel,
-			 NautilusView *view)
+			 NemoView *view)
 {
 	if (user_cancel) {
 		view->details->selection_was_removed = FALSE;
@@ -4091,7 +4091,7 @@ static void
 trash_or_delete_files (GtkWindow *parent_window,
 		       const GList *files,
 		       gboolean delete_if_all_already_in_trash,
-		       NautilusView *view)
+		       NemoView *view)
 {
 	GList *locations;
 	const GList *node;
@@ -4099,54 +4099,54 @@ trash_or_delete_files (GtkWindow *parent_window,
 	locations = NULL;
 	for (node = files; node != NULL; node = node->next) {
 		locations = g_list_prepend (locations,
-					    nautilus_file_get_location ((NautilusFile *) node->data));
+					    nemo_file_get_location ((NemoFile *) node->data));
 	}
 	
 	locations = g_list_reverse (locations);
 
-	nautilus_file_operations_trash_or_delete (locations,
+	nemo_file_operations_trash_or_delete (locations,
 						  parent_window,
-						  (NautilusDeleteCallback) trash_or_delete_done_cb,
+						  (NemoDeleteCallback) trash_or_delete_done_cb,
 						  view);
 	g_list_free_full (locations, g_object_unref);
 }
 
 static gboolean
-can_rename_file (NautilusView *view, NautilusFile *file)
+can_rename_file (NemoView *view, NemoFile *file)
 {
-	return nautilus_file_can_rename (file);
+	return nemo_file_can_rename (file);
 }
 
 gboolean
-nautilus_view_get_is_renaming (NautilusView *view)
+nemo_view_get_is_renaming (NemoView *view)
 {
 	return view->details->is_renaming;
 }
 
 void
-nautilus_view_set_is_renaming (NautilusView *view,
+nemo_view_set_is_renaming (NemoView *view,
 			       gboolean      is_renaming)
 {
 	view->details->is_renaming = is_renaming;
 }
 
 static void
-start_renaming_file (NautilusView *view,
-		     NautilusFile *file,
+start_renaming_file (NemoView *view,
+		     NemoFile *file,
 		     gboolean select_all)
 {
 	view->details->is_renaming = TRUE;
 
 	if (file !=  NULL) {
-		nautilus_view_select_file (view, file);
+		nemo_view_select_file (view, file);
 	}
 }
 
 static void
-update_context_menu_position_from_event (NautilusView *view,
+update_context_menu_position_from_event (NemoView *view,
 					 GdkEventButton  *event)
 {
-	g_return_if_fail (NAUTILUS_IS_VIEW (view));
+	g_return_if_fail (NEMO_IS_VIEW (view));
 
 	if (event != NULL) {
 		view->details->context_menu_position.x = event->x;
@@ -4162,18 +4162,18 @@ update_context_menu_position_from_event (NautilusView *view,
 static void
 open_one_in_new_window (gpointer data, gpointer callback_data)
 {
-	g_assert (NAUTILUS_IS_FILE (data));
-	g_assert (NAUTILUS_IS_VIEW (callback_data));
+	g_assert (NEMO_IS_FILE (data));
+	g_assert (NEMO_IS_VIEW (callback_data));
 
-	nautilus_view_activate_file (NAUTILUS_VIEW (callback_data),
-				     NAUTILUS_FILE (data),
-				     NAUTILUS_WINDOW_OPEN_FLAG_NEW_WINDOW);
+	nemo_view_activate_file (NEMO_VIEW (callback_data),
+				     NEMO_FILE (data),
+				     NEMO_WINDOW_OPEN_FLAG_NEW_WINDOW);
 }
 
-NautilusFile *
-nautilus_view_get_directory_as_file (NautilusView *view)
+NemoFile *
+nemo_view_get_directory_as_file (NemoView *view)
 {
-	g_assert (NAUTILUS_IS_VIEW (view));
+	g_assert (NEMO_IS_VIEW (view));
 
 	return view->details->directory_as_file; 
 }
@@ -4185,10 +4185,10 @@ open_with_launch_application_callback (GtkAction *action,
 	ApplicationLaunchParameters *launch_parameters;
 	
 	launch_parameters = (ApplicationLaunchParameters *) callback_data;
-	nautilus_launch_application 
+	nemo_launch_application 
 		(launch_parameters->application,
 		 launch_parameters->files,
-		 nautilus_view_get_containing_window (launch_parameters->directory_view));
+		 nemo_view_get_containing_window (launch_parameters->directory_view));
 }
 
 static char *
@@ -4313,7 +4313,7 @@ add_submenu (GtkUIManager *ui_manager,
 }
 
 static void
-add_application_to_open_with_menu (NautilusView *view,
+add_application_to_open_with_menu (NemoView *view,
 				   GAppInfo *application, 
 				   GList *files,
 				   int index,
@@ -4371,7 +4371,7 @@ add_application_to_open_with_menu (NautilusView *view,
 				     action);
 	g_object_unref (action);
 	
-	gtk_ui_manager_add_ui (nautilus_window_get_ui_manager (view->details->window),
+	gtk_ui_manager_add_ui (nemo_window_get_ui_manager (view->details->window),
 			       view->details->open_with_merge_id,
 			       menu_placeholder,
 			       action_name,
@@ -4381,12 +4381,12 @@ add_application_to_open_with_menu (NautilusView *view,
 
 	path = g_strdup_printf ("%s/%s", menu_placeholder, action_name);
 	menuitem = gtk_ui_manager_get_widget (
-					      nautilus_window_get_ui_manager (view->details->window),
+					      nemo_window_get_ui_manager (view->details->window),
 					      path);
 	gtk_image_menu_item_set_always_show_image (GTK_IMAGE_MENU_ITEM (menuitem), TRUE);
 	g_free (path);
 
-	gtk_ui_manager_add_ui (nautilus_window_get_ui_manager (view->details->window),
+	gtk_ui_manager_add_ui (nemo_window_get_ui_manager (view->details->window),
 			       view->details->open_with_merge_id,
 			       popup_placeholder,
 			       action_name,
@@ -4396,7 +4396,7 @@ add_application_to_open_with_menu (NautilusView *view,
 
 	path = g_strdup_printf ("%s/%s", popup_placeholder, action_name);
 	menuitem = gtk_ui_manager_get_widget (
-					      nautilus_window_get_ui_manager (view->details->window),
+					      nemo_window_get_ui_manager (view->details->window),
 					      path);
 	gtk_image_menu_item_set_always_show_image (GTK_IMAGE_MENU_ITEM (menuitem), TRUE);
 
@@ -4410,9 +4410,9 @@ static void
 get_x_content_async_callback (const char **content,
 			      gpointer user_data)
 {
-	NautilusView *view;
+	NemoView *view;
 
-	view = NAUTILUS_VIEW (user_data);
+	view = NEMO_VIEW (user_data);
 
 	if (view->details->window != NULL) {
 		schedule_update_menus (view);
@@ -4421,7 +4421,7 @@ get_x_content_async_callback (const char **content,
 }
 
 static void
-add_x_content_apps (NautilusView *view, NautilusFile *file, GList **applications)
+add_x_content_apps (NemoView *view, NemoFile *file, GList **applications)
 {
 	GMount *mount;
 	char **x_content_types;
@@ -4429,13 +4429,13 @@ add_x_content_apps (NautilusView *view, NautilusFile *file, GList **applications
 
 	g_return_if_fail (applications != NULL);
 
-	mount = nautilus_file_get_mount (file);
+	mount = nemo_file_get_mount (file);
 
 	if (mount == NULL) {
 		return;
 	}
 	
-	x_content_types = nautilus_get_cached_x_content_types_for_mount (mount);
+	x_content_types = nemo_get_cached_x_content_types_for_mount (mount);
 	if (x_content_types != NULL) {
 		for (n = 0; x_content_types[n] != NULL; n++) {
 			char *x_content_type = x_content_types[n];
@@ -4446,7 +4446,7 @@ add_x_content_apps (NautilusView *view, NautilusFile *file, GList **applications
 		}
 		g_strfreev (x_content_types);
 	} else {
-		nautilus_get_x_content_types_for_mount_async (mount,
+		nemo_get_x_content_types_for_mount_async (mount,
 							      get_x_content_async_callback,
 							      NULL,
 							      g_object_ref (view));
@@ -4457,10 +4457,10 @@ add_x_content_apps (NautilusView *view, NautilusFile *file, GList **applications
 }
 
 static void
-reset_open_with_menu (NautilusView *view, GList *selection)
+reset_open_with_menu (NemoView *view, GList *selection)
 {
 	GList *applications, *node;
-	NautilusFile *file;
+	NemoFile *file;
 	gboolean submenu_visible, filter_default;
 	int num_applications;
 	int index;
@@ -4472,12 +4472,12 @@ reset_open_with_menu (NautilusView *view, GList *selection)
 
 	/* Clear any previous inserted items in the applications and viewers placeholders */
 
-	ui_manager = nautilus_window_get_ui_manager (view->details->window);
-	nautilus_ui_unmerge_ui (ui_manager,
+	ui_manager = nemo_window_get_ui_manager (view->details->window);
+	nemo_ui_unmerge_ui (ui_manager,
 				&view->details->open_with_merge_id,
 				&view->details->open_with_action_group);
 	
-	nautilus_ui_prepare_merge_ui (ui_manager,
+	nemo_ui_prepare_merge_ui (ui_manager,
 				      "OpenWithGroup",
 				      &view->details->open_with_merge_id,
 				      &view->details->open_with_action_group);
@@ -4489,25 +4489,25 @@ reset_open_with_menu (NautilusView *view, GList *selection)
 
 	for (node = selection; node != NULL; node = node->next) {
 
-		file = NAUTILUS_FILE (node->data);
+		file = NEMO_FILE (node->data);
 
-		other_applications_visible &= ((!nautilus_mime_file_opens_in_view (file) &&
-						!nautilus_file_is_nautilus_link (file)) ||
-					       nautilus_file_is_directory (file));
+		other_applications_visible &= ((!nemo_mime_file_opens_in_view (file) &&
+						!nemo_file_is_nemo_link (file)) ||
+					       nemo_file_is_directory (file));
 	}
 
 	default_app = NULL;
 	if (filter_default) {
-		default_app = nautilus_mime_get_default_application_for_files (selection);
+		default_app = nemo_mime_get_default_application_for_files (selection);
 	}
 
 	applications = NULL;
 	if (other_applications_visible) {
-		applications = nautilus_mime_get_applications_for_files (selection);
+		applications = nemo_mime_get_applications_for_files (selection);
 	}
 
 	if (g_list_length (selection) == 1) {
-		add_x_content_apps (view, NAUTILUS_FILE (selection->data), &applications);
+		add_x_content_apps (view, NEMO_FILE (selection->data), &applications);
 	}
 
 
@@ -4531,14 +4531,14 @@ reset_open_with_menu (NautilusView *view, GList *selection)
 		}
 
 		if (submenu_visible) {
-			menu_path = NAUTILUS_VIEW_MENU_PATH_APPLICATIONS_SUBMENU_PLACEHOLDER;
-			popup_path = NAUTILUS_VIEW_POPUP_PATH_APPLICATIONS_SUBMENU_PLACEHOLDER;
+			menu_path = NEMO_VIEW_MENU_PATH_APPLICATIONS_SUBMENU_PLACEHOLDER;
+			popup_path = NEMO_VIEW_POPUP_PATH_APPLICATIONS_SUBMENU_PLACEHOLDER;
 		} else {
-			menu_path = NAUTILUS_VIEW_MENU_PATH_APPLICATIONS_PLACEHOLDER;
-			popup_path = NAUTILUS_VIEW_POPUP_PATH_APPLICATIONS_PLACEHOLDER;
+			menu_path = NEMO_VIEW_MENU_PATH_APPLICATIONS_PLACEHOLDER;
+			popup_path = NEMO_VIEW_POPUP_PATH_APPLICATIONS_PLACEHOLDER;
 		}
 
-		gtk_ui_manager_add_ui (nautilus_window_get_ui_manager (view->details->window),
+		gtk_ui_manager_add_ui (nemo_window_get_ui_manager (view->details->window),
 				       view->details->open_with_merge_id,
 				       menu_path,
 				       "separator",
@@ -4562,17 +4562,17 @@ reset_open_with_menu (NautilusView *view, GList *selection)
 
 	if (submenu_visible) {
 		action = gtk_action_group_get_action (view->details->dir_action_group,
-						      NAUTILUS_ACTION_OTHER_APPLICATION1);
+						      NEMO_ACTION_OTHER_APPLICATION1);
 		gtk_action_set_visible (action, open_with_chooser_visible);
 		action = gtk_action_group_get_action (view->details->dir_action_group,
-						      NAUTILUS_ACTION_OTHER_APPLICATION2);
+						      NEMO_ACTION_OTHER_APPLICATION2);
 		gtk_action_set_visible (action, FALSE);
 	} else {
 		action = gtk_action_group_get_action (view->details->dir_action_group,
-						      NAUTILUS_ACTION_OTHER_APPLICATION1);
+						      NEMO_ACTION_OTHER_APPLICATION1);
 		gtk_action_set_visible (action, FALSE);
 		action = gtk_action_group_get_action (view->details->dir_action_group,
-						      NAUTILUS_ACTION_OTHER_APPLICATION2);
+						      NEMO_ACTION_OTHER_APPLICATION2);
 		gtk_action_set_visible (action, open_with_chooser_visible);
 	}
 }
@@ -4585,29 +4585,29 @@ get_all_extension_menu_items (GtkWidget *window,
 	GList *providers;
 	GList *l;
 	
-	providers = nautilus_module_get_extensions_for_type (NAUTILUS_TYPE_MENU_PROVIDER);
+	providers = nemo_module_get_extensions_for_type (NEMO_TYPE_MENU_PROVIDER);
 	items = NULL;
 
 	for (l = providers; l != NULL; l = l->next) {
-		NautilusMenuProvider *provider;
+		NemoMenuProvider *provider;
 		GList *file_items;
 		
-		provider = NAUTILUS_MENU_PROVIDER (l->data);
-		file_items = nautilus_menu_provider_get_file_items (provider,
+		provider = NEMO_MENU_PROVIDER (l->data);
+		file_items = nemo_menu_provider_get_file_items (provider,
 								    window,
 								    selection);
 		items = g_list_concat (items, file_items);		
 	}
 
-	nautilus_module_extension_list_free (providers);
+	nemo_module_extension_list_free (providers);
 
 	return items;
 }
 
 typedef struct 
 {
-	NautilusMenuItem *item;
-	NautilusView *view;
+	NemoMenuItem *item;
+	NemoView *view;
 	GList *selection;
 	GtkAction *action;
 } ExtensionActionCallbackData;
@@ -4617,7 +4617,7 @@ static void
 extension_action_callback_data_free (ExtensionActionCallbackData *data)
 {
 	g_object_unref (data->item);
-	nautilus_file_list_free (data->selection);
+	nemo_file_list_free (data->selection);
 	
 	g_free (data);
 }
@@ -4628,7 +4628,7 @@ search_in_menu_items (GList* items, const char *item_name)
 	GList* list;
 	
 	for (list = items; list != NULL; list = list->next) {
-		NautilusMenu* menu;
+		NemoMenu* menu;
 		char *name;
 		
 		g_object_get (list->data, "name", &name, NULL);
@@ -4644,9 +4644,9 @@ search_in_menu_items (GList* items, const char *item_name)
 			gboolean ret;
 			GList* submenus;
 
-			submenus = nautilus_menu_get_items (menu);
+			submenus = nemo_menu_get_items (menu);
 			ret = search_in_menu_items (submenus, item_name);
-			nautilus_menu_item_list_free (submenus);
+			nemo_menu_item_list_free (submenus);
 			g_object_unref (menu);
 			if (ret) {
 				return TRUE;
@@ -4684,29 +4684,29 @@ extension_action_callback (GtkAction *action,
 	g_free (item_name);
 
 	if (is_valid) {
-		nautilus_menu_item_activate (data->item);
+		nemo_menu_item_activate (data->item);
 	}
 }
 
 static GdkPixbuf *
-get_menu_icon_for_file (NautilusFile *file)
+get_menu_icon_for_file (NemoFile *file)
 {
-	NautilusIconInfo *info;
+	NemoIconInfo *info;
 	GdkPixbuf *pixbuf;
 	int size;
 
-	size = nautilus_get_icon_size_for_stock_size (GTK_ICON_SIZE_MENU);
+	size = nemo_get_icon_size_for_stock_size (GTK_ICON_SIZE_MENU);
 	
-	info = nautilus_file_get_icon (file, size, 0);
-	pixbuf = nautilus_icon_info_get_pixbuf_nodefault_at_size (info, size);
+	info = nemo_file_get_icon (file, size, 0);
+	pixbuf = nemo_icon_info_get_pixbuf_nodefault_at_size (info, size);
 	g_object_unref (info);
 	
 	return pixbuf;
 }
 
 static GtkAction *
-add_extension_action_for_files (NautilusView *view, 
-				NautilusMenuItem *item,
+add_extension_action_for_files (NemoView *view, 
+				NemoMenuItem *item,
 				GList *files)
 {
 	char *name, *label, *tip, *icon;
@@ -4728,7 +4728,7 @@ add_extension_action_for_files (NautilusView *view,
 				 NULL);
 
 	if (icon != NULL) {
-		pixbuf = nautilus_ui_get_menu_icon (icon);
+		pixbuf = nemo_ui_get_menu_icon (icon);
 		if (pixbuf != NULL) {
 			gtk_action_set_gicon (action, G_ICON (pixbuf));
 			g_object_unref (pixbuf);
@@ -4741,7 +4741,7 @@ add_extension_action_for_files (NautilusView *view,
 	data = g_new0 (ExtensionActionCallbackData, 1);
 	data->item = g_object_ref (item);
 	data->view = view;
-	data->selection = nautilus_file_list_copy (files);
+	data->selection = nemo_file_list_copy (files);
 	data->action = action;
 
 	g_signal_connect_data (action, "activate",
@@ -4762,7 +4762,7 @@ add_extension_action_for_files (NautilusView *view,
 }
 
 static void
-add_extension_menu_items (NautilusView *view,
+add_extension_menu_items (NemoView *view,
 			  GList *files,
 			  GList *menu_items,
 			  const char *subdirectory)
@@ -4770,21 +4770,21 @@ add_extension_menu_items (NautilusView *view,
 	GtkUIManager *ui_manager;
 	GList *l;
 
-	ui_manager = nautilus_window_get_ui_manager (view->details->window);
+	ui_manager = nemo_window_get_ui_manager (view->details->window);
 	
 	for (l = menu_items; l; l = l->next) {
-		NautilusMenuItem *item;
-		NautilusMenu *menu;
+		NemoMenuItem *item;
+		NemoMenu *menu;
 		GtkAction *action;
 		char *path;
 		
-		item = NAUTILUS_MENU_ITEM (l->data);
+		item = NEMO_MENU_ITEM (l->data);
 		
 		g_object_get (item, "menu", &menu, NULL);
 		
 		action = add_extension_action_for_files (view, item, files);
 		
-		path = g_build_path ("/", NAUTILUS_VIEW_POPUP_PATH_EXTENSION_ACTIONS, subdirectory, NULL);
+		path = g_build_path ("/", NEMO_VIEW_POPUP_PATH_EXTENSION_ACTIONS, subdirectory, NULL);
 		gtk_ui_manager_add_ui (ui_manager,
 				       view->details->extensions_menu_merge_id,
 				       path,
@@ -4794,7 +4794,7 @@ add_extension_menu_items (NautilusView *view,
 				       FALSE);
 		g_free (path);
 
-		path = g_build_path ("/", NAUTILUS_VIEW_MENU_PATH_EXTENSION_ACTIONS_PLACEHOLDER, subdirectory, NULL);
+		path = g_build_path ("/", NEMO_VIEW_MENU_PATH_EXTENSION_ACTIONS_PLACEHOLDER, subdirectory, NULL);
 		gtk_ui_manager_add_ui (ui_manager,
 				       view->details->extensions_menu_merge_id,
 				       path,
@@ -4809,7 +4809,7 @@ add_extension_menu_items (NautilusView *view,
 			char *subdir;
 			GList *children;
 			
-			children = nautilus_menu_get_items (menu);
+			children = nemo_menu_get_items (menu);
 			
 			subdir = g_build_path ("/", subdirectory, gtk_action_get_name (action), NULL);
 			add_extension_menu_items (view,
@@ -4817,26 +4817,26 @@ add_extension_menu_items (NautilusView *view,
 						  children,
 						  subdir);
 
-			nautilus_menu_item_list_free (children);
+			nemo_menu_item_list_free (children);
 			g_free (subdir);
 		}			
 	}
 }
 
 static void
-reset_extension_actions_menu (NautilusView *view, GList *selection)
+reset_extension_actions_menu (NemoView *view, GList *selection)
 {
 	GList *items;
 	GtkUIManager *ui_manager;
 	
 	/* Clear any previous inserted items in the extension actions placeholder */
-	ui_manager = nautilus_window_get_ui_manager (view->details->window);
+	ui_manager = nemo_window_get_ui_manager (view->details->window);
 
-	nautilus_ui_unmerge_ui (ui_manager,
+	nemo_ui_unmerge_ui (ui_manager,
 				&view->details->extensions_menu_merge_id,
 				&view->details->extensions_menu_action_group);
 	
-	nautilus_ui_prepare_merge_ui (ui_manager,
+	nemo_ui_prepare_merge_ui (ui_manager,
 				      "DirExtensionsMenuGroup",
 				      &view->details->extensions_menu_merge_id,
 				      &view->details->extensions_menu_action_group);
@@ -4852,7 +4852,7 @@ reset_extension_actions_menu (NautilusView *view, GList *selection)
 }
 
 static char *
-change_to_view_directory (NautilusView *view)
+change_to_view_directory (NemoView *view)
 {
 	char *path;
 	char *old_path;
@@ -4873,9 +4873,9 @@ change_to_view_directory (NautilusView *view)
 
 static char **
 get_file_names_as_parameter_array (GList *selection,
-				   NautilusDirectory *model)
+				   NemoDirectory *model)
 {
-	NautilusFile *file;
+	NemoFile *file;
 	char **parameters;
 	GList *node;
 	GFile *file_location;
@@ -4888,18 +4888,18 @@ get_file_names_as_parameter_array (GList *selection,
 
 	parameters = g_new (char *, g_list_length (selection) + 1);
 
-	model_location = nautilus_directory_get_location (model);
+	model_location = nemo_directory_get_location (model);
 
 	for (node = selection, i = 0; node != NULL; node = node->next, i++) {
-		file = NAUTILUS_FILE (node->data);
+		file = NEMO_FILE (node->data);
 
-		if (!nautilus_file_is_local (file)) {
+		if (!nemo_file_is_local (file)) {
 			parameters[i] = NULL;
 			g_strfreev (parameters);
 			return NULL;
 		}
 
-		file_location = nautilus_file_get_location (NAUTILUS_FILE (node->data));
+		file_location = nemo_file_get_location (NEMO_FILE (node->data));
 		parameters[i] = g_file_get_relative_path (model_location, file_location);
 		if (parameters[i] == NULL) {
 			parameters[i] = g_file_get_path (file_location);
@@ -4919,7 +4919,7 @@ get_file_paths_or_uris_as_newline_delimited_string (GList *selection, gboolean g
 	char *path;
 	char *uri;
 	char *result;
-	NautilusDesktopLink *link;
+	NemoDesktopLink *link;
 	GString *expanding_string;
 	GList *node;
 	GFile *location;
@@ -4927,16 +4927,16 @@ get_file_paths_or_uris_as_newline_delimited_string (GList *selection, gboolean g
 	expanding_string = g_string_new ("");
 	for (node = selection; node != NULL; node = node->next) {
 		uri = NULL;
-		if (NAUTILUS_IS_DESKTOP_ICON_FILE (node->data)) {
-			link = nautilus_desktop_icon_file_get_link (NAUTILUS_DESKTOP_ICON_FILE (node->data));
+		if (NEMO_IS_DESKTOP_ICON_FILE (node->data)) {
+			link = nemo_desktop_icon_file_get_link (NEMO_DESKTOP_ICON_FILE (node->data));
 			if (link != NULL) {
-				location = nautilus_desktop_link_get_activation_location (link);
+				location = nemo_desktop_link_get_activation_location (link);
 				uri = g_file_get_uri (location);
 				g_object_unref (location);
 				g_object_unref (G_OBJECT (link));
 			}
 		} else {
-			uri = nautilus_file_get_uri (NAUTILUS_FILE (node->data));
+			uri = nemo_file_get_uri (NEMO_FILE (node->data));
 		}
 		if (uri == NULL) {
 			continue;
@@ -4976,15 +4976,15 @@ get_file_uris_as_newline_delimited_string (GList *selection)
 
 /* returns newly allocated strings for setting the environment variables */
 static void
-get_strings_for_environment_variables (NautilusView *view, GList *selected_files,
+get_strings_for_environment_variables (NemoView *view, GList *selected_files,
 				       char **file_paths, char **uris, char **uri)
 {
 	char *directory_uri;
 
 	/* We need to check that the directory uri starts with "file:" since
-	 * nautilus_directory_is_local returns FALSE for nfs.
+	 * nemo_directory_is_local returns FALSE for nfs.
 	 */
-	directory_uri = nautilus_directory_get_uri (view->details->model);
+	directory_uri = nemo_directory_get_uri (view->details->model);
 	if (g_str_has_prefix (directory_uri, "file:") ||
 	    eel_uri_is_desktop (directory_uri) ||
 	    eel_uri_is_trash (directory_uri)) {
@@ -4996,25 +4996,25 @@ get_strings_for_environment_variables (NautilusView *view, GList *selected_files
 
 	*uris = get_file_uris_as_newline_delimited_string (selected_files);
 
-	*uri = nautilus_directory_get_uri (view->details->model);
+	*uri = nemo_directory_get_uri (view->details->model);
 	if (eel_uri_is_desktop (*uri)) {
 		g_free (*uri);
-		*uri = nautilus_get_desktop_directory_uri ();
+		*uri = nemo_get_desktop_directory_uri ();
 	}
 }
 
-static NautilusView *
-get_directory_view_of_extra_pane (NautilusView *view)
+static NemoView *
+get_directory_view_of_extra_pane (NemoView *view)
 {
-	NautilusWindowSlot *slot;
-	NautilusView *next_view;
+	NemoWindowSlot *slot;
+	NemoView *next_view;
 
-	slot = nautilus_window_get_extra_slot (nautilus_view_get_nautilus_window (view));
+	slot = nemo_window_get_extra_slot (nemo_view_get_nemo_window (view));
 	if (slot != NULL) {
-		next_view = nautilus_window_slot_get_current_view (slot);
+		next_view = nemo_window_slot_get_current_view (slot);
 
-		if (NAUTILUS_IS_VIEW (next_view)) {
-			return NAUTILUS_VIEW (next_view);
+		if (NEMO_IS_VIEW (next_view)) {
+			return NEMO_VIEW (next_view);
 		}
 	}
 	return NULL;
@@ -5022,56 +5022,56 @@ get_directory_view_of_extra_pane (NautilusView *view)
 
 /*
  * Set up some environment variables that scripts can use
- * to take advantage of the current Nautilus state.
+ * to take advantage of the current Nemo state.
  */
 static void
-set_script_environment_variables (NautilusView *view, GList *selected_files)
+set_script_environment_variables (NemoView *view, GList *selected_files)
 {
 	char *file_paths;
 	char *uris;
 	char *uri;
 	char *geometry_string;
-	NautilusView *next_view;
+	NemoView *next_view;
 
 	get_strings_for_environment_variables (view, selected_files,
 					       &file_paths, &uris, &uri);
 
-	g_setenv ("NAUTILUS_SCRIPT_SELECTED_FILE_PATHS", file_paths, TRUE);
+	g_setenv ("NEMO_SCRIPT_SELECTED_FILE_PATHS", file_paths, TRUE);
 	g_free (file_paths);
 
-	g_setenv ("NAUTILUS_SCRIPT_SELECTED_URIS", uris, TRUE);
+	g_setenv ("NEMO_SCRIPT_SELECTED_URIS", uris, TRUE);
 	g_free (uris);
 
-	g_setenv ("NAUTILUS_SCRIPT_CURRENT_URI", uri, TRUE);
+	g_setenv ("NEMO_SCRIPT_CURRENT_URI", uri, TRUE);
 	g_free (uri);
 
 	geometry_string = eel_gtk_window_get_geometry_string
-		(GTK_WINDOW (nautilus_view_get_containing_window (view)));
-	g_setenv ("NAUTILUS_SCRIPT_WINDOW_GEOMETRY", geometry_string, TRUE);
+		(GTK_WINDOW (nemo_view_get_containing_window (view)));
+	g_setenv ("NEMO_SCRIPT_WINDOW_GEOMETRY", geometry_string, TRUE);
 	g_free (geometry_string);
 
 	/* next pane */
 	next_view = get_directory_view_of_extra_pane (view);
 	if (next_view) {
 		GList *next_pane_selected_files;
-		next_pane_selected_files = nautilus_view_get_selection (next_view);
+		next_pane_selected_files = nemo_view_get_selection (next_view);
 
 		get_strings_for_environment_variables (next_view, next_pane_selected_files,
 						       &file_paths, &uris, &uri);
-		nautilus_file_list_free (next_pane_selected_files);
+		nemo_file_list_free (next_pane_selected_files);
 	} else {
 		file_paths = g_strdup("");
 		uris = g_strdup("");
 		uri = g_strdup("");
 	}
 
-	g_setenv ("NAUTILUS_SCRIPT_NEXT_PANE_SELECTED_FILE_PATHS", file_paths, TRUE);
+	g_setenv ("NEMO_SCRIPT_NEXT_PANE_SELECTED_FILE_PATHS", file_paths, TRUE);
 	g_free (file_paths);
 
-	g_setenv ("NAUTILUS_SCRIPT_NEXT_PANE_SELECTED_URIS", uris, TRUE);
+	g_setenv ("NEMO_SCRIPT_NEXT_PANE_SELECTED_URIS", uris, TRUE);
 	g_free (uris);
 
-	g_setenv ("NAUTILUS_SCRIPT_NEXT_PANE_CURRENT_URI", uri, TRUE);
+	g_setenv ("NEMO_SCRIPT_NEXT_PANE_CURRENT_URI", uri, TRUE);
 	g_free (uri);
 }
 
@@ -5079,13 +5079,13 @@ set_script_environment_variables (NautilusView *view, GList *selected_files)
 static void
 unset_script_environment_variables (void)
 {
-	g_unsetenv ("NAUTILUS_SCRIPT_SELECTED_FILE_PATHS");
-	g_unsetenv ("NAUTILUS_SCRIPT_SELECTED_URIS");
-	g_unsetenv ("NAUTILUS_SCRIPT_CURRENT_URI");
-	g_unsetenv ("NAUTILUS_SCRIPT_WINDOW_GEOMETRY");
-	g_unsetenv ("NAUTILUS_SCRIPT_NEXT_PANE_SELECTED_FILE_PATHS");
-	g_unsetenv ("NAUTILUS_SCRIPT_NEXT_PANE_SELECTED_URIS");
-	g_unsetenv ("NAUTILUS_SCRIPT_NEXT_PANE_CURRENT_URI");
+	g_unsetenv ("NEMO_SCRIPT_SELECTED_FILE_PATHS");
+	g_unsetenv ("NEMO_SCRIPT_SELECTED_URIS");
+	g_unsetenv ("NEMO_SCRIPT_CURRENT_URI");
+	g_unsetenv ("NEMO_SCRIPT_WINDOW_GEOMETRY");
+	g_unsetenv ("NEMO_SCRIPT_NEXT_PANE_SELECTED_FILE_PATHS");
+	g_unsetenv ("NEMO_SCRIPT_NEXT_PANE_SELECTED_URIS");
+	g_unsetenv ("NEMO_SCRIPT_NEXT_PANE_CURRENT_URI");
 }
 
 static void
@@ -5102,7 +5102,7 @@ run_script_callback (GtkAction *action, gpointer callback_data)
 	
 	launch_parameters = (ScriptLaunchParameters *) callback_data;
 
-	file_uri = nautilus_file_get_uri (launch_parameters->file);
+	file_uri = nemo_file_get_uri (launch_parameters->file);
 	local_file_path = g_filename_from_uri (file_uri, NULL, NULL);
 	g_assert (local_file_path != NULL);
 	g_free (file_uri);
@@ -5112,7 +5112,7 @@ run_script_callback (GtkAction *action, gpointer callback_data)
 
 	old_working_dir = change_to_view_directory (launch_parameters->directory_view);
 
-	selected_files = nautilus_view_get_selection (launch_parameters->directory_view);
+	selected_files = nemo_view_get_selection (launch_parameters->directory_view);
 	set_script_environment_variables (launch_parameters->directory_view, selected_files);
 	 
 	parameters = get_file_names_as_parameter_array (selected_files,
@@ -5123,11 +5123,11 @@ run_script_callback (GtkAction *action, gpointer callback_data)
 	DEBUG ("run_script_callback, script_path=\"%s\" (omitting script parameters)",
 	       local_file_path);
 
-	nautilus_launch_application_from_command_array (screen, quoted_path, FALSE,
+	nemo_launch_application_from_command_array (screen, quoted_path, FALSE,
 							(const char * const *) parameters);
 	g_strfreev (parameters);
 
-	nautilus_file_list_free (selected_files);
+	nemo_file_list_free (selected_files);
 	unset_script_environment_variables ();
 	g_chdir (old_working_dir);		
 	g_free (old_working_dir);
@@ -5135,8 +5135,8 @@ run_script_callback (GtkAction *action, gpointer callback_data)
 }
 
 static void
-add_script_to_scripts_menus (NautilusView *directory_view,
-			     NautilusFile *file,
+add_script_to_scripts_menus (NemoView *directory_view,
+			     NemoFile *file,
 			     const char *menu_path,
 			     const char *popup_path, 
 			     const char *popup_bg_path)
@@ -5151,8 +5151,8 @@ add_script_to_scripts_menus (NautilusView *directory_view,
 	GtkUIManager *ui_manager;
 	GtkAction *action;
 
-	name = nautilus_file_get_display_name (file);
-	uri = nautilus_file_get_uri (file);
+	name = nemo_file_get_display_name (file);
+	uri = nemo_file_get_uri (file);
 	tip = g_strdup_printf (_("Run \"%s\" on any selected items"), name);
 
 	launch_parameters = script_launch_parameters_new (file, directory_view);
@@ -5181,7 +5181,7 @@ add_script_to_scripts_menus (NautilusView *directory_view,
 						action, NULL);
 	g_object_unref (action);
 
-	ui_manager = nautilus_window_get_ui_manager (directory_view->details->window);
+	ui_manager = nemo_window_get_ui_manager (directory_view->details->window);
 
 	gtk_ui_manager_add_ui (ui_manager,
 			       directory_view->details->scripts_merge_id,
@@ -5213,10 +5213,10 @@ add_script_to_scripts_menus (NautilusView *directory_view,
 }
 
 static void
-add_submenu_to_directory_menus (NautilusView *directory_view,
+add_submenu_to_directory_menus (NemoView *directory_view,
 				GtkActionGroup *action_group,
 				guint merge_id,
-				NautilusFile *file,
+				NemoFile *file,
 				const char *menu_path,
 				const char *popup_path,
 				const char *popup_bg_path)
@@ -5226,9 +5226,9 @@ add_submenu_to_directory_menus (NautilusView *directory_view,
 	char *uri;
 	GtkUIManager *ui_manager;
 
-	ui_manager = nautilus_window_get_ui_manager (directory_view->details->window);
-	uri = nautilus_file_get_uri (file);
-	name = nautilus_file_get_display_name (file);
+	ui_manager = nemo_window_get_ui_manager (directory_view->details->window);
+	uri = nemo_file_get_uri (file);
+	name = nemo_file_get_display_name (file);
 	pixbuf = get_menu_icon_for_file (file);
 	add_submenu (ui_manager, action_group, merge_id, menu_path, uri, name, pixbuf, TRUE);
 	add_submenu (ui_manager, action_group, merge_id, popup_path, uri, name, pixbuf, FALSE);
@@ -5265,49 +5265,49 @@ directory_belongs_in_scripts_menu (const char *uri)
 }
 
 static gboolean
-update_directory_in_scripts_menu (NautilusView *view, NautilusDirectory *directory)
+update_directory_in_scripts_menu (NemoView *view, NemoDirectory *directory)
 {
 	char *menu_path, *popup_path, *popup_bg_path;
 	GList *file_list, *filtered, *node;
 	gboolean any_scripts;
-	NautilusFile *file;
-	NautilusDirectory *dir;
+	NemoFile *file;
+	NemoDirectory *dir;
 	char *uri;
 	char *escaped_path;
 	
-	uri = nautilus_directory_get_uri (directory);
+	uri = nemo_directory_get_uri (directory);
 	escaped_path = escape_action_path (uri + scripts_directory_uri_length);
 	g_free (uri);
-	menu_path = g_strconcat (NAUTILUS_VIEW_MENU_PATH_SCRIPTS_PLACEHOLDER,
+	menu_path = g_strconcat (NEMO_VIEW_MENU_PATH_SCRIPTS_PLACEHOLDER,
 				 escaped_path,
 				 NULL);
-	popup_path = g_strconcat (NAUTILUS_VIEW_POPUP_PATH_SCRIPTS_PLACEHOLDER,
+	popup_path = g_strconcat (NEMO_VIEW_POPUP_PATH_SCRIPTS_PLACEHOLDER,
 				  escaped_path,
 				  NULL);
-	popup_bg_path = g_strconcat (NAUTILUS_VIEW_POPUP_PATH_BACKGROUND_SCRIPTS_PLACEHOLDER,
+	popup_bg_path = g_strconcat (NEMO_VIEW_POPUP_PATH_BACKGROUND_SCRIPTS_PLACEHOLDER,
 				     escaped_path,
 				     NULL);
 	g_free (escaped_path);
 
-	file_list = nautilus_directory_get_file_list (directory);
-	filtered = nautilus_file_list_filter_hidden (file_list, FALSE);
-	nautilus_file_list_free (file_list);
+	file_list = nemo_directory_get_file_list (directory);
+	filtered = nemo_file_list_filter_hidden (file_list, FALSE);
+	nemo_file_list_free (file_list);
 
-	file_list = nautilus_file_list_sort_by_display_name (filtered);
+	file_list = nemo_file_list_sort_by_display_name (filtered);
 
 	any_scripts = FALSE;
 	for (node = file_list; node != NULL; node = node->next) {
 		file = node->data;
 
-		if (nautilus_file_is_launchable (file)) {
+		if (nemo_file_is_launchable (file)) {
 			add_script_to_scripts_menus (view, file, menu_path, popup_path, popup_bg_path);
 			any_scripts = TRUE;
-		} else if (nautilus_file_is_directory (file)) {
-			uri = nautilus_file_get_uri (file);
+		} else if (nemo_file_is_directory (file)) {
+			uri = nemo_file_get_uri (file);
 			if (directory_belongs_in_scripts_menu (uri)) {
-				dir = nautilus_directory_get_by_uri (uri);
+				dir = nemo_directory_get_by_uri (uri);
 				add_directory_to_scripts_directory_list (view, dir);
-				nautilus_directory_unref (dir);
+				nemo_directory_unref (dir);
 
 				add_submenu_to_directory_menus (view,
 								view->details->scripts_action_group,
@@ -5320,7 +5320,7 @@ update_directory_in_scripts_menu (NautilusView *view, NautilusDirectory *directo
 		}
 	}
 
-	nautilus_file_list_free (file_list);
+	nemo_file_list_free (file_list);
 
 	g_free (popup_path);
 	g_free (popup_bg_path);
@@ -5330,11 +5330,11 @@ update_directory_in_scripts_menu (NautilusView *view, NautilusDirectory *directo
 }
 
 static void
-update_scripts_menu (NautilusView *view)
+update_scripts_menu (NemoView *view)
 {
 	gboolean any_scripts;
 	GList *sorted_copy, *node;
-	NautilusDirectory *directory;
+	NemoDirectory *directory;
 	char *uri;
 	GtkUIManager *ui_manager;
 	GtkAction *action;
@@ -5344,24 +5344,24 @@ update_scripts_menu (NautilusView *view)
 	   occur before we finish. */
 	view->details->scripts_invalid = FALSE;
 
-	ui_manager = nautilus_window_get_ui_manager (view->details->window);
-	nautilus_ui_unmerge_ui (ui_manager,
+	ui_manager = nemo_window_get_ui_manager (view->details->window);
+	nemo_ui_unmerge_ui (ui_manager,
 				&view->details->scripts_merge_id,
 				&view->details->scripts_action_group);
 	
-	nautilus_ui_prepare_merge_ui (ui_manager,
+	nemo_ui_prepare_merge_ui (ui_manager,
 				      "ScriptsGroup",
 				      &view->details->scripts_merge_id,
 				      &view->details->scripts_action_group);
 
 	/* As we walk through the directories, remove any that no longer belong. */
 	any_scripts = FALSE;
-	sorted_copy = nautilus_directory_list_sort_by_uri
-		(nautilus_directory_list_copy (view->details->scripts_directory_list));
+	sorted_copy = nemo_directory_list_sort_by_uri
+		(nemo_directory_list_copy (view->details->scripts_directory_list));
 	for (node = sorted_copy; node != NULL; node = node->next) {
 		directory = node->data;
 
-		uri = nautilus_directory_get_uri (directory);
+		uri = nemo_directory_get_uri (directory);
 		if (!directory_belongs_in_scripts_menu (uri)) {
 			remove_directory_from_scripts_directory_list (view, directory);
 		} else if (update_directory_in_scripts_menu (view, directory)) {
@@ -5369,9 +5369,9 @@ update_scripts_menu (NautilusView *view)
 		}
 		g_free (uri);
 	}
-	nautilus_directory_list_free (sorted_copy);
+	nemo_directory_list_free (sorted_copy);
 
-	action = gtk_action_group_get_action (view->details->dir_action_group, NAUTILUS_ACTION_SCRIPTS);
+	action = gtk_action_group_get_action (view->details->dir_action_group, NEMO_ACTION_SCRIPTS);
 	gtk_action_set_visible (action, any_scripts);
 }
 
@@ -5382,12 +5382,12 @@ create_template_callback (GtkAction *action, gpointer callback_data)
 
 	parameters = callback_data;
 	
-	nautilus_view_new_file (parameters->directory_view, NULL, parameters->file);
+	nemo_view_new_file (parameters->directory_view, NULL, parameters->file);
 }
 
 static void
-add_template_to_templates_menus (NautilusView *directory_view,
-				 NautilusFile *file,
+add_template_to_templates_menus (NemoView *directory_view,
+				 NemoFile *file,
 				 const char *menu_path,
 				 const char *popup_bg_path)
 {
@@ -5399,11 +5399,11 @@ add_template_to_templates_menus (NautilusView *directory_view,
 	GtkUIManager *ui_manager;
 	GtkAction *action;
 
-	tmp = nautilus_file_get_display_name (file);
+	tmp = nemo_file_get_display_name (file);
 	name = eel_filename_strip_extension (tmp);
 	g_free (tmp);
 
-	uri = nautilus_file_get_uri (file);
+	uri = nemo_file_get_uri (file);
 	tip = g_strdup_printf (_("Create a new document from template \"%s\""), name);
 
 	action_name = escape_action_name (uri, "template_");
@@ -5432,7 +5432,7 @@ add_template_to_templates_menus (NautilusView *directory_view,
 				     action);
 	g_object_unref (action);
 
-	ui_manager = nautilus_window_get_ui_manager (directory_view->details->window);
+	ui_manager = nemo_window_get_ui_manager (directory_view->details->window);
 
 	gtk_ui_manager_add_ui (ui_manager,
 			       directory_view->details->templates_merge_id,
@@ -5458,9 +5458,9 @@ add_template_to_templates_menus (NautilusView *directory_view,
 }
 
 static void
-update_templates_directory (NautilusView *view)
+update_templates_directory (NemoView *view)
 {
-	NautilusDirectory *templates_directory;
+	NemoDirectory *templates_directory;
 	GList *node, *next;
 	char *templates_uri;
 
@@ -5469,17 +5469,17 @@ update_templates_directory (NautilusView *view)
 		remove_directory_from_templates_directory_list (view, node->data);
 	}
 	
-	if (nautilus_should_use_templates_directory ()) {
-		templates_uri = nautilus_get_templates_directory_uri ();
-		templates_directory = nautilus_directory_get_by_uri (templates_uri);
+	if (nemo_should_use_templates_directory ()) {
+		templates_uri = nemo_get_templates_directory_uri ();
+		templates_directory = nemo_directory_get_by_uri (templates_uri);
 		g_free (templates_uri);
 		add_directory_to_templates_directory_list (view, templates_directory);
-		nautilus_directory_unref (templates_directory);
+		nemo_directory_unref (templates_directory);
 	}
 }
 
 static void
-user_dirs_changed (NautilusView *view)
+user_dirs_changed (NemoView *view)
 {
 	update_templates_directory (view);
 	view->details->templates_invalid = TRUE;
@@ -5516,15 +5516,15 @@ directory_belongs_in_templates_menu (const char *templates_directory_uri,
 }
 
 static gboolean
-update_directory_in_templates_menu (NautilusView *view,
+update_directory_in_templates_menu (NemoView *view,
 				    const char *templates_directory_uri,
-				    NautilusDirectory *directory)
+				    NemoDirectory *directory)
 {
 	char *menu_path, *popup_bg_path;
 	GList *file_list, *filtered, *node;
 	gboolean any_templates;
-	NautilusFile *file;
-	NautilusDirectory *dir;
+	NemoFile *file;
+	NemoDirectory *dir;
 	char *escaped_path;
 	char *uri;
 	int num;
@@ -5532,34 +5532,34 @@ update_directory_in_templates_menu (NautilusView *view,
 	/* We know this directory belongs to the template dir, so it must exist */
 	g_assert (templates_directory_uri);
 	
-	uri = nautilus_directory_get_uri (directory);
+	uri = nemo_directory_get_uri (directory);
 	escaped_path = escape_action_path (uri + strlen (templates_directory_uri));
 	g_free (uri);
-	menu_path = g_strconcat (NAUTILUS_VIEW_MENU_PATH_NEW_DOCUMENTS_PLACEHOLDER,
+	menu_path = g_strconcat (NEMO_VIEW_MENU_PATH_NEW_DOCUMENTS_PLACEHOLDER,
 				 escaped_path,
 				 NULL);
-	popup_bg_path = g_strconcat (NAUTILUS_VIEW_POPUP_PATH_BACKGROUND_NEW_DOCUMENTS_PLACEHOLDER,
+	popup_bg_path = g_strconcat (NEMO_VIEW_POPUP_PATH_BACKGROUND_NEW_DOCUMENTS_PLACEHOLDER,
 				     escaped_path,
 				     NULL);
 	g_free (escaped_path);
 
-	file_list = nautilus_directory_get_file_list (directory);
-	filtered = nautilus_file_list_filter_hidden (file_list, FALSE);
-	nautilus_file_list_free (file_list);
+	file_list = nemo_directory_get_file_list (directory);
+	filtered = nemo_file_list_filter_hidden (file_list, FALSE);
+	nemo_file_list_free (file_list);
 
-	file_list = nautilus_file_list_sort_by_display_name (filtered);
+	file_list = nemo_file_list_sort_by_display_name (filtered);
 
 	num = 0;
 	any_templates = FALSE;
 	for (node = file_list; num < TEMPLATE_LIMIT && node != NULL; node = node->next, num++) {
 		file = node->data;
 
-		if (nautilus_file_is_directory (file)) {
-			uri = nautilus_file_get_uri (file);
+		if (nemo_file_is_directory (file)) {
+			uri = nemo_file_get_uri (file);
 			if (directory_belongs_in_templates_menu (templates_directory_uri, uri)) {
-				dir = nautilus_directory_get_by_uri (uri);
+				dir = nemo_directory_get_by_uri (uri);
 				add_directory_to_templates_directory_list (view, dir);
-				nautilus_directory_unref (dir);
+				nemo_directory_unref (dir);
 
 				add_submenu_to_directory_menus (view,
 								view->details->templates_action_group,
@@ -5569,13 +5569,13 @@ update_directory_in_templates_menu (NautilusView *view,
 				any_templates = TRUE;
 			}
 			g_free (uri);
-		} else if (nautilus_file_can_read (file)) {
+		} else if (nemo_file_can_read (file)) {
 			add_template_to_templates_menus (view, file, menu_path, popup_bg_path);
 			any_templates = TRUE;
 		}
 	}
 
-	nautilus_file_list_free (file_list);
+	nemo_file_list_free (file_list);
 
 	g_free (popup_bg_path);
 	g_free (menu_path);
@@ -5586,18 +5586,18 @@ update_directory_in_templates_menu (NautilusView *view,
 
 
 static void
-update_templates_menu (NautilusView *view)
+update_templates_menu (NemoView *view)
 {
 	gboolean any_templates;
 	GList *sorted_copy, *node;
-	NautilusDirectory *directory;
+	NemoDirectory *directory;
 	GtkUIManager *ui_manager;
 	char *uri;
 	GtkAction *action;
 	char *templates_directory_uri;
 
-	if (nautilus_should_use_templates_directory ()) {
-		templates_directory_uri = nautilus_get_templates_directory_uri ();
+	if (nemo_should_use_templates_directory ()) {
+		templates_directory_uri = nemo_get_templates_directory_uri ();
 	} else {
 		templates_directory_uri = NULL;
 	}
@@ -5607,24 +5607,24 @@ update_templates_menu (NautilusView *view)
 	   occur before we finish. */
 	view->details->templates_invalid = FALSE;
 
-	ui_manager = nautilus_window_get_ui_manager (view->details->window);
-	nautilus_ui_unmerge_ui (ui_manager,
+	ui_manager = nemo_window_get_ui_manager (view->details->window);
+	nemo_ui_unmerge_ui (ui_manager,
 				&view->details->templates_merge_id,
 				&view->details->templates_action_group);
 
-	nautilus_ui_prepare_merge_ui (ui_manager,
+	nemo_ui_prepare_merge_ui (ui_manager,
 				      "TemplatesGroup",
 				      &view->details->templates_merge_id,
 				      &view->details->templates_action_group);
 
 	/* As we walk through the directories, remove any that no longer belong. */
 	any_templates = FALSE;
-	sorted_copy = nautilus_directory_list_sort_by_uri
-		(nautilus_directory_list_copy (view->details->templates_directory_list));
+	sorted_copy = nemo_directory_list_sort_by_uri
+		(nemo_directory_list_copy (view->details->templates_directory_list));
 	for (node = sorted_copy; node != NULL; node = node->next) {
 		directory = node->data;
 
-		uri = nautilus_directory_get_uri (directory);
+		uri = nemo_directory_get_uri (directory);
 		if (!directory_belongs_in_templates_menu (templates_directory_uri, uri)) {
 			remove_directory_from_templates_directory_list (view, directory);
 		} else if (update_directory_in_templates_menu (view,
@@ -5634,9 +5634,9 @@ update_templates_menu (NautilusView *view)
 		}
 		g_free (uri);
 	}
-	nautilus_directory_list_free (sorted_copy);
+	nemo_directory_list_free (sorted_copy);
 
-	action = gtk_action_group_get_action (view->details->dir_action_group, NAUTILUS_ACTION_NO_TEMPLATES);
+	action = gtk_action_group_get_action (view->details->dir_action_group, NEMO_ACTION_NO_TEMPLATES);
 	gtk_action_set_visible (action, !any_templates);
 
 	g_free (templates_directory_uri);
@@ -5647,15 +5647,15 @@ static void
 action_open_scripts_folder_callback (GtkAction *action, 
 				     gpointer callback_data)
 {      
-	NautilusView *view;
+	NemoView *view;
 	static GFile *location = NULL;
 
 	if (location == NULL) {
 		location = g_file_new_for_uri (scripts_directory_uri);
 	}
 
-	view = NAUTILUS_VIEW (callback_data);
-	nautilus_window_slot_go_to (view->details->slot, location, FALSE);
+	view = NEMO_VIEW (callback_data);
+	nemo_window_slot_go_to (view->details->slot, location, FALSE);
 
 	eel_show_info_dialog_with_details 
 		(_("All executable files in this folder will appear in the "
@@ -5670,23 +5670,23 @@ action_open_scripts_folder_callback (GtkAction *action,
 		   "(e.g. a folder showing web or ftp content), scripts will "
 		   "be passed no parameters.\n\n"
 		   "In all cases, the following environment variables will be "
-		   "set by Nautilus, which the scripts may use:\n\n"
-		   "NAUTILUS_SCRIPT_SELECTED_FILE_PATHS: newline-delimited paths for selected files (only if local)\n\n"
-		   "NAUTILUS_SCRIPT_SELECTED_URIS: newline-delimited URIs for selected files\n\n"
-		   "NAUTILUS_SCRIPT_CURRENT_URI: URI for current location\n\n"
-		   "NAUTILUS_SCRIPT_WINDOW_GEOMETRY: position and size of current window\n\n"
-		   "NAUTILUS_SCRIPT_NEXT_PANE_SELECTED_FILE_PATHS: newline-delimited paths for selected files in the inactive pane of a split-view window (only if local)\n\n"
-		   "NAUTILUS_SCRIPT_NEXT_PANE_SELECTED_URIS: newline-delimited URIs for selected files in the inactive pane of a split-view window\n\n"
-		   "NAUTILUS_SCRIPT_NEXT_PANE_CURRENT_URI: URI for current location in the inactive pane of a split-view window"),
-		 nautilus_view_get_containing_window (view));
+		   "set by Nemo, which the scripts may use:\n\n"
+		   "NEMO_SCRIPT_SELECTED_FILE_PATHS: newline-delimited paths for selected files (only if local)\n\n"
+		   "NEMO_SCRIPT_SELECTED_URIS: newline-delimited URIs for selected files\n\n"
+		   "NEMO_SCRIPT_CURRENT_URI: URI for current location\n\n"
+		   "NEMO_SCRIPT_WINDOW_GEOMETRY: position and size of current window\n\n"
+		   "NEMO_SCRIPT_NEXT_PANE_SELECTED_FILE_PATHS: newline-delimited paths for selected files in the inactive pane of a split-view window (only if local)\n\n"
+		   "NEMO_SCRIPT_NEXT_PANE_SELECTED_URIS: newline-delimited URIs for selected files in the inactive pane of a split-view window\n\n"
+		   "NEMO_SCRIPT_NEXT_PANE_CURRENT_URI: URI for current location in the inactive pane of a split-view window"),
+		 nemo_view_get_containing_window (view));
 }
 
 static GtkMenu *
-create_popup_menu (NautilusView *view, const char *popup_path)
+create_popup_menu (NemoView *view, const char *popup_path)
 {
 	GtkWidget *menu;
 	
-	menu = gtk_ui_manager_get_widget (nautilus_window_get_ui_manager (view->details->window),
+	menu = gtk_ui_manager_get_widget (nemo_window_get_ui_manager (view->details->window),
 					  popup_path);
 	gtk_menu_set_screen (GTK_MENU (menu),
 			     gtk_widget_get_screen (GTK_WIDGET (view)));
@@ -5696,13 +5696,13 @@ create_popup_menu (NautilusView *view, const char *popup_path)
 }
 	
 static void
-copy_or_cut_files (NautilusView *view,
+copy_or_cut_files (NemoView *view,
 		   GList           *clipboard_contents,
 		   gboolean         cut)
 {
 	int count;
 	char *status_string, *name;
-	NautilusClipboardInfo info;
+	NemoClipboardInfo info;
         GtkTargetList *target_list;
         GtkTargetEntry *targets;
         int n_targets;
@@ -5718,17 +5718,17 @@ copy_or_cut_files (NautilusView *view,
         targets = gtk_target_table_new_from_list (target_list, &n_targets);
         gtk_target_list_unref (target_list);
 
-	gtk_clipboard_set_with_data (nautilus_clipboard_get (GTK_WIDGET (view)),
+	gtk_clipboard_set_with_data (nemo_clipboard_get (GTK_WIDGET (view)),
 				     targets, n_targets,
-				     nautilus_get_clipboard_callback, nautilus_clear_clipboard_callback,
+				     nemo_get_clipboard_callback, nemo_clear_clipboard_callback,
 				     NULL);
         gtk_target_table_free (targets, n_targets);
 
-	nautilus_clipboard_monitor_set_clipboard_info (nautilus_clipboard_monitor_get (), &info);
+	nemo_clipboard_monitor_set_clipboard_info (nemo_clipboard_monitor_get (), &info);
 
 	count = g_list_length (clipboard_contents);
 	if (count == 1) {
-		name = nautilus_file_get_display_name (clipboard_contents->data);
+		name = nemo_file_get_display_name (clipboard_contents->data);
 		if (cut) {
 			status_string = g_strdup_printf (_("\"%s\" will be moved "
 							   "if you select the Paste command"),
@@ -5757,7 +5757,7 @@ copy_or_cut_files (NautilusView *view,
 		}
 	}
 
-	nautilus_window_slot_set_status (view->details->slot,
+	nemo_window_slot_set_status (view->details->slot,
 					 status_string, NULL);
 	g_free (status_string);
 }
@@ -5766,24 +5766,24 @@ static void
 action_copy_files_callback (GtkAction *action,
 			    gpointer callback_data)
 {
-	NautilusView *view;
+	NemoView *view;
 	GList *selection;
 
-	view = NAUTILUS_VIEW (callback_data);
+	view = NEMO_VIEW (callback_data);
 
-	selection = nautilus_view_get_selection_for_file_transfer (view);
+	selection = nemo_view_get_selection_for_file_transfer (view);
 	copy_or_cut_files (view, selection, FALSE);
-	nautilus_file_list_free (selection);
+	nemo_file_list_free (selection);
 }
 
 static void
-move_copy_selection_to_location (NautilusView *view,
+move_copy_selection_to_location (NemoView *view,
 				 int copy_action,
 				 char *target_uri)
 {
 	GList *selection, *uris, *l;
 
-	selection = nautilus_view_get_selection_for_file_transfer (view);
+	selection = nemo_view_get_selection_for_file_transfer (view);
 	if (selection == NULL) {
 		return;
 	}
@@ -5791,29 +5791,29 @@ move_copy_selection_to_location (NautilusView *view,
 	uris = NULL;
 	for (l = selection; l != NULL; l = l->next) {
 		uris = g_list_prepend (uris,
-				       nautilus_file_get_uri ((NautilusFile *) l->data));
+				       nemo_file_get_uri ((NemoFile *) l->data));
 	}
 	uris = g_list_reverse (uris);
 
-	nautilus_view_move_copy_items (view, uris, NULL, target_uri,
+	nemo_view_move_copy_items (view, uris, NULL, target_uri,
 				       copy_action,
 				       0, 0);
 
 	g_list_free_full (uris, g_free);
-	nautilus_file_list_free (selection);
+	nemo_file_list_free (selection);
 }
 
 static void
-move_copy_selection_to_next_pane (NautilusView *view,
+move_copy_selection_to_next_pane (NemoView *view,
 				  int copy_action)
 {
-	NautilusWindowSlot *slot;
+	NemoWindowSlot *slot;
 	char *dest_location;
 
-	slot = nautilus_window_get_extra_slot (nautilus_view_get_nautilus_window (view));
+	slot = nemo_window_get_extra_slot (nemo_view_get_nemo_window (view));
 	g_return_if_fail (slot != NULL);
 
-	dest_location = nautilus_window_slot_get_current_uri (slot);
+	dest_location = nemo_window_slot_get_current_uri (slot);
 	g_return_if_fail (dest_location != NULL);
 
 	move_copy_selection_to_location (view, copy_action, dest_location);
@@ -5822,9 +5822,9 @@ move_copy_selection_to_next_pane (NautilusView *view,
 static void
 action_copy_to_next_pane_callback (GtkAction *action, gpointer callback_data)
 {
-	NautilusView *view;
+	NemoView *view;
 
-	view = NAUTILUS_VIEW (callback_data);
+	view = NEMO_VIEW (callback_data);
 	move_copy_selection_to_next_pane (view,
 					  GDK_ACTION_COPY);
 }
@@ -5832,16 +5832,16 @@ action_copy_to_next_pane_callback (GtkAction *action, gpointer callback_data)
 static void
 action_move_to_next_pane_callback (GtkAction *action, gpointer callback_data)
 {
-	NautilusWindowSlot *slot;
+	NemoWindowSlot *slot;
 	char *dest_location;
-	NautilusView *view;
+	NemoView *view;
 
-	view = NAUTILUS_VIEW (callback_data);
+	view = NEMO_VIEW (callback_data);
 
-	slot = nautilus_window_get_extra_slot (nautilus_view_get_nautilus_window (view));
+	slot = nemo_window_get_extra_slot (nemo_view_get_nemo_window (view));
 	g_return_if_fail (slot != NULL);
 
-	dest_location = nautilus_window_slot_get_current_uri (slot);
+	dest_location = nemo_window_slot_get_current_uri (slot);
 	g_return_if_fail (dest_location != NULL);
 
 	move_copy_selection_to_location (view, GDK_ACTION_MOVE, dest_location);
@@ -5850,12 +5850,12 @@ action_move_to_next_pane_callback (GtkAction *action, gpointer callback_data)
 static void
 action_copy_to_home_callback (GtkAction *action, gpointer callback_data)
 {
-	NautilusView *view;
+	NemoView *view;
 	char *dest_location;
 
-	view = NAUTILUS_VIEW (callback_data);
+	view = NEMO_VIEW (callback_data);
 
-	dest_location = nautilus_get_home_directory_uri ();
+	dest_location = nemo_get_home_directory_uri ();
 	move_copy_selection_to_location (view, GDK_ACTION_COPY, dest_location);
 	g_free (dest_location);
 }
@@ -5863,12 +5863,12 @@ action_copy_to_home_callback (GtkAction *action, gpointer callback_data)
 static void
 action_move_to_home_callback (GtkAction *action, gpointer callback_data)
 {
-	NautilusView *view;
+	NemoView *view;
 	char *dest_location;
 
-	view = NAUTILUS_VIEW (callback_data);
+	view = NEMO_VIEW (callback_data);
 
-	dest_location = nautilus_get_home_directory_uri ();
+	dest_location = nemo_get_home_directory_uri ();
 	move_copy_selection_to_location (view, GDK_ACTION_MOVE, dest_location);
 	g_free (dest_location);
 }
@@ -5876,12 +5876,12 @@ action_move_to_home_callback (GtkAction *action, gpointer callback_data)
 static void
 action_copy_to_desktop_callback (GtkAction *action, gpointer callback_data)
 {
-	NautilusView *view;
+	NemoView *view;
 	char *dest_location;
 
-	view = NAUTILUS_VIEW (callback_data);
+	view = NEMO_VIEW (callback_data);
 
-	dest_location = nautilus_get_desktop_directory_uri ();
+	dest_location = nemo_get_desktop_directory_uri ();
 	move_copy_selection_to_location (view, GDK_ACTION_COPY, dest_location);
 	g_free (dest_location);
 }
@@ -5889,12 +5889,12 @@ action_copy_to_desktop_callback (GtkAction *action, gpointer callback_data)
 static void
 action_move_to_desktop_callback (GtkAction *action, gpointer callback_data)
 {
-	NautilusView *view;
+	NemoView *view;
 	char *dest_location;
 
-	view = NAUTILUS_VIEW (callback_data);
+	view = NEMO_VIEW (callback_data);
 
-	dest_location = nautilus_get_desktop_directory_uri ();
+	dest_location = nemo_get_desktop_directory_uri ();
 	move_copy_selection_to_location (view, GDK_ACTION_MOVE, dest_location);
 	g_free (dest_location);
 }
@@ -5903,18 +5903,18 @@ static void
 action_cut_files_callback (GtkAction *action,
 			   gpointer callback_data)
 {
-	NautilusView *view;
+	NemoView *view;
 	GList *selection;
 
-	view = NAUTILUS_VIEW (callback_data);
+	view = NEMO_VIEW (callback_data);
 
-	selection = nautilus_view_get_selection_for_file_transfer (view);
+	selection = nemo_view_get_selection_for_file_transfer (view);
 	copy_or_cut_files (view, selection, TRUE);
-	nautilus_file_list_free (selection);
+	nemo_file_list_free (selection);
 }
 
 static void
-paste_clipboard_data (NautilusView *view,
+paste_clipboard_data (NemoView *view,
 		      GtkSelectionData *selection_data,
 		      char *destination_uri)
 {
@@ -5922,21 +5922,21 @@ paste_clipboard_data (NautilusView *view,
 	GList *item_uris;
 
 	cut = FALSE;
-	item_uris = nautilus_clipboard_get_uri_list_from_selection_data (selection_data, &cut,
+	item_uris = nemo_clipboard_get_uri_list_from_selection_data (selection_data, &cut,
 									 copied_files_atom);
 
 	if (item_uris == NULL|| destination_uri == NULL) {
-		nautilus_window_slot_set_status (view->details->slot,
+		nemo_window_slot_set_status (view->details->slot,
 						 _("There is nothing on the clipboard to paste."),
 						 NULL);
 	} else {
-		nautilus_view_move_copy_items (view, item_uris, NULL, destination_uri,
+		nemo_view_move_copy_items (view, item_uris, NULL, destination_uri,
 					       cut ? GDK_ACTION_MOVE : GDK_ACTION_COPY,
 					       0, 0);
 
 		/* If items are cut then remove from clipboard */
 		if (cut) {
-			gtk_clipboard_clear (nautilus_clipboard_get (GTK_WIDGET (view)));
+			gtk_clipboard_clear (nemo_clipboard_get (GTK_WIDGET (view)));
 		}
 
 		g_list_free_full (item_uris, g_free);
@@ -5948,12 +5948,12 @@ paste_clipboard_received_callback (GtkClipboard     *clipboard,
 				   GtkSelectionData *selection_data,
 				   gpointer          data)
 {
-	NautilusView *view;
+	NemoView *view;
 	char *view_uri;
 
-	view = NAUTILUS_VIEW (data);
+	view = NEMO_VIEW (data);
 
-	view_uri = nautilus_view_get_backing_uri (view);
+	view_uri = nemo_view_get_backing_uri (view);
 
 	if (view->details->window != NULL) {
 		paste_clipboard_data (view, selection_data, view_uri);
@@ -5965,8 +5965,8 @@ paste_clipboard_received_callback (GtkClipboard     *clipboard,
 }
 
 typedef struct {
-	NautilusView *view;
-	NautilusFile *target;
+	NemoView *view;
+	NemoFile *target;
 } PasteIntoData;
 
 static void
@@ -5975,15 +5975,15 @@ paste_into_clipboard_received_callback (GtkClipboard     *clipboard,
 					gpointer          callback_data)
 {
 	PasteIntoData *data;
-	NautilusView *view;
+	NemoView *view;
 	char *directory_uri;
 
 	data = (PasteIntoData *) callback_data;
 
-	view = NAUTILUS_VIEW (data->view);
+	view = NEMO_VIEW (data->view);
 
 	if (view->details->window != NULL) {
-		directory_uri = nautilus_file_get_activation_uri (data->target);
+		directory_uri = nemo_file_get_activation_uri (data->target);
 
 		paste_clipboard_data (view, selection_data, directory_uri);
 
@@ -5991,7 +5991,7 @@ paste_into_clipboard_received_callback (GtkClipboard     *clipboard,
 	}
 
 	g_object_unref (view);
-	nautilus_file_unref (data->target);
+	nemo_file_unref (data->target);
 	g_free (data);
 }
 
@@ -5999,32 +5999,32 @@ static void
 action_paste_files_callback (GtkAction *action,
 			     gpointer callback_data)
 {
-	NautilusView *view;
+	NemoView *view;
 
-	view = NAUTILUS_VIEW (callback_data);
+	view = NEMO_VIEW (callback_data);
 
 	g_object_ref (view);
-	gtk_clipboard_request_contents (nautilus_clipboard_get (GTK_WIDGET (view)),
+	gtk_clipboard_request_contents (nemo_clipboard_get (GTK_WIDGET (view)),
 					copied_files_atom,
 					paste_clipboard_received_callback,
 					view);
 }
 
 static void
-paste_into (NautilusView *view,
-	    NautilusFile *target)
+paste_into (NemoView *view,
+	    NemoFile *target)
 {
 	PasteIntoData *data;
 
-	g_assert (NAUTILUS_IS_VIEW (view));
-	g_assert (NAUTILUS_IS_FILE (target));
+	g_assert (NEMO_IS_VIEW (view));
+	g_assert (NEMO_IS_FILE (target));
 
 	data = g_new (PasteIntoData, 1);
 
 	data->view = g_object_ref (view);
-	data->target = nautilus_file_ref (target);
+	data->target = nemo_file_ref (target);
 
-	gtk_clipboard_request_contents (nautilus_clipboard_get (GTK_WIDGET (view)),
+	gtk_clipboard_request_contents (nemo_clipboard_get (GTK_WIDGET (view)),
 					copied_files_atom,
 					paste_into_clipboard_received_callback,
 					data);
@@ -6034,20 +6034,20 @@ static void
 action_paste_files_into_callback (GtkAction *action,
 				  gpointer callback_data)
 {
-	NautilusView *view;
+	NemoView *view;
 	GList *selection;
 
-	view = NAUTILUS_VIEW (callback_data);
-	selection = nautilus_view_get_selection (view);
+	view = NEMO_VIEW (callback_data);
+	selection = nemo_view_get_selection (view);
 	if (selection != NULL) {
-		paste_into (view, NAUTILUS_FILE (selection->data));
-		nautilus_file_list_free (selection);
+		paste_into (view, NEMO_FILE (selection->data));
+		nemo_file_list_free (selection);
 	}
 
 }
 
 static void
-invoke_external_bulk_rename_utility (NautilusView *view,
+invoke_external_bulk_rename_utility (NemoView *view,
 				     GList *selection)
 {
 	GString *cmd;
@@ -6055,7 +6055,7 @@ invoke_external_bulk_rename_utility (NautilusView *view,
 	char *quoted_parameter;
 	char *bulk_rename_tool;
 	GList *walk;
-	NautilusFile *file;
+	NemoFile *file;
 
 	/* assemble command line */
 	bulk_rename_tool = get_bulk_rename_tool ();
@@ -6063,7 +6063,7 @@ invoke_external_bulk_rename_utility (NautilusView *view,
 	g_free (bulk_rename_tool);
 	for (walk = selection; walk; walk = walk->next) {
 		file = walk->data;
-		parameter = nautilus_file_get_uri (file);
+		parameter = nemo_file_get_uri (file);
 		quoted_parameter = g_shell_quote (parameter);
 		g_free (parameter);
 		cmd = g_string_append (cmd, " ");
@@ -6072,53 +6072,53 @@ invoke_external_bulk_rename_utility (NautilusView *view,
 	}
 
 	/* spawning and error handling */
-	nautilus_launch_application_from_command (gtk_widget_get_screen (GTK_WIDGET (view)),
+	nemo_launch_application_from_command (gtk_widget_get_screen (GTK_WIDGET (view)),
 						  cmd->str, FALSE, NULL);
 	g_string_free (cmd, TRUE);
 }
 
 static void
-real_action_undo (NautilusView *view)
+real_action_undo (NemoView *view)
 {
 	GtkWidget *toplevel;
 
 	toplevel = gtk_widget_get_toplevel (GTK_WIDGET (view));
-	nautilus_file_undo_manager_undo (GTK_WINDOW (toplevel));
+	nemo_file_undo_manager_undo (GTK_WINDOW (toplevel));
 }
 
 static void
-real_action_redo (NautilusView *view)
+real_action_redo (NemoView *view)
 {
 	GtkWidget *toplevel;
 
 	toplevel = gtk_widget_get_toplevel (GTK_WIDGET (view));
-	nautilus_file_undo_manager_redo (GTK_WINDOW (toplevel));
+	nemo_file_undo_manager_redo (GTK_WINDOW (toplevel));
 }
 
 static void
 action_undo_callback (GtkAction *action,
 		      gpointer callback_data)
 {
-	real_action_undo (NAUTILUS_VIEW (callback_data));
+	real_action_undo (NEMO_VIEW (callback_data));
 }
 
 static void
 action_redo_callback (GtkAction *action,
 		      gpointer callback_data)
 {
-	real_action_redo (NAUTILUS_VIEW (callback_data));
+	real_action_redo (NEMO_VIEW (callback_data));
 }
 
 static void
-real_action_rename (NautilusView *view,
+real_action_rename (NemoView *view,
 		    gboolean select_all)
 {
-	NautilusFile *file;
+	NemoFile *file;
 	GList *selection;
 
-	g_assert (NAUTILUS_IS_VIEW (view));
+	g_assert (NEMO_IS_VIEW (view));
 
-	selection = nautilus_view_get_selection (view);
+	selection = nemo_view_get_selection (view);
 
 	if (selection_not_empty_in_menu_callback (view, selection)) {
 		/* If there is more than one file selected, invoke a batch renamer */
@@ -6127,35 +6127,35 @@ real_action_rename (NautilusView *view,
 				invoke_external_bulk_rename_utility (view, selection);
 			}
 		} else {
-			file = NAUTILUS_FILE (selection->data);
+			file = NEMO_FILE (selection->data);
 			if (!select_all) {
 				/* directories don't have a file extension, so
 				 * they are always pre-selected as a whole */
-				select_all = nautilus_file_is_directory (file);
+				select_all = nemo_file_is_directory (file);
 			}
-			NAUTILUS_VIEW_CLASS (G_OBJECT_GET_CLASS (view))->start_renaming_file (view, file, select_all);
+			NEMO_VIEW_CLASS (G_OBJECT_GET_CLASS (view))->start_renaming_file (view, file, select_all);
 		}
 	}
 
-	nautilus_file_list_free (selection);
+	nemo_file_list_free (selection);
 }
 
 static void
 action_rename_callback (GtkAction *action,
 			gpointer callback_data)
 {
-	real_action_rename (NAUTILUS_VIEW (callback_data), FALSE);
+	real_action_rename (NEMO_VIEW (callback_data), FALSE);
 }
 
 static void
 action_rename_select_all_callback (GtkAction *action,
 				   gpointer callback_data)
 {
-	real_action_rename (NAUTILUS_VIEW (callback_data), TRUE);
+	real_action_rename (NEMO_VIEW (callback_data), TRUE);
 }
 
 static void
-file_mount_callback (NautilusFile  *file,
+file_mount_callback (NemoFile  *file,
 		     GFile         *result_location,
 		     GError        *error,
 		     gpointer       callback_data)
@@ -6171,14 +6171,14 @@ file_mount_callback (NautilusFile  *file,
 }
 
 static void
-file_unmount_callback (NautilusFile  *file,
+file_unmount_callback (NemoFile  *file,
 		       GFile         *result_location,
 		       GError        *error,
 		       gpointer       callback_data)
 {
-	NautilusView *view;
+	NemoView *view;
 
-	view = NAUTILUS_VIEW (callback_data);
+	view = NEMO_VIEW (callback_data);
 	g_object_unref (view);
 
 	if (error != NULL &&
@@ -6191,14 +6191,14 @@ file_unmount_callback (NautilusFile  *file,
 }
 
 static void
-file_eject_callback (NautilusFile  *file,
+file_eject_callback (NemoFile  *file,
 		     GFile         *result_location,
 		     GError        *error,
 		     gpointer       callback_data)
 {
-	NautilusView *view;
+	NemoView *view;
 
-	view = NAUTILUS_VIEW (callback_data);
+	view = NEMO_VIEW (callback_data);
 	g_object_unref (view);
 
 	if (error != NULL &&
@@ -6211,7 +6211,7 @@ file_eject_callback (NautilusFile  *file,
 }
 
 static void
-file_stop_callback (NautilusFile  *file,
+file_stop_callback (NemoFile  *file,
 		    GFile         *result_location,
 		    GError        *error,
 		    gpointer       callback_data)
@@ -6229,80 +6229,80 @@ static void
 action_mount_volume_callback (GtkAction *action,
 			      gpointer data)
 {
-	NautilusFile *file;
+	NemoFile *file;
 	GList *selection, *l;
-	NautilusView *view;
+	NemoView *view;
 	GMountOperation *mount_op;
 
-        view = NAUTILUS_VIEW (data);
+        view = NEMO_VIEW (data);
 	
-	selection = nautilus_view_get_selection (view);
+	selection = nemo_view_get_selection (view);
 	for (l = selection; l != NULL; l = l->next) {
-		file = NAUTILUS_FILE (l->data);
+		file = NEMO_FILE (l->data);
 		
-		if (nautilus_file_can_mount (file)) {
-			mount_op = gtk_mount_operation_new (nautilus_view_get_containing_window (view));
+		if (nemo_file_can_mount (file)) {
+			mount_op = gtk_mount_operation_new (nemo_view_get_containing_window (view));
 			g_mount_operation_set_password_save (mount_op, G_PASSWORD_SAVE_FOR_SESSION);
-			nautilus_file_mount (file, mount_op, NULL,
+			nemo_file_mount (file, mount_op, NULL,
 					     file_mount_callback, NULL);
 			g_object_unref (mount_op);
 		}
 	}
-	nautilus_file_list_free (selection);
+	nemo_file_list_free (selection);
 }
 
 static void
 action_unmount_volume_callback (GtkAction *action,
 				gpointer data)
 {
-	NautilusFile *file;
+	NemoFile *file;
 	GList *selection, *l;
-	NautilusView *view;
+	NemoView *view;
 
-        view = NAUTILUS_VIEW (data);
+        view = NEMO_VIEW (data);
 	
-	selection = nautilus_view_get_selection (view);
+	selection = nemo_view_get_selection (view);
 
 	for (l = selection; l != NULL; l = l->next) {
-		file = NAUTILUS_FILE (l->data);
-		if (nautilus_file_can_unmount (file)) {
+		file = NEMO_FILE (l->data);
+		if (nemo_file_can_unmount (file)) {
 			GMountOperation *mount_op;
-			mount_op = gtk_mount_operation_new (nautilus_view_get_containing_window (view));
-			nautilus_file_unmount (file, mount_op, NULL,
+			mount_op = gtk_mount_operation_new (nemo_view_get_containing_window (view));
+			nemo_file_unmount (file, mount_op, NULL,
 					       file_unmount_callback, g_object_ref (view));
 			g_object_unref (mount_op);
 		}
 	}
-	nautilus_file_list_free (selection);
+	nemo_file_list_free (selection);
 }
 
 static void
 action_eject_volume_callback (GtkAction *action,
 			      gpointer data)
 {
-	NautilusFile *file;
+	NemoFile *file;
 	GList *selection, *l;
-	NautilusView *view;
+	NemoView *view;
 
-        view = NAUTILUS_VIEW (data);
+        view = NEMO_VIEW (data);
 	
-	selection = nautilus_view_get_selection (view);
+	selection = nemo_view_get_selection (view);
 	for (l = selection; l != NULL; l = l->next) {
-		file = NAUTILUS_FILE (l->data);
+		file = NEMO_FILE (l->data);
 		
-		if (nautilus_file_can_eject (file)) {
+		if (nemo_file_can_eject (file)) {
 			GMountOperation *mount_op;
-			mount_op = gtk_mount_operation_new (nautilus_view_get_containing_window (view));
-			nautilus_file_eject (file, mount_op, NULL,
+			mount_op = gtk_mount_operation_new (nemo_view_get_containing_window (view));
+			nemo_file_eject (file, mount_op, NULL,
 					     file_eject_callback, g_object_ref (view));
 			g_object_unref (mount_op);
 		}
 	}	
-	nautilus_file_list_free (selection);
+	nemo_file_list_free (selection);
 }
 
 static void
-file_start_callback (NautilusFile  *file,
+file_start_callback (NemoFile  *file,
 		     GFile         *result_location,
 		     GError        *error,
 		     gpointer       callback_data)
@@ -6321,91 +6321,91 @@ static void
 action_start_volume_callback (GtkAction *action,
 			      gpointer   data)
 {
-	NautilusFile *file;
+	NemoFile *file;
 	GList *selection, *l;
-	NautilusView *view;
+	NemoView *view;
 	GMountOperation *mount_op;
 
-        view = NAUTILUS_VIEW (data);
+        view = NEMO_VIEW (data);
 
-	selection = nautilus_view_get_selection (view);
+	selection = nemo_view_get_selection (view);
 	for (l = selection; l != NULL; l = l->next) {
-		file = NAUTILUS_FILE (l->data);
+		file = NEMO_FILE (l->data);
 
-		if (nautilus_file_can_start (file) || nautilus_file_can_start_degraded (file)) {
-			mount_op = gtk_mount_operation_new (nautilus_view_get_containing_window (view));
-			nautilus_file_start (file, mount_op, NULL,
+		if (nemo_file_can_start (file) || nemo_file_can_start_degraded (file)) {
+			mount_op = gtk_mount_operation_new (nemo_view_get_containing_window (view));
+			nemo_file_start (file, mount_op, NULL,
 					     file_start_callback, NULL);
 			g_object_unref (mount_op);
 		}
 	}
-	nautilus_file_list_free (selection);
+	nemo_file_list_free (selection);
 }
 
 static void
 action_stop_volume_callback (GtkAction *action,
 			     gpointer   data)
 {
-	NautilusFile *file;
+	NemoFile *file;
 	GList *selection, *l;
-	NautilusView *view;
+	NemoView *view;
 
-        view = NAUTILUS_VIEW (data);
+        view = NEMO_VIEW (data);
 
-	selection = nautilus_view_get_selection (view);
+	selection = nemo_view_get_selection (view);
 	for (l = selection; l != NULL; l = l->next) {
-		file = NAUTILUS_FILE (l->data);
+		file = NEMO_FILE (l->data);
 
-		if (nautilus_file_can_stop (file)) {
+		if (nemo_file_can_stop (file)) {
 			GMountOperation *mount_op;
-			mount_op = gtk_mount_operation_new (nautilus_view_get_containing_window (view));
-			nautilus_file_stop (file, mount_op, NULL,
+			mount_op = gtk_mount_operation_new (nemo_view_get_containing_window (view));
+			nemo_file_stop (file, mount_op, NULL,
 					    file_stop_callback, NULL);
 			g_object_unref (mount_op);
 		}
 	}
-	nautilus_file_list_free (selection);
+	nemo_file_list_free (selection);
 }
 
 static void
 action_detect_media_callback (GtkAction *action,
 			      gpointer   data)
 {
-	NautilusFile *file;
+	NemoFile *file;
 	GList *selection, *l;
-	NautilusView *view;
+	NemoView *view;
 
-        view = NAUTILUS_VIEW (data);
+        view = NEMO_VIEW (data);
 
-	selection = nautilus_view_get_selection (view);
+	selection = nemo_view_get_selection (view);
 	for (l = selection; l != NULL; l = l->next) {
-		file = NAUTILUS_FILE (l->data);
+		file = NEMO_FILE (l->data);
 
-		if (nautilus_file_can_poll_for_media (file) && !nautilus_file_is_media_check_automatic (file)) {
-			nautilus_file_poll_for_media (file);
+		if (nemo_file_can_poll_for_media (file) && !nemo_file_is_media_check_automatic (file)) {
+			nemo_file_poll_for_media (file);
 		}
 	}
-	nautilus_file_list_free (selection);
+	nemo_file_list_free (selection);
 }
 
 static void
 action_self_mount_volume_callback (GtkAction *action,
 				   gpointer data)
 {
-	NautilusFile *file;
-	NautilusView *view;
+	NemoFile *file;
+	NemoView *view;
 	GMountOperation *mount_op;
 
-	view = NAUTILUS_VIEW (data);
+	view = NEMO_VIEW (data);
 
-	file = nautilus_view_get_directory_as_file (view);
+	file = nemo_view_get_directory_as_file (view);
 	if (file == NULL) {
 		return;
 	}
 
-	mount_op = gtk_mount_operation_new (nautilus_view_get_containing_window (view));
+	mount_op = gtk_mount_operation_new (nemo_view_get_containing_window (view));
 	g_mount_operation_set_password_save (mount_op, G_PASSWORD_SAVE_FOR_SESSION);
-	nautilus_file_mount (file, mount_op, NULL, file_mount_callback, NULL);
+	nemo_file_mount (file, mount_op, NULL, file_mount_callback, NULL);
 	g_object_unref (mount_op);
 }
 
@@ -6413,19 +6413,19 @@ static void
 action_self_unmount_volume_callback (GtkAction *action,
 				     gpointer data)
 {
-	NautilusFile *file;
-	NautilusView *view;
+	NemoFile *file;
+	NemoView *view;
 	GMountOperation *mount_op;
 
-	view = NAUTILUS_VIEW (data);
+	view = NEMO_VIEW (data);
 
-	file = nautilus_view_get_directory_as_file (view);
+	file = nemo_view_get_directory_as_file (view);
 	if (file == NULL) {
 		return;
 	}
 
-	mount_op = gtk_mount_operation_new (nautilus_view_get_containing_window (view));
-	nautilus_file_unmount (file, mount_op, NULL, file_unmount_callback, g_object_ref (view));
+	mount_op = gtk_mount_operation_new (nemo_view_get_containing_window (view));
+	nemo_file_unmount (file, mount_op, NULL, file_unmount_callback, g_object_ref (view));
 	g_object_unref (mount_op);
 }
 
@@ -6433,19 +6433,19 @@ static void
 action_self_eject_volume_callback (GtkAction *action,
 				   gpointer data)
 {
-	NautilusFile *file;
-	NautilusView *view;
+	NemoFile *file;
+	NemoView *view;
 	GMountOperation *mount_op;
 
-	view = NAUTILUS_VIEW (data);
+	view = NEMO_VIEW (data);
 
-	file = nautilus_view_get_directory_as_file (view);
+	file = nemo_view_get_directory_as_file (view);
 	if (file == NULL) {
 		return;
 	}
 	
-	mount_op = gtk_mount_operation_new (nautilus_view_get_containing_window (view));
-	nautilus_file_eject (file, mount_op, NULL, file_eject_callback, g_object_ref (view));
+	mount_op = gtk_mount_operation_new (nemo_view_get_containing_window (view));
+	nemo_file_eject (file, mount_op, NULL, file_eject_callback, g_object_ref (view));
 	g_object_unref (mount_op);
 }
 
@@ -6453,19 +6453,19 @@ static void
 action_self_start_volume_callback (GtkAction *action,
 				   gpointer   data)
 {
-	NautilusFile *file;
-	NautilusView *view;
+	NemoFile *file;
+	NemoView *view;
 	GMountOperation *mount_op;
 
-	view = NAUTILUS_VIEW (data);
+	view = NEMO_VIEW (data);
 
-	file = nautilus_view_get_directory_as_file (view);
+	file = nemo_view_get_directory_as_file (view);
 	if (file == NULL) {
 		return;
 	}
 
-	mount_op = gtk_mount_operation_new (nautilus_view_get_containing_window (view));
-	nautilus_file_start (file, mount_op, NULL, file_start_callback, NULL);
+	mount_op = gtk_mount_operation_new (nemo_view_get_containing_window (view));
+	nemo_file_start (file, mount_op, NULL, file_start_callback, NULL);
 	g_object_unref (mount_op);
 }
 
@@ -6473,19 +6473,19 @@ static void
 action_self_stop_volume_callback (GtkAction *action,
 				  gpointer   data)
 {
-	NautilusFile *file;
-	NautilusView *view;
+	NemoFile *file;
+	NemoView *view;
 	GMountOperation *mount_op;
 
-	view = NAUTILUS_VIEW (data);
+	view = NEMO_VIEW (data);
 
-	file = nautilus_view_get_directory_as_file (view);
+	file = nemo_view_get_directory_as_file (view);
 	if (file == NULL) {
 		return;
 	}
 
-	mount_op = gtk_mount_operation_new (nautilus_view_get_containing_window (view));
-	nautilus_file_stop (file, mount_op, NULL,
+	mount_op = gtk_mount_operation_new (nemo_view_get_containing_window (view));
+	nemo_file_stop (file, mount_op, NULL,
 			    file_stop_callback, NULL);
 	g_object_unref (mount_op);
 }
@@ -6494,37 +6494,37 @@ static void
 action_self_detect_media_callback (GtkAction *action,
 				   gpointer   data)
 {
-	NautilusFile *file;
-	NautilusView *view;
+	NemoFile *file;
+	NemoView *view;
 
-	view = NAUTILUS_VIEW (data);
+	view = NEMO_VIEW (data);
 
-	file = nautilus_view_get_directory_as_file (view);
+	file = nemo_view_get_directory_as_file (view);
 	if (file == NULL) {
 		return;
 	}
 
-	nautilus_file_poll_for_media (file);
+	nemo_file_poll_for_media (file);
 }
 
 static void
 action_location_mount_volume_callback (GtkAction *action,
 				       gpointer data)
 {
-	NautilusFile *file;
-	NautilusView *view;
+	NemoFile *file;
+	NemoView *view;
 	GMountOperation *mount_op;
 
-	view = NAUTILUS_VIEW (data);
+	view = NEMO_VIEW (data);
 
 	file = view->details->location_popup_directory_as_file;
 	if (file == NULL) {
 		return;
 	}
 
-	mount_op = gtk_mount_operation_new (nautilus_view_get_containing_window (view));
+	mount_op = gtk_mount_operation_new (nemo_view_get_containing_window (view));
 	g_mount_operation_set_password_save (mount_op, G_PASSWORD_SAVE_FOR_SESSION);
-	nautilus_file_mount (file, mount_op, NULL, file_mount_callback, NULL);
+	nemo_file_mount (file, mount_op, NULL, file_mount_callback, NULL);
 	g_object_unref (mount_op);
 }
 
@@ -6532,19 +6532,19 @@ static void
 action_location_unmount_volume_callback (GtkAction *action,
 					 gpointer data)
 {
-	NautilusFile *file;
-	NautilusView *view;
+	NemoFile *file;
+	NemoView *view;
 	GMountOperation *mount_op;
 
-	view = NAUTILUS_VIEW (data);
+	view = NEMO_VIEW (data);
 
 	file = view->details->location_popup_directory_as_file;
 	if (file == NULL) {
 		return;
 	}
 
-	mount_op = gtk_mount_operation_new (nautilus_view_get_containing_window (view));
-	nautilus_file_unmount (file, mount_op, NULL,
+	mount_op = gtk_mount_operation_new (nemo_view_get_containing_window (view));
+	nemo_file_unmount (file, mount_op, NULL,
 			       file_unmount_callback, g_object_ref (view));
 	g_object_unref (mount_op);
 }
@@ -6553,19 +6553,19 @@ static void
 action_location_eject_volume_callback (GtkAction *action,
 				       gpointer data)
 {
-	NautilusFile *file;
-	NautilusView *view;
+	NemoFile *file;
+	NemoView *view;
 	GMountOperation *mount_op;
 
-	view = NAUTILUS_VIEW (data);
+	view = NEMO_VIEW (data);
 
 	file = view->details->location_popup_directory_as_file;
 	if (file == NULL) {
 		return;
 	}
 	
-	mount_op = gtk_mount_operation_new (nautilus_view_get_containing_window (view));
-	nautilus_file_eject (file, mount_op, NULL,
+	mount_op = gtk_mount_operation_new (nemo_view_get_containing_window (view));
+	nemo_file_eject (file, mount_op, NULL,
 			     file_eject_callback, g_object_ref (view));
 	g_object_unref (mount_op);
 }
@@ -6574,19 +6574,19 @@ static void
 action_location_start_volume_callback (GtkAction *action,
 				       gpointer   data)
 {
-	NautilusFile *file;
-	NautilusView *view;
+	NemoFile *file;
+	NemoView *view;
 	GMountOperation *mount_op;
 
-	view = NAUTILUS_VIEW (data);
+	view = NEMO_VIEW (data);
 
 	file = view->details->location_popup_directory_as_file;
 	if (file == NULL) {
 		return;
 	}
 
-	mount_op = gtk_mount_operation_new (nautilus_view_get_containing_window (view));
-	nautilus_file_start (file, mount_op, NULL, file_start_callback, NULL);
+	mount_op = gtk_mount_operation_new (nemo_view_get_containing_window (view));
+	nemo_file_start (file, mount_op, NULL, file_start_callback, NULL);
 	g_object_unref (mount_op);
 }
 
@@ -6594,19 +6594,19 @@ static void
 action_location_stop_volume_callback (GtkAction *action,
 				      gpointer   data)
 {
-	NautilusFile *file;
-	NautilusView *view;
+	NemoFile *file;
+	NemoView *view;
 	GMountOperation *mount_op;
 
-	view = NAUTILUS_VIEW (data);
+	view = NEMO_VIEW (data);
 
 	file = view->details->location_popup_directory_as_file;
 	if (file == NULL) {
 		return;
 	}
 
-	mount_op = gtk_mount_operation_new (nautilus_view_get_containing_window (view));
-	nautilus_file_stop (file, mount_op, NULL,
+	mount_op = gtk_mount_operation_new (nemo_view_get_containing_window (view));
+	nemo_file_stop (file, mount_op, NULL,
 			    file_stop_callback, NULL);
 	g_object_unref (mount_op);
 }
@@ -6615,17 +6615,17 @@ static void
 action_location_detect_media_callback (GtkAction *action,
 				       gpointer   data)
 {
-	NautilusFile *file;
-	NautilusView *view;
+	NemoFile *file;
+	NemoView *view;
 
-	view = NAUTILUS_VIEW (data);
+	view = NEMO_VIEW (data);
 
 	file = view->details->location_popup_directory_as_file;
 	if (file == NULL) {
 		return;
 	}
 
-	nautilus_file_poll_for_media (file);
+	nemo_file_poll_for_media (file);
 }
 
 static void
@@ -6676,11 +6676,11 @@ static void
 action_connect_to_server_link_callback (GtkAction *action,
 					gpointer data)
 {
-	NautilusFile *file;
+	NemoFile *file;
 	GList *selection;
-	NautilusView *view;
+	NemoView *view;
 	char *uri;
-	NautilusIconInfo *icon;
+	NemoIconInfo *icon;
 	const char *icon_name;
 	char *name;
 	GtkWidget *dialog;
@@ -6689,26 +6689,26 @@ action_connect_to_server_link_callback (GtkAction *action,
 	GtkWidget *box;
 	char *title;
 
-        view = NAUTILUS_VIEW (data);
+        view = NEMO_VIEW (data);
 	
-	selection = nautilus_view_get_selection (view);
+	selection = nemo_view_get_selection (view);
 
 	if (!eel_g_list_exactly_one_item (selection)) {
-		nautilus_file_list_free (selection);
+		nemo_file_list_free (selection);
 		return;
 	}
 
-	file = NAUTILUS_FILE (selection->data);
+	file = NEMO_FILE (selection->data);
 
-	uri = nautilus_file_get_activation_uri (file);
-	icon = nautilus_file_get_icon (file, NAUTILUS_ICON_SIZE_STANDARD, 0);
-	icon_name = nautilus_icon_info_get_used_name (icon);
-	name = nautilus_file_get_display_name (file);
+	uri = nemo_file_get_activation_uri (file);
+	icon = nemo_file_get_icon (file, NEMO_ICON_SIZE_STANDARD, 0);
+	icon_name = nemo_icon_info_get_used_name (icon);
+	name = nemo_file_get_display_name (file);
 
 	if (uri != NULL) {
 		title = g_strdup_printf (_("Connect to Server %s"), name);
 		dialog = gtk_dialog_new_with_buttons (title,
-						      nautilus_view_get_containing_window (view),
+						      nemo_view_get_containing_window (view),
 						      0,
 						      GTK_STOCK_CANCEL, GTK_RESPONSE_CANCEL,
 						      _("_Connect"), GTK_RESPONSE_OK,
@@ -6761,48 +6761,48 @@ static void
 action_location_open_alternate_callback (GtkAction *action,
 					 gpointer   callback_data)
 {
-	NautilusView *view;
-	NautilusFile *file;
+	NemoView *view;
+	NemoFile *file;
 
-	view = NAUTILUS_VIEW (callback_data);
+	view = NEMO_VIEW (callback_data);
 
 	file = view->details->location_popup_directory_as_file;
 	if (file == NULL) {
 		return;
 	}
-	nautilus_view_activate_file (view,
+	nemo_view_activate_file (view,
 				     file,
-				     NAUTILUS_WINDOW_OPEN_FLAG_NEW_WINDOW);
+				     NEMO_WINDOW_OPEN_FLAG_NEW_WINDOW);
 }
 
 static void
 action_location_open_in_new_tab_callback (GtkAction *action,
 					  gpointer   callback_data)
 {
-	NautilusView *view;
-	NautilusFile *file;
+	NemoView *view;
+	NemoFile *file;
 
-	view = NAUTILUS_VIEW (callback_data);
+	view = NEMO_VIEW (callback_data);
 
 	file = view->details->location_popup_directory_as_file;
 	if (file == NULL) {
 		return;
 	}
 
-	nautilus_view_activate_file (view,
+	nemo_view_activate_file (view,
 				     file,
-				     NAUTILUS_WINDOW_OPEN_FLAG_NEW_TAB);
+				     NEMO_WINDOW_OPEN_FLAG_NEW_TAB);
 }
 
 static void
 action_location_cut_callback (GtkAction *action,
 			      gpointer   callback_data)
 {
-	NautilusView *view;
-	NautilusFile *file;
+	NemoView *view;
+	NemoFile *file;
 	GList *files;
 
-	view = NAUTILUS_VIEW (callback_data);
+	view = NEMO_VIEW (callback_data);
 
 	file = view->details->location_popup_directory_as_file;
 	g_return_if_fail (file != NULL);
@@ -6816,11 +6816,11 @@ static void
 action_location_copy_callback (GtkAction *action,
 			       gpointer   callback_data)
 {
-	NautilusView *view;
-	NautilusFile *file;
+	NemoView *view;
+	NemoFile *file;
 	GList *files;
 
-	view = NAUTILUS_VIEW (callback_data);
+	view = NEMO_VIEW (callback_data);
 
 	file = view->details->location_popup_directory_as_file;
 	g_return_if_fail (file != NULL);
@@ -6834,10 +6834,10 @@ static void
 action_location_paste_files_into_callback (GtkAction *action,
 					   gpointer callback_data)
 {
-	NautilusView *view;
-	NautilusFile *file;
+	NemoView *view;
+	NemoFile *file;
 
-	view = NAUTILUS_VIEW (callback_data);
+	view = NEMO_VIEW (callback_data);
 
 	file = view->details->location_popup_directory_as_file;
 	g_return_if_fail (file != NULL);
@@ -6849,17 +6849,17 @@ static void
 action_location_trash_callback (GtkAction *action,
 				gpointer   callback_data)
 {
-	NautilusView *view;
-	NautilusFile *file;
+	NemoView *view;
+	NemoFile *file;
 	GList *files;
 
-	view = NAUTILUS_VIEW (callback_data);
+	view = NEMO_VIEW (callback_data);
 
 	file = view->details->location_popup_directory_as_file;
 	g_return_if_fail (file != NULL);
 
 	files = g_list_append (NULL, file);
-	trash_or_delete_files (nautilus_view_get_containing_window (view),
+	trash_or_delete_files (nemo_view_get_containing_window (view),
 			       files, TRUE,
 			       view);
 	g_list_free (files);
@@ -6869,20 +6869,20 @@ static void
 action_location_delete_callback (GtkAction *action,
 				 gpointer   callback_data)
 {
-	NautilusView *view;
-	NautilusFile *file;
+	NemoView *view;
+	NemoFile *file;
 	GFile *location;
 	GList *files;
 
-	view = NAUTILUS_VIEW (callback_data);
+	view = NEMO_VIEW (callback_data);
 
 	file = view->details->location_popup_directory_as_file;
 	g_return_if_fail (file != NULL);
 
-	location = nautilus_file_get_location (file);
+	location = nemo_file_get_location (file);
 
 	files = g_list_append (NULL, location);
-	nautilus_file_operations_delete (files, nautilus_view_get_containing_window (view),
+	nemo_file_operations_delete (files, nemo_view_get_containing_window (view),
 					 NULL, NULL);
 
 	g_list_free_full (files, g_object_unref);
@@ -6892,24 +6892,24 @@ static void
 action_location_restore_from_trash_callback (GtkAction *action,
 					     gpointer callback_data)
 {
-	NautilusView *view;
-	NautilusFile *file;
+	NemoView *view;
+	NemoFile *file;
 	GList l;
 
-	view = NAUTILUS_VIEW (callback_data);
+	view = NEMO_VIEW (callback_data);
 	file = view->details->location_popup_directory_as_file;
 
 	l.prev = NULL;
 	l.next = NULL;
 	l.data = file;
-	nautilus_restore_files_from_trash (&l,
-					   nautilus_view_get_containing_window (view));
+	nemo_restore_files_from_trash (&l,
+					   nemo_view_get_containing_window (view));
 }
 
 static void
-nautilus_view_init_show_hidden_files (NautilusView *view)
+nemo_view_init_show_hidden_files (NemoView *view)
 {
-	NautilusWindowShowHiddenFilesMode mode;
+	NemoWindowShowHiddenFilesMode mode;
 	gboolean show_hidden_changed;
 	gboolean show_hidden_default_setting;
 
@@ -6918,16 +6918,16 @@ nautilus_view_init_show_hidden_files (NautilusView *view)
 	}
 
 	show_hidden_changed = FALSE;
-	mode = nautilus_window_get_hidden_files_mode (view->details->window);
+	mode = nemo_window_get_hidden_files_mode (view->details->window);
 
-	if (mode == NAUTILUS_WINDOW_SHOW_HIDDEN_FILES_DEFAULT) {
-		show_hidden_default_setting = g_settings_get_boolean (nautilus_preferences, NAUTILUS_PREFERENCES_SHOW_HIDDEN_FILES);
+	if (mode == NEMO_WINDOW_SHOW_HIDDEN_FILES_DEFAULT) {
+		show_hidden_default_setting = g_settings_get_boolean (nemo_preferences, NEMO_PREFERENCES_SHOW_HIDDEN_FILES);
 		if (show_hidden_default_setting != view->details->show_hidden_files) {
 			view->details->show_hidden_files = show_hidden_default_setting;
 			show_hidden_changed = TRUE;
 		}
 	} else {
-		if (mode == NAUTILUS_WINDOW_SHOW_HIDDEN_FILES_ENABLE) {
+		if (mode == NEMO_WINDOW_SHOW_HIDDEN_FILES_ENABLE) {
 			show_hidden_changed = !view->details->show_hidden_files;
 			view->details->show_hidden_files = TRUE;
 		} else {
@@ -7045,7 +7045,7 @@ static const GtkActionEntry directory_view_entries[] = {
   /* tooltip */                  NULL,
 				 G_CALLBACK (action_rename_select_all_callback) },
   /* name, stock id */         { "Trash", NULL,
-  /* label, accelerator */       N_("Mo_ve to Trash"), "<control>Delete",
+  /* label, accelerator */       N_("Mo_ve to Trash"), NULL,
   /* tooltip */                  N_("Move each selected item to the Trash"),
 				 G_CALLBACK (action_trash_callback) },
   /* name, stock id */         { "Delete", NULL,
@@ -7140,37 +7140,37 @@ static const GtkActionEntry directory_view_entries[] = {
 				 G_CALLBACK (action_save_search_as_callback) },
 
   /* Location-specific actions */
-  /* name, stock id */         { NAUTILUS_ACTION_LOCATION_OPEN_ALTERNATE, NULL,
+  /* name, stock id */         { NEMO_ACTION_LOCATION_OPEN_ALTERNATE, NULL,
   /* label, accelerator */       N_("Open in Navigation Window"), "",
   /* tooltip */                  N_("Open this folder in a navigation window"),
 				 G_CALLBACK (action_location_open_alternate_callback) },
-  /* name, stock id */         { NAUTILUS_ACTION_LOCATION_OPEN_IN_NEW_TAB, NULL,
+  /* name, stock id */         { NEMO_ACTION_LOCATION_OPEN_IN_NEW_TAB, NULL,
   /* label, accelerator */       N_("Open in New _Tab"), "",
   /* tooltip */                  N_("Open this folder in a new tab"),
 				 G_CALLBACK (action_location_open_in_new_tab_callback) },
 
-  /* name, stock id */         { NAUTILUS_ACTION_LOCATION_CUT, GTK_STOCK_CUT,
+  /* name, stock id */         { NEMO_ACTION_LOCATION_CUT, GTK_STOCK_CUT,
   /* label, accelerator */       NULL, "",
   /* tooltip */                  N_("Prepare this folder to be moved with a Paste command"),
 				 G_CALLBACK (action_location_cut_callback) },
-  /* name, stock id */         { NAUTILUS_ACTION_LOCATION_COPY, GTK_STOCK_COPY,
+  /* name, stock id */         { NEMO_ACTION_LOCATION_COPY, GTK_STOCK_COPY,
   /* label, accelerator */       NULL, "",
   /* tooltip */                  N_("Prepare this folder to be copied with a Paste command"),
 				 G_CALLBACK (action_location_copy_callback) },
-  /* name, stock id */         { NAUTILUS_ACTION_LOCATION_PASTE_FILES_INTO, GTK_STOCK_PASTE,
+  /* name, stock id */         { NEMO_ACTION_LOCATION_PASTE_FILES_INTO, GTK_STOCK_PASTE,
   /* label, accelerator */       N_("_Paste Into Folder"), "",
   /* tooltip */                  N_("Move or copy files previously selected by a Cut or Copy command into this folder"),
 				 G_CALLBACK (action_location_paste_files_into_callback) },
 
-  /* name, stock id */         { NAUTILUS_ACTION_LOCATION_TRASH, NULL,
+  /* name, stock id */         { NEMO_ACTION_LOCATION_TRASH, NULL,
   /* label, accelerator */       N_("Mo_ve to Trash"), "",
   /* tooltip */                  N_("Move this folder to the Trash"),
 				 G_CALLBACK (action_location_trash_callback) },
-  /* name, stock id */         { NAUTILUS_ACTION_LOCATION_DELETE, NAUTILUS_ICON_DELETE,
+  /* name, stock id */         { NEMO_ACTION_LOCATION_DELETE, NEMO_ICON_DELETE,
   /* label, accelerator */       N_("_Delete"), "",
   /* tooltip */                  N_("Delete this folder, without moving to the Trash"),
 				 G_CALLBACK (action_location_delete_callback) },
-  /* name, stock id */         { NAUTILUS_ACTION_LOCATION_RESTORE_FROM_TRASH, NULL,
+  /* name, stock id */         { NEMO_ACTION_LOCATION_RESTORE_FROM_TRASH, NULL,
   /* label, accelerator */       N_("_Restore"), NULL, NULL,
 				 G_CALLBACK (action_location_restore_from_trash_callback) },
 
@@ -7204,32 +7204,32 @@ static const GtkActionEntry directory_view_entries[] = {
   /* tooltip */                  N_("View or modify the properties of this folder"),
 				 G_CALLBACK (action_location_properties_callback) },
 
-  /* name, stock id, label */  {NAUTILUS_ACTION_COPY_TO_NEXT_PANE, NULL, N_("_Other pane"),
+  /* name, stock id, label */  {NEMO_ACTION_COPY_TO_NEXT_PANE, NULL, N_("_Other pane"),
 				NULL, N_("Copy the current selection to the other pane in the window"),
 				G_CALLBACK (action_copy_to_next_pane_callback) },
-  /* name, stock id, label */  {NAUTILUS_ACTION_MOVE_TO_NEXT_PANE, NULL, N_("_Other pane"),
+  /* name, stock id, label */  {NEMO_ACTION_MOVE_TO_NEXT_PANE, NULL, N_("_Other pane"),
 				NULL, N_("Move the current selection to the other pane in the window"),
 				G_CALLBACK (action_move_to_next_pane_callback) },
-  /* name, stock id, label */  {NAUTILUS_ACTION_COPY_TO_HOME, NAUTILUS_ICON_HOME,
+  /* name, stock id, label */  {NEMO_ACTION_COPY_TO_HOME, NEMO_ICON_HOME,
 				N_("_Home"), NULL,
 				N_("Copy the current selection to the home folder"),
 				G_CALLBACK (action_copy_to_home_callback) },
-  /* name, stock id, label */  {NAUTILUS_ACTION_MOVE_TO_HOME, NAUTILUS_ICON_HOME,
+  /* name, stock id, label */  {NEMO_ACTION_MOVE_TO_HOME, NEMO_ICON_HOME,
 				N_("_Home"), NULL,
 				N_("Move the current selection to the home folder"),
 				G_CALLBACK (action_move_to_home_callback) },
-  /* name, stock id, label */  {NAUTILUS_ACTION_COPY_TO_DESKTOP, NAUTILUS_ICON_DESKTOP,
+  /* name, stock id, label */  {NEMO_ACTION_COPY_TO_DESKTOP, NEMO_ICON_DESKTOP,
 				N_("_Desktop"), NULL,
 				N_("Copy the current selection to the desktop"),
 				G_CALLBACK (action_copy_to_desktop_callback) },
-  /* name, stock id, label */  {NAUTILUS_ACTION_MOVE_TO_DESKTOP, NAUTILUS_ICON_DESKTOP,
+  /* name, stock id, label */  {NEMO_ACTION_MOVE_TO_DESKTOP, NEMO_ICON_DESKTOP,
 				N_("_Desktop"), NULL,
 				N_("Move the current selection to the desktop"),
 				G_CALLBACK (action_move_to_desktop_callback) },
 };
 
 static void
-connect_proxy (NautilusView *view,
+connect_proxy (NemoView *view,
 	       GtkAction *action,
 	       GtkWidget *proxy,
 	       GtkActionGroup *action_group)
@@ -7237,9 +7237,9 @@ connect_proxy (NautilusView *view,
 	GdkPixbuf *pixbuf;
 	GtkWidget *image;
 
-	if (strcmp (gtk_action_get_name (action), NAUTILUS_ACTION_NEW_EMPTY_DOCUMENT) == 0 &&
+	if (strcmp (gtk_action_get_name (action), NEMO_ACTION_NEW_EMPTY_DOCUMENT) == 0 &&
 	    GTK_IS_IMAGE_MENU_ITEM (proxy)) {
-		pixbuf = nautilus_ui_get_menu_icon ("text-x-generic");
+		pixbuf = nemo_ui_get_menu_icon ("text-x-generic");
 		if (pixbuf != NULL) {
 			image = gtk_image_new_from_pixbuf (pixbuf);
 			gtk_image_menu_item_set_image (GTK_IMAGE_MENU_ITEM (proxy), image);
@@ -7250,7 +7250,7 @@ connect_proxy (NautilusView *view,
 }
 
 static void
-pre_activate (NautilusView *view,
+pre_activate (NemoView *view,
 	      GtkAction *action,
 	      GtkActionGroup *action_group)
 {
@@ -7286,14 +7286,14 @@ pre_activate (NautilusView *view,
 }
 
 static void
-real_merge_menus (NautilusView *view)
+real_merge_menus (NemoView *view)
 {
 	GtkActionGroup *action_group;
 	GtkUIManager *ui_manager;
 	GtkAction *action;
 	char *tooltip;
 
-	ui_manager = nautilus_window_get_ui_manager (view->details->window);
+	ui_manager = nemo_window_get_ui_manager (view->details->window);
 
 	action_group = gtk_action_group_new ("DirViewActions");
 	gtk_action_group_set_translation_domain (action_group, GETTEXT_PACKAGE);
@@ -7303,14 +7303,14 @@ real_merge_menus (NautilusView *view)
 				      view);
 
 	/* Translators: %s is a directory */
-	tooltip = g_strdup_printf (_("Run or manage scripts from %s"), "~/.gnome2/nautilus-scripts");
+	tooltip = g_strdup_printf (_("Run or manage scripts from %s"), "~/.gnome2/nemo-scripts");
 	/* Create a script action here specially because its tooltip is dynamic */
 	action = gtk_action_new ("Scripts", _("_Scripts"), tooltip, NULL);
 	gtk_action_group_add_action (action_group, action);
 	g_object_unref (action);
 	g_free (tooltip);
 
-	action = gtk_action_group_get_action (action_group, NAUTILUS_ACTION_NO_TEMPLATES);
+	action = gtk_action_group_get_action (action_group, NEMO_ACTION_NO_TEMPLATES);
 	gtk_action_set_sensitive (action, FALSE);
 
 	g_signal_connect_object (action_group, "connect-proxy",
@@ -7324,7 +7324,7 @@ real_merge_menus (NautilusView *view)
 	gtk_ui_manager_insert_action_group (ui_manager, action_group, -1);
 	g_object_unref (action_group); /* owned by ui manager */
 
-	view->details->dir_merge_id = gtk_ui_manager_add_ui_from_resource (ui_manager, "/org/gnome/nautilus/nautilus-directory-view-ui.xml", NULL);
+	view->details->dir_merge_id = gtk_ui_manager_add_ui_from_resource (ui_manager, "/org/gnome/nemo/nemo-directory-view-ui.xml", NULL);
 	
 	view->details->scripts_invalid = TRUE;
 	view->details->templates_invalid = TRUE;
@@ -7332,29 +7332,29 @@ real_merge_menus (NautilusView *view)
 
 
 static gboolean
-can_paste_into_file (NautilusFile *file)
+can_paste_into_file (NemoFile *file)
 {
-	if (nautilus_file_is_directory (file) &&
-	    nautilus_file_can_write (file)) {
+	if (nemo_file_is_directory (file) &&
+	    nemo_file_can_write (file)) {
 		return TRUE;
 	}
-	if (nautilus_file_has_activation_uri (file)) {
+	if (nemo_file_has_activation_uri (file)) {
 		GFile *location;
-		NautilusFile *activation_file;
+		NemoFile *activation_file;
 		gboolean res;
 		
-		location = nautilus_file_get_activation_location (file);
-		activation_file = nautilus_file_get (location);
+		location = nemo_file_get_activation_location (file);
+		activation_file = nemo_file_get (location);
 		g_object_unref (location);
 	
 		/* The target location might not have data for it read yet,
 		   and we can't want to do sync I/O, so treat the unknown
 		   case as can-write */
-		res = (nautilus_file_get_file_type (activation_file) == G_FILE_TYPE_UNKNOWN) ||
-			(nautilus_file_get_file_type (activation_file) == G_FILE_TYPE_DIRECTORY &&
-			 nautilus_file_can_write (activation_file));
+		res = (nemo_file_get_file_type (activation_file) == G_FILE_TYPE_UNKNOWN) ||
+			(nemo_file_get_file_type (activation_file) == G_FILE_TYPE_DIRECTORY &&
+			 nemo_file_can_write (activation_file));
 
-		nautilus_file_unref (activation_file);
+		nemo_file_unref (activation_file);
 		
 		return res;
 	}
@@ -7368,14 +7368,14 @@ clipboard_targets_received (GtkClipboard     *clipboard,
                             int               n_targets,
 			    gpointer          user_data)
 {
-	NautilusView *view;
+	NemoView *view;
 	gboolean can_paste;
 	int i;
 	GList *selection;
 	int count;
 	GtkAction *action;
 
-	view = NAUTILUS_VIEW (user_data);
+	view = NEMO_VIEW (user_data);
 	can_paste = FALSE;
 
 	if (view->details->window == NULL ||
@@ -7394,22 +7394,22 @@ clipboard_targets_received (GtkClipboard     *clipboard,
 	}
 	
 	
-	selection = nautilus_view_get_selection (view);
+	selection = nemo_view_get_selection (view);
 	count = g_list_length (selection);
 	
 	action = gtk_action_group_get_action (view->details->dir_action_group,
-					      NAUTILUS_ACTION_PASTE);
+					      NEMO_ACTION_PASTE);
 	gtk_action_set_sensitive (action,
-				  can_paste && !nautilus_view_is_read_only (view));
+				  can_paste && !nemo_view_is_read_only (view));
 
 	action = gtk_action_group_get_action (view->details->dir_action_group,
-					      NAUTILUS_ACTION_PASTE_FILES_INTO);
+					      NEMO_ACTION_PASTE_FILES_INTO);
 	gtk_action_set_sensitive (action,
 	                          can_paste && count == 1 &&
-	                          can_paste_into_file (NAUTILUS_FILE (selection->data)));
+	                          can_paste_into_file (NEMO_FILE (selection->data)));
 
 	action = gtk_action_group_get_action (view->details->dir_action_group,
-					      NAUTILUS_ACTION_LOCATION_PASTE_FILES_INTO);
+					      NEMO_ACTION_LOCATION_PASTE_FILES_INTO);
 	g_object_set_data (G_OBJECT (action),
 			   "can-paste-according-to-clipboard",
 			   GINT_TO_POINTER (can_paste));
@@ -7419,13 +7419,13 @@ clipboard_targets_received (GtkClipboard     *clipboard,
 				  GPOINTER_TO_INT (g_object_get_data (G_OBJECT (action),
 								      "can-paste-according-to-destination")));
 
-	nautilus_file_list_free (selection);
+	nemo_file_list_free (selection);
 	
 	g_object_unref (view);
 }
 
 static gboolean
-should_show_empty_trash (NautilusView *view)
+should_show_empty_trash (NemoView *view)
 {
 	return (showing_trash_directory (view));
 }
@@ -7434,26 +7434,26 @@ static gboolean
 file_list_all_are_folders (GList *file_list)
 {
 	GList *l;
-	NautilusFile *file, *linked_file;
+	NemoFile *file, *linked_file;
 	char *activation_uri;
 	gboolean is_dir;
 	
 	for (l = file_list; l != NULL; l = l->next) {
-		file = NAUTILUS_FILE (l->data);
-		if (nautilus_file_is_nautilus_link (file) &&
-		    !NAUTILUS_IS_DESKTOP_ICON_FILE (file)) {
-			if (nautilus_file_is_launcher (file)) {
+		file = NEMO_FILE (l->data);
+		if (nemo_file_is_nemo_link (file) &&
+		    !NEMO_IS_DESKTOP_ICON_FILE (file)) {
+			if (nemo_file_is_launcher (file)) {
 				return FALSE;
 			}
 				
-			activation_uri = nautilus_file_get_activation_uri (file);
+			activation_uri = nemo_file_get_activation_uri (file);
 			
 			if (activation_uri == NULL) {
 				g_free (activation_uri);
 				return FALSE;
 			}
 
-			linked_file = nautilus_file_get_existing_by_uri (activation_uri);
+			linked_file = nemo_file_get_existing_by_uri (activation_uri);
 
 			/* We might not actually know the type of the linked file yet,
 			 * however we don't want to schedule a read, since that might do things
@@ -7463,18 +7463,18 @@ file_list_all_are_folders (GList *file_list)
 			 */
 			is_dir =
 				(linked_file != NULL &&
-				 nautilus_file_is_directory (linked_file)) ||
+				 nemo_file_is_directory (linked_file)) ||
 				(activation_uri != NULL &&
 				 activation_uri[strlen (activation_uri) - 1] == '/');
 			
-			nautilus_file_unref (linked_file);
+			nemo_file_unref (linked_file);
 			g_free (activation_uri);
 			
 			if (!is_dir) {
 				return FALSE;
 			}
-		} else if (!(nautilus_file_is_directory (file) ||
-			     NAUTILUS_IS_DESKTOP_ICON_FILE (file))) {
+		} else if (!(nemo_file_is_directory (file) ||
+			     NEMO_IS_DESKTOP_ICON_FILE (file))) {
 			return FALSE;
 		}
 	}
@@ -7482,7 +7482,7 @@ file_list_all_are_folders (GList *file_list)
 }
 
 static void
-file_should_show_foreach (NautilusFile        *file,
+file_should_show_foreach (NemoFile        *file,
 			  gboolean            *show_mount,
 			  gboolean            *show_unmount,
 			  gboolean            *show_eject,
@@ -7502,36 +7502,36 @@ file_should_show_foreach (NautilusFile        *file,
 	*show_stop = FALSE;
 	*show_poll = FALSE;
 
-	if (nautilus_file_can_eject (file)) {
+	if (nemo_file_can_eject (file)) {
 		*show_eject = TRUE;
 	}
 
-	if (nautilus_file_can_mount (file)) {
+	if (nemo_file_can_mount (file)) {
 		*show_mount = TRUE;
 	}
 
-	if (nautilus_file_can_start (file) || nautilus_file_can_start_degraded (file)) {
+	if (nemo_file_can_start (file) || nemo_file_can_start_degraded (file)) {
 		*show_start = TRUE;
 	}
 
-	if (nautilus_file_can_stop (file)) {
+	if (nemo_file_can_stop (file)) {
 		*show_stop = TRUE;
 	}
 
 	/* Dot not show both Unmount and Eject/Safe Removal; too confusing to
 	 * have too many menu entries */
-	if (nautilus_file_can_unmount (file) && !*show_eject && !*show_stop) {
+	if (nemo_file_can_unmount (file) && !*show_eject && !*show_stop) {
 		*show_unmount = TRUE;
 	}
 
-	if (nautilus_file_can_poll_for_media (file) && !nautilus_file_is_media_check_automatic (file)) {
+	if (nemo_file_can_poll_for_media (file) && !nemo_file_is_media_check_automatic (file)) {
 		*show_poll = TRUE;
 	}
 
-	*start_stop_type = nautilus_file_get_start_stop_type (file);
+	*start_stop_type = nemo_file_get_start_stop_type (file);
 
-	if (nautilus_file_is_nautilus_link (file)) {
-		uri = nautilus_file_get_activation_uri (file);
+	if (nemo_file_is_nemo_link (file)) {
+		uri = nemo_file_get_activation_uri (file);
 		if (uri != NULL &&
 		    (eel_istr_has_prefix (uri, "ftp:") ||
 		     eel_istr_has_prefix (uri, "ssh:") ||
@@ -7545,7 +7545,7 @@ file_should_show_foreach (NautilusFile        *file,
 }
 
 static void
-file_should_show_self (NautilusFile        *file,
+file_should_show_self (NemoFile        *file,
 		       gboolean            *show_mount,
 		       gboolean            *show_unmount,
 		       gboolean            *show_eject,
@@ -7565,48 +7565,48 @@ file_should_show_self (NautilusFile        *file,
 		return;
 	}
 
-	if (nautilus_file_can_eject (file)) {
+	if (nemo_file_can_eject (file)) {
 		*show_eject = TRUE;
 	}
 
-	if (nautilus_file_can_mount (file)) {
+	if (nemo_file_can_mount (file)) {
 		*show_mount = TRUE;
 	}
 
-	if (nautilus_file_can_start (file) || nautilus_file_can_start_degraded (file)) {
+	if (nemo_file_can_start (file) || nemo_file_can_start_degraded (file)) {
 		*show_start = TRUE;
 	}
 
-	if (nautilus_file_can_stop (file)) {
+	if (nemo_file_can_stop (file)) {
 		*show_stop = TRUE;
 	}
 
 	/* Dot not show both Unmount and Eject/Safe Removal; too confusing to
 	 * have too many menu entries */
-	if (nautilus_file_can_unmount (file) && !*show_eject && !*show_stop) {
+	if (nemo_file_can_unmount (file) && !*show_eject && !*show_stop) {
 		*show_unmount = TRUE;
 	}
 
-	if (nautilus_file_can_poll_for_media (file) && !nautilus_file_is_media_check_automatic (file)) {
+	if (nemo_file_can_poll_for_media (file) && !nemo_file_is_media_check_automatic (file)) {
 		*show_poll = TRUE;
 	}
 
-	*start_stop_type = nautilus_file_get_start_stop_type (file);
+	*start_stop_type = nemo_file_get_start_stop_type (file);
 
 }
 
 static gboolean
 files_are_all_directories (GList *files)
 {
-	NautilusFile *file;
+	NemoFile *file;
 	GList *l;
 	gboolean all_directories;
 
 	all_directories = TRUE;
 
 	for (l = files; l != NULL; l = l->next) {
-		file = NAUTILUS_FILE (l->data);
-		all_directories &= nautilus_file_is_directory (file);
+		file = NEMO_FILE (l->data);
+		all_directories &= nemo_file_is_directory (file);
 	}
 
 	return all_directories;
@@ -7615,15 +7615,15 @@ files_are_all_directories (GList *files)
 static gboolean
 files_is_none_directory (GList *files)
 {
-	NautilusFile *file;
+	NemoFile *file;
 	GList *l;
 	gboolean no_directory;
 
 	no_directory = TRUE;
 
 	for (l = files; l != NULL; l = l->next) {
-		file = NAUTILUS_FILE (l->data);
-		no_directory &= !nautilus_file_is_directory (file);
+		file = NEMO_FILE (l->data);
+		no_directory &= !nemo_file_is_directory (file);
 	}
 
 	return no_directory;
@@ -7634,8 +7634,8 @@ update_restore_from_trash_action (GtkAction *action,
 				  GList *files,
 				  gboolean is_self)
 {
-	NautilusFile *original_file;
-	NautilusFile *original_dir;
+	NemoFile *original_file;
+	NemoFile *original_dir;
 	GHashTable *original_dirs_hash;
 	GList *original_dirs;
 	GFile *original_location;
@@ -7650,13 +7650,13 @@ update_restore_from_trash_action (GtkAction *action,
 
 	if (files != NULL) {
 		if (g_list_length (files) == 1) {
-			original_file = nautilus_file_get_trash_original_file (files->data);
+			original_file = nemo_file_get_trash_original_file (files->data);
 		} else {
-			original_dirs_hash = nautilus_trashed_files_get_original_directories (files, NULL);
+			original_dirs_hash = nemo_trashed_files_get_original_directories (files, NULL);
 			if (original_dirs_hash != NULL) {
 				original_dirs = g_hash_table_get_keys (original_dirs_hash);
 				if (g_list_length (original_dirs) == 1) {
-					original_dir = nautilus_file_ref (NAUTILUS_FILE (original_dirs->data));
+					original_dir = nemo_file_ref (NEMO_FILE (original_dirs->data));
 				}
 			}
 		}
@@ -7666,9 +7666,9 @@ update_restore_from_trash_action (GtkAction *action,
 		gtk_action_set_visible (action, TRUE);
 
 		if (original_file != NULL) {
-			original_location = nautilus_file_get_location (original_file);
+			original_location = nemo_file_get_location (original_file);
 		} else if (original_dir != NULL) {
-			original_location = nautilus_file_get_location (original_dir);
+			original_location = nemo_file_get_location (original_dir);
 		}
 
 		if (original_location != NULL) {
@@ -7721,8 +7721,8 @@ update_restore_from_trash_action (GtkAction *action,
 		gtk_action_set_visible (action, FALSE);
 	}
 
-	nautilus_file_unref (original_file);
-	nautilus_file_unref (original_dir);
+	nemo_file_unref (original_file);
+	nemo_file_unref (original_dir);
 	g_list_free (original_dirs);
 
 	if (original_dirs_hash != NULL) {
@@ -7731,12 +7731,12 @@ update_restore_from_trash_action (GtkAction *action,
 }
 
 static void
-real_update_menus_volumes (NautilusView *view,
+real_update_menus_volumes (NemoView *view,
 			   GList *selection,
 			   gint selection_count)
 {
 	GList *l;
-	NautilusFile *file;
+	NemoFile *file;
 	gboolean show_mount;
 	gboolean show_unmount;
 	gboolean show_eject;
@@ -7777,7 +7777,7 @@ real_update_menus_volumes (NautilusView *view,
 		gboolean show_stop_one;
 		gboolean show_poll_one;
 
-		file = NAUTILUS_FILE (l->data);
+		file = NEMO_FILE (l->data);
 		file_should_show_foreach (file,
 					  &show_mount_one,
 					  &show_unmount_one,
@@ -7798,23 +7798,23 @@ real_update_menus_volumes (NautilusView *view,
 	}
 
 	action = gtk_action_group_get_action (view->details->dir_action_group,
-					      NAUTILUS_ACTION_CONNECT_TO_SERVER_LINK);
+					      NEMO_ACTION_CONNECT_TO_SERVER_LINK);
 	gtk_action_set_visible (action, show_connect);
 	
 	action = gtk_action_group_get_action (view->details->dir_action_group,
-					      NAUTILUS_ACTION_MOUNT_VOLUME);
+					      NEMO_ACTION_MOUNT_VOLUME);
 	gtk_action_set_visible (action, show_mount);
 	
 	action = gtk_action_group_get_action (view->details->dir_action_group,
-					      NAUTILUS_ACTION_UNMOUNT_VOLUME);
+					      NEMO_ACTION_UNMOUNT_VOLUME);
 	gtk_action_set_visible (action, show_unmount);
 	
 	action = gtk_action_group_get_action (view->details->dir_action_group,
-					      NAUTILUS_ACTION_EJECT_VOLUME);
+					      NEMO_ACTION_EJECT_VOLUME);
 	gtk_action_set_visible (action, show_eject);
 	
 	action = gtk_action_group_get_action (view->details->dir_action_group,
-					      NAUTILUS_ACTION_START_VOLUME);
+					      NEMO_ACTION_START_VOLUME);
 	gtk_action_set_visible (action, show_start);
 	if (show_start) {
 		switch (start_stop_type) {
@@ -7843,7 +7843,7 @@ real_update_menus_volumes (NautilusView *view,
 	}
 
 	action = gtk_action_group_get_action (view->details->dir_action_group,
-					      NAUTILUS_ACTION_STOP_VOLUME);
+					      NEMO_ACTION_STOP_VOLUME);
 	gtk_action_set_visible (action, show_stop);
 	if (show_stop) {
 		switch (start_stop_type) {
@@ -7872,13 +7872,13 @@ real_update_menus_volumes (NautilusView *view,
 	}
 
 	action = gtk_action_group_get_action (view->details->dir_action_group,
-					      NAUTILUS_ACTION_POLL);
+					      NEMO_ACTION_POLL);
 	gtk_action_set_visible (action, show_poll);
 
 	show_self_mount = show_self_unmount = show_self_eject =
 		show_self_start = show_self_stop = show_self_poll = FALSE;
 
-	file = nautilus_view_get_directory_as_file (view);
+	file = nemo_view_get_directory_as_file (view);
 	file_should_show_self (file,
 			       &show_self_mount,
 			       &show_self_unmount,
@@ -7889,19 +7889,19 @@ real_update_menus_volumes (NautilusView *view,
 			       &self_start_stop_type);
 
 	action = gtk_action_group_get_action (view->details->dir_action_group,
-					      NAUTILUS_ACTION_SELF_MOUNT_VOLUME);
+					      NEMO_ACTION_SELF_MOUNT_VOLUME);
 	gtk_action_set_visible (action, show_self_mount);
 
 	action = gtk_action_group_get_action (view->details->dir_action_group,
-					      NAUTILUS_ACTION_SELF_UNMOUNT_VOLUME);
+					      NEMO_ACTION_SELF_UNMOUNT_VOLUME);
 	gtk_action_set_visible (action, show_self_unmount);
 
 	action = gtk_action_group_get_action (view->details->dir_action_group,
-					      NAUTILUS_ACTION_SELF_EJECT_VOLUME);
+					      NEMO_ACTION_SELF_EJECT_VOLUME);
 	gtk_action_set_visible (action, show_self_eject);
 
 	action = gtk_action_group_get_action (view->details->dir_action_group,
-					      NAUTILUS_ACTION_SELF_START_VOLUME);
+					      NEMO_ACTION_SELF_START_VOLUME);
 	gtk_action_set_visible (action, show_self_start);
 	if (show_self_start) {
 		switch (self_start_stop_type) {
@@ -7930,7 +7930,7 @@ real_update_menus_volumes (NautilusView *view,
 	}
 
 	action = gtk_action_group_get_action (view->details->dir_action_group,
-					      NAUTILUS_ACTION_SELF_STOP_VOLUME);
+					      NEMO_ACTION_SELF_STOP_VOLUME);
 	gtk_action_set_visible (action, show_self_stop);
 	if (show_self_stop) {
 		switch (self_start_stop_type) {
@@ -7959,16 +7959,16 @@ real_update_menus_volumes (NautilusView *view,
 	}
 
 	action = gtk_action_group_get_action (view->details->dir_action_group,
-					      NAUTILUS_ACTION_SELF_POLL);
+					      NEMO_ACTION_SELF_POLL);
 	gtk_action_set_visible (action, show_self_poll);
 
 }
 
 static void
-real_update_location_menu_volumes (NautilusView *view)
+real_update_location_menu_volumes (NemoView *view)
 {
 	GtkAction *action;
-	NautilusFile *file;
+	NemoFile *file;
 	gboolean show_mount;
 	gboolean show_unmount;
 	gboolean show_eject;
@@ -7978,10 +7978,10 @@ real_update_location_menu_volumes (NautilusView *view)
 	gboolean show_poll;
 	GDriveStartStopType start_stop_type;
 
-	g_assert (NAUTILUS_IS_VIEW (view));
-	g_assert (NAUTILUS_IS_FILE (view->details->location_popup_directory_as_file));
+	g_assert (NEMO_IS_VIEW (view));
+	g_assert (NEMO_IS_FILE (view->details->location_popup_directory_as_file));
 
-	file = NAUTILUS_FILE (view->details->location_popup_directory_as_file);
+	file = NEMO_FILE (view->details->location_popup_directory_as_file);
 	file_should_show_foreach (file,
 				  &show_mount,
 				  &show_unmount,
@@ -7993,19 +7993,19 @@ real_update_location_menu_volumes (NautilusView *view)
 				  &start_stop_type);
 
 	action = gtk_action_group_get_action (view->details->dir_action_group,
-					      NAUTILUS_ACTION_LOCATION_MOUNT_VOLUME);
+					      NEMO_ACTION_LOCATION_MOUNT_VOLUME);
 	gtk_action_set_visible (action, show_mount);
 
 	action = gtk_action_group_get_action (view->details->dir_action_group,
-					      NAUTILUS_ACTION_LOCATION_UNMOUNT_VOLUME);
+					      NEMO_ACTION_LOCATION_UNMOUNT_VOLUME);
 	gtk_action_set_visible (action, show_unmount);
 
 	action = gtk_action_group_get_action (view->details->dir_action_group,
-					      NAUTILUS_ACTION_LOCATION_EJECT_VOLUME);
+					      NEMO_ACTION_LOCATION_EJECT_VOLUME);
 	gtk_action_set_visible (action, show_eject);
 
 	action = gtk_action_group_get_action (view->details->dir_action_group,
-					      NAUTILUS_ACTION_LOCATION_START_VOLUME);
+					      NEMO_ACTION_LOCATION_START_VOLUME);
 	gtk_action_set_visible (action, show_start);
 	if (show_start) {
 		switch (start_stop_type) {
@@ -8034,7 +8034,7 @@ real_update_location_menu_volumes (NautilusView *view)
 	}
 
 	action = gtk_action_group_get_action (view->details->dir_action_group,
-					      NAUTILUS_ACTION_LOCATION_STOP_VOLUME);
+					      NEMO_ACTION_LOCATION_STOP_VOLUME);
 	gtk_action_set_visible (action, show_stop);
 	if (show_stop) {
 		switch (start_stop_type) {
@@ -8063,7 +8063,7 @@ real_update_location_menu_volumes (NautilusView *view)
 	}
 
 	action = gtk_action_group_get_action (view->details->dir_action_group,
-					      NAUTILUS_ACTION_LOCATION_POLL);
+					      NEMO_ACTION_LOCATION_POLL);
 	gtk_action_set_visible (action, show_poll);
 }
 
@@ -8072,7 +8072,7 @@ real_update_location_menu_volumes (NautilusView *view)
  * Update on selection changes
  */
 static void
-real_update_paste_menu (NautilusView *view,
+real_update_paste_menu (NemoView *view,
 			GList *selection,
 			gint selection_count)
 {
@@ -8082,35 +8082,35 @@ real_update_paste_menu (NautilusView *view,
 	GtkAction *action;
 
 	selection_is_read_only = selection_count == 1 &&
-		(!nautilus_file_can_write (NAUTILUS_FILE (selection->data)) &&
-		 !nautilus_file_has_activation_uri (NAUTILUS_FILE (selection->data)));
+		(!nemo_file_can_write (NEMO_FILE (selection->data)) &&
+		 !nemo_file_has_activation_uri (NEMO_FILE (selection->data)));
 		 
-	is_read_only = nautilus_view_is_read_only (view);
+	is_read_only = nemo_view_is_read_only (view);
 	
 	can_paste_files_into = (selection_count == 1 && 
-	                        can_paste_into_file (NAUTILUS_FILE (selection->data)));
+	                        can_paste_into_file (NEMO_FILE (selection->data)));
 
 	action = gtk_action_group_get_action (view->details->dir_action_group,
-					      NAUTILUS_ACTION_PASTE);
+					      NEMO_ACTION_PASTE);
 	gtk_action_set_sensitive (action, !is_read_only);
 	
 	action = gtk_action_group_get_action (view->details->dir_action_group,
-					      NAUTILUS_ACTION_PASTE_FILES_INTO);
+					      NEMO_ACTION_PASTE_FILES_INTO);
 	gtk_action_set_visible (action, can_paste_files_into);
 	gtk_action_set_sensitive (action, !selection_is_read_only);
 
 	/* Ask the clipboard */
 	g_object_ref (view); /* Need to keep the object alive until we get the reply */
-	gtk_clipboard_request_targets (nautilus_clipboard_get (GTK_WIDGET (view)),
+	gtk_clipboard_request_targets (nemo_clipboard_get (GTK_WIDGET (view)),
 				       clipboard_targets_received,
 				       view);
 }
 
 static void
-real_update_location_menu (NautilusView *view)
+real_update_location_menu (NemoView *view)
 {
 	GtkAction *action;
-	NautilusFile *file;
+	NemoFile *file;
 	gboolean is_special_link;
 	gboolean is_desktop_or_home_dir;
 	gboolean can_delete_file, show_delete;
@@ -8121,11 +8121,11 @@ real_update_location_menu (NautilusView *view)
 	char *label;
 	char *tip;
 
-	show_open_in_new_tab = g_settings_get_boolean (nautilus_preferences, NAUTILUS_PREFERENCES_ALWAYS_USE_BROWSER);
-	show_open_alternate = g_settings_get_boolean (nautilus_preferences, NAUTILUS_PREFERENCES_ALWAYS_USE_BROWSER);
+	show_open_in_new_tab = g_settings_get_boolean (nemo_preferences, NEMO_PREFERENCES_ALWAYS_USE_BROWSER);
+	show_open_alternate = g_settings_get_boolean (nemo_preferences, NEMO_PREFERENCES_ALWAYS_USE_BROWSER);
 
 	action = gtk_action_group_get_action (view->details->dir_action_group,
-					      NAUTILUS_ACTION_LOCATION_OPEN_ALTERNATE);
+					      NEMO_ACTION_LOCATION_OPEN_ALTERNATE);
 	gtk_action_set_visible (action, show_open_alternate);
 
 	label = _("Open in New _Window");
@@ -8134,7 +8134,7 @@ real_update_location_menu (NautilusView *view)
 		      NULL);
 
 	action = gtk_action_group_get_action (view->details->dir_action_group,
-					      NAUTILUS_ACTION_LOCATION_OPEN_IN_NEW_TAB);
+					      NEMO_ACTION_LOCATION_OPEN_IN_NEW_TAB);
 	gtk_action_set_visible (action, show_open_in_new_tab);
 
 	label = _("Open in New _Tab");
@@ -8143,26 +8143,26 @@ real_update_location_menu (NautilusView *view)
 		      NULL);
 
 	file = view->details->location_popup_directory_as_file;
-	g_assert (NAUTILUS_IS_FILE (file));
-	g_assert (nautilus_file_check_if_ready (file, NAUTILUS_FILE_ATTRIBUTE_INFO |
-						NAUTILUS_FILE_ATTRIBUTE_MOUNT |
-						NAUTILUS_FILE_ATTRIBUTE_FILESYSTEM_INFO));
+	g_assert (NEMO_IS_FILE (file));
+	g_assert (nemo_file_check_if_ready (file, NEMO_FILE_ATTRIBUTE_INFO |
+						NEMO_FILE_ATTRIBUTE_MOUNT |
+						NEMO_FILE_ATTRIBUTE_FILESYSTEM_INFO));
 
-	is_special_link = NAUTILUS_IS_DESKTOP_ICON_FILE (file);
-	is_desktop_or_home_dir = nautilus_file_is_home (file)
-		|| nautilus_file_is_desktop_directory (file);
+	is_special_link = NEMO_IS_DESKTOP_ICON_FILE (file);
+	is_desktop_or_home_dir = nemo_file_is_home (file)
+		|| nemo_file_is_desktop_directory (file);
 
 	can_delete_file =
-		nautilus_file_can_delete (file) &&
+		nemo_file_can_delete (file) &&
 		!is_special_link &&
 		!is_desktop_or_home_dir;
 
 	action = gtk_action_group_get_action (view->details->dir_action_group,
-					      NAUTILUS_ACTION_LOCATION_CUT);
+					      NEMO_ACTION_LOCATION_CUT);
 	gtk_action_set_sensitive (action, can_delete_file);
 
 	action = gtk_action_group_get_action (view->details->dir_action_group,
-					      NAUTILUS_ACTION_LOCATION_PASTE_FILES_INTO);
+					      NEMO_ACTION_LOCATION_PASTE_FILES_INTO);
 	g_object_set_data (G_OBJECT (action),
 			   "can-paste-according-to-destination",
 			   GINT_TO_POINTER (can_paste_into_file (file)));
@@ -8175,8 +8175,8 @@ real_update_location_menu (NautilusView *view)
 	show_delete = TRUE;
 
 	if (file != NULL &&
-	    nautilus_file_is_in_trash (file)) {
-		if (nautilus_file_is_self_owned (file)) {
+	    nemo_file_is_in_trash (file)) {
+		if (nemo_file_is_self_owned (file)) {
 			show_delete = FALSE;
 		}
 
@@ -8186,34 +8186,34 @@ real_update_location_menu (NautilusView *view)
 	} else {
 		label = _("Mo_ve to Trash");
 		tip = _("Move the open folder to the Trash");
-		show_separate_delete_command = g_settings_get_boolean (nautilus_preferences, NAUTILUS_PREFERENCES_ENABLE_DELETE);
+		show_separate_delete_command = g_settings_get_boolean (nemo_preferences, NEMO_PREFERENCES_ENABLE_DELETE);
 	}
 
 	action = gtk_action_group_get_action (view->details->dir_action_group,
-					      NAUTILUS_ACTION_LOCATION_TRASH);
+					      NEMO_ACTION_LOCATION_TRASH);
 	g_object_set (action,
 		      "label", label,
 		      "tooltip", tip,
 		      "icon-name", (file != NULL &&
-				    nautilus_file_is_in_trash (file)) ?
-		      NAUTILUS_ICON_DELETE : NAUTILUS_ICON_TRASH_FULL,
+				    nemo_file_is_in_trash (file)) ?
+		      NEMO_ICON_DELETE : NEMO_ICON_TRASH_FULL,
 		      NULL);
 	gtk_action_set_sensitive (action, can_delete_file);
 	gtk_action_set_visible (action, show_delete);
 
 	action = gtk_action_group_get_action (view->details->dir_action_group,
-					      NAUTILUS_ACTION_LOCATION_DELETE);
+					      NEMO_ACTION_LOCATION_DELETE);
 	gtk_action_set_visible (action, show_separate_delete_command);
 	if (show_separate_delete_command) {
 		gtk_action_set_sensitive (action, can_delete_file);
 		g_object_set (action,
-			      "icon-name", NAUTILUS_ICON_DELETE,
+			      "icon-name", NEMO_ICON_DELETE,
 			      "sensitive", can_delete_file,
 			      NULL);
 	}
 
 	action = gtk_action_group_get_action (view->details->dir_action_group,
-					      NAUTILUS_ACTION_LOCATION_RESTORE_FROM_TRASH);
+					      NEMO_ACTION_LOCATION_RESTORE_FROM_TRASH);
 	l.prev = NULL;
 	l.next = NULL;
 	l.data = file;
@@ -8223,7 +8223,7 @@ real_update_location_menu (NautilusView *view)
 }
 
 static void
-clipboard_changed_callback (NautilusClipboardMonitor *monitor, NautilusView *view)
+clipboard_changed_callback (NemoClipboardMonitor *monitor, NemoView *view)
 {
 	GList *selection;
 	gint selection_count;
@@ -8232,24 +8232,24 @@ clipboard_changed_callback (NautilusClipboardMonitor *monitor, NautilusView *vie
 		return;
 	}
 
-	selection = nautilus_view_get_selection (view);
+	selection = nemo_view_get_selection (view);
 	selection_count = g_list_length (selection);
 
 	real_update_paste_menu (view, selection, selection_count);
 
-	nautilus_file_list_free (selection);
+	nemo_file_list_free (selection);
 	
 }
 
 static gboolean
 can_delete_all (GList *files)
 {
-	NautilusFile *file;
+	NemoFile *file;
 	GList *l;
 
 	for (l = files; l != NULL; l = l->next) {
 		file = l->data;
-		if (!nautilus_file_can_delete (file)) {
+		if (!nemo_file_can_delete (file)) {
 			return FALSE;
 		}
 	}
@@ -8257,19 +8257,19 @@ can_delete_all (GList *files)
 }
 
 static gboolean
-has_writable_extra_pane (NautilusView *view)
+has_writable_extra_pane (NemoView *view)
 {
-	NautilusView *other_view;
+	NemoView *other_view;
 
 	other_view = get_directory_view_of_extra_pane (view);
 	if (other_view != NULL) {
-		return !nautilus_view_is_read_only (other_view);
+		return !nemo_view_is_read_only (other_view);
 	}
 	return FALSE;
 }
 
 static void
-real_update_menus (NautilusView *view)
+real_update_menus (NemoView *view)
 {
 	GList *selection, *l;
 	gint selection_count;
@@ -8298,13 +8298,13 @@ real_update_menus (NautilusView *view)
 	gboolean next_pane_is_writable;
 	gboolean show_properties;
 
-	selection = nautilus_view_get_selection (view);
+	selection = nemo_view_get_selection (view);
 	selection_count = g_list_length (selection);
 
 	selection_contains_special_link = special_link_in_selection (view);
 	selection_contains_desktop_or_home_dir = desktop_or_home_dir_in_selection (view);
 
-	can_create_files = nautilus_view_supports_creating_files (view);
+	can_create_files = nemo_view_supports_creating_files (view);
 	can_delete_files =
 		can_delete_all (selection) &&
 		selection_count != 0 &&
@@ -8317,7 +8317,7 @@ real_update_menus (NautilusView *view)
 	can_link_files = can_create_files && can_copy_files;
 	
 	action = gtk_action_group_get_action (view->details->dir_action_group,
-					      NAUTILUS_ACTION_RENAME);
+					      NEMO_ACTION_RENAME);
 	/* rename sensitivity depending on selection */
 	if (selection_count > 1) {
 		/* If multiple files are selected, sensitivity depends on whether a bulk renamer is registered. */
@@ -8325,25 +8325,25 @@ real_update_menus (NautilusView *view)
 	} else {
 		gtk_action_set_sensitive (action,
 					  selection_count == 1 &&
-					  nautilus_view_can_rename_file (view, selection->data));
+					  nemo_view_can_rename_file (view, selection->data));
 	}
 
 	action = gtk_action_group_get_action (view->details->dir_action_group,
-					      NAUTILUS_ACTION_NEW_FOLDER);
+					      NEMO_ACTION_NEW_FOLDER);
 	gtk_action_set_sensitive (action, can_create_files);
 
 	action = gtk_action_group_get_action (view->details->dir_action_group,
-					      NAUTILUS_ACTION_OPEN);
+					      NEMO_ACTION_OPEN);
 	gtk_action_set_sensitive (action, selection_count != 0);
 	
 	can_open = show_app = selection_count != 0;
 
 	for (l = selection; l != NULL; l = l->next) {
-		NautilusFile *file;
+		NemoFile *file;
 
-		file = NAUTILUS_FILE (selection->data);
+		file = NEMO_FILE (selection->data);
 
-		if (!nautilus_mime_file_opens_in_external_app (file)) {
+		if (!nemo_mime_file_opens_in_external_app (file)) {
 			show_app = FALSE;
 		}
 
@@ -8358,7 +8358,7 @@ real_update_menus (NautilusView *view)
 	app_icon = NULL;
 
 	if (can_open && show_app) {
-		app = nautilus_mime_get_default_application_for_files (selection);
+		app = nemo_mime_get_default_application_for_files (selection);
 	}
 
 	if (app != NULL) {
@@ -8382,16 +8382,16 @@ real_update_menus (NautilusView *view)
 		      NULL);
 
 	menuitem = gtk_ui_manager_get_widget (
-					      nautilus_window_get_ui_manager (view->details->window),
-					      NAUTILUS_VIEW_MENU_PATH_OPEN);
+					      nemo_window_get_ui_manager (view->details->window),
+					      NEMO_VIEW_MENU_PATH_OPEN);
 
 	/* Only force displaying the icon if it is an application icon */
 	gtk_image_menu_item_set_always_show_image (
 						   GTK_IMAGE_MENU_ITEM (menuitem), app_icon != NULL);
 
 	menuitem = gtk_ui_manager_get_widget (
-					      nautilus_window_get_ui_manager (view->details->window),
-					      NAUTILUS_VIEW_POPUP_PATH_OPEN);
+					      nemo_window_get_ui_manager (view->details->window),
+					      NEMO_VIEW_POPUP_PATH_OPEN);
 
 	/* Only force displaying the icon if it is an application icon */
 	gtk_image_menu_item_set_always_show_image (
@@ -8410,11 +8410,11 @@ real_update_menus (NautilusView *view)
 
 	show_open_alternate = file_list_all_are_folders (selection) &&
 		selection_count > 0 &&
-		g_settings_get_boolean (nautilus_preferences, NAUTILUS_PREFERENCES_ALWAYS_USE_BROWSER) &&
-		!NAUTILUS_IS_DESKTOP_ICON_VIEW (view);
+		g_settings_get_boolean (nemo_preferences, NEMO_PREFERENCES_ALWAYS_USE_BROWSER) &&
+		!NEMO_IS_DESKTOP_ICON_VIEW (view);
 
 	action = gtk_action_group_get_action (view->details->dir_action_group,
-					      NAUTILUS_ACTION_OPEN_ALTERNATE);
+					      NEMO_ACTION_OPEN_ALTERNATE);
 
 	gtk_action_set_sensitive (action,  selection_count != 0);
 	gtk_action_set_visible (action, show_open_alternate);
@@ -8435,7 +8435,7 @@ real_update_menus (NautilusView *view)
 
 	show_open_in_new_tab = show_open_alternate;
 	action = gtk_action_group_get_action (view->details->dir_action_group,
-					      NAUTILUS_ACTION_OPEN_IN_NEW_TAB);
+					      NEMO_ACTION_OPEN_IN_NEW_TAB);
 	gtk_action_set_sensitive (action, selection_count != 0);
 	gtk_action_set_visible (action, show_open_in_new_tab);
 
@@ -8464,42 +8464,42 @@ real_update_menus (NautilusView *view)
 	} else {
 		label = _("Mo_ve to Trash");
 		tip = _("Move each selected item to the Trash");
-		show_separate_delete_command = g_settings_get_boolean (nautilus_preferences, NAUTILUS_PREFERENCES_ENABLE_DELETE);
+		show_separate_delete_command = g_settings_get_boolean (nemo_preferences, NEMO_PREFERENCES_ENABLE_DELETE);
 	}
 	
 	action = gtk_action_group_get_action (view->details->dir_action_group,
-					      NAUTILUS_ACTION_TRASH);
+					      NEMO_ACTION_TRASH);
 	g_object_set (action,
 		      "label", label,
 		      "tooltip", tip,
 		      "icon-name", all_selected_items_in_trash (view) ?
-		      NAUTILUS_ICON_DELETE : NAUTILUS_ICON_TRASH_FULL,
+		      NEMO_ICON_DELETE : NEMO_ICON_TRASH_FULL,
 		      NULL);
 	gtk_action_set_sensitive (action, can_delete_files);
 
 	action = gtk_action_group_get_action (view->details->dir_action_group,
-					      NAUTILUS_ACTION_DELETE);
+					      NEMO_ACTION_DELETE);
 	gtk_action_set_visible (action, show_separate_delete_command);
 	
 	if (show_separate_delete_command) {
 		g_object_set (action,
 			      "label", _("_Delete"),
-			      "icon-name", NAUTILUS_ICON_DELETE,
+			      "icon-name", NEMO_ICON_DELETE,
 			      NULL);
 	}
 	gtk_action_set_sensitive (action, can_delete_files);
 
 
 	action = gtk_action_group_get_action (view->details->dir_action_group,
-					      NAUTILUS_ACTION_RESTORE_FROM_TRASH);
+					      NEMO_ACTION_RESTORE_FROM_TRASH);
 	update_restore_from_trash_action (action, selection, FALSE);
 	
 	action = gtk_action_group_get_action (view->details->dir_action_group,
-					      NAUTILUS_ACTION_DUPLICATE);
+					      NEMO_ACTION_DUPLICATE);
 	gtk_action_set_sensitive (action, can_duplicate_files);
 
 	action = gtk_action_group_get_action (view->details->dir_action_group,
-					      NAUTILUS_ACTION_CREATE_LINK);
+					      NEMO_ACTION_CREATE_LINK);
 	gtk_action_set_sensitive (action, can_link_files);
 	g_object_set (action, "label",
 		      ngettext ("Ma_ke Link",
@@ -8507,10 +8507,10 @@ real_update_menus (NautilusView *view)
 				selection_count),
 		      NULL);
 	
-	show_properties = (!NAUTILUS_IS_DESKTOP_ICON_VIEW (view) || selection_count > 0);
+	show_properties = (!NEMO_IS_DESKTOP_ICON_VIEW (view) || selection_count > 0);
 
 	action = gtk_action_group_get_action (view->details->dir_action_group,
-					      NAUTILUS_ACTION_PROPERTIES);
+					      NEMO_ACTION_PROPERTIES);
 
 	gtk_action_set_sensitive (action, show_properties);
 
@@ -8523,60 +8523,60 @@ real_update_menus (NautilusView *view)
 	gtk_action_set_visible (action, show_properties);
 
 	action = gtk_action_group_get_action (view->details->dir_action_group,
-					      NAUTILUS_ACTION_PROPERTIES_ACCEL);
+					      NEMO_ACTION_PROPERTIES_ACCEL);
 
 	gtk_action_set_sensitive (action, show_properties);
 
 	action = gtk_action_group_get_action (view->details->dir_action_group,
-					      NAUTILUS_ACTION_EMPTY_TRASH);
+					      NEMO_ACTION_EMPTY_TRASH);
 	g_object_set (action,
 		      "label", _("E_mpty Trash"),
 		      NULL);
-	gtk_action_set_sensitive (action, !nautilus_trash_monitor_is_empty ());
+	gtk_action_set_sensitive (action, !nemo_trash_monitor_is_empty ());
 	gtk_action_set_visible (action, should_show_empty_trash (view));
 
 	show_save_search = FALSE;
 	save_search_sensitive = FALSE;
 	show_save_search_as = FALSE;
 	if (view->details->model &&
-	    NAUTILUS_IS_SEARCH_DIRECTORY (view->details->model)) {
-		NautilusSearchDirectory *search;
+	    NEMO_IS_SEARCH_DIRECTORY (view->details->model)) {
+		NemoSearchDirectory *search;
 
-		search = NAUTILUS_SEARCH_DIRECTORY (view->details->model);
-		if (nautilus_search_directory_is_saved_search (search)) {
+		search = NEMO_SEARCH_DIRECTORY (view->details->model);
+		if (nemo_search_directory_is_saved_search (search)) {
 			show_save_search = TRUE;
-			save_search_sensitive = nautilus_search_directory_is_modified (search);
+			save_search_sensitive = nemo_search_directory_is_modified (search);
 		} else {
 			show_save_search_as = TRUE;
 		}
 	} 
 	action = gtk_action_group_get_action (view->details->dir_action_group,
-					      NAUTILUS_ACTION_SAVE_SEARCH);
+					      NEMO_ACTION_SAVE_SEARCH);
 	gtk_action_set_visible (action, show_save_search);
 	gtk_action_set_sensitive (action, save_search_sensitive);
 	action = gtk_action_group_get_action (view->details->dir_action_group,
-					      NAUTILUS_ACTION_SAVE_SEARCH_AS);
+					      NEMO_ACTION_SAVE_SEARCH_AS);
 	gtk_action_set_visible (action, show_save_search_as);
 
 
 	action = gtk_action_group_get_action (view->details->dir_action_group,
-					      NAUTILUS_ACTION_SELECT_ALL);
-	gtk_action_set_sensitive (action, !nautilus_view_is_empty (view));
+					      NEMO_ACTION_SELECT_ALL);
+	gtk_action_set_sensitive (action, !nemo_view_is_empty (view));
 
 	action = gtk_action_group_get_action (view->details->dir_action_group,
-					      NAUTILUS_ACTION_SELECT_PATTERN);
-	gtk_action_set_sensitive (action, !nautilus_view_is_empty (view));
+					      NEMO_ACTION_SELECT_PATTERN);
+	gtk_action_set_sensitive (action, !nemo_view_is_empty (view));
 
 	action = gtk_action_group_get_action (view->details->dir_action_group,
-					      NAUTILUS_ACTION_INVERT_SELECTION);
-	gtk_action_set_sensitive (action, !nautilus_view_is_empty (view));
+					      NEMO_ACTION_INVERT_SELECTION);
+	gtk_action_set_sensitive (action, !nemo_view_is_empty (view));
 
 	action = gtk_action_group_get_action (view->details->dir_action_group,
-					      NAUTILUS_ACTION_CUT);
+					      NEMO_ACTION_CUT);
 	gtk_action_set_sensitive (action, can_delete_files);
 
 	action = gtk_action_group_get_action (view->details->dir_action_group,
-					      NAUTILUS_ACTION_COPY);
+					      NEMO_ACTION_COPY);
 	gtk_action_set_sensitive (action, can_copy_files);
 
 	real_update_paste_menu (view, selection, selection_count);
@@ -8585,14 +8585,14 @@ real_update_menus (NautilusView *view)
 
 	update_undo_actions (view);
 
-	nautilus_file_list_free (selection);
+	nemo_file_list_free (selection);
 
 	if (view->details->scripts_invalid) {
 		update_scripts_menu (view);
 	}
 
 	action = gtk_action_group_get_action (view->details->dir_action_group,
-					      NAUTILUS_ACTION_NEW_DOCUMENTS);
+					      NEMO_ACTION_NEW_DOCUMENTS);
 	gtk_action_set_sensitive (action, can_create_files);
 
 	if (can_create_files && view->details->templates_invalid) {
@@ -8603,32 +8603,32 @@ real_update_menus (NautilusView *view)
 
 	/* next pane: works if file is copyable, and next pane is writable */
 	action = gtk_action_group_get_action (view->details->dir_action_group,
-					      NAUTILUS_ACTION_COPY_TO_NEXT_PANE);
+					      NEMO_ACTION_COPY_TO_NEXT_PANE);
 	gtk_action_set_sensitive (action, can_copy_files && next_pane_is_writable);
 
 	/* move to next pane: works if file is cuttable, and next pane is writable */
 	action = gtk_action_group_get_action (view->details->dir_action_group,
-					      NAUTILUS_ACTION_MOVE_TO_NEXT_PANE);
+					      NEMO_ACTION_MOVE_TO_NEXT_PANE);
 	gtk_action_set_sensitive (action, can_delete_files && next_pane_is_writable);
 
 
 	show_desktop_target =
-		g_settings_get_boolean (gnome_background_preferences, NAUTILUS_PREFERENCES_SHOW_DESKTOP) &&
-		!g_settings_get_boolean (nautilus_preferences, NAUTILUS_PREFERENCES_DESKTOP_IS_HOME_DIR);
+		g_settings_get_boolean (gnome_background_preferences, NEMO_PREFERENCES_SHOW_DESKTOP) &&
+		!g_settings_get_boolean (nemo_preferences, NEMO_PREFERENCES_DESKTOP_IS_HOME_DIR);
 
 	action = gtk_action_group_get_action (view->details->dir_action_group,
-					      NAUTILUS_ACTION_COPY_TO_HOME);
+					      NEMO_ACTION_COPY_TO_HOME);
 	gtk_action_set_sensitive (action, can_copy_files);
 	action = gtk_action_group_get_action (view->details->dir_action_group,
-					      NAUTILUS_ACTION_COPY_TO_DESKTOP);
+					      NEMO_ACTION_COPY_TO_DESKTOP);
 	gtk_action_set_sensitive (action, can_copy_files);
 	gtk_action_set_visible (action, show_desktop_target);
 
 	action = gtk_action_group_get_action (view->details->dir_action_group,
-					      NAUTILUS_ACTION_MOVE_TO_HOME);
+					      NEMO_ACTION_MOVE_TO_HOME);
 	gtk_action_set_sensitive (action, can_delete_files);
 	action = gtk_action_group_get_action (view->details->dir_action_group,
-					      NAUTILUS_ACTION_MOVE_TO_DESKTOP);
+					      NEMO_ACTION_MOVE_TO_DESKTOP);
 	gtk_action_set_sensitive (action, can_delete_files);
 	gtk_action_set_visible (action, show_desktop_target);
 
@@ -8641,20 +8641,20 @@ real_update_menus (NautilusView *view)
 }
 
 /**
- * nautilus_view_pop_up_selection_context_menu
+ * nemo_view_pop_up_selection_context_menu
  *
  * Pop up a context menu appropriate to the selected items.
- * @view: NautilusView of interest.
+ * @view: NemoView of interest.
  * @event: The event that triggered this context menu.
  * 
- * Return value: NautilusDirectory for this view.
+ * Return value: NemoDirectory for this view.
  * 
  **/
 void 
-nautilus_view_pop_up_selection_context_menu  (NautilusView *view, 
+nemo_view_pop_up_selection_context_menu  (NemoView *view, 
 					      GdkEventButton  *event)
 {
-	g_assert (NAUTILUS_IS_VIEW (view));
+	g_assert (NEMO_IS_VIEW (view));
 
 	/* Make the context menu items not flash as they update to proper disabled,
 	 * etc. states by forcing menus to update now.
@@ -8664,24 +8664,24 @@ nautilus_view_pop_up_selection_context_menu  (NautilusView *view,
 	update_context_menu_position_from_event (view, event);
 
 	eel_pop_up_context_menu (create_popup_menu 
-				 (view, NAUTILUS_VIEW_POPUP_PATH_SELECTION),
+				 (view, NEMO_VIEW_POPUP_PATH_SELECTION),
 				 event);
 }
 
 /**
- * nautilus_view_pop_up_background_context_menu
+ * nemo_view_pop_up_background_context_menu
  *
  * Pop up a context menu appropriate to the view globally at the last right click location.
- * @view: NautilusView of interest.
+ * @view: NemoView of interest.
  * 
- * Return value: NautilusDirectory for this view.
+ * Return value: NemoDirectory for this view.
  * 
  **/
 void 
-nautilus_view_pop_up_background_context_menu (NautilusView *view, 
+nemo_view_pop_up_background_context_menu (NemoView *view, 
 					      GdkEventButton  *event)
 {
-	g_assert (NAUTILUS_IS_VIEW (view));
+	g_assert (NEMO_IS_VIEW (view));
 
 	/* Make the context menu items not flash as they update to proper disabled,
 	 * etc. states by forcing menus to update now.
@@ -8692,12 +8692,12 @@ nautilus_view_pop_up_background_context_menu (NautilusView *view,
 
 
 	eel_pop_up_context_menu (create_popup_menu 
-				 (view, NAUTILUS_VIEW_POPUP_PATH_BACKGROUND),
+				 (view, NEMO_VIEW_POPUP_PATH_BACKGROUND),
 				 event);
 }
 
 static void
-real_pop_up_location_context_menu (NautilusView *view)
+real_pop_up_location_context_menu (NemoView *view)
 {
 	/* always update the menu before showing it. Shouldn't be too expensive. */
 	real_update_location_menu (view);
@@ -8705,18 +8705,18 @@ real_pop_up_location_context_menu (NautilusView *view)
 	update_context_menu_position_from_event (view, view->details->location_popup_event);
 
 	eel_pop_up_context_menu (create_popup_menu 
-				 (view, NAUTILUS_VIEW_POPUP_PATH_LOCATION),
+				 (view, NEMO_VIEW_POPUP_PATH_LOCATION),
 				 view->details->location_popup_event);
 }
 
 static void
-location_popup_file_attributes_ready (NautilusFile *file,
+location_popup_file_attributes_ready (NemoFile *file,
 				      gpointer      data)
 {
-	NautilusView *view;
+	NemoView *view;
 
-	view = NAUTILUS_VIEW (data);
-	g_assert (NAUTILUS_IS_VIEW (view));
+	view = NEMO_VIEW (data);
+	g_assert (NEMO_IS_VIEW (view));
 
 	g_assert (file == view->details->location_popup_directory_as_file);
 
@@ -8724,24 +8724,24 @@ location_popup_file_attributes_ready (NautilusFile *file,
 }
 
 static void
-unschedule_pop_up_location_context_menu (NautilusView *view)
+unschedule_pop_up_location_context_menu (NemoView *view)
 {
 	if (view->details->location_popup_directory_as_file != NULL) {
-		g_assert (NAUTILUS_IS_FILE (view->details->location_popup_directory_as_file));
-		nautilus_file_cancel_call_when_ready (view->details->location_popup_directory_as_file,
+		g_assert (NEMO_IS_FILE (view->details->location_popup_directory_as_file));
+		nemo_file_cancel_call_when_ready (view->details->location_popup_directory_as_file,
 						      location_popup_file_attributes_ready,
 						      view);
-		nautilus_file_unref (view->details->location_popup_directory_as_file);
+		nemo_file_unref (view->details->location_popup_directory_as_file);
 		view->details->location_popup_directory_as_file = NULL;
 	}
 }
 
 static void
-schedule_pop_up_location_context_menu (NautilusView *view,
+schedule_pop_up_location_context_menu (NemoView *view,
 				       GdkEventButton  *event,
-				       NautilusFile    *file)
+				       NemoFile    *file)
 {
-	g_assert (NAUTILUS_IS_FILE (file));
+	g_assert (NEMO_IS_FILE (file));
 
 	if (view->details->location_popup_event != NULL) {
 		gdk_event_free ((GdkEvent *) view->details->location_popup_event);
@@ -8749,59 +8749,59 @@ schedule_pop_up_location_context_menu (NautilusView *view,
 	view->details->location_popup_event = (GdkEventButton *) gdk_event_copy ((GdkEvent *)event);
 
 	if (file == view->details->location_popup_directory_as_file) {
-		if (nautilus_file_check_if_ready (file, NAUTILUS_FILE_ATTRIBUTE_INFO |
-						  NAUTILUS_FILE_ATTRIBUTE_MOUNT |
-						  NAUTILUS_FILE_ATTRIBUTE_FILESYSTEM_INFO)) {
+		if (nemo_file_check_if_ready (file, NEMO_FILE_ATTRIBUTE_INFO |
+						  NEMO_FILE_ATTRIBUTE_MOUNT |
+						  NEMO_FILE_ATTRIBUTE_FILESYSTEM_INFO)) {
 			real_pop_up_location_context_menu (view);
 		}
 	} else {
 		unschedule_pop_up_location_context_menu (view);
 
-		view->details->location_popup_directory_as_file = nautilus_file_ref (file);
-		nautilus_file_call_when_ready (view->details->location_popup_directory_as_file,
-					       NAUTILUS_FILE_ATTRIBUTE_INFO |
-					       NAUTILUS_FILE_ATTRIBUTE_MOUNT |
-					       NAUTILUS_FILE_ATTRIBUTE_FILESYSTEM_INFO,
+		view->details->location_popup_directory_as_file = nemo_file_ref (file);
+		nemo_file_call_when_ready (view->details->location_popup_directory_as_file,
+					       NEMO_FILE_ATTRIBUTE_INFO |
+					       NEMO_FILE_ATTRIBUTE_MOUNT |
+					       NEMO_FILE_ATTRIBUTE_FILESYSTEM_INFO,
 					       location_popup_file_attributes_ready,
 					       view);
 	}
 }
 
 /**
- * nautilus_view_pop_up_location_context_menu
+ * nemo_view_pop_up_location_context_menu
  *
  * Pop up a context menu appropriate to the view globally.
- * @view: NautilusView of interest.
+ * @view: NemoView of interest.
  * @event: GdkEventButton triggering the popup.
  * @location: The location the popup-menu should be created for,
  * or NULL for the currently displayed location.
  *
  **/
 void 
-nautilus_view_pop_up_location_context_menu (NautilusView *view, 
+nemo_view_pop_up_location_context_menu (NemoView *view, 
 					    GdkEventButton  *event,
 					    const char      *location)
 {
-	NautilusFile *file;
+	NemoFile *file;
 
-	g_assert (NAUTILUS_IS_VIEW (view));
+	g_assert (NEMO_IS_VIEW (view));
 
 	if (location != NULL) {
-		file = nautilus_file_get_by_uri (location);
+		file = nemo_file_get_by_uri (location);
 	} else {
-		file = nautilus_file_ref (view->details->directory_as_file);
+		file = nemo_file_ref (view->details->directory_as_file);
 	}
 
 	if (file != NULL) {
 		schedule_pop_up_location_context_menu (view, event, file);
-		nautilus_file_unref (file);
+		nemo_file_unref (file);
 	}
 }
 
 static void
-schedule_update_menus (NautilusView *view) 
+schedule_update_menus (NemoView *view) 
 {
-	g_assert (NAUTILUS_IS_VIEW (view));
+	g_assert (NEMO_IS_VIEW (view));
 
 	/* Don't schedule updates after destroy (#349551),
  	 * or if we are not active.
@@ -8821,7 +8821,7 @@ schedule_update_menus (NautilusView *view)
 }
 
 static void
-remove_update_status_idle_callback (NautilusView *view) 
+remove_update_status_idle_callback (NemoView *view) 
 {
 	if (view->details->update_status_idle_id != 0) {
 		g_source_remove (view->details->update_status_idle_id);
@@ -8832,18 +8832,18 @@ remove_update_status_idle_callback (NautilusView *view)
 static gboolean
 update_status_idle_callback (gpointer data)
 {
-	NautilusView *view;
+	NemoView *view;
 
-	view = NAUTILUS_VIEW (data);
-	nautilus_view_display_selection_info (view);
+	view = NEMO_VIEW (data);
+	nemo_view_display_selection_info (view);
 	view->details->update_status_idle_id = 0;
 	return FALSE;
 }
 
 static void
-schedule_update_status (NautilusView *view) 
+schedule_update_status (NemoView *view) 
 {
-	g_assert (NAUTILUS_IS_VIEW (view));
+	g_assert (NEMO_IS_VIEW (view));
 
 	/* Make sure we haven't already destroyed it */
 	if (view->details->window == NULL) {
@@ -8863,25 +8863,25 @@ schedule_update_status (NautilusView *view)
 }
 
 /**
- * nautilus_view_notify_selection_changed:
+ * nemo_view_notify_selection_changed:
  * 
  * Notify this view that the selection has changed. This is normally
  * called only by subclasses.
- * @view: NautilusView whose selection has changed.
+ * @view: NemoView whose selection has changed.
  * 
  **/
 void
-nautilus_view_notify_selection_changed (NautilusView *view)
+nemo_view_notify_selection_changed (NemoView *view)
 {
 	GtkWindow *window;
 	GList *selection;
 	
-	g_return_if_fail (NAUTILUS_IS_VIEW (view));
+	g_return_if_fail (NEMO_IS_VIEW (view));
 
-	selection = nautilus_view_get_selection (view);
-	window = nautilus_view_get_containing_window (view);
+	selection = nemo_view_get_selection (view);
+	window = nemo_view_get_containing_window (view);
 	DEBUG_FILES (selection, "Selection changed in window %p", window);
-	nautilus_file_list_free (selection);
+	nemo_file_list_free (selection);
 
 	view->details->selection_was_removed = FALSE;
 
@@ -8911,9 +8911,9 @@ nautilus_view_notify_selection_changed (NautilusView *view)
 }
 
 static void
-file_changed_callback (NautilusFile *file, gpointer callback_data)
+file_changed_callback (NemoFile *file, gpointer callback_data)
 {
-	NautilusView *view = NAUTILUS_VIEW (callback_data);
+	NemoView *view = NEMO_VIEW (callback_data);
 
 	schedule_changes (view);
 
@@ -8926,22 +8926,22 @@ file_changed_callback (NautilusFile *file, gpointer callback_data)
  * 
  * Switch the displayed location to a new uri. If the uri is not valid,
  * the location will not be switched; user feedback will be provided instead.
- * @view: NautilusView whose location will be changed.
+ * @view: NemoView whose location will be changed.
  * @uri: A string representing the uri to switch to.
  * 
  **/
 static void
-load_directory (NautilusView *view,
-		NautilusDirectory *directory)
+load_directory (NemoView *view,
+		NemoDirectory *directory)
 {
-	NautilusDirectory *old_directory;
-	NautilusFile *old_file;
-	NautilusFileAttributes attributes;
+	NemoDirectory *old_directory;
+	NemoFile *old_file;
+	NemoFileAttributes attributes;
 
-	g_assert (NAUTILUS_IS_VIEW (view));
-	g_assert (NAUTILUS_IS_DIRECTORY (directory));
+	g_assert (NEMO_IS_VIEW (view));
+	g_assert (NEMO_IS_DIRECTORY (directory));
 
-	nautilus_view_stop_loading (view);
+	nemo_view_stop_loading (view);
 	g_signal_emit (view, signals[CLEAR], 0);
 
 	view->details->loading = TRUE;
@@ -8953,21 +8953,21 @@ load_directory (NautilusView *view,
 	schedule_update_menus (view);
 	
 	while (view->details->subdirectory_list != NULL) {
-		nautilus_view_remove_subdirectory (view,
+		nemo_view_remove_subdirectory (view,
 						   view->details->subdirectory_list->data);
 	}
 
 	disconnect_model_handlers (view);
 
 	old_directory = view->details->model;
-	nautilus_directory_ref (directory);
+	nemo_directory_ref (directory);
 	view->details->model = directory;
-	nautilus_directory_unref (old_directory);
+	nemo_directory_unref (old_directory);
 
 	old_file = view->details->directory_as_file;
 	view->details->directory_as_file =
-		nautilus_directory_get_corresponding_file (directory);
-	nautilus_file_unref (old_file);
+		nemo_directory_get_corresponding_file (directory);
+	nemo_file_unref (old_file);
 
 	view->details->reported_load_error = FALSE;
 
@@ -8976,16 +8976,16 @@ load_directory (NautilusView *view,
          * change the directory's file metadata.
 	 */
 	attributes = 
-		NAUTILUS_FILE_ATTRIBUTE_INFO |
-		NAUTILUS_FILE_ATTRIBUTE_MOUNT |
-		NAUTILUS_FILE_ATTRIBUTE_FILESYSTEM_INFO;
+		NEMO_FILE_ATTRIBUTE_INFO |
+		NEMO_FILE_ATTRIBUTE_MOUNT |
+		NEMO_FILE_ATTRIBUTE_FILESYSTEM_INFO;
 	view->details->metadata_for_directory_as_file_pending = TRUE;
 	view->details->metadata_for_files_in_directory_pending = TRUE;
-	nautilus_file_call_when_ready
+	nemo_file_call_when_ready
 		(view->details->directory_as_file,
 		 attributes,
 		 metadata_for_directory_as_file_ready_callback, view);
-	nautilus_directory_call_when_ready
+	nemo_directory_call_when_ready
 		(view->details->model,
 		 attributes,
 		 FALSE,
@@ -8995,9 +8995,9 @@ load_directory (NautilusView *view,
 	 * because of New Folder, and relative emblems.
 	 */
 	attributes = 
-		NAUTILUS_FILE_ATTRIBUTE_INFO |
-		NAUTILUS_FILE_ATTRIBUTE_FILESYSTEM_INFO;
-	nautilus_file_monitor_add (view->details->directory_as_file,
+		NEMO_FILE_ATTRIBUTE_INFO |
+		NEMO_FILE_ATTRIBUTE_FILESYSTEM_INFO;
+	nemo_file_monitor_add (view->details->directory_as_file,
 				   &view->details->directory_as_file,
 				   attributes);
 
@@ -9007,12 +9007,12 @@ load_directory (NautilusView *view,
 }
 
 static void
-finish_loading (NautilusView *view)
+finish_loading (NemoView *view)
 {
-	NautilusFileAttributes attributes;
+	NemoFileAttributes attributes;
 
-	nautilus_window_report_load_underway (view->details->window,
-					      NAUTILUS_VIEW (view));
+	nemo_window_report_load_underway (view->details->window,
+					      NEMO_VIEW (view));
 
 	/* Tell interested parties that we've begun loading this directory now.
 	 * Subclasses use this to know that the new metadata is now available.
@@ -9020,9 +9020,9 @@ finish_loading (NautilusView *view)
 	g_signal_emit (view, signals[BEGIN_LOADING], 0);
 
 	/* Assume we have now all information to show window */
-	nautilus_window_view_visible  (view->details->window, NAUTILUS_VIEW (view));
+	nemo_window_view_visible  (view->details->window, NEMO_VIEW (view));
 
-	if (nautilus_directory_are_all_files_seen (view->details->model)) {
+	if (nemo_directory_are_all_files_seen (view->details->model)) {
 		/* Unschedule a pending update and schedule a new one with the minimal
 		 * update interval. This gives the view a short chance at gathering the
 		 * (cached) deep counts.
@@ -9047,14 +9047,14 @@ finish_loading (NautilusView *view)
 	 * and possible custom name.
 	 */
 	attributes =
-		NAUTILUS_FILE_ATTRIBUTES_FOR_ICON |
-		NAUTILUS_FILE_ATTRIBUTE_DIRECTORY_ITEM_COUNT |
-		NAUTILUS_FILE_ATTRIBUTE_INFO |
-		NAUTILUS_FILE_ATTRIBUTE_LINK_INFO |
-		NAUTILUS_FILE_ATTRIBUTE_MOUNT |
-		NAUTILUS_FILE_ATTRIBUTE_EXTENSION_INFO;
+		NEMO_FILE_ATTRIBUTES_FOR_ICON |
+		NEMO_FILE_ATTRIBUTE_DIRECTORY_ITEM_COUNT |
+		NEMO_FILE_ATTRIBUTE_INFO |
+		NEMO_FILE_ATTRIBUTE_LINK_INFO |
+		NEMO_FILE_ATTRIBUTE_MOUNT |
+		NEMO_FILE_ATTRIBUTE_EXTENSION_INFO;
 
-	nautilus_directory_file_monitor_add (view->details->model,
+	nemo_directory_file_monitor_add (view->details->model,
 					     &view->details->model,
 					     view->details->show_hidden_files,
 					     attributes,
@@ -9069,7 +9069,7 @@ finish_loading (NautilusView *view)
 }
 
 static void
-finish_loading_if_all_metadata_loaded (NautilusView *view)
+finish_loading_if_all_metadata_loaded (NemoView *view)
 {
 	if (!view->details->metadata_for_directory_as_file_pending &&
 	    !view->details->metadata_for_files_in_directory_pending) {
@@ -9078,14 +9078,14 @@ finish_loading_if_all_metadata_loaded (NautilusView *view)
 }
 
 static void
-metadata_for_directory_as_file_ready_callback (NautilusFile *file,
+metadata_for_directory_as_file_ready_callback (NemoFile *file,
 			      		       gpointer callback_data)
 {
-	NautilusView *view;
+	NemoView *view;
 
 	view = callback_data;
 
-	g_assert (NAUTILUS_IS_VIEW (view));
+	g_assert (NEMO_IS_VIEW (view));
 	g_assert (view->details->directory_as_file == file);
 	g_assert (view->details->metadata_for_directory_as_file_pending);
 
@@ -9095,15 +9095,15 @@ metadata_for_directory_as_file_ready_callback (NautilusFile *file,
 }
 
 static void
-metadata_for_files_in_directory_ready_callback (NautilusDirectory *directory,
+metadata_for_files_in_directory_ready_callback (NemoDirectory *directory,
 				   		GList *files,
 			           		gpointer callback_data)
 {
-	NautilusView *view;
+	NemoView *view;
 
 	view = callback_data;
 
-	g_assert (NAUTILUS_IS_VIEW (view));
+	g_assert (NEMO_IS_VIEW (view));
 	g_assert (view->details->model == directory);
 	g_assert (view->details->metadata_for_files_in_directory_pending);
 
@@ -9122,19 +9122,19 @@ disconnect_handler (GObject *object, int *id)
 }
 
 static void
-disconnect_directory_handler (NautilusView *view, int *id)
+disconnect_directory_handler (NemoView *view, int *id)
 {
 	disconnect_handler (G_OBJECT (view->details->model), id);
 }
 
 static void
-disconnect_directory_as_file_handler (NautilusView *view, int *id)
+disconnect_directory_as_file_handler (NemoView *view, int *id)
 {
 	disconnect_handler (G_OBJECT (view->details->directory_as_file), id);
 }
 
 static void
-disconnect_model_handlers (NautilusView *view)
+disconnect_model_handlers (NemoView *view)
 {
 	if (view->details->model == NULL) {
 		return;
@@ -9144,27 +9144,27 @@ disconnect_model_handlers (NautilusView *view)
 	disconnect_directory_handler (view, &view->details->done_loading_handler_id);
 	disconnect_directory_handler (view, &view->details->load_error_handler_id);
 	disconnect_directory_as_file_handler (view, &view->details->file_changed_handler_id);
-	nautilus_file_cancel_call_when_ready (view->details->directory_as_file,
+	nemo_file_cancel_call_when_ready (view->details->directory_as_file,
 					      metadata_for_directory_as_file_ready_callback,
 					      view);
-	nautilus_directory_cancel_callback (view->details->model,
+	nemo_directory_cancel_callback (view->details->model,
 					    metadata_for_files_in_directory_ready_callback,
 					    view);
-	nautilus_directory_file_monitor_remove (view->details->model,
+	nemo_directory_file_monitor_remove (view->details->model,
 						&view->details->model);
-	nautilus_file_monitor_remove (view->details->directory_as_file,
+	nemo_file_monitor_remove (view->details->directory_as_file,
 				      &view->details->directory_as_file);
 }
 
 static void
-nautilus_view_select_file (NautilusView *view, NautilusFile *file)
+nemo_view_select_file (NemoView *view, NemoFile *file)
 {
 	GList file_list;
 
 	file_list.data = file;
 	file_list.next = NULL;
 	file_list.prev = NULL;
-	nautilus_view_call_set_selection (view, &file_list);
+	nemo_view_call_set_selection (view, &file_list);
 }
 
 static gboolean
@@ -9174,16 +9174,16 @@ remove_all (gpointer key, gpointer value, gpointer callback_data)
 }
 
 /**
- * nautilus_view_stop_loading:
+ * nemo_view_stop_loading:
  * 
  * Stop the current ongoing process, such as switching to a new uri.
- * @view: NautilusView in question.
+ * @view: NemoView in question.
  * 
  **/
 void
-nautilus_view_stop_loading (NautilusView *view)
+nemo_view_stop_loading (NemoView *view)
 {
-	g_return_if_fail (NAUTILUS_IS_VIEW (view));
+	g_return_if_fail (NEMO_IS_VIEW (view));
 
 	unschedule_display_of_pending_files (view);
 	reset_update_interval (view);
@@ -9207,59 +9207,59 @@ nautilus_view_stop_loading (NautilusView *view)
 	view->details->pending_selection = NULL;
 
 	if (view->details->model != NULL) {
-		nautilus_directory_file_monitor_remove (view->details->model, view);
+		nemo_directory_file_monitor_remove (view->details->model, view);
 	}
 	done_loading (view, FALSE);
 }
 
 gboolean
-nautilus_view_is_editable (NautilusView *view)
+nemo_view_is_editable (NemoView *view)
 {
-	NautilusDirectory *directory;
+	NemoDirectory *directory;
 
-	directory = nautilus_view_get_model (view);
+	directory = nemo_view_get_model (view);
 
 	if (directory != NULL) {
-		return nautilus_directory_is_editable (directory);
+		return nemo_directory_is_editable (directory);
 	}
 
 	return TRUE;
 }
 
 static gboolean
-real_is_read_only (NautilusView *view)
+real_is_read_only (NemoView *view)
 {
-	NautilusFile *file;
+	NemoFile *file;
 	
-	if (!nautilus_view_is_editable (view)) {
+	if (!nemo_view_is_editable (view)) {
 		return TRUE;
 	}
 	
-	file = nautilus_view_get_directory_as_file (view);
+	file = nemo_view_get_directory_as_file (view);
 	if (file != NULL) {
-		return !nautilus_file_can_write (file);
+		return !nemo_file_can_write (file);
 	}
 	return FALSE;
 }
 
 /**
- * nautilus_view_should_show_file
+ * nemo_view_should_show_file
  * 
  * Returns whether or not this file should be displayed based on
  * current filtering options.
  */
 gboolean
-nautilus_view_should_show_file (NautilusView *view, NautilusFile *file)
+nemo_view_should_show_file (NemoView *view, NemoFile *file)
 {
-	return nautilus_file_should_show (file,
+	return nemo_file_should_show (file,
 					  view->details->show_hidden_files,
 					  view->details->show_foreign_files);
 }
 
 static gboolean
-real_using_manual_layout (NautilusView *view)
+real_using_manual_layout (NemoView *view)
 {
-	g_return_val_if_fail (NAUTILUS_IS_VIEW (view), FALSE);
+	g_return_val_if_fail (NEMO_IS_VIEW (view), FALSE);
 
 	return FALSE;
 }
@@ -9267,11 +9267,11 @@ real_using_manual_layout (NautilusView *view)
 static void
 schedule_update_menus_callback (gpointer callback_data)
 {
-	schedule_update_menus (NAUTILUS_VIEW (callback_data));
+	schedule_update_menus (NEMO_VIEW (callback_data));
 }
 
 void
-nautilus_view_ignore_hidden_file_preferences (NautilusView *view)
+nemo_view_ignore_hidden_file_preferences (NemoView *view)
 {
 	g_return_if_fail (view->details->model == NULL);
 
@@ -9284,31 +9284,31 @@ nautilus_view_ignore_hidden_file_preferences (NautilusView *view)
 }
 
 void
-nautilus_view_set_show_foreign (NautilusView *view,
+nemo_view_set_show_foreign (NemoView *view,
 				gboolean show_foreign)
 {
 	view->details->show_foreign_files = show_foreign;
 }
 
 char *
-nautilus_view_get_uri (NautilusView *view)
+nemo_view_get_uri (NemoView *view)
 {
-	g_return_val_if_fail (NAUTILUS_IS_VIEW (view), NULL);
+	g_return_val_if_fail (NEMO_IS_VIEW (view), NULL);
 	if (view->details->model == NULL) {
 		return NULL;
 	}
-	return nautilus_directory_get_uri (view->details->model);
+	return nemo_directory_get_uri (view->details->model);
 }
 
 void
-nautilus_view_move_copy_items (NautilusView *view,
+nemo_view_move_copy_items (NemoView *view,
 			       const GList *item_uris,
 			       GArray *relative_item_points,
 			       const char *target_uri,
 			       int copy_action,
 			       int x, int y)
 {
-	NautilusFile *target_file;
+	NemoFile *target_file;
 	
 	g_assert (relative_item_points == NULL
 		  || relative_item_points->len == 0 
@@ -9317,26 +9317,26 @@ nautilus_view_move_copy_items (NautilusView *view,
 	/* add the drop location to the icon offsets */
 	offset_drop_points (relative_item_points, x, y);
 
-	target_file = nautilus_file_get_existing_by_uri (target_uri);
+	target_file = nemo_file_get_existing_by_uri (target_uri);
 	/* special-case "command:" here instead of starting a move/copy */
-	if (target_file != NULL && nautilus_file_is_launcher (target_file)) {
-		nautilus_file_unref (target_file);
-		nautilus_launch_desktop_file (
+	if (target_file != NULL && nemo_file_is_launcher (target_file)) {
+		nemo_file_unref (target_file);
+		nemo_launch_desktop_file (
 					      gtk_widget_get_screen (GTK_WIDGET (view)),
 					      target_uri, item_uris,
-					      nautilus_view_get_containing_window (view));
+					      nemo_view_get_containing_window (view));
 		return;
 	} else if (copy_action == GDK_ACTION_COPY &&
-		   nautilus_is_file_roller_installed () &&
+		   nemo_is_file_roller_installed () &&
 		   target_file != NULL &&
-		   nautilus_file_is_archive (target_file)) {
+		   nemo_file_is_archive (target_file)) {
 		char *command, *quoted_uri, *tmp;
 		const GList *l;
 		GdkScreen  *screen;
 
 		/* Handle dropping onto a file-roller archiver file, instead of starting a move/copy */
 
-		nautilus_file_unref (target_file);
+		nemo_file_unref (target_file);
 
 		quoted_uri = g_shell_quote (target_uri);
 		command = g_strconcat ("file-roller -a ", quoted_uri, NULL);
@@ -9357,85 +9357,85 @@ nautilus_view_move_copy_items (NautilusView *view,
 			screen = gdk_screen_get_default ();
 		}
 
-		nautilus_launch_application_from_command (screen, command, FALSE, NULL);
+		nemo_launch_application_from_command (screen, command, FALSE, NULL);
 		g_free (command);
 
 		return;
 	}
-	nautilus_file_unref (target_file);
+	nemo_file_unref (target_file);
 
-	nautilus_file_operations_copy_move
+	nemo_file_operations_copy_move
 		(item_uris, relative_item_points, 
 		 target_uri, copy_action, GTK_WIDGET (view),
 		 copy_move_done_callback, pre_copy_move (view));
 }
 
 static void
-nautilus_view_trash_state_changed_callback (NautilusTrashMonitor *trash_monitor,
+nemo_view_trash_state_changed_callback (NemoTrashMonitor *trash_monitor,
 					    gboolean state, gpointer callback_data)
 {
-	NautilusView *view;
+	NemoView *view;
 
-	view = (NautilusView *) callback_data;
-	g_assert (NAUTILUS_IS_VIEW (view));
+	view = (NemoView *) callback_data;
+	g_assert (NEMO_IS_VIEW (view));
 	
 	schedule_update_menus (view);
 }
 
 void
-nautilus_view_start_batching_selection_changes (NautilusView *view)
+nemo_view_start_batching_selection_changes (NemoView *view)
 {
-	g_return_if_fail (NAUTILUS_IS_VIEW (view));
+	g_return_if_fail (NEMO_IS_VIEW (view));
 
 	++view->details->batching_selection_level;
 	view->details->selection_changed_while_batched = FALSE;
 }
 
 void
-nautilus_view_stop_batching_selection_changes (NautilusView *view)
+nemo_view_stop_batching_selection_changes (NemoView *view)
 {
-	g_return_if_fail (NAUTILUS_IS_VIEW (view));
+	g_return_if_fail (NEMO_IS_VIEW (view));
 	g_return_if_fail (view->details->batching_selection_level > 0);
 
 	if (--view->details->batching_selection_level == 0) {
 		if (view->details->selection_changed_while_batched) {
-			nautilus_view_notify_selection_changed (view);
+			nemo_view_notify_selection_changed (view);
 		}
 	}
 }
 
 gboolean
-nautilus_view_get_active (NautilusView *view)
+nemo_view_get_active (NemoView *view)
 {
-	g_assert (NAUTILUS_IS_VIEW (view));
+	g_assert (NEMO_IS_VIEW (view));
 	return view->details->active;
 }
 
 static GArray *
-real_get_selected_icon_locations (NautilusView *view)
+real_get_selected_icon_locations (NemoView *view)
 {
         /* By default, just return an empty list. */
         return g_array_new (FALSE, TRUE, sizeof (GdkPoint));
 }
 
 static void
-nautilus_view_set_property (GObject         *object,
+nemo_view_set_property (GObject         *object,
 			    guint            prop_id,
 			    const GValue    *value,
 			    GParamSpec      *pspec)
 {
-	NautilusView *directory_view;
-	NautilusWindowSlot *slot;
-	NautilusWindow *window;
+	NemoView *directory_view;
+	NemoWindowSlot *slot;
+	NemoWindow *window;
   
-	directory_view = NAUTILUS_VIEW (object);
+	directory_view = NEMO_VIEW (object);
 
 	switch (prop_id)  {
 	case PROP_WINDOW_SLOT:
 		g_assert (directory_view->details->slot == NULL);
 
-		slot = NAUTILUS_WINDOW_SLOT (g_value_get_object (value));
-		window = nautilus_window_slot_get_window (slot);
+		slot = NEMO_WINDOW_SLOT (g_value_get_object (value));
+		window = nemo_window_slot_get_window (slot);
 
 		directory_view->details->slot = slot;
 		directory_view->details->window = window;
@@ -9450,7 +9450,7 @@ nautilus_view_set_property (GObject         *object,
 		g_signal_connect_object (directory_view->details->window,
 					 "hidden-files-mode-changed", G_CALLBACK (hidden_files_mode_changed),
 					 directory_view, 0);
-		nautilus_view_init_show_hidden_files (directory_view);
+		nemo_view_init_show_hidden_files (directory_view);
 		break;
 	case PROP_SUPPORTS_ZOOMING:
 		directory_view->details->supports_zooming = g_value_get_boolean (value);
@@ -9463,7 +9463,7 @@ nautilus_view_set_property (GObject         *object,
 
 
 gboolean
-nautilus_view_handle_scroll_event (NautilusView *directory_view,
+nemo_view_handle_scroll_event (NemoView *directory_view,
 				   GdkEventScroll *event)
 {
 	static gdouble total_delta_y = 0;
@@ -9473,12 +9473,12 @@ nautilus_view_handle_scroll_event (NautilusView *directory_view,
 		switch (event->direction) {
 		case GDK_SCROLL_UP:
 			/* Zoom In */
-			nautilus_view_bump_zoom_level (directory_view, 1);
+			nemo_view_bump_zoom_level (directory_view, 1);
 			return TRUE;
 
 		case GDK_SCROLL_DOWN:
 			/* Zoom Out */
-			nautilus_view_bump_zoom_level (directory_view, -1);
+			nemo_view_bump_zoom_level (directory_view, -1);
 			return TRUE;
 
 		case GDK_SCROLL_SMOOTH:
@@ -9491,12 +9491,12 @@ nautilus_view_handle_scroll_event (NautilusView *directory_view,
 			if (total_delta_y >= 1) {
 				total_delta_y = 0;
 				/* emulate scroll down */
-				nautilus_view_bump_zoom_level (directory_view, -1);
+				nemo_view_bump_zoom_level (directory_view, -1);
 				return TRUE;
 			} else if (total_delta_y <= - 1) {
 				total_delta_y = 0;
 				/* emulate scroll up */
-				nautilus_view_bump_zoom_level (directory_view, 1);
+				nemo_view_bump_zoom_level (directory_view, 1);
 				return TRUE;				
 			} else {
 				/* eat event */
@@ -9517,13 +9517,13 @@ nautilus_view_handle_scroll_event (NautilusView *directory_view,
 
 /* handle Shift+Scroll, which will cause a zoom-in/out */
 static gboolean
-nautilus_view_scroll_event (GtkWidget *widget,
+nemo_view_scroll_event (GtkWidget *widget,
 			    GdkEventScroll *event)
 {
-	NautilusView *directory_view;
+	NemoView *directory_view;
 
-	directory_view = NAUTILUS_VIEW (widget);
-	if (nautilus_view_handle_scroll_event (directory_view, event)) {
+	directory_view = NEMO_VIEW (widget);
+	if (nemo_view_handle_scroll_event (directory_view, event)) {
 		return TRUE;
 	}
 
@@ -9532,13 +9532,13 @@ nautilus_view_scroll_event (GtkWidget *widget,
 
 
 static void
-nautilus_view_parent_set (GtkWidget *widget,
+nemo_view_parent_set (GtkWidget *widget,
 			  GtkWidget *old_parent)
 {
-	NautilusView *view;
+	NemoView *view;
 	GtkWidget *parent;
 
-	view = NAUTILUS_VIEW (widget);
+	view = NEMO_VIEW (widget);
 
 	parent = gtk_widget_get_parent (widget);
 	g_assert (parent == NULL || old_parent == NULL);
@@ -9551,20 +9551,20 @@ nautilus_view_parent_set (GtkWidget *widget,
 		g_assert (old_parent == NULL);
 
 		if (view->details->slot == 
-		    nautilus_window_get_active_slot (view->details->window)) {
+		    nemo_window_get_active_slot (view->details->window)) {
 			view->details->active = TRUE;
 
-			nautilus_view_merge_menus (view);
+			nemo_view_merge_menus (view);
 			schedule_update_menus (view);
 		}
 	} else {
-		nautilus_view_unmerge_menus (view);
+		nemo_view_unmerge_menus (view);
 		remove_update_menus_timeout_callback (view);
 	}
 }
 
 static void
-nautilus_view_class_init (NautilusViewClass *klass)
+nemo_view_class_init (NemoViewClass *klass)
 {
 	GObjectClass *oclass;
 	GtkWidgetClass *widget_class;
@@ -9575,14 +9575,14 @@ nautilus_view_class_init (NautilusViewClass *klass)
 	scrolled_window_class = GTK_SCROLLED_WINDOW_CLASS (klass);
 	oclass = G_OBJECT_CLASS (klass);
 
-	oclass->finalize = nautilus_view_finalize;
-	oclass->set_property = nautilus_view_set_property;
+	oclass->finalize = nemo_view_finalize;
+	oclass->set_property = nemo_view_set_property;
 
-	widget_class->destroy = nautilus_view_destroy;
-	widget_class->scroll_event = nautilus_view_scroll_event;
-	widget_class->parent_set = nautilus_view_parent_set;
+	widget_class->destroy = nemo_view_destroy;
+	widget_class->scroll_event = nemo_view_scroll_event;
+	widget_class->parent_set = nemo_view_parent_set;
 
-	g_type_class_add_private (klass, sizeof (NautilusViewDetails));
+	g_type_class_add_private (klass, sizeof (NemoViewDetails));
 
 	/* Get rid of the strange 3-pixel gap that GtkScrolledWindow
 	 * uses by default. It does us no good.
@@ -9593,15 +9593,15 @@ nautilus_view_class_init (NautilusViewClass *klass)
 		g_signal_new ("add_file",
 		              G_TYPE_FROM_CLASS (klass),
 		              G_SIGNAL_RUN_LAST,
-		              G_STRUCT_OFFSET (NautilusViewClass, add_file),
+		              G_STRUCT_OFFSET (NemoViewClass, add_file),
 		              NULL, NULL,
 		              g_cclosure_marshal_generic,
-		              G_TYPE_NONE, 2, NAUTILUS_TYPE_FILE, NAUTILUS_TYPE_DIRECTORY);
+		              G_TYPE_NONE, 2, NEMO_TYPE_FILE, NEMO_TYPE_DIRECTORY);
 	signals[BEGIN_FILE_CHANGES] =
 		g_signal_new ("begin_file_changes",
 		              G_TYPE_FROM_CLASS (klass),
 		              G_SIGNAL_RUN_LAST,
-		              G_STRUCT_OFFSET (NautilusViewClass, begin_file_changes),
+		              G_STRUCT_OFFSET (NemoViewClass, begin_file_changes),
 		              NULL, NULL,
 		              g_cclosure_marshal_VOID__VOID,
 		              G_TYPE_NONE, 0);
@@ -9609,7 +9609,7 @@ nautilus_view_class_init (NautilusViewClass *klass)
 		g_signal_new ("begin_loading",
 		              G_TYPE_FROM_CLASS (klass),
 		              G_SIGNAL_RUN_LAST,
-		              G_STRUCT_OFFSET (NautilusViewClass, begin_loading),
+		              G_STRUCT_OFFSET (NemoViewClass, begin_loading),
 		              NULL, NULL,
 		              g_cclosure_marshal_VOID__VOID,
 		              G_TYPE_NONE, 0);
@@ -9617,7 +9617,7 @@ nautilus_view_class_init (NautilusViewClass *klass)
 		g_signal_new ("clear",
 		              G_TYPE_FROM_CLASS (klass),
 		              G_SIGNAL_RUN_LAST,
-		              G_STRUCT_OFFSET (NautilusViewClass, clear),
+		              G_STRUCT_OFFSET (NemoViewClass, clear),
 		              NULL, NULL,
 		              g_cclosure_marshal_VOID__VOID,
 		              G_TYPE_NONE, 0);
@@ -9625,7 +9625,7 @@ nautilus_view_class_init (NautilusViewClass *klass)
 		g_signal_new ("end_file_changes",
 		              G_TYPE_FROM_CLASS (klass),
 		              G_SIGNAL_RUN_LAST,
-		              G_STRUCT_OFFSET (NautilusViewClass, end_file_changes),
+		              G_STRUCT_OFFSET (NemoViewClass, end_file_changes),
 		              NULL, NULL,
 		              g_cclosure_marshal_VOID__VOID,
 		              G_TYPE_NONE, 0);
@@ -9633,7 +9633,7 @@ nautilus_view_class_init (NautilusViewClass *klass)
 		g_signal_new ("end_loading",
 		              G_TYPE_FROM_CLASS (klass),
 		              G_SIGNAL_RUN_LAST,
-		              G_STRUCT_OFFSET (NautilusViewClass, end_loading),
+		              G_STRUCT_OFFSET (NemoViewClass, end_loading),
 		              NULL, NULL,
 		              g_cclosure_marshal_VOID__BOOLEAN,
 		              G_TYPE_NONE, 1, G_TYPE_BOOLEAN);
@@ -9641,15 +9641,15 @@ nautilus_view_class_init (NautilusViewClass *klass)
 		g_signal_new ("file_changed",
 		              G_TYPE_FROM_CLASS (klass),
 		              G_SIGNAL_RUN_LAST,
-		              G_STRUCT_OFFSET (NautilusViewClass, file_changed),
+		              G_STRUCT_OFFSET (NemoViewClass, file_changed),
 		              NULL, NULL,
 		              g_cclosure_marshal_generic,
-		              G_TYPE_NONE, 2, NAUTILUS_TYPE_FILE, NAUTILUS_TYPE_DIRECTORY);
+		              G_TYPE_NONE, 2, NEMO_TYPE_FILE, NEMO_TYPE_DIRECTORY);
 	signals[LOAD_ERROR] =
 		g_signal_new ("load_error",
 		              G_TYPE_FROM_CLASS (klass),
 		              G_SIGNAL_RUN_LAST,
-		              G_STRUCT_OFFSET (NautilusViewClass, load_error),
+		              G_STRUCT_OFFSET (NemoViewClass, load_error),
 		              NULL, NULL,
 		              g_cclosure_marshal_VOID__POINTER,
 		              G_TYPE_NONE, 1, G_TYPE_POINTER);
@@ -9657,10 +9657,10 @@ nautilus_view_class_init (NautilusViewClass *klass)
 		g_signal_new ("remove_file",
 		              G_TYPE_FROM_CLASS (klass),
 		              G_SIGNAL_RUN_LAST,
-		              G_STRUCT_OFFSET (NautilusViewClass, remove_file),
+		              G_STRUCT_OFFSET (NemoViewClass, remove_file),
 		              NULL, NULL,
 		              g_cclosure_marshal_generic,
-		              G_TYPE_NONE, 2, NAUTILUS_TYPE_FILE, NAUTILUS_TYPE_DIRECTORY);
+		              G_TYPE_NONE, 2, NEMO_TYPE_FILE, NEMO_TYPE_DIRECTORY);
 	signals[ZOOM_LEVEL_CHANGED] =
 		g_signal_new ("zoom-level-changed",
 			      G_TYPE_FROM_CLASS (klass),
@@ -9680,7 +9680,7 @@ nautilus_view_class_init (NautilusViewClass *klass)
 		g_signal_new ("trash",
 			      G_TYPE_FROM_CLASS (klass),
 			      G_SIGNAL_RUN_LAST | G_SIGNAL_ACTION,
-			      G_STRUCT_OFFSET (NautilusViewClass, trash),
+			      G_STRUCT_OFFSET (NemoViewClass, trash),
 			      g_signal_accumulator_true_handled, NULL,
 			      g_cclosure_marshal_generic,
 			      G_TYPE_BOOLEAN, 0);
@@ -9688,7 +9688,7 @@ nautilus_view_class_init (NautilusViewClass *klass)
 		g_signal_new ("delete",
 			      G_TYPE_FROM_CLASS (klass),
 			      G_SIGNAL_RUN_LAST | G_SIGNAL_ACTION,
-			      G_STRUCT_OFFSET (NautilusViewClass, delete),
+			      G_STRUCT_OFFSET (NemoViewClass, delete),
 			      g_signal_accumulator_true_handled, NULL,
 			      g_cclosure_marshal_generic,
 			      G_TYPE_BOOLEAN, 0);
@@ -9712,7 +9712,7 @@ nautilus_view_class_init (NautilusViewClass *klass)
 		g_param_spec_object ("window-slot",
 				     "Window Slot",
 				     "The parent window slot reference",
-				     NAUTILUS_TYPE_WINDOW_SLOT,
+				     NEMO_TYPE_WINDOW_SLOT,
 				     G_PARAM_WRITABLE |
 				     G_PARAM_CONSTRUCT_ONLY);
 	properties[PROP_SUPPORTS_ZOOMING] =
@@ -9726,9 +9726,9 @@ nautilus_view_class_init (NautilusViewClass *klass)
 	g_object_class_install_properties (oclass, NUM_PROPERTIES, properties);
 
 	binding_set = gtk_binding_set_by_class (klass);
-	gtk_binding_entry_add_signal (binding_set, GDK_KEY_Delete, GDK_CONTROL_MASK,
+	gtk_binding_entry_add_signal (binding_set, GDK_KEY_Delete, 0,
 				      "trash", 0);
-	gtk_binding_entry_add_signal (binding_set, GDK_KEY_KP_Delete, GDK_CONTROL_MASK,
+	gtk_binding_entry_add_signal (binding_set, GDK_KEY_KP_Delete, 0,
 				      "trash", 0);
 	gtk_binding_entry_add_signal (binding_set, GDK_KEY_KP_Delete, GDK_SHIFT_MASK,
 				      "delete", 0);

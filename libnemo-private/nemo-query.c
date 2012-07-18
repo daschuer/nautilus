@@ -2,12 +2,12 @@
 /*
  * Copyright (C) 2005 Novell, Inc.
  *
- * Nautilus is free software; you can redistribute it and/or
+ * Nemo is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
  * published by the Free Software Foundation; either version 2 of the
  * License, or (at your option) any later version.
  *
- * Nautilus is distributed in the hope that it will be useful,
+ * Nemo is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
  * General Public License for more details.
@@ -24,106 +24,106 @@
 #include <config.h>
 #include <string.h>
 
-#include "nautilus-query.h"
+#include "nemo-query.h"
 #include <eel/eel-glib-extensions.h>
 #include <glib/gi18n.h>
-#include <libnautilus-private/nautilus-file-utilities.h>
+#include <libnemo-private/nemo-file-utilities.h>
 
-struct NautilusQueryDetails {
+struct NemoQueryDetails {
 	char *text;
 	char *location_uri;
 	GList *mime_types;
 };
 
-static void  nautilus_query_class_init       (NautilusQueryClass *class);
-static void  nautilus_query_init             (NautilusQuery      *query);
+static void  nemo_query_class_init       (NemoQueryClass *class);
+static void  nemo_query_init             (NemoQuery      *query);
 
-G_DEFINE_TYPE (NautilusQuery, nautilus_query, G_TYPE_OBJECT);
+G_DEFINE_TYPE (NemoQuery, nemo_query, G_TYPE_OBJECT);
 
 static void
 finalize (GObject *object)
 {
-	NautilusQuery *query;
+	NemoQuery *query;
 
-	query = NAUTILUS_QUERY (object);
+	query = NEMO_QUERY (object);
 	g_free (query->details->text);
 
-	G_OBJECT_CLASS (nautilus_query_parent_class)->finalize (object);
+	G_OBJECT_CLASS (nemo_query_parent_class)->finalize (object);
 }
 
 static void
-nautilus_query_class_init (NautilusQueryClass *class)
+nemo_query_class_init (NemoQueryClass *class)
 {
 	GObjectClass *gobject_class;
 
 	gobject_class = G_OBJECT_CLASS (class);
 	gobject_class->finalize = finalize;
 
-	g_type_class_add_private (class, sizeof (NautilusQueryDetails));
+	g_type_class_add_private (class, sizeof (NemoQueryDetails));
 }
 
 static void
-nautilus_query_init (NautilusQuery *query)
+nemo_query_init (NemoQuery *query)
 {
-	query->details = G_TYPE_INSTANCE_GET_PRIVATE (query, NAUTILUS_TYPE_QUERY,
-						      NautilusQueryDetails);
+	query->details = G_TYPE_INSTANCE_GET_PRIVATE (query, NEMO_TYPE_QUERY,
+						      NemoQueryDetails);
 }
 
-NautilusQuery *
-nautilus_query_new (void)
+NemoQuery *
+nemo_query_new (void)
 {
-	return g_object_new (NAUTILUS_TYPE_QUERY,  NULL);
+	return g_object_new (NEMO_TYPE_QUERY,  NULL);
 }
 
 
 char *
-nautilus_query_get_text (NautilusQuery *query)
+nemo_query_get_text (NemoQuery *query)
 {
 	return g_strdup (query->details->text);
 }
 
 void 
-nautilus_query_set_text (NautilusQuery *query, const char *text)
+nemo_query_set_text (NemoQuery *query, const char *text)
 {
 	g_free (query->details->text);
 	query->details->text = g_strdup (text);
 }
 
 char *
-nautilus_query_get_location (NautilusQuery *query)
+nemo_query_get_location (NemoQuery *query)
 {
 	return g_strdup (query->details->location_uri);
 }
 	
 void
-nautilus_query_set_location (NautilusQuery *query, const char *uri)
+nemo_query_set_location (NemoQuery *query, const char *uri)
 {
 	g_free (query->details->location_uri);
 	query->details->location_uri = g_strdup (uri);
 }
 
 GList *
-nautilus_query_get_mime_types (NautilusQuery *query)
+nemo_query_get_mime_types (NemoQuery *query)
 {
 	return eel_g_str_list_copy (query->details->mime_types);
 }
 
 void
-nautilus_query_set_mime_types (NautilusQuery *query, GList *mime_types)
+nemo_query_set_mime_types (NemoQuery *query, GList *mime_types)
 {
 	g_list_free_full (query->details->mime_types, g_free);
 	query->details->mime_types = eel_g_str_list_copy (mime_types);
 }
 
 void
-nautilus_query_add_mime_type (NautilusQuery *query, const char *mime_type)
+nemo_query_add_mime_type (NemoQuery *query, const char *mime_type)
 {
 	query->details->mime_types = g_list_append (query->details->mime_types,
 						    g_strdup (mime_type));
 }
 
 char *
-nautilus_query_to_readable_string (NautilusQuery *query)
+nemo_query_to_readable_string (NemoQuery *query)
 {
 	if (!query || !query->details->text) {
 		return g_strdup (_("Search"));
@@ -138,7 +138,7 @@ encode_home_uri (const char *uri)
 	char *home_uri;
 	const char *encoded_uri;
 
-	home_uri = nautilus_get_home_directory_uri ();
+	home_uri = nemo_get_home_directory_uri ();
 
 	if (g_str_has_prefix (uri, home_uri)) {
 		encoded_uri = uri + strlen (home_uri);
@@ -163,7 +163,7 @@ decode_home_uri (const char *uri)
 	if (g_str_has_prefix (uri, "file:")) {
 		decoded_uri = g_strdup (uri);
 	} else {
-		home_uri = nautilus_get_home_directory_uri ();
+		home_uri = nemo_get_home_directory_uri ();
 
 		decoded_uri = g_strconcat (home_uri, "/", uri, NULL);
 		
@@ -175,7 +175,7 @@ decode_home_uri (const char *uri)
 
 
 typedef struct {
-	NautilusQuery *query;
+	NemoQuery *query;
 	gboolean in_text;
 	gboolean in_location;
 	gboolean in_mimetypes;
@@ -240,13 +240,13 @@ text_cb (GMarkupParseContext *ctx,
 	t = g_strndup (text, text_len);
 	
 	if (info->in_text) {
-		nautilus_query_set_text (info->query, t);
+		nemo_query_set_text (info->query, t);
 	} else if (info->in_location) {
 		uri = decode_home_uri (t);
-		nautilus_query_set_location (info->query, uri);
+		nemo_query_set_location (info->query, uri);
 		g_free (uri);
 	} else if (info->in_mimetypes && info->in_mimetype) {
-		nautilus_query_add_mime_type (info->query, t);
+		nemo_query_add_mime_type (info->query, t);
 	}
 	
 	g_free (t);
@@ -274,8 +274,8 @@ static GMarkupParser parser = {
 };
 
 
-static NautilusQuery *
-nautilus_query_parse_xml (char *xml, gsize xml_len)
+static NemoQuery *
+nemo_query_parse_xml (char *xml, gsize xml_len)
 {
 	ParserInfo info = { NULL };
 	GMarkupParseContext *ctx;
@@ -284,7 +284,7 @@ nautilus_query_parse_xml (char *xml, gsize xml_len)
 		xml_len = strlen (xml);
 	}
 	
-	info.query = nautilus_query_new ();
+	info.query = nemo_query_new ();
 	info.in_text = FALSE;
 	info.error = FALSE;
 
@@ -300,10 +300,10 @@ nautilus_query_parse_xml (char *xml, gsize xml_len)
 }
 
 
-NautilusQuery *
-nautilus_query_load (char *file)
+NemoQuery *
+nemo_query_load (char *file)
 {
-	NautilusQuery *query;
+	NemoQuery *query;
 	char *xml;
 	gsize xml_len;
 	
@@ -318,14 +318,14 @@ nautilus_query_load (char *file)
 		return NULL;
 	}
 
-	query = nautilus_query_parse_xml (xml, xml_len);
+	query = nemo_query_parse_xml (xml, xml_len);
 	g_free (xml);
 
 	return query;
 }
 
 static char *
-nautilus_query_to_xml (NautilusQuery *query)
+nemo_query_to_xml (NemoQuery *query)
 {
 	GString *xml;
 	char *text;
@@ -364,7 +364,7 @@ nautilus_query_to_xml (NautilusQuery *query)
 }
 
 gboolean
-nautilus_query_save (NautilusQuery *query, char *file)
+nemo_query_save (NemoQuery *query, char *file)
 {
 	char *xml;
 	GError *err = NULL;
@@ -372,7 +372,7 @@ nautilus_query_save (NautilusQuery *query, char *file)
 
 
 	res = TRUE;
-	xml = nautilus_query_to_xml (query);
+	xml = nemo_query_to_xml (query);
 	g_file_set_contents (file, xml, strlen (xml), &err);
 	g_free (xml);
 	

@@ -1,16 +1,16 @@
 /* -*- Mode: C; indent-tabs-mode: t; c-basic-offset: 8; tab-width: 8 -*- */
 /*
- * Nautilus
+ * Nemo
  *
  * Copyright (C) 2003 Red Hat, Inc.
  * Copyright (C) 2010 Cosimo Cecchi <cosimoc@gnome.org>
  *
- * Nautilus is free software; you can redistribute it and/or
+ * Nemo is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
  * published by the Free Software Foundation; either version 2 of the
  * License, or (at your option) any later version.
  *
- * Nautilus is distributed in the hope that it will be useful,
+ * Nemo is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
  * General Public License for more details.
@@ -23,7 +23,7 @@
 
 #include <config.h>
 
-#include "nautilus-connect-server-dialog.h"
+#include "nemo-connect-server-dialog.h"
 
 #include <string.h>
 #include <eel/eel-stock-dialogs.h>
@@ -31,19 +31,19 @@
 #include <gio/gio.h>
 #include <gtk/gtk.h>
 
-#include "nautilus-bookmark-list.h"
-#include "nautilus-connect-server-operation.h"
-#include "nautilus-window.h"
+#include "nemo-bookmark-list.h"
+#include "nemo-connect-server-operation.h"
+#include "nemo-window.h"
 
-#include <libnautilus-private/nautilus-global-preferences.h>
-#include <libnautilus-private/nautilus-icon-names.h>
+#include <libnemo-private/nemo-global-preferences.h>
+#include <libnemo-private/nemo-icon-names.h>
 
 /* TODO:
  * - name entry + pre-fill
  * - NetworkManager integration
  */
 
-struct _NautilusConnectServerDialogDetails {
+struct _NemoConnectServerDialogDetails {
 	GtkWidget *primary_grid;
 	GtkWidget *user_details;
 	GtkWidget *port_spinbutton;
@@ -77,13 +77,13 @@ struct _NautilusConnectServerDialogDetails {
 	GCancellable *mount_cancellable;
 };
 
-G_DEFINE_TYPE (NautilusConnectServerDialog, nautilus_connect_server_dialog,
+G_DEFINE_TYPE (NemoConnectServerDialog, nemo_connect_server_dialog,
 	       GTK_TYPE_DIALOG)
 
 static void sensitive_entry_changed_callback (GtkEditable *editable,
 					      GtkWidget *widget);
 static void iconized_entry_changed_cb (GtkEditable *entry,
-				       NautilusConnectServerDialog *dialog);
+				       NemoConnectServerDialog *dialog);
 
 enum {
 	RESPONSE_CONNECT
@@ -146,7 +146,7 @@ get_method_description (struct MethodInfo *meth)
 }
 
 static void
-connect_dialog_restore_info_bar (NautilusConnectServerDialog *dialog,
+connect_dialog_restore_info_bar (NemoConnectServerDialog *dialog,
 				 GtkMessageType message_type)
 {
 	if (dialog->details->info_bar_content != NULL) {
@@ -159,7 +159,7 @@ connect_dialog_restore_info_bar (NautilusConnectServerDialog *dialog,
 }
 
 static void
-connect_dialog_set_connecting (NautilusConnectServerDialog *dialog)
+connect_dialog_set_connecting (NemoConnectServerDialog *dialog)
 {
 	GtkWidget *hbox;
 	GtkWidget *widget;
@@ -192,7 +192,7 @@ connect_dialog_set_connecting (NautilusConnectServerDialog *dialog)
 }
 
 static void
-connect_dialog_gvfs_error (NautilusConnectServerDialog *dialog)
+connect_dialog_gvfs_error (NemoConnectServerDialog *dialog)
 {
 	GtkWidget *hbox, *image, *content_area, *label;
 
@@ -224,7 +224,7 @@ iconized_entry_restore (gpointer data,
 			gpointer user_data)
 {
 	GtkEntry *entry;
-	NautilusConnectServerDialog *dialog;
+	NemoConnectServerDialog *dialog;
 
 	entry = data;
 	dialog = user_data;
@@ -240,7 +240,7 @@ iconized_entry_restore (gpointer data,
 
 static void
 iconized_entry_changed_cb (GtkEditable *entry,
-			   NautilusConnectServerDialog *dialog)
+			   NemoConnectServerDialog *dialog)
 {
 	dialog->details->iconized_entries =
 		g_list_remove (dialog->details->iconized_entries, entry);
@@ -249,7 +249,7 @@ iconized_entry_changed_cb (GtkEditable *entry,
 }
 
 static void
-iconize_entry (NautilusConnectServerDialog *dialog,
+iconize_entry (NemoConnectServerDialog *dialog,
 	       GtkWidget *entry)
 {
 	if (!g_list_find (dialog->details->iconized_entries, entry)) {
@@ -268,7 +268,7 @@ iconize_entry (NautilusConnectServerDialog *dialog,
 }
 
 static void
-connect_dialog_set_info_bar_error (NautilusConnectServerDialog *dialog,
+connect_dialog_set_info_bar_error (NemoConnectServerDialog *dialog,
 				   GError *error)
 {
 	GtkWidget *content_area, *label, *entry, *hbox, *icon;
@@ -336,7 +336,7 @@ connect_dialog_set_info_bar_error (NautilusConnectServerDialog *dialog,
 }
 
 static void
-connect_dialog_finish_fill (NautilusConnectServerDialog *dialog)
+connect_dialog_finish_fill (NemoConnectServerDialog *dialog)
 {
 	GAskPasswordFlags flags;
 	GMountOperation *op;
@@ -374,7 +374,7 @@ connect_dialog_finish_fill (NautilusConnectServerDialog *dialog)
 }
 
 static void
-connect_dialog_request_additional_details (NautilusConnectServerDialog *self,
+connect_dialog_request_additional_details (NemoConnectServerDialog *self,
 					   GAskPasswordFlags flags,
 					   const gchar *default_user,
 					   const gchar *default_domain)
@@ -444,13 +444,13 @@ display_location_async_cb (GObject *source,
 			   GAsyncResult *res,
 			   gpointer user_data)
 {
-	NautilusConnectServerDialog *dialog;
+	NemoConnectServerDialog *dialog;
 	GError *error;
 
-	dialog = NAUTILUS_CONNECT_SERVER_DIALOG (source);
+	dialog = NEMO_CONNECT_SERVER_DIALOG (source);
 	error = NULL;
 
-	nautilus_connect_server_dialog_display_location_finish (dialog,
+	nemo_connect_server_dialog_display_location_finish (dialog,
 								res, &error);
 
 	if (error != NULL) {
@@ -467,7 +467,7 @@ mount_enclosing_ready_cb (GObject *source,
 			  gpointer user_data)
 {
 	GFile *location;
-	NautilusConnectServerDialog *dialog;
+	NemoConnectServerDialog *dialog;
 	GError *error;
 
 	error = NULL;
@@ -478,7 +478,7 @@ mount_enclosing_ready_cb (GObject *source,
 
 	if (!error || g_error_matches (error, G_IO_ERROR, G_IO_ERROR_ALREADY_MOUNTED)) {
 		/* volume is mounted, show it */
-		nautilus_connect_server_dialog_display_location_async (dialog, location,
+		nemo_connect_server_dialog_display_location_async (dialog, location,
 								       display_location_async_cb, NULL);
 	} else {
 		if (dialog->details->should_destroy) {
@@ -496,14 +496,14 @@ mount_enclosing_ready_cb (GObject *source,
 }
 
 static void
-connect_dialog_present_uri_async (NautilusConnectServerDialog *self,
+connect_dialog_present_uri_async (NemoConnectServerDialog *self,
 				  GFile *location)
 {
 	GMountOperation *op;
 
 	self->details->mount_cancellable = g_cancellable_new ();
 
-	op = nautilus_connect_server_operation_new (self);
+	op = nemo_connect_server_operation_new (self);
 	g_file_mount_enclosing_volume (location,
 				       0, op, self->details->mount_cancellable,
 				       mount_enclosing_ready_cb, self);
@@ -511,7 +511,7 @@ connect_dialog_present_uri_async (NautilusConnectServerDialog *self,
 }
 
 static void
-connect_dialog_connect_to_server (NautilusConnectServerDialog *dialog)
+connect_dialog_connect_to_server (NemoConnectServerDialog *dialog)
 {
 	struct MethodInfo *meth;
 	GFile *location;
@@ -630,7 +630,7 @@ connect_dialog_connect_to_server (NautilusConnectServerDialog *dialog)
 }
 
 static void
-connect_to_server_or_finish_fill (NautilusConnectServerDialog *dialog)
+connect_to_server_or_finish_fill (NemoConnectServerDialog *dialog)
 {
 	if (dialog->details->fill_details_res != NULL) {
 		connect_dialog_finish_fill (dialog);
@@ -640,7 +640,7 @@ connect_to_server_or_finish_fill (NautilusConnectServerDialog *dialog)
 }
 
 static gboolean
-connect_dialog_abort_mount_operation (NautilusConnectServerDialog *dialog)
+connect_dialog_abort_mount_operation (NemoConnectServerDialog *dialog)
 {
 	gboolean retval = FALSE;
 
@@ -666,7 +666,7 @@ connect_dialog_abort_mount_operation (NautilusConnectServerDialog *dialog)
 }
 
 static void
-connect_dialog_destroy (NautilusConnectServerDialog *dialog)
+connect_dialog_destroy (NemoConnectServerDialog *dialog)
 {
 	if (connect_dialog_abort_mount_operation (dialog)) {
 		dialog->details->should_destroy = TRUE;
@@ -677,7 +677,7 @@ connect_dialog_destroy (NautilusConnectServerDialog *dialog)
 }
 
 static void
-connect_dialog_response_cb (NautilusConnectServerDialog *dialog,
+connect_dialog_response_cb (NemoConnectServerDialog *dialog,
 			    int response_id,
 			    gpointer data)
 {
@@ -695,7 +695,7 @@ connect_dialog_response_cb (NautilusConnectServerDialog *dialog,
 	case GTK_RESPONSE_HELP :
 		error = NULL;
 		gtk_show_uri (gtk_window_get_screen (GTK_WINDOW (dialog)),
-			      "help:gnome-help/nautilus-connect",
+			      "help:ubuntu-help/nemo-connect",
 			      gtk_get_current_event_time (), &error);
 		if (error) {
 			eel_show_error_dialog (_("There was an error displaying help."), error->message,
@@ -709,7 +709,7 @@ connect_dialog_response_cb (NautilusConnectServerDialog *dialog,
 }
 
 static void
-connect_dialog_cleanup (NautilusConnectServerDialog *dialog)
+connect_dialog_cleanup (NemoConnectServerDialog *dialog)
 {
 	/* hide the infobar */
 	gtk_widget_hide (dialog->details->info_bar);
@@ -742,7 +742,7 @@ connect_dialog_cleanup (NautilusConnectServerDialog *dialog)
 
 
 static void
-connect_dialog_setup_for_type (NautilusConnectServerDialog *dialog)
+connect_dialog_setup_for_type (NemoConnectServerDialog *dialog)
 {
 	struct MethodInfo *meth;
 	int index;;
@@ -811,7 +811,7 @@ sensitive_entry_changed_callback (GtkEditable *editable,
 }
 
 static void
-bind_visibility (NautilusConnectServerDialog *dialog,
+bind_visibility (NemoConnectServerDialog *dialog,
 		 GtkWidget *source,
 		 GtkWidget *dest)
 {
@@ -823,7 +823,7 @@ bind_visibility (NautilusConnectServerDialog *dialog,
 }
 
 static void
-nautilus_connect_server_dialog_init (NautilusConnectServerDialog *dialog)
+nemo_connect_server_dialog_init (NemoConnectServerDialog *dialog)
 {
 	GtkWidget *label;
 	GtkWidget *alignment;
@@ -835,8 +835,8 @@ nautilus_connect_server_dialog_init (NautilusConnectServerDialog *dialog)
 	gchar *str;
 	int i;
 	
-	dialog->details = G_TYPE_INSTANCE_GET_PRIVATE (dialog, NAUTILUS_TYPE_CONNECT_SERVER_DIALOG,
-						       NautilusConnectServerDialogDetails);
+	dialog->details = G_TYPE_INSTANCE_GET_PRIVATE (dialog, NEMO_TYPE_CONNECT_SERVER_DIALOG,
+						       NemoConnectServerDialogDetails);
 
 	content_area = gtk_dialog_get_content_area (GTK_DIALOG (dialog));
 
@@ -1126,11 +1126,11 @@ nautilus_connect_server_dialog_init (NautilusConnectServerDialog *dialog)
 }
 
 static void
-nautilus_connect_server_dialog_finalize (GObject *object)
+nemo_connect_server_dialog_finalize (GObject *object)
 {
-	NautilusConnectServerDialog *dialog;
+	NemoConnectServerDialog *dialog;
 
-	dialog = NAUTILUS_CONNECT_SERVER_DIALOG (object);
+	dialog = NEMO_CONNECT_SERVER_DIALOG (object);
 
 	connect_dialog_abort_mount_operation (dialog);
 
@@ -1139,26 +1139,26 @@ nautilus_connect_server_dialog_finalize (GObject *object)
 		dialog->details->iconized_entries = NULL;
 	}
 
-	G_OBJECT_CLASS (nautilus_connect_server_dialog_parent_class)->finalize (object);
+	G_OBJECT_CLASS (nemo_connect_server_dialog_parent_class)->finalize (object);
 }
 
 static void
-nautilus_connect_server_dialog_class_init (NautilusConnectServerDialogClass *class)
+nemo_connect_server_dialog_class_init (NemoConnectServerDialogClass *class)
 {
 	GObjectClass *oclass;
 
 	oclass = G_OBJECT_CLASS (class);
-	oclass->finalize = nautilus_connect_server_dialog_finalize;
+	oclass->finalize = nemo_connect_server_dialog_finalize;
 
-	g_type_class_add_private (class, sizeof (NautilusConnectServerDialogDetails));
+	g_type_class_add_private (class, sizeof (NemoConnectServerDialogDetails));
 }
 
 GtkWidget *
-nautilus_connect_server_dialog_new (NautilusWindow *window)
+nemo_connect_server_dialog_new (NemoWindow *window)
 {
 	GtkWidget *dialog;
 
-	dialog = gtk_widget_new (NAUTILUS_TYPE_CONNECT_SERVER_DIALOG, NULL);
+	dialog = gtk_widget_new (NEMO_TYPE_CONNECT_SERVER_DIALOG, NULL);
 
 	if (window) {
 		gtk_window_set_screen (GTK_WINDOW (dialog),
@@ -1169,14 +1169,14 @@ nautilus_connect_server_dialog_new (NautilusWindow *window)
 }
 
 gboolean
-nautilus_connect_server_dialog_fill_details_finish (NautilusConnectServerDialog *self,
+nemo_connect_server_dialog_fill_details_finish (NemoConnectServerDialog *self,
 						    GAsyncResult *result)
 {
 	return g_simple_async_result_get_op_res_gboolean (G_SIMPLE_ASYNC_RESULT (result));
 }
 
 void
-nautilus_connect_server_dialog_fill_details_async (NautilusConnectServerDialog *self,
+nemo_connect_server_dialog_fill_details_async (NemoConnectServerDialog *self,
 						   GMountOperation *operation,
 						   const gchar *default_user,
 						   const gchar *default_domain,
@@ -1198,7 +1198,7 @@ nautilus_connect_server_dialog_fill_details_async (NautilusConnectServerDialog *
 	}
 
 	fill_details_res = g_simple_async_result_new (G_OBJECT (self), callback, user_data,
-						      nautilus_connect_server_dialog_fill_details_async);
+						      nemo_connect_server_dialog_fill_details_async);
 
 	self->details->fill_details_res = fill_details_res;
 	set_flags = (flags & G_ASK_PASSWORD_NEED_PASSWORD) |

@@ -1,6 +1,6 @@
 /* -*- Mode: C; indent-tabs-mode: t; c-basic-offset: 8; tab-width: 8 -*- */
 
-/* NautilusEntry: one-line text editing widget. This consists of bug fixes
+/* NemoEntry: one-line text editing widget. This consists of bug fixes
  * and other improvements to GtkEntry, and all the changes could be rolled
  * into GtkEntry some day.
  *
@@ -25,16 +25,16 @@
  */
 
 #include <config.h>
-#include "nautilus-entry.h"
+#include "nemo-entry.h"
 
 #include <string.h>
-#include "nautilus-global-preferences.h"
-#include "nautilus-undo-signal-handlers.h"
+#include "nemo-global-preferences.h"
+#include "nemo-undo-signal-handlers.h"
 #include <gdk/gdkkeysyms.h>
 #include <gtk/gtk.h>
 #include <glib/gi18n.h>
 
-struct NautilusEntryDetails {
+struct NemoEntryDetails {
 	gboolean user_edit;
 	gboolean special_tab_handling;
 
@@ -48,47 +48,47 @@ enum {
 };
 static guint signals[LAST_SIGNAL];
 
-static void nautilus_entry_editable_init (GtkEditableInterface *iface);
+static void nemo_entry_editable_init (GtkEditableInterface *iface);
 
-G_DEFINE_TYPE_WITH_CODE (NautilusEntry, nautilus_entry, GTK_TYPE_ENTRY,
+G_DEFINE_TYPE_WITH_CODE (NemoEntry, nemo_entry, GTK_TYPE_ENTRY,
 			 G_IMPLEMENT_INTERFACE (GTK_TYPE_EDITABLE,
-						nautilus_entry_editable_init));
+						nemo_entry_editable_init));
 
 static GtkEditableInterface *parent_editable_interface = NULL;
 
 static void
-nautilus_entry_init (NautilusEntry *entry)
+nemo_entry_init (NemoEntry *entry)
 {
-	entry->details = g_new0 (NautilusEntryDetails, 1);
+	entry->details = g_new0 (NemoEntryDetails, 1);
 	
 	entry->details->user_edit = TRUE;
 
-	nautilus_undo_set_up_nautilus_entry_for_undo (entry);
+	nemo_undo_set_up_nemo_entry_for_undo (entry);
 }
 
 GtkWidget *
-nautilus_entry_new (void)
+nemo_entry_new (void)
 {
-	return gtk_widget_new (NAUTILUS_TYPE_ENTRY, NULL);
+	return gtk_widget_new (NEMO_TYPE_ENTRY, NULL);
 }
 
 GtkWidget *
-nautilus_entry_new_with_max_length (guint16 max)
+nemo_entry_new_with_max_length (guint16 max)
 {
 	GtkWidget *widget;
 
-	widget = gtk_widget_new (NAUTILUS_TYPE_ENTRY, NULL);
+	widget = gtk_widget_new (NEMO_TYPE_ENTRY, NULL);
 	gtk_entry_set_max_length (GTK_ENTRY (widget), max);
 
 	return widget;
 }
 
 static void
-nautilus_entry_finalize (GObject *object)
+nemo_entry_finalize (GObject *object)
 {
-	NautilusEntry *entry;
+	NemoEntry *entry;
 
-	entry = NAUTILUS_ENTRY (object);
+	entry = NEMO_ENTRY (object);
 
 	if (entry->details->select_idle_id != 0) {
 		g_source_remove (entry->details->select_idle_id);
@@ -96,19 +96,19 @@ nautilus_entry_finalize (GObject *object)
 	
 	g_free (entry->details);
 
-	G_OBJECT_CLASS (nautilus_entry_parent_class)->finalize (object);
+	G_OBJECT_CLASS (nemo_entry_parent_class)->finalize (object);
 }
 
 static gboolean
-nautilus_entry_key_press (GtkWidget *widget, GdkEventKey *event)
+nemo_entry_key_press (GtkWidget *widget, GdkEventKey *event)
 {
-	NautilusEntry *entry;
+	NemoEntry *entry;
 	GtkEditable *editable;
 	int position;
 	gboolean old_has, new_has;
 	gboolean result;
 	
-	entry = NAUTILUS_ENTRY (widget);
+	entry = NEMO_ENTRY (widget);
 	editable = GTK_EDITABLE (widget);
 	
 	if (!gtk_editable_get_editable (editable)) {
@@ -136,7 +136,7 @@ nautilus_entry_key_press (GtkWidget *widget, GdkEventKey *event)
 	
 	old_has = gtk_editable_get_selection_bounds (editable, NULL, NULL);
 
-	result = GTK_WIDGET_CLASS (nautilus_entry_parent_class)->key_press_event (widget, event);
+	result = GTK_WIDGET_CLASS (nemo_entry_parent_class)->key_press_event (widget, event);
 
 	/* Pressing a key usually changes the selection if there is a selection.
 	 * If there is not selection, we can save work by not emitting a signal.
@@ -153,7 +153,7 @@ nautilus_entry_key_press (GtkWidget *widget, GdkEventKey *event)
 }
 
 static gboolean
-nautilus_entry_motion_notify (GtkWidget *widget, GdkEventMotion *event)
+nemo_entry_motion_notify (GtkWidget *widget, GdkEventMotion *event)
 {
 	int result;
 	gboolean old_had, new_had;
@@ -164,7 +164,7 @@ nautilus_entry_motion_notify (GtkWidget *widget, GdkEventMotion *event)
 
 	old_had = gtk_editable_get_selection_bounds (editable, &old_start, &old_end);
 
-	result = GTK_WIDGET_CLASS (nautilus_entry_parent_class)->motion_notify_event (widget, event);
+	result = GTK_WIDGET_CLASS (nemo_entry_parent_class)->motion_notify_event (widget, event);
 
 	/* Send a signal if dragging the mouse caused the selection to change. */
 	if (result) {
@@ -178,16 +178,16 @@ nautilus_entry_motion_notify (GtkWidget *widget, GdkEventMotion *event)
 }
 
 /**
- * nautilus_entry_select_all
+ * nemo_entry_select_all
  *
  * Select all text, leaving the text cursor position at the end.
  * 
- * @entry: A NautilusEntry
+ * @entry: A NemoEntry
  **/
 void
-nautilus_entry_select_all (NautilusEntry *entry)
+nemo_entry_select_all (NemoEntry *entry)
 {
-	g_return_if_fail (NAUTILUS_IS_ENTRY (entry));
+	g_return_if_fail (NEMO_IS_ENTRY (entry));
 
 	gtk_editable_set_position (GTK_EDITABLE (entry), -1);
 	gtk_editable_select_region (GTK_EDITABLE (entry), 0, -1);
@@ -196,11 +196,11 @@ nautilus_entry_select_all (NautilusEntry *entry)
 static gboolean
 select_all_at_idle (gpointer callback_data)
 {
-	NautilusEntry *entry;
+	NemoEntry *entry;
 
-	entry = NAUTILUS_ENTRY (callback_data);
+	entry = NEMO_ENTRY (callback_data);
 
-	nautilus_entry_select_all (entry);
+	nemo_entry_select_all (entry);
 
 	entry->details->select_idle_id = 0;
 	
@@ -208,19 +208,19 @@ select_all_at_idle (gpointer callback_data)
 }
 
 /**
- * nautilus_entry_select_all_at_idle
+ * nemo_entry_select_all_at_idle
  *
  * Select all text at the next idle, not immediately.
  * This is useful when reacting to a key press, because
  * changing the selection and the text cursor position doesn't
  * work in a key_press signal handler.
  * 
- * @entry: A NautilusEntry
+ * @entry: A NemoEntry
  **/
 void
-nautilus_entry_select_all_at_idle (NautilusEntry *entry)
+nemo_entry_select_all_at_idle (NemoEntry *entry)
 {
-	g_return_if_fail (NAUTILUS_IS_ENTRY (entry));
+	g_return_if_fail (NEMO_IS_ENTRY (entry));
 
 	/* If the text cursor position changes in this routine
 	 * then gtk_entry_key_press will unselect (and we want
@@ -233,21 +233,21 @@ nautilus_entry_select_all_at_idle (NautilusEntry *entry)
 }
 
 /**
- * nautilus_entry_set_text
+ * nemo_entry_set_text
  *
  * This function wraps gtk_entry_set_text.  It sets undo_registered
  * to TRUE and preserves the old value for a later restore.  This is
  * done so the programmatic changes to the entry do not register
  * with the undo manager.
  *  
- * @entry: A NautilusEntry
+ * @entry: A NemoEntry
  * @test: The text to set
  **/
 
 void
-nautilus_entry_set_text (NautilusEntry *entry, const gchar *text)
+nemo_entry_set_text (NemoEntry *entry, const gchar *text)
 {
-	g_return_if_fail (NAUTILUS_IS_ENTRY (entry));
+	g_return_if_fail (NEMO_IS_ENTRY (entry));
 
 	entry->details->user_edit = FALSE;
 	gtk_entry_set_text (GTK_ENTRY (entry), text);
@@ -257,7 +257,7 @@ nautilus_entry_set_text (NautilusEntry *entry, const gchar *text)
 }
 
 static void
-nautilus_entry_set_selection_bounds (GtkEditable *editable,
+nemo_entry_set_selection_bounds (GtkEditable *editable,
 				     int start_pos,
 				     int end_pos)
 {
@@ -267,12 +267,12 @@ nautilus_entry_set_selection_bounds (GtkEditable *editable,
 }
 
 static gboolean
-nautilus_entry_button_press (GtkWidget *widget,
+nemo_entry_button_press (GtkWidget *widget,
 			     GdkEventButton *event)
 {
 	gboolean result;
 
-	result = GTK_WIDGET_CLASS (nautilus_entry_parent_class)->button_press_event (widget, event);
+	result = GTK_WIDGET_CLASS (nemo_entry_parent_class)->button_press_event (widget, event);
 
 	if (result) {
 		g_signal_emit (widget, signals[SELECTION_CHANGED], 0);
@@ -282,12 +282,12 @@ nautilus_entry_button_press (GtkWidget *widget,
 }
 
 static gboolean
-nautilus_entry_button_release (GtkWidget *widget,
+nemo_entry_button_release (GtkWidget *widget,
 			       GdkEventButton *event)
 {
 	gboolean result;
 
-	result = GTK_WIDGET_CLASS (nautilus_entry_parent_class)->button_release_event (widget, event);
+	result = GTK_WIDGET_CLASS (nemo_entry_parent_class)->button_release_event (widget, event);
 
 	if (result) {
 		g_signal_emit (widget, signals[SELECTION_CHANGED], 0);
@@ -297,12 +297,12 @@ nautilus_entry_button_release (GtkWidget *widget,
 }
 
 static void
-nautilus_entry_insert_text (GtkEditable *editable, const gchar *text,
+nemo_entry_insert_text (GtkEditable *editable, const gchar *text,
 			    int length, int *position)
 {
-	NautilusEntry *entry;
+	NemoEntry *entry;
 
-	entry = NAUTILUS_ENTRY(editable);
+	entry = NEMO_ENTRY(editable);
 
 	/* Fire off user changed signals */
 	if (entry->details->user_edit) {
@@ -315,11 +315,11 @@ nautilus_entry_insert_text (GtkEditable *editable, const gchar *text,
 }
 			 		     
 static void 
-nautilus_entry_delete_text (GtkEditable *editable, int start_pos, int end_pos)
+nemo_entry_delete_text (GtkEditable *editable, int start_pos, int end_pos)
 {
-	NautilusEntry *entry;
+	NemoEntry *entry;
 	
-	entry = NAUTILUS_ENTRY (editable);
+	entry = NEMO_ENTRY (editable);
 
 	/* Fire off user changed signals */
 	if (entry->details->user_edit) {
@@ -335,31 +335,31 @@ nautilus_entry_delete_text (GtkEditable *editable, int start_pos, int end_pos)
  * when the selection changes. Changing the selection to NULL and then
  * back to the original selection owner still sends the event, so the
  * selection owner then gets the selection ripped away from it. We ran into
- * this with type-completion behavior in NautilusLocationBar (see bug 5313).
+ * this with type-completion behavior in NemoLocationBar (see bug 5313).
  * There's a FIXME comment that seems to be about this same issue in
  * gtk+/gtkselection.c, gtk_selection_clear.
  */
 static gboolean
-nautilus_entry_selection_clear (GtkWidget *widget,
+nemo_entry_selection_clear (GtkWidget *widget,
 			        GdkEventSelection *event)
 {
-	g_assert (NAUTILUS_IS_ENTRY (widget));
+	g_assert (NEMO_IS_ENTRY (widget));
 	
 	if (gdk_selection_owner_get (event->selection) == gtk_widget_get_window (widget)) {
 		return FALSE;
 	}
 	
-	return GTK_WIDGET_CLASS (nautilus_entry_parent_class)->selection_clear_event (widget, event);
+	return GTK_WIDGET_CLASS (nemo_entry_parent_class)->selection_clear_event (widget, event);
 }
 
 static void
-nautilus_entry_editable_init (GtkEditableInterface *iface)
+nemo_entry_editable_init (GtkEditableInterface *iface)
 {
 	parent_editable_interface = g_type_interface_peek_parent (iface);
 
-	iface->insert_text = nautilus_entry_insert_text;
-	iface->delete_text = nautilus_entry_delete_text;
-	iface->set_selection_bounds = nautilus_entry_set_selection_bounds;
+	iface->insert_text = nemo_entry_insert_text;
+	iface->delete_text = nemo_entry_delete_text;
+	iface->set_selection_bounds = nemo_entry_set_selection_bounds;
 
 	/* Otherwise we might need some memcpy loving */
 	g_assert (iface->do_insert_text != NULL);
@@ -368,7 +368,7 @@ nautilus_entry_editable_init (GtkEditableInterface *iface)
 }
 
 static void
-nautilus_entry_class_init (NautilusEntryClass *class)
+nemo_entry_class_init (NemoEntryClass *class)
 {
 	GtkWidgetClass *widget_class;
 	GObjectClass *gobject_class;
@@ -376,20 +376,20 @@ nautilus_entry_class_init (NautilusEntryClass *class)
 	widget_class = GTK_WIDGET_CLASS (class);
 	gobject_class = G_OBJECT_CLASS (class);
 		
-	widget_class->button_press_event = nautilus_entry_button_press;
-	widget_class->button_release_event = nautilus_entry_button_release;
-	widget_class->key_press_event = nautilus_entry_key_press;
-	widget_class->motion_notify_event = nautilus_entry_motion_notify;
-	widget_class->selection_clear_event = nautilus_entry_selection_clear;
+	widget_class->button_press_event = nemo_entry_button_press;
+	widget_class->button_release_event = nemo_entry_button_release;
+	widget_class->key_press_event = nemo_entry_key_press;
+	widget_class->motion_notify_event = nemo_entry_motion_notify;
+	widget_class->selection_clear_event = nemo_entry_selection_clear;
 	
-	gobject_class->finalize = nautilus_entry_finalize;
+	gobject_class->finalize = nemo_entry_finalize;
 
 	/* Set up signals */
 	signals[USER_CHANGED] = g_signal_new
 		("user_changed",
 		 G_TYPE_FROM_CLASS (class),
 		 G_SIGNAL_RUN_LAST,
-		 G_STRUCT_OFFSET (NautilusEntryClass, user_changed),
+		 G_STRUCT_OFFSET (NemoEntryClass, user_changed),
 		 NULL, NULL,
 		 g_cclosure_marshal_VOID__VOID,
 		 G_TYPE_NONE, 0);
@@ -397,17 +397,17 @@ nautilus_entry_class_init (NautilusEntryClass *class)
 		("selection_changed",
 		 G_TYPE_FROM_CLASS (class),
 		 G_SIGNAL_RUN_LAST,
-		 G_STRUCT_OFFSET (NautilusEntryClass, selection_changed),
+		 G_STRUCT_OFFSET (NemoEntryClass, selection_changed),
 		 NULL, NULL,
 		 g_cclosure_marshal_VOID__VOID,
 		 G_TYPE_NONE, 0);
 }
 
 void
-nautilus_entry_set_special_tab_handling (NautilusEntry *entry,
+nemo_entry_set_special_tab_handling (NemoEntry *entry,
 					 gboolean special_tab_handling)
 {
-	g_return_if_fail (NAUTILUS_IS_ENTRY (entry));
+	g_return_if_fail (NEMO_IS_ENTRY (entry));
 
 	entry->details->special_tab_handling = special_tab_handling;
 }

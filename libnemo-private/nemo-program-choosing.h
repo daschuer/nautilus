@@ -1,6 +1,6 @@
 /* -*- Mode: C; indent-tabs-mode: t; c-basic-offset: 8; tab-width: 8 -*- */
 
-/* nautilus-program-choosing.h - functions for selecting and activating
+/* nemo-program-choosing.h - functions for selecting and activating
  				 programs for opening/viewing particular files.
 
    Copyright (C) 2000 Eazel, Inc.
@@ -23,36 +23,36 @@
    Author: John Sullivan <sullivan@eazel.com>
 */
 
-#ifndef NAUTILUS_PROGRAM_CHOOSING_H
-#define NAUTILUS_PROGRAM_CHOOSING_H
+#ifndef NEMO_PROGRAM_CHOOSING_H
+#define NEMO_PROGRAM_CHOOSING_H
 
 #include <gtk/gtk.h>
 #include <gio/gio.h>
-#include <libnautilus-private/nautilus-file.h>
+#include <libnemo-private/nemo-file.h>
 
-typedef void (*NautilusApplicationChoiceCallback) (GAppInfo                      *application,
+typedef void (*NemoApplicationChoiceCallback) (GAppInfo                      *application,
 						   gpointer			  callback_data);
 
-void nautilus_launch_application                 (GAppInfo                          *application,
+void nemo_launch_application                 (GAppInfo                          *application,
 						  GList                             *files,
 						  GtkWindow                         *parent_window);
-void nautilus_launch_application_by_uri          (GAppInfo                          *application,
+void nemo_launch_application_by_uri          (GAppInfo                          *application,
 						  GList                             *uris,
 						  GtkWindow                         *parent_window);
-void nautilus_launch_application_for_mount       (GAppInfo                          *app_info,
+void nemo_launch_application_for_mount       (GAppInfo                          *app_info,
 						  GMount                            *mount,
 						  GtkWindow                         *parent_window);
-void nautilus_launch_application_from_command    (GdkScreen                         *screen,
+void nemo_launch_application_from_command    (GdkScreen                         *screen,
 						  const char                        *command_string,
 						  gboolean                           use_terminal,
 						  ...) G_GNUC_NULL_TERMINATED;
-void nautilus_launch_application_from_command_array (GdkScreen                         *screen,
+void nemo_launch_application_from_command_array (GdkScreen                         *screen,
 						     const char                        *command_string,
 						     gboolean                           use_terminal,
 						     const char * const *               parameters);
-void nautilus_launch_desktop_file		 (GdkScreen                         *screen,
+void nemo_launch_desktop_file		 (GdkScreen                         *screen,
 						  const char                        *desktop_file_uri,
 						  const GList                       *parameter_uris,
 						  GtkWindow                         *parent_window);
 						  
-#endif /* NAUTILUS_PROGRAM_CHOOSING_H */
+#endif /* NEMO_PROGRAM_CHOOSING_H */

@@ -1,5 +1,5 @@
 /*
- *  Nautilus SendTo extension
+ *  Nemo SendTo extension
  *
  *  Copyright (C) 2005 Roberto Majadas
  *
@@ -21,32 +21,32 @@
  *
  */
 
-#ifndef NAUTILUS_NSTE_H
-#define NAUTILUS_NSTE_H
+#ifndef NEMO_NSTE_H
+#define NEMO_NSTE_H
 
 #include <glib-object.h>
 
 G_BEGIN_DECLS
 
-#define NAUTILUS_TYPE_NSTE  (nautilus_nste_get_type ())
-#define NAUTILUS_NSTE(o)    (G_TYPE_CHECK_INSTANCE_CAST ((o), NAUTILUS_TYPE_NSTE, NautilusNste))
-#define NAUTILUS_IS_NSTE(o) (G_TYPE_CHECK_INSTANCE_TYPE ((o), NAUTILUS_TYPE_NSTE))
+#define NEMO_TYPE_NSTE  (nemo_nste_get_type ())
+#define NEMO_NSTE(o)    (G_TYPE_CHECK_INSTANCE_CAST ((o), NEMO_TYPE_NSTE, NemoNste))
+#define NEMO_IS_NSTE(o) (G_TYPE_CHECK_INSTANCE_TYPE ((o), NEMO_TYPE_NSTE))
 
-typedef struct _NautilusNste      NautilusNste;
-typedef struct _NautilusNsteClass NautilusNsteClass;
+typedef struct _NemoNste      NemoNste;
+typedef struct _NemoNsteClass NemoNsteClass;
 
-struct _NautilusNste {
+struct _NemoNste {
 	GObject  __parent;
 	gboolean nst_present;
 };
 
-struct _NautilusNsteClass {
+struct _NemoNsteClass {
 	GObjectClass __parent;
 };
 
-GType nautilus_nste_get_type      (void);
-void  nautilus_nste_register_type (GTypeModule *module);
+GType nemo_nste_get_type      (void);
+void  nemo_nste_register_type (GTypeModule *module);
 
 G_END_DECLS
 
-#endif /* NAUTILUS_NSTE_H */
+#endif /* NEMO_NSTE_H */

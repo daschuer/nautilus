@@ -1,5 +1,5 @@
-#ifndef NAUTILUS_ICON_INFO_H
-#define NAUTILUS_ICON_INFO_H
+#ifndef NEMO_ICON_INFO_H
+#define NEMO_ICON_INFO_H
 
 #include <glib-object.h>
 #include <gdk-pixbuf/gdk-pixbuf.h>
@@ -9,85 +9,85 @@
 
 G_BEGIN_DECLS
 
-/* Names for Nautilus's different zoom levels, from tiniest items to largest items */
+/* Names for Nemo's different zoom levels, from tiniest items to largest items */
 typedef enum {
-	NAUTILUS_ZOOM_LEVEL_SMALLEST,
-	NAUTILUS_ZOOM_LEVEL_SMALLER,
-	NAUTILUS_ZOOM_LEVEL_SMALL,
-	NAUTILUS_ZOOM_LEVEL_STANDARD,
-	NAUTILUS_ZOOM_LEVEL_LARGE,
-	NAUTILUS_ZOOM_LEVEL_LARGER,
-	NAUTILUS_ZOOM_LEVEL_LARGEST
-} NautilusZoomLevel;
+	NEMO_ZOOM_LEVEL_SMALLEST,
+	NEMO_ZOOM_LEVEL_SMALLER,
+	NEMO_ZOOM_LEVEL_SMALL,
+	NEMO_ZOOM_LEVEL_STANDARD,
+	NEMO_ZOOM_LEVEL_LARGE,
+	NEMO_ZOOM_LEVEL_LARGER,
+	NEMO_ZOOM_LEVEL_LARGEST
+} NemoZoomLevel;
 
-#define NAUTILUS_ZOOM_LEVEL_N_ENTRIES (NAUTILUS_ZOOM_LEVEL_LARGEST + 1)
+#define NEMO_ZOOM_LEVEL_N_ENTRIES (NEMO_ZOOM_LEVEL_LARGEST + 1)
 
-/* Nominal icon sizes for each Nautilus zoom level.
+/* Nominal icon sizes for each Nemo zoom level.
  * This scheme assumes that icons are designed to
  * fit in a square space, though each image needn't
  * be square. Since individual icons can be stretched,
  * each icon is not constrained to this nominal size.
  */
-#define NAUTILUS_ICON_SIZE_SMALLEST	16
-#define NAUTILUS_ICON_SIZE_SMALLER	24
-#define NAUTILUS_ICON_SIZE_SMALL	32
-#define NAUTILUS_ICON_SIZE_STANDARD	48
-#define NAUTILUS_ICON_SIZE_LARGE	72
-#define NAUTILUS_ICON_SIZE_LARGER	96
-#define NAUTILUS_ICON_SIZE_LARGEST     192
+#define NEMO_ICON_SIZE_SMALLEST	16
+#define NEMO_ICON_SIZE_SMALLER	24
+#define NEMO_ICON_SIZE_SMALL	32
+#define NEMO_ICON_SIZE_STANDARD	48
+#define NEMO_ICON_SIZE_LARGE	72
+#define NEMO_ICON_SIZE_LARGER	96
+#define NEMO_ICON_SIZE_LARGEST     192
 
 /* Maximum size of an icon that the icon factory will ever produce */
-#define NAUTILUS_ICON_MAXIMUM_SIZE     320
+#define NEMO_ICON_MAXIMUM_SIZE     320
 
-typedef struct _NautilusIconInfo      NautilusIconInfo;
-typedef struct _NautilusIconInfoClass NautilusIconInfoClass;
-
-
-#define NAUTILUS_TYPE_ICON_INFO                 (nautilus_icon_info_get_type ())
-#define NAUTILUS_ICON_INFO(obj)                 (G_TYPE_CHECK_INSTANCE_CAST ((obj), NAUTILUS_TYPE_ICON_INFO, NautilusIconInfo))
-#define NAUTILUS_ICON_INFO_CLASS(klass)         (G_TYPE_CHECK_CLASS_CAST ((klass), NAUTILUS_TYPE_ICON_INFO, NautilusIconInfoClass))
-#define NAUTILUS_IS_ICON_INFO(obj)              (G_TYPE_CHECK_INSTANCE_TYPE ((obj), NAUTILUS_TYPE_ICON_INFO))
-#define NAUTILUS_IS_ICON_INFO_CLASS(klass)      (G_TYPE_CHECK_CLASS_TYPE ((klass), NAUTILUS_TYPE_ICON_INFO))
-#define NAUTILUS_ICON_INFO_GET_CLASS(obj)       (G_TYPE_INSTANCE_GET_CLASS ((obj), NAUTILUS_TYPE_ICON_INFO, NautilusIconInfoClass))
+typedef struct _NemoIconInfo      NemoIconInfo;
+typedef struct _NemoIconInfoClass NemoIconInfoClass;
 
 
-GType    nautilus_icon_info_get_type (void) G_GNUC_CONST;
+#define NEMO_TYPE_ICON_INFO                 (nemo_icon_info_get_type ())
+#define NEMO_ICON_INFO(obj)                 (G_TYPE_CHECK_INSTANCE_CAST ((obj), NEMO_TYPE_ICON_INFO, NemoIconInfo))
+#define NEMO_ICON_INFO_CLASS(klass)         (G_TYPE_CHECK_CLASS_CAST ((klass), NEMO_TYPE_ICON_INFO, NemoIconInfoClass))
+#define NEMO_IS_ICON_INFO(obj)              (G_TYPE_CHECK_INSTANCE_TYPE ((obj), NEMO_TYPE_ICON_INFO))
+#define NEMO_IS_ICON_INFO_CLASS(klass)      (G_TYPE_CHECK_CLASS_TYPE ((klass), NEMO_TYPE_ICON_INFO))
+#define NEMO_ICON_INFO_GET_CLASS(obj)       (G_TYPE_INSTANCE_GET_CLASS ((obj), NEMO_TYPE_ICON_INFO, NemoIconInfoClass))
 
-NautilusIconInfo *    nautilus_icon_info_new_for_pixbuf               (GdkPixbuf         *pixbuf);
-NautilusIconInfo *    nautilus_icon_info_lookup                       (GIcon             *icon,
+
+GType    nemo_icon_info_get_type (void) G_GNUC_CONST;
+
+NemoIconInfo *    nemo_icon_info_new_for_pixbuf               (GdkPixbuf         *pixbuf);
+NemoIconInfo *    nemo_icon_info_lookup                       (GIcon             *icon,
 								       int                size);
-NautilusIconInfo *    nautilus_icon_info_lookup_from_name             (const char        *name,
+NemoIconInfo *    nemo_icon_info_lookup_from_name             (const char        *name,
 								       int                size);
-NautilusIconInfo *    nautilus_icon_info_lookup_from_path             (const char        *path,
+NemoIconInfo *    nemo_icon_info_lookup_from_path             (const char        *path,
 								       int                size);
-gboolean              nautilus_icon_info_is_fallback                  (NautilusIconInfo  *icon);
-GdkPixbuf *           nautilus_icon_info_get_pixbuf                   (NautilusIconInfo  *icon);
-GdkPixbuf *           nautilus_icon_info_get_pixbuf_nodefault         (NautilusIconInfo  *icon);
-GdkPixbuf *           nautilus_icon_info_get_pixbuf_nodefault_at_size (NautilusIconInfo  *icon,
+gboolean              nemo_icon_info_is_fallback                  (NemoIconInfo  *icon);
+GdkPixbuf *           nemo_icon_info_get_pixbuf                   (NemoIconInfo  *icon);
+GdkPixbuf *           nemo_icon_info_get_pixbuf_nodefault         (NemoIconInfo  *icon);
+GdkPixbuf *           nemo_icon_info_get_pixbuf_nodefault_at_size (NemoIconInfo  *icon,
 								       gsize              forced_size);
-GdkPixbuf *           nautilus_icon_info_get_pixbuf_at_size           (NautilusIconInfo  *icon,
+GdkPixbuf *           nemo_icon_info_get_pixbuf_at_size           (NemoIconInfo  *icon,
 								       gsize              forced_size);
-gboolean              nautilus_icon_info_get_embedded_rect            (NautilusIconInfo  *icon,
+gboolean              nemo_icon_info_get_embedded_rect            (NemoIconInfo  *icon,
 								       GdkRectangle      *rectangle);
-gboolean              nautilus_icon_info_get_attach_points            (NautilusIconInfo  *icon,
+gboolean              nemo_icon_info_get_attach_points            (NemoIconInfo  *icon,
 								       GdkPoint         **points,
 								       gint              *n_points);
-const char *          nautilus_icon_info_get_display_name             (NautilusIconInfo  *icon);
-const char *          nautilus_icon_info_get_used_name                (NautilusIconInfo  *icon);
+const char *          nemo_icon_info_get_display_name             (NemoIconInfo  *icon);
+const char *          nemo_icon_info_get_used_name                (NemoIconInfo  *icon);
 
-void                  nautilus_icon_info_clear_caches                 (void);
+void                  nemo_icon_info_clear_caches                 (void);
 
 /* Relationship between zoom levels and icons sizes. */
-guint nautilus_get_icon_size_for_zoom_level          (NautilusZoomLevel  zoom_level);
+guint nemo_get_icon_size_for_zoom_level          (NemoZoomLevel  zoom_level);
 
-gint  nautilus_get_icon_size_for_stock_size          (GtkIconSize        size);
-guint nautilus_icon_get_emblem_size_for_icon_size    (guint              size);
+gint  nemo_get_icon_size_for_stock_size          (GtkIconSize        size);
+guint nemo_icon_get_emblem_size_for_icon_size    (guint              size);
 
-gboolean nautilus_icon_theme_can_render              (GThemedIcon *icon);
-GIcon * nautilus_user_special_directory_get_gicon (GUserDirectory directory);
+gboolean nemo_icon_theme_can_render              (GThemedIcon *icon);
+GIcon * nemo_user_special_directory_get_gicon (GUserDirectory directory);
 
 
 G_END_DECLS
 
-#endif /* NAUTILUS_ICON_INFO_H */
+#endif /* NEMO_ICON_INFO_H */
 

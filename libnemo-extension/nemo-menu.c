@@ -1,5 +1,5 @@
 /*
- *  nautilus-menu.h - Menus exported by NautilusMenuProvider objects.
+ *  nemo-menu.h - Menus exported by NemoMenuProvider objects.
  *
  *  Copyright (C) 2005 Raffaele Sandrini
  *
@@ -22,20 +22,20 @@
  */
 
 #include <config.h>
-#include "nautilus-menu.h"
-#include "nautilus-extension-i18n.h"
+#include "nemo-menu.h"
+#include "nemo-extension-i18n.h"
 
 #include <glib.h>
 
-#define NAUTILUS_MENU_GET_PRIVATE(o) (G_TYPE_INSTANCE_GET_PRIVATE ((o), NAUTILUS_TYPE_MENU, NautilusMenuPrivate))
-G_DEFINE_TYPE (NautilusMenu, nautilus_menu, G_TYPE_OBJECT);
+#define NEMO_MENU_GET_PRIVATE(o) (G_TYPE_INSTANCE_GET_PRIVATE ((o), NEMO_TYPE_MENU, NemoMenuPrivate))
+G_DEFINE_TYPE (NemoMenu, nemo_menu, G_TYPE_OBJECT);
 
-struct _NautilusMenuPrivate {
+struct _NemoMenuPrivate {
 	GList *item_list;
 };
 
 void
-nautilus_menu_append_item (NautilusMenu *menu, NautilusMenuItem *item)
+nemo_menu_append_item (NemoMenu *menu, NemoMenuItem *item)
 {
 	g_return_if_fail (menu != NULL);
 	g_return_if_fail (item != NULL);
@@ -44,13 +44,13 @@ nautilus_menu_append_item (NautilusMenu *menu, NautilusMenuItem *item)
 }
 
 /**
- * nautilus_menu_get_items:
- * @menu: a #NautilusMenu
+ * nemo_menu_get_items:
+ * @menu: a #NemoMenu
  *
- * Returns: (element-type NautilusMenuItem) (transfer full): the provided #NautilusMenuItem list
+ * Returns: (element-type NemoMenuItem) (transfer full): the provided #NemoMenuItem list
  */
 GList *
-nautilus_menu_get_items (NautilusMenu *menu)
+nemo_menu_get_items (NemoMenu *menu)
 {
 	GList *item_list;
 
@@ -63,12 +63,12 @@ nautilus_menu_get_items (NautilusMenu *menu)
 }
 
 /**
- * nautilus_menu_item_list_free:
- * @item_list: (element-type NautilusMenuItem): a list of #NautilusMenuItem
+ * nemo_menu_item_list_free:
+ * @item_list: (element-type NemoMenuItem): a list of #NemoMenuItem
  *
  */
 void
-nautilus_menu_item_list_free (GList *item_list)
+nemo_menu_item_list_free (GList *item_list)
 {
 	g_return_if_fail (item_list != NULL);
 	
@@ -79,43 +79,43 @@ nautilus_menu_item_list_free (GList *item_list)
 /* Type initialization */
 
 static void
-nautilus_menu_finalize (GObject *object)
+nemo_menu_finalize (GObject *object)
 {
-	NautilusMenu *menu = NAUTILUS_MENU (object);
+	NemoMenu *menu = NEMO_MENU (object);
 
 	if (menu->priv->item_list) {
 		g_list_free (menu->priv->item_list);
 	}
 
-	G_OBJECT_CLASS (nautilus_menu_parent_class)->finalize (object);
+	G_OBJECT_CLASS (nemo_menu_parent_class)->finalize (object);
 }
 
 static void
-nautilus_menu_init (NautilusMenu *menu)
+nemo_menu_init (NemoMenu *menu)
 {
-	menu->priv = NAUTILUS_MENU_GET_PRIVATE (menu);
+	menu->priv = NEMO_MENU_GET_PRIVATE (menu);
 
 	menu->priv->item_list = NULL;
 }
 
 static void
-nautilus_menu_class_init (NautilusMenuClass *klass)
+nemo_menu_class_init (NemoMenuClass *klass)
 {
 	GObjectClass *object_class = G_OBJECT_CLASS (klass);
 	
-	g_type_class_add_private (klass, sizeof (NautilusMenuPrivate));
+	g_type_class_add_private (klass, sizeof (NemoMenuPrivate));
 	
-	object_class->finalize = nautilus_menu_finalize;
+	object_class->finalize = nemo_menu_finalize;
 }
 
 /* public constructors */
 
-NautilusMenu *
-nautilus_menu_new (void)
+NemoMenu *
+nemo_menu_new (void)
 {
-	NautilusMenu *obj;
+	NemoMenu *obj;
 	
-	obj = NAUTILUS_MENU (g_object_new (NAUTILUS_TYPE_MENU, NULL));
+	obj = NEMO_MENU (g_object_new (NEMO_TYPE_MENU, NULL));
 	
 	return obj;
 }

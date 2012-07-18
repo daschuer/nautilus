@@ -21,35 +21,35 @@
  * Author: Alexander Larsson <alexl@redhat.com>
  */
 
-#ifndef NAUTILUS_IMAGE_PROPERTIES_PAGE_H
-#define NAUTILUS_IMAGE_PROPERTIES_PAGE_H
+#ifndef NEMO_IMAGE_PROPERTIES_PAGE_H
+#define NEMO_IMAGE_PROPERTIES_PAGE_H
 
 #include <gtk/gtk.h>
 
-#define NAUTILUS_TYPE_IMAGE_PROPERTIES_PAGE nautilus_image_properties_page_get_type()
-#define NAUTILUS_IMAGE_PROPERTIES_PAGE(obj) \
-  (G_TYPE_CHECK_INSTANCE_CAST ((obj), NAUTILUS_TYPE_IMAGE_PROPERTIES_PAGE, NautilusImagePropertiesPage))
-#define NAUTILUS_IMAGE_PROPERTIES_PAGE_CLASS(klass) \
-  (G_TYPE_CHECK_CLASS_CAST ((klass), NAUTILUS_TYPE_IMAGE_PROPERTIES_PAGE, NautilusImagePropertiesPageClass))
-#define NAUTILUS_IS_IMAGE_PROPERTIES_PAGE(obj) \
-  (G_TYPE_CHECK_INSTANCE_TYPE ((obj), NAUTILUS_TYPE_IMAGE_PROPERTIES_PAGE))
-#define NAUTILUS_IS_IMAGE_PROPERTIES_PAGE_CLASS(klass) \
-  (G_TYPE_CHECK_CLASS_TYPE ((klass), NAUTILUS_TYPE_IMAGE_PROPERTIES_PAGE))
-#define NAUTILUS_IMAGE_PROPERTIES_PAGE_GET_CLASS(obj) \
-  (G_TYPE_INSTANCE_GET_CLASS ((obj), NAUTILUS_TYPE_IMAGE_PROPERTIES_PAGE, NautilusImagePropertiesPageClass))
+#define NEMO_TYPE_IMAGE_PROPERTIES_PAGE nemo_image_properties_page_get_type()
+#define NEMO_IMAGE_PROPERTIES_PAGE(obj) \
+  (G_TYPE_CHECK_INSTANCE_CAST ((obj), NEMO_TYPE_IMAGE_PROPERTIES_PAGE, NemoImagePropertiesPage))
+#define NEMO_IMAGE_PROPERTIES_PAGE_CLASS(klass) \
+  (G_TYPE_CHECK_CLASS_CAST ((klass), NEMO_TYPE_IMAGE_PROPERTIES_PAGE, NemoImagePropertiesPageClass))
+#define NEMO_IS_IMAGE_PROPERTIES_PAGE(obj) \
+  (G_TYPE_CHECK_INSTANCE_TYPE ((obj), NEMO_TYPE_IMAGE_PROPERTIES_PAGE))
+#define NEMO_IS_IMAGE_PROPERTIES_PAGE_CLASS(klass) \
+  (G_TYPE_CHECK_CLASS_TYPE ((klass), NEMO_TYPE_IMAGE_PROPERTIES_PAGE))
+#define NEMO_IMAGE_PROPERTIES_PAGE_GET_CLASS(obj) \
+  (G_TYPE_INSTANCE_GET_CLASS ((obj), NEMO_TYPE_IMAGE_PROPERTIES_PAGE, NemoImagePropertiesPageClass))
 
-typedef struct NautilusImagePropertiesPageDetails NautilusImagePropertiesPageDetails;
+typedef struct NemoImagePropertiesPageDetails NemoImagePropertiesPageDetails;
 
 typedef struct {
 	GtkBox parent;
-	NautilusImagePropertiesPageDetails *details;
-} NautilusImagePropertiesPage;
+	NemoImagePropertiesPageDetails *details;
+} NemoImagePropertiesPage;
 
 typedef struct {
 	GtkBoxClass parent;
-} NautilusImagePropertiesPageClass;
+} NemoImagePropertiesPageClass;
 
-GType nautilus_image_properties_page_get_type (void);
-void  nautilus_image_properties_page_register (void);
+GType nemo_image_properties_page_get_type (void);
+void  nemo_image_properties_page_register (void);
 
-#endif /* NAUTILUS_IMAGE_PROPERTIES_PAGE_H */
+#endif /* NEMO_IMAGE_PROPERTIES_PAGE_H */

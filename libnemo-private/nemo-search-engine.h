@@ -2,12 +2,12 @@
 /*
  * Copyright (C) 2005 Novell, Inc.
  *
- * Nautilus is free software; you can redistribute it and/or
+ * Nemo is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
  * published by the Free Software Foundation; either version 2 of the
  * License, or (at your option) any later version.
  *
- * Nautilus is distributed in the hope that it will be useful,
+ * Nemo is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
  * General Public License for more details.
@@ -21,53 +21,53 @@
  *
  */
 
-#ifndef NAUTILUS_SEARCH_ENGINE_H
-#define NAUTILUS_SEARCH_ENGINE_H
+#ifndef NEMO_SEARCH_ENGINE_H
+#define NEMO_SEARCH_ENGINE_H
 
 #include <glib-object.h>
-#include <libnautilus-private/nautilus-query.h>
+#include <libnemo-private/nemo-query.h>
 
-#define NAUTILUS_TYPE_SEARCH_ENGINE		(nautilus_search_engine_get_type ())
-#define NAUTILUS_SEARCH_ENGINE(obj)		(G_TYPE_CHECK_INSTANCE_CAST ((obj), NAUTILUS_TYPE_SEARCH_ENGINE, NautilusSearchEngine))
-#define NAUTILUS_SEARCH_ENGINE_CLASS(klass)	(G_TYPE_CHECK_CLASS_CAST ((klass), NAUTILUS_TYPE_SEARCH_ENGINE, NautilusSearchEngineClass))
-#define NAUTILUS_IS_SEARCH_ENGINE(obj)		(G_TYPE_CHECK_INSTANCE_TYPE ((obj), NAUTILUS_TYPE_SEARCH_ENGINE))
-#define NAUTILUS_IS_SEARCH_ENGINE_CLASS(klass)	(G_TYPE_CHECK_CLASS_TYPE ((klass), NAUTILUS_TYPE_SEARCH_ENGINE))
-#define NAUTILUS_SEARCH_ENGINE_GET_CLASS(obj)    (G_TYPE_INSTANCE_GET_CLASS ((obj), NAUTILUS_TYPE_SEARCH_ENGINE, NautilusSearchEngineClass))
+#define NEMO_TYPE_SEARCH_ENGINE		(nemo_search_engine_get_type ())
+#define NEMO_SEARCH_ENGINE(obj)		(G_TYPE_CHECK_INSTANCE_CAST ((obj), NEMO_TYPE_SEARCH_ENGINE, NemoSearchEngine))
+#define NEMO_SEARCH_ENGINE_CLASS(klass)	(G_TYPE_CHECK_CLASS_CAST ((klass), NEMO_TYPE_SEARCH_ENGINE, NemoSearchEngineClass))
+#define NEMO_IS_SEARCH_ENGINE(obj)		(G_TYPE_CHECK_INSTANCE_TYPE ((obj), NEMO_TYPE_SEARCH_ENGINE))
+#define NEMO_IS_SEARCH_ENGINE_CLASS(klass)	(G_TYPE_CHECK_CLASS_TYPE ((klass), NEMO_TYPE_SEARCH_ENGINE))
+#define NEMO_SEARCH_ENGINE_GET_CLASS(obj)    (G_TYPE_INSTANCE_GET_CLASS ((obj), NEMO_TYPE_SEARCH_ENGINE, NemoSearchEngineClass))
 
-typedef struct NautilusSearchEngineDetails NautilusSearchEngineDetails;
+typedef struct NemoSearchEngineDetails NemoSearchEngineDetails;
 
-typedef struct NautilusSearchEngine {
+typedef struct NemoSearchEngine {
 	GObject parent;
-	NautilusSearchEngineDetails *details;
-} NautilusSearchEngine;
+	NemoSearchEngineDetails *details;
+} NemoSearchEngine;
 
 typedef struct {
 	GObjectClass parent_class;
 	
 	/* VTable */
-	void (*set_query) (NautilusSearchEngine *engine, NautilusQuery *query);
-	void (*start) (NautilusSearchEngine *engine);
-	void (*stop) (NautilusSearchEngine *engine);
+	void (*set_query) (NemoSearchEngine *engine, NemoQuery *query);
+	void (*start) (NemoSearchEngine *engine);
+	void (*stop) (NemoSearchEngine *engine);
 
 	/* Signals */
-	void (*hits_added) (NautilusSearchEngine *engine, GList *hits);
-	void (*hits_subtracted) (NautilusSearchEngine *engine, GList *hits);
-	void (*finished) (NautilusSearchEngine *engine);
-	void (*error) (NautilusSearchEngine *engine, const char *error_message);
-} NautilusSearchEngineClass;
+	void (*hits_added) (NemoSearchEngine *engine, GList *hits);
+	void (*hits_subtracted) (NemoSearchEngine *engine, GList *hits);
+	void (*finished) (NemoSearchEngine *engine);
+	void (*error) (NemoSearchEngine *engine, const char *error_message);
+} NemoSearchEngineClass;
 
-GType          nautilus_search_engine_get_type  (void);
-gboolean       nautilus_search_engine_enabled (void);
+GType          nemo_search_engine_get_type  (void);
+gboolean       nemo_search_engine_enabled (void);
 
-NautilusSearchEngine* nautilus_search_engine_new       (void);
+NemoSearchEngine* nemo_search_engine_new       (void);
 
-void           nautilus_search_engine_set_query (NautilusSearchEngine *engine, NautilusQuery *query);
-void	       nautilus_search_engine_start (NautilusSearchEngine *engine);
-void	       nautilus_search_engine_stop (NautilusSearchEngine *engine);
+void           nemo_search_engine_set_query (NemoSearchEngine *engine, NemoQuery *query);
+void	       nemo_search_engine_start (NemoSearchEngine *engine);
+void	       nemo_search_engine_stop (NemoSearchEngine *engine);
 
-void	       nautilus_search_engine_hits_added (NautilusSearchEngine *engine, GList *hits);
-void	       nautilus_search_engine_hits_subtracted (NautilusSearchEngine *engine, GList *hits);
-void	       nautilus_search_engine_finished (NautilusSearchEngine *engine);
-void	       nautilus_search_engine_error (NautilusSearchEngine *engine, const char *error_message);
+void	       nemo_search_engine_hits_added (NemoSearchEngine *engine, GList *hits);
+void	       nemo_search_engine_hits_subtracted (NemoSearchEngine *engine, GList *hits);
+void	       nemo_search_engine_finished (NemoSearchEngine *engine);
+void	       nemo_search_engine_error (NemoSearchEngine *engine, const char *error_message);
 
-#endif /* NAUTILUS_SEARCH_ENGINE_H */
+#endif /* NEMO_SEARCH_ENGINE_H */

@@ -1,15 +1,15 @@
 /* -*- Mode: C; indent-tabs-mode: t; c-basic-offset: 8; tab-width: 8 -*- */
 
-/* nautilus-convert-metadata.c - Convert old metadata format to gvfs metadata.
+/* nemo-convert-metadata.c - Convert old metadata format to gvfs metadata.
  *
  * Copyright (C) 2009 Alexander Larsson
  *
- * Nautilus is free software; you can redistribute it and/or
+ * Nemo is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
  * published by the Free Software Foundation; either version 2 of the
  * License, or (at your option) any later version.
  *
- * Nautilus is distributed in the hope that it will be useful,
+ * Nemo is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
  * General Public License for more details.
@@ -31,7 +31,7 @@
 #include <string.h>
 #include <libxml/tree.h>
 
-#include <libnautilus-private/nautilus-metadata.h>
+#include <libnemo-private/nemo-metadata.h>
 
 static gboolean quiet = FALSE;
 
@@ -52,7 +52,7 @@ xml_get_root_children (xmlDocPtr document)
 
 
 static char *
-get_uri_from_nautilus_metafile_name (const char *filename)
+get_uri_from_nemo_metafile_name (const char *filename)
 {
 	GString *s;
 	char c;
@@ -89,37 +89,37 @@ static struct {
 	const char *old_key;
 	const char *new_key;
 } metadata_keys[] = {
-	{"default_component", "metadata::" NAUTILUS_METADATA_KEY_DEFAULT_VIEW},
-	{"background_color", "metadata::" NAUTILUS_METADATA_KEY_LOCATION_BACKGROUND_COLOR},
-	{"background_tile_image", "metadata::" NAUTILUS_METADATA_KEY_LOCATION_BACKGROUND_IMAGE},
-	{"icon_view_zoom_level", "metadata::" NAUTILUS_METADATA_KEY_ICON_VIEW_ZOOM_LEVEL},
-	{"icon_view_auto_layout", "metadata::" NAUTILUS_METADATA_KEY_ICON_VIEW_AUTO_LAYOUT},
-	{"icon_view_sort_by", "metadata::" NAUTILUS_METADATA_KEY_ICON_VIEW_SORT_BY},
-	{"icon_view_sort_reversed", "metadata::" NAUTILUS_METADATA_KEY_ICON_VIEW_SORT_REVERSED},
-	{"icon_view_keep_aligned", "metadata::" NAUTILUS_METADATA_KEY_ICON_VIEW_KEEP_ALIGNED},
-	{"icon_view_layout_timestamp", "metadata::" NAUTILUS_METADATA_KEY_ICON_VIEW_LAYOUT_TIMESTAMP},
-	{"list_view_zoom_level", "metadata::" NAUTILUS_METADATA_KEY_LIST_VIEW_ZOOM_LEVEL},
-	{"list_view_sort_column", "metadata::" NAUTILUS_METADATA_KEY_LIST_VIEW_SORT_COLUMN},
-	{"list_view_sort_reversed", "metadata::" NAUTILUS_METADATA_KEY_LIST_VIEW_SORT_REVERSED},
-	{"list_view_visible_columns", "metadata::" NAUTILUS_METADATA_KEY_LIST_VIEW_VISIBLE_COLUMNS},
-	{"list_view_column_order", "metadata::" NAUTILUS_METADATA_KEY_LIST_VIEW_COLUMN_ORDER},
-	{"compact_view_zoom_level", "metadata::" NAUTILUS_METADATA_KEY_COMPACT_VIEW_ZOOM_LEVEL},
-	{"window_geometry", "metadata::" NAUTILUS_METADATA_KEY_WINDOW_GEOMETRY},
-	{"window_scroll_position", "metadata::" NAUTILUS_METADATA_KEY_WINDOW_SCROLL_POSITION},
-	{"window_show_hidden_files", "metadata::" NAUTILUS_METADATA_KEY_WINDOW_SHOW_HIDDEN_FILES},
-	{"window_maximized", "metadata::" NAUTILUS_METADATA_KEY_WINDOW_MAXIMIZED},
-	{"window_sticky", "metadata::" NAUTILUS_METADATA_KEY_WINDOW_STICKY},
-	{"window_keep_above", "metadata::" NAUTILUS_METADATA_KEY_WINDOW_KEEP_ABOVE},
-	{"sidebar_background_color", "metadata::" NAUTILUS_METADATA_KEY_SIDEBAR_BACKGROUND_COLOR},
-	{"sidebar_background_tile_image", "metadata::" NAUTILUS_METADATA_KEY_SIDEBAR_BACKGROUND_IMAGE},
-	{"sidebar_buttons", "metadata::" NAUTILUS_METADATA_KEY_SIDEBAR_BUTTONS},
-	{"annotation", "metadata::" NAUTILUS_METADATA_KEY_ANNOTATION},
-	{"icon_position", "metadata::" NAUTILUS_METADATA_KEY_ICON_POSITION},
-	{"icon_position_timestamp", "metadata::" NAUTILUS_METADATA_KEY_ICON_POSITION_TIMESTAMP},
-	{"icon_scale", "metadata::" NAUTILUS_METADATA_KEY_ICON_SCALE},
-	{"custom_icon", "metadata::" NAUTILUS_METADATA_KEY_CUSTOM_ICON},
-	{"screen", "metadata::" NAUTILUS_METADATA_KEY_SCREEN},
-	{"keyword", "metadata::" NAUTILUS_METADATA_KEY_EMBLEMS},
+	{"default_component", "metadata::" NEMO_METADATA_KEY_DEFAULT_VIEW},
+	{"background_color", "metadata::" NEMO_METADATA_KEY_LOCATION_BACKGROUND_COLOR},
+	{"background_tile_image", "metadata::" NEMO_METADATA_KEY_LOCATION_BACKGROUND_IMAGE},
+	{"icon_view_zoom_level", "metadata::" NEMO_METADATA_KEY_ICON_VIEW_ZOOM_LEVEL},
+	{"icon_view_auto_layout", "metadata::" NEMO_METADATA_KEY_ICON_VIEW_AUTO_LAYOUT},
+	{"icon_view_sort_by", "metadata::" NEMO_METADATA_KEY_ICON_VIEW_SORT_BY},
+	{"icon_view_sort_reversed", "metadata::" NEMO_METADATA_KEY_ICON_VIEW_SORT_REVERSED},
+	{"icon_view_keep_aligned", "metadata::" NEMO_METADATA_KEY_ICON_VIEW_KEEP_ALIGNED},
+	{"icon_view_layout_timestamp", "metadata::" NEMO_METADATA_KEY_ICON_VIEW_LAYOUT_TIMESTAMP},
+	{"list_view_zoom_level", "metadata::" NEMO_METADATA_KEY_LIST_VIEW_ZOOM_LEVEL},
+	{"list_view_sort_column", "metadata::" NEMO_METADATA_KEY_LIST_VIEW_SORT_COLUMN},
+	{"list_view_sort_reversed", "metadata::" NEMO_METADATA_KEY_LIST_VIEW_SORT_REVERSED},
+	{"list_view_visible_columns", "metadata::" NEMO_METADATA_KEY_LIST_VIEW_VISIBLE_COLUMNS},
+	{"list_view_column_order", "metadata::" NEMO_METADATA_KEY_LIST_VIEW_COLUMN_ORDER},
+	{"compact_view_zoom_level", "metadata::" NEMO_METADATA_KEY_COMPACT_VIEW_ZOOM_LEVEL},
+	{"window_geometry", "metadata::" NEMO_METADATA_KEY_WINDOW_GEOMETRY},
+	{"window_scroll_position", "metadata::" NEMO_METADATA_KEY_WINDOW_SCROLL_POSITION},
+	{"window_show_hidden_files", "metadata::" NEMO_METADATA_KEY_WINDOW_SHOW_HIDDEN_FILES},
+	{"window_maximized", "metadata::" NEMO_METADATA_KEY_WINDOW_MAXIMIZED},
+	{"window_sticky", "metadata::" NEMO_METADATA_KEY_WINDOW_STICKY},
+	{"window_keep_above", "metadata::" NEMO_METADATA_KEY_WINDOW_KEEP_ABOVE},
+	{"sidebar_background_color", "metadata::" NEMO_METADATA_KEY_SIDEBAR_BACKGROUND_COLOR},
+	{"sidebar_background_tile_image", "metadata::" NEMO_METADATA_KEY_SIDEBAR_BACKGROUND_IMAGE},
+	{"sidebar_buttons", "metadata::" NEMO_METADATA_KEY_SIDEBAR_BUTTONS},
+	{"annotation", "metadata::" NEMO_METADATA_KEY_ANNOTATION},
+	{"icon_position", "metadata::" NEMO_METADATA_KEY_ICON_POSITION},
+	{"icon_position_timestamp", "metadata::" NEMO_METADATA_KEY_ICON_POSITION_TIMESTAMP},
+	{"icon_scale", "metadata::" NEMO_METADATA_KEY_ICON_SCALE},
+	{"custom_icon", "metadata::" NEMO_METADATA_KEY_CUSTOM_ICON},
+	{"screen", "metadata::" NEMO_METADATA_KEY_SCREEN},
+	{"keyword", "metadata::" NEMO_METADATA_KEY_EMBLEMS},
 };
 
 static const char *
@@ -255,7 +255,7 @@ convert_xml_file (xmlDocPtr xml,
 }
 
 static void
-convert_nautilus_file (char *file)
+convert_nemo_file (char *file)
 {
 	GFile *dir;
 	char *uri;
@@ -270,7 +270,7 @@ convert_nautilus_file (char *file)
 		return;
 	}
 
-	uri = get_uri_from_nautilus_metafile_name (file);
+	uri = get_uri_from_nemo_metafile_name (file);
 	if (uri == NULL) {
 		g_free (contents);
 		return;
@@ -305,7 +305,7 @@ main (int argc, char *argv[])
 
 	g_type_init ();
 
-	context = g_option_context_new ("<nautilus metadata files> - convert nautilus metadata");
+	context = g_option_context_new ("<nemo metadata files> - convert nemo metadata");
 	g_option_context_add_main_entries (context, entries, NULL);
 	if (!g_option_context_parse (context, &argc, &argv, &error)) {
 		g_printerr ("option parsing failed: %s\n", error->message);
@@ -321,14 +321,14 @@ main (int argc, char *argv[])
 		/* Convert all metafiles */
 
 		metafile_dir = g_build_filename (g_get_home_dir (),
-						 ".nautilus/metafiles", NULL);
+						 ".nemo/metafiles", NULL);
 
 		dir = g_dir_open (metafile_dir, 0, NULL);
 		if (dir) {
 			while ((entry = g_dir_read_name (dir)) != NULL) {
 				file = g_build_filename (metafile_dir, entry, NULL);
 				if (g_str_has_suffix (file, ".xml"))
-					convert_nautilus_file (file);
+					convert_nemo_file (file);
 				g_free (file);
 			}
 			g_dir_close (dir);
@@ -336,7 +336,7 @@ main (int argc, char *argv[])
 		g_free (metafile_dir);
 	} else {
 		for (i = 1; i < argc; i++) {
-			convert_nautilus_file (argv[i]);
+			convert_nemo_file (argv[i]);
 		}
 	}
 

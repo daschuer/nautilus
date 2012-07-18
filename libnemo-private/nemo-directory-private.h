@@ -1,6 +1,6 @@
 /* -*- Mode: C; indent-tabs-mode: t; c-basic-offset: 8; tab-width: 8 -*-
 
-   nautilus-directory-private.h: Nautilus directory model.
+   nemo-directory-private.h: Nemo directory model.
  
    Copyright (C) 1999, 2000, 2001 Eazel, Inc.
   
@@ -24,11 +24,11 @@
 
 #include <gio/gio.h>
 #include <eel/eel-vfs-extensions.h>
-#include <libnautilus-private/nautilus-directory.h>
-#include <libnautilus-private/nautilus-file-queue.h>
-#include <libnautilus-private/nautilus-file.h>
-#include <libnautilus-private/nautilus-monitor.h>
-#include <libnautilus-extension/nautilus-info-provider.h>
+#include <libnemo-private/nemo-directory.h>
+#include <libnemo-private/nemo-file-queue.h>
+#include <libnemo-private/nemo-file.h>
+#include <libnemo-private/nemo-monitor.h>
+#include <libnemo-extension/nemo-info-provider.h>
 #include <libxml/tree.h>
 
 typedef struct LinkInfoReadState LinkInfoReadState;
@@ -67,20 +67,20 @@ typedef gint32 RequestCounter[REQUEST_TYPE_LAST];
 #define REQUEST_WANTS_TYPE(request, type) ((request) & (1<<(type)))
 #define REQUEST_SET_TYPE(request, type) (request) |= (1<<(type))
 
-struct NautilusDirectoryDetails
+struct NemoDirectoryDetails
 {
 	/* The location. */
 	GFile *location;
 
 	/* The file objects. */
-	NautilusFile *as_file;
+	NemoFile *as_file;
 	GList *file_list;
 	GHashTable *file_hash;
 
 	/* Queues of files needing some I/O done. */
-	NautilusFileQueue *high_priority_queue;
-	NautilusFileQueue *low_priority_queue;
-	NautilusFileQueue *extension_queue;
+	NemoFileQueue *high_priority_queue;
+	NemoFileQueue *low_priority_queue;
+	NemoFileQueue *extension_queue;
 
 	/* These lists are going to be pretty short.  If we think they
 	 * are going to get big, we can use hash tables instead.
@@ -91,7 +91,7 @@ struct NautilusDirectoryDetails
 	RequestCounter monitor_counters;
 	guint call_ready_idle_id;
 
-	NautilusMonitor *monitor;
+	NemoMonitor *monitor;
 	gulong 		 mime_db_monitor;
 
 	gboolean in_async_service_loop;
@@ -110,17 +110,17 @@ struct NautilusDirectoryDetails
 
 	DirectoryCountState *count_in_progress;
 
-	NautilusFile *deep_count_file;
+	NemoFile *deep_count_file;
 	DeepCountState *deep_count_in_progress;
 
 	MimeListState *mime_list_in_progress;
 
-	NautilusFile *get_info_file;
+	NemoFile *get_info_file;
 	GetInfoState *get_info_in_progress;
 
-	NautilusFile *extension_info_file;
-	NautilusInfoProvider *extension_info_provider;
-	NautilusOperationHandle *extension_info_in_progress;
+	NemoFile *extension_info_file;
+	NemoInfoProvider *extension_info_provider;
+	NemoOperationHandle *extension_info_in_progress;
 	guint extension_info_idle;
 
 	ThumbnailState *thumbnail_state;
@@ -138,106 +138,106 @@ struct NautilusDirectoryDetails
 	GHashTable *hidden_file_hash;
 };
 
-NautilusDirectory *nautilus_directory_get_existing                    (GFile                     *location);
+NemoDirectory *nemo_directory_get_existing                    (GFile                     *location);
 
 /* async. interface */
-void               nautilus_directory_async_state_changed             (NautilusDirectory         *directory);
-void               nautilus_directory_call_when_ready_internal        (NautilusDirectory         *directory,
-								       NautilusFile              *file,
-								       NautilusFileAttributes     file_attributes,
+void               nemo_directory_async_state_changed             (NemoDirectory         *directory);
+void               nemo_directory_call_when_ready_internal        (NemoDirectory         *directory,
+								       NemoFile              *file,
+								       NemoFileAttributes     file_attributes,
 								       gboolean                   wait_for_file_list,
-								       NautilusDirectoryCallback  directory_callback,
-								       NautilusFileCallback       file_callback,
+								       NemoDirectoryCallback  directory_callback,
+								       NemoFileCallback       file_callback,
 								       gpointer                   callback_data);
-gboolean           nautilus_directory_check_if_ready_internal         (NautilusDirectory         *directory,
-								       NautilusFile              *file,
-								       NautilusFileAttributes     file_attributes);
-void               nautilus_directory_cancel_callback_internal        (NautilusDirectory         *directory,
-								       NautilusFile              *file,
-								       NautilusDirectoryCallback  directory_callback,
-								       NautilusFileCallback       file_callback,
+gboolean           nemo_directory_check_if_ready_internal         (NemoDirectory         *directory,
+								       NemoFile              *file,
+								       NemoFileAttributes     file_attributes);
+void               nemo_directory_cancel_callback_internal        (NemoDirectory         *directory,
+								       NemoFile              *file,
+								       NemoDirectoryCallback  directory_callback,
+								       NemoFileCallback       file_callback,
 								       gpointer                   callback_data);
-void               nautilus_directory_monitor_add_internal            (NautilusDirectory         *directory,
-								       NautilusFile              *file,
+void               nemo_directory_monitor_add_internal            (NemoDirectory         *directory,
+								       NemoFile              *file,
 								       gconstpointer              client,
 								       gboolean                   monitor_hidden_files,
-								       NautilusFileAttributes     attributes,
-								       NautilusDirectoryCallback  callback,
+								       NemoFileAttributes     attributes,
+								       NemoDirectoryCallback  callback,
 								       gpointer                   callback_data);
-void               nautilus_directory_monitor_remove_internal         (NautilusDirectory         *directory,
-								       NautilusFile              *file,
+void               nemo_directory_monitor_remove_internal         (NemoDirectory         *directory,
+								       NemoFile              *file,
 								       gconstpointer              client);
-void               nautilus_directory_get_info_for_new_files          (NautilusDirectory         *directory,
+void               nemo_directory_get_info_for_new_files          (NemoDirectory         *directory,
 								       GList                     *vfs_uris);
-NautilusFile *     nautilus_directory_get_existing_corresponding_file (NautilusDirectory         *directory);
-void               nautilus_directory_invalidate_count_and_mime_list  (NautilusDirectory         *directory);
-gboolean           nautilus_directory_is_file_list_monitored          (NautilusDirectory         *directory);
-gboolean           nautilus_directory_is_anyone_monitoring_file_list  (NautilusDirectory         *directory);
-gboolean           nautilus_directory_has_active_request_for_file     (NautilusDirectory         *directory,
-								       NautilusFile              *file);
-void               nautilus_directory_remove_file_monitor_link        (NautilusDirectory         *directory,
+NemoFile *     nemo_directory_get_existing_corresponding_file (NemoDirectory         *directory);
+void               nemo_directory_invalidate_count_and_mime_list  (NemoDirectory         *directory);
+gboolean           nemo_directory_is_file_list_monitored          (NemoDirectory         *directory);
+gboolean           nemo_directory_is_anyone_monitoring_file_list  (NemoDirectory         *directory);
+gboolean           nemo_directory_has_active_request_for_file     (NemoDirectory         *directory,
+								       NemoFile              *file);
+void               nemo_directory_remove_file_monitor_link        (NemoDirectory         *directory,
 								       GList                     *link);
-void               nautilus_directory_schedule_dequeue_pending        (NautilusDirectory         *directory);
-void               nautilus_directory_stop_monitoring_file_list       (NautilusDirectory         *directory);
-void               nautilus_directory_cancel                          (NautilusDirectory         *directory);
-void               nautilus_async_destroying_file                     (NautilusFile              *file);
-void               nautilus_directory_force_reload_internal           (NautilusDirectory         *directory,
-								       NautilusFileAttributes     file_attributes);
-void               nautilus_directory_cancel_loading_file_attributes  (NautilusDirectory         *directory,
-								       NautilusFile              *file,
-								       NautilusFileAttributes     file_attributes);
+void               nemo_directory_schedule_dequeue_pending        (NemoDirectory         *directory);
+void               nemo_directory_stop_monitoring_file_list       (NemoDirectory         *directory);
+void               nemo_directory_cancel                          (NemoDirectory         *directory);
+void               nemo_async_destroying_file                     (NemoFile              *file);
+void               nemo_directory_force_reload_internal           (NemoDirectory         *directory,
+								       NemoFileAttributes     file_attributes);
+void               nemo_directory_cancel_loading_file_attributes  (NemoDirectory         *directory,
+								       NemoFile              *file,
+								       NemoFileAttributes     file_attributes);
 
 /* Calls shared between directory, file, and async. code. */
-void               nautilus_directory_emit_files_added                (NautilusDirectory         *directory,
+void               nemo_directory_emit_files_added                (NemoDirectory         *directory,
 								       GList                     *added_files);
-void               nautilus_directory_emit_files_changed              (NautilusDirectory         *directory,
+void               nemo_directory_emit_files_changed              (NemoDirectory         *directory,
 								       GList                     *changed_files);
-void               nautilus_directory_emit_change_signals             (NautilusDirectory         *directory,
+void               nemo_directory_emit_change_signals             (NemoDirectory         *directory,
 								       GList                     *changed_files);
-void               emit_change_signals_for_all_files		      (NautilusDirectory	 *directory);
+void               emit_change_signals_for_all_files		      (NemoDirectory	 *directory);
 void               emit_change_signals_for_all_files_in_all_directories (void);
-void               nautilus_directory_emit_done_loading               (NautilusDirectory         *directory);
-void               nautilus_directory_emit_load_error                 (NautilusDirectory         *directory,
+void               nemo_directory_emit_done_loading               (NemoDirectory         *directory);
+void               nemo_directory_emit_load_error                 (NemoDirectory         *directory,
 								       GError                    *error);
-NautilusDirectory *nautilus_directory_get_internal                    (GFile                     *location,
+NemoDirectory *nemo_directory_get_internal                    (GFile                     *location,
 								       gboolean                   create);
-char *             nautilus_directory_get_name_for_self_as_new_file   (NautilusDirectory         *directory);
-Request            nautilus_directory_set_up_request                  (NautilusFileAttributes     file_attributes);
+char *             nemo_directory_get_name_for_self_as_new_file   (NemoDirectory         *directory);
+Request            nemo_directory_set_up_request                  (NemoFileAttributes     file_attributes);
 
 /* Interface to the file list. */
-NautilusFile *     nautilus_directory_find_file_by_name               (NautilusDirectory         *directory,
+NemoFile *     nemo_directory_find_file_by_name               (NemoDirectory         *directory,
 								       const char                *filename);
-NautilusFile *     nautilus_directory_find_file_by_internal_filename  (NautilusDirectory         *directory,
+NemoFile *     nemo_directory_find_file_by_internal_filename  (NemoDirectory         *directory,
 								       const char                *internal_filename);
 
-void               nautilus_directory_add_file                        (NautilusDirectory         *directory,
-								       NautilusFile              *file);
-void               nautilus_directory_remove_file                     (NautilusDirectory         *directory,
-								       NautilusFile              *file);
-FileMonitors *     nautilus_directory_remove_file_monitors            (NautilusDirectory         *directory,
-								       NautilusFile              *file);
-void               nautilus_directory_add_file_monitors               (NautilusDirectory         *directory,
-								       NautilusFile              *file,
+void               nemo_directory_add_file                        (NemoDirectory         *directory,
+								       NemoFile              *file);
+void               nemo_directory_remove_file                     (NemoDirectory         *directory,
+								       NemoFile              *file);
+FileMonitors *     nemo_directory_remove_file_monitors            (NemoDirectory         *directory,
+								       NemoFile              *file);
+void               nemo_directory_add_file_monitors               (NemoDirectory         *directory,
+								       NemoFile              *file,
 								       FileMonitors              *monitors);
-void               nautilus_directory_add_file                        (NautilusDirectory         *directory,
-								       NautilusFile              *file);
-GList *            nautilus_directory_begin_file_name_change          (NautilusDirectory         *directory,
-								       NautilusFile              *file);
-void               nautilus_directory_end_file_name_change            (NautilusDirectory         *directory,
-								       NautilusFile              *file,
+void               nemo_directory_add_file                        (NemoDirectory         *directory,
+								       NemoFile              *file);
+GList *            nemo_directory_begin_file_name_change          (NemoDirectory         *directory,
+								       NemoFile              *file);
+void               nemo_directory_end_file_name_change            (NemoDirectory         *directory,
+								       NemoFile              *file,
 								       GList                     *node);
-void               nautilus_directory_moved                           (const char                *from_uri,
+void               nemo_directory_moved                           (const char                *from_uri,
 								       const char                *to_uri);
 /* Interface to the work queue. */
 
-void               nautilus_directory_add_file_to_work_queue          (NautilusDirectory *directory,
-								       NautilusFile *file);
-void               nautilus_directory_remove_file_from_work_queue     (NautilusDirectory *directory,
-								       NautilusFile *file);
+void               nemo_directory_add_file_to_work_queue          (NemoDirectory *directory,
+								       NemoFile *file);
+void               nemo_directory_remove_file_from_work_queue     (NemoDirectory *directory,
+								       NemoFile *file);
 
 /* KDE compatibility hacks */
 
-void               nautilus_set_kde_trash_name                        (const char *trash_dir);
+void               nemo_set_kde_trash_name                        (const char *trash_dir);
 
 /* debugging functions */
-int                nautilus_directory_number_outstanding              (void);
+int                nemo_directory_number_outstanding              (void);

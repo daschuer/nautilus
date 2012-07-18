@@ -20,39 +20,39 @@
  *
  */
 
-#ifndef __NAUTILUS_TRASH_BAR_H
-#define __NAUTILUS_TRASH_BAR_H
+#ifndef __NEMO_TRASH_BAR_H
+#define __NEMO_TRASH_BAR_H
 
-#include "nautilus-view.h"
+#include "nemo-view.h"
 
 #include <gtk/gtk.h>
 
 G_BEGIN_DECLS
 
-#define NAUTILUS_TYPE_TRASH_BAR         (nautilus_trash_bar_get_type ())
-#define NAUTILUS_TRASH_BAR(o)           (G_TYPE_CHECK_INSTANCE_CAST ((o), NAUTILUS_TYPE_TRASH_BAR, NautilusTrashBar))
-#define NAUTILUS_TRASH_BAR_CLASS(k)     (G_TYPE_CHECK_CLASS_CAST((k), NAUTILUS_TYPE_TRASH_BAR, NautilusTrashBarClass))
-#define NAUTILUS_IS_TRASH_BAR(o)        (G_TYPE_CHECK_INSTANCE_TYPE ((o), NAUTILUS_TYPE_TRASH_BAR))
-#define NAUTILUS_IS_TRASH_BAR_CLASS(k)  (G_TYPE_CHECK_CLASS_TYPE ((k), NAUTILUS_TYPE_TRASH_BAR))
-#define NAUTILUS_TRASH_BAR_GET_CLASS(o) (G_TYPE_INSTANCE_GET_CLASS ((o), NAUTILUS_TYPE_TRASH_BAR, NautilusTrashBarClass))
+#define NEMO_TYPE_TRASH_BAR         (nemo_trash_bar_get_type ())
+#define NEMO_TRASH_BAR(o)           (G_TYPE_CHECK_INSTANCE_CAST ((o), NEMO_TYPE_TRASH_BAR, NemoTrashBar))
+#define NEMO_TRASH_BAR_CLASS(k)     (G_TYPE_CHECK_CLASS_CAST((k), NEMO_TYPE_TRASH_BAR, NemoTrashBarClass))
+#define NEMO_IS_TRASH_BAR(o)        (G_TYPE_CHECK_INSTANCE_TYPE ((o), NEMO_TYPE_TRASH_BAR))
+#define NEMO_IS_TRASH_BAR_CLASS(k)  (G_TYPE_CHECK_CLASS_TYPE ((k), NEMO_TYPE_TRASH_BAR))
+#define NEMO_TRASH_BAR_GET_CLASS(o) (G_TYPE_INSTANCE_GET_CLASS ((o), NEMO_TYPE_TRASH_BAR, NemoTrashBarClass))
 
-typedef struct NautilusTrashBarPrivate NautilusTrashBarPrivate;
+typedef struct NemoTrashBarPrivate NemoTrashBarPrivate;
 
 typedef struct
 {
 	GtkInfoBar parent;
 
-	NautilusTrashBarPrivate *priv;
-} NautilusTrashBar;
+	NemoTrashBarPrivate *priv;
+} NemoTrashBar;
 
 typedef struct
 {
 	GtkInfoBarClass parent_class;
-} NautilusTrashBarClass;
+} NemoTrashBarClass;
 
-GType		 nautilus_trash_bar_get_type	(void) G_GNUC_CONST;
+GType		 nemo_trash_bar_get_type	(void) G_GNUC_CONST;
 
-GtkWidget       *nautilus_trash_bar_new         (NautilusView *view);
+GtkWidget       *nemo_trash_bar_new         (NemoView *view);
 
 
 G_END_DECLS

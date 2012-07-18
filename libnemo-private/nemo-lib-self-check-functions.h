@@ -1,7 +1,7 @@
 /* -*- Mode: C; indent-tabs-mode: t; c-basic-offset: 8; tab-width: 8 -*-
 
-   nautilus-lib-self-check-functions.h: Wrapper and prototypes for all
-   self-check functions in libnautilus.
+   nemo-lib-self-check-functions.h: Wrapper and prototypes for all
+   self-check functions in libnemo.
  
    Copyright (C) 2000 Eazel, Inc.
   
@@ -25,7 +25,7 @@
 
 #include <eel/eel-self-checks.h>
 
-void nautilus_run_lib_self_checks (void);
+void nemo_run_lib_self_checks (void);
 
 /* Putting the prototypes for these self-check functions in each
    header file for the files they are defined in would make compiling
@@ -38,13 +38,13 @@ void nautilus_run_lib_self_checks (void);
    can be used to do operations on the whole list of functions.
 */
 
-#define NAUTILUS_LIB_FOR_EACH_SELF_CHECK_FUNCTION(macro) \
-	macro (nautilus_self_check_file_utilities) \
-	macro (nautilus_self_check_file_operations) \
-	macro (nautilus_self_check_directory) \
-	macro (nautilus_self_check_file) \
-	macro (nautilus_self_check_icon_container) \
+#define NEMO_LIB_FOR_EACH_SELF_CHECK_FUNCTION(macro) \
+	macro (nemo_self_check_file_utilities) \
+	macro (nemo_self_check_file_operations) \
+	macro (nemo_self_check_directory) \
+	macro (nemo_self_check_file) \
+	macro (nemo_self_check_icon_container) \
 /* Add new self-check functions to the list above this line. */
 
 /* Generate prototypes for all the functions. */
-NAUTILUS_LIB_FOR_EACH_SELF_CHECK_FUNCTION (EEL_SELF_CHECK_FUNCTION_PROTOTYPE)
+NEMO_LIB_FOR_EACH_SELF_CHECK_FUNCTION (EEL_SELF_CHECK_FUNCTION_PROTOTYPE)

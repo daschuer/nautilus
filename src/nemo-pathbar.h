@@ -1,4 +1,4 @@
-/* nautilus-pathbar.h
+/* nemo-pathbar.h
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Library General Public
@@ -18,24 +18,24 @@
  * 
  */
 
-#ifndef NAUTILUS_PATHBAR_H
-#define NAUTILUS_PATHBAR_H
+#ifndef NEMO_PATHBAR_H
+#define NEMO_PATHBAR_H
 
 #include <gtk/gtk.h>
 #include <gio/gio.h>
 
-typedef struct _NautilusPathBar      NautilusPathBar;
-typedef struct _NautilusPathBarClass NautilusPathBarClass;
+typedef struct _NemoPathBar      NemoPathBar;
+typedef struct _NemoPathBarClass NemoPathBarClass;
 
 
-#define NAUTILUS_TYPE_PATH_BAR                 (nautilus_path_bar_get_type ())
-#define NAUTILUS_PATH_BAR(obj)                 (G_TYPE_CHECK_INSTANCE_CAST ((obj), NAUTILUS_TYPE_PATH_BAR, NautilusPathBar))
-#define NAUTILUS_PATH_BAR_CLASS(klass)         (G_TYPE_CHECK_CLASS_CAST ((klass), NAUTILUS_TYPE_PATH_BAR, NautilusPathBarClass))
-#define NAUTILUS_IS_PATH_BAR(obj)              (G_TYPE_CHECK_INSTANCE_TYPE ((obj), NAUTILUS_TYPE_PATH_BAR))
-#define NAUTILUS_IS_PATH_BAR_CLASS(klass)      (G_TYPE_CHECK_CLASS_TYPE ((klass), NAUTILUS_TYPE_PATH_BAR))
-#define NAUTILUS_PATH_BAR_GET_CLASS(obj)       (G_TYPE_INSTANCE_GET_CLASS ((obj), NAUTILUS_TYPE_PATH_BAR, NautilusPathBarClass))
+#define NEMO_TYPE_PATH_BAR                 (nemo_path_bar_get_type ())
+#define NEMO_PATH_BAR(obj)                 (G_TYPE_CHECK_INSTANCE_CAST ((obj), NEMO_TYPE_PATH_BAR, NemoPathBar))
+#define NEMO_PATH_BAR_CLASS(klass)         (G_TYPE_CHECK_CLASS_CAST ((klass), NEMO_TYPE_PATH_BAR, NemoPathBarClass))
+#define NEMO_IS_PATH_BAR(obj)              (G_TYPE_CHECK_INSTANCE_TYPE ((obj), NEMO_TYPE_PATH_BAR))
+#define NEMO_IS_PATH_BAR_CLASS(klass)      (G_TYPE_CHECK_CLASS_TYPE ((klass), NEMO_TYPE_PATH_BAR))
+#define NEMO_PATH_BAR_GET_CLASS(obj)       (G_TYPE_INSTANCE_GET_CLASS ((obj), NEMO_TYPE_PATH_BAR, NemoPathBarClass))
 
-struct _NautilusPathBar
+struct _NemoPathBar
 {
 	GtkContainer parent;
 
@@ -67,21 +67,21 @@ struct _NautilusPathBar
 	gboolean drag_slider_timeout_for_up_button;
 };
 
-struct _NautilusPathBarClass
+struct _NemoPathBarClass
 {
 	GtkContainerClass parent_class;
 
-  	void (* path_clicked)   (NautilusPathBar  *path_bar,
+  	void (* path_clicked)   (NemoPathBar  *path_bar,
 				 GFile             *location);
-  	void (* path_set)       (NautilusPathBar  *path_bar,
+  	void (* path_set)       (NemoPathBar  *path_bar,
 				 GFile             *location);
 };
 
-GType    nautilus_path_bar_get_type (void) G_GNUC_CONST;
+GType    nemo_path_bar_get_type (void) G_GNUC_CONST;
 
-gboolean nautilus_path_bar_set_path    (NautilusPathBar *path_bar, GFile *file);
-GFile *  nautilus_path_bar_get_path_for_button (NautilusPathBar *path_bar,
+gboolean nemo_path_bar_set_path    (NemoPathBar *path_bar, GFile *file);
+GFile *  nemo_path_bar_get_path_for_button (NemoPathBar *path_bar,
 						GtkWidget       *button);
-void     nautilus_path_bar_clear_buttons (NautilusPathBar *path_bar);
+void     nemo_path_bar_clear_buttons (NemoPathBar *path_bar);
 
-#endif /* NAUTILUS_PATHBAR_H */
+#endif /* NEMO_PATHBAR_H */

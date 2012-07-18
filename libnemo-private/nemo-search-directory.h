@@ -1,6 +1,6 @@
 /* -*- Mode: C; indent-tabs-mode: t; c-basic-offset: 8; tab-width: 8 -*-
 
-   nautilus-search-directory.h: Subclass of NautilusDirectory to implement
+   nemo-search-directory.h: Subclass of NemoDirectory to implement
    a virtual directory consisting of the search directory and the search
    icons
  
@@ -22,49 +22,49 @@
    Boston, MA 02111-1307, USA.
 */
 
-#ifndef NAUTILUS_SEARCH_DIRECTORY_H
-#define NAUTILUS_SEARCH_DIRECTORY_H
+#ifndef NEMO_SEARCH_DIRECTORY_H
+#define NEMO_SEARCH_DIRECTORY_H
 
-#include <libnautilus-private/nautilus-directory.h>
-#include <libnautilus-private/nautilus-query.h>
+#include <libnemo-private/nemo-directory.h>
+#include <libnemo-private/nemo-query.h>
 
-#define NAUTILUS_TYPE_SEARCH_DIRECTORY nautilus_search_directory_get_type()
-#define NAUTILUS_SEARCH_DIRECTORY(obj) \
-  (G_TYPE_CHECK_INSTANCE_CAST ((obj), NAUTILUS_TYPE_SEARCH_DIRECTORY, NautilusSearchDirectory))
-#define NAUTILUS_SEARCH_DIRECTORY_CLASS(klass) \
-  (G_TYPE_CHECK_CLASS_CAST ((klass), NAUTILUS_TYPE_SEARCH_DIRECTORY, NautilusSearchDirectoryClass))
-#define NAUTILUS_IS_SEARCH_DIRECTORY(obj) \
-  (G_TYPE_CHECK_INSTANCE_TYPE ((obj), NAUTILUS_TYPE_SEARCH_DIRECTORY))
-#define NAUTILUS_IS_SEARCH_DIRECTORY_CLASS(klass) \
-  (G_TYPE_CHECK_CLASS_TYPE ((klass), NAUTILUS_TYPE_SEARCH_DIRECTORY))
-#define NAUTILUS_SEARCH_DIRECTORY_GET_CLASS(obj) \
-  (G_TYPE_INSTANCE_GET_CLASS ((obj), NAUTILUS_TYPE_SEARCH_DIRECTORY, NautilusSearchDirectoryClass))
+#define NEMO_TYPE_SEARCH_DIRECTORY nemo_search_directory_get_type()
+#define NEMO_SEARCH_DIRECTORY(obj) \
+  (G_TYPE_CHECK_INSTANCE_CAST ((obj), NEMO_TYPE_SEARCH_DIRECTORY, NemoSearchDirectory))
+#define NEMO_SEARCH_DIRECTORY_CLASS(klass) \
+  (G_TYPE_CHECK_CLASS_CAST ((klass), NEMO_TYPE_SEARCH_DIRECTORY, NemoSearchDirectoryClass))
+#define NEMO_IS_SEARCH_DIRECTORY(obj) \
+  (G_TYPE_CHECK_INSTANCE_TYPE ((obj), NEMO_TYPE_SEARCH_DIRECTORY))
+#define NEMO_IS_SEARCH_DIRECTORY_CLASS(klass) \
+  (G_TYPE_CHECK_CLASS_TYPE ((klass), NEMO_TYPE_SEARCH_DIRECTORY))
+#define NEMO_SEARCH_DIRECTORY_GET_CLASS(obj) \
+  (G_TYPE_INSTANCE_GET_CLASS ((obj), NEMO_TYPE_SEARCH_DIRECTORY, NemoSearchDirectoryClass))
 
-typedef struct NautilusSearchDirectoryDetails NautilusSearchDirectoryDetails;
-
-typedef struct {
-	NautilusDirectory parent_slot;
-	NautilusSearchDirectoryDetails *details;
-} NautilusSearchDirectory;
+typedef struct NemoSearchDirectoryDetails NemoSearchDirectoryDetails;
 
 typedef struct {
-	NautilusDirectoryClass parent_slot;
-} NautilusSearchDirectoryClass;
+	NemoDirectory parent_slot;
+	NemoSearchDirectoryDetails *details;
+} NemoSearchDirectory;
 
-GType   nautilus_search_directory_get_type             (void);
+typedef struct {
+	NemoDirectoryClass parent_slot;
+} NemoSearchDirectoryClass;
 
-char   *nautilus_search_directory_generate_new_uri     (void);
+GType   nemo_search_directory_get_type             (void);
 
-NautilusSearchDirectory *nautilus_search_directory_new_from_saved_search (const char *uri);
+char   *nemo_search_directory_generate_new_uri     (void);
 
-gboolean       nautilus_search_directory_is_saved_search (NautilusSearchDirectory *search);
-gboolean       nautilus_search_directory_is_modified     (NautilusSearchDirectory *search);
-void           nautilus_search_directory_save_search     (NautilusSearchDirectory *search);
-void           nautilus_search_directory_save_to_file    (NautilusSearchDirectory *search,
+NemoSearchDirectory *nemo_search_directory_new_from_saved_search (const char *uri);
+
+gboolean       nemo_search_directory_is_saved_search (NemoSearchDirectory *search);
+gboolean       nemo_search_directory_is_modified     (NemoSearchDirectory *search);
+void           nemo_search_directory_save_search     (NemoSearchDirectory *search);
+void           nemo_search_directory_save_to_file    (NemoSearchDirectory *search,
 							  const char              *save_file_uri);
 
-NautilusQuery *nautilus_search_directory_get_query       (NautilusSearchDirectory *search);
-void           nautilus_search_directory_set_query       (NautilusSearchDirectory *search,
-							  NautilusQuery           *query);
+NemoQuery *nemo_search_directory_get_query       (NemoSearchDirectory *search);
+void           nemo_search_directory_set_query       (NemoSearchDirectory *search,
+							  NemoQuery           *query);
 
-#endif /* NAUTILUS_SEARCH_DIRECTORY_H */
+#endif /* NEMO_SEARCH_DIRECTORY_H */

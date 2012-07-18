@@ -1,16 +1,16 @@
 /* -*- Mode: C; indent-tabs-mode: t; c-basic-offset: 8; tab-width: 8 -*- */
 
-/* nautilus-connect-server-main.c - Start the "Connect to Server" dialog.
- * Nautilus
+/* nemo-connect-server-main.c - Start the "Connect to Server" dialog.
+ * Nemo
  *
  * Copyright (C) 2005 Vincent Untz
  *
- * Nautilus is free software; you can redistribute it and/or
+ * Nemo is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
  * published by the Free Software Foundation; either version 2 of the
  * License, or (at your option) any later version.
  *
- * Nautilus is distributed in the hope that it will be useful,
+ * Nemo is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
  * General Public License for more details.
@@ -36,10 +36,10 @@
 
 #include <eel/eel-stock-dialogs.h>
 
-#include <libnautilus-private/nautilus-icon-names.h>
-#include <libnautilus-private/nautilus-global-preferences.h>
+#include <libnemo-private/nemo-icon-names.h>
+#include <libnemo-private/nemo-global-preferences.h>
 
-#include "nautilus-connect-server-dialog.h"
+#include "nemo-connect-server-dialog.h"
 
 static GSimpleAsyncResult *display_location_res = NULL;
 static gboolean just_print_uri = FALSE;
@@ -55,7 +55,7 @@ main_dialog_destroyed (GtkWidget *widget,
 }
 
 gboolean
-nautilus_connect_server_dialog_display_location_finish (NautilusConnectServerDialog *self,
+nemo_connect_server_dialog_display_location_finish (NemoConnectServerDialog *self,
 							GAsyncResult *res,
 							GError **error)
 {
@@ -67,7 +67,7 @@ nautilus_connect_server_dialog_display_location_finish (NautilusConnectServerDia
 }
 
 void
-nautilus_connect_server_dialog_display_location_async (NautilusConnectServerDialog *self,
+nemo_connect_server_dialog_display_location_async (NemoConnectServerDialog *self,
 						       GFile *location,
 						       GAsyncReadyCallback callback,
 						       gpointer user_data)
@@ -78,7 +78,7 @@ nautilus_connect_server_dialog_display_location_async (NautilusConnectServerDial
 
 	display_location_res = g_simple_async_result_new (G_OBJECT (self),
 							  callback, user_data,
-							  nautilus_connect_server_dialog_display_location_async);
+							  nemo_connect_server_dialog_display_location_async);
 
 	error = NULL;
 	uri = g_file_get_uri (location);
@@ -142,11 +142,11 @@ main (int argc, char *argv[])
 
 	g_option_context_free (context);
 
-	nautilus_global_preferences_init ();
+	nemo_global_preferences_init ();
 
-	gtk_window_set_default_icon_name (NAUTILUS_ICON_FOLDER);
+	gtk_window_set_default_icon_name (NEMO_ICON_FOLDER);
 
-	dialog = nautilus_connect_server_dialog_new (NULL);
+	dialog = nemo_connect_server_dialog_new (NULL);
 
 	g_signal_connect (dialog, "destroy",
 			  G_CALLBACK (main_dialog_destroyed), NULL);

@@ -1,6 +1,6 @@
-The Nautilus team would like to thank the following contributors:
+The Nemo team would like to thank the following contributors:
 
-Nautilus 2.12 - 2.22
+Nemo 2.12 - 2.22
 ====================
 
 A. Walton  <awalton@svn.gnome.org>
@@ -245,7 +245,7 @@ marten ter borgh  <marten@terborgh.demon.nl>
 Žygimantas Beručka  <zygis@gnome.org>
 
 
-Nautilus 2.4 - 2.10
+Nemo 2.4 - 2.10
 ===================
 
 Alan Swanson  <swanson@ukfsn.org>
@@ -274,7 +274,7 @@ Fernando Herrera  <fherrera@onirica.com>
 Francisco Javier F. Serrador  <serrador@cvs.gnome.org>
 Grahame Bowland  <grahame@angrygoats.net>
 Gustavo Giraldez  <gustavo.giraldez@gmx.net>
-Hugo  <nautilus@starbreeze.knoware.nl>
+Hugo  <nemo@starbreeze.knoware.nl>
 Iain  <iaingnome@gmail.com>
 Ian Wienand  <ianw@gelato.unsw.edu.au>
 J. Christopher Six  <j.christopher.six@gmail.com>
@@ -320,11 +320,11 @@ Vincent Untz  <vincent@vuntz.net>
 William Lachance  <wlach@nit.ca>
 Xan Lopez  <xan@gnome.org>
 
-Nautilus 2.4
+Nemo 2.4
 ============
 
 Alex Duggan  <aldug@astrolinux.com> - bug fixes
-Anders Carlsson <andersca@codefactory.se> - bug fixes, Made NautilusFileAttributes a bitmask
+Anders Carlsson <andersca@codefactory.se> - bug fixes, Made NemoFileAttributes a bitmask
 Arvind Samptur <arvind.samptur@wipro.com> - multihead work
 Bastien Nocera  <hadess@hadess.net> - bug fixes
 Chris Altmann  <altmann@rcsis.com> - bug fixes
@@ -365,7 +365,7 @@ Reinout van Schouwen <reinout@cs.vu.nl> - string fixes
 Stephen Browne <stephen.browne@sun.com> - bug fixes
 Wolfgang Pichler <madmin@dialog-telekom.at> - initial work on multirooted tree
 
-Nautilus 2.0 and 2.2
+Nemo 2.0 and 2.2
 ====================
 
 Alex Duggan <aldug@gnome.org> - bug fixes
@@ -403,7 +403,7 @@ Heath Harrelson <heath@pointedstick.net>
 John Fleck  <jfleck@inkstain.net>
 Luis Villa <louie@ximian.com>
 
-Nautilus 1.x
+Nemo 1.x
 ============
 
 Alex Larsson  <alexl@redhat.com> - faster thumbnailing for JPEGs, bug fixes

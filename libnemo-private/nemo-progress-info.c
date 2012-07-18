@@ -1,6 +1,6 @@
 /* -*- Mode: C; indent-tabs-mode: t; c-basic-offset: 8; tab-width: 8 -*-
 
-   nautilus-progress-info.h: file operation progress info.
+   nemo-progress-info.h: file operation progress info.
  
    Copyright (C) 2007 Red Hat, Inc.
   
@@ -27,9 +27,9 @@
 #include <glib/gi18n.h>
 #include <eel/eel-string.h>
 #include <eel/eel-glib-extensions.h>
-#include "nautilus-progress-info.h"
-#include "nautilus-progress-info-manager.h"
-#include "nautilus-icon-info.h"
+#include "nemo-progress-info.h"
+#include "nemo-progress-info-manager.h"
+#include "nemo-icon-info.h"
 
 enum {
   CHANGED,
@@ -43,7 +43,7 @@ enum {
 
 static guint signals[LAST_SIGNAL] = { 0 };
 
-struct _NautilusProgressInfo
+struct _NemoProgressInfo
 {
 	GObject parent_instance;
 	
@@ -52,6 +52,8 @@ struct _NautilusProgressInfo
 	char *status;
 	char *details;
 	double progress;
+	double current;
+	double total;
 	gboolean activity_mode;
 	gboolean started;
 	gboolean finished;
@@ -66,37 +68,37 @@ struct _NautilusProgressInfo
 	gboolean progress_at_idle;
 };
 
-struct _NautilusProgressInfoClass
+struct _NemoProgressInfoClass
 {
 	GObjectClass parent_class;
 };
 
 G_LOCK_DEFINE_STATIC(progress_info);
 
-G_DEFINE_TYPE (NautilusProgressInfo, nautilus_progress_info, G_TYPE_OBJECT)
+G_DEFINE_TYPE (NemoProgressInfo, nemo_progress_info, G_TYPE_OBJECT)
 
 static void
-nautilus_progress_info_finalize (GObject *object)
+nemo_progress_info_finalize (GObject *object)
 {
-	NautilusProgressInfo *info;
+	NemoProgressInfo *info;
 	
-	info = NAUTILUS_PROGRESS_INFO (object);
+	info = NEMO_PROGRESS_INFO (object);
 
 	g_free (info->status);
 	g_free (info->details);
 	g_object_unref (info->cancellable);
 	
-	if (G_OBJECT_CLASS (nautilus_progress_info_parent_class)->finalize) {
-		(*G_OBJECT_CLASS (nautilus_progress_info_parent_class)->finalize) (object);
+	if (G_OBJECT_CLASS (nemo_progress_info_parent_class)->finalize) {
+		(*G_OBJECT_CLASS (nemo_progress_info_parent_class)->finalize) (object);
 	}
 }
 
 static void
-nautilus_progress_info_dispose (GObject *object)
+nemo_progress_info_dispose (GObject *object)
 {
-	NautilusProgressInfo *info;
+	NemoProgressInfo *info;
 	
-	info = NAUTILUS_PROGRESS_INFO (object);
+	info = NEMO_PROGRESS_INFO (object);
 
 	G_LOCK (progress_info);
 
@@ -112,16 +114,16 @@ nautilus_progress_info_dispose (GObject *object)
 }
 
 static void
-nautilus_progress_info_class_init (NautilusProgressInfoClass *klass)
+nemo_progress_info_class_init (NemoProgressInfoClass *klass)
 {
 	GObjectClass *gobject_class = G_OBJECT_CLASS (klass);
 	
-	gobject_class->finalize = nautilus_progress_info_finalize;
-	gobject_class->dispose = nautilus_progress_info_dispose;
+	gobject_class->finalize = nemo_progress_info_finalize;
+	gobject_class->dispose = nemo_progress_info_dispose;
 	
 	signals[CHANGED] =
 		g_signal_new ("changed",
-			      NAUTILUS_TYPE_PROGRESS_INFO,
+			      NEMO_TYPE_PROGRESS_INFO,
 			      G_SIGNAL_RUN_LAST,
 			      0,
 			      NULL, NULL,
@@ -130,7 +132,7 @@ nautilus_progress_info_class_init (NautilusProgressInfoClass *klass)
 	
 	signals[PROGRESS_CHANGED] =
 		g_signal_new ("progress-changed",
-			      NAUTILUS_TYPE_PROGRESS_INFO,
+			      NEMO_TYPE_PROGRESS_INFO,
 			      G_SIGNAL_RUN_LAST,
 			      0,
 			      NULL, NULL,
@@ -139,7 +141,7 @@ nautilus_progress_info_class_init (NautilusProgressInfoClass *klass)
 	
 	signals[STARTED] =
 		g_signal_new ("started",
-			      NAUTILUS_TYPE_PROGRESS_INFO,
+			      NEMO_TYPE_PROGRESS_INFO,
 			      G_SIGNAL_RUN_LAST,
 			      0,
 			      NULL, NULL,
@@ -148,7 +150,7 @@ nautilus_progress_info_class_init (NautilusProgressInfoClass *klass)
 	
 	signals[FINISHED] =
 		g_signal_new ("finished",
-			      NAUTILUS_TYPE_PROGRESS_INFO,
+			      NEMO_TYPE_PROGRESS_INFO,
 			      G_SIGNAL_RUN_LAST,
 			      0,
 			      NULL, NULL,
@@ -158,29 +160,29 @@ nautilus_progress_info_class_init (NautilusProgressInfoClass *klass)
 }
 
 static void
-nautilus_progress_info_init (NautilusProgressInfo *info)
+nemo_progress_info_init (NemoProgressInfo *info)
 {
-	NautilusProgressInfoManager *manager;
+	NemoProgressInfoManager *manager;
 
 	info->cancellable = g_cancellable_new ();
 
-	manager = nautilus_progress_info_manager_new ();
-	nautilus_progress_info_manager_add_new_info (manager, info);
+	manager = nemo_progress_info_manager_new ();
+	nemo_progress_info_manager_add_new_info (manager, info);
 	g_object_unref (manager);
 }
 
-NautilusProgressInfo *
-nautilus_progress_info_new (void)
+NemoProgressInfo *
+nemo_progress_info_new (void)
 {
-	NautilusProgressInfo *info;
+	NemoProgressInfo *info;
 	
-	info = g_object_new (NAUTILUS_TYPE_PROGRESS_INFO, NULL);
+	info = g_object_new (NEMO_TYPE_PROGRESS_INFO, NULL);
 	
 	return info;
 }
 
 char *
-nautilus_progress_info_get_status (NautilusProgressInfo *info)
+nemo_progress_info_get_status (NemoProgressInfo *info)
 {
 	char *res;
 	
@@ -198,7 +200,7 @@ nautilus_progress_info_get_status (NautilusProgressInfo *info)
 }
 
 char *
-nautilus_progress_info_get_details (NautilusProgressInfo *info)
+nemo_progress_info_get_details (NemoProgressInfo *info)
 {
 	char *res;
 	
@@ -216,7 +218,7 @@ nautilus_progress_info_get_details (NautilusProgressInfo *info)
 }
 
 double
-nautilus_progress_info_get_progress (NautilusProgressInfo *info)
+nemo_progress_info_get_progress (NemoProgressInfo *info)
 {
 	double res;
 	
@@ -233,8 +235,44 @@ nautilus_progress_info_get_progress (NautilusProgressInfo *info)
 	return res;
 }
 
+double
+nemo_progress_info_get_current (NemoProgressInfo *info)
+{
+	double current;
+	
+	G_LOCK (progress_info);
+
+	if (info->activity_mode) {
+		current = 0.0;
+	} else {
+		current = info->current;
+	}
+	
+	G_UNLOCK (progress_info);
+	
+	return current;
+}
+
+double
+nemo_progress_info_get_total (NemoProgressInfo *info)
+{
+	double total;
+	
+	G_LOCK (progress_info);
+
+	if (info->activity_mode) {
+		total = -1.0;
+	} else {
+		total = info->total;
+	}
+	
+	G_UNLOCK (progress_info);
+	
+	return total;
+}
+
 void
-nautilus_progress_info_cancel (NautilusProgressInfo *info)
+nemo_progress_info_cancel (NemoProgressInfo *info)
 {
 	G_LOCK (progress_info);
 	
@@ -244,7 +282,7 @@ nautilus_progress_info_cancel (NautilusProgressInfo *info)
 }
 
 GCancellable *
-nautilus_progress_info_get_cancellable (NautilusProgressInfo *info)
+nemo_progress_info_get_cancellable (NemoProgressInfo *info)
 {
 	GCancellable *c;
 	
@@ -258,7 +296,7 @@ nautilus_progress_info_get_cancellable (NautilusProgressInfo *info)
 }
 
 gboolean
-nautilus_progress_info_get_is_started (NautilusProgressInfo *info)
+nemo_progress_info_get_is_started (NemoProgressInfo *info)
 {
 	gboolean res;
 	
@@ -272,7 +310,7 @@ nautilus_progress_info_get_is_started (NautilusProgressInfo *info)
 }
 
 gboolean
-nautilus_progress_info_get_is_finished (NautilusProgressInfo *info)
+nemo_progress_info_get_is_finished (NemoProgressInfo *info)
 {
 	gboolean res;
 	
@@ -286,7 +324,7 @@ nautilus_progress_info_get_is_finished (NautilusProgressInfo *info)
 }
 
 gboolean
-nautilus_progress_info_get_is_paused (NautilusProgressInfo *info)
+nemo_progress_info_get_is_paused (NemoProgressInfo *info)
 {
 	gboolean res;
 	
@@ -302,7 +340,7 @@ nautilus_progress_info_get_is_paused (NautilusProgressInfo *info)
 static gboolean
 idle_callback (gpointer data)
 {
-	NautilusProgressInfo *info = data;
+	NemoProgressInfo *info = data;
 	gboolean start_at_idle;
 	gboolean finish_at_idle;
 	gboolean changed_at_idle;
@@ -377,7 +415,7 @@ idle_callback (gpointer data)
 
 /* Called with lock held */
 static void
-queue_idle (NautilusProgressInfo *info, gboolean now)
+queue_idle (NemoProgressInfo *info, gboolean now)
 {
 	if (info->idle_source == NULL ||
 	    (now && !info->source_is_now)) {
@@ -399,7 +437,7 @@ queue_idle (NautilusProgressInfo *info, gboolean now)
 }
 
 void
-nautilus_progress_info_pause (NautilusProgressInfo *info)
+nemo_progress_info_pause (NemoProgressInfo *info)
 {
 	G_LOCK (progress_info);
 
@@ -411,7 +449,7 @@ nautilus_progress_info_pause (NautilusProgressInfo *info)
 }
 
 void
-nautilus_progress_info_resume (NautilusProgressInfo *info)
+nemo_progress_info_resume (NemoProgressInfo *info)
 {
 	G_LOCK (progress_info);
 
@@ -423,7 +461,7 @@ nautilus_progress_info_resume (NautilusProgressInfo *info)
 }
 
 void
-nautilus_progress_info_start (NautilusProgressInfo *info)
+nemo_progress_info_start (NemoProgressInfo *info)
 {
 	G_LOCK (progress_info);
 	
@@ -438,7 +476,7 @@ nautilus_progress_info_start (NautilusProgressInfo *info)
 }
 
 void
-nautilus_progress_info_finish (NautilusProgressInfo *info)
+nemo_progress_info_finish (NemoProgressInfo *info)
 {
 	G_LOCK (progress_info);
 	
@@ -453,7 +491,7 @@ nautilus_progress_info_finish (NautilusProgressInfo *info)
 }
 
 void
-nautilus_progress_info_take_status (NautilusProgressInfo *info,
+nemo_progress_info_take_status (NemoProgressInfo *info,
 				    char *status)
 {
 	G_LOCK (progress_info);
@@ -472,7 +510,7 @@ nautilus_progress_info_take_status (NautilusProgressInfo *info,
 }
 
 void
-nautilus_progress_info_set_status (NautilusProgressInfo *info,
+nemo_progress_info_set_status (NemoProgressInfo *info,
 				   const char *status)
 {
 	G_LOCK (progress_info);
@@ -490,7 +528,7 @@ nautilus_progress_info_set_status (NautilusProgressInfo *info,
 
 
 void
-nautilus_progress_info_take_details (NautilusProgressInfo *info,
+nemo_progress_info_take_details (NemoProgressInfo *info,
 				     char           *details)
 {
 	G_LOCK (progress_info);
@@ -509,7 +547,7 @@ nautilus_progress_info_take_details (NautilusProgressInfo *info,
 }
 
 void
-nautilus_progress_info_set_details (NautilusProgressInfo *info,
+nemo_progress_info_set_details (NemoProgressInfo *info,
 				    const char           *details)
 {
 	G_LOCK (progress_info);
@@ -526,7 +564,7 @@ nautilus_progress_info_set_details (NautilusProgressInfo *info,
 }
 
 void
-nautilus_progress_info_pulse_progress (NautilusProgressInfo *info)
+nemo_progress_info_pulse_progress (NemoProgressInfo *info)
 {
 	G_LOCK (progress_info);
 
@@ -539,7 +577,7 @@ nautilus_progress_info_pulse_progress (NautilusProgressInfo *info)
 }
 
 void
-nautilus_progress_info_set_progress (NautilusProgressInfo *info,
+nemo_progress_info_set_progress (NemoProgressInfo *info,
 				     double                current,
 				     double                total)
 {
@@ -566,6 +604,8 @@ nautilus_progress_info_set_progress (NautilusProgressInfo *info,
 	    ) {
 		info->activity_mode = FALSE;
 		info->progress = current_percent;
+		info->current = current;
+		info->total = total;
 		info->progress_at_idle = TRUE;
 		queue_idle (info, FALSE);
 	}

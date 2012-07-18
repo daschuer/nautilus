@@ -1,6 +1,6 @@
 /* -*- Mode: C; indent-tabs-mode: t; c-basic-offset: 8; tab-width: 8 -*- */
-/* nautilus-file-drag.h - Drag & drop handling code that operated on 
-   NautilusFile objects.
+/* nemo-file-drag.h - Drag & drop handling code that operated on 
+   NemoFile objects.
 
    Copyright (C) 2000 Eazel, Inc.
 
@@ -22,21 +22,21 @@
    Authors: Pavel Cisler <pavel@eazel.com>,
 */
 
-#ifndef NAUTILUS_FILE_DND_H
-#define NAUTILUS_FILE_DND_H
+#ifndef NEMO_FILE_DND_H
+#define NEMO_FILE_DND_H
 
-#include <libnautilus-private/nautilus-dnd.h>
-#include <libnautilus-private/nautilus-file.h>
+#include <libnemo-private/nemo-dnd.h>
+#include <libnemo-private/nemo-file.h>
 
-#define NAUTILUS_FILE_DND_ERASE_KEYWORD "erase"
+#define NEMO_FILE_DND_ERASE_KEYWORD "erase"
 
-gboolean nautilus_drag_can_accept_item              (NautilusFile *drop_target_item,
+gboolean nemo_drag_can_accept_item              (NemoFile *drop_target_item,
 						     const char   *item_uri);
-gboolean nautilus_drag_can_accept_items             (NautilusFile *drop_target_item,
+gboolean nemo_drag_can_accept_items             (NemoFile *drop_target_item,
 						     const GList  *items);
-gboolean nautilus_drag_can_accept_info              (NautilusFile *drop_target_item,
-						     NautilusIconDndTargetType drag_type,
+gboolean nemo_drag_can_accept_info              (NemoFile *drop_target_item,
+						     NemoIconDndTargetType drag_type,
 						     const GList *items);
 
-#endif /* NAUTILUS_FILE_DND_H */
+#endif /* NEMO_FILE_DND_H */
 

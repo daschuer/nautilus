@@ -1,6 +1,6 @@
 /* -*- Mode: C; indent-tabs-mode: t; c-basic-offset: 8; tab-width: 8 -*- */
 
-/* Nautilus - Icon canvas item class for icon container.
+/* Nemo - Icon canvas item class for icon container.
  *
  * Copyright (C) 2000 Eazel, Inc
  *
@@ -24,13 +24,13 @@
 
 #include <config.h>
 #include <math.h>
-#include "nautilus-icon-canvas-item.h"
+#include "nemo-icon-canvas-item.h"
 
 #include <glib/gi18n.h>
 
-#include "nautilus-file-utilities.h"
-#include "nautilus-global-preferences.h"
-#include "nautilus-icon-private.h"
+#include "nemo-file-utilities.h"
+#include "nemo-global-preferences.h"
+#include "nemo-icon-private.h"
 #include <eel/eel-art-extensions.h>
 #include <eel/eel-gdk-extensions.h>
 #include <eel/eel-glib-extensions.h>
@@ -72,8 +72,8 @@
  *    if it wasn't ellipsized.
  */
 
-/* Private part of the NautilusIconCanvasItem structure. */
-struct NautilusIconCanvasItemDetails {
+/* Private part of the NemoIconCanvasItem structure. */
+struct NemoIconCanvasItemDetails {
 	/* The image, text, font. */
 	double x, y;
 	GdkPixbuf *pixbuf;
@@ -161,53 +161,53 @@ typedef enum {
 	TOP_SIDE
 } RectangleSide;
 
-static void nautilus_icon_canvas_item_text_interface_init (EelAccessibleTextIface *iface);
-static GType nautilus_icon_canvas_item_accessible_factory_get_type (void);
+static void nemo_icon_canvas_item_text_interface_init (EelAccessibleTextIface *iface);
+static GType nemo_icon_canvas_item_accessible_factory_get_type (void);
 
-G_DEFINE_TYPE_WITH_CODE (NautilusIconCanvasItem, nautilus_icon_canvas_item, EEL_TYPE_CANVAS_ITEM,
+G_DEFINE_TYPE_WITH_CODE (NemoIconCanvasItem, nemo_icon_canvas_item, EEL_TYPE_CANVAS_ITEM,
 			 G_IMPLEMENT_INTERFACE (EEL_TYPE_ACCESSIBLE_TEXT,
-						nautilus_icon_canvas_item_text_interface_init));
+						nemo_icon_canvas_item_text_interface_init));
 
 /* private */
-static void     draw_label_text                      (NautilusIconCanvasItem        *item,
+static void     draw_label_text                      (NemoIconCanvasItem        *item,
 						      cairo_t                       *cr,
 						      EelIRect                       icon_rect);
-static void     measure_label_text                   (NautilusIconCanvasItem        *item);
-static void     get_icon_canvas_rectangle            (NautilusIconCanvasItem        *item,
+static void     measure_label_text                   (NemoIconCanvasItem        *item);
+static void     get_icon_canvas_rectangle            (NemoIconCanvasItem        *item,
 						      EelIRect                      *rect);
 static void     draw_pixbuf                          (GdkPixbuf                     *pixbuf,
 						      cairo_t                       *cr,
 						      int                            x,
 						      int                            y);
 static PangoLayout *get_label_layout                 (PangoLayout                  **layout,
-						      NautilusIconCanvasItem        *item,
+						      NemoIconCanvasItem        *item,
 						      const char                    *text);
-static gboolean hit_test_stretch_handle              (NautilusIconCanvasItem        *item,
+static gboolean hit_test_stretch_handle              (NemoIconCanvasItem        *item,
 						      EelIRect                       canvas_rect,
 						      GtkCornerType *corner);
-static void      draw_embedded_text                  (NautilusIconCanvasItem        *icon_item,
+static void      draw_embedded_text                  (NemoIconCanvasItem        *icon_item,
                                                       cairo_t                       *cr,
 						      int                            x,
 						      int                            y);
 
-static void       nautilus_icon_canvas_item_ensure_bounds_up_to_date (NautilusIconCanvasItem *icon_item);
+static void       nemo_icon_canvas_item_ensure_bounds_up_to_date (NemoIconCanvasItem *icon_item);
 
 /* Object initialization function for the icon item. */
 static void
-nautilus_icon_canvas_item_init (NautilusIconCanvasItem *icon_item)
+nemo_icon_canvas_item_init (NemoIconCanvasItem *icon_item)
 {
-	icon_item->details = G_TYPE_INSTANCE_GET_PRIVATE ((icon_item), NAUTILUS_TYPE_ICON_CANVAS_ITEM, NautilusIconCanvasItemDetails);
-	nautilus_icon_canvas_item_invalidate_label_size (icon_item);
+	icon_item->details = G_TYPE_INSTANCE_GET_PRIVATE ((icon_item), NEMO_TYPE_ICON_CANVAS_ITEM, NemoIconCanvasItemDetails);
+	nemo_icon_canvas_item_invalidate_label_size (icon_item);
 }
 
 static void
-nautilus_icon_canvas_item_finalize (GObject *object)
+nemo_icon_canvas_item_finalize (GObject *object)
 {
-	NautilusIconCanvasItemDetails *details;
+	NemoIconCanvasItemDetails *details;
 
-	g_assert (NAUTILUS_IS_ICON_CANVAS_ITEM (object));
+	g_assert (NEMO_IS_ICON_CANVAS_ITEM (object));
 
-	details = NAUTILUS_ICON_CANVAS_ITEM (object)->details;
+	details = NEMO_ICON_CANVAS_ITEM (object)->details;
 
 	if (details->cursor_window != NULL) {
 		gdk_window_set_cursor (details->cursor_window, NULL);
@@ -244,7 +244,7 @@ nautilus_icon_canvas_item_finalize (GObject *object)
 
 	g_free (details->embedded_text);
 
-	G_OBJECT_CLASS (nautilus_icon_canvas_item_parent_class)->finalize (object);
+	G_OBJECT_CLASS (nemo_icon_canvas_item_parent_class)->finalize (object);
 }
  
 /* Currently we require pixbufs in this format (for hit testing).
@@ -263,14 +263,14 @@ pixbuf_is_acceptable (GdkPixbuf *pixbuf)
 }
 
 static void
-nautilus_icon_canvas_item_invalidate_bounds_cache (NautilusIconCanvasItem *item)
+nemo_icon_canvas_item_invalidate_bounds_cache (NemoIconCanvasItem *item)
 {
 	item->details->bounds_cached = FALSE;
 }
 
 /* invalidate the text width and height cached in the item details. */
 void
-nautilus_icon_canvas_item_invalidate_label_size (NautilusIconCanvasItem *item)
+nemo_icon_canvas_item_invalidate_label_size (NemoIconCanvasItem *item)
 {
 	if (item->details->editable_text_layout != NULL) {
 		pango_layout_context_changed (item->details->editable_text_layout);
@@ -281,7 +281,7 @@ nautilus_icon_canvas_item_invalidate_label_size (NautilusIconCanvasItem *item)
 	if (item->details->embedded_text_layout != NULL) {
 		pango_layout_context_changed (item->details->embedded_text_layout);
 	}
-	nautilus_icon_canvas_item_invalidate_bounds_cache (item);
+	nemo_icon_canvas_item_invalidate_bounds_cache (item);
 	item->details->text_width = -1;
 	item->details->text_height = -1;
 	item->details->text_height_for_layout = -1;
@@ -291,16 +291,16 @@ nautilus_icon_canvas_item_invalidate_label_size (NautilusIconCanvasItem *item)
 
 /* Set property handler for the icon item. */
 static void
-nautilus_icon_canvas_item_set_property (GObject        *object,
+nemo_icon_canvas_item_set_property (GObject        *object,
 					guint           property_id,
 					const GValue   *value,
 					GParamSpec     *pspec)
 {
-	NautilusIconCanvasItem *item;
-	NautilusIconCanvasItemDetails *details;
+	NemoIconCanvasItem *item;
+	NemoIconCanvasItemDetails *details;
 	AtkObject *accessible;
 
-	item = NAUTILUS_ICON_CANVAS_ITEM (object);
+	item = NEMO_ICON_CANVAS_ITEM (object);
 	accessible = atk_gobject_accessible_for_object (G_OBJECT (item));
 	details = item->details;
 
@@ -320,7 +320,7 @@ nautilus_icon_canvas_item_set_property (GObject        *object,
 			g_object_notify (G_OBJECT(accessible), "accessible-name");
 		}
 		
-		nautilus_icon_canvas_item_invalidate_label_size (item);
+		nemo_icon_canvas_item_invalidate_label_size (item);
 		if (details->editable_text_layout) {
 			g_object_unref (details->editable_text_layout);
 			details->editable_text_layout = NULL;
@@ -336,7 +336,7 @@ nautilus_icon_canvas_item_set_property (GObject        *object,
 		g_free (details->additional_text);
 		details->additional_text = g_strdup (g_value_get_string (value));
 		
-		nautilus_icon_canvas_item_invalidate_label_size (item);		
+		nemo_icon_canvas_item_invalidate_label_size (item);		
 		if (details->additional_text_layout) {
 			g_object_unref (details->additional_text_layout);
 			details->additional_text_layout = NULL;
@@ -348,7 +348,7 @@ nautilus_icon_canvas_item_set_property (GObject        *object,
 			return;
 		}
 		details->is_highlighted_for_selection = g_value_get_boolean (value);
-		nautilus_icon_canvas_item_invalidate_label_size (item);
+		nemo_icon_canvas_item_invalidate_label_size (item);
 
 		atk_object_notify_state_change (accessible, ATK_STATE_SELECTED,
 						details->is_highlighted_for_selection);
@@ -381,7 +381,7 @@ nautilus_icon_canvas_item_set_property (GObject        *object,
 		break;
 
 	default:
-		g_warning ("nautilus_icons_view_item_item_set_arg on unknown argument");
+		g_warning ("nemo_icons_view_item_item_set_arg on unknown argument");
 		return;
 	}
 	
@@ -390,14 +390,14 @@ nautilus_icon_canvas_item_set_property (GObject        *object,
 
 /* Get property handler for the icon item */
 static void
-nautilus_icon_canvas_item_get_property (GObject        *object,
+nemo_icon_canvas_item_get_property (GObject        *object,
 					guint           property_id,
 					GValue         *value,
 					GParamSpec     *pspec)
 {
-	NautilusIconCanvasItemDetails *details;
+	NemoIconCanvasItemDetails *details;
 	
-	details = NAUTILUS_ICON_CANVAS_ITEM (object)->details;
+	details = NEMO_ICON_CANVAS_ITEM (object)->details;
 	
 	switch (property_id) {
 		
@@ -432,7 +432,7 @@ nautilus_icon_canvas_item_get_property (GObject        *object,
 }
 
 cairo_surface_t *
-nautilus_icon_canvas_item_get_drag_surface (NautilusIconCanvasItem *item)
+nemo_icon_canvas_item_get_drag_surface (NemoIconCanvasItem *item)
 {
 	cairo_surface_t *surface;
 	EelCanvas *canvas;
@@ -444,14 +444,14 @@ nautilus_icon_canvas_item_get_drag_surface (NautilusIconCanvasItem *item)
 	cairo_t *cr;
 	GtkStyleContext *context;
 	
-	g_return_val_if_fail (NAUTILUS_IS_ICON_CANVAS_ITEM (item), NULL);
+	g_return_val_if_fail (NEMO_IS_ICON_CANVAS_ITEM (item), NULL);
 
 	canvas = EEL_CANVAS_ITEM (item)->canvas;
 	screen = gtk_widget_get_screen (GTK_WIDGET (canvas));
 	context = gtk_widget_get_style_context (GTK_WIDGET (canvas));
 
 	gtk_style_context_save (context);
-	gtk_style_context_add_class (context, "nautilus-canvas-item");
+	gtk_style_context_add_class (context, "nemo-canvas-item");
 
 	/* Assume we're updated so canvas item data is right */
 
@@ -493,12 +493,12 @@ nautilus_icon_canvas_item_get_drag_surface (NautilusIconCanvasItem *item)
 }
 
 void
-nautilus_icon_canvas_item_set_image (NautilusIconCanvasItem *item,
+nemo_icon_canvas_item_set_image (NemoIconCanvasItem *item,
 				     GdkPixbuf *image)
 {
-	NautilusIconCanvasItemDetails *details;	
+	NemoIconCanvasItemDetails *details;	
 	
-	g_return_if_fail (NAUTILUS_IS_ICON_CANVAS_ITEM (item));
+	g_return_if_fail (NEMO_IS_ICON_CANVAS_ITEM (item));
 	g_return_if_fail (image == NULL || pixbuf_is_acceptable (image));
 
 	details = item->details;	
@@ -519,12 +519,12 @@ nautilus_icon_canvas_item_set_image (NautilusIconCanvasItem *item,
 
 	details->pixbuf = image;
 			
-	nautilus_icon_canvas_item_invalidate_bounds_cache (item);
+	nemo_icon_canvas_item_invalidate_bounds_cache (item);
 	eel_canvas_item_request_update (EEL_CANVAS_ITEM (item));	
 }
 
 void 
-nautilus_icon_canvas_item_set_attach_points (NautilusIconCanvasItem *item,
+nemo_icon_canvas_item_set_attach_points (NemoIconCanvasItem *item,
 					     GdkPoint *attach_points,
 					     int n_attach_points)
 {
@@ -537,21 +537,21 @@ nautilus_icon_canvas_item_set_attach_points (NautilusIconCanvasItem *item,
 		item->details->n_attach_points = n_attach_points;
 	}
 	
-	nautilus_icon_canvas_item_invalidate_bounds_cache (item);
+	nemo_icon_canvas_item_invalidate_bounds_cache (item);
 }
 
 void
-nautilus_icon_canvas_item_set_embedded_text_rect (NautilusIconCanvasItem       *item,
+nemo_icon_canvas_item_set_embedded_text_rect (NemoIconCanvasItem       *item,
 						  const GdkRectangle           *text_rect)
 {
 	item->details->embedded_text_rect = *text_rect;
 
-	nautilus_icon_canvas_item_invalidate_bounds_cache (item);
+	nemo_icon_canvas_item_invalidate_bounds_cache (item);
 	eel_canvas_item_request_update (EEL_CANVAS_ITEM (item));
 }
 
 void
-nautilus_icon_canvas_item_set_embedded_text (NautilusIconCanvasItem       *item,
+nemo_icon_canvas_item_set_embedded_text (NemoIconCanvasItem       *item,
 					     const char                   *text)
 {
 	g_free (item->details->embedded_text);
@@ -574,7 +574,7 @@ nautilus_icon_canvas_item_set_embedded_text (NautilusIconCanvasItem       *item,
  * class, it has no assumptions about how the item is used.
  */
 static void
-recompute_bounding_box (NautilusIconCanvasItem *icon_item,
+recompute_bounding_box (NemoIconCanvasItem *icon_item,
 			double i2w_dx, double i2w_dy)
 {
 	/* The bounds stored in the item is the same as what get_bounds
@@ -604,10 +604,10 @@ recompute_bounding_box (NautilusIconCanvasItem *icon_item,
 }
 
 static EelIRect
-compute_text_rectangle (const NautilusIconCanvasItem *item,
+compute_text_rectangle (const NemoIconCanvasItem *item,
 			EelIRect icon_rectangle,
 			gboolean canvas_coords,
-			NautilusIconCanvasItemBoundsUsage usage)
+			NemoIconCanvasItemBoundsUsage usage)
 {
 	EelIRect text_rectangle;
 	double pixels_per_unit;
@@ -628,8 +628,8 @@ compute_text_rectangle (const NautilusIconCanvasItem *item,
 		text_dx = item->details->text_dx / pixels_per_unit;
 	}
 	
-	if (NAUTILUS_ICON_CONTAINER (EEL_CANVAS_ITEM (item)->canvas)->details->label_position == NAUTILUS_ICON_LABEL_POSITION_BESIDE) {
-		if (!nautilus_icon_container_is_layout_rtl (NAUTILUS_ICON_CONTAINER (EEL_CANVAS_ITEM (item)->canvas))) {
+	if (NEMO_ICON_CONTAINER (EEL_CANVAS_ITEM (item)->canvas)->details->label_position == NEMO_ICON_LABEL_POSITION_BESIDE) {
+		if (!nemo_icon_container_is_layout_rtl (NEMO_ICON_CONTAINER (EEL_CANVAS_ITEM (item)->canvas))) {
                 	text_rectangle.x0 = icon_rectangle.x1;
                 	text_rectangle.x1 = text_rectangle.x0 + text_dx + text_width;
 		} else {
@@ -695,7 +695,7 @@ get_current_canvas_bounds (EelCanvasItem *item)
 }
 
 void
-nautilus_icon_canvas_item_update_bounds (NautilusIconCanvasItem *item,
+nemo_icon_canvas_item_update_bounds (NemoIconCanvasItem *item,
 					 double i2w_dx, double i2w_dy)
 {
 	EelIRect before, after;
@@ -726,15 +726,15 @@ nautilus_icon_canvas_item_update_bounds (NautilusIconCanvasItem *item,
 
 /* Update handler for the icon canvas item. */
 static void
-nautilus_icon_canvas_item_update (EelCanvasItem *item,
+nemo_icon_canvas_item_update (EelCanvasItem *item,
 				  double i2w_dx, double i2w_dy,
 				  gint flags)
 {
-	nautilus_icon_canvas_item_update_bounds (NAUTILUS_ICON_CANVAS_ITEM (item), i2w_dx, i2w_dy);
+	nemo_icon_canvas_item_update_bounds (NEMO_ICON_CANVAS_ITEM (item), i2w_dx, i2w_dy);
 
 	eel_canvas_item_request_redraw (EEL_CANVAS_ITEM (item));
 
-	EEL_CANVAS_ITEM_CLASS (nautilus_icon_canvas_item_parent_class)->update (item, i2w_dx, i2w_dy, flags);
+	EEL_CANVAS_ITEM_CLASS (nemo_icon_canvas_item_parent_class)->update (item, i2w_dx, i2w_dy, flags);
 }
 
 /* Rendering */
@@ -743,10 +743,10 @@ in_single_click_mode (void)
 {
 	int click_policy;
 
-	click_policy = g_settings_get_enum (nautilus_preferences,
-					    NAUTILUS_PREFERENCES_CLICK_POLICY);
+	click_policy = g_settings_get_enum (nemo_preferences,
+					    NEMO_PREFERENCES_CLICK_POLICY);
 
-	return click_policy == NAUTILUS_CLICK_POLICY_SINGLE;
+	return click_policy == NEMO_CLICK_POLICY_SINGLE;
 }
 
 
@@ -819,34 +819,34 @@ layout_get_size_for_layout (PangoLayout *layout,
 }
 
 #define IS_COMPACT_VIEW(container) \
-        ((container->details->layout_mode == NAUTILUS_ICON_LAYOUT_T_B_L_R || \
-	  container->details->layout_mode == NAUTILUS_ICON_LAYOUT_T_B_R_L) && \
-	 container->details->label_position == NAUTILUS_ICON_LABEL_POSITION_BESIDE)
+        ((container->details->layout_mode == NEMO_ICON_LAYOUT_T_B_L_R || \
+	  container->details->layout_mode == NEMO_ICON_LAYOUT_T_B_R_L) && \
+	 container->details->label_position == NEMO_ICON_LABEL_POSITION_BESIDE)
 
 #define TEXT_BACK_PADDING_X 4
 #define TEXT_BACK_PADDING_Y 1
 
 static void
-prepare_pango_layout_width (NautilusIconCanvasItem *item,
+prepare_pango_layout_width (NemoIconCanvasItem *item,
 			    PangoLayout *layout)
 {
-	if (nautilus_icon_canvas_item_get_max_text_width (item) < 0) {
+	if (nemo_icon_canvas_item_get_max_text_width (item) < 0) {
 		pango_layout_set_width (layout, -1);
 	} else {
-		pango_layout_set_width (layout, floor (nautilus_icon_canvas_item_get_max_text_width (item)) * PANGO_SCALE);
+		pango_layout_set_width (layout, floor (nemo_icon_canvas_item_get_max_text_width (item)) * PANGO_SCALE);
 		pango_layout_set_ellipsize (layout, PANGO_ELLIPSIZE_END);
 	}
 }
 
 static void
-prepare_pango_layout_for_measure_entire_text (NautilusIconCanvasItem *item,
+prepare_pango_layout_for_measure_entire_text (NemoIconCanvasItem *item,
 					      PangoLayout *layout)
 {
-	NautilusIconContainer *container;
+	NemoIconContainer *container;
 
 	prepare_pango_layout_width (item, layout);
 
-	container = NAUTILUS_ICON_CONTAINER (EEL_CANVAS_ITEM (item)->canvas);
+	container = NEMO_ICON_CONTAINER (EEL_CANVAS_ITEM (item)->canvas);
 
 	if (IS_COMPACT_VIEW (container)) {
 		pango_layout_set_height (layout, -1);
@@ -856,16 +856,16 @@ prepare_pango_layout_for_measure_entire_text (NautilusIconCanvasItem *item,
 }
 
 static void
-prepare_pango_layout_for_draw (NautilusIconCanvasItem *item,
+prepare_pango_layout_for_draw (NemoIconCanvasItem *item,
 			       PangoLayout *layout)
 {
-	NautilusIconCanvasItemDetails *details;
-	NautilusIconContainer *container;
+	NemoIconCanvasItemDetails *details;
+	NemoIconContainer *container;
 	gboolean needs_highlight;
 
 	prepare_pango_layout_width (item, layout);
 
-	container = NAUTILUS_ICON_CONTAINER (EEL_CANVAS_ITEM (item)->canvas);
+	container = NEMO_ICON_CONTAINER (EEL_CANVAS_ITEM (item)->canvas);
 	details = item->details;
 
 	needs_highlight = details->is_highlighted_for_selection || details->is_highlighted_for_drop;
@@ -876,7 +876,7 @@ prepare_pango_layout_for_draw (NautilusIconCanvasItem *item,
 		   details->is_prelit ||
 		   details->is_highlighted_as_keyboard_focus ||
 		   details->entire_text ||
-		   container->details->label_position == NAUTILUS_ICON_LABEL_POSITION_BESIDE) {
+		   container->details->label_position == NEMO_ICON_LABEL_POSITION_BESIDE) {
 		/* VOODOO-TODO, cf. compute_text_rectangle() */
 		pango_layout_set_height (layout, G_MININT);
 	} else {
@@ -885,15 +885,15 @@ prepare_pango_layout_for_draw (NautilusIconCanvasItem *item,
 		 * out itself (which it doesn't ATM).
 		 */
 		pango_layout_set_height (layout,
-					 nautilus_icon_container_get_max_layout_lines_for_pango (container));
+					 nemo_icon_container_get_max_layout_lines_for_pango (container));
 	}
 }
 
 static void
-measure_label_text (NautilusIconCanvasItem *item)
+measure_label_text (NemoIconCanvasItem *item)
 {
-	NautilusIconCanvasItemDetails *details;
-	NautilusIconContainer *container;
+	NemoIconCanvasItemDetails *details;
+	NemoIconContainer *container;
 	gint editable_height, editable_height_for_layout, editable_height_for_entire_text, editable_width, editable_dx;
 	gint additional_height, additional_width, additional_dx;
 	PangoLayout *editable_layout;
@@ -940,7 +940,7 @@ measure_label_text (NautilusIconCanvasItem *item)
 	additional_height = 0;
 	additional_dx = 0;
 
-	container = NAUTILUS_ICON_CONTAINER (EEL_CANVAS_ITEM (item)->canvas);	
+	container = NEMO_ICON_CONTAINER (EEL_CANVAS_ITEM (item)->canvas);	
 	editable_layout = NULL;
 	additional_layout = NULL;
 
@@ -957,7 +957,7 @@ measure_label_text (NautilusIconCanvasItem *item)
 				      &editable_height_for_entire_text,
 				      NULL);
 		layout_get_size_for_layout (editable_layout,
-					    nautilus_icon_container_get_max_layout_lines (container),
+					    nemo_icon_container_get_max_layout_lines (container),
 					    editable_height_for_entire_text,
 					    &editable_height_for_layout);
 
@@ -1016,12 +1016,12 @@ measure_label_text (NautilusIconCanvasItem *item)
 }
 
 static void
-draw_label_text (NautilusIconCanvasItem *item,
+draw_label_text (NemoIconCanvasItem *item,
                  cairo_t *cr,
 		 EelIRect icon_rect)
 {
-	NautilusIconCanvasItemDetails *details;
-	NautilusIconContainer *container;
+	NemoIconCanvasItemDetails *details;
+	NemoIconContainer *container;
 	PangoLayout *editable_layout;
 	PangoLayout *additional_layout;
 	GtkStyleContext *context;
@@ -1046,14 +1046,14 @@ draw_label_text (NautilusIconCanvasItem *item,
 		return;
 	}
 
-	container = NAUTILUS_ICON_CONTAINER (EEL_CANVAS_ITEM (item)->canvas);
+	container = NEMO_ICON_CONTAINER (EEL_CANVAS_ITEM (item)->canvas);
 	context = gtk_widget_get_style_context (GTK_WIDGET (container));
 
 	text_rect = compute_text_rectangle (item, icon_rect, TRUE, BOUNDS_USAGE_FOR_DISPLAY);
 
 	needs_highlight = details->is_highlighted_for_selection || details->is_highlighted_for_drop;
-	is_rtl_label_beside = nautilus_icon_container_is_layout_rtl (container) &&
-			      container->details->label_position == NAUTILUS_ICON_LABEL_POSITION_BESIDE;
+	is_rtl_label_beside = nemo_icon_container_is_layout_rtl (container) &&
+			      container->details->label_position == NEMO_ICON_LABEL_POSITION_BESIDE;
 
 	editable_layout = NULL;
 	additional_layout = NULL;
@@ -1062,7 +1062,7 @@ draw_label_text (NautilusIconCanvasItem *item,
 	have_additional = details->additional_text != NULL && details->additional_text[0] != '\0';
 	g_assert (have_editable || have_additional);
 
-	max_text_width = floor (nautilus_icon_canvas_item_get_max_text_width (item));
+	max_text_width = floor (nemo_icon_canvas_item_get_max_text_width (item));
 
 	base_state = gtk_widget_get_state_flags (GTK_WIDGET (container));
 	base_state &= ~(GTK_STATE_FLAG_SELECTED | 
@@ -1109,7 +1109,7 @@ draw_label_text (NautilusIconCanvasItem *item,
 		gtk_style_context_restore (context);
 	}
 
-	if (container->details->label_position == NAUTILUS_ICON_LABEL_POSITION_BESIDE) {
+	if (container->details->label_position == NEMO_ICON_LABEL_POSITION_BESIDE) {
 		x = text_rect.x0 + 2;
 	} else {
 		x = text_rect.x0 + ((text_rect.x1 - text_rect.x0) - max_text_width) / 2;
@@ -1188,7 +1188,7 @@ draw_label_text (NautilusIconCanvasItem *item,
 }
 
 void
-nautilus_icon_canvas_item_set_is_visible (NautilusIconCanvasItem       *item,
+nemo_icon_canvas_item_set_is_visible (NemoIconCanvasItem       *item,
 					  gboolean                      visible)
 {
 	if (item->details->is_visible == visible)
@@ -1197,14 +1197,14 @@ nautilus_icon_canvas_item_set_is_visible (NautilusIconCanvasItem       *item,
 	item->details->is_visible = visible;
 
 	if (!visible) {
-		nautilus_icon_canvas_item_invalidate_label (item);
+		nemo_icon_canvas_item_invalidate_label (item);
 	}
 }
 
 void
-nautilus_icon_canvas_item_invalidate_label (NautilusIconCanvasItem     *item)
+nemo_icon_canvas_item_invalidate_label (NemoIconCanvasItem     *item)
 {
-	nautilus_icon_canvas_item_invalidate_label_size (item);
+	nemo_icon_canvas_item_invalidate_label_size (item);
 
 	if (item->details->editable_text_layout) {
 		g_object_unref (item->details->editable_text_layout);
@@ -1229,10 +1229,10 @@ get_knob_pixbuf (void)
 	GdkPixbuf *knob_pixbuf;
 
 	knob_pixbuf = gtk_icon_theme_load_icon (gtk_icon_theme_get_default (),
-						"stock-nautilus-knob",
+						"stock-nemo-knob",
 						8, 0, NULL);
 	if (!knob_pixbuf) {
-		GInputStream *stream = g_resources_open_stream ("/org/gnome/nautilus/icons/knob.png", 0, NULL);
+		GInputStream *stream = g_resources_open_stream ("/org/gnome/nemo/icons/knob.png", 0, NULL);
 		if (stream != NULL) {
 			knob_pixbuf = gdk_pixbuf_new_from_stream (stream, NULL, NULL);
 			g_object_unref (stream);
@@ -1243,7 +1243,7 @@ get_knob_pixbuf (void)
 }
 
 static void
-draw_stretch_handles (NautilusIconCanvasItem *item,
+draw_stretch_handles (NemoIconCanvasItem *item,
                       cairo_t *cr,
 		      const EelIRect *rect)
 {
@@ -1302,7 +1302,7 @@ draw_pixbuf (GdkPixbuf *pixbuf,
 
 /* shared code to highlight or dim the passed-in pixbuf */
 static GdkPixbuf *
-real_map_pixbuf (NautilusIconCanvasItem *icon_item)
+real_map_pixbuf (NemoIconCanvasItem *icon_item)
 {
 	EelCanvas *canvas;
 	GdkPixbuf *temp_pixbuf, *old_pixbuf;
@@ -1342,7 +1342,7 @@ real_map_pixbuf (NautilusIconCanvasItem *icon_item)
 }
 
 static GdkPixbuf *
-map_pixbuf (NautilusIconCanvasItem *icon_item)
+map_pixbuf (NemoIconCanvasItem *icon_item)
 {
 	if (!(icon_item->details->rendered_pixbuf != NULL
 	      && icon_item->details->rendered_is_prelit == icon_item->details->is_prelit
@@ -1367,7 +1367,7 @@ map_pixbuf (NautilusIconCanvasItem *icon_item)
 }
 
 static void
-draw_embedded_text (NautilusIconCanvasItem *item,
+draw_embedded_text (NemoIconCanvasItem *item,
                     cairo_t *cr,
 		    int x, int y)
 {
@@ -1425,19 +1425,19 @@ draw_embedded_text (NautilusIconCanvasItem *item,
 
 /* Draw the icon item for non-anti-aliased mode. */
 static void
-nautilus_icon_canvas_item_draw (EelCanvasItem *item,
+nemo_icon_canvas_item_draw (EelCanvasItem *item,
                                 cairo_t *cr,
                                 cairo_region_t *region)
 {
-	NautilusIconContainer *container;
-	NautilusIconCanvasItem *icon_item;
-	NautilusIconCanvasItemDetails *details;
+	NemoIconContainer *container;
+	NemoIconCanvasItem *icon_item;
+	NemoIconCanvasItemDetails *details;
 	EelIRect icon_rect;
 	GdkPixbuf *temp_pixbuf;
 	GtkStyleContext *context;
 
-	container = NAUTILUS_ICON_CONTAINER (item->canvas);
-	icon_item = NAUTILUS_ICON_CANVAS_ITEM (item);
+	container = NEMO_ICON_CONTAINER (item->canvas);
+	icon_item = NEMO_ICON_CANVAS_ITEM (item);
 	details = icon_item->details;
 
         /* Draw the pixbuf. */
@@ -1447,7 +1447,7 @@ nautilus_icon_canvas_item_draw (EelCanvasItem *item,
 
 	context = gtk_widget_get_style_context (GTK_WIDGET (container));
 	gtk_style_context_save (context);
-	gtk_style_context_add_class (context, "nautilus-canvas-item");
+	gtk_style_context_add_class (context, "nemo-canvas-item");
 
 	icon_rect = icon_item->details->canvas_rect;
 	temp_pixbuf = map_pixbuf (icon_item);
@@ -1470,20 +1470,15 @@ nautilus_icon_canvas_item_draw (EelCanvasItem *item,
 
 #define ZERO_WIDTH_SPACE "\xE2\x80\x8B"
 
-#define ZERO_OR_THREE_DIGITS(p) \
-	(!g_ascii_isdigit (*(p)) || \
-	 (g_ascii_isdigit (*(p+1)) && \
-	  g_ascii_isdigit (*(p+2))))
-
 
 static PangoLayout *
-create_label_layout (NautilusIconCanvasItem *item,
+create_label_layout (NemoIconCanvasItem *item,
 		     const char *text)
 {
 	PangoLayout *layout;
 	PangoContext *context;
 	PangoFontDescription *desc;
-	NautilusIconContainer *container;
+	NemoIconContainer *container;
 	EelCanvasItem *canvas_item;
 	GString *str;
 	char *zeroified_text;
@@ -1491,7 +1486,7 @@ create_label_layout (NautilusIconCanvasItem *item,
 
 	canvas_item = EEL_CANVAS_ITEM (item);
 
-	container = NAUTILUS_ICON_CONTAINER (canvas_item->canvas);
+	container = NEMO_ICON_CONTAINER (canvas_item->canvas);
 	context = gtk_widget_get_pango_context (GTK_WIDGET (canvas_item->canvas));
 	layout = pango_layout_new (context);
 	
@@ -1503,11 +1498,9 @@ create_label_layout (NautilusIconCanvasItem *item,
 		for (p = text; *p != '\0'; p++) {
 			str = g_string_append_c (str, *p);
 
-			if (*p == '_' || *p == '-' || (*p == '.' && ZERO_OR_THREE_DIGITS (p+1))) {
+			if (*p == '_' || *p == '-' || (*p == '.' && !g_ascii_isdigit(*(p+1)))) {
 				/* Ensure that we allow to break after '_' or '.' characters,
-				 * if they are not likely to be part of a version information, to
-				 * not break wrapping of foobar-0.0.1.
-				 * Wrap before IPs and long numbers, though. */
+				 * if they are not followed by a number */
 				str = g_string_append (str, ZERO_WIDTH_SPACE);
 			}
 		}
@@ -1518,8 +1511,8 @@ create_label_layout (NautilusIconCanvasItem *item,
 	pango_layout_set_text (layout, zeroified_text, -1);
 	pango_layout_set_auto_dir (layout, FALSE);
 	
-	if (container->details->label_position == NAUTILUS_ICON_LABEL_POSITION_BESIDE) {
-		if (!nautilus_icon_container_is_layout_rtl (container)) {
+	if (container->details->label_position == NEMO_ICON_LABEL_POSITION_BESIDE) {
+		if (!nemo_icon_container_is_layout_rtl (container)) {
 			pango_layout_set_alignment (layout, PANGO_ALIGN_LEFT);
 		} else {
 			pango_layout_set_alignment (layout, PANGO_ALIGN_RIGHT);
@@ -1549,7 +1542,7 @@ create_label_layout (NautilusIconCanvasItem *item,
 
 static PangoLayout *
 get_label_layout (PangoLayout **layout_cache,
-		  NautilusIconCanvasItem *item,
+		  NemoIconCanvasItem *item,
 		  const char *text)
 {
 	PangoLayout *layout;
@@ -1570,23 +1563,23 @@ get_label_layout (PangoLayout **layout_cache,
 /* handle events */
 
 static int
-nautilus_icon_canvas_item_event (EelCanvasItem *item, GdkEvent *event)
+nemo_icon_canvas_item_event (EelCanvasItem *item, GdkEvent *event)
 {
-	NautilusIconCanvasItem *icon_item;
+	NemoIconCanvasItem *icon_item;
 	GdkCursor *cursor;
 	GdkWindow *cursor_window;
 
-	icon_item = NAUTILUS_ICON_CANVAS_ITEM (item);
+	icon_item = NEMO_ICON_CANVAS_ITEM (item);
 	cursor_window = ((GdkEventAny *)event)->window;
 
 	switch (event->type) {
 	case GDK_ENTER_NOTIFY:
 		if (!icon_item->details->is_prelit) {
 			icon_item->details->is_prelit = TRUE;
-			nautilus_icon_canvas_item_invalidate_label_size (icon_item);
+			nemo_icon_canvas_item_invalidate_label_size (icon_item);
 			eel_canvas_item_request_update (item);
 			eel_canvas_item_send_behind (item,
-						     NAUTILUS_ICON_CONTAINER (item->canvas)->details->rubberband_info.selection_rectangle);
+						     NEMO_ICON_CONTAINER (item->canvas)->details->rubberband_info.selection_rectangle);
 
 			/* show a hand cursor */
 			if (in_single_click_mode ()) {
@@ -1609,7 +1602,7 @@ nautilus_icon_canvas_item_event (EelCanvasItem *item, GdkEvent *event)
 			 */
 			icon_item->details->is_prelit = FALSE;
 			icon_item->details->is_highlighted_for_drop = FALSE;
-			nautilus_icon_canvas_item_invalidate_label_size (icon_item);
+			nemo_icon_canvas_item_invalidate_label_size (icon_item);
 			eel_canvas_item_request_update (item);
 
 			/* show default cursor */
@@ -1625,9 +1618,9 @@ nautilus_icon_canvas_item_event (EelCanvasItem *item, GdkEvent *event)
 }
 
 static gboolean
-hit_test (NautilusIconCanvasItem *icon_item, EelIRect canvas_rect)
+hit_test (NemoIconCanvasItem *icon_item, EelIRect canvas_rect)
 {
-	NautilusIconCanvasItemDetails *details;
+	NemoIconCanvasItemDetails *details;
 	
 	details = icon_item->details;
 	
@@ -1658,7 +1651,7 @@ hit_test (NautilusIconCanvasItem *icon_item, EelIRect canvas_rect)
 
 /* Point handler for the icon canvas item. */
 static double
-nautilus_icon_canvas_item_point (EelCanvasItem *item, double x, double y, int cx, int cy,
+nemo_icon_canvas_item_point (EelCanvasItem *item, double x, double y, int cx, int cy,
 				 EelCanvasItem **actual_item)
 {
 	EelIRect canvas_rect;
@@ -1668,7 +1661,7 @@ nautilus_icon_canvas_item_point (EelCanvasItem *item, double x, double y, int cx
 	canvas_rect.y0 = cy;
 	canvas_rect.x1 = cx + 1;
 	canvas_rect.y1 = cy + 1;
-	if (hit_test (NAUTILUS_ICON_CANVAS_ITEM (item), canvas_rect)) {
+	if (hit_test (NEMO_ICON_CANVAS_ITEM (item), canvas_rect)) {
 		return 0.0;
 	} else {
 		/* This value means not hit.
@@ -1679,12 +1672,12 @@ nautilus_icon_canvas_item_point (EelCanvasItem *item, double x, double y, int cx
 }
 
 static void
-nautilus_icon_canvas_item_translate (EelCanvasItem *item, double dx, double dy)
+nemo_icon_canvas_item_translate (EelCanvasItem *item, double dx, double dy)
 {
-	NautilusIconCanvasItem *icon_item;
-	NautilusIconCanvasItemDetails *details;
+	NemoIconCanvasItem *icon_item;
+	NemoIconCanvasItemDetails *details;
 	
-	icon_item = NAUTILUS_ICON_CANVAS_ITEM (item);
+	icon_item = NEMO_ICON_CANVAS_ITEM (item);
 	details = icon_item->details;
 
 	details->x += dx;
@@ -1692,15 +1685,15 @@ nautilus_icon_canvas_item_translate (EelCanvasItem *item, double dx, double dy)
 }
 
 void
-nautilus_icon_canvas_item_get_bounds_for_layout (NautilusIconCanvasItem *icon_item,
+nemo_icon_canvas_item_get_bounds_for_layout (NemoIconCanvasItem *icon_item,
 						 double *x1, double *y1, double *x2, double *y2)
 {
-	NautilusIconCanvasItemDetails *details;
+	NemoIconCanvasItemDetails *details;
 	EelIRect *total_rect;
 
 	details = icon_item->details;
 
-	nautilus_icon_canvas_item_ensure_bounds_up_to_date (icon_item);
+	nemo_icon_canvas_item_ensure_bounds_up_to_date (icon_item);
 	g_assert (details->bounds_cached);
 
 	total_rect = &details->bounds_cache_for_layout;
@@ -1721,15 +1714,15 @@ nautilus_icon_canvas_item_get_bounds_for_layout (NautilusIconCanvasItem *icon_it
 }
 
 void
-nautilus_icon_canvas_item_get_bounds_for_entire_item (NautilusIconCanvasItem *icon_item,
+nemo_icon_canvas_item_get_bounds_for_entire_item (NemoIconCanvasItem *icon_item,
 						      double *x1, double *y1, double *x2, double *y2)
 {
-	NautilusIconCanvasItemDetails *details;
+	NemoIconCanvasItemDetails *details;
 	EelIRect *total_rect;
 
 	details = icon_item->details;
 
-	nautilus_icon_canvas_item_ensure_bounds_up_to_date (icon_item);
+	nemo_icon_canvas_item_ensure_bounds_up_to_date (icon_item);
 	g_assert (details->bounds_cached);
 
 	total_rect = &details->bounds_cache_for_entire_item;
@@ -1751,14 +1744,14 @@ nautilus_icon_canvas_item_get_bounds_for_entire_item (NautilusIconCanvasItem *ic
 	
 /* Bounds handler for the icon canvas item. */
 static void
-nautilus_icon_canvas_item_bounds (EelCanvasItem *item,
+nemo_icon_canvas_item_bounds (EelCanvasItem *item,
 				  double *x1, double *y1, double *x2, double *y2)
 {
-	NautilusIconCanvasItem *icon_item;
-	NautilusIconCanvasItemDetails *details;
+	NemoIconCanvasItem *icon_item;
+	NemoIconCanvasItemDetails *details;
 	EelIRect *total_rect;
 
-	icon_item = NAUTILUS_ICON_CANVAS_ITEM (item);
+	icon_item = NEMO_ICON_CANVAS_ITEM (item);
 	details = icon_item->details;
 
 	g_assert (x1 != NULL);
@@ -1766,7 +1759,7 @@ nautilus_icon_canvas_item_bounds (EelCanvasItem *item,
 	g_assert (x2 != NULL);
 	g_assert (y2 != NULL);
 
-	nautilus_icon_canvas_item_ensure_bounds_up_to_date (icon_item);
+	nemo_icon_canvas_item_ensure_bounds_up_to_date (icon_item);
 	g_assert (details->bounds_cached);
 
 	total_rect = &details->bounds_cache;
@@ -1779,9 +1772,9 @@ nautilus_icon_canvas_item_bounds (EelCanvasItem *item,
 }
 
 static void
-nautilus_icon_canvas_item_ensure_bounds_up_to_date (NautilusIconCanvasItem *icon_item)
+nemo_icon_canvas_item_ensure_bounds_up_to_date (NemoIconCanvasItem *icon_item)
 {
-	NautilusIconCanvasItemDetails *details;
+	NemoIconCanvasItemDetails *details;
 	EelIRect icon_rect, icon_rect_raw;
 	EelIRect text_rect, text_rect_for_layout, text_rect_for_entire_text;
 	EelIRect total_rect, total_rect_for_layout, total_rect_for_entire_text;
@@ -1832,13 +1825,13 @@ nautilus_icon_canvas_item_ensure_bounds_up_to_date (NautilusIconCanvasItem *icon
 
 /* Get the rectangle of the icon only, in world coordinates. */
 EelDRect
-nautilus_icon_canvas_item_get_icon_rectangle (const NautilusIconCanvasItem *item)
+nemo_icon_canvas_item_get_icon_rectangle (const NemoIconCanvasItem *item)
 {
 	EelDRect rectangle;
 	double pixels_per_unit;
 	GdkPixbuf *pixbuf;
 	
-	g_return_val_if_fail (NAUTILUS_IS_ICON_CANVAS_ITEM (item), eel_drect_empty);
+	g_return_val_if_fail (NEMO_IS_ICON_CANVAS_ITEM (item), eel_drect_empty);
 
 	rectangle.x0 = item->details->x;
 	rectangle.y0 = item->details->y;
@@ -1860,7 +1853,7 @@ nautilus_icon_canvas_item_get_icon_rectangle (const NautilusIconCanvasItem *item
 }
 
 EelDRect
-nautilus_icon_canvas_item_get_text_rectangle (NautilusIconCanvasItem *item,
+nemo_icon_canvas_item_get_text_rectangle (NemoIconCanvasItem *item,
 					      gboolean for_layout)
 {
 	/* FIXME */
@@ -1870,7 +1863,7 @@ nautilus_icon_canvas_item_get_text_rectangle (NautilusIconCanvasItem *item,
 	double pixels_per_unit;
 	GdkPixbuf *pixbuf;
 	
-	g_return_val_if_fail (NAUTILUS_IS_ICON_CANVAS_ITEM (item), eel_drect_empty);
+	g_return_val_if_fail (NEMO_IS_ICON_CANVAS_ITEM (item), eel_drect_empty);
 
 	icon_rectangle.x0 = item->details->x;
 	icon_rectangle.y0 = item->details->y;
@@ -1904,12 +1897,12 @@ nautilus_icon_canvas_item_get_text_rectangle (NautilusIconCanvasItem *item,
 
 /* Get the rectangle of the icon only, in canvas coordinates. */
 static void
-get_icon_canvas_rectangle (NautilusIconCanvasItem *item,
+get_icon_canvas_rectangle (NemoIconCanvasItem *item,
 			   EelIRect *rect)
 {
 	GdkPixbuf *pixbuf;
 
-	g_assert (NAUTILUS_IS_ICON_CANVAS_ITEM (item));
+	g_assert (NEMO_IS_ICON_CANVAS_ITEM (item));
 	g_assert (rect != NULL);
 
 	eel_canvas_w2c (EEL_CANVAS_ITEM (item)->canvas,
@@ -1925,10 +1918,10 @@ get_icon_canvas_rectangle (NautilusIconCanvasItem *item,
 }
 
 void
-nautilus_icon_canvas_item_set_show_stretch_handles (NautilusIconCanvasItem *item,
+nemo_icon_canvas_item_set_show_stretch_handles (NemoIconCanvasItem *item,
 						    gboolean show_stretch_handles)
 {
-	g_return_if_fail (NAUTILUS_IS_ICON_CANVAS_ITEM (item));
+	g_return_if_fail (NEMO_IS_ICON_CANVAS_ITEM (item));
 	g_return_if_fail (show_stretch_handles == FALSE || show_stretch_handles == TRUE);
 	
 	if (!item->details->show_stretch_handles == !show_stretch_handles) {
@@ -1941,7 +1934,7 @@ nautilus_icon_canvas_item_set_show_stretch_handles (NautilusIconCanvasItem *item
 
 /* Check if one of the stretch handles was hit. */
 static gboolean
-hit_test_stretch_handle (NautilusIconCanvasItem *item,
+hit_test_stretch_handle (NemoIconCanvasItem *item,
 			 EelIRect probe_canvas_rect,
 			 GtkCornerType *corner)
 {
@@ -1950,7 +1943,7 @@ hit_test_stretch_handle (NautilusIconCanvasItem *item,
 	int knob_width, knob_height;
 	int hit_corner;
 	
-	g_assert (NAUTILUS_IS_ICON_CANVAS_ITEM (item));
+	g_assert (NEMO_IS_ICON_CANVAS_ITEM (item));
 
 	/* Make sure there are handles to hit. */
 	if (!item->details->show_stretch_handles) {
@@ -1989,14 +1982,14 @@ hit_test_stretch_handle (NautilusIconCanvasItem *item,
 }
 
 gboolean
-nautilus_icon_canvas_item_hit_test_stretch_handles (NautilusIconCanvasItem *item,
+nemo_icon_canvas_item_hit_test_stretch_handles (NemoIconCanvasItem *item,
 						    gdouble world_x,
 						    gdouble world_y,
 						    GtkCornerType *corner)
 {
 	EelIRect canvas_rect;
 
-	g_return_val_if_fail (NAUTILUS_IS_ICON_CANVAS_ITEM (item), FALSE);
+	g_return_val_if_fail (NEMO_IS_ICON_CANVAS_ITEM (item), FALSE);
 	
 	eel_canvas_w2c (EEL_CANVAS_ITEM (item)->canvas,
 			  world_x,
@@ -2008,31 +2001,31 @@ nautilus_icon_canvas_item_hit_test_stretch_handles (NautilusIconCanvasItem *item
 	return hit_test_stretch_handle (item, canvas_rect, corner);
 }
 
-/* nautilus_icon_canvas_item_hit_test_rectangle
+/* nemo_icon_canvas_item_hit_test_rectangle
  *
  * Check and see if there is an intersection between the item and the
  * canvas rect.
  */
 gboolean
-nautilus_icon_canvas_item_hit_test_rectangle (NautilusIconCanvasItem *item, EelIRect canvas_rect)
+nemo_icon_canvas_item_hit_test_rectangle (NemoIconCanvasItem *item, EelIRect canvas_rect)
 {
-	g_return_val_if_fail (NAUTILUS_IS_ICON_CANVAS_ITEM (item), FALSE);
+	g_return_val_if_fail (NEMO_IS_ICON_CANVAS_ITEM (item), FALSE);
 
 	return hit_test (item, canvas_rect);
 }
 
 const char *
-nautilus_icon_canvas_item_get_editable_text (NautilusIconCanvasItem *icon_item)
+nemo_icon_canvas_item_get_editable_text (NemoIconCanvasItem *icon_item)
 {
-	g_return_val_if_fail (NAUTILUS_IS_ICON_CANVAS_ITEM (icon_item), NULL);
+	g_return_val_if_fail (NEMO_IS_ICON_CANVAS_ITEM (icon_item), NULL);
 
 	return icon_item->details->editable_text;
 }
 
 void
-nautilus_icon_canvas_item_set_renaming (NautilusIconCanvasItem *item, gboolean state)
+nemo_icon_canvas_item_set_renaming (NemoIconCanvasItem *item, gboolean state)
 {
-	g_return_if_fail (NAUTILUS_IS_ICON_CANVAS_ITEM (item));
+	g_return_if_fail (NEMO_IS_ICON_CANVAS_ITEM (item));
 	g_return_if_fail (state == FALSE || state == TRUE);
 
 	if (!item->details->is_renaming == !state) {
@@ -2044,17 +2037,17 @@ nautilus_icon_canvas_item_set_renaming (NautilusIconCanvasItem *item, gboolean s
 }
 
 double
-nautilus_icon_canvas_item_get_max_text_width (NautilusIconCanvasItem *item)
+nemo_icon_canvas_item_get_max_text_width (NemoIconCanvasItem *item)
 {
 	EelCanvasItem *canvas_item;
-	NautilusIconContainer *container;
+	NemoIconContainer *container;
 
 	canvas_item = EEL_CANVAS_ITEM (item);
-	container = NAUTILUS_ICON_CONTAINER (canvas_item->canvas);
+	container = NEMO_ICON_CONTAINER (canvas_item->canvas);
 
-	if (container->details->label_position == NAUTILUS_ICON_LABEL_POSITION_BESIDE) {
-		if (container->details->layout_mode == NAUTILUS_ICON_LAYOUT_T_B_L_R ||
-		    container->details->layout_mode == NAUTILUS_ICON_LAYOUT_T_B_R_L) {
+	if (container->details->label_position == NEMO_ICON_LABEL_POSITION_BESIDE) {
+		if (container->details->layout_mode == NEMO_ICON_LAYOUT_T_B_L_R ||
+		    container->details->layout_mode == NEMO_ICON_LAYOUT_T_B_R_L) {
 			if (container->details->all_columns_same_width) {
 				return MAX_TEXT_WIDTH_BESIDE_TOP_TO_BOTTOM * canvas_item->canvas->pixels_per_unit;
 			} else {
@@ -2069,20 +2062,20 @@ nautilus_icon_canvas_item_get_max_text_width (NautilusIconCanvasItem *item)
 }
 
 void
-nautilus_icon_canvas_item_set_entire_text (NautilusIconCanvasItem       *item,
+nemo_icon_canvas_item_set_entire_text (NemoIconCanvasItem       *item,
 					   gboolean                      entire_text)
 {
 	if (item->details->entire_text != entire_text) {
 		item->details->entire_text = entire_text;
 
-		nautilus_icon_canvas_item_invalidate_label_size (item);
+		nemo_icon_canvas_item_invalidate_label_size (item);
 		eel_canvas_item_request_update (EEL_CANVAS_ITEM (item));
 	}
 }
 
 /* Class initialization function for the icon canvas item. */
 static void
-nautilus_icon_canvas_item_class_init (NautilusIconCanvasItemClass *class)
+nemo_icon_canvas_item_class_init (NemoIconCanvasItemClass *class)
 {
 	GObjectClass *object_class;
 	EelCanvasItemClass *item_class;
@@ -2090,9 +2083,9 @@ nautilus_icon_canvas_item_class_init (NautilusIconCanvasItemClass *class)
 	object_class = G_OBJECT_CLASS (class);
 	item_class = EEL_CANVAS_ITEM_CLASS (class);
 
-	object_class->finalize = nautilus_icon_canvas_item_finalize;
-	object_class->set_property = nautilus_icon_canvas_item_set_property;
-	object_class->get_property = nautilus_icon_canvas_item_get_property;
+	object_class->finalize = nemo_icon_canvas_item_finalize;
+	object_class->set_property = nemo_icon_canvas_item_set_property;
+	object_class->get_property = nemo_icon_canvas_item_get_property;
 
         g_object_class_install_property (
 		object_class,
@@ -2143,41 +2136,41 @@ nautilus_icon_canvas_item_class_init (NautilusIconCanvasItemClass *class)
 				      "whether we are highlighted for a clipboard paste (after we have been cut)",
  				      FALSE, G_PARAM_READWRITE));
 
-	item_class->update = nautilus_icon_canvas_item_update;
-	item_class->draw = nautilus_icon_canvas_item_draw;
-	item_class->point = nautilus_icon_canvas_item_point;
-	item_class->translate = nautilus_icon_canvas_item_translate;
-	item_class->bounds = nautilus_icon_canvas_item_bounds;
-	item_class->event = nautilus_icon_canvas_item_event;
+	item_class->update = nemo_icon_canvas_item_update;
+	item_class->draw = nemo_icon_canvas_item_draw;
+	item_class->point = nemo_icon_canvas_item_point;
+	item_class->translate = nemo_icon_canvas_item_translate;
+	item_class->bounds = nemo_icon_canvas_item_bounds;
+	item_class->event = nemo_icon_canvas_item_event;
 
 	atk_registry_set_factory_type (atk_get_default_registry (),
-				       NAUTILUS_TYPE_ICON_CANVAS_ITEM,
-				       nautilus_icon_canvas_item_accessible_factory_get_type ());
+				       NEMO_TYPE_ICON_CANVAS_ITEM,
+				       nemo_icon_canvas_item_accessible_factory_get_type ());
 
-	g_type_class_add_private (class, sizeof (NautilusIconCanvasItemDetails));
+	g_type_class_add_private (class, sizeof (NemoIconCanvasItemDetails));
 }
 
 static GailTextUtil *
-nautilus_icon_canvas_item_get_text (GObject *text)
+nemo_icon_canvas_item_get_text (GObject *text)
 {
-	return NAUTILUS_ICON_CANVAS_ITEM (text)->details->text_util;
+	return NEMO_ICON_CANVAS_ITEM (text)->details->text_util;
 }
 
 static void
-nautilus_icon_canvas_item_text_interface_init (EelAccessibleTextIface *iface)
+nemo_icon_canvas_item_text_interface_init (EelAccessibleTextIface *iface)
 {
-	iface->get_text = nautilus_icon_canvas_item_get_text;
+	iface->get_text = nemo_icon_canvas_item_get_text;
 }
 
 /* ============================= a11y interfaces =========================== */
 
-static const char *nautilus_icon_canvas_item_accessible_action_names[] = {
+static const char *nemo_icon_canvas_item_accessible_action_names[] = {
         "open",
         "menu",
         NULL
 };
 
-static const char *nautilus_icon_canvas_item_accessible_action_descriptions[] = {
+static const char *nemo_icon_canvas_item_accessible_action_descriptions[] = {
         "Open item",
         "Popup context menu",
         NULL
@@ -2193,38 +2186,34 @@ typedef struct {
         char *action_descriptions[LAST_ACTION];
 	char *image_description;
 	char *description;
-} NautilusIconCanvasItemAccessiblePrivate;
+} NemoIconCanvasItemAccessiblePrivate;
 
 typedef struct {
-	NautilusIconCanvasItem *item;
+	NemoIconCanvasItem *item;
 	gint action_number;
-} NautilusIconCanvasItemAccessibleActionContext;
+} NemoIconCanvasItemAccessibleActionContext;
 
-typedef struct {
-	EelCanvasItemAccessible parent;
-	NautilusIconCanvasItemAccessiblePrivate *priv;
-} NautilusIconCanvasItemAccessible;
+static GType nemo_icon_canvas_item_accessible_get_type (void);
 
-typedef struct {
-	EelCanvasItemAccessibleClass parent_class;
-} NautilusIconCanvasItemAccessibleClass;
-
-#define GET_ACCESSIBLE_PRIV(o) ((NautilusIconCanvasItemAccessible *) o)->priv;
+#define GET_PRIV(o) \
+	G_TYPE_INSTANCE_GET_PRIVATE(o,\
+				    nemo_icon_canvas_item_accessible_get_type (),\
+				    NemoIconCanvasItemAccessiblePrivate);
 
 /* accessible AtkAction interface */
 static gboolean
-nautilus_icon_canvas_item_accessible_idle_do_action (gpointer data)
+nemo_icon_canvas_item_accessible_idle_do_action (gpointer data)
 {
-	NautilusIconCanvasItem *item;
-	NautilusIconCanvasItemAccessibleActionContext *ctx;
-	NautilusIcon *icon;
-	NautilusIconContainer *container;
+	NemoIconCanvasItem *item;
+	NemoIconCanvasItemAccessibleActionContext *ctx;
+	NemoIcon *icon;
+	NemoIconContainer *container;
 	GList* selection;
 	GList file_list;
         GdkEventButton button_event = { 0 };
 	gint action_number;
 
-	container = NAUTILUS_ICON_CONTAINER (data);
+	container = NEMO_ICON_CONTAINER (data);
 	container->details->a11y_item_action_idle_handler = 0;
 	while (!g_queue_is_empty (container->details->a11y_item_action_queue)) {
 		ctx = g_queue_pop_head (container->details->a11y_item_action_queue);
@@ -2241,7 +2230,7 @@ nautilus_icon_canvas_item_accessible_idle_do_action (gpointer data)
         		g_signal_emit_by_name (container, "activate", &file_list);
 			break;
 		case ACTION_MENU:
-			selection = nautilus_icon_container_get_selection (container);
+			selection = nemo_icon_container_get_selection (container);
 			if (selection == NULL ||
 			    g_list_length (selection) != 1 ||
  			    selection->data != icon->data)  {
@@ -2260,37 +2249,37 @@ nautilus_icon_canvas_item_accessible_idle_do_action (gpointer data)
 }
 
 static gboolean
-nautilus_icon_canvas_item_accessible_do_action (AtkAction *accessible,
+nemo_icon_canvas_item_accessible_do_action (AtkAction *accessible,
 						int i)
 {
-	NautilusIconCanvasItem *item;
-	NautilusIconCanvasItemAccessibleActionContext *ctx;
-	NautilusIconContainer *container;
+	NemoIconCanvasItem *item;
+	NemoIconCanvasItemAccessibleActionContext *ctx;
+	NemoIconContainer *container;
 
 	g_assert (i < LAST_ACTION);
 
-	item = NAUTILUS_ICON_CANVAS_ITEM (atk_gobject_accessible_get_object (ATK_GOBJECT_ACCESSIBLE (accessible)));
+	item = NEMO_ICON_CANVAS_ITEM (atk_gobject_accessible_get_object (ATK_GOBJECT_ACCESSIBLE (accessible)));
 	if (!item) {
 		return FALSE;
 	}
 
-	container = NAUTILUS_ICON_CONTAINER (EEL_CANVAS_ITEM (item)->canvas);
+	container = NEMO_ICON_CONTAINER (EEL_CANVAS_ITEM (item)->canvas);
 	switch (i) {
 	case ACTION_OPEN:
 	case ACTION_MENU:
 		if (container->details->a11y_item_action_queue == NULL) {
 			container->details->a11y_item_action_queue = g_queue_new ();
 		}
-		ctx = g_new (NautilusIconCanvasItemAccessibleActionContext, 1);
+		ctx = g_new (NemoIconCanvasItemAccessibleActionContext, 1);
 		ctx->action_number = i;
 		ctx->item = item;
 		g_queue_push_head (container->details->a11y_item_action_queue, ctx);
 		if (container->details->a11y_item_action_idle_handler == 0) {
-			container->details->a11y_item_action_idle_handler = g_idle_add (nautilus_icon_canvas_item_accessible_idle_do_action, container);
+			container->details->a11y_item_action_idle_handler = g_idle_add (nemo_icon_canvas_item_accessible_idle_do_action, container);
 		}
 		break;
         default :
-                g_warning ("Invalid action passed to NautilusIconCanvasItemAccessible::do_action");
+                g_warning ("Invalid action passed to NemoIconCanvasItemAccessible::do_action");
                 return FALSE;
         }
 
@@ -2298,38 +2287,38 @@ nautilus_icon_canvas_item_accessible_do_action (AtkAction *accessible,
 }
 
 static int
-nautilus_icon_canvas_item_accessible_get_n_actions (AtkAction *accessible)
+nemo_icon_canvas_item_accessible_get_n_actions (AtkAction *accessible)
 {
 	return LAST_ACTION;
 }
 
 static const char *
-nautilus_icon_canvas_item_accessible_action_get_description (AtkAction *accessible,
+nemo_icon_canvas_item_accessible_action_get_description (AtkAction *accessible,
                                                              int i)
 {
-	NautilusIconCanvasItemAccessiblePrivate *priv;
+	NemoIconCanvasItemAccessiblePrivate *priv;
 
 	g_assert (i < LAST_ACTION);
 
-	priv = GET_ACCESSIBLE_PRIV (accessible);
+	priv = GET_PRIV (accessible);
 
 	if (priv->action_descriptions[i]) {
 		return priv->action_descriptions[i];
 	} else {
-		return nautilus_icon_canvas_item_accessible_action_descriptions[i];
+		return nemo_icon_canvas_item_accessible_action_descriptions[i];
 	}
 }
 
 static const char *
-nautilus_icon_canvas_item_accessible_action_get_name (AtkAction *accessible, int i)
+nemo_icon_canvas_item_accessible_action_get_name (AtkAction *accessible, int i)
 {
 	g_assert (i < LAST_ACTION);
 
-	return nautilus_icon_canvas_item_accessible_action_names[i];
+	return nemo_icon_canvas_item_accessible_action_names[i];
 }
 
 static const char *
-nautilus_icon_canvas_item_accessible_action_get_keybinding (AtkAction *accessible,
+nemo_icon_canvas_item_accessible_action_get_keybinding (AtkAction *accessible,
 							    int i)
 {
 	g_assert (i < LAST_ACTION);
@@ -2338,15 +2327,15 @@ nautilus_icon_canvas_item_accessible_action_get_keybinding (AtkAction *accessibl
 }
 
 static gboolean
-nautilus_icon_canvas_item_accessible_action_set_description (AtkAction *accessible,
+nemo_icon_canvas_item_accessible_action_set_description (AtkAction *accessible,
 							     int i,
 							     const char *description)
 {
-	NautilusIconCanvasItemAccessiblePrivate *priv;
+	NemoIconCanvasItemAccessiblePrivate *priv;
 
 	g_assert (i < LAST_ACTION);
 
-	priv = GET_ACCESSIBLE_PRIV (accessible);
+	priv = GET_PRIV (accessible);
 
 	if (priv->action_descriptions[i]) {
 		g_free (priv->action_descriptions[i]);
@@ -2357,26 +2346,26 @@ nautilus_icon_canvas_item_accessible_action_set_description (AtkAction *accessib
 }
 
 static void
-nautilus_icon_canvas_item_accessible_action_interface_init (AtkActionIface *iface)
+nemo_icon_canvas_item_accessible_action_interface_init (AtkActionIface *iface)
 {
-	iface->do_action = nautilus_icon_canvas_item_accessible_do_action;
-	iface->get_n_actions = nautilus_icon_canvas_item_accessible_get_n_actions;
-	iface->get_description = nautilus_icon_canvas_item_accessible_action_get_description;
-	iface->get_keybinding = nautilus_icon_canvas_item_accessible_action_get_keybinding;
-	iface->get_name = nautilus_icon_canvas_item_accessible_action_get_name;
-	iface->set_description = nautilus_icon_canvas_item_accessible_action_set_description;
+	iface->do_action = nemo_icon_canvas_item_accessible_do_action;
+	iface->get_n_actions = nemo_icon_canvas_item_accessible_get_n_actions;
+	iface->get_description = nemo_icon_canvas_item_accessible_action_get_description;
+	iface->get_keybinding = nemo_icon_canvas_item_accessible_action_get_keybinding;
+	iface->get_name = nemo_icon_canvas_item_accessible_action_get_name;
+	iface->set_description = nemo_icon_canvas_item_accessible_action_set_description;
 }
 
 static const gchar *
-nautilus_icon_canvas_item_accessible_get_name (AtkObject *accessible)
+nemo_icon_canvas_item_accessible_get_name (AtkObject *accessible)
 {
-	NautilusIconCanvasItem *item;
+	NemoIconCanvasItem *item;
 
 	if (accessible->name) {
 		return accessible->name;
 	}
 
-	item = NAUTILUS_ICON_CANVAS_ITEM (atk_gobject_accessible_get_object (ATK_GOBJECT_ACCESSIBLE (accessible)));
+	item = NEMO_ICON_CANVAS_ITEM (atk_gobject_accessible_get_object (ATK_GOBJECT_ACCESSIBLE (accessible)));
 	if (!item) {
 		return NULL;
 	}
@@ -2384,11 +2373,11 @@ nautilus_icon_canvas_item_accessible_get_name (AtkObject *accessible)
 }
 
 static const gchar*
-nautilus_icon_canvas_item_accessible_get_description (AtkObject *accessible)
+nemo_icon_canvas_item_accessible_get_description (AtkObject *accessible)
 {
-	NautilusIconCanvasItem *item;
+	NemoIconCanvasItem *item;
 
-	item = NAUTILUS_ICON_CANVAS_ITEM (atk_gobject_accessible_get_object (ATK_GOBJECT_ACCESSIBLE (accessible)));
+	item = NEMO_ICON_CANVAS_ITEM (atk_gobject_accessible_get_object (ATK_GOBJECT_ACCESSIBLE (accessible)));
 	if (!item) {
 		return NULL;
 	}
@@ -2397,11 +2386,11 @@ nautilus_icon_canvas_item_accessible_get_description (AtkObject *accessible)
 }
 
 static AtkObject *
-nautilus_icon_canvas_item_accessible_get_parent (AtkObject *accessible)
+nemo_icon_canvas_item_accessible_get_parent (AtkObject *accessible)
 {
-	NautilusIconCanvasItem *item;
+	NemoIconCanvasItem *item;
 	
-	item = NAUTILUS_ICON_CANVAS_ITEM (atk_gobject_accessible_get_object (ATK_GOBJECT_ACCESSIBLE (accessible)));
+	item = NEMO_ICON_CANVAS_ITEM (atk_gobject_accessible_get_object (ATK_GOBJECT_ACCESSIBLE (accessible)));
 	if (!item) {
 		return NULL;
 	}
@@ -2410,20 +2399,20 @@ nautilus_icon_canvas_item_accessible_get_parent (AtkObject *accessible)
 }
 
 static int
-nautilus_icon_canvas_item_accessible_get_index_in_parent (AtkObject *accessible)
+nemo_icon_canvas_item_accessible_get_index_in_parent (AtkObject *accessible)
 {
-	NautilusIconCanvasItem *item;
-	NautilusIconContainer *container;
+	NemoIconCanvasItem *item;
+	NemoIconContainer *container;
 	GList *l;
-	NautilusIcon *icon;
+	NemoIcon *icon;
 	int i;
 
-	item = NAUTILUS_ICON_CANVAS_ITEM (atk_gobject_accessible_get_object (ATK_GOBJECT_ACCESSIBLE (accessible)));
+	item = NEMO_ICON_CANVAS_ITEM (atk_gobject_accessible_get_object (ATK_GOBJECT_ACCESSIBLE (accessible)));
 	if (!item) {
 		return -1;
 	}
 	
-	container = NAUTILUS_ICON_CONTAINER (EEL_CANVAS_ITEM (item)->canvas);
+	container = NEMO_ICON_CONTAINER (EEL_CANVAS_ITEM (item)->canvas);
 	
 	l = container->details->icons;
 	i = 0;
@@ -2442,26 +2431,26 @@ nautilus_icon_canvas_item_accessible_get_index_in_parent (AtkObject *accessible)
 }
 
 static const gchar *
-nautilus_icon_canvas_item_accessible_get_image_description (AtkImage *image)
+nemo_icon_canvas_item_accessible_get_image_description (AtkImage *image)
 {
-	NautilusIconCanvasItemAccessiblePrivate *priv;
-	NautilusIconCanvasItem *item;
-	NautilusIcon *icon;
-	NautilusIconContainer *container;
+	NemoIconCanvasItemAccessiblePrivate *priv;
+	NemoIconCanvasItem *item;
+	NemoIcon *icon;
+	NemoIconContainer *container;
 	char *description;
 
-	priv = GET_ACCESSIBLE_PRIV (image);
+	priv = GET_PRIV (image);
 
 	if (priv->image_description) {
 		return priv->image_description;
 	} else {
-		item = NAUTILUS_ICON_CANVAS_ITEM (atk_gobject_accessible_get_object (ATK_GOBJECT_ACCESSIBLE (image)));
+		item = NEMO_ICON_CANVAS_ITEM (atk_gobject_accessible_get_object (ATK_GOBJECT_ACCESSIBLE (image)));
 		if (item == NULL) {
 			return NULL;
 		}
 		icon = item->user_data;
-		container = NAUTILUS_ICON_CONTAINER (EEL_CANVAS_ITEM (item)->canvas);
-		description = nautilus_icon_container_get_icon_description (container, icon->data);
+		container = NEMO_ICON_CONTAINER (EEL_CANVAS_ITEM (item)->canvas);
+		description = nemo_icon_container_get_icon_description (container, icon->data);
 		g_free (priv->description);
 		priv->description = description;
 		return priv->description;
@@ -2469,14 +2458,14 @@ nautilus_icon_canvas_item_accessible_get_image_description (AtkImage *image)
 }
 
 static void
-nautilus_icon_canvas_item_accessible_get_image_size
+nemo_icon_canvas_item_accessible_get_image_size
 	(AtkImage *image, 
 	 gint     *width,
 	 gint     *height)
 {
-	NautilusIconCanvasItem *item;
+	NemoIconCanvasItem *item;
 
-	item = NAUTILUS_ICON_CANVAS_ITEM (atk_gobject_accessible_get_object (ATK_GOBJECT_ACCESSIBLE (image)));
+	item = NEMO_ICON_CANVAS_ITEM (atk_gobject_accessible_get_object (ATK_GOBJECT_ACCESSIBLE (image)));
 
 	if (!item || !item->details->pixbuf) {
 		*width = *height = 0;
@@ -2487,16 +2476,16 @@ nautilus_icon_canvas_item_accessible_get_image_size
 }
 
 static void
-nautilus_icon_canvas_item_accessible_get_image_position
+nemo_icon_canvas_item_accessible_get_image_position
 	(AtkImage		 *image,
 	 gint                    *x,
 	 gint	                 *y,
 	 AtkCoordType	         coord_type)
 {
-	NautilusIconCanvasItem *item;
+	NemoIconCanvasItem *item;
 	gint x_offset, y_offset, itmp;
 
-	item = NAUTILUS_ICON_CANVAS_ITEM (atk_gobject_accessible_get_object (ATK_GOBJECT_ACCESSIBLE (image)));
+	item = NEMO_ICON_CANVAS_ITEM (atk_gobject_accessible_get_object (ATK_GOBJECT_ACCESSIBLE (image)));
 	if (!item) {
 		return;
 	}
@@ -2524,12 +2513,12 @@ nautilus_icon_canvas_item_accessible_get_image_position
 }
 
 static gboolean
-nautilus_icon_canvas_item_accessible_set_image_description (AtkImage    *image,
+nemo_icon_canvas_item_accessible_set_image_description (AtkImage    *image,
 							    const gchar *description)
 {
-	NautilusIconCanvasItemAccessiblePrivate *priv;
+	NemoIconCanvasItemAccessiblePrivate *priv;
 
-	priv = GET_ACCESSIBLE_PRIV (image);
+	priv = GET_PRIV (image);
 
 	g_free (priv->image_description);
 	priv->image_description = g_strdup (description);
@@ -2538,23 +2527,23 @@ nautilus_icon_canvas_item_accessible_set_image_description (AtkImage    *image,
 }
 
 static void
-nautilus_icon_canvas_item_accessible_image_interface_init (AtkImageIface *iface)
+nemo_icon_canvas_item_accessible_image_interface_init (AtkImageIface *iface)
 {
-	iface->get_image_description = nautilus_icon_canvas_item_accessible_get_image_description;
-	iface->set_image_description = nautilus_icon_canvas_item_accessible_set_image_description;
-	iface->get_image_size        = nautilus_icon_canvas_item_accessible_get_image_size;
-	iface->get_image_position    = nautilus_icon_canvas_item_accessible_get_image_position;
+	iface->get_image_description = nemo_icon_canvas_item_accessible_get_image_description;
+	iface->set_image_description = nemo_icon_canvas_item_accessible_set_image_description;
+	iface->get_image_size        = nemo_icon_canvas_item_accessible_get_image_size;
+	iface->get_image_position    = nemo_icon_canvas_item_accessible_get_image_position;
 }
 
 /* accessible text interface */
 static gint
-nautilus_icon_canvas_item_accessible_get_offset_at_point (AtkText	 *text,
+nemo_icon_canvas_item_accessible_get_offset_at_point (AtkText	 *text,
                                                           gint           x,
                                                           gint           y,
                                                           AtkCoordType coords)
 {
 	gint real_x, real_y, real_width, real_height;
-	NautilusIconCanvasItem *item;
+	NemoIconCanvasItem *item;
 	gint editable_height;
 	gint offset = 0;
 	gint index;
@@ -2571,7 +2560,7 @@ nautilus_icon_canvas_item_accessible_get_offset_at_point (AtkText	 *text,
 	x -= real_x;
 	y -= real_y; 
 
-	item = NAUTILUS_ICON_CANVAS_ITEM (atk_gobject_accessible_get_object (ATK_GOBJECT_ACCESSIBLE (text)));
+	item = NEMO_ICON_CANVAS_ITEM (atk_gobject_accessible_get_object (ATK_GOBJECT_ACCESSIBLE (text)));
 
 	if (item->details->pixbuf) {
 		y -= gdk_pixbuf_get_height (item->details->pixbuf);
@@ -2653,7 +2642,7 @@ nautilus_icon_canvas_item_accessible_get_offset_at_point (AtkText	 *text,
 }
 
 static void
-nautilus_icon_canvas_item_accessible_get_character_extents (AtkText	   *text,
+nemo_icon_canvas_item_accessible_get_character_extents (AtkText	   *text,
                                                             gint	   offset,
                                                             gint	   *x,
                                                             gint	   *y,
@@ -2665,7 +2654,7 @@ nautilus_icon_canvas_item_accessible_get_character_extents (AtkText	   *text,
 	gint len, byte_offset;
 	gint editable_height;
 	gchar *icon_text;
-	NautilusIconCanvasItem *item;
+	NemoIconCanvasItem *item;
 	PangoLayout *layout, *editable_layout, *additional_layout;
 	PangoRectangle rect;
 	PangoRectangle rect0;
@@ -2673,7 +2662,7 @@ nautilus_icon_canvas_item_accessible_get_character_extents (AtkText	   *text,
 	gint text_offset;
 
 	atk_component_get_position (ATK_COMPONENT (text), &pos_x, &pos_y, coords);
-	item = NAUTILUS_ICON_CANVAS_ITEM (atk_gobject_accessible_get_object (ATK_GOBJECT_ACCESSIBLE (text)));
+	item = NEMO_ICON_CANVAS_ITEM (atk_gobject_accessible_get_object (ATK_GOBJECT_ACCESSIBLE (text)));
 
 	if (item->details->pixbuf) {
 		pos_y += gdk_pixbuf_get_height (item->details->pixbuf);
@@ -2731,7 +2720,7 @@ nautilus_icon_canvas_item_accessible_get_character_extents (AtkText	   *text,
 }
 
 static void
-nautilus_icon_canvas_item_accessible_text_interface_init (AtkTextIface *iface)
+nemo_icon_canvas_item_accessible_text_interface_init (AtkTextIface *iface)
 {
  	iface->get_text                = eel_accessibility_text_get_text;
 	iface->get_character_at_offset = eel_accessibility_text_get_character_at_offset;
@@ -2739,40 +2728,46 @@ nautilus_icon_canvas_item_accessible_text_interface_init (AtkTextIface *iface)
         iface->get_text_at_offset      = eel_accessibility_text_get_text_at_offset;
    	iface->get_text_after_offset   = eel_accessibility_text_get_text_after_offset;
       	iface->get_character_count     = eel_accessibility_text_get_character_count;
-	iface->get_character_extents   = nautilus_icon_canvas_item_accessible_get_character_extents;
-	iface->get_offset_at_point     = nautilus_icon_canvas_item_accessible_get_offset_at_point;
+	iface->get_character_extents   = nemo_icon_canvas_item_accessible_get_character_extents;
+	iface->get_offset_at_point     = nemo_icon_canvas_item_accessible_get_offset_at_point;
 }
 
-static GType nautilus_icon_canvas_item_accessible_get_type (void);
+typedef struct {
+	AtkGObjectAccessible parent;
+} NemoIconCanvasItemAccessible;
 
-G_DEFINE_TYPE_WITH_CODE (NautilusIconCanvasItemAccessible,
-			 nautilus_icon_canvas_item_accessible,
-			 eel_canvas_item_accessible_get_type (),
+typedef struct {
+	AtkGObjectAccessibleClass parent_class;
+} NemoIconCanvasItemAccessibleClass;
+
+G_DEFINE_TYPE_WITH_CODE (NemoIconCanvasItemAccessible,
+			 nemo_icon_canvas_item_accessible,
+			 ATK_TYPE_GOBJECT_ACCESSIBLE,
 			 G_IMPLEMENT_INTERFACE (ATK_TYPE_IMAGE,
-						nautilus_icon_canvas_item_accessible_image_interface_init)
+						nemo_icon_canvas_item_accessible_image_interface_init)
 			 G_IMPLEMENT_INTERFACE (ATK_TYPE_TEXT,
-						nautilus_icon_canvas_item_accessible_text_interface_init)
+						nemo_icon_canvas_item_accessible_text_interface_init)
 			 G_IMPLEMENT_INTERFACE (ATK_TYPE_ACTION,
-						nautilus_icon_canvas_item_accessible_action_interface_init));
+						nemo_icon_canvas_item_accessible_action_interface_init));
 
 static AtkStateSet*
-nautilus_icon_canvas_item_accessible_ref_state_set (AtkObject *accessible)
+nemo_icon_canvas_item_accessible_ref_state_set (AtkObject *accessible)
 {
 	AtkStateSet *state_set;
-	NautilusIconCanvasItem *item;
-	NautilusIconContainer *container;
-	NautilusIcon *icon;
+	NemoIconCanvasItem *item;
+	NemoIconContainer *container;
+	NemoIcon *icon;
 	GList *l;
 	gboolean one_item_selected;
 
-	state_set = ATK_OBJECT_CLASS (nautilus_icon_canvas_item_accessible_parent_class)->ref_state_set (accessible);
+	state_set = ATK_OBJECT_CLASS (nemo_icon_canvas_item_accessible_parent_class)->ref_state_set (accessible);
 
-	item = NAUTILUS_ICON_CANVAS_ITEM (atk_gobject_accessible_get_object (ATK_GOBJECT_ACCESSIBLE (accessible)));
+	item = NEMO_ICON_CANVAS_ITEM (atk_gobject_accessible_get_object (ATK_GOBJECT_ACCESSIBLE (accessible)));
 	if (!item) {
 		atk_state_set_add_state (state_set, ATK_STATE_DEFUNCT);
 		return state_set;
 	}
-	container = NAUTILUS_ICON_CONTAINER (EEL_CANVAS_ITEM (item)->canvas);
+	container = NEMO_ICON_CONTAINER (EEL_CANVAS_ITEM (item)->canvas);
 	if (item->details->is_highlighted_as_keyboard_focus) {
 		atk_state_set_add_state (state_set, ATK_STATE_FOCUSED);
 	} else if (!container->details->keyboard_focus) {
@@ -2805,12 +2800,12 @@ nautilus_icon_canvas_item_accessible_ref_state_set (AtkObject *accessible)
 }
 
 static void
-nautilus_icon_canvas_item_accessible_finalize (GObject *object)
+nemo_icon_canvas_item_accessible_finalize (GObject *object)
 {
-	NautilusIconCanvasItemAccessiblePrivate *priv;
+	NemoIconCanvasItemAccessiblePrivate *priv;
 	int i;
 
-	priv = GET_ACCESSIBLE_PRIV (object);
+	priv = GET_PRIV (object);
 
 	for (i = 0; i < LAST_ACTION; i++) {
 		g_free (priv->action_descriptions[i]);
@@ -2818,59 +2813,57 @@ nautilus_icon_canvas_item_accessible_finalize (GObject *object)
 	g_free (priv->image_description);
 	g_free (priv->description);
 
-        G_OBJECT_CLASS (nautilus_icon_canvas_item_accessible_parent_class)->finalize (object);
+        G_OBJECT_CLASS (nemo_icon_canvas_item_accessible_parent_class)->finalize (object);
 }
 
 static void
-nautilus_icon_canvas_item_accessible_initialize (AtkObject *accessible,
+nemo_icon_canvas_item_accessible_initialize (AtkObject *accessible,
 						 gpointer widget)
 {
-	ATK_OBJECT_CLASS (nautilus_icon_canvas_item_accessible_parent_class)->initialize (accessible, widget);
+	ATK_OBJECT_CLASS (nemo_icon_canvas_item_accessible_parent_class)->initialize (accessible, widget);
 
 	atk_object_set_role (accessible, ATK_ROLE_ICON);
 }
 
 static void
-nautilus_icon_canvas_item_accessible_class_init (NautilusIconCanvasItemAccessibleClass *klass)
+nemo_icon_canvas_item_accessible_class_init (NemoIconCanvasItemAccessibleClass *klass)
 {
 	AtkObjectClass *aclass = ATK_OBJECT_CLASS (klass);
 	GObjectClass *oclass = G_OBJECT_CLASS (klass);
 
-	oclass->finalize = nautilus_icon_canvas_item_accessible_finalize;
+	oclass->finalize = nemo_icon_canvas_item_accessible_finalize;
 
-	aclass->initialize = nautilus_icon_canvas_item_accessible_initialize;
+	aclass->initialize = nemo_icon_canvas_item_accessible_initialize;
 
-	aclass->get_name = nautilus_icon_canvas_item_accessible_get_name;
-	aclass->get_description = nautilus_icon_canvas_item_accessible_get_description;
-	aclass->get_parent = nautilus_icon_canvas_item_accessible_get_parent;
-	aclass->get_index_in_parent = nautilus_icon_canvas_item_accessible_get_index_in_parent;
-	aclass->ref_state_set = nautilus_icon_canvas_item_accessible_ref_state_set;
+	aclass->get_name = nemo_icon_canvas_item_accessible_get_name;
+	aclass->get_description = nemo_icon_canvas_item_accessible_get_description;
+	aclass->get_parent = nemo_icon_canvas_item_accessible_get_parent;
+	aclass->get_index_in_parent = nemo_icon_canvas_item_accessible_get_index_in_parent;
+	aclass->ref_state_set = nemo_icon_canvas_item_accessible_ref_state_set;
 
-	g_type_class_add_private (klass, sizeof (NautilusIconCanvasItemAccessiblePrivate));
+	g_type_class_add_private (klass, sizeof (NemoIconCanvasItemAccessiblePrivate));
 }
 
 static void
-nautilus_icon_canvas_item_accessible_init (NautilusIconCanvasItemAccessible *self)
+nemo_icon_canvas_item_accessible_init (NemoIconCanvasItemAccessible *self)
 {
-	self->priv = G_TYPE_INSTANCE_GET_PRIVATE (self, nautilus_icon_canvas_item_accessible_get_type (),
-						  NautilusIconCanvasItemAccessiblePrivate);
 }
 
 /* dummy typedef */
-typedef AtkObjectFactory      NautilusIconCanvasItemAccessibleFactory;
-typedef AtkObjectFactoryClass NautilusIconCanvasItemAccessibleFactoryClass;
+typedef AtkObjectFactory      NemoIconCanvasItemAccessibleFactory;
+typedef AtkObjectFactoryClass NemoIconCanvasItemAccessibleFactoryClass;
 
-G_DEFINE_TYPE (NautilusIconCanvasItemAccessibleFactory, nautilus_icon_canvas_item_accessible_factory,
+G_DEFINE_TYPE (NemoIconCanvasItemAccessibleFactory, nemo_icon_canvas_item_accessible_factory,
 	       ATK_TYPE_OBJECT_FACTORY);
 
 static AtkObject *
-nautilus_icon_canvas_item_accessible_factory_create_accessible (GObject *for_object)
+nemo_icon_canvas_item_accessible_factory_create_accessible (GObject *for_object)
 {
 	AtkObject *accessible;
-	NautilusIconCanvasItem *item;
+	NemoIconCanvasItem *item;
 	GString *item_text;
 
-	item = NAUTILUS_ICON_CANVAS_ITEM (for_object);
+	item = NEMO_ICON_CANVAS_ITEM (for_object);
 	g_assert (item != NULL);
 
 	item_text = g_string_new (NULL);
@@ -2886,26 +2879,26 @@ nautilus_icon_canvas_item_accessible_factory_create_accessible (GObject *for_obj
 				   item_text->str);
 	g_string_free (item_text, TRUE);
 
-	accessible = g_object_new (nautilus_icon_canvas_item_accessible_get_type (), NULL);
+	accessible = g_object_new (nemo_icon_canvas_item_accessible_get_type (), NULL);
 	atk_object_initialize (accessible, for_object);
 
 	return accessible;
 }
 
 static GType
-nautilus_icon_canvas_item_accessible_factory_get_accessible_type (void)
+nemo_icon_canvas_item_accessible_factory_get_accessible_type (void)
 {
-	return nautilus_icon_canvas_item_accessible_get_type ();
+	return nemo_icon_canvas_item_accessible_get_type ();
 }
 
 static void
-nautilus_icon_canvas_item_accessible_factory_init (NautilusIconCanvasItemAccessibleFactory *self)
+nemo_icon_canvas_item_accessible_factory_init (NemoIconCanvasItemAccessibleFactory *self)
 {
 }
 
 static void
-nautilus_icon_canvas_item_accessible_factory_class_init (NautilusIconCanvasItemAccessibleFactoryClass *klass)
+nemo_icon_canvas_item_accessible_factory_class_init (NemoIconCanvasItemAccessibleFactoryClass *klass)
 {
-	klass->create_accessible = nautilus_icon_canvas_item_accessible_factory_create_accessible;
-	klass->get_accessible_type = nautilus_icon_canvas_item_accessible_factory_get_accessible_type;
+	klass->create_accessible = nemo_icon_canvas_item_accessible_factory_create_accessible;
+	klass->get_accessible_type = nemo_icon_canvas_item_accessible_factory_get_accessible_type;
 }

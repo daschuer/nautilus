@@ -1,5 +1,5 @@
 /*
- *  nautilus-info-provider.h - Type definitions for Nautilus extensions
+ *  nemo-info-provider.h - Type definitions for Nemo extensions
  * 
  *  Copyright (C) 2003 Novell, Inc.
  *
@@ -21,45 +21,45 @@
  * 
  */
 
-/* This interface is implemented by Nautilus extensions that want to 
- * provide information about files.  Extensions are called when Nautilus 
- * needs information about a file.  They are passed a NautilusFileInfo 
+/* This interface is implemented by Nemo extensions that want to 
+ * provide information about files.  Extensions are called when Nemo 
+ * needs information about a file.  They are passed a NemoFileInfo 
  * object which should be filled with relevant information */
 
-#ifndef NAUTILUS_EXTENSION_TYPES_H
-#define NAUTILUS_EXTENSION_TYPES_H
+#ifndef NEMO_EXTENSION_TYPES_H
+#define NEMO_EXTENSION_TYPES_H
 
 #include <glib-object.h>
 
 G_BEGIN_DECLS
 
-#define NAUTILUS_TYPE_OPERATION_RESULT (nautilus_operation_result_get_type ())
+#define NEMO_TYPE_OPERATION_RESULT (nemo_operation_result_get_type ())
 
 /* Handle for asynchronous interfaces.  These are opaque handles that must
  * be unique within an extension object.  These are returned by operations
- * that return NAUTILUS_OPERATION_IN_PROGRESS */
-typedef struct _NautilusOperationHandle NautilusOperationHandle;
+ * that return NEMO_OPERATION_IN_PROGRESS */
+typedef struct _NemoOperationHandle NemoOperationHandle;
 
 typedef enum {
 	/* Returned if the call succeeded, and the extension is done 
 	 * with the request */
-	NAUTILUS_OPERATION_COMPLETE,
+	NEMO_OPERATION_COMPLETE,
 
 	/* Returned if the call failed */
-	NAUTILUS_OPERATION_FAILED,
+	NEMO_OPERATION_FAILED,
 
 	/* Returned if the extension has begun an async operation. 
 	 * If this is returned, the extension must set the handle 
 	 * parameter and call the callback closure when the 
 	 * operation is complete. */
-	NAUTILUS_OPERATION_IN_PROGRESS
-} NautilusOperationResult;
+	NEMO_OPERATION_IN_PROGRESS
+} NemoOperationResult;
 
-GType nautilus_operation_result_get_type (void);
+GType nemo_operation_result_get_type (void);
 
-void nautilus_module_initialize (GTypeModule  *module);
-void nautilus_module_shutdown   (void);
-void nautilus_module_list_types (const GType **types,
+void nemo_module_initialize (GTypeModule  *module);
+void nemo_module_shutdown   (void);
+void nemo_module_list_types (const GType **types,
 				 int          *num_types);
 
 G_END_DECLS

@@ -22,11 +22,11 @@
    Author: Darin Adler <darin@bentspoon.com>
 */
 
-#ifndef NAUTILUS_DEFAULT_FILE_ICON_H
-#define NAUTILUS_DEFAULT_FILE_ICON_H
+#ifndef NEMO_DEFAULT_FILE_ICON_H
+#define NEMO_DEFAULT_FILE_ICON_H
 
-extern const int nautilus_default_file_icon_width;
-extern const int nautilus_default_file_icon_height;
-extern const unsigned char nautilus_default_file_icon[];
+extern const int nemo_default_file_icon_width;
+extern const int nemo_default_file_icon_height;
+extern const unsigned char nemo_default_file_icon[];
 
-#endif /* NAUTILUS_DEFAULT_FILE_ICON_H */
+#endif /* NEMO_DEFAULT_FILE_ICON_H */

@@ -1,16 +1,16 @@
 /* -*- Mode: C; indent-tabs-mode: t; c-basic-offset: 8; tab-width: 8 -*- */
 
 /*
- * Nautilus
+ * Nemo
  *
  * Copyright (C) 2011, Red Hat, Inc.
  *
- * Nautilus is free software; you can redistribute it and/or
+ * Nemo is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
  * published by the Free Software Foundation; either version 2 of the
  * License, or (at your option) any later version.
  *
- * Nautilus is distributed in the hope that it will be useful,
+ * Nemo is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
  * General Public License for more details.
@@ -25,16 +25,16 @@
 
 #include <config.h>
 
-#include "nautilus-toolbar.h"
+#include "nemo-toolbar.h"
 
-#include "nautilus-location-bar.h"
-#include "nautilus-pathbar.h"
-#include "nautilus-window-private.h"
+#include "nemo-location-bar.h"
+#include "nemo-pathbar.h"
+#include "nemo-window-private.h"
 
-#include <libnautilus-private/nautilus-global-preferences.h>
-#include <libnautilus-private/nautilus-ui-utilities.h>
+#include <libnemo-private/nemo-global-preferences.h>
+#include <libnemo-private/nemo-ui-utilities.h>
 
-struct _NautilusToolbarPriv {
+struct _NemoToolbarPriv {
 	GtkWidget *toolbar;
 
 	GtkActionGroup *action_group;
@@ -59,15 +59,15 @@ enum {
 
 static GParamSpec *properties[NUM_PROPERTIES] = { NULL, };
 
-G_DEFINE_TYPE (NautilusToolbar, nautilus_toolbar, GTK_TYPE_BOX);
+G_DEFINE_TYPE (NemoToolbar, nemo_toolbar, GTK_TYPE_BOX);
 
 static void
-toolbar_update_appearance (NautilusToolbar *self)
+toolbar_update_appearance (NemoToolbar *self)
 {
 	gboolean show_location_entry;
 
 	show_location_entry = self->priv->show_location_entry ||
-		g_settings_get_boolean (nautilus_preferences, NAUTILUS_PREFERENCES_ALWAYS_USE_LOCATION_ENTRY);
+		g_settings_get_boolean (nemo_preferences, NEMO_PREFERENCES_ALWAYS_USE_LOCATION_ENTRY);
 
 	gtk_widget_set_visible (self->priv->toolbar,
 				self->priv->show_main_bar);
@@ -82,21 +82,21 @@ toolbar_update_appearance (NautilusToolbar *self)
 }
 
 static void
-nautilus_toolbar_constructed (GObject *obj)
+nemo_toolbar_constructed (GObject *obj)
 {
-	NautilusToolbar *self = NAUTILUS_TOOLBAR (obj);
+	NemoToolbar *self = NEMO_TOOLBAR (obj);
 	GtkToolItem *item;
 	GtkWidget *hbox, *toolbar, *search;
 	GtkStyleContext *context;
 
-	G_OBJECT_CLASS (nautilus_toolbar_parent_class)->constructed (obj);
+	G_OBJECT_CLASS (nemo_toolbar_parent_class)->constructed (obj);
 
 	gtk_style_context_set_junction_sides (gtk_widget_get_style_context (GTK_WIDGET (self)),
 					      GTK_JUNCTION_BOTTOM);
 
 	/* add the UI */
 	self->priv->ui_manager = gtk_ui_manager_new ();
-	gtk_ui_manager_add_ui_from_resource (self->priv->ui_manager, "/org/gnome/nautilus/nautilus-toolbar-ui.xml", NULL);
+	gtk_ui_manager_add_ui_from_resource (self->priv->ui_manager, "/org/gnome/nemo/nemo-toolbar-ui.xml", NULL);
 	gtk_ui_manager_insert_action_group (self->priv->ui_manager, self->priv->action_group, 0);
 
 	toolbar = gtk_ui_manager_get_widget (self->priv->ui_manager, "/Toolbar");
@@ -108,7 +108,7 @@ nautilus_toolbar_constructed (GObject *obj)
 
 	search = gtk_ui_manager_get_widget (self->priv->ui_manager, "/Toolbar/Search");
 	gtk_style_context_add_class (gtk_widget_get_style_context (search), GTK_STYLE_CLASS_RAISED);
-	gtk_widget_set_name (search, "nautilus-search-button");
+	gtk_widget_set_name (search, "nemo-search-button");
 
 	gtk_box_pack_start (GTK_BOX (self), self->priv->toolbar, TRUE, TRUE, 0);
 	gtk_widget_show_all (self->priv->toolbar);
@@ -117,11 +117,11 @@ nautilus_toolbar_constructed (GObject *obj)
 	gtk_widget_show (hbox);
 
 	/* regular path bar */
-	self->priv->path_bar = g_object_new (NAUTILUS_TYPE_PATH_BAR, NULL);
+	self->priv->path_bar = g_object_new (NEMO_TYPE_PATH_BAR, NULL);
 	gtk_box_pack_start (GTK_BOX (hbox), self->priv->path_bar, TRUE, TRUE, 0);
 
 	/* entry-like location bar */
-	self->priv->location_bar = nautilus_location_bar_new ();
+	self->priv->location_bar = nemo_location_bar_new ();
 	gtk_box_pack_start (GTK_BOX (hbox), self->priv->location_bar, TRUE, TRUE, 0);
 
 	item = gtk_tool_item_new ();
@@ -131,31 +131,31 @@ nautilus_toolbar_constructed (GObject *obj)
 	gtk_widget_show (GTK_WIDGET (item));
 
 	/* search bar */
-	self->priv->search_bar = nautilus_search_bar_new ();
+	self->priv->search_bar = nemo_search_bar_new ();
 	gtk_box_pack_start (GTK_BOX (self), self->priv->search_bar, TRUE, TRUE, 0);
 
-	g_signal_connect_swapped (nautilus_preferences,
-				  "changed::" NAUTILUS_PREFERENCES_ALWAYS_USE_LOCATION_ENTRY,
+	g_signal_connect_swapped (nemo_preferences,
+				  "changed::" NEMO_PREFERENCES_ALWAYS_USE_LOCATION_ENTRY,
 				  G_CALLBACK (toolbar_update_appearance), self);
 
 	toolbar_update_appearance (self);
 }
 
 static void
-nautilus_toolbar_init (NautilusToolbar *self)
+nemo_toolbar_init (NemoToolbar *self)
 {
-	self->priv = G_TYPE_INSTANCE_GET_PRIVATE (self, NAUTILUS_TYPE_TOOLBAR,
-						  NautilusToolbarPriv);
+	self->priv = G_TYPE_INSTANCE_GET_PRIVATE (self, NEMO_TYPE_TOOLBAR,
+						  NemoToolbarPriv);
 	self->priv->show_main_bar = TRUE;	
 }
 
 static void
-nautilus_toolbar_get_property (GObject *object,
+nemo_toolbar_get_property (GObject *object,
 			       guint property_id,
 			       GValue *value,
 			       GParamSpec *pspec)
 {
-	NautilusToolbar *self = NAUTILUS_TOOLBAR (object);
+	NemoToolbar *self = NEMO_TOOLBAR (object);
 
 	switch (property_id) {
 	case PROP_SHOW_LOCATION_ENTRY:
@@ -174,25 +174,25 @@ nautilus_toolbar_get_property (GObject *object,
 }
 
 static void
-nautilus_toolbar_set_property (GObject *object,
+nemo_toolbar_set_property (GObject *object,
 			       guint property_id,
 			       const GValue *value,
 			       GParamSpec *pspec)
 {
-	NautilusToolbar *self = NAUTILUS_TOOLBAR (object);
+	NemoToolbar *self = NEMO_TOOLBAR (object);
 
 	switch (property_id) {
 	case PROP_ACTION_GROUP:
 		self->priv->action_group = g_value_dup_object (value);
 		break;
 	case PROP_SHOW_LOCATION_ENTRY:
-		nautilus_toolbar_set_show_location_entry (self, g_value_get_boolean (value));
+		nemo_toolbar_set_show_location_entry (self, g_value_get_boolean (value));
 		break;
 	case PROP_SHOW_SEARCH_BAR:
-		nautilus_toolbar_set_show_search_bar (self, g_value_get_boolean (value));
+		nemo_toolbar_set_show_search_bar (self, g_value_get_boolean (value));
 		break;
 	case PROP_SHOW_MAIN_BAR:
-		nautilus_toolbar_set_show_main_bar (self, g_value_get_boolean (value));
+		nemo_toolbar_set_show_main_bar (self, g_value_get_boolean (value));
 		break;
 	default:
 		G_OBJECT_WARN_INVALID_PROPERTY_ID (object, property_id, pspec);
@@ -201,29 +201,29 @@ nautilus_toolbar_set_property (GObject *object,
 }
 
 static void
-nautilus_toolbar_dispose (GObject *obj)
+nemo_toolbar_dispose (GObject *obj)
 {
-	NautilusToolbar *self = NAUTILUS_TOOLBAR (obj);
+	NemoToolbar *self = NEMO_TOOLBAR (obj);
 
 	g_clear_object (&self->priv->ui_manager);
 	g_clear_object (&self->priv->action_group);
 
-	g_signal_handlers_disconnect_by_func (nautilus_preferences,
+	g_signal_handlers_disconnect_by_func (nemo_preferences,
 					      toolbar_update_appearance, self);
 
-	G_OBJECT_CLASS (nautilus_toolbar_parent_class)->dispose (obj);
+	G_OBJECT_CLASS (nemo_toolbar_parent_class)->dispose (obj);
 }
 
 static void
-nautilus_toolbar_class_init (NautilusToolbarClass *klass)
+nemo_toolbar_class_init (NemoToolbarClass *klass)
 {
 	GObjectClass *oclass;
 
 	oclass = G_OBJECT_CLASS (klass);
-	oclass->get_property = nautilus_toolbar_get_property;
-	oclass->set_property = nautilus_toolbar_set_property;
-	oclass->constructed = nautilus_toolbar_constructed;
-	oclass->dispose = nautilus_toolbar_dispose;
+	oclass->get_property = nemo_toolbar_get_property;
+	oclass->set_property = nemo_toolbar_set_property;
+	oclass->constructed = nemo_toolbar_constructed;
+	oclass->dispose = nemo_toolbar_dispose;
 
 	properties[PROP_ACTION_GROUP] =
 		g_param_spec_object ("action-group",
@@ -251,39 +251,39 @@ nautilus_toolbar_class_init (NautilusToolbarClass *klass)
 				      TRUE,
 				      G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS);
 	
-	g_type_class_add_private (klass, sizeof (NautilusToolbarClass));
+	g_type_class_add_private (klass, sizeof (NemoToolbarClass));
 	g_object_class_install_properties (oclass, NUM_PROPERTIES, properties);
 }
 
 GtkWidget *
-nautilus_toolbar_new (GtkActionGroup *action_group)
+nemo_toolbar_new (GtkActionGroup *action_group)
 {
-	return g_object_new (NAUTILUS_TYPE_TOOLBAR,
+	return g_object_new (NEMO_TYPE_TOOLBAR,
 			     "action-group", action_group,
 			     "orientation", GTK_ORIENTATION_VERTICAL,
 			     NULL);
 }
 
 GtkWidget *
-nautilus_toolbar_get_path_bar (NautilusToolbar *self)
+nemo_toolbar_get_path_bar (NemoToolbar *self)
 {
 	return self->priv->path_bar;
 }
 
 GtkWidget *
-nautilus_toolbar_get_location_bar (NautilusToolbar *self)
+nemo_toolbar_get_location_bar (NemoToolbar *self)
 {
 	return self->priv->location_bar;
 }
 
 GtkWidget *
-nautilus_toolbar_get_search_bar (NautilusToolbar *self)
+nemo_toolbar_get_search_bar (NemoToolbar *self)
 {
 	return self->priv->search_bar;
 }
 
 void
-nautilus_toolbar_set_show_main_bar (NautilusToolbar *self,
+nemo_toolbar_set_show_main_bar (NemoToolbar *self,
 				    gboolean show_main_bar)
 {
 	if (show_main_bar != self->priv->show_main_bar) {
@@ -295,7 +295,7 @@ nautilus_toolbar_set_show_main_bar (NautilusToolbar *self,
 }
 
 void
-nautilus_toolbar_set_show_location_entry (NautilusToolbar *self,
+nemo_toolbar_set_show_location_entry (NemoToolbar *self,
 					  gboolean show_location_entry)
 {
 	if (show_location_entry != self->priv->show_location_entry) {
@@ -307,7 +307,7 @@ nautilus_toolbar_set_show_location_entry (NautilusToolbar *self,
 }
 
 void
-nautilus_toolbar_set_show_search_bar (NautilusToolbar *self,
+nemo_toolbar_set_show_search_bar (NemoToolbar *self,
 				      gboolean show_search_bar)
 {
 	if (show_search_bar != self->priv->show_search_bar) {

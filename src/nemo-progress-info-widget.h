@@ -1,6 +1,6 @@
 /* -*- Mode: C; indent-tabs-mode: t; c-basic-offset: 8; tab-width: 8 -*- */
 /*
- * nautilus-progress-info-widget.h: file operation progress user interface.
+ * nemo-progress-info-widget.h: file operation progress user interface.
  *
  * Copyright (C) 2007, 2011 Red Hat, Inc.
  *
@@ -24,40 +24,40 @@
  *
  */
 
-#ifndef __NAUTILUS_PROGRESS_INFO_WIDGET_H__
-#define __NAUTILUS_PROGRESS_INFO_WIDGET_H__
+#ifndef __NEMO_PROGRESS_INFO_WIDGET_H__
+#define __NEMO_PROGRESS_INFO_WIDGET_H__
 
 #include <gtk/gtk.h>
 
-#include <libnautilus-private/nautilus-progress-info.h>
+#include <libnemo-private/nemo-progress-info.h>
 
-#define NAUTILUS_TYPE_PROGRESS_INFO_WIDGET nautilus_progress_info_widget_get_type()
-#define NAUTILUS_PROGRESS_INFO_WIDGET(obj) \
-	(G_TYPE_CHECK_INSTANCE_CAST ((obj), NAUTILUS_TYPE_PROGRESS_INFO_WIDGET, NautilusProgressInfoWidget))
-#define NAUTILUS_PROGRESS_INFO_WIDGET_CLASS(klass) \
-	(G_TYPE_CHECK_CLASS_CAST ((klass), NAUTILUS_TYPE_PROGRESS_INFO_WIDGET, NautilusProgressInfoWidgetClass))
-#define NAUTILUS_IS_PROGRESS_INFO_WIDGET(obj) \
-	(G_TYPE_CHECK_INSTANCE_TYPE ((obj), NAUTILUS_TYPE_PROGRESS_INFO_WIDGET))
-#define NAUTILUS_IS_PROGRESS_INFO_WIDGET_CLASS(klass) \
-	(G_TYPE_CHECK_CLASS_TYPE ((klass), NAUTILUS_TYPE_PROGRESS_INFO_WIDGET))
-#define NAUTILUS_PROGRESS_INFO_WIDGET_GET_CLASS(obj) \
-	(G_TYPE_INSTANCE_GET_CLASS ((obj), NAUTILUS_TYPE_PROGRESS_INFO_WIDGET, NautilusProgressInfoWidgetClass))
+#define NEMO_TYPE_PROGRESS_INFO_WIDGET nemo_progress_info_widget_get_type()
+#define NEMO_PROGRESS_INFO_WIDGET(obj) \
+	(G_TYPE_CHECK_INSTANCE_CAST ((obj), NEMO_TYPE_PROGRESS_INFO_WIDGET, NemoProgressInfoWidget))
+#define NEMO_PROGRESS_INFO_WIDGET_CLASS(klass) \
+	(G_TYPE_CHECK_CLASS_CAST ((klass), NEMO_TYPE_PROGRESS_INFO_WIDGET, NemoProgressInfoWidgetClass))
+#define NEMO_IS_PROGRESS_INFO_WIDGET(obj) \
+	(G_TYPE_CHECK_INSTANCE_TYPE ((obj), NEMO_TYPE_PROGRESS_INFO_WIDGET))
+#define NEMO_IS_PROGRESS_INFO_WIDGET_CLASS(klass) \
+	(G_TYPE_CHECK_CLASS_TYPE ((klass), NEMO_TYPE_PROGRESS_INFO_WIDGET))
+#define NEMO_PROGRESS_INFO_WIDGET_GET_CLASS(obj) \
+	(G_TYPE_INSTANCE_GET_CLASS ((obj), NEMO_TYPE_PROGRESS_INFO_WIDGET, NemoProgressInfoWidgetClass))
 
-typedef struct _NautilusProgressInfoWidgetPriv NautilusProgressInfoWidgetPriv;
+typedef struct _NemoProgressInfoWidgetPriv NemoProgressInfoWidgetPriv;
 
 typedef struct {
 	GtkBox parent;
 
 	/* private */
-	NautilusProgressInfoWidgetPriv *priv;
-} NautilusProgressInfoWidget;
+	NemoProgressInfoWidgetPriv *priv;
+} NemoProgressInfoWidget;
 
 typedef struct {
 	GtkBoxClass parent_class;
-} NautilusProgressInfoWidgetClass;
+} NemoProgressInfoWidgetClass;
 
-GType nautilus_progress_info_widget_get_type (void);
+GType nemo_progress_info_widget_get_type (void);
 
-GtkWidget * nautilus_progress_info_widget_new (NautilusProgressInfo *info);
+GtkWidget * nemo_progress_info_widget_new (NemoProgressInfo *info);
 
-#endif /* __NAUTILUS_PROGRESS_INFO_WIDGET_H__ */
+#endif /* __NEMO_PROGRESS_INFO_WIDGET_H__ */

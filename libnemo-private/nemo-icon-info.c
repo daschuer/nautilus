@@ -1,5 +1,5 @@
 /* -*- Mode: C; indent-tabs-mode: t; c-basic-offset: 8; tab-width: 8 -*- */
-/* nautilus-icon-info.c
+/* nemo-icon-info.c
  * Copyright (C) 2007  Red Hat, Inc.,  Alexander Larsson <alexl@redhat.com>
  *
  * This library is free software; you can redistribute it and/or
@@ -20,13 +20,13 @@
 
 #include <config.h>
 #include <string.h>
-#include "nautilus-icon-info.h"
-#include "nautilus-icon-names.h"
-#include "nautilus-default-file-icon.h"
+#include "nemo-icon-info.h"
+#include "nemo-icon-names.h"
+#include "nemo-default-file-icon.h"
 #include <gtk/gtk.h>
 #include <gio/gio.h>
 
-struct _NautilusIconInfo
+struct _NemoIconInfo
 {
 	GObject parent;
 
@@ -42,26 +42,26 @@ struct _NautilusIconInfo
         char *icon_name;
 };
 
-struct _NautilusIconInfoClass
+struct _NemoIconInfoClass
 {
 	GObjectClass parent_class;
 };
 
 static void schedule_reap_cache (void);
 
-G_DEFINE_TYPE (NautilusIconInfo,
-	       nautilus_icon_info,
+G_DEFINE_TYPE (NemoIconInfo,
+	       nemo_icon_info,
 	       G_TYPE_OBJECT);
 
 static void
-nautilus_icon_info_init (NautilusIconInfo *icon)
+nemo_icon_info_init (NemoIconInfo *icon)
 {
 	icon->last_use_time = g_get_monotonic_time ();
 	icon->sole_owner = TRUE;
 }
 
 gboolean
-nautilus_icon_info_is_fallback (NautilusIconInfo  *icon)
+nemo_icon_info_is_fallback (NemoIconInfo  *icon)
 {
   return icon->pixbuf == NULL;
 }
@@ -71,7 +71,7 @@ pixbuf_toggle_notify (gpointer      info,
 		      GObject      *object,
 		      gboolean      is_last_ref)
 {
-	NautilusIconInfo  *icon = info;
+	NemoIconInfo  *icon = info;
 	
 	if (is_last_ref) {
 		icon->sole_owner = TRUE;	
@@ -84,11 +84,11 @@ pixbuf_toggle_notify (gpointer      info,
 }
 
 static void
-nautilus_icon_info_finalize (GObject *object)
+nemo_icon_info_finalize (GObject *object)
 {
-        NautilusIconInfo *icon;
+        NemoIconInfo *icon;
 
-        icon = NAUTILUS_ICON_INFO (object);
+        icon = NEMO_ICON_INFO (object);
 
 	if (!icon->sole_owner && icon->pixbuf) {
 		g_object_remove_toggle_ref (G_OBJECT (icon->pixbuf),
@@ -103,26 +103,26 @@ nautilus_icon_info_finalize (GObject *object)
 	g_free (icon->display_name);
 	g_free (icon->icon_name);
 
-        G_OBJECT_CLASS (nautilus_icon_info_parent_class)->finalize (object);
+        G_OBJECT_CLASS (nemo_icon_info_parent_class)->finalize (object);
 }
 
 static void
-nautilus_icon_info_class_init (NautilusIconInfoClass *icon_info_class)
+nemo_icon_info_class_init (NemoIconInfoClass *icon_info_class)
 {
         GObjectClass *gobject_class;
 
         gobject_class = (GObjectClass *) icon_info_class;
 
-        gobject_class->finalize = nautilus_icon_info_finalize;
+        gobject_class->finalize = nemo_icon_info_finalize;
 
 }
 
-NautilusIconInfo *
-nautilus_icon_info_new_for_pixbuf (GdkPixbuf *pixbuf)
+NemoIconInfo *
+nemo_icon_info_new_for_pixbuf (GdkPixbuf *pixbuf)
 {
-	NautilusIconInfo *icon;
+	NemoIconInfo *icon;
 
-	icon = g_object_new (NAUTILUS_TYPE_ICON_INFO, NULL);
+	icon = g_object_new (NEMO_TYPE_ICON_INFO, NULL);
 
 	if (pixbuf) {
 		icon->pixbuf = g_object_ref (pixbuf);
@@ -131,16 +131,16 @@ nautilus_icon_info_new_for_pixbuf (GdkPixbuf *pixbuf)
 	return icon;
 }
 
-static NautilusIconInfo *
-nautilus_icon_info_new_for_icon_info (GtkIconInfo *icon_info)
+static NemoIconInfo *
+nemo_icon_info_new_for_icon_info (GtkIconInfo *icon_info)
 {
-	NautilusIconInfo *icon;
+	NemoIconInfo *icon;
 	GdkPoint *points;
 	gint n_points;
 	const char *filename;
 	char *basename, *p;
 
-	icon = g_object_new (NAUTILUS_TYPE_ICON_INFO, NULL);
+	icon = g_object_new (NEMO_TYPE_ICON_INFO, NULL);
 
 	icon->pixbuf = gtk_icon_info_load_icon (icon_info, NULL);
 
@@ -191,7 +191,7 @@ reap_old_icon (gpointer  key,
 	       gpointer  value,
 	       gpointer  user_info)
 {
-	NautilusIconInfo *icon = value;
+	NemoIconInfo *icon = value;
 	gboolean *reapable_icons_left = user_info;
 
 	if (icon->sole_owner) {
@@ -247,7 +247,7 @@ schedule_reap_cache (void)
 }
 
 void
-nautilus_icon_info_clear_caches (void)
+nemo_icon_info_clear_caches (void)
 {
 	if (loadable_icon_cache) {
 		g_hash_table_remove_all (loadable_icon_cache);
@@ -324,11 +324,11 @@ themed_icon_key_free (ThemedIconKey *key)
 	g_slice_free (ThemedIconKey, key);
 }
 
-NautilusIconInfo *
-nautilus_icon_info_lookup (GIcon *icon,
+NemoIconInfo *
+nemo_icon_info_lookup (GIcon *icon,
 			   int size)
 {
-	NautilusIconInfo *icon_info;
+	NemoIconInfo *icon_info;
 	GdkPixbuf *pixbuf;
 	
 	if (G_IS_LOADABLE_ICON (icon)) {
@@ -364,7 +364,7 @@ nautilus_icon_info_lookup (GIcon *icon,
 			g_object_unref (stream);
 		}
 
-		icon_info = nautilus_icon_info_new_for_pixbuf (pixbuf);
+		icon_info = nemo_icon_info_new_for_pixbuf (pixbuf);
 
 		key = loadable_icon_key_new (icon, size);
 		g_hash_table_insert (loadable_icon_cache, key, icon_info);
@@ -392,13 +392,13 @@ nautilus_icon_info_lookup (GIcon *icon,
 		gtkicon_info = gtk_icon_theme_choose_icon (icon_theme, (const char **)names, size, 0);
 
 		if (gtkicon_info == NULL) {
-			return nautilus_icon_info_new_for_pixbuf (NULL);
+			return nemo_icon_info_new_for_pixbuf (NULL);
 		}
 
 		filename = gtk_icon_info_get_filename (gtkicon_info);
 		if (filename == NULL) {
 			gtk_icon_info_free (gtkicon_info);
-			return nautilus_icon_info_new_for_pixbuf (NULL);
+			return nemo_icon_info_new_for_pixbuf (NULL);
 		}
 
 		lookup_key.filename = (char *)filename;
@@ -410,7 +410,7 @@ nautilus_icon_info_lookup (GIcon *icon,
 			return g_object_ref (icon_info);
 		}
 		
-		icon_info = nautilus_icon_info_new_for_icon_info (gtkicon_info);
+		icon_info = nemo_icon_info_new_for_icon_info (gtkicon_info);
 		
 		key = themed_icon_key_new (filename, size);
 		g_hash_table_insert (themed_icon_cache, key, icon_info);
@@ -433,7 +433,7 @@ nautilus_icon_info_lookup (GIcon *icon,
                         pixbuf = NULL;
                 }
 
-		icon_info = nautilus_icon_info_new_for_pixbuf (pixbuf);
+		icon_info = nemo_icon_info_new_for_pixbuf (pixbuf);
 
 		if (pixbuf != NULL) {
 			g_object_unref (pixbuf);
@@ -443,37 +443,37 @@ nautilus_icon_info_lookup (GIcon *icon,
         }
 }
 
-NautilusIconInfo *
-nautilus_icon_info_lookup_from_name (const char *name,
+NemoIconInfo *
+nemo_icon_info_lookup_from_name (const char *name,
 				     int size)
 {
 	GIcon *icon;
-	NautilusIconInfo *info;
+	NemoIconInfo *info;
 
 	icon = g_themed_icon_new (name);
-	info = nautilus_icon_info_lookup (icon, size);
+	info = nemo_icon_info_lookup (icon, size);
 	g_object_unref (icon);
 	return info;
 }
 
-NautilusIconInfo *
-nautilus_icon_info_lookup_from_path (const char *path,
+NemoIconInfo *
+nemo_icon_info_lookup_from_path (const char *path,
 				     int size)
 {
 	GFile *icon_file;
 	GIcon *icon;
-	NautilusIconInfo *info;
+	NemoIconInfo *info;
 
 	icon_file = g_file_new_for_path (path);
 	icon = g_file_icon_new (icon_file);
-	info = nautilus_icon_info_lookup (icon, size);
+	info = nemo_icon_info_lookup (icon, size);
 	g_object_unref (icon);
 	g_object_unref (icon_file);
 	return info;
 }
 
 GdkPixbuf *
-nautilus_icon_info_get_pixbuf_nodefault (NautilusIconInfo  *icon)
+nemo_icon_info_get_pixbuf_nodefault (NemoIconInfo  *icon)
 {
 	GdkPixbuf *res;
 
@@ -495,19 +495,19 @@ nautilus_icon_info_get_pixbuf_nodefault (NautilusIconInfo  *icon)
 
 
 GdkPixbuf *
-nautilus_icon_info_get_pixbuf (NautilusIconInfo *icon)
+nemo_icon_info_get_pixbuf (NemoIconInfo *icon)
 {
 	GdkPixbuf *res;
 
-	res = nautilus_icon_info_get_pixbuf_nodefault (icon);
+	res = nemo_icon_info_get_pixbuf_nodefault (icon);
 	if (res == NULL) {
-		res = gdk_pixbuf_new_from_data (nautilus_default_file_icon,
+		res = gdk_pixbuf_new_from_data (nemo_default_file_icon,
 						GDK_COLORSPACE_RGB,
 						TRUE,
 						8,
-						nautilus_default_file_icon_width,
-						nautilus_default_file_icon_height,
-						nautilus_default_file_icon_width * 4, /* stride */
+						nemo_default_file_icon_width,
+						nemo_default_file_icon_height,
+						nemo_default_file_icon_width * 4, /* stride */
 						NULL, /* don't destroy info */
 						NULL);
 	} 
@@ -516,14 +516,14 @@ nautilus_icon_info_get_pixbuf (NautilusIconInfo *icon)
 }
 
 GdkPixbuf *
-nautilus_icon_info_get_pixbuf_nodefault_at_size (NautilusIconInfo  *icon,
+nemo_icon_info_get_pixbuf_nodefault_at_size (NemoIconInfo  *icon,
 						 gsize              forced_size)
 {
 	GdkPixbuf *pixbuf, *scaled_pixbuf;
 	int w, h, s;
 	double scale;
 
-	pixbuf = nautilus_icon_info_get_pixbuf_nodefault (icon);
+	pixbuf = nemo_icon_info_get_pixbuf_nodefault (icon);
 
 	if (pixbuf == NULL)
 	  return NULL;
@@ -545,14 +545,14 @@ nautilus_icon_info_get_pixbuf_nodefault_at_size (NautilusIconInfo  *icon,
 
 
 GdkPixbuf *
-nautilus_icon_info_get_pixbuf_at_size (NautilusIconInfo  *icon,
+nemo_icon_info_get_pixbuf_at_size (NemoIconInfo  *icon,
 				       gsize              forced_size)
 {
 	GdkPixbuf *pixbuf, *scaled_pixbuf;
 	int w, h, s;
 	double scale;
 
-	pixbuf = nautilus_icon_info_get_pixbuf (icon);
+	pixbuf = nemo_icon_info_get_pixbuf (icon);
 
 	w = gdk_pixbuf_get_width (pixbuf);
 	h = gdk_pixbuf_get_height (pixbuf);
@@ -570,7 +570,7 @@ nautilus_icon_info_get_pixbuf_at_size (NautilusIconInfo  *icon,
 }
 
 gboolean
-nautilus_icon_info_get_embedded_rect (NautilusIconInfo  *icon,
+nemo_icon_info_get_embedded_rect (NemoIconInfo  *icon,
 				      GdkRectangle      *rectangle)
 {
 	*rectangle = icon->embedded_rect;
@@ -578,7 +578,7 @@ nautilus_icon_info_get_embedded_rect (NautilusIconInfo  *icon,
 }
 
 gboolean
-nautilus_icon_info_get_attach_points (NautilusIconInfo  *icon,
+nemo_icon_info_get_attach_points (NemoIconInfo  *icon,
 				      GdkPoint         **points,
 				      gint              *n_points)
 {
@@ -588,13 +588,13 @@ nautilus_icon_info_get_attach_points (NautilusIconInfo  *icon,
 }
 
 const char *
-nautilus_icon_info_get_display_name   (NautilusIconInfo  *icon)
+nemo_icon_info_get_display_name   (NemoIconInfo  *icon)
 {
 	return icon->display_name;
 }
 
 const char *
-nautilus_icon_info_get_used_name (NautilusIconInfo  *icon)
+nemo_icon_info_get_used_name (NemoIconInfo  *icon)
 {
 	return icon->icon_name;
 }
@@ -602,45 +602,45 @@ nautilus_icon_info_get_used_name (NautilusIconInfo  *icon)
 /* Return nominal icon size for given zoom level.
  * @zoom_level: zoom level for which to find matching icon size.
  * 
- * Return value: icon size between NAUTILUS_ICON_SIZE_SMALLEST and
- * NAUTILUS_ICON_SIZE_LARGEST, inclusive.
+ * Return value: icon size between NEMO_ICON_SIZE_SMALLEST and
+ * NEMO_ICON_SIZE_LARGEST, inclusive.
  */
 guint
-nautilus_get_icon_size_for_zoom_level (NautilusZoomLevel zoom_level)
+nemo_get_icon_size_for_zoom_level (NemoZoomLevel zoom_level)
 {
 	switch (zoom_level) {
-	case NAUTILUS_ZOOM_LEVEL_SMALLEST:
-		return NAUTILUS_ICON_SIZE_SMALLEST;
-	case NAUTILUS_ZOOM_LEVEL_SMALLER:
-		return NAUTILUS_ICON_SIZE_SMALLER;
-	case NAUTILUS_ZOOM_LEVEL_SMALL:
-		return NAUTILUS_ICON_SIZE_SMALL;
-	case NAUTILUS_ZOOM_LEVEL_STANDARD:
-		return NAUTILUS_ICON_SIZE_STANDARD;
-	case NAUTILUS_ZOOM_LEVEL_LARGE:
-		return NAUTILUS_ICON_SIZE_LARGE;
-	case NAUTILUS_ZOOM_LEVEL_LARGER:
-		return NAUTILUS_ICON_SIZE_LARGER;
-	case NAUTILUS_ZOOM_LEVEL_LARGEST:
-		return NAUTILUS_ICON_SIZE_LARGEST;
+	case NEMO_ZOOM_LEVEL_SMALLEST:
+		return NEMO_ICON_SIZE_SMALLEST;
+	case NEMO_ZOOM_LEVEL_SMALLER:
+		return NEMO_ICON_SIZE_SMALLER;
+	case NEMO_ZOOM_LEVEL_SMALL:
+		return NEMO_ICON_SIZE_SMALL;
+	case NEMO_ZOOM_LEVEL_STANDARD:
+		return NEMO_ICON_SIZE_STANDARD;
+	case NEMO_ZOOM_LEVEL_LARGE:
+		return NEMO_ICON_SIZE_LARGE;
+	case NEMO_ZOOM_LEVEL_LARGER:
+		return NEMO_ICON_SIZE_LARGER;
+	case NEMO_ZOOM_LEVEL_LARGEST:
+		return NEMO_ICON_SIZE_LARGEST;
 	}
-	g_return_val_if_reached (NAUTILUS_ICON_SIZE_STANDARD);
+	g_return_val_if_reached (NEMO_ICON_SIZE_STANDARD);
 }
 
 gint
-nautilus_get_icon_size_for_stock_size (GtkIconSize size)
+nemo_get_icon_size_for_stock_size (GtkIconSize size)
 {
   gint w, h;
 
   if (gtk_icon_size_lookup (size, &w, &h)) {
     return MAX (w, h);
   } 
-  return NAUTILUS_ICON_SIZE_STANDARD;
+  return NEMO_ICON_SIZE_STANDARD;
 }
 
 
 guint
-nautilus_icon_get_emblem_size_for_icon_size (guint size)
+nemo_icon_get_emblem_size_for_icon_size (guint size)
 {
 	if (size >= 96)
 		return 48;
@@ -657,7 +657,7 @@ nautilus_icon_get_emblem_size_for_icon_size (guint size)
 }
 
 gboolean
-nautilus_icon_theme_can_render (GThemedIcon *icon)
+nemo_icon_theme_can_render (GThemedIcon *icon)
 {
 	GtkIconTheme *icon_theme;
 	const gchar * const *names;
@@ -677,12 +677,12 @@ nautilus_icon_theme_can_render (GThemedIcon *icon)
 }
 
 GIcon *
-nautilus_user_special_directory_get_gicon (GUserDirectory directory)
+nemo_user_special_directory_get_gicon (GUserDirectory directory)
 {
 
 	#define ICON_CASE(x) \
 		case G_USER_DIRECTORY_ ## x:\
-			return g_themed_icon_new (NAUTILUS_ICON_FOLDER_ ## x);
+			return g_themed_icon_new (NEMO_ICON_FOLDER_ ## x);
 
 	switch (directory) {
 

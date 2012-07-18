@@ -1,8 +1,8 @@
 /* -*- Mode: C; indent-tabs-mode: t; c-basic-offset: 8; tab-width: 8 -*- */
 
-/* nautilus-clipboard.c
+/* nemo-clipboard.c
  *
- * Nautilus Clipboard support.  For now, routines to support component cut
+ * Nemo Clipboard support.  For now, routines to support component cut
  * and paste.
  *
  * Copyright (C) 1999, 2000  Free Software Foundaton
@@ -28,8 +28,8 @@
  */
 
 #include <config.h>
-#include "nautilus-clipboard.h"
-#include "nautilus-file-utilities.h"
+#include "nemo-clipboard.h"
+#include "nemo-file-utilities.h"
 
 #include <glib/gi18n.h>
 #include <gtk/gtk.h>
@@ -130,7 +130,7 @@ action_select_all_callback (GtkAction *action,
 
 	g_assert (callback_data != NULL);
 
-	target_data = g_object_get_data (callback_data, "Nautilus:clipboard_target_data");
+	target_data = g_object_get_data (callback_data, "Nemo:clipboard_target_data");
 	g_assert (target_data != NULL);
 
 	target_data->select_all_callback (callback_data);
@@ -204,7 +204,7 @@ static gboolean
 clipboard_items_are_merged_in (GtkWidget *widget)
 {
 	return GPOINTER_TO_INT (g_object_get_data (G_OBJECT (widget),
-						   "Nautilus:clipboard_menu_items_merged"));
+						   "Nemo:clipboard_menu_items_merged"));
 }
 
 static void
@@ -212,7 +212,7 @@ set_clipboard_items_are_merged_in (GObject *widget_as_object,
 				   gboolean merged_in)
 {
 	g_object_set_data (widget_as_object,
-			   "Nautilus:clipboard_menu_items_merged",
+			   "Nemo:clipboard_menu_items_merged",
 			   GINT_TO_POINTER (merged_in));
 }
 
@@ -479,7 +479,7 @@ initialize_clipboard_component_with_callback_data (GtkEditable *target,
 }
 
 static void
-nautilus_clipboard_real_set_up (gpointer target,
+nemo_clipboard_real_set_up (gpointer target,
 				GtkUIManager *ui_manager,
 				gboolean shares_selection_changes,
 				SelectAllCallback select_all_callback,
@@ -488,7 +488,7 @@ nautilus_clipboard_real_set_up (gpointer target,
 {
 	TargetCallbackData *target_data;
 
-	if (g_object_get_data (G_OBJECT (target), "Nautilus:clipboard_target_data") != NULL) {
+	if (g_object_get_data (G_OBJECT (target), "Nemo:clipboard_target_data") != NULL) {
 		return;
 	}
 
@@ -507,7 +507,7 @@ nautilus_clipboard_real_set_up (gpointer target,
 	g_signal_connect (target, "destroy",
 			  G_CALLBACK (target_destroy_callback), target_data);
 
-	g_object_set_data_full (G_OBJECT (target), "Nautilus:clipboard_target_data",
+	g_object_set_data_full (G_OBJECT (target), "Nemo:clipboard_target_data",
 				target_data, (GDestroyNotify) target_data_free);
 
 	/* Call the focus changed callback once to merge if the window is
@@ -517,14 +517,14 @@ nautilus_clipboard_real_set_up (gpointer target,
 }
 
 void
-nautilus_clipboard_set_up_editable (GtkEditable *target,
+nemo_clipboard_set_up_editable (GtkEditable *target,
 				    GtkUIManager *ui_manager,
 				    gboolean shares_selection_changes)
 {
 	g_return_if_fail (GTK_IS_EDITABLE (target));
 	g_return_if_fail (GTK_IS_UI_MANAGER (ui_manager));
 
-	nautilus_clipboard_real_set_up (target, ui_manager,
+	nemo_clipboard_real_set_up (target, ui_manager,
 					shares_selection_changes,
 					editable_select_all_callback,
 					editable_connect_callbacks,
@@ -532,13 +532,13 @@ nautilus_clipboard_set_up_editable (GtkEditable *target,
 }
 
 void
-nautilus_clipboard_set_up_text_view (GtkTextView *target,
+nemo_clipboard_set_up_text_view (GtkTextView *target,
 				     GtkUIManager *ui_manager)
 {
 	g_return_if_fail (GTK_IS_TEXT_VIEW (target));
 	g_return_if_fail (GTK_IS_UI_MANAGER (ui_manager));
 
-	nautilus_clipboard_real_set_up (target, ui_manager, TRUE,
+	nemo_clipboard_real_set_up (target, ui_manager, TRUE,
 					text_view_select_all_callback,
 					text_view_connect_callbacks,
 					text_view_disconnect_callbacks);
@@ -574,7 +574,7 @@ convert_lines_to_str_list (char **lines, gboolean *cut)
 }
 
 GList*
-nautilus_clipboard_get_uri_list_from_selection_data (GtkSelectionData *selection_data,
+nemo_clipboard_get_uri_list_from_selection_data (GtkSelectionData *selection_data,
 						     gboolean *cut,
 						     GdkAtom copied_files_atom)
 {
@@ -602,14 +602,14 @@ nautilus_clipboard_get_uri_list_from_selection_data (GtkSelectionData *selection
 }
 
 GtkClipboard *
-nautilus_clipboard_get (GtkWidget *widget)
+nemo_clipboard_get (GtkWidget *widget)
 {
 	return gtk_clipboard_get_for_display (gtk_widget_get_display (GTK_WIDGET (widget)),
 					      GDK_SELECTION_CLIPBOARD);
 }
 
 void
-nautilus_clipboard_clear_if_colliding_uris (GtkWidget *widget,
+nemo_clipboard_clear_if_colliding_uris (GtkWidget *widget,
 					    const GList *item_uris,
 					    GdkAtom copied_files_atom)
 {
@@ -618,13 +618,13 @@ nautilus_clipboard_clear_if_colliding_uris (GtkWidget *widget,
 	gboolean collision;
 
 	collision = FALSE;
-	data = gtk_clipboard_wait_for_contents (nautilus_clipboard_get (widget),
+	data = gtk_clipboard_wait_for_contents (nemo_clipboard_get (widget),
 						copied_files_atom);
 	if (data == NULL) {
 		return;
 	}
 
-	clipboard_item_uris = nautilus_clipboard_get_uri_list_from_selection_data (data, NULL,
+	clipboard_item_uris = nemo_clipboard_get_uri_list_from_selection_data (data, NULL,
 										   copied_files_atom);
 
 	for (l = (GList *) item_uris; l; l = l->next) {
@@ -636,7 +636,7 @@ nautilus_clipboard_clear_if_colliding_uris (GtkWidget *widget,
 	}
 	
 	if (collision) {
-		gtk_clipboard_clear (nautilus_clipboard_get (widget));
+		gtk_clipboard_clear (nemo_clipboard_get (widget));
 	}
 	
 	if (clipboard_item_uris) {

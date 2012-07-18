@@ -1,5 +1,5 @@
 /*
- *  nautilus-location-widget-provider.c - Interface for Nautilus
+ *  nemo-location-widget-provider.c - Interface for Nemo
                  extensions that provide extra widgets for a location
  *
  *  Copyright (C) 2005 Red Hat, Inc.
@@ -23,24 +23,24 @@
  */
 
 #include <config.h>
-#include "nautilus-location-widget-provider.h"
+#include "nemo-location-widget-provider.h"
 
 #include <glib-object.h>
 
 static void
-nautilus_location_widget_provider_base_init (gpointer g_class)
+nemo_location_widget_provider_base_init (gpointer g_class)
 {
 }
 
 GType                   
-nautilus_location_widget_provider_get_type (void)
+nemo_location_widget_provider_get_type (void)
 {
 	static GType type = 0;
 
 	if (!type) {
 		const GTypeInfo info = {
-			sizeof (NautilusLocationWidgetProviderIface),
-			nautilus_location_widget_provider_base_init,
+			sizeof (NemoLocationWidgetProviderIface),
+			nemo_location_widget_provider_base_init,
 			NULL,
 			NULL,
 			NULL,
@@ -51,7 +51,7 @@ nautilus_location_widget_provider_get_type (void)
 		};
 		
 		type = g_type_register_static (G_TYPE_INTERFACE, 
-					       "NautilusLocationWidgetProvider",
+					       "NemoLocationWidgetProvider",
 					       &info, 0);
 		g_type_interface_add_prerequisite (type, G_TYPE_OBJECT);
 	}
@@ -60,21 +60,21 @@ nautilus_location_widget_provider_get_type (void)
 }
 
 /**
- * nautilus_location_widget_provider_get_widget:
- * @provider: a #NautilusLocationWidgetProvider
+ * nemo_location_widget_provider_get_widget:
+ * @provider: a #NemoLocationWidgetProvider
  * @uri: the URI of the location
  * @window: parent #GtkWindow
  *
  * Returns: (transfer none): the location widget for @provider at @uri
  */
 GtkWidget *
-nautilus_location_widget_provider_get_widget (NautilusLocationWidgetProvider     *provider,
+nemo_location_widget_provider_get_widget (NemoLocationWidgetProvider     *provider,
 					      const char                         *uri,
 					      GtkWidget                          *window)
 {
-	g_return_val_if_fail (NAUTILUS_IS_LOCATION_WIDGET_PROVIDER (provider), NULL);
+	g_return_val_if_fail (NEMO_IS_LOCATION_WIDGET_PROVIDER (provider), NULL);
 
-	return NAUTILUS_LOCATION_WIDGET_PROVIDER_GET_IFACE (provider)->get_widget 
+	return NEMO_LOCATION_WIDGET_PROVIDER_GET_IFACE (provider)->get_widget 
 		(provider, uri, window);
 
 }				       

@@ -1,6 +1,6 @@
 /* -*- Mode: C; indent-tabs-mode: t; c-basic-offset: 8; tab-width: 8 -*-
 
-   nautilus-vfs-directory.h: Subclass of NautilusDirectory to implement the
+   nemo-vfs-directory.h: Subclass of NemoDirectory to implement the
    the case of a VFS directory.
  
    Copyright (C) 1999, 2000 Eazel, Inc.
@@ -23,33 +23,33 @@
    Author: Darin Adler <darin@bentspoon.com>
 */
 
-#ifndef NAUTILUS_VFS_DIRECTORY_H
-#define NAUTILUS_VFS_DIRECTORY_H
+#ifndef NEMO_VFS_DIRECTORY_H
+#define NEMO_VFS_DIRECTORY_H
 
-#include <libnautilus-private/nautilus-directory.h>
+#include <libnemo-private/nemo-directory.h>
 
-#define NAUTILUS_TYPE_VFS_DIRECTORY nautilus_vfs_directory_get_type()
-#define NAUTILUS_VFS_DIRECTORY(obj) \
-  (G_TYPE_CHECK_INSTANCE_CAST ((obj), NAUTILUS_TYPE_VFS_DIRECTORY, NautilusVFSDirectory))
-#define NAUTILUS_VFS_DIRECTORY_CLASS(klass) \
-  (G_TYPE_CHECK_CLASS_CAST ((klass), NAUTILUS_TYPE_VFS_DIRECTORY, NautilusVFSDirectoryClass))
-#define NAUTILUS_IS_VFS_DIRECTORY(obj) \
-  (G_TYPE_CHECK_INSTANCE_TYPE ((obj), NAUTILUS_TYPE_VFS_DIRECTORY))
-#define NAUTILUS_IS_VFS_DIRECTORY_CLASS(klass) \
-  (G_TYPE_CHECK_CLASS_TYPE ((klass), NAUTILUS_TYPE_VFS_DIRECTORY))
-#define NAUTILUS_VFS_DIRECTORY_GET_CLASS(obj) \
-  (G_TYPE_INSTANCE_GET_CLASS ((obj), NAUTILUS_TYPE_VFS_DIRECTORY, NautilusVFSDirectoryClass))
+#define NEMO_TYPE_VFS_DIRECTORY nemo_vfs_directory_get_type()
+#define NEMO_VFS_DIRECTORY(obj) \
+  (G_TYPE_CHECK_INSTANCE_CAST ((obj), NEMO_TYPE_VFS_DIRECTORY, NemoVFSDirectory))
+#define NEMO_VFS_DIRECTORY_CLASS(klass) \
+  (G_TYPE_CHECK_CLASS_CAST ((klass), NEMO_TYPE_VFS_DIRECTORY, NemoVFSDirectoryClass))
+#define NEMO_IS_VFS_DIRECTORY(obj) \
+  (G_TYPE_CHECK_INSTANCE_TYPE ((obj), NEMO_TYPE_VFS_DIRECTORY))
+#define NEMO_IS_VFS_DIRECTORY_CLASS(klass) \
+  (G_TYPE_CHECK_CLASS_TYPE ((klass), NEMO_TYPE_VFS_DIRECTORY))
+#define NEMO_VFS_DIRECTORY_GET_CLASS(obj) \
+  (G_TYPE_INSTANCE_GET_CLASS ((obj), NEMO_TYPE_VFS_DIRECTORY, NemoVFSDirectoryClass))
 
-typedef struct NautilusVFSDirectoryDetails NautilusVFSDirectoryDetails;
-
-typedef struct {
-	NautilusDirectory parent_slot;
-} NautilusVFSDirectory;
+typedef struct NemoVFSDirectoryDetails NemoVFSDirectoryDetails;
 
 typedef struct {
-	NautilusDirectoryClass parent_slot;
-} NautilusVFSDirectoryClass;
+	NemoDirectory parent_slot;
+} NemoVFSDirectory;
 
-GType   nautilus_vfs_directory_get_type (void);
+typedef struct {
+	NemoDirectoryClass parent_slot;
+} NemoVFSDirectoryClass;
 
-#endif /* NAUTILUS_VFS_DIRECTORY_H */
+GType   nemo_vfs_directory_get_type (void);
+
+#endif /* NEMO_VFS_DIRECTORY_H */

@@ -1,6 +1,6 @@
 /* -*- Mode: C; indent-tabs-mode: t; c-basic-offset: 8; tab-width: 8 -*- */
 
-/* Nautilus - Nautilus navigation state
+/* Nemo - Nemo navigation state
  *
  * Copyright (C) 2011 Red Hat Inc.
  *
@@ -25,9 +25,9 @@
 
 #include <config.h>
 
-#include "nautilus-navigation-state.h"
+#include "nemo-navigation-state.h"
 
-struct _NautilusNavigationStateDetails {
+struct _NemoNavigationStateDetails {
 	GtkActionGroup *slave;
 	GtkActionGroup *master;
 
@@ -46,17 +46,17 @@ enum {
 
 static GParamSpec *properties[NUM_PROPERTIES] = { NULL, };
 
-G_DEFINE_TYPE (NautilusNavigationState, nautilus_navigation_state, G_TYPE_OBJECT);
+G_DEFINE_TYPE (NemoNavigationState, nemo_navigation_state, G_TYPE_OBJECT);
 
 static void
-clear_bindings (NautilusNavigationState *self)
+clear_bindings (NemoNavigationState *self)
 {
 	g_list_free_full (self->priv->active_bindings, g_object_unref);
 	self->priv->active_bindings = NULL;
 }
 
 static void
-update_bindings (NautilusNavigationState *self)
+update_bindings (NemoNavigationState *self)
 {
 	gint length, idx;
 	GBinding *binding;
@@ -85,24 +85,24 @@ update_bindings (NautilusNavigationState *self)
 }
 
 static void
-nautilus_navigation_state_init (NautilusNavigationState *self)
+nemo_navigation_state_init (NemoNavigationState *self)
 {
-	self->priv = G_TYPE_INSTANCE_GET_PRIVATE (self, NAUTILUS_TYPE_NAVIGATION_STATE,
-						  NautilusNavigationStateDetails);
+	self->priv = G_TYPE_INSTANCE_GET_PRIVATE (self, NEMO_TYPE_NAVIGATION_STATE,
+						  NemoNavigationStateDetails);
 }
 
 static void
-nautilus_navigation_state_set_property (GObject *object,
+nemo_navigation_state_set_property (GObject *object,
 					guint property_id,
 					const GValue *value,
 					GParamSpec *pspec)
 {
-	NautilusNavigationState *self = NAUTILUS_NAVIGATION_STATE (object);
+	NemoNavigationState *self = NEMO_NAVIGATION_STATE (object);
 
 	switch (property_id) {
 	case PROP_SLAVE:
 		self->priv->slave = g_value_dup_object (value);
-		nautilus_navigation_state_add_group (self, g_value_get_object (value));
+		nemo_navigation_state_add_group (self, g_value_get_object (value));
 		break;
 	case PROP_MASTER:
 		self->priv->master = g_value_dup_object (value);
@@ -117,19 +117,19 @@ nautilus_navigation_state_set_property (GObject *object,
 }
 
 static void
-nautilus_navigation_state_finalize (GObject *obj)
+nemo_navigation_state_finalize (GObject *obj)
 {
-	NautilusNavigationState *self = NAUTILUS_NAVIGATION_STATE (obj);
+	NemoNavigationState *self = NEMO_NAVIGATION_STATE (obj);
 
 	g_strfreev (self->priv->action_names);
 
-	G_OBJECT_CLASS (nautilus_navigation_state_parent_class)->finalize (obj);	
+	G_OBJECT_CLASS (nemo_navigation_state_parent_class)->finalize (obj);	
 }
 
 static void
-nautilus_navigation_state_dispose (GObject *obj)
+nemo_navigation_state_dispose (GObject *obj)
 {
-	NautilusNavigationState *self = NAUTILUS_NAVIGATION_STATE (obj);
+	NemoNavigationState *self = NEMO_NAVIGATION_STATE (obj);
 
 	clear_bindings (self);
 
@@ -141,17 +141,17 @@ nautilus_navigation_state_dispose (GObject *obj)
 		self->priv->groups = NULL;
 	}
 
-	G_OBJECT_CLASS (nautilus_navigation_state_parent_class)->dispose (obj);
+	G_OBJECT_CLASS (nemo_navigation_state_parent_class)->dispose (obj);
 }
 
 static void
-nautilus_navigation_state_class_init (NautilusNavigationStateClass *klass)
+nemo_navigation_state_class_init (NemoNavigationStateClass *klass)
 {
 	GObjectClass *oclass = G_OBJECT_CLASS (klass);
 
-	oclass->dispose = nautilus_navigation_state_dispose;
-	oclass->finalize = nautilus_navigation_state_finalize;
-	oclass->set_property = nautilus_navigation_state_set_property;
+	oclass->dispose = nemo_navigation_state_dispose;
+	oclass->finalize = nemo_navigation_state_finalize;
+	oclass->set_property = nemo_navigation_state_set_property;
 
 	properties[PROP_SLAVE] =
 		g_param_spec_object ("slave",
@@ -174,21 +174,21 @@ nautilus_navigation_state_class_init (NautilusNavigationStateClass *klass)
 				    G_PARAM_WRITABLE | G_PARAM_STATIC_STRINGS);
 
 	g_object_class_install_properties (oclass, NUM_PROPERTIES, properties);
-	g_type_class_add_private (klass, sizeof (NautilusNavigationStateDetails));
+	g_type_class_add_private (klass, sizeof (NemoNavigationStateDetails));
 }
 
-NautilusNavigationState *
-nautilus_navigation_state_new (GtkActionGroup *slave,
+NemoNavigationState *
+nemo_navigation_state_new (GtkActionGroup *slave,
 			       const gchar **action_names)
 {
-	return g_object_new (NAUTILUS_TYPE_NAVIGATION_STATE,
+	return g_object_new (NEMO_TYPE_NAVIGATION_STATE,
 			     "slave", slave,
 			     "action-names", action_names,
 			     NULL);
 }
 
 void
-nautilus_navigation_state_set_master (NautilusNavigationState *self,
+nemo_navigation_state_set_master (NemoNavigationState *self,
 				      GtkActionGroup *master)
 {
 	if (self->priv->master != master) {
@@ -204,14 +204,14 @@ nautilus_navigation_state_set_master (NautilusNavigationState *self,
 }
 
 void
-nautilus_navigation_state_add_group (NautilusNavigationState *self,
+nemo_navigation_state_add_group (NemoNavigationState *self,
 				     GtkActionGroup *group)
 {
 	self->priv->groups = g_list_prepend (self->priv->groups, g_object_ref (group));
 }
 
 void
-nautilus_navigation_state_sync_all (NautilusNavigationState *self)
+nemo_navigation_state_sync_all (NemoNavigationState *self)
 {
 	GList *l;
 	gint length, idx;
@@ -239,13 +239,13 @@ nautilus_navigation_state_sync_all (NautilusNavigationState *self)
 }
 
 GtkActionGroup *
-nautilus_navigation_state_get_master (NautilusNavigationState *self)
+nemo_navigation_state_get_master (NemoNavigationState *self)
 {
 	return self->priv->master;
 }
 
 void
-nautilus_navigation_state_set_boolean (NautilusNavigationState *self,
+nemo_navigation_state_set_boolean (NemoNavigationState *self,
 				       const gchar *action_name,
 				       gboolean value)
 {

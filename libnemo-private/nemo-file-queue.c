@@ -21,38 +21,38 @@
 */
 
 #include <config.h>
-#include "nautilus-file-queue.h"
+#include "nemo-file-queue.h"
 
 #include <glib.h>
 
-struct NautilusFileQueue {
+struct NemoFileQueue {
 	GList *head;
 	GList *tail;
 	GHashTable *item_to_link_map;
 };
 
-NautilusFileQueue *
-nautilus_file_queue_new (void)
+NemoFileQueue *
+nemo_file_queue_new (void)
 {
-	NautilusFileQueue *queue;
+	NemoFileQueue *queue;
 	
-	queue = g_new0 (NautilusFileQueue, 1);
+	queue = g_new0 (NemoFileQueue, 1);
 	queue->item_to_link_map = g_hash_table_new (g_direct_hash, g_direct_equal);
 
 	return queue;
 }
 
 void
-nautilus_file_queue_destroy (NautilusFileQueue *queue)
+nemo_file_queue_destroy (NemoFileQueue *queue)
 {
 	g_hash_table_destroy (queue->item_to_link_map);
-	nautilus_file_list_free (queue->head);
+	nemo_file_list_free (queue->head);
 	g_free (queue);
 }
 
 void
-nautilus_file_queue_enqueue (NautilusFileQueue *queue,
-			     NautilusFile      *file)
+nemo_file_queue_enqueue (NemoFileQueue *queue,
+			     NemoFile      *file)
 {
 	if (g_hash_table_lookup (queue->item_to_link_map, file) != NULL) {
 		/* It's already on the queue. */
@@ -67,25 +67,25 @@ nautilus_file_queue_enqueue (NautilusFileQueue *queue,
 		queue->tail = queue->tail->next;
 	}
 
-	nautilus_file_ref (file);
+	nemo_file_ref (file);
 	g_hash_table_insert (queue->item_to_link_map, file, queue->tail);
 }
 
-NautilusFile *
-nautilus_file_queue_dequeue (NautilusFileQueue *queue)
+NemoFile *
+nemo_file_queue_dequeue (NemoFileQueue *queue)
 {
-	NautilusFile *file;
+	NemoFile *file;
 
-	file = nautilus_file_queue_head (queue);
-	nautilus_file_queue_remove (queue, file);
+	file = nemo_file_queue_head (queue);
+	nemo_file_queue_remove (queue, file);
 
 	return file;
 }
 
 
 void
-nautilus_file_queue_remove (NautilusFileQueue *queue,
-			    NautilusFile *file)
+nemo_file_queue_remove (NemoFileQueue *queue,
+			    NemoFile *file)
 {
 	GList *link;
 
@@ -105,21 +105,21 @@ nautilus_file_queue_remove (NautilusFileQueue *queue,
 	g_list_free (link);
 	g_hash_table_remove (queue->item_to_link_map, file);
 
-	nautilus_file_unref (file);
+	nemo_file_unref (file);
 }
 
-NautilusFile *
-nautilus_file_queue_head (NautilusFileQueue *queue)
+NemoFile *
+nemo_file_queue_head (NemoFileQueue *queue)
 {
 	if (queue->head == NULL) {
 		return NULL;
 	}
 
-	return NAUTILUS_FILE (queue->head->data);
+	return NEMO_FILE (queue->head->data);
 }
 
 gboolean
-nautilus_file_queue_is_empty (NautilusFileQueue *queue)
+nemo_file_queue_is_empty (NemoFileQueue *queue)
 {
 	return (queue->head == NULL);
 }

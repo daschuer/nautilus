@@ -1,6 +1,6 @@
 /* -*- Mode: C; indent-tabs-mode: t; c-basic-offset: 8; tab-width: 8 -*- */
 
-/* nautilus-bookmark.h - implementation of individual bookmarks.
+/* nemo-bookmark.h - implementation of individual bookmarks.
  *
  * Copyright (C) 1999, 2000 Eazel, Inc.
  * Copyright (C) 2011, Red Hat, Inc.
@@ -24,33 +24,33 @@
  *          Cosimo Cecchi <cosimoc@redhat.com>
  */
 
-#ifndef NAUTILUS_BOOKMARK_H
-#define NAUTILUS_BOOKMARK_H
+#ifndef NEMO_BOOKMARK_H
+#define NEMO_BOOKMARK_H
 
 #include <gtk/gtk.h>
 #include <gio/gio.h>
-typedef struct NautilusBookmark NautilusBookmark;
+typedef struct NemoBookmark NemoBookmark;
 
-#define NAUTILUS_TYPE_BOOKMARK nautilus_bookmark_get_type()
-#define NAUTILUS_BOOKMARK(obj) \
-  (G_TYPE_CHECK_INSTANCE_CAST ((obj), NAUTILUS_TYPE_BOOKMARK, NautilusBookmark))
-#define NAUTILUS_BOOKMARK_CLASS(klass) \
-  (G_TYPE_CHECK_CLASS_CAST ((klass), NAUTILUS_TYPE_BOOKMARK, NautilusBookmarkClass))
-#define NAUTILUS_IS_BOOKMARK(obj) \
-  (G_TYPE_CHECK_INSTANCE_TYPE ((obj), NAUTILUS_TYPE_BOOKMARK))
-#define NAUTILUS_IS_BOOKMARK_CLASS(klass) \
-  (G_TYPE_CHECK_CLASS_TYPE ((klass), NAUTILUS_TYPE_BOOKMARK))
-#define NAUTILUS_BOOKMARK_GET_CLASS(obj) \
-  (G_TYPE_INSTANCE_GET_CLASS ((obj), NAUTILUS_TYPE_BOOKMARK, NautilusBookmarkClass))
+#define NEMO_TYPE_BOOKMARK nemo_bookmark_get_type()
+#define NEMO_BOOKMARK(obj) \
+  (G_TYPE_CHECK_INSTANCE_CAST ((obj), NEMO_TYPE_BOOKMARK, NemoBookmark))
+#define NEMO_BOOKMARK_CLASS(klass) \
+  (G_TYPE_CHECK_CLASS_CAST ((klass), NEMO_TYPE_BOOKMARK, NemoBookmarkClass))
+#define NEMO_IS_BOOKMARK(obj) \
+  (G_TYPE_CHECK_INSTANCE_TYPE ((obj), NEMO_TYPE_BOOKMARK))
+#define NEMO_IS_BOOKMARK_CLASS(klass) \
+  (G_TYPE_CHECK_CLASS_TYPE ((klass), NEMO_TYPE_BOOKMARK))
+#define NEMO_BOOKMARK_GET_CLASS(obj) \
+  (G_TYPE_INSTANCE_GET_CLASS ((obj), NEMO_TYPE_BOOKMARK, NemoBookmarkClass))
 
-typedef struct NautilusBookmarkDetails NautilusBookmarkDetails;
+typedef struct NemoBookmarkDetails NemoBookmarkDetails;
 
-struct NautilusBookmark {
+struct NemoBookmark {
 	GObject object;
-	NautilusBookmarkDetails *details;	
+	NemoBookmarkDetails *details;	
 };
 
-struct NautilusBookmarkClass {
+struct NemoBookmarkClass {
 	GObjectClass parent_class;
 
 	/* Signals that clients can connect to. */
@@ -58,35 +58,35 @@ struct NautilusBookmarkClass {
 	/* The contents-changed signal is emitted when the bookmark's contents
 	 * (custom name or URI) changed.
 	 */
-	void	(* contents_changed) (NautilusBookmark *bookmark);
+	void	(* contents_changed) (NemoBookmark *bookmark);
 };
 
-typedef struct NautilusBookmarkClass NautilusBookmarkClass;
+typedef struct NemoBookmarkClass NemoBookmarkClass;
 
-GType                 nautilus_bookmark_get_type               (void);
-NautilusBookmark *    nautilus_bookmark_new                    (GFile *location,
+GType                 nemo_bookmark_get_type               (void);
+NemoBookmark *    nemo_bookmark_new                    (GFile *location,
                                                                 const char *custom_name,
                                                                 GIcon *icon);
-NautilusBookmark *    nautilus_bookmark_copy                   (NautilusBookmark      *bookmark);
-const char *          nautilus_bookmark_get_name               (NautilusBookmark      *bookmark);
-GFile *               nautilus_bookmark_get_location           (NautilusBookmark      *bookmark);
-char *                nautilus_bookmark_get_uri                (NautilusBookmark      *bookmark);
-GIcon *               nautilus_bookmark_get_icon               (NautilusBookmark      *bookmark);
-gboolean	      nautilus_bookmark_get_has_custom_name    (NautilusBookmark      *bookmark);		
-void                  nautilus_bookmark_set_custom_name        (NautilusBookmark      *bookmark,
+NemoBookmark *    nemo_bookmark_copy                   (NemoBookmark      *bookmark);
+const char *          nemo_bookmark_get_name               (NemoBookmark      *bookmark);
+GFile *               nemo_bookmark_get_location           (NemoBookmark      *bookmark);
+char *                nemo_bookmark_get_uri                (NemoBookmark      *bookmark);
+GIcon *               nemo_bookmark_get_icon               (NemoBookmark      *bookmark);
+gboolean	      nemo_bookmark_get_has_custom_name    (NemoBookmark      *bookmark);		
+void                  nemo_bookmark_set_custom_name        (NemoBookmark      *bookmark,
 								const char            *new_name);		
-gboolean              nautilus_bookmark_uri_known_not_to_exist (NautilusBookmark      *bookmark);
-int                   nautilus_bookmark_compare_with           (gconstpointer          a,
+gboolean              nemo_bookmark_uri_known_not_to_exist (NemoBookmark      *bookmark);
+int                   nemo_bookmark_compare_with           (gconstpointer          a,
 								gconstpointer          b);
-int                   nautilus_bookmark_compare_uris           (gconstpointer          a,
+int                   nemo_bookmark_compare_uris           (gconstpointer          a,
 								gconstpointer          b);
 
-void                  nautilus_bookmark_set_scroll_pos         (NautilusBookmark      *bookmark,
+void                  nemo_bookmark_set_scroll_pos         (NemoBookmark      *bookmark,
 								const char            *uri);
-char *                nautilus_bookmark_get_scroll_pos         (NautilusBookmark      *bookmark);
+char *                nemo_bookmark_get_scroll_pos         (NemoBookmark      *bookmark);
 
 
 /* Helper functions for displaying bookmarks */
-GtkWidget *           nautilus_bookmark_menu_item_new          (NautilusBookmark      *bookmark);
+GtkWidget *           nemo_bookmark_menu_item_new          (NemoBookmark      *bookmark);
 
-#endif /* NAUTILUS_BOOKMARK_H */
+#endif /* NEMO_BOOKMARK_H */

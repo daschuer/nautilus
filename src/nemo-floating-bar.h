@@ -1,6 +1,6 @@
 /* -*- Mode: C; indent-tabs-mode: t; c-basic-offset: 8; tab-width: 8 -*- */
 
-/* Nautilus - Floating status bar.
+/* Nemo - Floating status bar.
  *
  * Copyright (C) 2011 Red Hat Inc.
  *
@@ -23,53 +23,53 @@
  *
  */
 
-#ifndef __NAUTILUS_FLOATING_BAR_H__
-#define __NAUTILUS_FLOATING_BAR_H__
+#ifndef __NEMO_FLOATING_BAR_H__
+#define __NEMO_FLOATING_BAR_H__
 
 #include <gtk/gtk.h>
 
-#define NAUTILUS_FLOATING_BAR_ACTION_ID_STOP 1
+#define NEMO_FLOATING_BAR_ACTION_ID_STOP 1
 
-#define NAUTILUS_TYPE_FLOATING_BAR nautilus_floating_bar_get_type()
-#define NAUTILUS_FLOATING_BAR(obj) \
-  (G_TYPE_CHECK_INSTANCE_CAST ((obj), NAUTILUS_TYPE_FLOATING_BAR, NautilusFloatingBar))
-#define NAUTILUS_FLOATING_BAR_CLASS(klass) \
-  (G_TYPE_CHECK_CLASS_CAST ((klass), NAUTILUS_TYPE_FLOATING_BAR, NautilusFloatingBarClass))
-#define NAUTILUS_IS_FLOATING_BAR(obj) \
-  (G_TYPE_CHECK_INSTANCE_TYPE ((obj), NAUTILUS_TYPE_FLOATING_BAR))
-#define NAUTILUS_IS_FLOATING_BAR_CLASS(klass) \
-  (G_TYPE_CHECK_CLASS_TYPE ((klass), NAUTILUS_TYPE_FLOATING_BAR))
-#define NAUTILUS_FLOATING_BAR_GET_CLASS(obj) \
-  (G_TYPE_INSTANCE_GET_CLASS ((obj), NAUTILUS_TYPE_FLOATING_BAR, NautilusFloatingBarClass))
+#define NEMO_TYPE_FLOATING_BAR nemo_floating_bar_get_type()
+#define NEMO_FLOATING_BAR(obj) \
+  (G_TYPE_CHECK_INSTANCE_CAST ((obj), NEMO_TYPE_FLOATING_BAR, NemoFloatingBar))
+#define NEMO_FLOATING_BAR_CLASS(klass) \
+  (G_TYPE_CHECK_CLASS_CAST ((klass), NEMO_TYPE_FLOATING_BAR, NemoFloatingBarClass))
+#define NEMO_IS_FLOATING_BAR(obj) \
+  (G_TYPE_CHECK_INSTANCE_TYPE ((obj), NEMO_TYPE_FLOATING_BAR))
+#define NEMO_IS_FLOATING_BAR_CLASS(klass) \
+  (G_TYPE_CHECK_CLASS_TYPE ((klass), NEMO_TYPE_FLOATING_BAR))
+#define NEMO_FLOATING_BAR_GET_CLASS(obj) \
+  (G_TYPE_INSTANCE_GET_CLASS ((obj), NEMO_TYPE_FLOATING_BAR, NemoFloatingBarClass))
 
-typedef struct _NautilusFloatingBar NautilusFloatingBar;
-typedef struct _NautilusFloatingBarClass NautilusFloatingBarClass;
-typedef struct _NautilusFloatingBarDetails NautilusFloatingBarDetails;
+typedef struct _NemoFloatingBar NemoFloatingBar;
+typedef struct _NemoFloatingBarClass NemoFloatingBarClass;
+typedef struct _NemoFloatingBarDetails NemoFloatingBarDetails;
 
-struct _NautilusFloatingBar {
+struct _NemoFloatingBar {
 	GtkBox parent;
-	NautilusFloatingBarDetails *priv;
+	NemoFloatingBarDetails *priv;
 };
 
-struct _NautilusFloatingBarClass {
+struct _NemoFloatingBarClass {
 	GtkBoxClass parent_class;
 };
 
 /* GObject */
-GType       nautilus_floating_bar_get_type  (void);
+GType       nemo_floating_bar_get_type  (void);
 
-GtkWidget * nautilus_floating_bar_new              (const gchar *label,
+GtkWidget * nemo_floating_bar_new              (const gchar *label,
 						    gboolean show_spinner);
 
-void        nautilus_floating_bar_set_label        (NautilusFloatingBar *self,
+void        nemo_floating_bar_set_label        (NemoFloatingBar *self,
 						    const gchar *label);
-void        nautilus_floating_bar_set_show_spinner (NautilusFloatingBar *self,
+void        nemo_floating_bar_set_show_spinner (NemoFloatingBar *self,
 						    gboolean show_spinner);
 
-void        nautilus_floating_bar_add_action       (NautilusFloatingBar *self,
+void        nemo_floating_bar_add_action       (NemoFloatingBar *self,
 						    const gchar *stock_id,
 						    gint action_id);
-void        nautilus_floating_bar_cleanup_actions  (NautilusFloatingBar *self);
+void        nemo_floating_bar_cleanup_actions  (NemoFloatingBar *self);
 
-#endif /* __NAUTILUS_FLOATING_BAR_H__ */
+#endif /* __NEMO_FLOATING_BAR_H__ */
 

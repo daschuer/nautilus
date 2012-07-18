@@ -23,32 +23,32 @@
  * Author: Rebecca Schulman <rebecka@eazel.com>
  */
 
-#ifndef NAUTILUS_CLIPBOARD_H
-#define NAUTILUS_CLIPBOARD_H
+#ifndef NEMO_CLIPBOARD_H
+#define NEMO_CLIPBOARD_H
 
 #include <gtk/gtk.h>
 
 /* This makes this editable or text view put clipboard commands into
  * the passed UI manager when the editable/text view is in focus.
- * Callers in Nautilus normally get the UI manager from
- * nautilus_window_get_ui_manager. */
+ * Callers in Nemo normally get the UI manager from
+ * nemo_window_get_ui_manager. */
 /* The shares selection changes argument should be set to true if the
  * widget uses the signal "selection_changed" to tell others about
- * text selection changes.  The NautilusEntry widget
- * is currently the only editable in nautilus that shares selection
+ * text selection changes.  The NemoEntry widget
+ * is currently the only editable in nemo that shares selection
  * changes. */
-void nautilus_clipboard_set_up_editable            (GtkEditable        *target,
+void nemo_clipboard_set_up_editable            (GtkEditable        *target,
 						    GtkUIManager       *ui_manager,
 						    gboolean            shares_selection_changes);
-void nautilus_clipboard_set_up_text_view           (GtkTextView        *target,
+void nemo_clipboard_set_up_text_view           (GtkTextView        *target,
 						    GtkUIManager       *ui_manager);
-void nautilus_clipboard_clear_if_colliding_uris    (GtkWidget          *widget,
+void nemo_clipboard_clear_if_colliding_uris    (GtkWidget          *widget,
 						    const GList        *item_uris,
 						    GdkAtom             copied_files_atom);
-GtkClipboard* nautilus_clipboard_get                (GtkWidget          *widget);
-GList* nautilus_clipboard_get_uri_list_from_selection_data
+GtkClipboard* nemo_clipboard_get                (GtkWidget          *widget);
+GList* nemo_clipboard_get_uri_list_from_selection_data
 						   (GtkSelectionData   *selection_data,
 						    gboolean           *cut,
 						    GdkAtom             copied_files_atom);
 
-#endif /* NAUTILUS_CLIPBOARD_H */
+#endif /* NEMO_CLIPBOARD_H */

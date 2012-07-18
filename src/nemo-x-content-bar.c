@@ -28,13 +28,13 @@
 #include <gtk/gtk.h>
 #include <string.h>
 
-#include "nautilus-x-content-bar.h"
-#include <libnautilus-private/nautilus-icon-info.h>
-#include <libnautilus-private/nautilus-program-choosing.h>
+#include "nemo-x-content-bar.h"
+#include <libnemo-private/nemo-icon-info.h>
+#include <libnemo-private/nemo-program-choosing.h>
 
-#define NAUTILUS_X_CONTENT_BAR_GET_PRIVATE(o) (G_TYPE_INSTANCE_GET_PRIVATE ((o), NAUTILUS_TYPE_X_CONTENT_BAR, NautilusXContentBarPrivate))
+#define NEMO_X_CONTENT_BAR_GET_PRIVATE(o) (G_TYPE_INSTANCE_GET_PRIVATE ((o), NEMO_TYPE_X_CONTENT_BAR, NemoXContentBarPrivate))
 
-struct NautilusXContentBarPrivate
+struct NemoXContentBarPrivate
 {
 	GtkWidget *label;
 	GtkWidget *button;
@@ -53,7 +53,7 @@ enum {
 	CONTENT_BAR_RESPONSE_APP = 1
 };
 
-G_DEFINE_TYPE (NautilusXContentBar, nautilus_x_content_bar, GTK_TYPE_INFO_BAR)
+G_DEFINE_TYPE (NemoXContentBar, nemo_x_content_bar, GTK_TYPE_INFO_BAR)
 
 static void
 content_bar_response_cb (GtkInfoBar *infobar,
@@ -61,7 +61,7 @@ content_bar_response_cb (GtkInfoBar *infobar,
 			 gpointer user_data)
 {
 	GAppInfo *default_app;
-	NautilusXContentBar *bar = user_data;
+	NemoXContentBar *bar = user_data;
 
 	if (response_id != CONTENT_BAR_RESPONSE_APP) {
 		return;
@@ -73,14 +73,14 @@ content_bar_response_cb (GtkInfoBar *infobar,
 
  	default_app = g_app_info_get_default_for_type (bar->priv->x_content_type, FALSE);
 	if (default_app != NULL) {
-		nautilus_launch_application_for_mount (default_app, bar->priv->mount,
+		nemo_launch_application_for_mount (default_app, bar->priv->mount,
 						       GTK_WINDOW (gtk_widget_get_toplevel (GTK_WIDGET (bar))));
 		g_object_unref (default_app);
 	}
 }
 
 static void
-nautilus_x_content_bar_set_x_content_type (NautilusXContentBar *bar, const char *x_content_type)
+nemo_x_content_bar_set_x_content_type (NemoXContentBar *bar, const char *x_content_type)
 {					  
 	char *message;
 	char *description;
@@ -155,7 +155,7 @@ nautilus_x_content_bar_set_x_content_type (NautilusXContentBar *bar, const char 
 }
 
 static void
-nautilus_x_content_bar_set_mount (NautilusXContentBar *bar, GMount *mount)
+nemo_x_content_bar_set_mount (NemoXContentBar *bar, GMount *mount)
 {
 	if (bar->priv->mount != NULL) {
 		g_object_unref (bar->priv->mount);
@@ -165,21 +165,21 @@ nautilus_x_content_bar_set_mount (NautilusXContentBar *bar, GMount *mount)
 
 
 static void
-nautilus_x_content_bar_set_property (GObject      *object,
+nemo_x_content_bar_set_property (GObject      *object,
 				     guint         prop_id,
 				     const GValue *value,
 				     GParamSpec   *pspec)
 {
-	NautilusXContentBar *bar;
+	NemoXContentBar *bar;
 
-	bar = NAUTILUS_X_CONTENT_BAR (object);
+	bar = NEMO_X_CONTENT_BAR (object);
 
 	switch (prop_id) {
 	case PROP_MOUNT:
-		nautilus_x_content_bar_set_mount (bar, G_MOUNT (g_value_get_object (value)));
+		nemo_x_content_bar_set_mount (bar, G_MOUNT (g_value_get_object (value)));
 		break;
 	case PROP_X_CONTENT_TYPE:
-		nautilus_x_content_bar_set_x_content_type (bar, g_value_get_string (value));
+		nemo_x_content_bar_set_x_content_type (bar, g_value_get_string (value));
 		break;
 	default:
 		G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
@@ -188,14 +188,14 @@ nautilus_x_content_bar_set_property (GObject      *object,
 }
 
 static void
-nautilus_x_content_bar_get_property (GObject    *object,
+nemo_x_content_bar_get_property (GObject    *object,
 				     guint       prop_id,
 				     GValue     *value,
 				     GParamSpec *pspec)
 {
-	NautilusXContentBar *bar;
+	NemoXContentBar *bar;
 
-	bar = NAUTILUS_X_CONTENT_BAR (object);
+	bar = NEMO_X_CONTENT_BAR (object);
 
 	switch (prop_id) {
 	case PROP_MOUNT:
@@ -211,28 +211,28 @@ nautilus_x_content_bar_get_property (GObject    *object,
 }
 
 static void
-nautilus_x_content_bar_finalize (GObject *object)
+nemo_x_content_bar_finalize (GObject *object)
 {
-	NautilusXContentBar *bar = NAUTILUS_X_CONTENT_BAR (object);
+	NemoXContentBar *bar = NEMO_X_CONTENT_BAR (object);
 
 	g_free (bar->priv->x_content_type);
 	if (bar->priv->mount != NULL)
 		g_object_unref (bar->priv->mount);
 
-        G_OBJECT_CLASS (nautilus_x_content_bar_parent_class)->finalize (object);
+        G_OBJECT_CLASS (nemo_x_content_bar_parent_class)->finalize (object);
 }
 
 static void
-nautilus_x_content_bar_class_init (NautilusXContentBarClass *klass)
+nemo_x_content_bar_class_init (NemoXContentBarClass *klass)
 {
 	GObjectClass *object_class;
 
 	object_class = G_OBJECT_CLASS (klass);
-	object_class->get_property = nautilus_x_content_bar_get_property;
-	object_class->set_property = nautilus_x_content_bar_set_property;
-	object_class->finalize = nautilus_x_content_bar_finalize;
+	object_class->get_property = nemo_x_content_bar_get_property;
+	object_class->set_property = nemo_x_content_bar_set_property;
+	object_class->finalize = nemo_x_content_bar_finalize;
 
-	g_type_class_add_private (klass, sizeof (NautilusXContentBarPrivate));
+	g_type_class_add_private (klass, sizeof (NemoXContentBarPrivate));
 
         g_object_class_install_property (object_class,
 					 PROP_MOUNT,
@@ -254,16 +254,16 @@ nautilus_x_content_bar_class_init (NautilusXContentBarClass *klass)
 }
 
 static void
-nautilus_x_content_bar_init (NautilusXContentBar *bar)
+nemo_x_content_bar_init (NemoXContentBar *bar)
 {
 	GtkWidget *content_area;
 
-	bar->priv = NAUTILUS_X_CONTENT_BAR_GET_PRIVATE (bar);
+	bar->priv = NEMO_X_CONTENT_BAR_GET_PRIVATE (bar);
 	content_area = gtk_info_bar_get_content_area (GTK_INFO_BAR (bar));
 
 	bar->priv->label = gtk_label_new (NULL);
 	gtk_style_context_add_class (gtk_widget_get_style_context (bar->priv->label),
-				     "nautilus-cluebar-label");
+				     "nemo-cluebar-label");
 	gtk_label_set_ellipsize (GTK_LABEL (bar->priv->label), PANGO_ELLIPSIZE_END);
 	gtk_container_add (GTK_CONTAINER (content_area), bar->priv->label);
 
@@ -277,10 +277,10 @@ nautilus_x_content_bar_init (NautilusXContentBar *bar)
 }
 
 GtkWidget *
-nautilus_x_content_bar_new (GMount *mount, 
+nemo_x_content_bar_new (GMount *mount, 
 			    const char *x_content_type)
 {
-	return g_object_new (NAUTILUS_TYPE_X_CONTENT_BAR, 
+	return g_object_new (NEMO_TYPE_X_CONTENT_BAR, 
 			     "mount", mount,
 			     "x-content-type", x_content_type, 
 			     NULL);

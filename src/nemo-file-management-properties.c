@@ -1,6 +1,6 @@
 /* -*- Mode: C; indent-tabs-mode: t; c-basic-offset: 8; tab-width: 8 -*- */
 
-/* nautilus-file-management-properties.c - Functions to create and show the nautilus preference dialog.
+/* nemo-file-management-properties.c - Functions to create and show the nemo preference dialog.
 
    Copyright (C) 2002 Jan Arne Petersen
 
@@ -24,7 +24,7 @@
 
 #include <config.h>
 
-#include "nautilus-file-management-properties.h"
+#include "nemo-file-management-properties.h"
 
 #include <string.h>
 #include <time.h>
@@ -35,35 +35,35 @@
 
 #include <eel/eel-glib-extensions.h>
 
-#include <libnautilus-private/nautilus-column-chooser.h>
-#include <libnautilus-private/nautilus-column-utilities.h>
-#include <libnautilus-private/nautilus-global-preferences.h>
-#include <libnautilus-private/nautilus-module.h>
+#include <libnemo-private/nemo-column-chooser.h>
+#include <libnemo-private/nemo-column-utilities.h>
+#include <libnemo-private/nemo-global-preferences.h>
+#include <libnemo-private/nemo-module.h>
 
 /* string enum preferences */
-#define NAUTILUS_FILE_MANAGEMENT_PROPERTIES_DEFAULT_VIEW_WIDGET "default_view_combobox"
-#define NAUTILUS_FILE_MANAGEMENT_PROPERTIES_ICON_VIEW_ZOOM_WIDGET "icon_view_zoom_combobox"
-#define NAUTILUS_FILE_MANAGEMENT_PROPERTIES_COMPACT_VIEW_ZOOM_WIDGET "compact_view_zoom_combobox"
-#define NAUTILUS_FILE_MANAGEMENT_PROPERTIES_LIST_VIEW_ZOOM_WIDGET "list_view_zoom_combobox"
-#define NAUTILUS_FILE_MANAGEMENT_PROPERTIES_SORT_ORDER_WIDGET "sort_order_combobox"
-#define NAUTILUS_FILE_MANAGEMENT_PROPERTIES_DATE_FORMAT_WIDGET "date_format_combobox"
-#define NAUTILUS_FILE_MANAGEMENT_PROPERTIES_PREVIEW_TEXT_WIDGET "preview_text_combobox"
-#define NAUTILUS_FILE_MANAGEMENT_PROPERTIES_PREVIEW_IMAGE_WIDGET "preview_image_combobox"
-#define NAUTILUS_FILE_MANAGEMENT_PROPERTIES_PREVIEW_FOLDER_WIDGET "preview_folder_combobox"
+#define NEMO_FILE_MANAGEMENT_PROPERTIES_DEFAULT_VIEW_WIDGET "default_view_combobox"
+#define NEMO_FILE_MANAGEMENT_PROPERTIES_ICON_VIEW_ZOOM_WIDGET "icon_view_zoom_combobox"
+#define NEMO_FILE_MANAGEMENT_PROPERTIES_COMPACT_VIEW_ZOOM_WIDGET "compact_view_zoom_combobox"
+#define NEMO_FILE_MANAGEMENT_PROPERTIES_LIST_VIEW_ZOOM_WIDGET "list_view_zoom_combobox"
+#define NEMO_FILE_MANAGEMENT_PROPERTIES_SORT_ORDER_WIDGET "sort_order_combobox"
+#define NEMO_FILE_MANAGEMENT_PROPERTIES_DATE_FORMAT_WIDGET "date_format_combobox"
+#define NEMO_FILE_MANAGEMENT_PROPERTIES_PREVIEW_TEXT_WIDGET "preview_text_combobox"
+#define NEMO_FILE_MANAGEMENT_PROPERTIES_PREVIEW_IMAGE_WIDGET "preview_image_combobox"
+#define NEMO_FILE_MANAGEMENT_PROPERTIES_PREVIEW_FOLDER_WIDGET "preview_folder_combobox"
 
 /* bool preferences */
-#define NAUTILUS_FILE_MANAGEMENT_PROPERTIES_FOLDERS_FIRST_WIDGET "sort_folders_first_checkbutton"
-#define NAUTILUS_FILE_MANAGEMENT_PROPERTIES_LABELS_BESIDE_ICONS_WIDGET "labels_beside_icons_checkbutton"
-#define NAUTILUS_FILE_MANAGEMENT_PROPERTIES_ALL_COLUMNS_SAME_WIDTH "all_columns_same_width_checkbutton"
-#define NAUTILUS_FILE_MANAGEMENT_PROPERTIES_ALWAYS_USE_BROWSER_WIDGET "always_use_browser_checkbutton"
-#define NAUTILUS_FILE_MANAGEMENT_PROPERTIES_TRASH_CONFIRM_WIDGET "trash_confirm_checkbutton"
-#define NAUTILUS_FILE_MANAGEMENT_PROPERTIES_TRASH_DELETE_WIDGET "trash_delete_checkbutton"
-#define NAUTILUS_FILE_MANAGEMENT_PROPERTIES_OPEN_NEW_WINDOW_WIDGET "new_window_checkbutton"
-#define NAUTILUS_FILE_MANAGEMENT_PROPERTIES_SHOW_HIDDEN_WIDGET "hidden_files_checkbutton"
-#define NAUTILUS_FILE_MANAGEMENT_PROPERTIES_TREE_VIEW_FOLDERS_WIDGET "treeview_folders_checkbutton"
+#define NEMO_FILE_MANAGEMENT_PROPERTIES_FOLDERS_FIRST_WIDGET "sort_folders_first_checkbutton"
+#define NEMO_FILE_MANAGEMENT_PROPERTIES_LABELS_BESIDE_ICONS_WIDGET "labels_beside_icons_checkbutton"
+#define NEMO_FILE_MANAGEMENT_PROPERTIES_ALL_COLUMNS_SAME_WIDTH "all_columns_same_width_checkbutton"
+#define NEMO_FILE_MANAGEMENT_PROPERTIES_ALWAYS_USE_BROWSER_WIDGET "always_use_browser_checkbutton"
+#define NEMO_FILE_MANAGEMENT_PROPERTIES_TRASH_CONFIRM_WIDGET "trash_confirm_checkbutton"
+#define NEMO_FILE_MANAGEMENT_PROPERTIES_TRASH_DELETE_WIDGET "trash_delete_checkbutton"
+#define NEMO_FILE_MANAGEMENT_PROPERTIES_OPEN_NEW_WINDOW_WIDGET "new_window_checkbutton"
+#define NEMO_FILE_MANAGEMENT_PROPERTIES_SHOW_HIDDEN_WIDGET "hidden_files_checkbutton"
+#define NEMO_FILE_MANAGEMENT_PROPERTIES_TREE_VIEW_FOLDERS_WIDGET "treeview_folders_checkbutton"
 
 /* int enums */
-#define NAUTILUS_FILE_MANAGEMENT_PROPERTIES_THUMBNAIL_LIMIT_WIDGET "preview_image_size_combobox"
+#define NEMO_FILE_MANAGEMENT_PROPERTIES_THUMBNAIL_LIMIT_WIDGET "preview_image_size_combobox"
 
 static const char * const default_view_values[] = {
 	"icon-view",
@@ -156,7 +156,7 @@ static const char * const icon_captions_components[] = {
 static GtkWidget *preferences_dialog = NULL;
 
 static void
-nautilus_file_management_properties_size_group_create (GtkBuilder *builder,
+nemo_file_management_properties_size_group_create (GtkBuilder *builder,
 						       char *prefix,
 						       int items)
 {
@@ -214,7 +214,7 @@ preferences_show_help (GtkWindow *parent,
 
 
 static void
-nautilus_file_management_properties_dialog_response_cb (GtkDialog *parent,
+nemo_file_management_properties_dialog_response_cb (GtkDialog *parent,
 							int response_id,
 							GtkBuilder *builder)
 {
@@ -224,43 +224,43 @@ nautilus_file_management_properties_dialog_response_cb (GtkDialog *parent,
 		switch (gtk_notebook_get_current_page (GTK_NOTEBOOK (gtk_builder_get_object (builder, "notebook1")))) {
 		default:
 		case 0:
-			section = "nautilus-views";
+			section = "nemo-views";
 			break;
 		case 1:
-			section = "nautilus-behavior";
+			section = "nemo-behavior";
 			break;
 		case 2:
-			section = "nautilus-display";
+			section = "nemo-display";
 			break;
 		case 3:
-			section = "nautilus-list";
+			section = "nemo-list";
 			break;
 		case 4:
-			section = "nautilus-preview";
+			section = "nemo-preview";
 			break;
 		}
-		preferences_show_help (GTK_WINDOW (parent), "gnome-help", section);
+		preferences_show_help (GTK_WINDOW (parent), "ubuntu-help", section);
 	} else if (response_id == GTK_RESPONSE_CLOSE) {
 		gtk_widget_destroy (GTK_WIDGET (parent));
 	}
 }
 
 static void
-columns_changed_callback (NautilusColumnChooser *chooser,
+columns_changed_callback (NemoColumnChooser *chooser,
 			  gpointer callback_data)
 {
 	char **visible_columns;
 	char **column_order;
 
-	nautilus_column_chooser_get_settings (NAUTILUS_COLUMN_CHOOSER (chooser),
+	nemo_column_chooser_get_settings (NEMO_COLUMN_CHOOSER (chooser),
 					      &visible_columns,
 					      &column_order);
 
-	g_settings_set_strv (nautilus_list_view_preferences,
-			     NAUTILUS_PREFERENCES_LIST_VIEW_DEFAULT_VISIBLE_COLUMNS,
+	g_settings_set_strv (nemo_list_view_preferences,
+			     NEMO_PREFERENCES_LIST_VIEW_DEFAULT_VISIBLE_COLUMNS,
 			     (const char * const *)visible_columns);
-	g_settings_set_strv (nautilus_list_view_preferences,
-			     NAUTILUS_PREFERENCES_LIST_VIEW_DEFAULT_COLUMN_ORDER,
+	g_settings_set_strv (nemo_list_view_preferences,
+			     NEMO_PREFERENCES_LIST_VIEW_DEFAULT_COLUMN_ORDER,
 			     (const char * const *)column_order);
 
 	g_strfreev (visible_columns);
@@ -288,11 +288,11 @@ create_icon_caption_combo_box_items (GtkComboBoxText *combo_box,
 	g_ptr_array_add (column_names, g_strdup ("none"));
 
 	for (l = columns; l != NULL; l = l->next) {
-		NautilusColumn *column;
+		NemoColumn *column;
 		char *name;
 		char *label;
 
-		column = NAUTILUS_COLUMN (l->data);
+		column = NEMO_COLUMN (l->data);
 
 		g_object_get (G_OBJECT (column), 
 			      "name", &name, "label", &label, 
@@ -345,8 +345,8 @@ icon_captions_changed_callback (GtkComboBox *combo_box,
 	}
 	g_ptr_array_add (captions, NULL);
 
-	g_settings_set_strv (nautilus_icon_view_preferences,
-			     NAUTILUS_PREFERENCES_ICON_VIEW_CAPTIONS,
+	g_settings_set_strv (nemo_icon_view_preferences,
+			     NEMO_PREFERENCES_ICON_VIEW_CAPTIONS,
 			     (const char **)captions->pdata);
 	g_ptr_array_free (captions, TRUE);
 }
@@ -389,7 +389,7 @@ update_icon_captions_from_settings (GtkBuilder *builder)
 	char **captions;
 	int i, j;
 
-	captions = g_settings_get_strv (nautilus_icon_view_preferences, NAUTILUS_PREFERENCES_ICON_VIEW_CAPTIONS);
+	captions = g_settings_get_strv (nemo_icon_view_preferences, NEMO_PREFERENCES_ICON_VIEW_CAPTIONS);
 	if (captions == NULL)
 		return;
 
@@ -414,16 +414,16 @@ update_icon_captions_from_settings (GtkBuilder *builder)
 }
 
 static void
-nautilus_file_management_properties_dialog_setup_icon_caption_page (GtkBuilder *builder)
+nemo_file_management_properties_dialog_setup_icon_caption_page (GtkBuilder *builder)
 {
 	GList *columns;
 	int i;
 	gboolean writable;
 
-	writable = g_settings_is_writable (nautilus_icon_view_preferences,
-					   NAUTILUS_PREFERENCES_ICON_VIEW_CAPTIONS);
+	writable = g_settings_is_writable (nemo_icon_view_preferences,
+					   NEMO_PREFERENCES_ICON_VIEW_CAPTIONS);
 
-	columns = nautilus_get_common_columns ();
+	columns = nemo_get_common_columns ();
 
 	for (i = 0; icon_captions_components[i] != NULL; i++) {
 		GtkWidget *combo_box;
@@ -439,7 +439,7 @@ nautilus_file_management_properties_dialog_setup_icon_caption_page (GtkBuilder *
 				  builder);
 	}
 
-	nautilus_column_list_free (columns);
+	nemo_column_list_free (columns);
 
 	update_icon_captions_from_settings (builder);
 }
@@ -454,7 +454,7 @@ create_date_format_menu (GtkBuilder *builder)
 
 	combo_box = GTK_COMBO_BOX_TEXT
 		(gtk_builder_get_object (builder,
-					 NAUTILUS_FILE_MANAGEMENT_PROPERTIES_DATE_FORMAT_WIDGET));
+					 NEMO_FILE_MANAGEMENT_PROPERTIES_DATE_FORMAT_WIDGET));
 
 	now_raw = time (NULL);
 	now = localtime (&now_raw);
@@ -473,17 +473,17 @@ create_date_format_menu (GtkBuilder *builder)
 }
 
 static void
-set_columns_from_settings (NautilusColumnChooser *chooser)
+set_columns_from_settings (NemoColumnChooser *chooser)
 {
 	char **visible_columns;
 	char **column_order;
 
-	visible_columns = g_settings_get_strv (nautilus_list_view_preferences,
-					       NAUTILUS_PREFERENCES_LIST_VIEW_DEFAULT_VISIBLE_COLUMNS);
-	column_order = g_settings_get_strv (nautilus_list_view_preferences,
-					    NAUTILUS_PREFERENCES_LIST_VIEW_DEFAULT_COLUMN_ORDER);
+	visible_columns = g_settings_get_strv (nemo_list_view_preferences,
+					       NEMO_PREFERENCES_LIST_VIEW_DEFAULT_VISIBLE_COLUMNS);
+	column_order = g_settings_get_strv (nemo_list_view_preferences,
+					    NEMO_PREFERENCES_LIST_VIEW_DEFAULT_COLUMN_ORDER);
 
-	nautilus_column_chooser_set_settings (NAUTILUS_COLUMN_CHOOSER (chooser),
+	nemo_column_chooser_set_settings (NEMO_COLUMN_CHOOSER (chooser),
 					      visible_columns,
 					      column_order);
 
@@ -492,29 +492,29 @@ set_columns_from_settings (NautilusColumnChooser *chooser)
 }
 
 static void
-use_default_callback (NautilusColumnChooser *chooser,
+use_default_callback (NemoColumnChooser *chooser,
 		      gpointer user_data)
 {
-	g_settings_reset (nautilus_list_view_preferences,
-			  NAUTILUS_PREFERENCES_LIST_VIEW_DEFAULT_VISIBLE_COLUMNS);
-	g_settings_reset (nautilus_list_view_preferences,
-			  NAUTILUS_PREFERENCES_LIST_VIEW_DEFAULT_COLUMN_ORDER);
+	g_settings_reset (nemo_list_view_preferences,
+			  NEMO_PREFERENCES_LIST_VIEW_DEFAULT_VISIBLE_COLUMNS);
+	g_settings_reset (nemo_list_view_preferences,
+			  NEMO_PREFERENCES_LIST_VIEW_DEFAULT_COLUMN_ORDER);
 	set_columns_from_settings (chooser);
 }
 
 static void
-nautilus_file_management_properties_dialog_setup_list_column_page (GtkBuilder *builder)
+nemo_file_management_properties_dialog_setup_list_column_page (GtkBuilder *builder)
 {
 	GtkWidget *chooser;
 	GtkWidget *box;
 
-	chooser = nautilus_column_chooser_new (NULL);
+	chooser = nemo_column_chooser_new (NULL);
 	g_signal_connect (chooser, "changed",
 			  G_CALLBACK (columns_changed_callback), chooser);
 	g_signal_connect (chooser, "use_default",
 			  G_CALLBACK (use_default_callback), chooser);
 
-	set_columns_from_settings (NAUTILUS_COLUMN_CHOOSER (chooser));
+	set_columns_from_settings (NEMO_COLUMN_CHOOSER (chooser));
 
 	gtk_widget_show (chooser);
 	box = GTK_WIDGET (gtk_builder_get_object (builder, "list_columns_vbox"));
@@ -704,110 +704,110 @@ bind_builder_radio (GtkBuilder *builder,
 
 
 static  void
-nautilus_file_management_properties_dialog_setup (GtkBuilder *builder, GtkWindow *window)
+nemo_file_management_properties_dialog_setup (GtkBuilder *builder, GtkWindow *window)
 {
 	GtkWidget *dialog;
 
 	/* setup UI */
-	nautilus_file_management_properties_size_group_create (builder,
+	nemo_file_management_properties_size_group_create (builder,
 							       "views_label",
 							       5);
-	nautilus_file_management_properties_size_group_create (builder,
+	nemo_file_management_properties_size_group_create (builder,
 							       "captions_label",
 							       3);
-	nautilus_file_management_properties_size_group_create (builder,
+	nemo_file_management_properties_size_group_create (builder,
 							       "preview_label",
 							       4);
 	create_date_format_menu (builder);
 
 	/* setup preferences */
-	bind_builder_bool (builder, nautilus_icon_view_preferences,
-			   NAUTILUS_FILE_MANAGEMENT_PROPERTIES_LABELS_BESIDE_ICONS_WIDGET,
-			   NAUTILUS_PREFERENCES_ICON_VIEW_LABELS_BESIDE_ICONS);
-	bind_builder_bool (builder, nautilus_compact_view_preferences,
-			   NAUTILUS_FILE_MANAGEMENT_PROPERTIES_ALL_COLUMNS_SAME_WIDTH,
-			   NAUTILUS_PREFERENCES_COMPACT_VIEW_ALL_COLUMNS_SAME_WIDTH);
-	bind_builder_bool (builder, nautilus_preferences,
-			   NAUTILUS_FILE_MANAGEMENT_PROPERTIES_FOLDERS_FIRST_WIDGET,
-			   NAUTILUS_PREFERENCES_SORT_DIRECTORIES_FIRST);
-	bind_builder_bool_inverted (builder, nautilus_preferences,
-				    NAUTILUS_FILE_MANAGEMENT_PROPERTIES_ALWAYS_USE_BROWSER_WIDGET,
-				    NAUTILUS_PREFERENCES_ALWAYS_USE_BROWSER);
+	bind_builder_bool (builder, nemo_icon_view_preferences,
+			   NEMO_FILE_MANAGEMENT_PROPERTIES_LABELS_BESIDE_ICONS_WIDGET,
+			   NEMO_PREFERENCES_ICON_VIEW_LABELS_BESIDE_ICONS);
+	bind_builder_bool (builder, nemo_compact_view_preferences,
+			   NEMO_FILE_MANAGEMENT_PROPERTIES_ALL_COLUMNS_SAME_WIDTH,
+			   NEMO_PREFERENCES_COMPACT_VIEW_ALL_COLUMNS_SAME_WIDTH);
+	bind_builder_bool (builder, nemo_preferences,
+			   NEMO_FILE_MANAGEMENT_PROPERTIES_FOLDERS_FIRST_WIDGET,
+			   NEMO_PREFERENCES_SORT_DIRECTORIES_FIRST);
+	bind_builder_bool_inverted (builder, nemo_preferences,
+				    NEMO_FILE_MANAGEMENT_PROPERTIES_ALWAYS_USE_BROWSER_WIDGET,
+				    NEMO_PREFERENCES_ALWAYS_USE_BROWSER);
 
-	bind_builder_bool (builder, nautilus_preferences,
-			   NAUTILUS_FILE_MANAGEMENT_PROPERTIES_TRASH_CONFIRM_WIDGET,
-			   NAUTILUS_PREFERENCES_CONFIRM_TRASH);
-	bind_builder_bool (builder, nautilus_preferences,
-			   NAUTILUS_FILE_MANAGEMENT_PROPERTIES_TRASH_DELETE_WIDGET,
-			   NAUTILUS_PREFERENCES_ENABLE_DELETE);
-	bind_builder_bool (builder, nautilus_preferences,
-			   NAUTILUS_FILE_MANAGEMENT_PROPERTIES_SHOW_HIDDEN_WIDGET,
-			   NAUTILUS_PREFERENCES_SHOW_HIDDEN_FILES);
+	bind_builder_bool (builder, nemo_preferences,
+			   NEMO_FILE_MANAGEMENT_PROPERTIES_TRASH_CONFIRM_WIDGET,
+			   NEMO_PREFERENCES_CONFIRM_TRASH);
+	bind_builder_bool (builder, nemo_preferences,
+			   NEMO_FILE_MANAGEMENT_PROPERTIES_TRASH_DELETE_WIDGET,
+			   NEMO_PREFERENCES_ENABLE_DELETE);
+	bind_builder_bool (builder, nemo_preferences,
+			   NEMO_FILE_MANAGEMENT_PROPERTIES_SHOW_HIDDEN_WIDGET,
+			   NEMO_PREFERENCES_SHOW_HIDDEN_FILES);
 
-	bind_builder_bool (builder, nautilus_tree_sidebar_preferences,
-			   NAUTILUS_FILE_MANAGEMENT_PROPERTIES_TREE_VIEW_FOLDERS_WIDGET,
-			   NAUTILUS_PREFERENCES_TREE_SHOW_ONLY_DIRECTORIES);
+	bind_builder_bool (builder, nemo_tree_sidebar_preferences,
+			   NEMO_FILE_MANAGEMENT_PROPERTIES_TREE_VIEW_FOLDERS_WIDGET,
+			   NEMO_PREFERENCES_TREE_SHOW_ONLY_DIRECTORIES);
 
-	bind_builder_enum (builder, nautilus_preferences,
-			   NAUTILUS_FILE_MANAGEMENT_PROPERTIES_DEFAULT_VIEW_WIDGET,
-			   NAUTILUS_PREFERENCES_DEFAULT_FOLDER_VIEWER,
+	bind_builder_enum (builder, nemo_preferences,
+			   NEMO_FILE_MANAGEMENT_PROPERTIES_DEFAULT_VIEW_WIDGET,
+			   NEMO_PREFERENCES_DEFAULT_FOLDER_VIEWER,
 			   (const char **) default_view_values);
-	bind_builder_enum (builder, nautilus_icon_view_preferences,
-			   NAUTILUS_FILE_MANAGEMENT_PROPERTIES_ICON_VIEW_ZOOM_WIDGET,
-			   NAUTILUS_PREFERENCES_ICON_VIEW_DEFAULT_ZOOM_LEVEL,
+	bind_builder_enum (builder, nemo_icon_view_preferences,
+			   NEMO_FILE_MANAGEMENT_PROPERTIES_ICON_VIEW_ZOOM_WIDGET,
+			   NEMO_PREFERENCES_ICON_VIEW_DEFAULT_ZOOM_LEVEL,
 			   (const char **) zoom_values);
-	bind_builder_enum (builder, nautilus_compact_view_preferences,
-			   NAUTILUS_FILE_MANAGEMENT_PROPERTIES_COMPACT_VIEW_ZOOM_WIDGET,
-			   NAUTILUS_PREFERENCES_COMPACT_VIEW_DEFAULT_ZOOM_LEVEL,
+	bind_builder_enum (builder, nemo_compact_view_preferences,
+			   NEMO_FILE_MANAGEMENT_PROPERTIES_COMPACT_VIEW_ZOOM_WIDGET,
+			   NEMO_PREFERENCES_COMPACT_VIEW_DEFAULT_ZOOM_LEVEL,
 			   (const char **) zoom_values);
-	bind_builder_enum (builder, nautilus_list_view_preferences,
-			   NAUTILUS_FILE_MANAGEMENT_PROPERTIES_LIST_VIEW_ZOOM_WIDGET,
-			   NAUTILUS_PREFERENCES_LIST_VIEW_DEFAULT_ZOOM_LEVEL,
+	bind_builder_enum (builder, nemo_list_view_preferences,
+			   NEMO_FILE_MANAGEMENT_PROPERTIES_LIST_VIEW_ZOOM_WIDGET,
+			   NEMO_PREFERENCES_LIST_VIEW_DEFAULT_ZOOM_LEVEL,
 			   (const char **) zoom_values);
-	bind_builder_enum (builder, nautilus_preferences,
-			   NAUTILUS_FILE_MANAGEMENT_PROPERTIES_SORT_ORDER_WIDGET,
-			   NAUTILUS_PREFERENCES_DEFAULT_SORT_ORDER,
+	bind_builder_enum (builder, nemo_preferences,
+			   NEMO_FILE_MANAGEMENT_PROPERTIES_SORT_ORDER_WIDGET,
+			   NEMO_PREFERENCES_DEFAULT_SORT_ORDER,
 			   (const char **) sort_order_values);
-	bind_builder_enum (builder, nautilus_preferences,
-			   NAUTILUS_FILE_MANAGEMENT_PROPERTIES_PREVIEW_TEXT_WIDGET,
-			   NAUTILUS_PREFERENCES_SHOW_TEXT_IN_ICONS,
+	bind_builder_enum (builder, nemo_preferences,
+			   NEMO_FILE_MANAGEMENT_PROPERTIES_PREVIEW_TEXT_WIDGET,
+			   NEMO_PREFERENCES_SHOW_TEXT_IN_ICONS,
 			   (const char **) preview_values);
-	bind_builder_enum (builder, nautilus_preferences,
-			   NAUTILUS_FILE_MANAGEMENT_PROPERTIES_PREVIEW_IMAGE_WIDGET,
-			   NAUTILUS_PREFERENCES_SHOW_IMAGE_FILE_THUMBNAILS,
+	bind_builder_enum (builder, nemo_preferences,
+			   NEMO_FILE_MANAGEMENT_PROPERTIES_PREVIEW_IMAGE_WIDGET,
+			   NEMO_PREFERENCES_SHOW_IMAGE_FILE_THUMBNAILS,
 			   (const char **) preview_values);
-	bind_builder_enum (builder, nautilus_preferences,
-			   NAUTILUS_FILE_MANAGEMENT_PROPERTIES_PREVIEW_FOLDER_WIDGET,
-			   NAUTILUS_PREFERENCES_SHOW_DIRECTORY_ITEM_COUNTS,
+	bind_builder_enum (builder, nemo_preferences,
+			   NEMO_FILE_MANAGEMENT_PROPERTIES_PREVIEW_FOLDER_WIDGET,
+			   NEMO_PREFERENCES_SHOW_DIRECTORY_ITEM_COUNTS,
 			   (const char **) preview_values);
-	bind_builder_enum (builder, nautilus_preferences,
-			   NAUTILUS_FILE_MANAGEMENT_PROPERTIES_DATE_FORMAT_WIDGET,
-			   NAUTILUS_PREFERENCES_DATE_FORMAT,
+	bind_builder_enum (builder, nemo_preferences,
+			   NEMO_FILE_MANAGEMENT_PROPERTIES_DATE_FORMAT_WIDGET,
+			   NEMO_PREFERENCES_DATE_FORMAT,
 			   (const char **) date_format_values);
 
 
-	bind_builder_radio (builder, nautilus_preferences,
+	bind_builder_radio (builder, nemo_preferences,
 			    (const char **) click_behavior_components,
-			    NAUTILUS_PREFERENCES_CLICK_POLICY,
+			    NEMO_PREFERENCES_CLICK_POLICY,
 			    (const char **) click_behavior_values);
-	bind_builder_radio (builder, nautilus_preferences,
+	bind_builder_radio (builder, nemo_preferences,
 			    (const char **) executable_text_components,
-			    NAUTILUS_PREFERENCES_EXECUTABLE_TEXT_ACTIVATION,
+			    NEMO_PREFERENCES_EXECUTABLE_TEXT_ACTIVATION,
 			    (const char **) executable_text_values);
 
-	bind_builder_uint_enum (builder, nautilus_preferences,
-				NAUTILUS_FILE_MANAGEMENT_PROPERTIES_THUMBNAIL_LIMIT_WIDGET,
-				NAUTILUS_PREFERENCES_IMAGE_FILE_THUMBNAIL_LIMIT,
+	bind_builder_uint_enum (builder, nemo_preferences,
+				NEMO_FILE_MANAGEMENT_PROPERTIES_THUMBNAIL_LIMIT_WIDGET,
+				NEMO_PREFERENCES_IMAGE_FILE_THUMBNAIL_LIMIT,
 				thumbnail_limit_values,
 				G_N_ELEMENTS (thumbnail_limit_values));
 
-	nautilus_file_management_properties_dialog_setup_icon_caption_page (builder);
-	nautilus_file_management_properties_dialog_setup_list_column_page (builder);
+	nemo_file_management_properties_dialog_setup_icon_caption_page (builder);
+	nemo_file_management_properties_dialog_setup_list_column_page (builder);
 
 	/* UI callbacks */
 	dialog = GTK_WIDGET (gtk_builder_get_object (builder, "file_management_dialog"));
 	g_signal_connect_data (dialog, "response",
-			       G_CALLBACK (nautilus_file_management_properties_dialog_response_cb),
+			       G_CALLBACK (nemo_file_management_properties_dialog_response_cb),
 			       g_object_ref (builder),
 			       (GClosureNotify)g_object_unref,
 			       0);
@@ -826,7 +826,7 @@ nautilus_file_management_properties_dialog_setup (GtkBuilder *builder, GtkWindow
 }
 
 void
-nautilus_file_management_properties_dialog_show (GtkWindow *window)
+nemo_file_management_properties_dialog_show (GtkWindow *window)
 {
 	GtkBuilder *builder;
 
@@ -838,10 +838,10 @@ nautilus_file_management_properties_dialog_show (GtkWindow *window)
 	builder = gtk_builder_new ();
 
 	gtk_builder_add_from_resource (builder,
-				       "/org/gnome/nautilus/nautilus-file-management-properties.ui",
+				       "/org/gnome/nemo/nemo-file-management-properties.ui",
 				       NULL);
 
-	nautilus_file_management_properties_dialog_setup (builder, window);
+	nemo_file_management_properties_dialog_setup (builder, window);
 
 	g_object_unref (builder);
 }

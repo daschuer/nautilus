@@ -1,16 +1,16 @@
 
 
-* Nautilus Architecture Block Diagram
+* Nemo Architecture Block Diagram
 
 
 +-----------------------------------------------------------------------+
 |                                                                       |
-|                            nautilus application                       |
+|                            nemo application                       |
 |                                                                       |
 |     +----------------------------------------------------------+      |
 |     |                                                          |      |
 |     |                                                          |      |
-|     |                      NautilusWindow                      |      |
+|     |                      NemoWindow                      |      |
 |     |                                                          |      |
 |     |                                                          |      |
 |     +----------------------------------------------------------+      |
@@ -19,7 +19,7 @@
 |               \|/                 \|/                   \|/           |
 | +---------------------+   +------------------+   +------------------+ |
 | |                     |   |                  |   |                  | |
-| | NautilusContentView |   | NautilusMetaView |   | NautilusMetaView | |
+| | NemoContentView |   | NemoMetaView |   | NemoMetaView | |
 | |                     |   |                  |   |                  | |
 | +---------------------+   +------------------+   +------------------+ |
 |         /||\                         /||\                      /||\   |
@@ -32,25 +32,25 @@
 |         \||/                 | |     \||/                  | | \||/                      |
 | +--------------------------+ | | +-----------------------+ | | +-----------------------+ |
 | |                          | | | |                       | | | |                       | |
-| | NautilusContentViewFrame | | | | NautilusMetaViewFrame | | | | NautilusMetaViewFrame | |
+| | NemoContentViewFrame | | | | NemoMetaViewFrame | | | | NemoMetaViewFrame | |
 | |                          | | | |                       | | | |                       | | 
 | +--------------------------+ | | +-----------------------+ | | +-----------------------+ |
 |                              | |                           | |                           |
-|   nautilus view component    | |  nautilus view component  | |  nautilus view component  |
+|   nemo view component    | |  nemo view component  | |  nemo view component  |
 |                              | |                           | |                           |
 +------------------------------+ +---------------------------+ +---------------------------+
 
 
 
-* Nautilus Architecture Summary
+* Nemo Architecture Summary
 
-Nautilus is a general-purpose shell application for browsing arbitrary
-content. It is implemented as `nautilus', a container application
+Nemo is a general-purpose shell application for browsing arbitrary
+content. It is implemented as `nemo', a container application
 which excercises overall control and provides chrome, and a number of
-nautilus view components. These view components may use the
-`libnautilus' library to ease implementation.
+nemo view components. These view components may use the
+`libnemo' library to ease implementation.
 
-There are two types of views, content views and meta-views. A nautilus
+There are two types of views, content views and meta-views. A nemo
 window typically has one content view, which is displayed in the main
 area of the window, and several meta-views, which are displayed on the
 left, typically one at a time. The meta-views should be panels that
@@ -60,32 +60,32 @@ navigation aids.
 However, ultimately multiple content views will be available and may
 be switched by using an option menu.
 
-The nautilus application has a NautilusWindow object for each window
-it displays. The NautilusWindow object provides various chrome and
-uses a number of NautilusView objects to communicate with view
-components. The relationship between NautilusWindow and the
-NautilusViews is mostly, but not completely one-way; primarily, the
+The nemo application has a NemoWindow object for each window
+it displays. The NemoWindow object provides various chrome and
+uses a number of NemoView objects to communicate with view
+components. The relationship between NemoWindow and the
+NemoViews is mostly, but not completely one-way; primarily, the
 window calls the view's methods and connects to its signals. 
 
-The NautilusView object serves as a proxy for a view component. It
+The NemoView object serves as a proxy for a view component. It
 provides a number of methods which correspond to the methods of the
-Nautilus:View IDL interface, and translates calls to these methods to
+Nemo:View IDL interface, and translates calls to these methods to
 CORBA calls to the view component. It also translates incoming calls
 from the view component into signal emissions for a set of signals
-that reflects that Nautilus:ViewFrame IDL interface.
+that reflects that Nemo:ViewFrame IDL interface.
 
-The NautilusViewFrame object serves the corresponding role in the view
+The NemoViewFrame object serves the corresponding role in the view
 component. It provides methods that correspond to the
-Nautilus:ViewFrame IDL interface which it translates to CORBA calls to
+Nemo:ViewFrame IDL interface which it translates to CORBA calls to
 the app, and translates incoming CORBA calls from the app into signal
-emissions which reflect the Nautilus:View IDL interface.
+emissions which reflect the Nemo:View IDL interface.
 
-Thus, whenever the application calls a NautilusView method to
+Thus, whenever the application calls a NemoView method to
 communicate with the view, a CORBA message is sent, and a signal is
-emitted in the view component by NautilusViewFrame. And conversely,
-when the view component calls a NautilusViewFrame method to
+emitted in the view component by NemoViewFrame. And conversely,
+when the view component calls a NemoViewFrame method to
 communicate with the app, a CORBA message is sent, and a signal is
-emitted by NautilusView.
+emitted by NemoView.
 
 
 
@@ -100,10 +100,10 @@ Back or Forward buttons, or the user selecting a bookmark.
 ** A view requests a location change
 
 For a view to initiate a location change, view-specific code in the
-component calls nautilus_view_frame_request_location_change with the
+component calls nemo_view_frame_request_location_change with the
 appropriate arguments. This results in the "request_location_change"
-signal being emitted by the corresponding NautilusView object in the
-app, as described above. The NautilusWindow has connected to this
+signal being emitted by the corresponding NemoView object in the
+app, as described above. The NemoWindow has connected to this
 signal, so it is made aware of the request. The app may decide to
 create a new window to display the new location, or to display it in
 the same window. Either way, control proceeds largely as below.
@@ -111,35 +111,35 @@ the same window. Either way, control proceeds largely as below.
 
 ** The framework carries out a location change
 
-When a NautilusWindow has determined that it should carry out a
+When a NemoWindow has determined that it should carry out a
 location change or load an initial location, it calls
-`nautilus_window_change_location'. This routine begins by stopping any
+`nemo_window_change_location'. This routine begins by stopping any
 previous in-progress loads. Then it determines the applicable content
 views and meta-views. It then enters a state machine which results in
 updating each view.
 
 When an individual view is being updated, one of two things may
 happen. First, if the same view component is still applicable but the
-location is different, `nautilus_view_notify_location_change' is
+location is different, `nemo_view_notify_location_change' is
 called which causes the "notify_location_change" signal to be emitted
 in the view. If the same view component is no longer applicable, then
-a new NautilusView object is created, and the component for the proper
-iid is loaded. Then `nautilus_view_notify_location_change' is called
+a new NemoView object is created, and the component for the proper
+iid is loaded. Then `nemo_view_notify_location_change' is called
 to set it's initial location.
 
 
 ** Other component types
 
-Nautilus also has built-in support for viewing locations via Bonobo
+Nemo also has built-in support for viewing locations via Bonobo
 subdocuments and Bonobo controls. This is implemented in the view and
-transparent to the nautilus application. However, the underlying
+transparent to the nemo application. However, the underlying
 architecture is different.
 
 
 
 * Other Communication
 
-The Nautilus:View and Nautilus:ViewFrame interfaces allow for other
+The Nemo:View and Nemo:ViewFrame interfaces allow for other
 communication as well. 
 
 The view may request that the frame update the status message,

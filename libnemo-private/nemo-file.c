@@ -1,6 +1,6 @@
 /* -*- Mode: C; indent-tabs-mode: t; c-basic-offset: 8; tab-width: 8 -*-
 
-   nautilus-file.c: Nautilus file model.
+   nemo-file.c: Nemo file model.
  
    Copyright (C) 1999, 2000, 2001 Eazel, Inc.
   
@@ -23,30 +23,30 @@
 */
 
 #include <config.h>
-#include "nautilus-file.h"
+#include "nemo-file.h"
 
-#include "nautilus-directory-notify.h"
-#include "nautilus-directory-private.h"
-#include "nautilus-signaller.h"
-#include "nautilus-desktop-directory.h"
-#include "nautilus-desktop-directory-file.h"
-#include "nautilus-desktop-icon-file.h"
-#include "nautilus-file-attributes.h"
-#include "nautilus-file-private.h"
-#include "nautilus-file-operations.h"
-#include "nautilus-file-utilities.h"
-#include "nautilus-global-preferences.h"
-#include "nautilus-lib-self-check-functions.h"
-#include "nautilus-link.h"
-#include "nautilus-metadata.h"
-#include "nautilus-module.h"
-#include "nautilus-search-directory.h"
-#include "nautilus-search-directory-file.h"
-#include "nautilus-thumbnails.h"
-#include "nautilus-vfs-file.h"
-#include "nautilus-file-undo-operations.h"
-#include "nautilus-file-undo-manager.h"
-#include "nautilus-saved-search-file.h"
+#include "nemo-directory-notify.h"
+#include "nemo-directory-private.h"
+#include "nemo-signaller.h"
+#include "nemo-desktop-directory.h"
+#include "nemo-desktop-directory-file.h"
+#include "nemo-desktop-icon-file.h"
+#include "nemo-file-attributes.h"
+#include "nemo-file-private.h"
+#include "nemo-file-operations.h"
+#include "nemo-file-utilities.h"
+#include "nemo-global-preferences.h"
+#include "nemo-lib-self-check-functions.h"
+#include "nemo-link.h"
+#include "nemo-metadata.h"
+#include "nemo-module.h"
+#include "nemo-search-directory.h"
+#include "nemo-search-directory-file.h"
+#include "nemo-thumbnails.h"
+#include "nemo-vfs-file.h"
+#include "nemo-file-undo-operations.h"
+#include "nemo-file-undo-manager.h"
+#include "nemo-saved-search-file.h"
 #include <eel/eel-debug.h>
 #include <eel/eel-glib-extensions.h>
 #include <eel/eel-gtk-extensions.h>
@@ -58,8 +58,8 @@
 #include <glib/gstdio.h>
 #include <gio/gio.h>
 #include <glib.h>
-#include <libnautilus-extension/nautilus-file-info.h>
-#include <libnautilus-extension/nautilus-extension-private.h>
+#include <libnemo-extension/nemo-file-info.h>
+#include <libnemo-extension/nemo-extension-private.h>
 #include <libxml/parser.h>
 #include <pwd.h>
 #include <stdlib.h>
@@ -72,29 +72,32 @@
 #include <selinux/selinux.h>
 #endif
 
-#define DEBUG_FLAG NAUTILUS_DEBUG_FILE
-#include <libnautilus-private/nautilus-debug.h>
+#define DEBUG_FLAG NEMO_DEBUG_FILE
+#include <libnemo-private/nemo-debug.h>
 
 /* Time in seconds to cache getpwuid results */
 #define GETPWUID_CACHE_TIME (5*60)
 
 #define ICON_NAME_THUMBNAIL_LOADING   "image-loading"
 
-#undef NAUTILUS_FILE_DEBUG_REF
-#undef NAUTILUS_FILE_DEBUG_REF_VALGRIND
+#undef NEMO_FILE_DEBUG_REF
+#undef NEMO_FILE_DEBUG_REF_VALGRIND
 
-#ifdef NAUTILUS_FILE_DEBUG_REF_VALGRIND
+#ifdef NEMO_FILE_DEBUG_REF_VALGRIND
 #include <valgrind/valgrind.h>
 #define DEBUG_REF_PRINTF VALGRIND_PRINTF_BACKTRACE
 #else
 #define DEBUG_REF_PRINTF printf
 #endif
 
+#include <zeitgeist.h>
+#define ZEITGEIST_NEMO_ACTOR "application://nemo.desktop"
+
 /* Files that start with these characters sort after files that don't. */
 #define SORT_LAST_CHAR1 '.'
 #define SORT_LAST_CHAR2 '#'
 
-/* Name of Nautilus trash directories */
+/* Name of Nemo trash directories */
 #define TRASH_DIRECTORY_NAME ".Trash"
 
 #define METADATA_ID_IS_LIST_MASK (1<<31)
@@ -103,7 +106,7 @@ typedef enum {
 	SHOW_HIDDEN = 1 << 0,
 } FilterOptions;
 
-typedef void (* ModifyListFunction) (GList **list, NautilusFile *file);
+typedef void (* ModifyListFunction) (GList **list, NemoFile *file);
 
 enum {
 	CHANGED,
@@ -143,56 +146,56 @@ static GQuark attribute_name_q,
 	attribute_volume_q,
 	attribute_free_space_q;
 
-static void     nautilus_file_info_iface_init                (NautilusFileInfoIface *iface);
-static char *   nautilus_file_get_owner_as_string            (NautilusFile          *file,
+static void     nemo_file_info_iface_init                (NemoFileInfoIface *iface);
+static char *   nemo_file_get_owner_as_string            (NemoFile          *file,
 							      gboolean               include_real_name);
-static char *   nautilus_file_get_type_as_string             (NautilusFile          *file);
-static gboolean update_info_and_name                         (NautilusFile          *file,
+static char *   nemo_file_get_type_as_string             (NemoFile          *file);
+static gboolean update_info_and_name                         (NemoFile          *file,
 							      GFileInfo             *info);
-static const char * nautilus_file_peek_display_name (NautilusFile *file);
-static const char * nautilus_file_peek_display_name_collation_key (NautilusFile *file);
+static const char * nemo_file_peek_display_name (NemoFile *file);
+static const char * nemo_file_peek_display_name_collation_key (NemoFile *file);
 static void file_mount_unmounted (GMount *mount,  gpointer data);
 static void metadata_hash_free (GHashTable *hash);
 
-G_DEFINE_TYPE_WITH_CODE (NautilusFile, nautilus_file, G_TYPE_OBJECT,
-			 G_IMPLEMENT_INTERFACE (NAUTILUS_TYPE_FILE_INFO,
-						nautilus_file_info_iface_init));
+G_DEFINE_TYPE_WITH_CODE (NemoFile, nemo_file, G_TYPE_OBJECT,
+			 G_IMPLEMENT_INTERFACE (NEMO_TYPE_FILE_INFO,
+						nemo_file_info_iface_init));
 
 static void
-nautilus_file_init (NautilusFile *file)
+nemo_file_init (NemoFile *file)
 {
-	file->details = G_TYPE_INSTANCE_GET_PRIVATE ((file), NAUTILUS_TYPE_FILE, NautilusFileDetails);
+	file->details = G_TYPE_INSTANCE_GET_PRIVATE ((file), NEMO_TYPE_FILE, NemoFileDetails);
 
-	nautilus_file_clear_info (file);
-	nautilus_file_invalidate_extension_info_internal (file);
+	nemo_file_clear_info (file);
+	nemo_file_invalidate_extension_info_internal (file);
 
 	file->details->free_space = -1;
 }
 
 static GObject*
-nautilus_file_constructor (GType                  type,
+nemo_file_constructor (GType                  type,
 			   guint                  n_construct_properties,
 			   GObjectConstructParam *construct_params)
 {
   GObject *object;
-  NautilusFile *file;
+  NemoFile *file;
 
-  object = (* G_OBJECT_CLASS (nautilus_file_parent_class)->constructor) (type,
+  object = (* G_OBJECT_CLASS (nemo_file_parent_class)->constructor) (type,
 									 n_construct_properties,
 									 construct_params);
 
-  file = NAUTILUS_FILE (object);
+  file = NEMO_FILE (object);
 
   /* Set to default type after full construction */
-  if (NAUTILUS_FILE_GET_CLASS (file)->default_file_type != G_FILE_TYPE_UNKNOWN) {
-	  file->details->type = NAUTILUS_FILE_GET_CLASS (file)->default_file_type;
+  if (NEMO_FILE_GET_CLASS (file)->default_file_type != G_FILE_TYPE_UNKNOWN) {
+	  file->details->type = NEMO_FILE_GET_CLASS (file)->default_file_type;
   }
   
   return object;
 }
 
 gboolean
-nautilus_file_set_display_name (NautilusFile *file,
+nemo_file_set_display_name (NemoFile *file,
 				const char *display_name,
 				const char *edit_name,
 				gboolean custom)
@@ -204,8 +207,8 @@ nautilus_file_set_display_name (NautilusFile *file,
 		   we already set it so that the old one is re-read */
 		if (file->details->got_custom_display_name) {
 			file->details->got_custom_display_name = FALSE;
-			nautilus_file_invalidate_attributes (file,
-							     NAUTILUS_FILE_ATTRIBUTE_INFO);
+			nemo_file_invalidate_attributes (file,
+							     NEMO_FILE_ATTRIBUTE_INFO);
 		}
 		return FALSE;
 	}
@@ -255,7 +258,7 @@ nautilus_file_set_display_name (NautilusFile *file,
 }
 
 static void
-nautilus_file_clear_display_name (NautilusFile *file)
+nemo_file_clear_display_name (NemoFile *file)
 {
 	eel_ref_str_unref (file->details->display_name);
 	file->details->display_name = NULL;
@@ -335,7 +338,7 @@ metadata_hash_equal (GHashTable *hash1,
 }
 
 static void
-clear_metadata (NautilusFile *file)
+clear_metadata (NemoFile *file)
 {
 	if (file->details->metadata) {
 		metadata_hash_free (file->details->metadata);
@@ -358,7 +361,7 @@ get_metadata_from_info (GFileInfo *info)
 	metadata = g_hash_table_new (NULL, NULL);
 
 	for (i = 0; attrs[i] != NULL; i++) {
-		id = nautilus_metadata_get_id (attrs[i] + strlen ("metadata::"));
+		id = nemo_metadata_get_id (attrs[i] + strlen ("metadata::"));
 		if (id == 0) {
 			continue;
 		}
@@ -384,7 +387,7 @@ get_metadata_from_info (GFileInfo *info)
 }
 
 gboolean
-nautilus_file_update_metadata_from_info (NautilusFile *file,
+nemo_file_update_metadata_from_info (NemoFile *file,
 					 GFileInfo *info)
 {
 	gboolean changed = FALSE;
@@ -409,7 +412,7 @@ nautilus_file_update_metadata_from_info (NautilusFile *file,
 }
 
 void
-nautilus_file_clear_info (NautilusFile *file)
+nemo_file_clear_info (NemoFile *file)
 {
 	file->details->got_file_info = FALSE;
 	if (file->details->get_info_error) {
@@ -418,10 +421,10 @@ nautilus_file_clear_info (NautilusFile *file)
 	}
 	/* Reset to default type, which might be other than unknown for
 	   special kinds of files like the desktop or a search directory */
-	file->details->type = NAUTILUS_FILE_GET_CLASS (file)->default_file_type;
+	file->details->type = NEMO_FILE_GET_CLASS (file)->default_file_type;
 
 	if (!file->details->got_custom_display_name) {
-		nautilus_file_clear_display_name (file);
+		nemo_file_clear_display_name (file);
 	}
 
 	if (!file->details->got_custom_activation_uri &&
@@ -491,44 +494,44 @@ nautilus_file_clear_info (NautilusFile *file)
 	clear_metadata (file);
 }
 
-static NautilusFile *
-nautilus_file_new_from_filename (NautilusDirectory *directory,
+static NemoFile *
+nemo_file_new_from_filename (NemoDirectory *directory,
 				 const char *filename,
 				 gboolean self_owned)
 {
-	NautilusFile *file;
+	NemoFile *file;
 
-	g_assert (NAUTILUS_IS_DIRECTORY (directory));
+	g_assert (NEMO_IS_DIRECTORY (directory));
 	g_assert (filename != NULL);
 	g_assert (filename[0] != '\0');
 
-	if (NAUTILUS_IS_DESKTOP_DIRECTORY (directory)) {
+	if (NEMO_IS_DESKTOP_DIRECTORY (directory)) {
 		if (self_owned) {
-			file = NAUTILUS_FILE (g_object_new (NAUTILUS_TYPE_DESKTOP_DIRECTORY_FILE, NULL));
+			file = NEMO_FILE (g_object_new (NEMO_TYPE_DESKTOP_DIRECTORY_FILE, NULL));
 		} else {
 			/* This doesn't normally happen, unless the user somehow types in a uri
 			 * that references a file like this. (See #349840) */
-			file = NAUTILUS_FILE (g_object_new (NAUTILUS_TYPE_VFS_FILE, NULL));
+			file = NEMO_FILE (g_object_new (NEMO_TYPE_VFS_FILE, NULL));
 		}
-	} else if (NAUTILUS_IS_SEARCH_DIRECTORY (directory)) {
+	} else if (NEMO_IS_SEARCH_DIRECTORY (directory)) {
 		if (self_owned) {
-			file = NAUTILUS_FILE (g_object_new (NAUTILUS_TYPE_SEARCH_DIRECTORY_FILE, NULL));
+			file = NEMO_FILE (g_object_new (NEMO_TYPE_SEARCH_DIRECTORY_FILE, NULL));
 		} else {
 			/* This doesn't normally happen, unless the user somehow types in a uri
 			 * that references a file like this. (See #349840) */
-			file = NAUTILUS_FILE (g_object_new (NAUTILUS_TYPE_VFS_FILE, NULL));
+			file = NEMO_FILE (g_object_new (NEMO_TYPE_VFS_FILE, NULL));
 		}
-	} else if (g_str_has_suffix (filename, NAUTILUS_SAVED_SEARCH_EXTENSION)) {
-		file = NAUTILUS_FILE (g_object_new (NAUTILUS_TYPE_SAVED_SEARCH_FILE, NULL));
+	} else if (g_str_has_suffix (filename, NEMO_SAVED_SEARCH_EXTENSION)) {
+		file = NEMO_FILE (g_object_new (NEMO_TYPE_SAVED_SEARCH_FILE, NULL));
 	} else {
-		file = NAUTILUS_FILE (g_object_new (NAUTILUS_TYPE_VFS_FILE, NULL));
+		file = NEMO_FILE (g_object_new (NEMO_TYPE_VFS_FILE, NULL));
 	}
 
-	file->details->directory = nautilus_directory_ref (directory);
+	file->details->directory = nemo_directory_ref (directory);
 
 	file->details->name = eel_ref_str_new (filename);
 
-#ifdef NAUTILUS_FILE_DEBUG_REF
+#ifdef NEMO_FILE_DEBUG_REF
 	DEBUG_REF_PRINTF("%10p ref'd", file);
 #endif
 
@@ -536,7 +539,7 @@ nautilus_file_new_from_filename (NautilusDirectory *directory,
 }
 
 static void
-modify_link_hash_table (NautilusFile *file,
+modify_link_hash_table (NemoFile *file,
 			ModifyListFunction modify_function)
 {
 	char *target_uri;
@@ -554,7 +557,7 @@ modify_link_hash_table (NautilusFile *file,
 		symbolic_links = g_hash_table_new (g_str_hash, g_str_equal);
 	}
 
-	target_uri = nautilus_file_get_symbolic_link_target_uri (file);
+	target_uri = nemo_file_get_symbolic_link_target_uri (file);
 	
 	/* Find the old contents of the hash table. */
 	found = g_hash_table_lookup_extended
@@ -585,7 +588,7 @@ symbolic_link_weak_notify (gpointer      data,
 }
 
 static void
-add_to_link_hash_table_list (GList **list, NautilusFile *file)
+add_to_link_hash_table_list (GList **list, NemoFile *file)
 {
 	if (g_list_find (*list, file) != NULL) {
 		g_warning ("Adding file to symlink_table multiple times. "
@@ -597,13 +600,13 @@ add_to_link_hash_table_list (GList **list, NautilusFile *file)
 }
 
 static void
-add_to_link_hash_table (NautilusFile *file)
+add_to_link_hash_table (NemoFile *file)
 {
 	modify_link_hash_table (file, add_to_link_hash_table_list);
 }
 
 static void
-remove_from_link_hash_table_list (GList **list, NautilusFile *file)
+remove_from_link_hash_table_list (GList **list, NemoFile *file)
 {
 	if (g_list_find (*list, file) != NULL) {
 		g_object_weak_unref (G_OBJECT (file), symbolic_link_weak_notify, list);
@@ -612,47 +615,47 @@ remove_from_link_hash_table_list (GList **list, NautilusFile *file)
 }
 
 static void
-remove_from_link_hash_table (NautilusFile *file)
+remove_from_link_hash_table (NemoFile *file)
 {
 	modify_link_hash_table (file, remove_from_link_hash_table_list);
 }
 
-NautilusFile *
-nautilus_file_new_from_info (NautilusDirectory *directory,
+NemoFile *
+nemo_file_new_from_info (NemoDirectory *directory,
 			     GFileInfo *info)
 {
-	NautilusFile *file;
+	NemoFile *file;
 	const char *mime_type;
 
-	g_return_val_if_fail (NAUTILUS_IS_DIRECTORY (directory), NULL);
+	g_return_val_if_fail (NEMO_IS_DIRECTORY (directory), NULL);
 	g_return_val_if_fail (info != NULL, NULL);
 
 	mime_type = g_file_info_get_content_type (info);
 	if (mime_type &&
-	    strcmp (mime_type, NAUTILUS_SAVED_SEARCH_MIMETYPE) == 0) {
+	    strcmp (mime_type, NEMO_SAVED_SEARCH_MIMETYPE) == 0) {
 		g_file_info_set_file_type (info, G_FILE_TYPE_DIRECTORY);
-		file = NAUTILUS_FILE (g_object_new (NAUTILUS_TYPE_SAVED_SEARCH_FILE, NULL));
+		file = NEMO_FILE (g_object_new (NEMO_TYPE_SAVED_SEARCH_FILE, NULL));
 	} else {
-		file = NAUTILUS_FILE (g_object_new (NAUTILUS_TYPE_VFS_FILE, NULL));
+		file = NEMO_FILE (g_object_new (NEMO_TYPE_VFS_FILE, NULL));
 	}
 
-	file->details->directory = nautilus_directory_ref (directory);
+	file->details->directory = nemo_directory_ref (directory);
 
 	update_info_and_name (file, info);
 
-#ifdef NAUTILUS_FILE_DEBUG_REF
+#ifdef NEMO_FILE_DEBUG_REF
 	DEBUG_REF_PRINTF("%10p ref'd", file);
 #endif
 
 	return file;
 }
 
-static NautilusFile *
-nautilus_file_get_internal (GFile *location, gboolean create)
+static NemoFile *
+nemo_file_get_internal (GFile *location, gboolean create)
 {
 	gboolean self_owned;
-	NautilusDirectory *directory;
-	NautilusFile *file;
+	NemoDirectory *directory;
+	NemoFile *file;
 	GFile *parent;
 	char *basename;
 
@@ -667,13 +670,13 @@ nautilus_file_get_internal (GFile *location, gboolean create)
 	} 
 
 	/* Get object that represents the directory. */
-	directory = nautilus_directory_get_internal (parent, create);
+	directory = nemo_directory_get_internal (parent, create);
 
 	g_object_unref (parent);
 
 	/* Get the name for the file. */
 	if (self_owned && directory != NULL) {
-		basename = nautilus_directory_get_name_for_self_as_new_file (directory);
+		basename = nemo_directory_get_name_for_self_as_new_file (directory);
 	} else {
 		basename = g_file_get_basename (location);
 	}
@@ -683,68 +686,68 @@ nautilus_file_get_internal (GFile *location, gboolean create)
 	} else if (self_owned) {
 		file = directory->details->as_file;
 	} else {
-		file = nautilus_directory_find_file_by_name (directory, basename);
+		file = nemo_directory_find_file_by_name (directory, basename);
 	}
 
 	/* Ref or create the file. */
 	if (file != NULL) {
-		nautilus_file_ref (file);
+		nemo_file_ref (file);
 	} else if (create) {
-		file = nautilus_file_new_from_filename (directory, basename, self_owned);
+		file = nemo_file_new_from_filename (directory, basename, self_owned);
 		if (self_owned) {
 			g_assert (directory->details->as_file == NULL);
 			directory->details->as_file = file;
 		} else {
-			nautilus_directory_add_file (directory, file);
+			nemo_directory_add_file (directory, file);
 		}
 	}
 
 	g_free (basename);
-	nautilus_directory_unref (directory);
+	nemo_directory_unref (directory);
 
 	return file;
 }
 
-NautilusFile *
-nautilus_file_get (GFile *location)
+NemoFile *
+nemo_file_get (GFile *location)
 {
-	return nautilus_file_get_internal (location, TRUE);
+	return nemo_file_get_internal (location, TRUE);
 }
 
-NautilusFile *
-nautilus_file_get_existing (GFile *location)
+NemoFile *
+nemo_file_get_existing (GFile *location)
 {
-	return nautilus_file_get_internal (location, FALSE);
+	return nemo_file_get_internal (location, FALSE);
 }
 
-NautilusFile *
-nautilus_file_get_existing_by_uri (const char *uri)
+NemoFile *
+nemo_file_get_existing_by_uri (const char *uri)
 {
 	GFile *location;
-	NautilusFile *file;
+	NemoFile *file;
 	
 	location = g_file_new_for_uri (uri);
-	file = nautilus_file_get_internal (location, FALSE);
+	file = nemo_file_get_internal (location, FALSE);
 	g_object_unref (location);
 	
 	return file;
 }
 
-NautilusFile *
-nautilus_file_get_by_uri (const char *uri)
+NemoFile *
+nemo_file_get_by_uri (const char *uri)
 {
 	GFile *location;
-	NautilusFile *file;
+	NemoFile *file;
 	
 	location = g_file_new_for_uri (uri);
-	file = nautilus_file_get_internal (location, TRUE);
+	file = nemo_file_get_internal (location, TRUE);
 	g_object_unref (location);
 	
 	return file;
 }
 
 gboolean
-nautilus_file_is_self_owned (NautilusFile *file)
+nemo_file_is_self_owned (NemoFile *file)
 {
 	return file->details->directory->details->as_file == file;
 }
@@ -752,31 +755,31 @@ nautilus_file_is_self_owned (NautilusFile *file)
 static void
 finalize (GObject *object)
 {
-	NautilusDirectory *directory;
-	NautilusFile *file;
+	NemoDirectory *directory;
+	NemoFile *file;
 	char *uri;
 
-	file = NAUTILUS_FILE (object);
+	file = NEMO_FILE (object);
 
 	g_assert (file->details->operations_in_progress == NULL);
 
 	if (file->details->is_thumbnailing) {
-		uri = nautilus_file_get_uri (file);
-		nautilus_thumbnail_remove_from_queue (uri);
+		uri = nemo_file_get_uri (file);
+		nemo_thumbnail_remove_from_queue (uri);
 		g_free (uri);
 	}
 	
-	nautilus_async_destroying_file (file);
+	nemo_async_destroying_file (file);
 
 	remove_from_link_hash_table (file);
 
 	directory = file->details->directory;
 	
-	if (nautilus_file_is_self_owned (file)) {
+	if (nemo_file_is_self_owned (file)) {
 		directory->details->as_file = NULL;
 	} else {
 		if (!file->details->is_gone) {
-			nautilus_directory_remove_file (directory, file);
+			nemo_directory_remove_file (directory, file);
 		}
 	}
 
@@ -784,7 +787,7 @@ finalize (GObject *object)
 		g_error_free (file->details->get_info_error);
 	}
 
-	nautilus_directory_unref (directory);
+	nemo_directory_unref (directory);
 	eel_ref_str_unref (file->details->name);
 	eel_ref_str_unref (file->details->display_name);
 	g_free (file->details->display_name_collation_key);
@@ -831,18 +834,18 @@ finalize (GObject *object)
 		metadata_hash_free (file->details->metadata);
 	}
 
-	G_OBJECT_CLASS (nautilus_file_parent_class)->finalize (object);
+	G_OBJECT_CLASS (nemo_file_parent_class)->finalize (object);
 }
 
-NautilusFile *
-nautilus_file_ref (NautilusFile *file)
+NemoFile *
+nemo_file_ref (NemoFile *file)
 {
 	if (file == NULL) {
 		return NULL;
 	}
-	g_return_val_if_fail (NAUTILUS_IS_FILE (file), NULL);
+	g_return_val_if_fail (NEMO_IS_FILE (file), NULL);
 
-#ifdef NAUTILUS_FILE_DEBUG_REF
+#ifdef NEMO_FILE_DEBUG_REF
 	DEBUG_REF_PRINTF("%10p ref'd", file);
 #endif
 	
@@ -850,15 +853,15 @@ nautilus_file_ref (NautilusFile *file)
 }
 
 void
-nautilus_file_unref (NautilusFile *file)
+nemo_file_unref (NemoFile *file)
 {
 	if (file == NULL) {
 		return;
 	}
 
-	g_return_if_fail (NAUTILUS_IS_FILE (file));
+	g_return_if_fail (NEMO_IS_FILE (file));
 
-#ifdef NAUTILUS_FILE_DEBUG_REF
+#ifdef NEMO_FILE_DEBUG_REF
 	DEBUG_REF_PRINTF("%10p unref'd", file);
 #endif
 	
@@ -866,7 +869,7 @@ nautilus_file_unref (NautilusFile *file)
 }
 
 /**
- * nautilus_file_get_parent_uri_for_display:
+ * nemo_file_get_parent_uri_for_display:
  * 
  * Get the uri for the parent directory.
  * 
@@ -877,14 +880,14 @@ nautilus_file_unref (NautilusFile *file)
  * If the parent is NULL, returns the empty string.
  */ 
 char *
-nautilus_file_get_parent_uri_for_display (NautilusFile *file) 
+nemo_file_get_parent_uri_for_display (NemoFile *file) 
 {
 	GFile *parent;
 	char *result;
 
-	g_assert (NAUTILUS_IS_FILE (file));
+	g_assert (NEMO_IS_FILE (file));
 	
-	parent = nautilus_file_get_parent_location (file);
+	parent = nemo_file_get_parent_location (file);
 	if (parent) {
 		result = g_file_get_parse_name (parent);
 		g_object_unref (parent);
@@ -896,57 +899,57 @@ nautilus_file_get_parent_uri_for_display (NautilusFile *file)
 }
 
 /**
- * nautilus_file_get_parent_uri:
+ * nemo_file_get_parent_uri:
  * 
  * Get the uri for the parent directory.
  * 
  * @file: The file in question.
  * 
  * Return value: A string for the parent's location, in "raw URI" form.
- * Use nautilus_file_get_parent_uri_for_display instead if the
+ * Use nemo_file_get_parent_uri_for_display instead if the
  * result is to be displayed on-screen.
  * If the parent is NULL, returns the empty string.
  */ 
 char *
-nautilus_file_get_parent_uri (NautilusFile *file) 
+nemo_file_get_parent_uri (NemoFile *file) 
 {
-	g_assert (NAUTILUS_IS_FILE (file));
+	g_assert (NEMO_IS_FILE (file));
 	
-	if (nautilus_file_is_self_owned (file)) {
+	if (nemo_file_is_self_owned (file)) {
 		/* Callers expect an empty string, not a NULL. */
 		return g_strdup ("");
 	}
 
-	return nautilus_directory_get_uri (file->details->directory);
+	return nemo_directory_get_uri (file->details->directory);
 }
 
 GFile *
-nautilus_file_get_parent_location (NautilusFile *file) 
+nemo_file_get_parent_location (NemoFile *file) 
 {
-	g_assert (NAUTILUS_IS_FILE (file));
+	g_assert (NEMO_IS_FILE (file));
 	
-	if (nautilus_file_is_self_owned (file)) {
+	if (nemo_file_is_self_owned (file)) {
 		/* Callers expect an empty string, not a NULL. */
 		return NULL;
 	}
 
-	return nautilus_directory_get_location (file->details->directory);
+	return nemo_directory_get_location (file->details->directory);
 }
 
-NautilusFile *
-nautilus_file_get_parent (NautilusFile *file)
+NemoFile *
+nemo_file_get_parent (NemoFile *file)
 {
-	g_assert (NAUTILUS_IS_FILE (file));
+	g_assert (NEMO_IS_FILE (file));
 	
-	if (nautilus_file_is_self_owned (file)) {
+	if (nemo_file_is_self_owned (file)) {
 		return NULL;
 	}
 
-	return nautilus_directory_get_corresponding_file (file->details->directory);
+	return nemo_directory_get_corresponding_file (file->details->directory);
 }
 
 /**
- * nautilus_file_can_read:
+ * nemo_file_can_read:
  * 
  * Check whether the user is allowed to read the contents of this file.
  * 
@@ -958,15 +961,15 @@ nautilus_file_get_parent (NautilusFile *file)
  * returns TRUE (so failures must always be handled).
  */
 gboolean
-nautilus_file_can_read (NautilusFile *file)
+nemo_file_can_read (NemoFile *file)
 {
-	g_return_val_if_fail (NAUTILUS_IS_FILE (file), FALSE);
+	g_return_val_if_fail (NEMO_IS_FILE (file), FALSE);
 	
 	return file->details->can_read;
 }
 
 /**
- * nautilus_file_can_write:
+ * nemo_file_can_write:
  * 
  * Check whether the user is allowed to write to this file.
  * 
@@ -978,15 +981,15 @@ nautilus_file_can_read (NautilusFile *file)
  * returns TRUE (so failures must always be handled).
  */
 gboolean
-nautilus_file_can_write (NautilusFile *file)
+nemo_file_can_write (NemoFile *file)
 {
-	g_return_val_if_fail (NAUTILUS_IS_FILE (file), FALSE);
+	g_return_val_if_fail (NEMO_IS_FILE (file), FALSE);
 
 	return file->details->can_write;
 }
 
 /**
- * nautilus_file_can_execute:
+ * nemo_file_can_execute:
  * 
  * Check whether the user is allowed to execute this file.
  * 
@@ -998,25 +1001,29 @@ nautilus_file_can_write (NautilusFile *file)
  * returns TRUE (so failures must always be handled).
  */
 gboolean
-nautilus_file_can_execute (NautilusFile *file)
+nemo_file_can_execute (NemoFile *file)
 {
-	g_return_val_if_fail (NAUTILUS_IS_FILE (file), FALSE);
+	g_return_val_if_fail (NEMO_IS_FILE (file), FALSE);
 
 	return file->details->can_execute;
 }
 
 gboolean
-nautilus_file_can_mount (NautilusFile *file)
+nemo_file_can_mount (NemoFile *file)
 {
-	g_return_val_if_fail (NAUTILUS_IS_FILE (file), FALSE);
+	g_return_val_if_fail (NEMO_IS_FILE (file), FALSE);
 	
 	return file->details->can_mount;
 }
 	
 gboolean
-nautilus_file_can_unmount (NautilusFile *file)
+nemo_file_can_unmount (NemoFile *file)
 {
-	g_return_val_if_fail (NAUTILUS_IS_FILE (file), FALSE);
+	g_return_val_if_fail (NEMO_IS_FILE (file), FALSE);
+
+	if (getenv("LTSP_CLIENT")) {
+		return FALSE;
+	}
 
 	return file->details->can_unmount ||
 		(file->details->mount != NULL &&
@@ -1024,9 +1031,13 @@ nautilus_file_can_unmount (NautilusFile *file)
 }
 	
 gboolean
-nautilus_file_can_eject (NautilusFile *file)
+nemo_file_can_eject (NemoFile *file)
 {
-	g_return_val_if_fail (NAUTILUS_IS_FILE (file), FALSE);
+	g_return_val_if_fail (NEMO_IS_FILE (file), FALSE);
+
+	if (getenv("LTSP_CLIENT")) {
+		return FALSE;
+	}
 
 	return file->details->can_eject ||
 		(file->details->mount != NULL &&
@@ -1034,12 +1045,12 @@ nautilus_file_can_eject (NautilusFile *file)
 }
 
 gboolean
-nautilus_file_can_start (NautilusFile *file)
+nemo_file_can_start (NemoFile *file)
 {
 	gboolean ret;
 	GDrive *drive;
 
-	g_return_val_if_fail (NAUTILUS_IS_FILE (file), FALSE);
+	g_return_val_if_fail (NEMO_IS_FILE (file), FALSE);
 
 	ret = FALSE;
 
@@ -1061,12 +1072,12 @@ nautilus_file_can_start (NautilusFile *file)
 }
 
 gboolean
-nautilus_file_can_start_degraded (NautilusFile *file)
+nemo_file_can_start_degraded (NemoFile *file)
 {
 	gboolean ret;
 	GDrive *drive;
 
-	g_return_val_if_fail (NAUTILUS_IS_FILE (file), FALSE);
+	g_return_val_if_fail (NEMO_IS_FILE (file), FALSE);
 
 	ret = FALSE;
 
@@ -1088,12 +1099,12 @@ nautilus_file_can_start_degraded (NautilusFile *file)
 }
 
 gboolean
-nautilus_file_can_poll_for_media (NautilusFile *file)
+nemo_file_can_poll_for_media (NemoFile *file)
 {
 	gboolean ret;
 	GDrive *drive;
 
-	g_return_val_if_fail (NAUTILUS_IS_FILE (file), FALSE);
+	g_return_val_if_fail (NEMO_IS_FILE (file), FALSE);
 
 	ret = FALSE;
 
@@ -1115,12 +1126,12 @@ nautilus_file_can_poll_for_media (NautilusFile *file)
 }
 
 gboolean
-nautilus_file_is_media_check_automatic (NautilusFile *file)
+nemo_file_is_media_check_automatic (NemoFile *file)
 {
 	gboolean ret;
 	GDrive *drive;
 
-	g_return_val_if_fail (NAUTILUS_IS_FILE (file), FALSE);
+	g_return_val_if_fail (NEMO_IS_FILE (file), FALSE);
 
 	ret = FALSE;
 
@@ -1143,12 +1154,12 @@ nautilus_file_is_media_check_automatic (NautilusFile *file)
 
 
 gboolean
-nautilus_file_can_stop (NautilusFile *file)
+nemo_file_can_stop (NemoFile *file)
 {
 	gboolean ret;
 	GDrive *drive;
 
-	g_return_val_if_fail (NAUTILUS_IS_FILE (file), FALSE);
+	g_return_val_if_fail (NEMO_IS_FILE (file), FALSE);
 
 	ret = FALSE;
 
@@ -1170,12 +1181,12 @@ nautilus_file_can_stop (NautilusFile *file)
 }
 
 GDriveStartStopType
-nautilus_file_get_start_stop_type (NautilusFile *file)
+nemo_file_get_start_stop_type (NemoFile *file)
 {
 	GDriveStartStopType ret;
 	GDrive *drive;
 
-	g_return_val_if_fail (NAUTILUS_IS_FILE (file), FALSE);
+	g_return_val_if_fail (NEMO_IS_FILE (file), FALSE);
 
 	ret = G_DRIVE_START_STOP_TYPE_UNKNOWN;
 
@@ -1196,15 +1207,15 @@ nautilus_file_get_start_stop_type (NautilusFile *file)
 }
 
 void
-nautilus_file_mount (NautilusFile                   *file,
+nemo_file_mount (NemoFile                   *file,
 		     GMountOperation                *mount_op,
 		     GCancellable                   *cancellable,
-		     NautilusFileOperationCallback   callback,
+		     NemoFileOperationCallback   callback,
 		     gpointer                        callback_data)
 {
 	GError *error;
 	
-	if (NAUTILUS_FILE_GET_CLASS (file)->mount == NULL) {
+	if (NEMO_FILE_GET_CLASS (file)->mount == NULL) {
 		if (callback) {
 			error = NULL;
 			g_set_error_literal (&error, G_IO_ERROR, G_IO_ERROR_NOT_SUPPORTED,
@@ -1213,13 +1224,13 @@ nautilus_file_mount (NautilusFile                   *file,
 			g_error_free (error);
 		}
 	} else {
-		NAUTILUS_FILE_GET_CLASS (file)->mount (file, mount_op, cancellable, callback, callback_data);
+		NEMO_FILE_GET_CLASS (file)->mount (file, mount_op, cancellable, callback, callback_data);
 	}
 }
 
 typedef struct {
-	NautilusFile *file;
-	NautilusFileOperationCallback callback;
+	NemoFile *file;
+	NemoFileOperationCallback callback;
 	gpointer callback_data;
 } UnmountData;
 
@@ -1232,23 +1243,23 @@ unmount_done (void *callback_data)
 	if (data->callback) {
 		data->callback (data->file, NULL, NULL, data->callback_data);
 	}
-	nautilus_file_unref (data->file);
+	nemo_file_unref (data->file);
 	g_free (data);
 }
 
 void
-nautilus_file_unmount (NautilusFile                   *file,
+nemo_file_unmount (NemoFile                   *file,
 		       GMountOperation                *mount_op,
 		       GCancellable                   *cancellable,
-		       NautilusFileOperationCallback   callback,
+		       NemoFileOperationCallback   callback,
 		       gpointer                        callback_data)
 {
 	GError *error;
 	UnmountData *data;
 
 	if (file->details->can_unmount) {
-		if (NAUTILUS_FILE_GET_CLASS (file)->unmount != NULL) {
-			NAUTILUS_FILE_GET_CLASS (file)->unmount (file, mount_op, cancellable, callback, callback_data);
+		if (NEMO_FILE_GET_CLASS (file)->unmount != NULL) {
+			NEMO_FILE_GET_CLASS (file)->unmount (file, mount_op, cancellable, callback, callback_data);
 		} else {
 			if (callback) {
 				error = NULL;
@@ -1261,28 +1272,28 @@ nautilus_file_unmount (NautilusFile                   *file,
 	} else if (file->details->mount != NULL &&
 		   g_mount_can_unmount (file->details->mount)) {
 		data = g_new0 (UnmountData, 1);
-		data->file = nautilus_file_ref (file);
+		data->file = nemo_file_ref (file);
 		data->callback = callback;
 		data->callback_data = callback_data;
-		nautilus_file_operations_unmount_mount_full (NULL, file->details->mount, FALSE, TRUE, unmount_done, data);
+		nemo_file_operations_unmount_mount_full (NULL, file->details->mount, FALSE, TRUE, unmount_done, data);
 	} else if (callback) {
 		callback (file, NULL, NULL, callback_data);
 	}
 }
 
 void
-nautilus_file_eject (NautilusFile                   *file,
+nemo_file_eject (NemoFile                   *file,
 		     GMountOperation                *mount_op,
 		     GCancellable                   *cancellable,
-		     NautilusFileOperationCallback   callback,
+		     NemoFileOperationCallback   callback,
 		     gpointer                        callback_data)
 {
 	GError *error;
 	UnmountData *data;
 
 	if (file->details->can_eject) {
-		if (NAUTILUS_FILE_GET_CLASS (file)->eject != NULL) {
-			NAUTILUS_FILE_GET_CLASS (file)->eject (file, mount_op, cancellable, callback, callback_data);
+		if (NEMO_FILE_GET_CLASS (file)->eject != NULL) {
+			NEMO_FILE_GET_CLASS (file)->eject (file, mount_op, cancellable, callback, callback_data);
 		} else {
 			if (callback) {
 				error = NULL;
@@ -1295,27 +1306,27 @@ nautilus_file_eject (NautilusFile                   *file,
 	} else if (file->details->mount != NULL &&
 		   g_mount_can_eject (file->details->mount)) {
 		data = g_new0 (UnmountData, 1);
-		data->file = nautilus_file_ref (file);
+		data->file = nemo_file_ref (file);
 		data->callback = callback;
 		data->callback_data = callback_data;
-		nautilus_file_operations_unmount_mount_full (NULL, file->details->mount, TRUE, TRUE, unmount_done, data);
+		nemo_file_operations_unmount_mount_full (NULL, file->details->mount, TRUE, TRUE, unmount_done, data);
 	} else if (callback) {
 		callback (file, NULL, NULL, callback_data);
 	}
 }
 
 void
-nautilus_file_start (NautilusFile                   *file,
+nemo_file_start (NemoFile                   *file,
 		     GMountOperation                *start_op,
 		     GCancellable                   *cancellable,
-		     NautilusFileOperationCallback   callback,
+		     NemoFileOperationCallback   callback,
 		     gpointer                        callback_data)
 {
 	GError *error;
 
 	if ((file->details->can_start || file->details->can_start_degraded) &&
-	    NAUTILUS_FILE_GET_CLASS (file)->start != NULL) {
-		NAUTILUS_FILE_GET_CLASS (file)->start (file, start_op, cancellable, callback, callback_data);
+	    NEMO_FILE_GET_CLASS (file)->start != NULL) {
+		NEMO_FILE_GET_CLASS (file)->start (file, start_op, cancellable, callback, callback_data);
 	} else {
 		if (callback) {
 			error = NULL;
@@ -1332,7 +1343,7 @@ file_stop_callback (GObject *source_object,
 		    GAsyncResult *res,
 		    gpointer callback_data)
 {
-	NautilusFileOperation *op;
+	NemoFileOperation *op;
 	gboolean stopped;
 	GError *error;
 
@@ -1350,24 +1361,24 @@ file_stop_callback (GObject *source_object,
 		error = NULL;
 	}
 
-	nautilus_file_operation_complete (op, NULL, error);
+	nemo_file_operation_complete (op, NULL, error);
 	if (error) {
 		g_error_free (error);
 	}
 }
 
 void
-nautilus_file_stop (NautilusFile                   *file,
+nemo_file_stop (NemoFile                   *file,
 		    GMountOperation                *mount_op,
 		    GCancellable                   *cancellable,
-		    NautilusFileOperationCallback   callback,
+		    NemoFileOperationCallback   callback,
 		    gpointer                        callback_data)
 {
 	GError *error;
 
-	if (NAUTILUS_FILE_GET_CLASS (file)->stop != NULL) {
+	if (NEMO_FILE_GET_CLASS (file)->stop != NULL) {
 		if (file->details->can_stop) {
-			NAUTILUS_FILE_GET_CLASS (file)->stop (file, mount_op, cancellable, callback, callback_data);
+			NEMO_FILE_GET_CLASS (file)->stop (file, mount_op, cancellable, callback, callback_data);
 		} else {
 			if (callback) {
 				error = NULL;
@@ -1385,9 +1396,9 @@ nautilus_file_stop (NautilusFile                   *file,
 			drive = g_mount_get_drive (file->details->mount);
 
 		if (drive != NULL && g_drive_can_stop (drive)) {
-			NautilusFileOperation *op;
+			NemoFileOperation *op;
 
-			op = nautilus_file_operation_new (file, callback, callback_data);
+			op = nemo_file_operation_new (file, callback, callback_data);
 			if (cancellable) {
 				g_object_unref (op->cancellable);
 				op->cancellable = g_object_ref (cancellable);
@@ -1416,11 +1427,11 @@ nautilus_file_stop (NautilusFile                   *file,
 }
 
 void
-nautilus_file_poll_for_media (NautilusFile *file)
+nemo_file_poll_for_media (NemoFile *file)
 {
 	if (file->details->can_poll_for_media) {
-		if (NAUTILUS_FILE_GET_CLASS (file)->stop != NULL) {
-			NAUTILUS_FILE_GET_CLASS (file)->poll_for_media (file);
+		if (NEMO_FILE_GET_CLASS (file)->stop != NULL) {
+			NEMO_FILE_GET_CLASS (file)->poll_for_media (file);
 		}
 	} else if (file->details->mount != NULL) {
 		GDrive *drive;
@@ -1436,7 +1447,7 @@ nautilus_file_poll_for_media (NautilusFile *file)
 }
 
 /**
- * nautilus_file_is_desktop_directory:
+ * nemo_file_is_desktop_directory:
  * 
  * Check whether this file is the desktop directory.
  * 
@@ -1445,7 +1456,7 @@ nautilus_file_poll_for_media (NautilusFile *file)
  * Return value: TRUE if this is the physical desktop directory.
  */
 gboolean
-nautilus_file_is_desktop_directory (NautilusFile *file)
+nemo_file_is_desktop_directory (NemoFile *file)
 {
 	GFile *dir;
 
@@ -1455,29 +1466,29 @@ nautilus_file_is_desktop_directory (NautilusFile *file)
 		return FALSE;
 	}
 
-	return nautilus_is_desktop_directory_file (dir, eel_ref_str_peek (file->details->name));
+	return nemo_is_desktop_directory_file (dir, eel_ref_str_peek (file->details->name));
 }
 
 static gboolean
-is_desktop_file (NautilusFile *file)
+is_desktop_file (NemoFile *file)
 {
-	return nautilus_file_is_mime_type (file, "application/x-desktop");
+	return nemo_file_is_mime_type (file, "application/x-desktop");
 }
 
 static gboolean
-can_rename_desktop_file (NautilusFile *file)
+can_rename_desktop_file (NemoFile *file)
 {
 	GFile *location;
 	gboolean res;
 
-	location = nautilus_file_get_location (file);
+	location = nemo_file_get_location (file);
 	res = g_file_is_native (location);
 	g_object_unref (location);
 	return res;
 }
 
 /**
- * nautilus_file_can_rename:
+ * nemo_file_can_rename:
  * 
  * Check whether the user is allowed to change the name of the file.
  * 
@@ -1489,37 +1500,37 @@ can_rename_desktop_file (NautilusFile *file)
  * returns TRUE (so rename failures must always be handled).
  */
 gboolean
-nautilus_file_can_rename (NautilusFile *file)
+nemo_file_can_rename (NemoFile *file)
 {
 	gboolean can_rename;
 	
-	g_return_val_if_fail (NAUTILUS_IS_FILE (file), FALSE);
+	g_return_val_if_fail (NEMO_IS_FILE (file), FALSE);
 
 	/* Nonexistent files can't be renamed. */
-	if (nautilus_file_is_gone (file)) {
+	if (nemo_file_is_gone (file)) {
 		return FALSE;
 	}
 
 	/* Self-owned files can't be renamed */
-	if (nautilus_file_is_self_owned (file)) {
+	if (nemo_file_is_self_owned (file)) {
 		return FALSE;
 	}
 
 	if ((is_desktop_file (file) && !can_rename_desktop_file (file)) ||
-	     nautilus_file_is_home (file)) {
+	     nemo_file_is_home (file)) {
 		return FALSE;
 	}
 	
 	can_rename = TRUE;
 
 	/* Certain types of links can't be renamed */
-	if (NAUTILUS_IS_DESKTOP_ICON_FILE (file)) {
-		NautilusDesktopLink *link;
+	if (NEMO_IS_DESKTOP_ICON_FILE (file)) {
+		NemoDesktopLink *link;
 
-		link = nautilus_desktop_icon_file_get_link (NAUTILUS_DESKTOP_ICON_FILE (file));
+		link = nemo_desktop_icon_file_get_link (NEMO_DESKTOP_ICON_FILE (file));
 
 		if (link != NULL) {
-			can_rename = nautilus_desktop_link_can_rename (link);
+			can_rename = nemo_desktop_link_can_rename (link);
 			g_object_unref (link);
 		}
 	}
@@ -1532,17 +1543,17 @@ nautilus_file_can_rename (NautilusFile *file)
 }
 
 gboolean
-nautilus_file_can_delete (NautilusFile *file)
+nemo_file_can_delete (NemoFile *file)
 {
-	g_return_val_if_fail (NAUTILUS_IS_FILE (file), FALSE);
+	g_return_val_if_fail (NEMO_IS_FILE (file), FALSE);
 
 	/* Nonexistent files can't be deleted. */
-	if (nautilus_file_is_gone (file)) {
+	if (nemo_file_is_gone (file)) {
 		return FALSE;
 	}
 
 	/* Self-owned files can't be deleted */
-	if (nautilus_file_is_self_owned (file)) {
+	if (nemo_file_is_self_owned (file)) {
 		return FALSE;
 	}
 
@@ -1550,17 +1561,17 @@ nautilus_file_can_delete (NautilusFile *file)
 }
 
 gboolean
-nautilus_file_can_trash (NautilusFile *file)
+nemo_file_can_trash (NemoFile *file)
 {
-	g_return_val_if_fail (NAUTILUS_IS_FILE (file), FALSE);
+	g_return_val_if_fail (NEMO_IS_FILE (file), FALSE);
 
 	/* Nonexistent files can't be deleted. */
-	if (nautilus_file_is_gone (file)) {
+	if (nemo_file_is_gone (file)) {
 		return FALSE;
 	}
 
 	/* Self-owned files can't be deleted */
-	if (nautilus_file_is_self_owned (file)) {
+	if (nemo_file_is_self_owned (file)) {
 		return FALSE;
 	}
 
@@ -1568,15 +1579,15 @@ nautilus_file_can_trash (NautilusFile *file)
 }
 
 GFile *
-nautilus_file_get_location (NautilusFile *file)
+nemo_file_get_location (NemoFile *file)
 {
 	GFile *dir;
 	
-	g_return_val_if_fail (NAUTILUS_IS_FILE (file), NULL);
+	g_return_val_if_fail (NEMO_IS_FILE (file), NULL);
 
 	dir = file->details->directory->details->location;
 	
-	if (nautilus_file_is_self_owned (file)) {
+	if (nemo_file_is_self_owned (file)) {
 		return g_object_ref (dir);
 	}
 	
@@ -1585,14 +1596,14 @@ nautilus_file_get_location (NautilusFile *file)
 
 /* Return the actual uri associated with the passed-in file. */
 char *
-nautilus_file_get_uri (NautilusFile *file)
+nemo_file_get_uri (NemoFile *file)
 {
 	char *uri;
 	GFile *loc;
 	
-	g_return_val_if_fail (NAUTILUS_IS_FILE (file), NULL);
+	g_return_val_if_fail (NEMO_IS_FILE (file), NULL);
 
-	loc = nautilus_file_get_location (file);
+	loc = nemo_file_get_location (file);
 	uri = g_file_get_uri (loc);
 	g_object_unref (loc);
 	
@@ -1600,34 +1611,34 @@ nautilus_file_get_uri (NautilusFile *file)
 }
 
 char *
-nautilus_file_get_uri_scheme (NautilusFile *file)
+nemo_file_get_uri_scheme (NemoFile *file)
 {
 	GFile *loc;
 	char *scheme;
 	
-	g_return_val_if_fail (NAUTILUS_IS_FILE (file), NULL);
+	g_return_val_if_fail (NEMO_IS_FILE (file), NULL);
 
 	if (file->details->directory == NULL || 
 	    file->details->directory->details->location == NULL) {
 		return NULL;
 	}
 
-	loc = nautilus_directory_get_location (file->details->directory);
+	loc = nemo_directory_get_location (file->details->directory);
 	scheme = g_file_get_uri_scheme (loc);
 	g_object_unref (loc);
 	
 	return scheme;
 }
 
-NautilusFileOperation *
-nautilus_file_operation_new (NautilusFile *file,
-			     NautilusFileOperationCallback callback,
+NemoFileOperation *
+nemo_file_operation_new (NemoFile *file,
+			     NemoFileOperationCallback callback,
 			     gpointer callback_data)
 {
-	NautilusFileOperation *op;
+	NemoFileOperation *op;
 
-	op = g_new0 (NautilusFileOperation, 1);
-	op->file = nautilus_file_ref (file);
+	op = g_new0 (NemoFileOperation, 1);
+	op->file = nemo_file_ref (file);
 	op->callback = callback;
 	op->callback_data = callback_data;
 	op->cancellable = g_cancellable_new ();
@@ -1639,46 +1650,46 @@ nautilus_file_operation_new (NautilusFile *file,
 }
 
 static void
-nautilus_file_operation_remove (NautilusFileOperation *op)
+nemo_file_operation_remove (NemoFileOperation *op)
 {
 	op->file->details->operations_in_progress = g_list_remove
 		(op->file->details->operations_in_progress, op);
 }
 
 void
-nautilus_file_operation_free (NautilusFileOperation *op)
+nemo_file_operation_free (NemoFileOperation *op)
 {
-	nautilus_file_operation_remove (op);
-	nautilus_file_unref (op->file);
+	nemo_file_operation_remove (op);
+	nemo_file_unref (op->file);
 	g_object_unref (op->cancellable);
 	if (op->free_data) {
 		op->free_data (op->data);
 	}
 
 	if (op->undo_info != NULL) {
-		nautilus_file_undo_manager_set_action (op->undo_info);
+		nemo_file_undo_manager_set_action (op->undo_info);
 	}
 
 	g_free (op);
 }
 
 void
-nautilus_file_operation_complete (NautilusFileOperation *op, GFile *result_file, GError *error)
+nemo_file_operation_complete (NemoFileOperation *op, GFile *result_file, GError *error)
 {
 	/* Claim that something changed even if the operation failed.
 	 * This makes it easier for some clients who see the "reverting"
 	 * as "changing back".
 	 */
-	nautilus_file_operation_remove (op);
-	nautilus_file_changed (op->file);
+	nemo_file_operation_remove (op);
+	nemo_file_changed (op->file);
 	if (op->callback) {
 		(* op->callback) (op->file, result_file, error, op->callback_data);
 	}
-	nautilus_file_operation_free (op);
+	nemo_file_operation_free (op);
 }
 
 void
-nautilus_file_operation_cancel (NautilusFileOperation *op)
+nemo_file_operation_cancel (NemoFileOperation *op)
 {
 	/* Cancel the operation if it's still in progress. */
 	g_cancellable_cancel (op->cancellable);
@@ -1689,9 +1700,9 @@ rename_get_info_callback (GObject *source_object,
 			  GAsyncResult *res,
 			  gpointer callback_data)
 {
-	NautilusFileOperation *op;
-	NautilusDirectory *directory;
-	NautilusFile *existing_file;
+	NemoFileOperation *op;
+	NemoDirectory *directory;
+	NemoFile *existing_file;
 	char *old_name;
 	char *old_uri;
 	char *new_uri;
@@ -1711,21 +1722,45 @@ rename_get_info_callback (GObject *source_object,
 		/* If there was another file by the same name in this
 		 * directory, mark it gone.
 		 */
-		existing_file = nautilus_directory_find_file_by_name (directory, new_name);
+		existing_file = nemo_directory_find_file_by_name (directory, new_name);
 		if (existing_file != NULL) {
-			nautilus_file_mark_gone (existing_file);
-			nautilus_file_changed (existing_file);
+			nemo_file_mark_gone (existing_file);
+			nemo_file_changed (existing_file);
 		}
 		
-		old_uri = nautilus_file_get_uri (op->file);
+		old_uri = nemo_file_get_uri (op->file);
 		old_name = g_strdup (eel_ref_str_peek (op->file->details->name));
 		
 		update_info_and_name (op->file, new_info);
-		
+
 		g_free (old_name);
 		
-		new_uri = nautilus_file_get_uri (op->file);
-		nautilus_directory_moved (old_uri, new_uri);
+		new_uri = nemo_file_get_uri (op->file);
+
+		// Send event to Zeitgeist
+		ZeitgeistLog *log = zeitgeist_log_get_default ();
+		gchar *origin = g_path_get_dirname (new_uri);
+		ZeitgeistSubject *subject = zeitgeist_subject_new_full (
+			old_uri,
+			NULL, // subject interpretation - auto-guess
+			NULL, // subject manifestation - auto-guess
+			g_file_info_get_content_type (new_info), // const char*
+			origin,
+			new_name,
+			NULL // storage - auto-guess
+		);
+        zeitgeist_subject_set_current_uri (subject, new_uri);
+		g_free (origin);
+		// FIXME: zeitgeist_subject_set_current_uri ();
+		ZeitgeistEvent *event = zeitgeist_event_new_full (
+			ZEITGEIST_ZG_MOVE_EVENT,
+			ZEITGEIST_ZG_USER_ACTIVITY,
+			ZEITGEIST_NEMO_ACTOR,
+			subject, NULL);
+		zeitgeist_log_insert_events_no_reply (log, event, NULL);
+		// ---
+		
+		nemo_directory_moved (old_uri, new_uri);
 		g_free (new_uri);
 		g_free (old_uri);
 		
@@ -1734,14 +1769,14 @@ rename_get_info_callback (GObject *source_object,
 		 * and a rename affects the contents of the desktop file.
 		 */
 		if (op->file->details->got_custom_display_name) {
-			nautilus_file_invalidate_attributes (op->file,
-							     NAUTILUS_FILE_ATTRIBUTE_INFO |
-							     NAUTILUS_FILE_ATTRIBUTE_LINK_INFO);
+			nemo_file_invalidate_attributes (op->file,
+							     NEMO_FILE_ATTRIBUTE_INFO |
+							     NEMO_FILE_ATTRIBUTE_LINK_INFO);
 		}
 		
 		g_object_unref (new_info);
 	}
-	nautilus_file_operation_complete (op, NULL, error);
+	nemo_file_operation_complete (op, NULL, error);
 	if (error) {
 		g_error_free (error);
 	}
@@ -1752,7 +1787,7 @@ rename_callback (GObject *source_object,
 		 GAsyncResult *res,
 		 gpointer callback_data)
 {
-	NautilusFileOperation *op;
+	NemoFileOperation *op;
 	GFile *new_file;
 	GError *error;
 
@@ -1764,24 +1799,24 @@ rename_callback (GObject *source_object,
 
 	if (new_file != NULL) {
 		if (op->undo_info != NULL) {
-			nautilus_file_undo_info_rename_set_data (NAUTILUS_FILE_UNDO_INFO_RENAME (op->undo_info),
+			nemo_file_undo_info_rename_set_data (NEMO_FILE_UNDO_INFO_RENAME (op->undo_info),
 								 G_FILE (source_object), new_file);
 		}
 
 		g_file_query_info_async (new_file,
-					 NAUTILUS_FILE_DEFAULT_ATTRIBUTES,
+					 NEMO_FILE_DEFAULT_ATTRIBUTES,
 					 0,
 					 G_PRIORITY_DEFAULT,
 					 op->cancellable,
 					 rename_get_info_callback, op);
 	} else {
-		nautilus_file_operation_complete (op, NULL, error);
+		nemo_file_operation_complete (op, NULL, error);
 		g_error_free (error);
 	}
 }
 
 static gboolean
-name_is (NautilusFile *file, const char *new_name)
+name_is (NemoFile *file, const char *new_name)
 {
 	const char *old_name;
 	old_name = eel_ref_str_peek (file->details->name);
@@ -1789,12 +1824,12 @@ name_is (NautilusFile *file, const char *new_name)
 }
 
 void
-nautilus_file_rename (NautilusFile *file,
+nemo_file_rename (NemoFile *file,
 		      const char *new_name,
-		      NautilusFileOperationCallback callback,
+		      NemoFileOperationCallback callback,
 		      gpointer callback_data)
 {
-	NautilusFileOperation *op;
+	NemoFileOperation *op;
 	char *uri;
 	char *old_name;
 	char *new_file_name;
@@ -1803,7 +1838,7 @@ nautilus_file_rename (NautilusFile *file,
 	GFile *location;
 	GError *error;
 	
-	g_return_if_fail (NAUTILUS_IS_FILE (file));
+	g_return_if_fail (NEMO_IS_FILE (file));
 	g_return_if_fail (new_name != NULL);
 	g_return_if_fail (callback != NULL);
 
@@ -1824,13 +1859,13 @@ nautilus_file_rename (NautilusFile *file,
 	 * We need to check this here because there may be a new
 	 * file with the same name.
 	 */
-	if (nautilus_file_is_gone (file)) {
+	if (nemo_file_is_gone (file)) {
 	       	/* Claim that something changed even if the rename
 		 * failed. This makes it easier for some clients who
 		 * see the "reverting" to the old name as "changing
 		 * back".
 		 */
-		nautilus_file_changed (file);
+		nemo_file_changed (file);
 		error = g_error_new (G_IO_ERROR, G_IO_ERROR_NOT_FOUND,
 				     _("File not found"));
 		(* callback) (file, NULL, error, callback_data);
@@ -1842,7 +1877,7 @@ nautilus_file_rename (NautilusFile *file,
 	 * (1) rename returns an error if new & old are same.
 	 * (2) We don't want to send file-changed signal if nothing changed.
 	 */
-	if (!NAUTILUS_IS_DESKTOP_ICON_FILE (file) &&
+	if (!NEMO_IS_DESKTOP_ICON_FILE (file) &&
 	    !is_renameable_desktop_file &&
 	    name_is (file, new_name)) {
 		(* callback) (file, NULL, NULL, callback_data);
@@ -1852,13 +1887,13 @@ nautilus_file_rename (NautilusFile *file,
 	/* Self-owned files can't be renamed. Test the name-not-actually-changing
 	 * case before this case.
 	 */
-	if (nautilus_file_is_self_owned (file)) {
+	if (nemo_file_is_self_owned (file)) {
 	       	/* Claim that something changed even if the rename
 		 * failed. This makes it easier for some clients who
 		 * see the "reverting" to the old name as "changing
 		 * back".
 		 */
-		nautilus_file_changed (file);
+		nemo_file_changed (file);
 		error = g_error_new (G_IO_ERROR, G_IO_ERROR_NOT_SUPPORTED,
 				     _("Toplevel files cannot be renamed"));
 		
@@ -1867,16 +1902,16 @@ nautilus_file_rename (NautilusFile *file,
 		return;
 	}
 
-	if (NAUTILUS_IS_DESKTOP_ICON_FILE (file)) {
-		NautilusDesktopLink *link;
+	if (NEMO_IS_DESKTOP_ICON_FILE (file)) {
+		NemoDesktopLink *link;
 
-		link = nautilus_desktop_icon_file_get_link (NAUTILUS_DESKTOP_ICON_FILE (file));
-		old_name = nautilus_file_get_display_name (file);
+		link = nemo_desktop_icon_file_get_link (NEMO_DESKTOP_ICON_FILE (file));
+		old_name = nemo_file_get_display_name (file);
 
 		if ((old_name != NULL && strcmp (new_name, old_name) == 0)) {
 			success = TRUE;
 		} else {
-			success = (link != NULL && nautilus_desktop_link_rename (link, new_name));
+			success = (link != NULL && nemo_desktop_link_rename (link, new_name));
 		}
 
 		if (success) {
@@ -1898,13 +1933,13 @@ nautilus_file_rename (NautilusFile *file,
 		 * This helps for the vfolder method where this can happen and
 		 * we want to minimize actual changes
 		 */
-		uri = nautilus_file_get_uri (file);
-		old_name = nautilus_link_local_get_text (uri);
+		uri = nemo_file_get_uri (file);
+		old_name = nemo_link_local_get_text (uri);
 		if (old_name != NULL && strcmp (new_name, old_name) == 0) {
 			success = TRUE;
 			name_changed = FALSE;
 		} else {
-			success = nautilus_link_local_set_text (uri, new_name);
+			success = nemo_link_local_set_text (uri, new_name);
 			name_changed = TRUE;
 		}
 		g_free (old_name);
@@ -1922,9 +1957,9 @@ nautilus_file_rename (NautilusFile *file,
 
 		if (name_is (file, new_file_name)) {
 			if (name_changed) {
-				nautilus_file_invalidate_attributes (file,
-								     NAUTILUS_FILE_ATTRIBUTE_INFO |
-								     NAUTILUS_FILE_ATTRIBUTE_LINK_INFO);
+				nemo_file_invalidate_attributes (file,
+								     NEMO_FILE_ATTRIBUTE_INFO |
+								     NEMO_FILE_ATTRIBUTE_LINK_INFO);
 			}
 
 			(* callback) (file, NULL, NULL, callback_data);
@@ -1936,13 +1971,13 @@ nautilus_file_rename (NautilusFile *file,
 	}
 
 	/* Set up a renaming operation. */
-	op = nautilus_file_operation_new (file, callback, callback_data);
+	op = nemo_file_operation_new (file, callback, callback_data);
 	op->is_rename = TRUE;
-	location = nautilus_file_get_location (file);
+	location = nemo_file_get_location (file);
 
 	/* Tell the undo manager a rename is taking place */
-	if (!nautilus_file_undo_manager_pop_flag ()) {
-		op->undo_info = nautilus_file_undo_info_rename_new ();
+	if (!nemo_file_undo_manager_pop_flag ()) {
+		op->undo_info = nemo_file_undo_info_rename_new ();
 	}
 
 	/* Do the renaming. */
@@ -1957,10 +1992,10 @@ nautilus_file_rename (NautilusFile *file,
 }
 
 gboolean
-nautilus_file_rename_in_progress (NautilusFile *file)
+nemo_file_rename_in_progress (NemoFile *file)
 {
 	GList *node;
-	NautilusFileOperation *op;
+	NemoFileOperation *op;
 
 	for (node = file->details->operations_in_progress; node != NULL; node = node->next) {
 		op = node->data;
@@ -1972,12 +2007,12 @@ nautilus_file_rename_in_progress (NautilusFile *file)
 }
 
 void
-nautilus_file_cancel (NautilusFile *file,
-		      NautilusFileOperationCallback callback,
+nemo_file_cancel (NemoFile *file,
+		      NemoFileOperationCallback callback,
 		      gpointer callback_data)
 {
 	GList *node, *next;
-	NautilusFileOperation *op;
+	NemoFileOperation *op;
 
 	for (node = file->details->operations_in_progress; node != NULL; node = next) {
 		next = node->next;
@@ -1985,21 +2020,21 @@ nautilus_file_cancel (NautilusFile *file,
 
 		g_assert (op->file == file);
 		if (op->callback == callback && op->callback_data == callback_data) {
-			nautilus_file_operation_cancel (op);
+			nemo_file_operation_cancel (op);
 		}
 	}
 }
 
 gboolean         
-nautilus_file_matches_uri (NautilusFile *file, const char *match_uri)
+nemo_file_matches_uri (NemoFile *file, const char *match_uri)
 {
 	GFile *match_file, *location;
 	gboolean result;
 
-	g_return_val_if_fail (NAUTILUS_IS_FILE (file), FALSE);
+	g_return_val_if_fail (NEMO_IS_FILE (file), FALSE);
 	g_return_val_if_fail (match_uri != NULL, FALSE);
 	
-	location = nautilus_file_get_location (file);
+	location = nemo_file_get_location (file);
 	match_file = g_file_new_for_uri (match_uri);
 	result = g_file_equal (location, match_file);
 	g_object_unref (location);
@@ -2009,14 +2044,14 @@ nautilus_file_matches_uri (NautilusFile *file, const char *match_uri)
 }
 
 int
-nautilus_file_compare_location (NautilusFile *file_1,
-                                NautilusFile *file_2)
+nemo_file_compare_location (NemoFile *file_1,
+                                NemoFile *file_2)
 {
 	GFile *loc_a, *loc_b;
 	gboolean res;
 
-	loc_a = nautilus_file_get_location (file_1);
-	loc_b = nautilus_file_get_location (file_2);
+	loc_a = nemo_file_get_location (file_1);
+	loc_b = nemo_file_get_location (file_2);
 
 	res = !g_file_equal (loc_a, loc_b);
 
@@ -2027,18 +2062,18 @@ nautilus_file_compare_location (NautilusFile *file_1,
 }
 
 gboolean
-nautilus_file_is_local (NautilusFile *file)
+nemo_file_is_local (NemoFile *file)
 {
-	g_return_val_if_fail (NAUTILUS_IS_FILE (file), FALSE);
+	g_return_val_if_fail (NEMO_IS_FILE (file), FALSE);
 	
-	return nautilus_directory_is_local (file->details->directory);
+	return nemo_directory_is_local (file->details->directory);
 }
 
 static void
-update_link (NautilusFile *link_file, NautilusFile *target_file)
+update_link (NemoFile *link_file, NemoFile *target_file)
 {
-	g_assert (NAUTILUS_IS_FILE (link_file));
-	g_assert (NAUTILUS_IS_FILE (target_file));
+	g_assert (NEMO_IS_FILE (link_file));
+	g_assert (NEMO_IS_FILE (target_file));
 
 	/* FIXME bugzilla.gnome.org 42044: If we don't put any code
 	 * here then the hash table is a waste of time.
@@ -2046,7 +2081,7 @@ update_link (NautilusFile *link_file, NautilusFile *target_file)
 }
 
 static GList *
-get_link_files (NautilusFile *target_file)
+get_link_files (NemoFile *target_file)
 {
 	char *uri;
 	GList **link_files;
@@ -2054,30 +2089,30 @@ get_link_files (NautilusFile *target_file)
 	if (symbolic_links == NULL) {
 		link_files = NULL;
 	} else {
-		uri = nautilus_file_get_uri (target_file);
+		uri = nemo_file_get_uri (target_file);
 		link_files = g_hash_table_lookup (symbolic_links, uri);
 		g_free (uri);
 	}
 	if (link_files) {
-		return nautilus_file_list_copy (*link_files);
+		return nemo_file_list_copy (*link_files);
 	}
 	return NULL;
 }
 
 static void
-update_links_if_target (NautilusFile *target_file)
+update_links_if_target (NemoFile *target_file)
 {
 	GList *link_files, *p;
 
 	link_files = get_link_files (target_file);
 	for (p = link_files; p != NULL; p = p->next) {
-		update_link (NAUTILUS_FILE (p->data), target_file);
+		update_link (NEMO_FILE (p->data), target_file);
 	}
-	nautilus_file_list_free (link_files);
+	nemo_file_list_free (link_files);
 }
 
 static gboolean
-update_info_internal (NautilusFile *file,
+update_info_internal (NemoFile *file,
 		      GFileInfo *info,
 		      gboolean update_name)
 {
@@ -2113,7 +2148,7 @@ update_info_internal (NautilusFile *file,
 	}
 
 	if (info == NULL) {
-		nautilus_file_mark_gone (file);
+		nemo_file_mark_gone (file);
 		return TRUE;
 	}
 
@@ -2132,7 +2167,7 @@ update_info_internal (NautilusFile *file,
 	}
 	file->details->got_file_info = TRUE;
 
-	changed |= nautilus_file_set_display_name (file,
+	changed |= nemo_file_set_display_name (file,
 						  g_file_info_get_display_name (info),
 						  g_file_info_get_edit_name (info),
 						  FALSE);
@@ -2473,7 +2508,7 @@ update_info_internal (NautilusFile *file,
 	}
 
 	changed |=
-		nautilus_file_update_metadata_from_info (file, info);
+		nemo_file_update_metadata_from_info (file, info);
 
 	if (update_name) {
 		name = g_file_info_get_name (info);
@@ -2481,7 +2516,7 @@ update_info_internal (NautilusFile *file,
 		    strcmp (eel_ref_str_peek (file->details->name), name) != 0) {
 			changed = TRUE;
 
-			node = nautilus_directory_begin_file_name_change
+			node = nemo_directory_begin_file_name_change
 				(file->details->directory, file);
 			
 			eel_ref_str_unref (file->details->name);
@@ -2495,13 +2530,13 @@ update_info_internal (NautilusFile *file,
 			if (!file->details->got_custom_display_name &&
 			    g_file_info_get_display_name (info) == NULL) {
 				/* If the file info's display name is NULL,
-				 * nautilus_file_set_display_name() did
+				 * nemo_file_set_display_name() did
 				 * not unset the display name.
 				 */
-				nautilus_file_clear_display_name (file);
+				nemo_file_clear_display_name (file);
 			}
 
-			nautilus_directory_end_file_name_change
+			nemo_directory_end_file_name_change
 				(file->details->directory, file, node);
 		}
 	}
@@ -2516,21 +2551,21 @@ update_info_internal (NautilusFile *file,
 }
 
 static gboolean
-update_info_and_name (NautilusFile *file,
+update_info_and_name (NemoFile *file,
 		      GFileInfo *info)
 {
 	return update_info_internal (file, info, TRUE);
 }
 
 gboolean
-nautilus_file_update_info (NautilusFile *file,
+nemo_file_update_info (NemoFile *file,
 			   GFileInfo *info)
 {
 	return update_info_internal (file, info, FALSE);
 }
 
 static gboolean
-update_name_internal (NautilusFile *file,
+update_name_internal (NemoFile *file,
 		      const char *name,
 		      gboolean in_directory)
 {
@@ -2548,7 +2583,7 @@ update_name_internal (NautilusFile *file,
 	
 	node = NULL;
 	if (in_directory) {
-		node = nautilus_directory_begin_file_name_change
+		node = nemo_directory_begin_file_name_change
 			(file->details->directory, file);
 	}
 	
@@ -2556,11 +2591,11 @@ update_name_internal (NautilusFile *file,
 	file->details->name = eel_ref_str_new (name);
 
 	if (!file->details->got_custom_display_name) {
-		nautilus_file_clear_display_name (file);
+		nemo_file_clear_display_name (file);
 	}
 
 	if (in_directory) {
-		nautilus_directory_end_file_name_change
+		nemo_directory_end_file_name_change
 			(file->details->directory, file, node);
 	}
 
@@ -2568,7 +2603,7 @@ update_name_internal (NautilusFile *file,
 }
 
 gboolean
-nautilus_file_update_name (NautilusFile *file, const char *name)
+nemo_file_update_name (NemoFile *file, const char *name)
 {
 	gboolean ret;
 	
@@ -2582,18 +2617,18 @@ nautilus_file_update_name (NautilusFile *file, const char *name)
 }
 
 gboolean
-nautilus_file_update_name_and_directory (NautilusFile *file, 
+nemo_file_update_name_and_directory (NemoFile *file, 
 					 const char *name,
-					 NautilusDirectory *new_directory)
+					 NemoDirectory *new_directory)
 {
-	NautilusDirectory *old_directory;
+	NemoDirectory *old_directory;
 	FileMonitors *monitors;
 
-	g_return_val_if_fail (NAUTILUS_IS_FILE (file), FALSE);
-	g_return_val_if_fail (NAUTILUS_IS_DIRECTORY (file->details->directory), FALSE);
+	g_return_val_if_fail (NEMO_IS_FILE (file), FALSE);
+	g_return_val_if_fail (NEMO_IS_DIRECTORY (file->details->directory), FALSE);
 	g_return_val_if_fail (!file->details->is_gone, FALSE);
-	g_return_val_if_fail (!nautilus_file_is_self_owned (file), FALSE);
-	g_return_val_if_fail (NAUTILUS_IS_DIRECTORY (new_directory), FALSE);
+	g_return_val_if_fail (!nemo_file_is_self_owned (file), FALSE);
+	g_return_val_if_fail (NEMO_IS_DIRECTORY (new_directory), FALSE);
 
 	old_directory = file->details->directory;
 	if (old_directory == new_directory) {
@@ -2604,7 +2639,7 @@ nautilus_file_update_name_and_directory (NautilusFile *file,
 		}
 	}
 
-	nautilus_file_ref (file);
+	nemo_file_ref (file);
 
 	/* FIXME bugzilla.gnome.org 42044: Need to let links that
 	 * point to the old name know that the file has been moved.
@@ -2612,42 +2647,42 @@ nautilus_file_update_name_and_directory (NautilusFile *file,
 
 	remove_from_link_hash_table (file);
 
-	monitors = nautilus_directory_remove_file_monitors (old_directory, file);
-	nautilus_directory_remove_file (old_directory, file);
+	monitors = nemo_directory_remove_file_monitors (old_directory, file);
+	nemo_directory_remove_file (old_directory, file);
 
-	file->details->directory = nautilus_directory_ref (new_directory);
-	nautilus_directory_unref (old_directory);
+	file->details->directory = nemo_directory_ref (new_directory);
+	nemo_directory_unref (old_directory);
 
 	if (name) {
 		update_name_internal (file, name, FALSE);
 	}
 
-	nautilus_directory_add_file (new_directory, file);
-	nautilus_directory_add_file_monitors (new_directory, file, monitors);
+	nemo_directory_add_file (new_directory, file);
+	nemo_directory_add_file_monitors (new_directory, file, monitors);
 
 	add_to_link_hash_table (file);
 
 	update_links_if_target (file);
 
-	nautilus_file_unref (file);
+	nemo_file_unref (file);
 
 	return TRUE;
 }
 
 void
-nautilus_file_set_directory (NautilusFile *file,
-			     NautilusDirectory *new_directory)
+nemo_file_set_directory (NemoFile *file,
+			     NemoDirectory *new_directory)
 {
-	nautilus_file_update_name_and_directory (file, NULL, new_directory);
+	nemo_file_update_name_and_directory (file, NULL, new_directory);
 }
 
 static Knowledge
-get_item_count (NautilusFile *file,
+get_item_count (NemoFile *file,
 		guint *count)
 {
 	gboolean known, unreadable;
 
-	known = nautilus_file_get_directory_item_count
+	known = nemo_file_get_directory_item_count
 		(file, count, &unreadable);
 	if (!known) {
 		return UNKNOWN;
@@ -2659,7 +2694,7 @@ get_item_count (NautilusFile *file,
 }
 
 static Knowledge
-get_size (NautilusFile *file,
+get_size (NemoFile *file,
 	  goffset *size)
 {
 	/* If we tried and failed, then treat it like there is no size
@@ -2690,9 +2725,9 @@ get_size (NautilusFile *file,
 }
 
 static Knowledge
-get_time (NautilusFile *file,
+get_time (NemoFile *file,
 	  time_t *time_out,
-	  NautilusDateType type)
+	  NemoDateType type)
 {
 	time_t time;
 
@@ -2712,13 +2747,13 @@ get_time (NautilusFile *file,
 
 	time = 0;
 	switch (type) {
-	case NAUTILUS_DATE_TYPE_MODIFIED:
+	case NEMO_DATE_TYPE_MODIFIED:
 		time = file->details->mtime;
 		break;
-	case NAUTILUS_DATE_TYPE_ACCESSED:
+	case NEMO_DATE_TYPE_ACCESSED:
 		time = file->details->atime;
 		break;
-	case NAUTILUS_DATE_TYPE_TRASHED:
+	case NEMO_DATE_TYPE_TRASHED:
 		time = file->details->trash_time;
 		break;
 	default:
@@ -2739,7 +2774,7 @@ get_time (NautilusFile *file,
 }
 
 static int
-compare_directories_by_count (NautilusFile *file_1, NautilusFile *file_2)
+compare_directories_by_count (NemoFile *file_1, NemoFile *file_2)
 {
 	/* Sort order:
 	 *   Directories with unknown # of items
@@ -2779,7 +2814,7 @@ compare_directories_by_count (NautilusFile *file_1, NautilusFile *file_2)
 }
 
 static int
-compare_files_by_size (NautilusFile *file_1, NautilusFile *file_2)
+compare_files_by_size (NemoFile *file_1, NemoFile *file_2)
 {
 	/* Sort order:
 	 *   Files with unknown size.
@@ -2819,7 +2854,7 @@ compare_files_by_size (NautilusFile *file_1, NautilusFile *file_2)
 }
 
 static int
-compare_by_size (NautilusFile *file_1, NautilusFile *file_2)
+compare_by_size (NemoFile *file_1, NemoFile *file_2)
 {
 	/* Sort order:
 	 *   Directories with n items
@@ -2834,8 +2869,8 @@ compare_by_size (NautilusFile *file_1, NautilusFile *file_2)
 
 	gboolean is_directory_1, is_directory_2;
 
-	is_directory_1 = nautilus_file_is_directory (file_1);
-	is_directory_2 = nautilus_file_is_directory (file_2);
+	is_directory_1 = nemo_file_is_directory (file_1);
+	is_directory_2 = nemo_file_is_directory (file_2);
 
 	if (is_directory_1 && !is_directory_2) {
 		return -1;
@@ -2852,15 +2887,15 @@ compare_by_size (NautilusFile *file_1, NautilusFile *file_2)
 }
 
 static int
-compare_by_display_name (NautilusFile *file_1, NautilusFile *file_2)
+compare_by_display_name (NemoFile *file_1, NemoFile *file_2)
 {
 	const char *name_1, *name_2;
 	const char *key_1, *key_2;
 	gboolean sort_last_1, sort_last_2;
 	int compare;
 
-	name_1 = nautilus_file_peek_display_name (file_1);
-	name_2 = nautilus_file_peek_display_name (file_2);
+	name_1 = nemo_file_peek_display_name (file_1);
+	name_2 = nemo_file_peek_display_name (file_2);
 
 	sort_last_1 = name_1[0] == SORT_LAST_CHAR1 || name_1[0] == SORT_LAST_CHAR2;
 	sort_last_2 = name_2[0] == SORT_LAST_CHAR1 || name_2[0] == SORT_LAST_CHAR2;
@@ -2870,8 +2905,8 @@ compare_by_display_name (NautilusFile *file_1, NautilusFile *file_2)
 	} else if (!sort_last_1 && sort_last_2) {
 		compare = -1;
 	} else {
-		key_1 = nautilus_file_peek_display_name_collation_key (file_1);
-		key_2 = nautilus_file_peek_display_name_collation_key (file_2);
+		key_1 = nemo_file_peek_display_name_collation_key (file_1);
+		key_2 = nemo_file_peek_display_name_collation_key (file_2);
 		compare = strcmp (key_1, key_2);
 	}
 
@@ -2879,7 +2914,7 @@ compare_by_display_name (NautilusFile *file_1, NautilusFile *file_2)
 }
 
 static int
-compare_by_directory_name (NautilusFile *file_1, NautilusFile *file_2)
+compare_by_directory_name (NemoFile *file_1, NemoFile *file_2)
 {
 	char *directory_1, *directory_2;
 	int compare;
@@ -2888,8 +2923,8 @@ compare_by_directory_name (NautilusFile *file_1, NautilusFile *file_2)
 		return 0;
 	}
 
-	directory_1 = nautilus_file_get_parent_uri_for_display (file_1);
-	directory_2 = nautilus_file_get_parent_uri_for_display (file_2);
+	directory_1 = nemo_file_get_parent_uri_for_display (file_1);
+	directory_2 = nemo_file_get_parent_uri_for_display (file_2);
 
 	compare = g_utf8_collate (directory_1, directory_2);
 
@@ -2900,12 +2935,12 @@ compare_by_directory_name (NautilusFile *file_1, NautilusFile *file_2)
 }
 
 static gboolean
-file_has_note (NautilusFile *file)
+file_has_note (NemoFile *file)
 {
 	char *note;
 	gboolean res;
 
-	note = nautilus_file_get_metadata (file, NAUTILUS_METADATA_KEY_ANNOTATION, NULL);
+	note = nemo_file_get_metadata (file, NEMO_METADATA_KEY_ANNOTATION, NULL);
 	res = note != NULL && note[0] != 0;
 	g_free (note);
 
@@ -2913,44 +2948,44 @@ file_has_note (NautilusFile *file)
 }
 
 static GList *
-prepend_automatic_keywords (NautilusFile *file,
+prepend_automatic_keywords (NemoFile *file,
 			    GList *names)
 {
 	/* Prepend in reverse order. */
-	NautilusFile *parent;
+	NemoFile *parent;
 
-	parent = nautilus_file_get_parent (file);
+	parent = nemo_file_get_parent (file);
 
 #ifdef TRASH_IS_FAST_ENOUGH
-	if (nautilus_file_is_in_trash (file)) {
+	if (nemo_file_is_in_trash (file)) {
 		names = g_list_prepend
-			(names, g_strdup (NAUTILUS_FILE_EMBLEM_NAME_TRASH));
+			(names, g_strdup (NEMO_FILE_EMBLEM_NAME_TRASH));
 	}
 #endif
 	if (file_has_note (file)) {
 		names = g_list_prepend
-			(names, g_strdup (NAUTILUS_FILE_EMBLEM_NAME_NOTE));
+			(names, g_strdup (NEMO_FILE_EMBLEM_NAME_NOTE));
 	}
 
 	/* Trash files are assumed to be read-only, 
 	 * so we want to ignore them here. */
-	if (!nautilus_file_can_write (file) &&
-	    !nautilus_file_is_in_trash (file) &&
-	    (parent == NULL || nautilus_file_can_write (parent))) {
+	if (!nemo_file_can_write (file) &&
+	    !nemo_file_is_in_trash (file) &&
+	    (parent == NULL || nemo_file_can_write (parent))) {
 		names = g_list_prepend
-			(names, g_strdup (NAUTILUS_FILE_EMBLEM_NAME_CANT_WRITE));
+			(names, g_strdup (NEMO_FILE_EMBLEM_NAME_CANT_WRITE));
 	}
-	if (!nautilus_file_can_read (file)) {
+	if (!nemo_file_can_read (file)) {
 		names = g_list_prepend
-			(names, g_strdup (NAUTILUS_FILE_EMBLEM_NAME_CANT_READ));
+			(names, g_strdup (NEMO_FILE_EMBLEM_NAME_CANT_READ));
 	}
-	if (nautilus_file_is_symbolic_link (file)) {
+	if (nemo_file_is_symbolic_link (file)) {
 		names = g_list_prepend
-			(names, g_strdup (NAUTILUS_FILE_EMBLEM_NAME_SYMBOLIC_LINK));
+			(names, g_strdup (NEMO_FILE_EMBLEM_NAME_SYMBOLIC_LINK));
 	}
 
 	if (parent) {
-		nautilus_file_unref (parent);
+		nemo_file_unref (parent);
 	}
 		
 	
@@ -2958,7 +2993,7 @@ prepend_automatic_keywords (NautilusFile *file,
 }
 
 static int
-compare_by_type (NautilusFile *file_1, NautilusFile *file_2)
+compare_by_type (NemoFile *file_1, NemoFile *file_2)
 {
 	gboolean is_directory_1;
 	gboolean is_directory_2;
@@ -2971,8 +3006,8 @@ compare_by_type (NautilusFile *file_1, NautilusFile *file_2)
 	 * that the string is dependent entirely on the mime type,
 	 * which is true now but might not be later.
 	 */
-	is_directory_1 = nautilus_file_is_directory (file_1);
-	is_directory_2 = nautilus_file_is_directory (file_2);
+	is_directory_1 = nemo_file_is_directory (file_1);
+	is_directory_2 = nemo_file_is_directory (file_2);
 	
 	if (is_directory_1 && is_directory_2) {
 		return 0;
@@ -2993,8 +3028,8 @@ compare_by_type (NautilusFile *file_1, NautilusFile *file_2)
 		return 0;
 	}
 
-	type_string_1 = nautilus_file_get_type_as_string (file_1);
-	type_string_2 = nautilus_file_get_type_as_string (file_2);
+	type_string_1 = nemo_file_get_type_as_string (file_1);
+	type_string_2 = nemo_file_get_type_as_string (file_2);
 
 	if (type_string_1 == NULL || type_string_2 == NULL) {
 		if (type_string_1 != NULL) {
@@ -3017,7 +3052,7 @@ compare_by_type (NautilusFile *file_1, NautilusFile *file_2)
 }
 
 static int
-compare_by_time (NautilusFile *file_1, NautilusFile *file_2, NautilusDateType type)
+compare_by_time (NemoFile *file_1, NemoFile *file_2, NemoDateType type)
 {
 	/* Sort order:
 	 *   Files with unknown times.
@@ -3060,7 +3095,7 @@ compare_by_time (NautilusFile *file_1, NautilusFile *file_2, NautilusDateType ty
 }
 
 static int
-compare_by_full_path (NautilusFile *file_1, NautilusFile *file_2)
+compare_by_full_path (NemoFile *file_1, NemoFile *file_2)
 {
 	int compare;
 
@@ -3072,16 +3107,16 @@ compare_by_full_path (NautilusFile *file_1, NautilusFile *file_2)
 }
 
 static int
-nautilus_file_compare_for_sort_internal (NautilusFile *file_1,
-					 NautilusFile *file_2,
+nemo_file_compare_for_sort_internal (NemoFile *file_1,
+					 NemoFile *file_2,
 					 gboolean directories_first,
 					 gboolean reversed)
 {
 	gboolean is_directory_1, is_directory_2;
 
 	if (directories_first) {
-		is_directory_1 = nautilus_file_is_directory (file_1);
-		is_directory_2 = nautilus_file_is_directory (file_2);
+		is_directory_1 = nemo_file_is_directory (file_1);
+		is_directory_2 = nemo_file_is_directory (file_2);
 
 		if (is_directory_1 && !is_directory_2) {
 			return -1;
@@ -3102,7 +3137,7 @@ nautilus_file_compare_for_sort_internal (NautilusFile *file_1,
 }
 
 /**
- * nautilus_file_compare_for_sort:
+ * nemo_file_compare_for_sort:
  * @file_1: A file object
  * @file_2: Another file object
  * @sort_type: Sort criterion
@@ -3117,9 +3152,9 @@ nautilus_file_compare_for_sort_internal (NautilusFile *file_1,
  * of the sort criterion being the primary but not only differentiator.
  **/
 int
-nautilus_file_compare_for_sort (NautilusFile *file_1,
-				NautilusFile *file_2,
-				NautilusFileSortType sort_type,
+nemo_file_compare_for_sort (NemoFile *file_1,
+				NemoFile *file_2,
+				NemoFileSortType sort_type,
 				gboolean directories_first,
 				gboolean reversed)
 {
@@ -3129,17 +3164,17 @@ nautilus_file_compare_for_sort (NautilusFile *file_1,
 		return 0;
 	}
 	
-	result = nautilus_file_compare_for_sort_internal (file_1, file_2, directories_first, reversed);
+	result = nemo_file_compare_for_sort_internal (file_1, file_2, directories_first, reversed);
 	
 	if (result == 0) {
 		switch (sort_type) {
-		case NAUTILUS_FILE_SORT_BY_DISPLAY_NAME:
+		case NEMO_FILE_SORT_BY_DISPLAY_NAME:
 			result = compare_by_display_name (file_1, file_2);
 			if (result == 0) {
 				result = compare_by_directory_name (file_1, file_2);
 			}
 			break;
-		case NAUTILUS_FILE_SORT_BY_SIZE:
+		case NEMO_FILE_SORT_BY_SIZE:
 			/* Compare directory sizes ourselves, then if necessary
 			 * use GnomeVFS to compare file sizes.
 			 */
@@ -3148,7 +3183,7 @@ nautilus_file_compare_for_sort (NautilusFile *file_1,
 				result = compare_by_full_path (file_1, file_2);
 			}
 			break;
-		case NAUTILUS_FILE_SORT_BY_TYPE:
+		case NEMO_FILE_SORT_BY_TYPE:
 			/* GnomeVFS doesn't know about our special text for certain
 			 * mime types, so we handle the mime-type sorting ourselves.
 			 */
@@ -3157,20 +3192,20 @@ nautilus_file_compare_for_sort (NautilusFile *file_1,
 				result = compare_by_full_path (file_1, file_2);
 			}
 			break;
-		case NAUTILUS_FILE_SORT_BY_MTIME:
-			result = compare_by_time (file_1, file_2, NAUTILUS_DATE_TYPE_MODIFIED);
+		case NEMO_FILE_SORT_BY_MTIME:
+			result = compare_by_time (file_1, file_2, NEMO_DATE_TYPE_MODIFIED);
 			if (result == 0) {
 				result = compare_by_full_path (file_1, file_2);
 			}
 			break;
-		case NAUTILUS_FILE_SORT_BY_ATIME:
-			result = compare_by_time (file_1, file_2, NAUTILUS_DATE_TYPE_ACCESSED);
+		case NEMO_FILE_SORT_BY_ATIME:
+			result = compare_by_time (file_1, file_2, NEMO_DATE_TYPE_ACCESSED);
 			if (result == 0) {
 				result = compare_by_full_path (file_1, file_2);
 			}
 			break;
-		case NAUTILUS_FILE_SORT_BY_TRASHED_TIME:
-			result = compare_by_time (file_1, file_2, NAUTILUS_DATE_TYPE_TRASHED);
+		case NEMO_FILE_SORT_BY_TRASHED_TIME:
+			result = compare_by_time (file_1, file_2, NEMO_DATE_TYPE_TRASHED);
 			if (result == 0) {
 				result = compare_by_full_path (file_1, file_2);
 			}
@@ -3188,8 +3223,8 @@ nautilus_file_compare_for_sort (NautilusFile *file_1,
 }
 
 int
-nautilus_file_compare_for_sort_by_attribute_q   (NautilusFile                   *file_1,
-						 NautilusFile                   *file_2,
+nemo_file_compare_for_sort_by_attribute_q   (NemoFile                   *file_1,
+						 NemoFile                   *file_2,
 						 GQuark                          attribute,
 						 gboolean                        directories_first,
 						 gboolean                        reversed)
@@ -3200,52 +3235,52 @@ nautilus_file_compare_for_sort_by_attribute_q   (NautilusFile                   
 		return 0;
 	}
 
-	/* Convert certain attributes into NautilusFileSortTypes and use
-	 * nautilus_file_compare_for_sort()
+	/* Convert certain attributes into NemoFileSortTypes and use
+	 * nemo_file_compare_for_sort()
 	 */
 	if (attribute == 0 || attribute == attribute_name_q) {
-		return nautilus_file_compare_for_sort (file_1, file_2,
-						       NAUTILUS_FILE_SORT_BY_DISPLAY_NAME,
+		return nemo_file_compare_for_sort (file_1, file_2,
+						       NEMO_FILE_SORT_BY_DISPLAY_NAME,
 						       directories_first,
 						       reversed);
 	} else if (attribute == attribute_size_q) {
-		return nautilus_file_compare_for_sort (file_1, file_2,
-						       NAUTILUS_FILE_SORT_BY_SIZE,
+		return nemo_file_compare_for_sort (file_1, file_2,
+						       NEMO_FILE_SORT_BY_SIZE,
 						       directories_first,
 						       reversed);
 	} else if (attribute == attribute_type_q) {
-		return nautilus_file_compare_for_sort (file_1, file_2,
-						       NAUTILUS_FILE_SORT_BY_TYPE,
+		return nemo_file_compare_for_sort (file_1, file_2,
+						       NEMO_FILE_SORT_BY_TYPE,
 						       directories_first,
 						       reversed);
 	} else if (attribute == attribute_modification_date_q || attribute == attribute_date_modified_q) {
-		return nautilus_file_compare_for_sort (file_1, file_2,
-						       NAUTILUS_FILE_SORT_BY_MTIME,
+		return nemo_file_compare_for_sort (file_1, file_2,
+						       NEMO_FILE_SORT_BY_MTIME,
 						       directories_first,
 						       reversed);
         } else if (attribute == attribute_accessed_date_q || attribute == attribute_date_accessed_q) {
-		return nautilus_file_compare_for_sort (file_1, file_2,
-						       NAUTILUS_FILE_SORT_BY_ATIME,
+		return nemo_file_compare_for_sort (file_1, file_2,
+						       NEMO_FILE_SORT_BY_ATIME,
 						       directories_first,
 						       reversed);
         } else if (attribute == attribute_trashed_on_q) {
-		return nautilus_file_compare_for_sort (file_1, file_2,
-						       NAUTILUS_FILE_SORT_BY_TRASHED_TIME,
+		return nemo_file_compare_for_sort (file_1, file_2,
+						       NEMO_FILE_SORT_BY_TRASHED_TIME,
 						       directories_first,
 						       reversed);
 	}
 
 	/* it is a normal attribute, compare by strings */
 
-	result = nautilus_file_compare_for_sort_internal (file_1, file_2, directories_first, reversed);
+	result = nemo_file_compare_for_sort_internal (file_1, file_2, directories_first, reversed);
 	
 	if (result == 0) {
 		char *value_1;
 		char *value_2;
 		
-		value_1 = nautilus_file_get_string_attribute_q (file_1, 
+		value_1 = nemo_file_get_string_attribute_q (file_1, 
 								attribute);
-		value_2 = nautilus_file_get_string_attribute_q (file_2, 
+		value_2 = nemo_file_get_string_attribute_q (file_2, 
 								attribute);
 
 		if (value_1 != NULL && value_2 != NULL) {
@@ -3264,13 +3299,13 @@ nautilus_file_compare_for_sort_by_attribute_q   (NautilusFile                   
 }
 
 int
-nautilus_file_compare_for_sort_by_attribute     (NautilusFile                   *file_1,
-						 NautilusFile                   *file_2,
+nemo_file_compare_for_sort_by_attribute     (NemoFile                   *file_1,
+						 NemoFile                   *file_2,
 						 const char                     *attribute,
 						 gboolean                        directories_first,
 						 gboolean                        reversed)
 {
-	return nautilus_file_compare_for_sort_by_attribute_q (file_1, file_2,
+	return nemo_file_compare_for_sort_by_attribute_q (file_1, file_2,
 							      g_quark_from_string (attribute),
 							      directories_first,
 							      reversed);
@@ -3278,7 +3313,7 @@ nautilus_file_compare_for_sort_by_attribute     (NautilusFile                   
 
 
 /**
- * nautilus_file_compare_name:
+ * nemo_file_compare_name:
  * @file: A file object
  * @pattern: A string we are comparing it with
  * 
@@ -3286,7 +3321,7 @@ nautilus_file_compare_for_sort_by_attribute     (NautilusFile                   
  * using the same sorting order as sort by name.
  **/
 int
-nautilus_file_compare_display_name (NautilusFile *file,
+nemo_file_compare_display_name (NemoFile *file,
 				    const char *pattern)
 {
 	const char *name;
@@ -3294,20 +3329,20 @@ nautilus_file_compare_display_name (NautilusFile *file,
 
 	g_return_val_if_fail (pattern != NULL, -1);
 
-	name = nautilus_file_peek_display_name (file);
+	name = nemo_file_peek_display_name (file);
 	result = g_utf8_collate (name, pattern);
 	return result;
 }
 
 
 gboolean
-nautilus_file_is_hidden_file (NautilusFile *file)
+nemo_file_is_hidden_file (NemoFile *file)
 {
 	return file->details->is_hidden;
 }
 
 static gboolean
-is_file_hidden (NautilusFile *file)
+is_file_hidden (NemoFile *file)
 {
 	return file->details->directory->details->hidden_file_hash != NULL &&
 		g_hash_table_lookup (file->details->directory->details->hidden_file_hash,
@@ -3316,31 +3351,31 @@ is_file_hidden (NautilusFile *file)
 }
 
 /**
- * nautilus_file_should_show:
+ * nemo_file_should_show:
  * @file: the file to check.
  * @show_hidden: whether we want to show hidden files or not.
  * 
- * Determines if a #NautilusFile should be shown. Note that when browsing
+ * Determines if a #NemoFile should be shown. Note that when browsing
  * a trash directory, this function will always return %TRUE. 
  *
  * Returns: %TRUE if the file should be shown, %FALSE if it shouldn't.
  */
 gboolean 
-nautilus_file_should_show (NautilusFile *file, 
+nemo_file_should_show (NemoFile *file, 
 			   gboolean show_hidden,
 			   gboolean show_foreign)
 {
 	/* Never hide any files in trash. */
-	if (nautilus_file_is_in_trash (file)) {
+	if (nemo_file_is_in_trash (file)) {
 		return TRUE;
 	} else {
-		return (show_hidden || (!nautilus_file_is_hidden_file (file) && !is_file_hidden (file))) &&
-			(show_foreign || !(nautilus_file_is_in_desktop (file) && nautilus_file_is_foreign_link (file)));
+		return (show_hidden || (!nemo_file_is_hidden_file (file) && !is_file_hidden (file))) &&
+			(show_foreign || !(nemo_file_is_in_desktop (file) && nemo_file_is_foreign_link (file)));
 	}
 }
 
 gboolean
-nautilus_file_is_home (NautilusFile *file)
+nemo_file_is_home (NemoFile *file)
 {
 	GFile *dir;
 
@@ -3349,15 +3384,15 @@ nautilus_file_is_home (NautilusFile *file)
 		return FALSE;
 	}
 
-	return nautilus_is_home_directory_file (dir,
+	return nemo_is_home_directory_file (dir,
 						eel_ref_str_peek (file->details->name));
 }
 
 gboolean
-nautilus_file_is_in_desktop (NautilusFile *file)
+nemo_file_is_in_desktop (NemoFile *file)
 {
 	if (file->details->directory->details->location) {
-		return nautilus_is_desktop_directory (file->details->directory->details->location);
+		return nemo_is_desktop_directory (file->details->directory->details->location);
 	}
 	return FALSE;
 }
@@ -3366,19 +3401,19 @@ static gboolean
 filter_hidden_partition_callback (gpointer data,
 				  gpointer callback_data)
 {
-	NautilusFile *file;
+	NemoFile *file;
 	FilterOptions options;
 
-	file = NAUTILUS_FILE (data);
+	file = NEMO_FILE (data);
 	options = GPOINTER_TO_INT (callback_data);
 
-	return nautilus_file_should_show (file,
+	return nemo_file_should_show (file,
 					  options & SHOW_HIDDEN,
 					  TRUE);
 }
 
 GList *
-nautilus_file_list_filter_hidden (GList    *files,
+nemo_file_list_filter_hidden (GList    *files,
 				  gboolean  show_hidden)
 {
 	GList *filtered_files;
@@ -3388,18 +3423,18 @@ nautilus_file_list_filter_hidden (GList    *files,
 	 * Eventually this should become a generic filtering thingy.
 	 */
 
-	filtered_files = nautilus_file_list_copy (files);
+	filtered_files = nemo_file_list_copy (files);
 	filtered_files = eel_g_list_partition (filtered_files,
 					       filter_hidden_partition_callback,
 					       GINT_TO_POINTER ((show_hidden ? SHOW_HIDDEN : 0)),
 					       &removed_files);
-	nautilus_file_list_free (removed_files);
+	nemo_file_list_free (removed_files);
 
 	return filtered_files;
 }
 
 char *
-nautilus_file_get_metadata (NautilusFile *file,
+nemo_file_get_metadata (NemoFile *file,
 			    const char *key,
 			    const char *default_metadata)
 {
@@ -3414,9 +3449,9 @@ nautilus_file_get_metadata (NautilusFile *file,
 		return g_strdup (default_metadata);
 	}
 
-	g_return_val_if_fail (NAUTILUS_IS_FILE (file), g_strdup (default_metadata));
+	g_return_val_if_fail (NEMO_IS_FILE (file), g_strdup (default_metadata));
 
-	id = nautilus_metadata_get_id (key);
+	id = nemo_metadata_get_id (key);
 	value = g_hash_table_lookup (file->details->metadata, GUINT_TO_POINTER (id));
 
 	if (value) {
@@ -3426,7 +3461,7 @@ nautilus_file_get_metadata (NautilusFile *file,
 }
 
 GList *
-nautilus_file_get_metadata_list (NautilusFile *file,
+nemo_file_get_metadata_list (NemoFile *file,
 				 const char *key)
 {
 	GList *res;
@@ -3442,9 +3477,9 @@ nautilus_file_get_metadata_list (NautilusFile *file,
 		return NULL;
 	}
 
-	g_return_val_if_fail (NAUTILUS_IS_FILE (file), NULL);
+	g_return_val_if_fail (NEMO_IS_FILE (file), NULL);
 
-	id = nautilus_metadata_get_id (key);
+	id = nemo_metadata_get_id (key);
 	id |= METADATA_ID_IS_LIST_MASK;
 
 	value = g_hash_table_lookup (file->details->metadata, GUINT_TO_POINTER (id));
@@ -3461,14 +3496,14 @@ nautilus_file_get_metadata_list (NautilusFile *file,
 }
 
 void
-nautilus_file_set_metadata (NautilusFile *file,
+nemo_file_set_metadata (NemoFile *file,
 			    const char *key,
 			    const char *default_metadata,
 			    const char *metadata)
 {
 	const char *val;
 
-	g_return_if_fail (NAUTILUS_IS_FILE (file));
+	g_return_if_fail (NEMO_IS_FILE (file));
 	g_return_if_fail (key != NULL);
 	g_return_if_fail (key[0] != '\0');
 
@@ -3477,11 +3512,11 @@ nautilus_file_set_metadata (NautilusFile *file,
 		val = default_metadata;
 	}
 
-	NAUTILUS_FILE_CLASS (G_OBJECT_GET_CLASS (file))->set_metadata (file, key, val);
+	NEMO_FILE_CLASS (G_OBJECT_GET_CLASS (file))->set_metadata (file, key, val);
 }
 
 void
-nautilus_file_set_metadata_list (NautilusFile *file,
+nemo_file_set_metadata_list (NemoFile *file,
 				 const char *key,
 				 GList *list)
 {
@@ -3489,7 +3524,7 @@ nautilus_file_set_metadata_list (NautilusFile *file,
 	int len, i;
 	GList *l;
 
-	g_return_if_fail (NAUTILUS_IS_FILE (file));
+	g_return_if_fail (NEMO_IS_FILE (file));
 	g_return_if_fail (key != NULL);
 	g_return_if_fail (key[0] != '\0');
 
@@ -3500,13 +3535,13 @@ nautilus_file_set_metadata_list (NautilusFile *file,
 	}
 	val[i] = NULL;
 
-	NAUTILUS_FILE_CLASS (G_OBJECT_GET_CLASS (file))->set_metadata_as_list (file, key, val);
+	NEMO_FILE_CLASS (G_OBJECT_GET_CLASS (file))->set_metadata_as_list (file, key, val);
 
 	g_free (val);
 }
 
 gboolean
-nautilus_file_get_boolean_metadata (NautilusFile *file,
+nemo_file_get_boolean_metadata (NemoFile *file,
 				    const char   *key,
 				    gboolean      default_metadata)
 {
@@ -3520,9 +3555,9 @@ nautilus_file_get_boolean_metadata (NautilusFile *file,
 		return default_metadata;
 	}
 
-	g_return_val_if_fail (NAUTILUS_IS_FILE (file), default_metadata);
+	g_return_val_if_fail (NEMO_IS_FILE (file), default_metadata);
 
-	result_as_string = nautilus_file_get_metadata
+	result_as_string = nemo_file_get_metadata
 		(file, key, default_metadata ? "true" : "false");
 	g_assert (result_as_string != NULL);
 
@@ -3540,7 +3575,7 @@ nautilus_file_get_boolean_metadata (NautilusFile *file,
 }
 
 int
-nautilus_file_get_integer_metadata (NautilusFile *file,
+nemo_file_get_integer_metadata (NemoFile *file,
 				    const char   *key,
 				    int           default_metadata)
 {
@@ -3555,10 +3590,10 @@ nautilus_file_get_integer_metadata (NautilusFile *file,
 	if (file == NULL) {
 		return default_metadata;
 	}
-	g_return_val_if_fail (NAUTILUS_IS_FILE (file), default_metadata);
+	g_return_val_if_fail (NEMO_IS_FILE (file), default_metadata);
 
 	g_snprintf (default_as_string, sizeof (default_as_string), "%d", default_metadata);
-	result_as_string = nautilus_file_get_metadata
+	result_as_string = nemo_file_get_metadata
 		(file, key, default_as_string);
 
 	/* Normally we can't get a a NULL, but we check for it here to
@@ -3597,13 +3632,13 @@ get_time_from_time_string (const char *time_string,
 }
 
 time_t
-nautilus_file_get_time_metadata (NautilusFile *file,
+nemo_file_get_time_metadata (NemoFile *file,
 				 const char   *key)
 {
 	time_t time;
 	char *time_string;
 
-	time_string = nautilus_file_get_metadata (file, key, NULL);
+	time_string = nemo_file_get_metadata (file, key, NULL);
 	if (!get_time_from_time_string (time_string, &time)) {
 		time = UNDEFINED_TIME;
 	}
@@ -3613,7 +3648,7 @@ nautilus_file_get_time_metadata (NautilusFile *file,
 }
 
 void
-nautilus_file_set_time_metadata (NautilusFile *file,
+nemo_file_set_time_metadata (NemoFile *file,
 				 const char   *key,
 				 time_t        time)
 {
@@ -3629,27 +3664,27 @@ nautilus_file_set_time_metadata (NautilusFile *file,
 		metadata = NULL;
 	}
 
-	nautilus_file_set_metadata (file, key, NULL, metadata);
+	nemo_file_set_metadata (file, key, NULL, metadata);
 }
 
 
 void
-nautilus_file_set_boolean_metadata (NautilusFile *file,
+nemo_file_set_boolean_metadata (NemoFile *file,
 				    const char   *key,
 				    gboolean      default_metadata,
 				    gboolean      metadata)
 {
-	g_return_if_fail (NAUTILUS_IS_FILE (file));
+	g_return_if_fail (NEMO_IS_FILE (file));
 	g_return_if_fail (key != NULL);
 	g_return_if_fail (key[0] != '\0');
 
-	nautilus_file_set_metadata (file, key,
+	nemo_file_set_metadata (file, key,
 				    default_metadata ? "true" : "false",
 				    metadata ? "true" : "false");
 }
 
 void
-nautilus_file_set_integer_metadata (NautilusFile *file,
+nemo_file_set_integer_metadata (NemoFile *file,
 				    const char   *key,
 				    int           default_metadata,
 				    int           metadata)
@@ -3657,19 +3692,19 @@ nautilus_file_set_integer_metadata (NautilusFile *file,
 	char value_as_string[32];
 	char default_as_string[32];
 
-	g_return_if_fail (NAUTILUS_IS_FILE (file));
+	g_return_if_fail (NEMO_IS_FILE (file));
 	g_return_if_fail (key != NULL);
 	g_return_if_fail (key[0] != '\0');
 
 	g_snprintf (value_as_string, sizeof (value_as_string), "%d", metadata);
 	g_snprintf (default_as_string, sizeof (default_as_string), "%d", default_metadata);
 
-	nautilus_file_set_metadata (file, key,
+	nemo_file_set_metadata (file, key,
 				    default_as_string, value_as_string);
 }
 
 static const char *
-nautilus_file_peek_display_name_collation_key (NautilusFile *file)
+nemo_file_peek_display_name_collation_key (NemoFile *file)
 {
 	const char *res;
 
@@ -3681,16 +3716,16 @@ nautilus_file_peek_display_name_collation_key (NautilusFile *file)
 }
 
 static const char *
-nautilus_file_peek_display_name (NautilusFile *file)
+nemo_file_peek_display_name (NemoFile *file)
 {
 	const char *name;
 	char *escaped_name;
 
-	/* FIXME: for some reason we can get a NautilusFile instance which is
+	/* FIXME: for some reason we can get a NemoFile instance which is
 	 *        no longer valid or could be freed somewhere else in the same time.
 	 *        There's race condition somewhere. See bug 602500.
 	 */
-	if (file == NULL || nautilus_file_is_gone (file))
+	if (file == NULL || nemo_file_is_gone (file))
 		return "";
 
 	/* Default to display name based on filename if its not set yet */
@@ -3698,13 +3733,13 @@ nautilus_file_peek_display_name (NautilusFile *file)
 	if (file->details->display_name == NULL) {
 		name = eel_ref_str_peek (file->details->name);
 		if (g_utf8_validate (name, -1, NULL)) {
-			nautilus_file_set_display_name (file,
+			nemo_file_set_display_name (file,
 							name,
 							NULL,
 							FALSE);
 		} else {
 			escaped_name = g_uri_escape_string (name, G_URI_RESERVED_CHARS_ALLOWED_IN_PATH, TRUE);
-			nautilus_file_set_display_name (file,
+			nemo_file_set_display_name (file,
 							escaped_name,
 							NULL,
 							FALSE);
@@ -3716,13 +3751,13 @@ nautilus_file_peek_display_name (NautilusFile *file)
 }
 
 char *
-nautilus_file_get_display_name (NautilusFile *file)
+nemo_file_get_display_name (NemoFile *file)
 {
-	return g_strdup (nautilus_file_peek_display_name (file));
+	return g_strdup (nemo_file_peek_display_name (file));
 }
 
 char *
-nautilus_file_get_edit_name (NautilusFile *file)
+nemo_file_get_edit_name (NemoFile *file)
 {
 	const char *res;
 	
@@ -3734,14 +3769,14 @@ nautilus_file_get_edit_name (NautilusFile *file)
 }
 
 char *
-nautilus_file_get_name (NautilusFile *file)
+nemo_file_get_name (NemoFile *file)
 {
 	return g_strdup (eel_ref_str_peek (file->details->name));
 }
 
 /**
- * nautilus_file_get_description:
- * @file: a #NautilusFile.
+ * nemo_file_get_description:
+ * @file: a #NemoFile.
  * 
  * Gets the standard::description key from @file, if 
  * it has been cached.
@@ -3750,100 +3785,100 @@ nautilus_file_get_name (NautilusFile *file)
  * 	key, or %NULL.
  */
 char *
-nautilus_file_get_description (NautilusFile *file)
+nemo_file_get_description (NemoFile *file)
 {
 	return g_strdup (file->details->description);
 }
    
 void             
-nautilus_file_monitor_add (NautilusFile *file,
+nemo_file_monitor_add (NemoFile *file,
 			   gconstpointer client,
-			   NautilusFileAttributes attributes)
+			   NemoFileAttributes attributes)
 {
-	g_return_if_fail (NAUTILUS_IS_FILE (file));
+	g_return_if_fail (NEMO_IS_FILE (file));
 	g_return_if_fail (client != NULL);
 
-	NAUTILUS_FILE_CLASS (G_OBJECT_GET_CLASS (file))->monitor_add (file, client, attributes);
+	NEMO_FILE_CLASS (G_OBJECT_GET_CLASS (file))->monitor_add (file, client, attributes);
 }   
 			   
 void
-nautilus_file_monitor_remove (NautilusFile *file,
+nemo_file_monitor_remove (NemoFile *file,
 			      gconstpointer client)
 {
-	g_return_if_fail (NAUTILUS_IS_FILE (file));
+	g_return_if_fail (NEMO_IS_FILE (file));
 	g_return_if_fail (client != NULL);
 
-	NAUTILUS_FILE_CLASS (G_OBJECT_GET_CLASS (file))->monitor_remove (file, client);
+	NEMO_FILE_CLASS (G_OBJECT_GET_CLASS (file))->monitor_remove (file, client);
 }			      
 
 gboolean
-nautilus_file_is_launcher (NautilusFile *file)
+nemo_file_is_launcher (NemoFile *file)
 {
 	return file->details->is_launcher;
 }
 
 gboolean
-nautilus_file_is_foreign_link (NautilusFile *file)
+nemo_file_is_foreign_link (NemoFile *file)
 {
 	return file->details->is_foreign_link;
 }
 
 gboolean
-nautilus_file_is_trusted_link (NautilusFile *file)
+nemo_file_is_trusted_link (NemoFile *file)
 {
 	return file->details->is_trusted_link;
 }
 
 gboolean
-nautilus_file_has_activation_uri (NautilusFile *file)
+nemo_file_has_activation_uri (NemoFile *file)
 {
 	return file->details->activation_uri != NULL;
 }
 
 
 /* Return the uri associated with the passed-in file, which may not be
- * the actual uri if the file is an desktop file or a nautilus
+ * the actual uri if the file is an desktop file or a nemo
  * xml link file.
  */
 char *
-nautilus_file_get_activation_uri (NautilusFile *file)
+nemo_file_get_activation_uri (NemoFile *file)
 {
-	g_return_val_if_fail (NAUTILUS_IS_FILE (file), NULL);
+	g_return_val_if_fail (NEMO_IS_FILE (file), NULL);
 
 	if (file->details->activation_uri != NULL) {
 		return g_strdup (file->details->activation_uri);
 	}
 	
-	return nautilus_file_get_uri (file);
+	return nemo_file_get_uri (file);
 }
 
 GFile *
-nautilus_file_get_activation_location (NautilusFile *file)
+nemo_file_get_activation_location (NemoFile *file)
 {
-	g_return_val_if_fail (NAUTILUS_IS_FILE (file), NULL);
+	g_return_val_if_fail (NEMO_IS_FILE (file), NULL);
 
 	if (file->details->activation_uri != NULL) {
 		return g_file_new_for_uri (file->details->activation_uri);
 	}
 	
-	return nautilus_file_get_location (file);
+	return nemo_file_get_location (file);
 }
 
 
 char *
-nautilus_file_get_drop_target_uri (NautilusFile *file)
+nemo_file_get_drop_target_uri (NemoFile *file)
 {
 	char *uri, *target_uri;
 	GFile *location;
-	NautilusDesktopLink *link;
+	NemoDesktopLink *link;
 	
-	g_return_val_if_fail (NAUTILUS_IS_FILE (file), NULL);
+	g_return_val_if_fail (NEMO_IS_FILE (file), NULL);
 
-	if (NAUTILUS_IS_DESKTOP_ICON_FILE (file)) {
-		link = nautilus_desktop_icon_file_get_link (NAUTILUS_DESKTOP_ICON_FILE (file));
+	if (NEMO_IS_DESKTOP_ICON_FILE (file)) {
+		link = nemo_desktop_icon_file_get_link (NEMO_DESKTOP_ICON_FILE (file));
 
 		if (link != NULL) {
-			location = nautilus_desktop_link_get_activation_location (link);
+			location = nemo_desktop_link_get_activation_location (link);
 			g_object_unref (link);
 			if (location != NULL) {
 				uri = g_file_get_uri (location);
@@ -3853,14 +3888,14 @@ nautilus_file_get_drop_target_uri (NautilusFile *file)
 		}
 	}
 	
-	uri = nautilus_file_get_uri (file);
+	uri = nemo_file_get_uri (file);
 			
-	/* Check for Nautilus link */
-	if (nautilus_file_is_nautilus_link (file)) {
-		location = nautilus_file_get_location (file);
+	/* Check for Nemo link */
+	if (nemo_file_is_nemo_link (file)) {
+		location = nemo_file_get_location (file);
 		/* FIXME bugzilla.gnome.org 43020: This does sync. I/O and works only locally. */
 		if (g_file_is_native (location)) {
-			target_uri = nautilus_link_local_get_link_uri (uri);
+			target_uri = nemo_link_local_get_link_uri (uri);
 			if (target_uri != NULL) {
 				g_free (uri);
 				uri = target_uri;
@@ -3885,17 +3920,17 @@ is_uri_relative (const char *uri)
 }
 
 static char *
-get_custom_icon_metadata_uri (NautilusFile *file)
+get_custom_icon_metadata_uri (NemoFile *file)
 {
 	char *custom_icon_uri;
 	char *uri;
 	char *dir_uri;
 	
-	uri = nautilus_file_get_metadata (file, NAUTILUS_METADATA_KEY_CUSTOM_ICON, NULL);
+	uri = nemo_file_get_metadata (file, NEMO_METADATA_KEY_CUSTOM_ICON, NULL);
 	if (uri != NULL &&
-	    nautilus_file_is_directory (file) &&
+	    nemo_file_is_directory (file) &&
 	    is_uri_relative (uri)) {
-		dir_uri = nautilus_file_get_uri (file);
+		dir_uri = nemo_file_get_uri (file);
 		custom_icon_uri = g_build_filename (dir_uri, uri, NULL);
 		g_free (dir_uri);
 		g_free (uri);
@@ -3906,18 +3941,18 @@ get_custom_icon_metadata_uri (NautilusFile *file)
 }
 
 static char *
-get_custom_icon_metadata_name (NautilusFile *file)
+get_custom_icon_metadata_name (NemoFile *file)
 {
 	char *icon_name;
 
-	icon_name = nautilus_file_get_metadata (file,
-						NAUTILUS_METADATA_KEY_CUSTOM_ICON_NAME, NULL);
+	icon_name = nemo_file_get_metadata (file,
+						NEMO_METADATA_KEY_CUSTOM_ICON_NAME, NULL);
 
 	return icon_name;
 }
 
 static GIcon *
-get_custom_icon (NautilusFile *file)
+get_custom_icon (NemoFile *file)
 {
 	char *custom_icon_uri, *custom_icon_name;
 	GFile *icon_file;
@@ -3963,12 +3998,12 @@ int cached_thumbnail_size;
 static int show_image_thumbs;
 
 GFilesystemPreviewType
-nautilus_file_get_filesystem_use_preview (NautilusFile *file)
+nemo_file_get_filesystem_use_preview (NemoFile *file)
 {
 	GFilesystemPreviewType use_preview;
-	NautilusFile *parent;
+	NemoFile *parent;
 
-	parent = nautilus_file_get_parent (file);
+	parent = nemo_file_get_parent (file);
 	if (parent != NULL) {
 		use_preview = parent->details->filesystem_use_preview;
 		g_object_unref (parent);
@@ -3980,12 +4015,12 @@ nautilus_file_get_filesystem_use_preview (NautilusFile *file)
 }
 
 gboolean
-nautilus_file_should_show_thumbnail (NautilusFile *file)
+nemo_file_should_show_thumbnail (NemoFile *file)
 {
 	const char *mime_type;
 	GFilesystemPreviewType use_preview;
 
-	use_preview = nautilus_file_get_filesystem_use_preview (file);
+	use_preview = nemo_file_get_filesystem_use_preview (file);
 
 	mime_type = eel_ref_str_peek (file->details->mime_type);
 	if (mime_type == NULL) {
@@ -3995,19 +4030,19 @@ nautilus_file_should_show_thumbnail (NautilusFile *file)
 	/* If the thumbnail has already been created, don't care about the size
 	 * of the original file.
 	 */
-	if (nautilus_thumbnail_is_mimetype_limited_by_size (mime_type) &&
+	if (nemo_thumbnail_is_mimetype_limited_by_size (mime_type) &&
 	    file->details->thumbnail_path == NULL &&
-	    nautilus_file_get_size (file) > cached_thumbnail_limit) {
+	    nemo_file_get_size (file) > cached_thumbnail_limit) {
 		return FALSE;
 	}
 
-	if (show_image_thumbs == NAUTILUS_SPEED_TRADEOFF_ALWAYS) {
+	if (show_image_thumbs == NEMO_SPEED_TRADEOFF_ALWAYS) {
 		if (use_preview == G_FILESYSTEM_PREVIEW_TYPE_NEVER) {
 			return FALSE;
 		} else {
 			return TRUE;
 		}
-	} else if (show_image_thumbs == NAUTILUS_SPEED_TRADEOFF_NEVER) {
+	} else if (show_image_thumbs == NEMO_SPEED_TRADEOFF_NEVER) {
 		return FALSE;
 	} else {
 		if (use_preview == G_FILESYSTEM_PREVIEW_TYPE_NEVER) {
@@ -4018,7 +4053,7 @@ nautilus_file_should_show_thumbnail (NautilusFile *file)
 			return TRUE;
 		} else {
 			/* only local files */
-			return nautilus_file_is_local (file);
+			return nemo_file_is_local (file);
 		}
 	}
 
@@ -4033,8 +4068,8 @@ prepend_icon_name (const char *name,
 }
 
 GIcon *
-nautilus_file_get_gicon (NautilusFile *file,
-			 NautilusFileIconFlags flags)
+nemo_file_get_gicon (NemoFile *file,
+			 NemoFileIconFlags flags)
 {
 	const char * const * names;
 	const char *name;
@@ -4059,9 +4094,9 @@ nautilus_file_get_gicon (NautilusFile *file,
 		icon = NULL;
 
 		/* fetch the mount icon here, we'll use it later */
-		if (flags & NAUTILUS_FILE_ICON_FLAGS_USE_MOUNT_ICON ||
-		    flags & NAUTILUS_FILE_ICON_FLAGS_USE_MOUNT_ICON_AS_EMBLEM) {
-			mount = nautilus_file_get_mount (file);
+		if (flags & NEMO_FILE_ICON_FLAGS_USE_MOUNT_ICON ||
+		    flags & NEMO_FILE_ICON_FLAGS_USE_MOUNT_ICON_AS_EMBLEM) {
+			mount = nemo_file_get_mount (file);
 
 			if (mount != NULL) {
 				mount_icon = g_mount_get_icon (mount);
@@ -4069,13 +4104,13 @@ nautilus_file_get_gicon (NautilusFile *file,
 			}
 		}
 
-		if (((flags & NAUTILUS_FILE_ICON_FLAGS_EMBEDDING_TEXT) ||
-		     (flags & NAUTILUS_FILE_ICON_FLAGS_FOR_DRAG_ACCEPT) ||
-		     (flags & NAUTILUS_FILE_ICON_FLAGS_FOR_OPEN_FOLDER) ||
-		     (flags & NAUTILUS_FILE_ICON_FLAGS_USE_MOUNT_ICON) ||
-		     (flags & NAUTILUS_FILE_ICON_FLAGS_USE_MOUNT_ICON_AS_EMBLEM) ||
-		     ((flags & NAUTILUS_FILE_ICON_FLAGS_IGNORE_VISITING) == 0 &&
-		      nautilus_file_has_open_window (file))) &&
+		if (((flags & NEMO_FILE_ICON_FLAGS_EMBEDDING_TEXT) ||
+		     (flags & NEMO_FILE_ICON_FLAGS_FOR_DRAG_ACCEPT) ||
+		     (flags & NEMO_FILE_ICON_FLAGS_FOR_OPEN_FOLDER) ||
+		     (flags & NEMO_FILE_ICON_FLAGS_USE_MOUNT_ICON) ||
+		     (flags & NEMO_FILE_ICON_FLAGS_USE_MOUNT_ICON_AS_EMBLEM) ||
+		     ((flags & NEMO_FILE_ICON_FLAGS_IGNORE_VISITING) == 0 &&
+		      nemo_file_has_open_window (file))) &&
 		    G_IS_THEMED_ICON (file->details->icon)) {
 			names = g_themed_icon_get_names (G_THEMED_ICON (file->details->icon));
 			prepend_array = g_ptr_array_new ();
@@ -4090,7 +4125,7 @@ nautilus_file_get_gicon (NautilusFile *file,
 					is_inode_directory = TRUE;
 				}
 				if (strcmp (name, "text-x-generic") == 0 &&
-				    (flags & NAUTILUS_FILE_ICON_FLAGS_EMBEDDING_TEXT)) {
+				    (flags & NEMO_FILE_ICON_FLAGS_EMBEDDING_TEXT)) {
 					is_preview = TRUE;
 				}
 			}
@@ -4105,16 +4140,16 @@ nautilus_file_get_gicon (NautilusFile *file,
 			if (is_inode_directory) {
 				g_ptr_array_add (prepend_array, "folder");
 			}
-			if (is_folder && (flags & NAUTILUS_FILE_ICON_FLAGS_FOR_OPEN_FOLDER)) {
+			if (is_folder && (flags & NEMO_FILE_ICON_FLAGS_FOR_OPEN_FOLDER)) {
 				g_ptr_array_add (prepend_array, "folder-open");
 			}
 			if (is_folder &&
-			    (flags & NAUTILUS_FILE_ICON_FLAGS_IGNORE_VISITING) == 0 &&
-			    nautilus_file_has_open_window (file)) {
+			    (flags & NEMO_FILE_ICON_FLAGS_IGNORE_VISITING) == 0 &&
+			    nemo_file_has_open_window (file)) {
 				g_ptr_array_add (prepend_array, "folder-visiting");
 			}
 			if (is_folder &&
-			    (flags & NAUTILUS_FILE_ICON_FLAGS_FOR_DRAG_ACCEPT)) {
+			    (flags & NEMO_FILE_ICON_FLAGS_FOR_DRAG_ACCEPT)) {
 				g_ptr_array_add (prepend_array, "folder-drag-accept");
 			}
 
@@ -4132,11 +4167,11 @@ nautilus_file_get_gicon (NautilusFile *file,
 			icon = g_object_ref (file->details->icon);
 		}
 
-		if ((flags & NAUTILUS_FILE_ICON_FLAGS_USE_MOUNT_ICON) &&
+		if ((flags & NEMO_FILE_ICON_FLAGS_USE_MOUNT_ICON) &&
 		    mount_icon != NULL) {
 			g_object_unref (icon);
 			icon = mount_icon;
-		} else if ((flags & NAUTILUS_FILE_ICON_FLAGS_USE_MOUNT_ICON_AS_EMBLEM) &&
+		} else if ((flags & NEMO_FILE_ICON_FLAGS_USE_MOUNT_ICON_AS_EMBLEM) &&
 			     mount_icon != NULL && !g_icon_equal (mount_icon, icon)) {
 
 			emblem = g_emblem_new (mount_icon);
@@ -4158,7 +4193,7 @@ nautilus_file_get_gicon (NautilusFile *file,
 }
 
 static GIcon *
-get_default_file_icon (NautilusFileIconFlags flags)
+get_default_file_icon (NemoFileIconFlags flags)
 {
 	static GIcon *fallback_icon = NULL;
 	static GIcon *fallback_icon_preview = NULL;
@@ -4167,19 +4202,19 @@ get_default_file_icon (NautilusFileIconFlags flags)
 		fallback_icon_preview = g_themed_icon_new ("text-x-preview");
 		g_themed_icon_append_name (G_THEMED_ICON (fallback_icon_preview), "text-x-generic");
 	}
-	if (flags & NAUTILUS_FILE_ICON_FLAGS_EMBEDDING_TEXT) {
+	if (flags & NEMO_FILE_ICON_FLAGS_EMBEDDING_TEXT) {
 		return fallback_icon_preview;
 	} else {
 		return fallback_icon;
 	}
 }
 
-NautilusIconInfo *
-nautilus_file_get_icon (NautilusFile *file,
+NemoIconInfo *
+nemo_file_get_icon (NemoFile *file,
 			int size,
-			NautilusFileIconFlags flags)
+			NemoFileIconFlags flags)
 {
-	NautilusIconInfo *icon;
+	NemoIconInfo *icon;
 	GIcon *gicon;
 	GdkPixbuf *raw_pixbuf, *scaled_pixbuf;
 	int modified_size;
@@ -4190,24 +4225,24 @@ nautilus_file_get_icon (NautilusFile *file,
 	
 	gicon = get_custom_icon (file);
 	if (gicon) {
-		icon = nautilus_icon_info_lookup (gicon, size);
+		icon = nemo_icon_info_lookup (gicon, size);
 		g_object_unref (gicon);
 		return icon;
 	}
 
 	DEBUG ("Called file_get_icon(), at size %d, force thumbnail %d", size,
-	       flags & NAUTILUS_FILE_ICON_FLAGS_FORCE_THUMBNAIL_SIZE);
+	       flags & NEMO_FILE_ICON_FLAGS_FORCE_THUMBNAIL_SIZE);
 	
-	if (flags & NAUTILUS_FILE_ICON_FLAGS_FORCE_THUMBNAIL_SIZE) {
+	if (flags & NEMO_FILE_ICON_FLAGS_FORCE_THUMBNAIL_SIZE) {
 		modified_size = size;
 	} else {
-		modified_size = size * cached_thumbnail_size / NAUTILUS_ICON_SIZE_STANDARD;
+		modified_size = size * cached_thumbnail_size / NEMO_ICON_SIZE_STANDARD;
 		DEBUG ("Modifying icon size to %d, as our cached thumbnail size is %d",
 		       modified_size, cached_thumbnail_size);
 	}
 
-	if (flags & NAUTILUS_FILE_ICON_FLAGS_USE_THUMBNAILS &&
-	    nautilus_file_should_show_thumbnail (file)) {
+	if (flags & NEMO_FILE_ICON_FLAGS_USE_THUMBNAILS &&
+	    nemo_file_should_show_thumbnail (file)) {
 		if (file->details->thumbnail) {
 			int w, h, s;
 			double scale;
@@ -4220,14 +4255,14 @@ nautilus_file_get_icon (NautilusFile *file,
 			s = MAX (w, h);			
 			/* Don't scale up small thumbnails in the standard view */
 			if (s <= cached_thumbnail_size) {
-				scale = (double)size / NAUTILUS_ICON_SIZE_STANDARD;
+				scale = (double)size / NEMO_ICON_SIZE_STANDARD;
 			}
 			else {
 				scale = (double)modified_size / s;
 			}
-			/* Make sure that icons don't get smaller than NAUTILUS_ICON_SIZE_SMALLEST */
-			if (s*scale <= NAUTILUS_ICON_SIZE_SMALLEST) {
-				scale = (double) NAUTILUS_ICON_SIZE_SMALLEST / s;
+			/* Make sure that icons don't get smaller than NEMO_ICON_SIZE_SMALLEST */
+			if (s*scale <= NEMO_ICON_SIZE_SMALLEST) {
+				scale = (double) NEMO_ICON_SIZE_SMALLEST / s;
 			}
 
 			scaled_pixbuf = gdk_pixbuf_scale_simple (raw_pixbuf,
@@ -4237,7 +4272,7 @@ nautilus_file_get_icon (NautilusFile *file,
 
 			/* We don't want frames around small icons */
 			if (!gdk_pixbuf_get_has_alpha(raw_pixbuf) || s >= 128) {
-				nautilus_thumbnail_frame_image (&scaled_pixbuf);
+				nemo_thumbnail_frame_image (&scaled_pixbuf);
 			}
 			g_object_unref (raw_pixbuf);
 
@@ -4247,61 +4282,61 @@ nautilus_file_get_icon (NautilusFile *file,
 			   ok to scale up from 128. */
 			if (modified_size > 128*1.25 &&
 			    !file->details->thumbnail_wants_original &&
-			    nautilus_can_thumbnail_internally (file)) {
+			    nemo_can_thumbnail_internally (file)) {
 				/* Invalidate if we resize upward */
 				file->details->thumbnail_wants_original = TRUE;
-				nautilus_file_invalidate_attributes (file, NAUTILUS_FILE_ATTRIBUTE_THUMBNAIL);
+				nemo_file_invalidate_attributes (file, NEMO_FILE_ATTRIBUTE_THUMBNAIL);
 			}
 
 			DEBUG ("Returning thumbnailed image, at size %d %d",
 			       (int) (w * scale), (int) (h * scale));
 			
-			icon = nautilus_icon_info_new_for_pixbuf (scaled_pixbuf);
+			icon = nemo_icon_info_new_for_pixbuf (scaled_pixbuf);
 			g_object_unref (scaled_pixbuf);
 			return icon;
 		} else if (file->details->thumbnail_path == NULL &&
 			   file->details->can_read &&				
 			   !file->details->is_thumbnailing &&
 			   !file->details->thumbnailing_failed) {
-			if (nautilus_can_thumbnail (file)) {
-				nautilus_create_thumbnail (file);
+			if (nemo_can_thumbnail (file)) {
+				nemo_create_thumbnail (file);
 			}
 		}
 	}
 
 	if (file->details->is_thumbnailing &&
-	    flags & NAUTILUS_FILE_ICON_FLAGS_USE_THUMBNAILS)
+	    flags & NEMO_FILE_ICON_FLAGS_USE_THUMBNAILS)
 		gicon = g_themed_icon_new (ICON_NAME_THUMBNAIL_LOADING);
 	else
-		gicon = nautilus_file_get_gicon (file, flags);
+		gicon = nemo_file_get_gicon (file, flags);
 	
 	if (gicon) {
-		icon = nautilus_icon_info_lookup (gicon, size);
-		if (nautilus_icon_info_is_fallback (icon)) {
+		icon = nemo_icon_info_lookup (gicon, size);
+		if (nemo_icon_info_is_fallback (icon)) {
 			g_object_unref (icon);
-			icon = nautilus_icon_info_lookup (get_default_file_icon (flags), size);
+			icon = nemo_icon_info_lookup (get_default_file_icon (flags), size);
 		}
 		g_object_unref (gicon);
 		return icon;
 	} else {
-		return nautilus_icon_info_lookup (get_default_file_icon (flags), size);
+		return nemo_icon_info_lookup (get_default_file_icon (flags), size);
 	}
 }
 
 GdkPixbuf *
-nautilus_file_get_icon_pixbuf (NautilusFile *file,
+nemo_file_get_icon_pixbuf (NemoFile *file,
 			       int size,
 			       gboolean force_size,
-			       NautilusFileIconFlags flags)
+			       NemoFileIconFlags flags)
 {
-	NautilusIconInfo *info;
+	NemoIconInfo *info;
 	GdkPixbuf *pixbuf;
 
-	info = nautilus_file_get_icon (file, size, flags);
+	info = nemo_file_get_icon (file, size, flags);
 	if (force_size) {
-		pixbuf =  nautilus_icon_info_get_pixbuf_at_size (info, size);
+		pixbuf =  nemo_icon_info_get_pixbuf_at_size (info, size);
 	} else {
-		pixbuf = nautilus_icon_info_get_pixbuf (info);
+		pixbuf = nemo_icon_info_get_pixbuf (info);
 	}
 	g_object_unref (info);
 	
@@ -4309,39 +4344,39 @@ nautilus_file_get_icon_pixbuf (NautilusFile *file,
 }
 
 gboolean
-nautilus_file_get_date (NautilusFile *file,
-			NautilusDateType date_type,
+nemo_file_get_date (NemoFile *file,
+			NemoDateType date_type,
 			time_t *date)
 {
 	if (date != NULL) {
 		*date = 0;
 	}
 
-	g_return_val_if_fail (date_type == NAUTILUS_DATE_TYPE_CHANGED
-			      || date_type == NAUTILUS_DATE_TYPE_ACCESSED
-			      || date_type == NAUTILUS_DATE_TYPE_MODIFIED
-			      || date_type == NAUTILUS_DATE_TYPE_TRASHED
-			      || date_type == NAUTILUS_DATE_TYPE_PERMISSIONS_CHANGED, FALSE);
+	g_return_val_if_fail (date_type == NEMO_DATE_TYPE_CHANGED
+			      || date_type == NEMO_DATE_TYPE_ACCESSED
+			      || date_type == NEMO_DATE_TYPE_MODIFIED
+			      || date_type == NEMO_DATE_TYPE_TRASHED
+			      || date_type == NEMO_DATE_TYPE_PERMISSIONS_CHANGED, FALSE);
 
 	if (file == NULL) {
 		return FALSE;
 	}
 
-	g_return_val_if_fail (NAUTILUS_IS_FILE (file), FALSE);
+	g_return_val_if_fail (NEMO_IS_FILE (file), FALSE);
 
-	return NAUTILUS_FILE_CLASS (G_OBJECT_GET_CLASS (file))->get_date (file, date_type, date);
+	return NEMO_FILE_CLASS (G_OBJECT_GET_CLASS (file))->get_date (file, date_type, date);
 }
 
 static char *
-nautilus_file_get_where_string (NautilusFile *file)
+nemo_file_get_where_string (NemoFile *file)
 {
 	if (file == NULL) {
 		return NULL;
 	}
 
-	g_return_val_if_fail (NAUTILUS_IS_FILE (file), NULL);
+	g_return_val_if_fail (NEMO_IS_FILE (file), NULL);
 
-	return NAUTILUS_FILE_CLASS (G_OBJECT_GET_CLASS (file))->get_where_string (file);
+	return NEMO_FILE_CLASS (G_OBJECT_GET_CLASS (file))->get_where_string (file);
 }
 
 static const char *TODAY_TIME_FORMATS [] = {
@@ -4354,7 +4389,7 @@ static const char *TODAY_TIME_FORMATS [] = {
 	 * the specifiers from the C standard, not extensions.
 	 * These include "%" followed by one of
 	 * "aAbBcdHIjmMpSUwWxXyYZ". There are two extensions
-	 * in the Nautilus version of strftime that can be
+	 * in the Nemo version of strftime that can be
 	 * used (and match GNU extensions). Putting a "-"
 	 * between the "%" and any numeric directive will turn
 	 * off zero padding, and putting a "_" there will use
@@ -4425,11 +4460,11 @@ static const char *CURRENT_WEEK_TIME_FORMATS [] = {
 };
 
 static char *
-nautilus_file_fit_date_as_string (NautilusFile *file,
-				  NautilusDateType date_type,
+nemo_file_fit_date_as_string (NemoFile *file,
+				  NemoDateType date_type,
 				  int width,
-				  NautilusWidthMeasureCallback measure_callback,
-				  NautilusTruncateCallback truncate_callback,
+				  NemoWidthMeasureCallback measure_callback,
+				  NemoTruncateCallback truncate_callback,
 				  void *measure_context)
 {
 	time_t file_time_raw;
@@ -4444,17 +4479,17 @@ nautilus_file_fit_date_as_string (NautilusFile *file,
 	guint32 file_date_age;
 	int i, date_format_pref;
 
-	if (!nautilus_file_get_date (file, date_type, &file_time_raw)) {
+	if (!nemo_file_get_date (file, date_type, &file_time_raw)) {
 		return NULL;
 	}
 
 	file_time = localtime (&file_time_raw);
-	date_format_pref = g_settings_get_enum (nautilus_preferences,
-						NAUTILUS_PREFERENCES_DATE_FORMAT);
+	date_format_pref = g_settings_get_enum (nemo_preferences,
+						NEMO_PREFERENCES_DATE_FORMAT);
 
-	if (date_format_pref == NAUTILUS_DATE_FORMAT_LOCALE) {
+	if (date_format_pref == NEMO_DATE_FORMAT_LOCALE) {
 		return eel_strdup_strftime ("%c", file_time);
-	} else if (date_format_pref == NAUTILUS_DATE_FORMAT_ISO) {
+	} else if (date_format_pref == NEMO_DATE_FORMAT_ISO) {
 		return eel_strdup_strftime ("%Y-%m-%d %H:%M:%S", file_time);
 	}
 	
@@ -4534,11 +4569,11 @@ nautilus_file_fit_date_as_string (NautilusFile *file,
 }
 
 /**
- * nautilus_file_fit_modified_date_as_string:
+ * nemo_file_fit_modified_date_as_string:
  * 
  * Get a user-displayable string representing a file modification date,
  * truncated to @width using the measuring and truncating callbacks.
- * @file: NautilusFile representing the file in question.
+ * @file: NemoFile representing the file in question.
  * @width: The desired resulting string width.
  * @measure_callback: The callback used to measure the string width.
  * @truncate_callback: The callback used to truncate the string to a desired width.
@@ -4548,33 +4583,33 @@ nautilus_file_fit_date_as_string (NautilusFile *file,
  * 
  **/
 char *
-nautilus_file_fit_modified_date_as_string (NautilusFile *file,
+nemo_file_fit_modified_date_as_string (NemoFile *file,
 					   int width,
-					   NautilusWidthMeasureCallback measure_callback,
-					   NautilusTruncateCallback truncate_callback,
+					   NemoWidthMeasureCallback measure_callback,
+					   NemoTruncateCallback truncate_callback,
 					   void *measure_context)
 {
-	return nautilus_file_fit_date_as_string (file, NAUTILUS_DATE_TYPE_MODIFIED,
+	return nemo_file_fit_date_as_string (file, NEMO_DATE_TYPE_MODIFIED,
 		width, measure_callback, truncate_callback, measure_context);
 }
 
 static char *
-nautilus_file_get_trash_original_file_parent_as_string (NautilusFile *file)
+nemo_file_get_trash_original_file_parent_as_string (NemoFile *file)
 {
-	NautilusFile *orig_file, *parent;
+	NemoFile *orig_file, *parent;
 	GFile *location;
 	char *filename;
 
 	if (file->details->trash_orig_path != NULL) {
-		orig_file = nautilus_file_get_trash_original_file (file);
-		parent = nautilus_file_get_parent (orig_file);
-		location = nautilus_file_get_location (parent);
+		orig_file = nemo_file_get_trash_original_file (file);
+		parent = nemo_file_get_parent (orig_file);
+		location = nemo_file_get_location (parent);
 
 		filename = g_file_get_parse_name (location);
 
 		g_object_unref (location);
-		nautilus_file_unref (parent);
-		nautilus_file_unref (orig_file);
+		nemo_file_unref (parent);
+		nemo_file_unref (orig_file);
 
 		return filename;
 	}
@@ -4583,47 +4618,47 @@ nautilus_file_get_trash_original_file_parent_as_string (NautilusFile *file)
 }
 
 /**
- * nautilus_file_get_date_as_string:
+ * nemo_file_get_date_as_string:
  * 
  * Get a user-displayable string representing a file modification date. 
  * The caller is responsible for g_free-ing this string.
- * @file: NautilusFile representing the file in question.
+ * @file: NemoFile representing the file in question.
  * 
  * Returns: Newly allocated string ready to display to the user.
  * 
  **/
 static char *
-nautilus_file_get_date_as_string (NautilusFile *file, NautilusDateType date_type)
+nemo_file_get_date_as_string (NemoFile *file, NemoDateType date_type)
 {
-	return nautilus_file_fit_date_as_string (file, date_type,
+	return nemo_file_fit_date_as_string (file, date_type,
 		0, NULL, NULL, NULL);
 }
 
-static NautilusSpeedTradeoffValue show_directory_item_count;
-static NautilusSpeedTradeoffValue show_text_in_icons;
+static NemoSpeedTradeoffValue show_directory_item_count;
+static NemoSpeedTradeoffValue show_text_in_icons;
 
 static void
 show_text_in_icons_changed_callback (gpointer callback_data)
 {
-	show_text_in_icons = g_settings_get_enum (nautilus_preferences, NAUTILUS_PREFERENCES_SHOW_TEXT_IN_ICONS);
+	show_text_in_icons = g_settings_get_enum (nemo_preferences, NEMO_PREFERENCES_SHOW_TEXT_IN_ICONS);
 }
 
 static void
 show_directory_item_count_changed_callback (gpointer callback_data)
 {
-	show_directory_item_count = g_settings_get_enum (nautilus_preferences, NAUTILUS_PREFERENCES_SHOW_DIRECTORY_ITEM_COUNTS);
+	show_directory_item_count = g_settings_get_enum (nemo_preferences, NEMO_PREFERENCES_SHOW_DIRECTORY_ITEM_COUNTS);
 }
 
 static gboolean
-get_speed_tradeoff_preference_for_file (NautilusFile *file, NautilusSpeedTradeoffValue value)
+get_speed_tradeoff_preference_for_file (NemoFile *file, NemoSpeedTradeoffValue value)
 {
 	GFilesystemPreviewType use_preview;
 
-	g_return_val_if_fail (NAUTILUS_IS_FILE (file), FALSE);
+	g_return_val_if_fail (NEMO_IS_FILE (file), FALSE);
 
-	use_preview = nautilus_file_get_filesystem_use_preview (file);
+	use_preview = nemo_file_get_filesystem_use_preview (file);
 	
-	if (value == NAUTILUS_SPEED_TRADEOFF_ALWAYS) {
+	if (value == NEMO_SPEED_TRADEOFF_ALWAYS) {
 		if (use_preview == G_FILESYSTEM_PREVIEW_TYPE_NEVER) {
 			return FALSE;
 		} else {
@@ -4631,11 +4666,11 @@ get_speed_tradeoff_preference_for_file (NautilusFile *file, NautilusSpeedTradeof
 		}
 	}
 	
-	if (value == NAUTILUS_SPEED_TRADEOFF_NEVER) {
+	if (value == NEMO_SPEED_TRADEOFF_NEVER) {
 		return FALSE;
 	}
 
-	g_assert (value == NAUTILUS_SPEED_TRADEOFF_LOCAL_ONLY);
+	g_assert (value == NEMO_SPEED_TRADEOFF_LOCAL_ONLY);
 
 	if (use_preview == G_FILESYSTEM_PREVIEW_TYPE_NEVER) {
 		/* file system says to never preview anything */
@@ -4645,16 +4680,16 @@ get_speed_tradeoff_preference_for_file (NautilusFile *file, NautilusSpeedTradeof
 		return TRUE;
 	} else {
 		/* only local files */
-		return nautilus_file_is_local (file);
+		return nemo_file_is_local (file);
 	}
 }
 
 gboolean
-nautilus_file_should_show_directory_item_count (NautilusFile *file)
+nemo_file_should_show_directory_item_count (NemoFile *file)
 {
 	static gboolean show_directory_item_count_callback_added = FALSE;
 	
-	g_return_val_if_fail (NAUTILUS_IS_FILE (file), FALSE);
+	g_return_val_if_fail (NEMO_IS_FILE (file), FALSE);
 	
 	if (file->details->mime_type &&
 	    strcmp (eel_ref_str_peek (file->details->mime_type), "x-directory/smb-share") == 0) {
@@ -4663,8 +4698,8 @@ nautilus_file_should_show_directory_item_count (NautilusFile *file)
 	
 	/* Add the callback once for the life of our process */
 	if (!show_directory_item_count_callback_added) {
-		g_signal_connect_swapped (nautilus_preferences,
-					  "changed::" NAUTILUS_PREFERENCES_SHOW_DIRECTORY_ITEM_COUNTS,
+		g_signal_connect_swapped (nemo_preferences,
+					  "changed::" NEMO_PREFERENCES_SHOW_DIRECTORY_ITEM_COUNTS,
 					  G_CALLBACK(show_directory_item_count_changed_callback),
 					  NULL);
 		show_directory_item_count_callback_added = TRUE;
@@ -4677,14 +4712,14 @@ nautilus_file_should_show_directory_item_count (NautilusFile *file)
 }
 
 gboolean
-nautilus_file_should_show_type (NautilusFile *file)
+nemo_file_should_show_type (NemoFile *file)
 {
 	char *uri;
 	gboolean ret;
 
-	g_return_val_if_fail (NAUTILUS_IS_FILE (file), FALSE);
+	g_return_val_if_fail (NEMO_IS_FILE (file), FALSE);
 
-	uri = nautilus_file_get_uri (file);
+	uri = nemo_file_get_uri (file);
 	ret = ((strcmp (uri, "computer:///") != 0) &&
 	       (strcmp (uri, "network:///") != 0) &&
 	       (strcmp (uri, "smb:///") != 0));
@@ -4694,16 +4729,16 @@ nautilus_file_should_show_type (NautilusFile *file)
 }
 
 gboolean
-nautilus_file_should_get_top_left_text (NautilusFile *file)
+nemo_file_should_get_top_left_text (NemoFile *file)
 {
 	static gboolean show_text_in_icons_callback_added = FALSE;
 	
-	g_return_val_if_fail (NAUTILUS_IS_FILE (file), FALSE);
+	g_return_val_if_fail (NEMO_IS_FILE (file), FALSE);
 
 	/* Add the callback once for the life of our process */
 	if (!show_text_in_icons_callback_added) {
-		g_signal_connect_swapped (nautilus_preferences,
-					  "changed::" NAUTILUS_PREFERENCES_SHOW_TEXT_IN_ICONS,
+		g_signal_connect_swapped (nemo_preferences,
+					  "changed::" NEMO_PREFERENCES_SHOW_TEXT_IN_ICONS,
 					  G_CALLBACK (show_text_in_icons_changed_callback),
 					  NULL);
 		show_text_in_icons_callback_added = TRUE;
@@ -4712,11 +4747,11 @@ nautilus_file_should_get_top_left_text (NautilusFile *file)
 		show_text_in_icons_changed_callback (NULL);
 	}
 	
-	if (show_text_in_icons == NAUTILUS_SPEED_TRADEOFF_ALWAYS) {
+	if (show_text_in_icons == NEMO_SPEED_TRADEOFF_ALWAYS) {
 		return TRUE;
 	}
 	
-	if (show_text_in_icons == NAUTILUS_SPEED_TRADEOFF_NEVER) {
+	if (show_text_in_icons == NEMO_SPEED_TRADEOFF_NEVER) {
 		return FALSE;
 	}
 
@@ -4724,10 +4759,10 @@ nautilus_file_should_get_top_left_text (NautilusFile *file)
 }
 
 /**
- * nautilus_file_get_directory_item_count
+ * nemo_file_get_directory_item_count
  * 
  * Get the number of items in a directory.
- * @file: NautilusFile representing a directory.
+ * @file: NemoFile representing a directory.
  * @count: Place to put count.
  * @count_unreadable: Set to TRUE (if non-NULL) if permissions prevent
  * the item count from being read on this directory. Otherwise set to FALSE.
@@ -4736,7 +4771,7 @@ nautilus_file_should_get_top_left_text (NautilusFile *file)
  * 
  **/
 gboolean
-nautilus_file_get_directory_item_count (NautilusFile *file, 
+nemo_file_get_directory_item_count (NemoFile *file, 
 					guint *count,
 					gboolean *count_unreadable)
 {
@@ -4747,39 +4782,39 @@ nautilus_file_get_directory_item_count (NautilusFile *file,
 		*count_unreadable = FALSE;
 	}
 	
-	g_return_val_if_fail (NAUTILUS_IS_FILE (file), FALSE);
+	g_return_val_if_fail (NEMO_IS_FILE (file), FALSE);
 
-	if (!nautilus_file_is_directory (file)) {
+	if (!nemo_file_is_directory (file)) {
 		return FALSE;
 	}
 
-	if (!nautilus_file_should_show_directory_item_count (file)) {
+	if (!nemo_file_should_show_directory_item_count (file)) {
 		return FALSE;
 	}
 
-	return NAUTILUS_FILE_CLASS (G_OBJECT_GET_CLASS (file))->get_item_count 
+	return NEMO_FILE_CLASS (G_OBJECT_GET_CLASS (file))->get_item_count 
 		(file, count, count_unreadable);
 }
 
 /**
- * nautilus_file_get_deep_counts
+ * nemo_file_get_deep_counts
  * 
  * Get the statistics about items inside a directory.
- * @file: NautilusFile representing a directory or file.
+ * @file: NemoFile representing a directory or file.
  * @directory_count: Place to put count of directories inside.
  * @files_count: Place to put count of files inside.
  * @unreadable_directory_count: Number of directories encountered
  * that were unreadable.
  * @total_size: Total size of all files and directories visited.
  * @force: Whether the deep counts should even be collected if
- * nautilus_file_should_show_directory_item_count returns FALSE
+ * nemo_file_should_show_directory_item_count returns FALSE
  * for this file.
  * 
  * Returns: Status to indicate whether sizes are available.
  * 
  **/
-NautilusRequestStatus
-nautilus_file_get_deep_counts (NautilusFile *file,
+NemoRequestStatus
+nemo_file_get_deep_counts (NemoFile *file,
 			       guint *directory_count,
 			       guint *file_count,
 			       guint *unreadable_directory_count,
@@ -4799,39 +4834,39 @@ nautilus_file_get_deep_counts (NautilusFile *file,
 		*total_size = 0;
 	}
 
-	g_return_val_if_fail (NAUTILUS_IS_FILE (file), NAUTILUS_REQUEST_DONE);
+	g_return_val_if_fail (NEMO_IS_FILE (file), NEMO_REQUEST_DONE);
 
-	if (!force && !nautilus_file_should_show_directory_item_count (file)) {
+	if (!force && !nemo_file_should_show_directory_item_count (file)) {
 		/* Set field so an existing value isn't treated as up-to-date
 		 * when preference changes later.
 		 */
-		file->details->deep_counts_status = NAUTILUS_REQUEST_NOT_STARTED;
+		file->details->deep_counts_status = NEMO_REQUEST_NOT_STARTED;
 		return file->details->deep_counts_status;
 	}
 
-	return NAUTILUS_FILE_CLASS (G_OBJECT_GET_CLASS (file))->get_deep_counts 
+	return NEMO_FILE_CLASS (G_OBJECT_GET_CLASS (file))->get_deep_counts 
 		(file, directory_count, file_count,
 		 unreadable_directory_count, total_size);
 }
 
 void
-nautilus_file_recompute_deep_counts (NautilusFile *file)
+nemo_file_recompute_deep_counts (NemoFile *file)
 {
-	if (file->details->deep_counts_status != NAUTILUS_REQUEST_IN_PROGRESS) {
-		file->details->deep_counts_status = NAUTILUS_REQUEST_NOT_STARTED;
+	if (file->details->deep_counts_status != NEMO_REQUEST_IN_PROGRESS) {
+		file->details->deep_counts_status = NEMO_REQUEST_NOT_STARTED;
 		if (file->details->directory != NULL) {
-			nautilus_directory_add_file_to_work_queue (file->details->directory, file);
-			nautilus_directory_async_state_changed (file->details->directory);
+			nemo_directory_add_file_to_work_queue (file->details->directory, file);
+			nemo_directory_async_state_changed (file->details->directory);
 		}
 	}
 }
 
 
 /**
- * nautilus_file_get_directory_item_mime_types
+ * nemo_file_get_directory_item_mime_types
  * 
  * Get the list of mime-types present in a directory.
- * @file: NautilusFile representing a directory. It is an error to
+ * @file: NemoFile representing a directory. It is an error to
  * call this function on a file that is not a directory.
  * @mime_list: Place to put the list of mime-types.
  * 
@@ -4839,13 +4874,13 @@ nautilus_file_recompute_deep_counts (NautilusFile *file)
  * 
  **/
 gboolean
-nautilus_file_get_directory_item_mime_types (NautilusFile *file,
+nemo_file_get_directory_item_mime_types (NemoFile *file,
 					     GList **mime_list)
 {
-	g_return_val_if_fail (NAUTILUS_IS_FILE (file), FALSE);
+	g_return_val_if_fail (NEMO_IS_FILE (file), FALSE);
 	g_return_val_if_fail (mime_list != NULL, FALSE);
 
-	if (!nautilus_file_is_directory (file)
+	if (!nemo_file_is_directory (file)
 	    || !file->details->got_mime_list) {
 		*mime_list = NULL;
 		return FALSE;
@@ -4856,23 +4891,23 @@ nautilus_file_get_directory_item_mime_types (NautilusFile *file,
 }
 
 gboolean
-nautilus_file_can_get_size (NautilusFile *file)
+nemo_file_can_get_size (NemoFile *file)
 {
 	return file->details->size == -1;
 }
 	
 
 /**
- * nautilus_file_get_size
+ * nemo_file_get_size
  * 
  * Get the file size.
- * @file: NautilusFile representing the file in question.
+ * @file: NemoFile representing the file in question.
  * 
  * Returns: Size in bytes.
  * 
  **/
 goffset
-nautilus_file_get_size (NautilusFile *file)
+nemo_file_get_size (NemoFile *file)
 {
 	/* Before we have info on the file, we don't know the size. */
 	if (file->details->size == -1)
@@ -4881,9 +4916,15 @@ nautilus_file_get_size (NautilusFile *file)
 }
 
 time_t
-nautilus_file_get_mtime (NautilusFile *file)
+nemo_file_get_mtime (NemoFile *file)
 {
 	return file->details->mtime;
+}
+
+time_t
+nemo_file_get_ctime (NemoFile *file)
+{
+	return file->details->ctime;
 }
 
 
@@ -4892,7 +4933,7 @@ set_attributes_get_info_callback (GObject *source_object,
 				  GAsyncResult *res,
 				  gpointer callback_data)
 {
-	NautilusFileOperation *op;
+	NemoFileOperation *op;
 	GFileInfo *new_info;
 	GError *error;
 	
@@ -4901,12 +4942,12 @@ set_attributes_get_info_callback (GObject *source_object,
 	error = NULL;
 	new_info = g_file_query_info_finish (G_FILE (source_object), res, &error);
 	if (new_info != NULL) {
-		if (nautilus_file_update_info (op->file, new_info)) {
-			nautilus_file_changed (op->file);
+		if (nemo_file_update_info (op->file, new_info)) {
+			nemo_file_changed (op->file);
 		}
 		g_object_unref (new_info);
 	}
-	nautilus_file_operation_complete (op, NULL, error);
+	nemo_file_operation_complete (op, NULL, error);
 	if (error) {
 		g_error_free (error);
 	}
@@ -4918,7 +4959,7 @@ set_attributes_callback (GObject *source_object,
 			 GAsyncResult *result,
 			 gpointer callback_data)
 {
-	NautilusFileOperation *op;
+	NemoFileOperation *op;
 	GError *error;
 	gboolean res;
 
@@ -4932,29 +4973,29 @@ set_attributes_callback (GObject *source_object,
 
 	if (res) {
 		g_file_query_info_async (G_FILE (source_object),
-					 NAUTILUS_FILE_DEFAULT_ATTRIBUTES,
+					 NEMO_FILE_DEFAULT_ATTRIBUTES,
 					 0,
 					 G_PRIORITY_DEFAULT,
 					 op->cancellable,
 					 set_attributes_get_info_callback, op);
 	} else {
-		nautilus_file_operation_complete (op, NULL, error);
+		nemo_file_operation_complete (op, NULL, error);
 		g_error_free (error);
 	}
 }
 
 void
-nautilus_file_set_attributes (NautilusFile *file, 
+nemo_file_set_attributes (NemoFile *file, 
 			      GFileInfo *attributes,
-			      NautilusFileOperationCallback callback,
+			      NemoFileOperationCallback callback,
 			      gpointer callback_data)
 {
-	NautilusFileOperation *op;
+	NemoFileOperation *op;
 	GFile *location;
 	
-	op = nautilus_file_operation_new (file, callback, callback_data);
+	op = nemo_file_operation_new (file, callback, callback_data);
 
-	location = nautilus_file_get_location (file);
+	location = nemo_file_get_location (file);
 	g_file_set_attributes_async (location,
 				     attributes,
 				     0, 
@@ -4967,7 +5008,7 @@ nautilus_file_set_attributes (NautilusFile *file,
 
 
 /**
- * nautilus_file_can_get_permissions:
+ * nemo_file_can_get_permissions:
  * 
  * Check whether the permissions for a file are determinable.
  * This might not be the case for files on non-UNIX file systems.
@@ -4977,13 +5018,13 @@ nautilus_file_set_attributes (NautilusFile *file,
  * Return value: TRUE if the permissions are valid.
  */
 gboolean
-nautilus_file_can_get_permissions (NautilusFile *file)
+nemo_file_can_get_permissions (NemoFile *file)
 {
 	return file->details->has_permissions;
 }
 
 /**
- * nautilus_file_can_set_permissions:
+ * nemo_file_can_set_permissions:
  * 
  * Check whether the current user is allowed to change
  * the permissions of a file.
@@ -4995,12 +5036,12 @@ nautilus_file_can_get_permissions (NautilusFile *file)
  * that when you actually try to do it, you will fail.
  */
 gboolean
-nautilus_file_can_set_permissions (NautilusFile *file)
+nemo_file_can_set_permissions (NemoFile *file)
 {
 	uid_t user_id;
 
 	if (file->details->uid != -1 &&
-	    nautilus_file_is_local (file)) {
+	    nemo_file_is_local (file)) {
 		/* Check the user. */
 		user_id = geteuid();
 
@@ -5024,38 +5065,38 @@ nautilus_file_can_set_permissions (NautilusFile *file)
 }
 
 guint
-nautilus_file_get_permissions (NautilusFile *file)
+nemo_file_get_permissions (NemoFile *file)
 {
-	g_return_val_if_fail (nautilus_file_can_get_permissions (file), 0);
+	g_return_val_if_fail (nemo_file_can_get_permissions (file), 0);
 
 	return file->details->permissions;
 }
 
 /**
- * nautilus_file_set_permissions:
+ * nemo_file_set_permissions:
  * 
  * Change a file's permissions. This should only be called if
- * nautilus_file_can_set_permissions returned TRUE.
+ * nemo_file_can_set_permissions returned TRUE.
  * 
- * @file: NautilusFile representing the file in question.
+ * @file: NemoFile representing the file in question.
  * @new_permissions: New permissions value. This is the whole
  * set of permissions, not a delta.
  **/
 void
-nautilus_file_set_permissions (NautilusFile *file, 
+nemo_file_set_permissions (NemoFile *file, 
 			       guint32 new_permissions,
-			       NautilusFileOperationCallback callback,
+			       NemoFileOperationCallback callback,
 			       gpointer callback_data)
 {
 	GFileInfo *info;
 	GError *error;
 
-	if (!nautilus_file_can_set_permissions (file)) {
+	if (!nemo_file_can_set_permissions (file)) {
 		/* Claim that something changed even if the permission change failed.
 		 * This makes it easier for some clients who see the "reverting"
 		 * to the old permissions as "changing back".
 		 */
-		nautilus_file_changed (file);
+		nemo_file_changed (file);
 		error = g_error_new (G_IO_ERROR, G_IO_ERROR_PERMISSION_DENIED,
 				     _("Not allowed to set permissions"));
 		(* callback) (file, NULL, error, callback_data);
@@ -5072,24 +5113,24 @@ nautilus_file_set_permissions (NautilusFile *file,
 		return;
 	}
 
-	if (!nautilus_file_undo_manager_pop_flag ()) {
-		NautilusFileUndoInfo *undo_info;
+	if (!nemo_file_undo_manager_pop_flag ()) {
+		NemoFileUndoInfo *undo_info;
 
-		undo_info = nautilus_file_undo_info_permissions_new (nautilus_file_get_location (file),
+		undo_info = nemo_file_undo_info_permissions_new (nemo_file_get_location (file),
 								     file->details->permissions,
 								     new_permissions);
-		nautilus_file_undo_manager_set_action (undo_info);
+		nemo_file_undo_manager_set_action (undo_info);
 	}
 
 	info = g_file_info_new ();
 	g_file_info_set_attribute_uint32 (info, G_FILE_ATTRIBUTE_UNIX_MODE, new_permissions);
-	nautilus_file_set_attributes (file, info, callback, callback_data);
+	nemo_file_set_attributes (file, info, callback, callback_data);
 	
 	g_object_unref (info);
 }
 
 /**
- * nautilus_file_can_get_selinux_context:
+ * nemo_file_can_get_selinux_context:
  * 
  * Check whether the selinux context for a file are determinable.
  * This might not be the case for files on non-UNIX file systems,
@@ -5100,31 +5141,31 @@ nautilus_file_set_permissions (NautilusFile *file,
  * Return value: TRUE if the permissions are valid.
  */
 gboolean
-nautilus_file_can_get_selinux_context (NautilusFile *file)
+nemo_file_can_get_selinux_context (NemoFile *file)
 {
 	return file->details->selinux_context != NULL;
 }
 
 
 /**
- * nautilus_file_get_selinux_context:
+ * nemo_file_get_selinux_context:
  * 
  * Get a user-displayable string representing a file's selinux
  * context
- * @file: NautilusFile representing the file in question.
+ * @file: NemoFile representing the file in question.
  * 
  * Returns: Newly allocated string ready to display to the user.
  * 
  **/
 char *
-nautilus_file_get_selinux_context (NautilusFile *file)
+nemo_file_get_selinux_context (NemoFile *file)
 {
 	char *translated;
 	char *raw;
 	
-	g_return_val_if_fail (NAUTILUS_IS_FILE (file), NULL);
+	g_return_val_if_fail (NEMO_IS_FILE (file), NULL);
 
-	if (!nautilus_file_can_get_selinux_context (file)) {
+	if (!nemo_file_can_get_selinux_context (file)) {
 		return NULL;
 	}
 
@@ -5260,7 +5301,7 @@ get_id_from_digit_string (const char *digit_string, uid_t *id)
 }
 
 /**
- * nautilus_file_can_get_owner:
+ * nemo_file_can_get_owner:
  * 
  * Check whether the owner a file is determinable.
  * This might not be the case for files on non-UNIX file systems.
@@ -5270,14 +5311,14 @@ get_id_from_digit_string (const char *digit_string, uid_t *id)
  * Return value: TRUE if the owner is valid.
  */
 gboolean
-nautilus_file_can_get_owner (NautilusFile *file)
+nemo_file_can_get_owner (NemoFile *file)
 {
 	/* Before we have info on a file, the owner is unknown. */
 	return file->details->uid != -1;
 }
 
 /**
- * nautilus_file_get_owner_name:
+ * nemo_file_get_owner_name:
  * 
  * Get the user name of the file's owner. If the owner has no
  * name, returns the userid as a string. The caller is responsible
@@ -5288,13 +5329,13 @@ nautilus_file_can_get_owner (NautilusFile *file)
  * Return value: A newly-allocated string.
  */
 char *
-nautilus_file_get_owner_name (NautilusFile *file)
+nemo_file_get_owner_name (NemoFile *file)
 {
-	return nautilus_file_get_owner_as_string (file, FALSE);
+	return nemo_file_get_owner_as_string (file, FALSE);
 }
 
 /**
- * nautilus_file_can_set_owner:
+ * nemo_file_can_set_owner:
  * 
  * Check whether the current user is allowed to change
  * the owner of a file.
@@ -5306,13 +5347,13 @@ nautilus_file_get_owner_name (NautilusFile *file)
  * that when you actually try to do it, you will fail.
  */
 gboolean
-nautilus_file_can_set_owner (NautilusFile *file)
+nemo_file_can_set_owner (NemoFile *file)
 {
 	/* Not allowed to set the owner if we can't
 	 * even read it. This can happen on non-UNIX file
 	 * systems.
 	 */
-	if (!nautilus_file_can_get_owner (file)) {
+	if (!nemo_file_can_get_owner (file)) {
 		return FALSE;
 	}
 
@@ -5321,10 +5362,10 @@ nautilus_file_can_set_owner (NautilusFile *file)
 }
 
 /**
- * nautilus_file_set_owner:
+ * nemo_file_set_owner:
  * 
  * Set the owner of a file. This will only have any effect if
- * nautilus_file_can_set_owner returns TRUE.
+ * nemo_file_can_set_owner returns TRUE.
  * 
  * @file: The file in question.
  * @user_name_or_id: The user name to set the owner to.
@@ -5335,22 +5376,22 @@ nautilus_file_can_set_owner (NautilusFile *file)
  * @callback_data: Parameter passed back with callback function.
  */
 void
-nautilus_file_set_owner (NautilusFile *file, 
+nemo_file_set_owner (NemoFile *file, 
 			 const char *user_name_or_id,
-			 NautilusFileOperationCallback callback,
+			 NemoFileOperationCallback callback,
 			 gpointer callback_data)
 {
 	GError *error;
 	GFileInfo *info;
 	uid_t new_id;
 
-	if (!nautilus_file_can_set_owner (file)) {
+	if (!nemo_file_can_set_owner (file)) {
 		/* Claim that something changed even if the permission
 		 * change failed. This makes it easier for some
 		 * clients who see the "reverting" to the old owner as
 		 * "changing back".
 		 */
-		nautilus_file_changed (file);
+		nemo_file_changed (file);
 		error = g_error_new (G_IO_ERROR, G_IO_ERROR_PERMISSION_DENIED,
 				     _("Not allowed to set owner"));
 		(* callback) (file, NULL, error, callback_data);
@@ -5368,7 +5409,7 @@ nautilus_file_set_owner (NautilusFile *file,
 		 * clients who see the "reverting" to the old owner as
 		 * "changing back".
 		 */
-		nautilus_file_changed (file);
+		nemo_file_changed (file);
 		error = g_error_new (G_IO_ERROR, G_IO_ERROR_INVALID_ARGUMENT,
 				     _("Specified owner '%s' doesn't exist"), user_name_or_id);
 		(* callback) (file, NULL, error, callback_data);
@@ -5385,29 +5426,29 @@ nautilus_file_set_owner (NautilusFile *file,
 		return;
 	}
 	
-	if (!nautilus_file_undo_manager_pop_flag ()) {
-		NautilusFileUndoInfo *undo_info;
+	if (!nemo_file_undo_manager_pop_flag ()) {
+		NemoFileUndoInfo *undo_info;
 		char* current_owner;
 
-		current_owner = nautilus_file_get_owner_as_string (file, FALSE);
+		current_owner = nemo_file_get_owner_as_string (file, FALSE);
 
-		undo_info = nautilus_file_undo_info_ownership_new (NAUTILUS_FILE_UNDO_OP_CHANGE_OWNER,
-								   nautilus_file_get_location (file),
+		undo_info = nemo_file_undo_info_ownership_new (NEMO_FILE_UNDO_OP_CHANGE_OWNER,
+								   nemo_file_get_location (file),
 								   current_owner,
 								   user_name_or_id);
-		nautilus_file_undo_manager_set_action (undo_info);
+		nemo_file_undo_manager_set_action (undo_info);
 
 		g_free (current_owner);
 	}
 
 	info = g_file_info_new ();
 	g_file_info_set_attribute_uint32 (info, G_FILE_ATTRIBUTE_UNIX_UID, new_id);
-	nautilus_file_set_attributes (file, info, callback, callback_data);
+	nemo_file_set_attributes (file, info, callback, callback_data);
 	g_object_unref (info);
 }
 
 /**
- * nautilus_get_user_names:
+ * nemo_get_user_names:
  * 
  * Get a list of user names. For users with a different associated 
  * "real name", the real name follows the standard user name, separated 
@@ -5415,7 +5456,7 @@ nautilus_file_set_owner (NautilusFile *file,
  * and its contents.
  */
 GList *
-nautilus_get_user_names (void)
+nemo_get_user_names (void)
 {
 	GList *list;
 	char *real_name, *name;
@@ -5442,7 +5483,7 @@ nautilus_get_user_names (void)
 }
 
 /**
- * nautilus_file_can_get_group:
+ * nemo_file_can_get_group:
  * 
  * Check whether the group a file is determinable.
  * This might not be the case for files on non-UNIX file systems.
@@ -5452,14 +5493,14 @@ nautilus_get_user_names (void)
  * Return value: TRUE if the group is valid.
  */
 gboolean
-nautilus_file_can_get_group (NautilusFile *file)
+nemo_file_can_get_group (NemoFile *file)
 {
 	/* Before we have info on a file, the group is unknown. */
 	return file->details->gid != -1;
 }
 
 /**
- * nautilus_file_get_group_name:
+ * nemo_file_get_group_name:
  * 
  * Get the name of the file's group. If the group has no
  * name, returns the groupid as a string. The caller is responsible
@@ -5470,13 +5511,13 @@ nautilus_file_can_get_group (NautilusFile *file)
  * Return value: A newly-allocated string.
  **/
 char *
-nautilus_file_get_group_name (NautilusFile *file)
+nemo_file_get_group_name (NemoFile *file)
 {
 	return g_strdup (eel_ref_str_peek (file->details->group));
 }
 
 /**
- * nautilus_file_can_set_group:
+ * nemo_file_can_set_group:
  * 
  * Check whether the current user is allowed to change
  * the group of a file.
@@ -5488,7 +5529,7 @@ nautilus_file_get_group_name (NautilusFile *file)
  * that when you actually try to do it, you will fail.
  */
 gboolean
-nautilus_file_can_set_group (NautilusFile *file)
+nemo_file_can_set_group (NemoFile *file)
 {
 	uid_t user_id;
 
@@ -5496,7 +5537,7 @@ nautilus_file_can_set_group (NautilusFile *file)
 	 * even read them. This can happen on non-UNIX file
 	 * systems.
 	 */
-	if (!nautilus_file_can_get_group (file)) {
+	if (!nemo_file_can_get_group (file)) {
 		return FALSE;
 	}
 
@@ -5522,7 +5563,7 @@ nautilus_file_can_set_group (NautilusFile *file)
  * NULL, returns a list of all group names.
  */
 static GList *
-nautilus_get_group_names_for_user (void)
+nemo_get_group_names_for_user (void)
 {
 	GList *list;
 	struct group *group;
@@ -5545,12 +5586,12 @@ nautilus_get_group_names_for_user (void)
 }
 
 /**
- * nautilus_get_group_names:
+ * nemo_get_group_names:
  * 
  * Get a list of all group names.
  */
 GList *
-nautilus_get_all_group_names (void)
+nemo_get_all_group_names (void)
 {
 	GList *list;
 	struct group *group;
@@ -5568,20 +5609,20 @@ nautilus_get_all_group_names (void)
 }
 
 /**
- * nautilus_file_get_settable_group_names:
+ * nemo_file_get_settable_group_names:
  * 
  * Get a list of all group names that the current user
  * can set the group of a specific file to.
  * 
- * @file: The NautilusFile in question.
+ * @file: The NemoFile in question.
  */
 GList *
-nautilus_file_get_settable_group_names (NautilusFile *file)
+nemo_file_get_settable_group_names (NemoFile *file)
 {
 	uid_t user_id;
 	GList *result;
 
-	if (!nautilus_file_can_set_group (file)) {
+	if (!nemo_file_can_set_group (file)) {
 		return NULL;
 	}	
 
@@ -5590,12 +5631,12 @@ nautilus_file_get_settable_group_names (NautilusFile *file)
 
 	if (user_id == 0) {
 		/* Root is allowed to set group to anything. */
-		result = nautilus_get_all_group_names ();
+		result = nemo_get_all_group_names ();
 	} else if (user_id == (uid_t) file->details->uid) {
 		/* Owner is allowed to set group to any that owner is member of. */
-		result = nautilus_get_group_names_for_user ();
+		result = nemo_get_group_names_for_user ();
 	} else {
-		g_warning ("unhandled case in nautilus_get_settable_group_names");
+		g_warning ("unhandled case in nemo_get_settable_group_names");
 		result = NULL;
 	}
 
@@ -5603,10 +5644,10 @@ nautilus_file_get_settable_group_names (NautilusFile *file)
 }
 
 /**
- * nautilus_file_set_group:
+ * nemo_file_set_group:
  * 
  * Set the group of a file. This will only have any effect if
- * nautilus_file_can_set_group returns TRUE.
+ * nemo_file_can_set_group returns TRUE.
  * 
  * @file: The file in question.
  * @group_name_or_id: The group name to set the owner to.
@@ -5617,22 +5658,22 @@ nautilus_file_get_settable_group_names (NautilusFile *file)
  * @callback_data: Parameter passed back with callback function.
  */
 void
-nautilus_file_set_group (NautilusFile *file, 
+nemo_file_set_group (NemoFile *file, 
 			 const char *group_name_or_id,
-			 NautilusFileOperationCallback callback,
+			 NemoFileOperationCallback callback,
 			 gpointer callback_data)
 {
 	GError *error;
 	GFileInfo *info;
 	uid_t new_id;
 
-	if (!nautilus_file_can_set_group (file)) {
+	if (!nemo_file_can_set_group (file)) {
 		/* Claim that something changed even if the group
 		 * change failed. This makes it easier for some
 		 * clients who see the "reverting" to the old group as
 		 * "changing back".
 		 */
-		nautilus_file_changed (file);
+		nemo_file_changed (file);
 		error = g_error_new (G_IO_ERROR, G_IO_ERROR_PERMISSION_DENIED,
 				     _("Not allowed to set group"));
 		(* callback) (file, NULL, error, callback_data);
@@ -5650,7 +5691,7 @@ nautilus_file_set_group (NautilusFile *file,
 		 * clients who see the "reverting" to the old group as
 		 * "changing back".
 		 */
-		nautilus_file_changed (file);
+		nemo_file_changed (file);
 		error = g_error_new (G_IO_ERROR, G_IO_ERROR_INVALID_ARGUMENT,
 				     _("Specified group '%s' doesn't exist"), group_name_or_id);
 		(* callback) (file, NULL, error, callback_data);
@@ -5663,45 +5704,45 @@ nautilus_file_set_group (NautilusFile *file,
 		return;
 	}
 
-	if (!nautilus_file_undo_manager_pop_flag ()) {
-		NautilusFileUndoInfo *undo_info;
+	if (!nemo_file_undo_manager_pop_flag ()) {
+		NemoFileUndoInfo *undo_info;
 		char *current_group;
 
-		current_group = nautilus_file_get_group_name (file);
-		undo_info = nautilus_file_undo_info_ownership_new (NAUTILUS_FILE_UNDO_OP_CHANGE_GROUP,
-								   nautilus_file_get_location (file),
+		current_group = nemo_file_get_group_name (file);
+		undo_info = nemo_file_undo_info_ownership_new (NEMO_FILE_UNDO_OP_CHANGE_GROUP,
+								   nemo_file_get_location (file),
 								   current_group,
 								   group_name_or_id);
-		nautilus_file_undo_manager_set_action (undo_info);
+		nemo_file_undo_manager_set_action (undo_info);
 
 		g_free (current_group);
 	}
 
 	info = g_file_info_new ();
 	g_file_info_set_attribute_uint32 (info, G_FILE_ATTRIBUTE_UNIX_GID, new_id);
-	nautilus_file_set_attributes (file, info, callback, callback_data);
+	nemo_file_set_attributes (file, info, callback, callback_data);
 	g_object_unref (info);
 }
 
 /**
- * nautilus_file_get_octal_permissions_as_string:
+ * nemo_file_get_octal_permissions_as_string:
  * 
  * Get a user-displayable string representing a file's permissions
  * as an octal number. The caller
  * is responsible for g_free-ing this string.
- * @file: NautilusFile representing the file in question.
+ * @file: NemoFile representing the file in question.
  * 
  * Returns: Newly allocated string ready to display to the user.
  * 
  **/
 static char *
-nautilus_file_get_octal_permissions_as_string (NautilusFile *file)
+nemo_file_get_octal_permissions_as_string (NemoFile *file)
 {
 	guint32 permissions;
 
-	g_assert (NAUTILUS_IS_FILE (file));
+	g_assert (NEMO_IS_FILE (file));
 
-	if (!nautilus_file_can_get_permissions (file)) {
+	if (!nemo_file_can_get_permissions (file)) {
 		return NULL;
 	}
 
@@ -5710,32 +5751,32 @@ nautilus_file_get_octal_permissions_as_string (NautilusFile *file)
 }
 
 /**
- * nautilus_file_get_permissions_as_string:
+ * nemo_file_get_permissions_as_string:
  * 
  * Get a user-displayable string representing a file's permissions. The caller
  * is responsible for g_free-ing this string.
- * @file: NautilusFile representing the file in question.
+ * @file: NemoFile representing the file in question.
  * 
  * Returns: Newly allocated string ready to display to the user.
  * 
  **/
 static char *
-nautilus_file_get_permissions_as_string (NautilusFile *file)
+nemo_file_get_permissions_as_string (NemoFile *file)
 {
 	guint32 permissions;
 	gboolean is_directory;
 	gboolean is_link;
 	gboolean suid, sgid, sticky;
 
-	if (!nautilus_file_can_get_permissions (file)) {
+	if (!nemo_file_can_get_permissions (file)) {
 		return NULL;
 	}
 
-	g_assert (NAUTILUS_IS_FILE (file));
+	g_assert (NEMO_IS_FILE (file));
 
 	permissions = file->details->permissions;
-	is_directory = nautilus_file_is_directory (file);
-	is_link = nautilus_file_is_symbolic_link (file);
+	is_directory = nemo_file_is_directory (file);
+	is_link = nemo_file_is_symbolic_link (file);
 
 	/* We use ls conventions for displaying these three obscure flags */
 	suid = permissions & S_ISUID;
@@ -5762,11 +5803,11 @@ nautilus_file_get_permissions_as_string (NautilusFile *file)
 }
 
 /**
- * nautilus_file_get_owner_as_string:
+ * nemo_file_get_owner_as_string:
  * 
  * Get a user-displayable string representing a file's owner. The caller
  * is responsible for g_free-ing this string.
- * @file: NautilusFile representing the file in question.
+ * @file: NemoFile representing the file in question.
  * @include_real_name: Whether or not to append the real name (if any)
  * for this user after the user name.
  * 
@@ -5774,7 +5815,7 @@ nautilus_file_get_permissions_as_string (NautilusFile *file)
  * 
  **/
 static char *
-nautilus_file_get_owner_as_string (NautilusFile *file, gboolean include_real_name)
+nemo_file_get_owner_as_string (NemoFile *file, gboolean include_real_name)
 {
 	char *user_name;
 
@@ -5815,18 +5856,18 @@ format_item_count_for_display (guint item_count,
 }
 
 /**
- * nautilus_file_get_size_as_string:
+ * nemo_file_get_size_as_string:
  * 
  * Get a user-displayable string representing a file size. The caller
  * is responsible for g_free-ing this string. The string is an item
  * count for directories.
- * @file: NautilusFile representing the file in question.
+ * @file: NemoFile representing the file in question.
  * 
  * Returns: Newly allocated string ready to display to the user.
  * 
  **/
 static char *
-nautilus_file_get_size_as_string (NautilusFile *file)
+nemo_file_get_size_as_string (NemoFile *file)
 {
 	guint item_count;
 	gboolean count_unreadable;
@@ -5835,10 +5876,10 @@ nautilus_file_get_size_as_string (NautilusFile *file)
 		return NULL;
 	}
 	
-	g_assert (NAUTILUS_IS_FILE (file));
+	g_assert (NEMO_IS_FILE (file));
 	
-	if (nautilus_file_is_directory (file)) {
-		if (!nautilus_file_get_directory_item_count (file, &item_count, &count_unreadable)) {
+	if (nemo_file_is_directory (file)) {
+		if (!nemo_file_get_directory_item_count (file, &item_count, &count_unreadable)) {
 			return NULL;
 		}
 		return format_item_count_for_display (item_count, TRUE, TRUE);
@@ -5851,19 +5892,19 @@ nautilus_file_get_size_as_string (NautilusFile *file)
 }
 
 /**
- * nautilus_file_get_size_as_string_with_real_size:
+ * nemo_file_get_size_as_string_with_real_size:
  * 
  * Get a user-displayable string representing a file size. The caller
  * is responsible for g_free-ing this string. The string is an item
  * count for directories.
  * This function adds the real size in the string.
- * @file: NautilusFile representing the file in question.
+ * @file: NemoFile representing the file in question.
  * 
  * Returns: Newly allocated string ready to display to the user.
  * 
  **/
 static char *
-nautilus_file_get_size_as_string_with_real_size (NautilusFile *file)
+nemo_file_get_size_as_string_with_real_size (NemoFile *file)
 {
 	guint item_count;
 	gboolean count_unreadable;
@@ -5872,10 +5913,10 @@ nautilus_file_get_size_as_string_with_real_size (NautilusFile *file)
 		return NULL;
 	}
 	
-	g_assert (NAUTILUS_IS_FILE (file));
+	g_assert (NEMO_IS_FILE (file));
 	
-	if (nautilus_file_is_directory (file)) {
-		if (!nautilus_file_get_directory_item_count (file, &item_count, &count_unreadable)) {
+	if (nemo_file_is_directory (file)) {
+		if (!nemo_file_get_directory_item_count (file, &item_count, &count_unreadable)) {
 			return NULL;
 		}
 		return format_item_count_for_display (item_count, TRUE, TRUE);
@@ -5890,12 +5931,12 @@ nautilus_file_get_size_as_string_with_real_size (NautilusFile *file)
 
 
 static char *
-nautilus_file_get_deep_count_as_string_internal (NautilusFile *file,
+nemo_file_get_deep_count_as_string_internal (NemoFile *file,
 						 gboolean report_size,
 						 gboolean report_directory_count,
 						 gboolean report_file_count)
 {
-	NautilusRequestStatus status;
+	NemoRequestStatus status;
 	guint directory_count;
 	guint file_count;
 	guint unreadable_count;
@@ -5910,14 +5951,14 @@ nautilus_file_get_deep_count_as_string_internal (NautilusFile *file,
 		return NULL;
 	}
 	
-	g_assert (NAUTILUS_IS_FILE (file));
-	g_assert (nautilus_file_is_directory (file));
+	g_assert (NEMO_IS_FILE (file));
+	g_assert (nemo_file_is_directory (file));
 
-	status = nautilus_file_get_deep_counts 
+	status = nemo_file_get_deep_counts 
 		(file, &directory_count, &file_count, &unreadable_count, &total_size, FALSE);
 
 	/* Check whether any info is available. */
-	if (status == NAUTILUS_REQUEST_NOT_STARTED) {
+	if (status == NEMO_REQUEST_NOT_STARTED) {
 		return NULL;
 	}
 
@@ -5925,12 +5966,12 @@ nautilus_file_get_deep_count_as_string_internal (NautilusFile *file,
 
 	if (total_count == 0) {
 		switch (status) {
-		case NAUTILUS_REQUEST_IN_PROGRESS:
+		case NEMO_REQUEST_IN_PROGRESS:
 			/* Don't return confident "zero" until we're finished looking,
 			 * because of next case.
 			 */
 			return NULL;
-		case NAUTILUS_REQUEST_DONE:
+		case NEMO_REQUEST_DONE:
 			/* Don't return "zero" if we there were contents but we couldn't read them. */
 			if (unreadable_count != 0) {
 				return NULL;
@@ -5941,7 +5982,7 @@ nautilus_file_get_deep_count_as_string_internal (NautilusFile *file,
 
 	/* Note that we don't distinguish the "everything was readable" case
 	 * from the "some things but not everything was readable" case here.
-	 * Callers can distinguish them using nautilus_file_get_deep_counts
+	 * Callers can distinguish them using nemo_file_get_deep_counts
 	 * directly if desired.
 	 */
 	if (report_size) {
@@ -5955,84 +5996,84 @@ nautilus_file_get_deep_count_as_string_internal (NautilusFile *file,
 }
 
 /**
- * nautilus_file_get_deep_size_as_string:
+ * nemo_file_get_deep_size_as_string:
  * 
  * Get a user-displayable string representing the size of all contained
  * items (only makes sense for directories). The caller
  * is responsible for g_free-ing this string.
- * @file: NautilusFile representing the file in question.
+ * @file: NemoFile representing the file in question.
  * 
  * Returns: Newly allocated string ready to display to the user.
  * 
  **/
 static char *
-nautilus_file_get_deep_size_as_string (NautilusFile *file)
+nemo_file_get_deep_size_as_string (NemoFile *file)
 {
-	return nautilus_file_get_deep_count_as_string_internal (file, TRUE, FALSE, FALSE);
+	return nemo_file_get_deep_count_as_string_internal (file, TRUE, FALSE, FALSE);
 }
 
 /**
- * nautilus_file_get_deep_total_count_as_string:
+ * nemo_file_get_deep_total_count_as_string:
  * 
  * Get a user-displayable string representing the count of all contained
  * items (only makes sense for directories). The caller
  * is responsible for g_free-ing this string.
- * @file: NautilusFile representing the file in question.
+ * @file: NemoFile representing the file in question.
  * 
  * Returns: Newly allocated string ready to display to the user.
  * 
  **/
 static char *
-nautilus_file_get_deep_total_count_as_string (NautilusFile *file)
+nemo_file_get_deep_total_count_as_string (NemoFile *file)
 {
-	return nautilus_file_get_deep_count_as_string_internal (file, FALSE, TRUE, TRUE);
+	return nemo_file_get_deep_count_as_string_internal (file, FALSE, TRUE, TRUE);
 }
 
 /**
- * nautilus_file_get_deep_file_count_as_string:
+ * nemo_file_get_deep_file_count_as_string:
  * 
  * Get a user-displayable string representing the count of all contained
  * items, not including directories. It only makes sense to call this
  * function on a directory. The caller
  * is responsible for g_free-ing this string.
- * @file: NautilusFile representing the file in question.
+ * @file: NemoFile representing the file in question.
  * 
  * Returns: Newly allocated string ready to display to the user.
  * 
  **/
 static char *
-nautilus_file_get_deep_file_count_as_string (NautilusFile *file)
+nemo_file_get_deep_file_count_as_string (NemoFile *file)
 {
-	return nautilus_file_get_deep_count_as_string_internal (file, FALSE, FALSE, TRUE);
+	return nemo_file_get_deep_count_as_string_internal (file, FALSE, FALSE, TRUE);
 }
 
 /**
- * nautilus_file_get_deep_directory_count_as_string:
+ * nemo_file_get_deep_directory_count_as_string:
  * 
  * Get a user-displayable string representing the count of all contained
  * directories. It only makes sense to call this
  * function on a directory. The caller
  * is responsible for g_free-ing this string.
- * @file: NautilusFile representing the file in question.
+ * @file: NemoFile representing the file in question.
  * 
  * Returns: Newly allocated string ready to display to the user.
  * 
  **/
 static char *
-nautilus_file_get_deep_directory_count_as_string (NautilusFile *file)
+nemo_file_get_deep_directory_count_as_string (NemoFile *file)
 {
-	return nautilus_file_get_deep_count_as_string_internal (file, FALSE, TRUE, FALSE);
+	return nemo_file_get_deep_count_as_string_internal (file, FALSE, TRUE, FALSE);
 }
 
 /**
- * nautilus_file_get_string_attribute:
+ * nemo_file_get_string_attribute:
  * 
  * Get a user-displayable string from a named attribute. Use g_free to
  * free this string. If the value is unknown, returns NULL. You can call
- * nautilus_file_get_string_attribute_with_default if you want a non-NULL
+ * nemo_file_get_string_attribute_with_default if you want a non-NULL
  * default.
  * 
- * @file: NautilusFile representing the file in question.
+ * @file: NemoFile representing the file in question.
  * @attribute_name: The name of the desired attribute. The currently supported
  * set includes "name", "type", "mime_type", "size", "deep_size", "deep_directory_count",
  * "deep_file_count", "deep_total_count", "date_modified", "date_changed", "date_accessed", 
@@ -6044,89 +6085,89 @@ nautilus_file_get_deep_directory_count_as_string (NautilusFile *file)
  * 
  **/
 char *
-nautilus_file_get_string_attribute_q (NautilusFile *file, GQuark attribute_q)
+nemo_file_get_string_attribute_q (NemoFile *file, GQuark attribute_q)
 {
 	char *extension_attribute;
 
 	if (attribute_q == attribute_name_q) {
-		return nautilus_file_get_display_name (file);
+		return nemo_file_get_display_name (file);
 	}
 	if (attribute_q == attribute_type_q) {
-		return nautilus_file_get_type_as_string (file);
+		return nemo_file_get_type_as_string (file);
 	}
 	if (attribute_q == attribute_mime_type_q) {
-		return nautilus_file_get_mime_type (file);
+		return nemo_file_get_mime_type (file);
 	}
 	if (attribute_q == attribute_size_q) {
-		return nautilus_file_get_size_as_string (file);
+		return nemo_file_get_size_as_string (file);
 	}
 	if (attribute_q == attribute_size_detail_q) {
-		return nautilus_file_get_size_as_string_with_real_size (file);
+		return nemo_file_get_size_as_string_with_real_size (file);
 	}
 	if (attribute_q == attribute_deep_size_q) {
-		return nautilus_file_get_deep_size_as_string (file);
+		return nemo_file_get_deep_size_as_string (file);
 	}
 	if (attribute_q == attribute_deep_file_count_q) {
-		return nautilus_file_get_deep_file_count_as_string (file);
+		return nemo_file_get_deep_file_count_as_string (file);
 	}
 	if (attribute_q == attribute_deep_directory_count_q) {
-		return nautilus_file_get_deep_directory_count_as_string (file);
+		return nemo_file_get_deep_directory_count_as_string (file);
 	}
 	if (attribute_q == attribute_deep_total_count_q) {
-		return nautilus_file_get_deep_total_count_as_string (file);
+		return nemo_file_get_deep_total_count_as_string (file);
 	}
 	if (attribute_q == attribute_trash_orig_path_q) {
-		return nautilus_file_get_trash_original_file_parent_as_string (file);
+		return nemo_file_get_trash_original_file_parent_as_string (file);
 	}
 	if (attribute_q == attribute_date_modified_q) {
-		return nautilus_file_get_date_as_string (file, 
-							 NAUTILUS_DATE_TYPE_MODIFIED);
+		return nemo_file_get_date_as_string (file, 
+							 NEMO_DATE_TYPE_MODIFIED);
 	}
 	if (attribute_q == attribute_date_changed_q) {
-		return nautilus_file_get_date_as_string (file, 
-							 NAUTILUS_DATE_TYPE_CHANGED);
+		return nemo_file_get_date_as_string (file, 
+							 NEMO_DATE_TYPE_CHANGED);
 	}
 	if (attribute_q == attribute_date_accessed_q) {
-		return nautilus_file_get_date_as_string (file,
-							 NAUTILUS_DATE_TYPE_ACCESSED);
+		return nemo_file_get_date_as_string (file,
+							 NEMO_DATE_TYPE_ACCESSED);
 	}
 	if (attribute_q == attribute_trashed_on_q) {
-		return nautilus_file_get_date_as_string (file,
-							 NAUTILUS_DATE_TYPE_TRASHED);
+		return nemo_file_get_date_as_string (file,
+							 NEMO_DATE_TYPE_TRASHED);
 	}
 	if (attribute_q == attribute_date_permissions_q) {
-		return nautilus_file_get_date_as_string (file,
-							 NAUTILUS_DATE_TYPE_PERMISSIONS_CHANGED);
+		return nemo_file_get_date_as_string (file,
+							 NEMO_DATE_TYPE_PERMISSIONS_CHANGED);
 	}
 	if (attribute_q == attribute_permissions_q) {
-		return nautilus_file_get_permissions_as_string (file);
+		return nemo_file_get_permissions_as_string (file);
 	}
 	if (attribute_q == attribute_selinux_context_q) {
-		return nautilus_file_get_selinux_context (file);
+		return nemo_file_get_selinux_context (file);
 	}
 	if (attribute_q == attribute_octal_permissions_q) {
-		return nautilus_file_get_octal_permissions_as_string (file);
+		return nemo_file_get_octal_permissions_as_string (file);
 	}
 	if (attribute_q == attribute_owner_q) {
-		return nautilus_file_get_owner_as_string (file, TRUE);
+		return nemo_file_get_owner_as_string (file, TRUE);
 	}
 	if (attribute_q == attribute_group_q) {
-		return nautilus_file_get_group_name (file);
+		return nemo_file_get_group_name (file);
 	}
 	if (attribute_q == attribute_uri_q) {
-		return nautilus_file_get_uri (file);
+		return nemo_file_get_uri (file);
 	}
 	if (attribute_q == attribute_where_q) {
-		return nautilus_file_get_where_string (file);
+		return nemo_file_get_where_string (file);
 	}
 	if (attribute_q == attribute_link_target_q) {
-		return nautilus_file_get_symbolic_link_target_path (file);
+		return nemo_file_get_symbolic_link_target_path (file);
 	}
 	if (attribute_q == attribute_volume_q) {
-		return nautilus_file_get_volume_name (file);
+		return nemo_file_get_volume_name (file);
 	}
 	if (attribute_q == attribute_free_space_q) {
-		return nautilus_file_get_volume_free_space (file);
+		return nemo_file_get_volume_free_space (file);
 	}
 
 	extension_attribute = NULL;
@@ -6145,38 +6186,38 @@ nautilus_file_get_string_attribute_q (NautilusFile *file, GQuark attribute_q)
 }
 
 char *
-nautilus_file_get_string_attribute (NautilusFile *file, const char *attribute_name)
+nemo_file_get_string_attribute (NemoFile *file, const char *attribute_name)
 {
-	return nautilus_file_get_string_attribute_q (file, g_quark_from_string (attribute_name));
+	return nemo_file_get_string_attribute_q (file, g_quark_from_string (attribute_name));
 }
 
 
 /**
- * nautilus_file_get_string_attribute_with_default:
+ * nemo_file_get_string_attribute_with_default:
  * 
  * Get a user-displayable string from a named attribute. Use g_free to
  * free this string. If the value is unknown, returns a string representing
  * the unknown value, which varies with attribute. You can call
- * nautilus_file_get_string_attribute if you want NULL instead of a default
+ * nemo_file_get_string_attribute if you want NULL instead of a default
  * result.
  * 
- * @file: NautilusFile representing the file in question.
+ * @file: NemoFile representing the file in question.
  * @attribute_name: The name of the desired attribute. See the description of
- * nautilus_file_get_string for the set of available attributes.
+ * nemo_file_get_string for the set of available attributes.
  * 
  * Returns: Newly allocated string ready to display to the user, or a string
  * such as "unknown" if the value is unknown or @attribute_name is not supported.
  * 
  **/
 char *
-nautilus_file_get_string_attribute_with_default_q (NautilusFile *file, GQuark attribute_q)
+nemo_file_get_string_attribute_with_default_q (NemoFile *file, GQuark attribute_q)
 {
 	char *result;
 	guint item_count;
 	gboolean count_unreadable;
-	NautilusRequestStatus status;
+	NemoRequestStatus status;
 
-	result = nautilus_file_get_string_attribute_q (file, attribute_q);
+	result = nemo_file_get_string_attribute_q (file, attribute_q);
 	if (result != NULL) {
 		return result;
 	}
@@ -6186,18 +6227,18 @@ nautilus_file_get_string_attribute_with_default_q (NautilusFile *file, GQuark at
 	 * Use hash table and switch statement or function pointers for speed? 
 	 */
 	if (attribute_q == attribute_size_q) {
-		if (!nautilus_file_should_show_directory_item_count (file)) {
+		if (!nemo_file_should_show_directory_item_count (file)) {
 			return g_strdup ("--");
 		}
 		count_unreadable = FALSE;
-		if (nautilus_file_is_directory (file)) {
-			nautilus_file_get_directory_item_count (file, &item_count, &count_unreadable);
+		if (nemo_file_is_directory (file)) {
+			nemo_file_get_directory_item_count (file, &item_count, &count_unreadable);
 		}
 		return g_strdup (count_unreadable ? _("? items") : "...");
 	}
 	if (attribute_q == attribute_deep_size_q) {
-		status = nautilus_file_get_deep_counts (file, NULL, NULL, NULL, NULL, FALSE);
-		if (status == NAUTILUS_REQUEST_DONE) {
+		status = nemo_file_get_deep_counts (file, NULL, NULL, NULL, NULL, FALSE);
+		if (status == NEMO_REQUEST_DONE) {
 			/* This means no contents at all were readable */
 			return g_strdup (_("? bytes"));
 		}
@@ -6206,8 +6247,8 @@ nautilus_file_get_string_attribute_with_default_q (NautilusFile *file, GQuark at
 	if (attribute_q == attribute_deep_file_count_q
 	    || attribute_q == attribute_deep_directory_count_q
 	    || attribute_q == attribute_deep_total_count_q) {
-		status = nautilus_file_get_deep_counts (file, NULL, NULL, NULL, NULL, FALSE);
-		if (status == NAUTILUS_REQUEST_DONE) {
+		status = nemo_file_get_deep_counts (file, NULL, NULL, NULL, NULL, FALSE);
+		if (status == NEMO_REQUEST_DONE) {
 			/* This means no contents at all were readable */
 			return g_strdup (_("? items"));
 		}
@@ -6235,13 +6276,13 @@ nautilus_file_get_string_attribute_with_default_q (NautilusFile *file, GQuark at
 }
 
 char *
-nautilus_file_get_string_attribute_with_default (NautilusFile *file, const char *attribute_name)
+nemo_file_get_string_attribute_with_default (NemoFile *file, const char *attribute_name)
 {
-	return nautilus_file_get_string_attribute_with_default_q (file, g_quark_from_string (attribute_name));
+	return nemo_file_get_string_attribute_with_default_q (file, g_quark_from_string (attribute_name));
 }
 
 gboolean
-nautilus_file_is_date_sort_attribute_q (GQuark attribute_q)
+nemo_file_is_date_sort_attribute_q (GQuark attribute_q)
 {
 	if (attribute_q == attribute_modification_date_q ||
 	    attribute_q == attribute_date_modified_q ||
@@ -6261,18 +6302,18 @@ nautilus_file_is_date_sort_attribute_q (GQuark attribute_q)
  * 
  * Get a user-displayable string representing a file type. The caller
  * is responsible for g_free-ing this string.
- * @file: NautilusFile representing the file in question.
+ * @file: NemoFile representing the file in question.
  * 
  * Returns: Newly allocated string ready to display to the user.
  * 
  **/
 static char *
-get_description (NautilusFile *file)
+get_description (NemoFile *file)
 {
 	const char *mime_type;
 	char *description;
 
-	g_assert (NAUTILUS_IS_FILE (file));
+	g_assert (NEMO_IS_FILE (file));
 
 	mime_type = eel_ref_str_peek (file->details->mime_type);
 	if (eel_str_is_empty (mime_type)) {
@@ -6280,7 +6321,7 @@ get_description (NautilusFile *file)
 	}
 
 	if (g_content_type_is_unknown (mime_type) &&
-	    nautilus_file_is_executable (file)) {
+	    nemo_file_is_executable (file)) {
 		return g_strdup (_("program"));
 	}
 
@@ -6294,12 +6335,12 @@ get_description (NautilusFile *file)
 
 /* Takes ownership of string */
 static char *
-update_description_for_link (NautilusFile *file, char *string)
+update_description_for_link (NemoFile *file, char *string)
 {
 	char *res;
 	
-	if (nautilus_file_is_symbolic_link (file)) {
-		g_assert (!nautilus_file_is_broken_symbolic_link (file));
+	if (nemo_file_is_symbolic_link (file)) {
+		g_assert (!nemo_file_is_broken_symbolic_link (file));
 		if (string == NULL) {
 			return g_strdup (_("link"));
 		}
@@ -6316,13 +6357,13 @@ update_description_for_link (NautilusFile *file, char *string)
 }
 
 static char *
-nautilus_file_get_type_as_string (NautilusFile *file)
+nemo_file_get_type_as_string (NemoFile *file)
 {
 	if (file == NULL) {
 		return NULL;
 	}
 
-	if (nautilus_file_is_broken_symbolic_link (file)) {
+	if (nemo_file_is_broken_symbolic_link (file)) {
 		return g_strdup (_("link (broken)"));
 	}
 	
@@ -6330,16 +6371,16 @@ nautilus_file_get_type_as_string (NautilusFile *file)
 }
 
 /**
- * nautilus_file_get_file_type
+ * nemo_file_get_file_type
  * 
  * Return this file's type.
- * @file: NautilusFile representing the file in question.
+ * @file: NemoFile representing the file in question.
  * 
  * Returns: The type.
  * 
  **/
 GFileType
-nautilus_file_get_file_type (NautilusFile *file)
+nemo_file_get_file_type (NemoFile *file)
 {
 	if (file == NULL) {
 		return G_FILE_TYPE_UNKNOWN;
@@ -6349,19 +6390,19 @@ nautilus_file_get_file_type (NautilusFile *file)
 }
 
 /**
- * nautilus_file_get_mime_type
+ * nemo_file_get_mime_type
  * 
  * Return this file's default mime type.
- * @file: NautilusFile representing the file in question.
+ * @file: NemoFile representing the file in question.
  * 
  * Returns: The mime type.
  * 
  **/
 char *
-nautilus_file_get_mime_type (NautilusFile *file)
+nemo_file_get_mime_type (NemoFile *file)
 {
 	if (file != NULL) {
-		g_return_val_if_fail (NAUTILUS_IS_FILE (file), NULL);
+		g_return_val_if_fail (NEMO_IS_FILE (file), NULL);
 		if (file->details->mime_type != NULL) {
 			return g_strdup (eel_ref_str_peek (file->details->mime_type));
 		}
@@ -6370,11 +6411,11 @@ nautilus_file_get_mime_type (NautilusFile *file)
 }
 
 /**
- * nautilus_file_is_mime_type
+ * nemo_file_is_mime_type
  * 
  * Check whether a file is of a particular MIME type, or inherited
  * from it.
- * @file: NautilusFile representing the file in question.
+ * @file: NemoFile representing the file in question.
  * @mime_type: The MIME-type string to test (e.g. "text/plain")
  * 
  * Return value: TRUE if @mime_type exactly matches the
@@ -6382,9 +6423,9 @@ nautilus_file_get_mime_type (NautilusFile *file)
  * 
  **/
 gboolean
-nautilus_file_is_mime_type (NautilusFile *file, const char *mime_type)
+nemo_file_is_mime_type (NemoFile *file, const char *mime_type)
 {
-	g_return_val_if_fail (NAUTILUS_IS_FILE (file), FALSE);
+	g_return_val_if_fail (NEMO_IS_FILE (file), FALSE);
 	g_return_val_if_fail (mime_type != NULL, FALSE);
 	
 	if (file->details->mime_type == NULL) {
@@ -6395,7 +6436,7 @@ nautilus_file_is_mime_type (NautilusFile *file, const char *mime_type)
 }
 
 gboolean
-nautilus_file_is_launchable (NautilusFile *file)
+nemo_file_is_launchable (NemoFile *file)
 {
 	gboolean type_can_be_executable;
 
@@ -6406,25 +6447,25 @@ nautilus_file_is_launchable (NautilusFile *file)
 	}
 		
 	return type_can_be_executable &&
-		nautilus_file_can_get_permissions (file) &&
-		nautilus_file_can_execute (file) &&
-		nautilus_file_is_executable (file) &&
-		!nautilus_file_is_directory (file);
+		nemo_file_can_get_permissions (file) &&
+		nemo_file_can_execute (file) &&
+		nemo_file_is_executable (file) &&
+		!nemo_file_is_directory (file);
 }
 
 
 /**
- * nautilus_file_get_emblem_icons
+ * nemo_file_get_emblem_icons
  * 
  * Return the list of names of emblems that this file should display,
  * in canonical order.
- * @file: NautilusFile representing the file in question.
+ * @file: NemoFile representing the file in question.
  * 
  * Returns: A list of emblem names.
  * 
  **/
 GList *
-nautilus_file_get_emblem_icons (NautilusFile *file,
+nemo_file_get_emblem_icons (NemoFile *file,
 				char **exclude)
 {
 	GList *keywords, *l;
@@ -6438,9 +6479,9 @@ nautilus_file_get_emblem_icons (NautilusFile *file,
 		return NULL;
 	}
 	
-	g_return_val_if_fail (NAUTILUS_IS_FILE (file), NULL);
+	g_return_val_if_fail (NEMO_IS_FILE (file), NULL);
 
-	keywords = nautilus_file_get_keywords (file);
+	keywords = nemo_file_get_keywords (file);
 	keywords = prepend_automatic_keywords (file, keywords);
 
 	icons = NULL;
@@ -6448,14 +6489,14 @@ nautilus_file_get_emblem_icons (NautilusFile *file,
 		keyword = l->data;
 		
 #ifdef TRASH_IS_FAST_ENOUGH
-		if (strcmp (keyword, NAUTILUS_FILE_EMBLEM_NAME_TRASH) == 0) {
+		if (strcmp (keyword, NEMO_FILE_EMBLEM_NAME_TRASH) == 0) {
 			char *uri;
 			gboolean file_is_trash;
 			/* Leave out the trash emblem for the trash itself, since
 			 * putting a trash emblem on a trash icon is gilding the
 			 * lily.
 			 */
-			uri = nautilus_file_get_uri (file);
+			uri = nemo_file_get_uri (file);
 			file_is_trash = strcmp (uri, EEL_TRASH_URI) == 0;
 			g_free (uri);
 			if (file_is_trash) {
@@ -6510,16 +6551,16 @@ sort_keyword_list_and_remove_duplicates (GList *keywords)
 }
 
 /**
- * nautilus_file_get_keywords
+ * nemo_file_get_keywords
  * 
  * Return this file's keywords.
- * @file: NautilusFile representing the file in question.
+ * @file: NemoFile representing the file in question.
  * 
  * Returns: A list of keywords.
  * 
  **/
 GList *
-nautilus_file_get_keywords (NautilusFile *file)
+nemo_file_get_keywords (NemoFile *file)
 {
 	GList *keywords;
 
@@ -6527,38 +6568,38 @@ nautilus_file_get_keywords (NautilusFile *file)
 		return NULL;
 	}
 
-	g_return_val_if_fail (NAUTILUS_IS_FILE (file), NULL);
+	g_return_val_if_fail (NEMO_IS_FILE (file), NULL);
 
 	keywords = eel_g_str_list_copy (file->details->extension_emblems);
 	keywords = g_list_concat (keywords, eel_g_str_list_copy (file->details->pending_extension_emblems));
-	keywords = g_list_concat (keywords, nautilus_file_get_metadata_list (file, NAUTILUS_METADATA_KEY_EMBLEMS));
+	keywords = g_list_concat (keywords, nemo_file_get_metadata_list (file, NEMO_METADATA_KEY_EMBLEMS));
 
 	return sort_keyword_list_and_remove_duplicates (keywords);
 }
 
 /**
- * nautilus_file_is_symbolic_link
+ * nemo_file_is_symbolic_link
  * 
  * Check if this file is a symbolic link.
- * @file: NautilusFile representing the file in question.
+ * @file: NemoFile representing the file in question.
  * 
  * Returns: True if the file is a symbolic link.
  * 
  **/
 gboolean
-nautilus_file_is_symbolic_link (NautilusFile *file)
+nemo_file_is_symbolic_link (NemoFile *file)
 {
 	return file->details->is_symlink;
 }
 
 gboolean
-nautilus_file_is_mountpoint (NautilusFile *file)
+nemo_file_is_mountpoint (NemoFile *file)
 {
 	return file->details->is_mountpoint;
 }
 
 GMount *
-nautilus_file_get_mount (NautilusFile *file)
+nemo_file_get_mount (NemoFile *file)
 {
 	if (file->details->mount) {
 		return g_object_ref (file->details->mount);
@@ -6570,15 +6611,15 @@ static void
 file_mount_unmounted (GMount *mount,
 		      gpointer data)
 {
-	NautilusFile *file;
+	NemoFile *file;
 
-	file = NAUTILUS_FILE (data);
+	file = NEMO_FILE (data);
 
-	nautilus_file_invalidate_attributes (file, NAUTILUS_FILE_ATTRIBUTE_MOUNT);
+	nemo_file_invalidate_attributes (file, NEMO_FILE_ATTRIBUTE_MOUNT);
 }
 
 void
-nautilus_file_set_mount (NautilusFile *file,
+nemo_file_set_mount (NemoFile *file,
 			 GMount *mount)
 {
 	if (file->details->mount) {
@@ -6595,25 +6636,25 @@ nautilus_file_set_mount (NautilusFile *file,
 }
 
 /**
- * nautilus_file_is_broken_symbolic_link
+ * nemo_file_is_broken_symbolic_link
  * 
  * Check if this file is a symbolic link with a missing target.
- * @file: NautilusFile representing the file in question.
+ * @file: NemoFile representing the file in question.
  * 
  * Returns: True if the file is a symbolic link with a missing target.
  * 
  **/
 gboolean
-nautilus_file_is_broken_symbolic_link (NautilusFile *file)
+nemo_file_is_broken_symbolic_link (NemoFile *file)
 {
 	if (file == NULL) {
 		return FALSE;
 	}
 		
-	g_return_val_if_fail (NAUTILUS_IS_FILE (file), FALSE);
+	g_return_val_if_fail (NEMO_IS_FILE (file), FALSE);
 
 	/* Non-broken symbolic links return the target's type for get_file_type. */
-	return nautilus_file_get_file_type (file) == G_FILE_TYPE_SYMBOLIC_LINK;
+	return nemo_file_get_file_type (file) == G_FILE_TYPE_SYMBOLIC_LINK;
 }
 
 static void
@@ -6621,11 +6662,11 @@ get_fs_free_cb (GObject *source_object,
 		GAsyncResult *res,
 		gpointer user_data)
 {
-	NautilusFile *file;
+	NemoFile *file;
 	guint64 free_space;
 	GFileInfo *info;
 
-	file = NAUTILUS_FILE (user_data);
+	file = NEMO_FILE (user_data);
 	
 	free_space = (guint64)-1;
 	info = g_file_query_filesystem_info_finish (G_FILE (source_object),
@@ -6639,21 +6680,21 @@ get_fs_free_cb (GObject *source_object,
 
 	if (file->details->free_space != free_space) {
 		file->details->free_space = free_space;
-		nautilus_file_emit_changed (file);
+		nemo_file_emit_changed (file);
 	}
 
-	nautilus_file_unref (file);
+	nemo_file_unref (file);
 }
 
 /**
- * nautilus_file_get_volume_free_space
+ * nemo_file_get_volume_free_space
  * Get a nicely formatted char with free space on the file's volume
- * @file: NautilusFile representing the file in question.
+ * @file: NemoFile representing the file in question.
  *
  * Returns: newly-allocated copy of file size in a formatted string
  */
 char *
-nautilus_file_get_volume_free_space (NautilusFile *file)
+nemo_file_get_volume_free_space (NemoFile *file)
 {
 	GFile *location;
 	char *res;
@@ -6664,12 +6705,12 @@ nautilus_file_get_volume_free_space (NautilusFile *file)
 	if (file->details->free_space_read == 0 ||
 	    (now - file->details->free_space_read) > 2)  {
 		file->details->free_space_read = now;
-		location = nautilus_file_get_location (file);
+		location = nemo_file_get_location (file);
 		g_file_query_filesystem_info_async (location,
 						    G_FILE_ATTRIBUTE_FILESYSTEM_FREE,
 						    0, NULL,
 						    get_fs_free_cb,
-						    nautilus_file_ref (file));
+						    nemo_file_ref (file));
 		g_object_unref (location);
 	}
 
@@ -6682,15 +6723,15 @@ nautilus_file_get_volume_free_space (NautilusFile *file)
 }
 
 /**
- * nautilus_file_get_volume_name
+ * nemo_file_get_volume_name
  * Get the path of the volume the file resides on
- * @file: NautilusFile representing the file in question.
+ * @file: NemoFile representing the file in question.
  * 
  * Returns: newly-allocated copy of the volume name of the target file, 
  * if the volume name isn't set, it returns the mount path of the volume
  */ 
 char *
-nautilus_file_get_volume_name (NautilusFile *file)
+nemo_file_get_volume_name (NemoFile *file)
 {
 	GFile *location;
 	char *res;
@@ -6698,7 +6739,7 @@ nautilus_file_get_volume_name (NautilusFile *file)
 
 	res = NULL;
 	
-	location = nautilus_file_get_location (file);
+	location = nemo_file_get_location (file);
 	mount = g_file_find_enclosing_mount (location, NULL, NULL);
 	if (mount) {
 		res = g_strdup (g_mount_get_name (mount));
@@ -6710,18 +6751,18 @@ nautilus_file_get_volume_name (NautilusFile *file)
 }
 
 /**
- * nautilus_file_get_symbolic_link_target_path
+ * nemo_file_get_symbolic_link_target_path
  * 
  * Get the file path of the target of a symbolic link. It is an error 
  * to call this function on a file that isn't a symbolic link.
- * @file: NautilusFile representing the symbolic link in question.
+ * @file: NemoFile representing the symbolic link in question.
  * 
  * Returns: newly-allocated copy of the file path of the target of the symbolic link.
  */
 char *
-nautilus_file_get_symbolic_link_target_path (NautilusFile *file)
+nemo_file_get_symbolic_link_target_path (NemoFile *file)
 {
-	if (!nautilus_file_is_symbolic_link (file)) {
+	if (!nemo_file_is_symbolic_link (file)) {
 		g_warning ("File has symlink target, but  is not marked as symlink");
 	}
 
@@ -6729,21 +6770,21 @@ nautilus_file_get_symbolic_link_target_path (NautilusFile *file)
 }
 
 /**
- * nautilus_file_get_symbolic_link_target_uri
+ * nemo_file_get_symbolic_link_target_uri
  * 
  * Get the uri of the target of a symbolic link. It is an error 
  * to call this function on a file that isn't a symbolic link.
- * @file: NautilusFile representing the symbolic link in question.
+ * @file: NemoFile representing the symbolic link in question.
  * 
  * Returns: newly-allocated copy of the uri of the target of the symbolic link.
  */
 char *
-nautilus_file_get_symbolic_link_target_uri (NautilusFile *file)
+nemo_file_get_symbolic_link_target_uri (NemoFile *file)
 {
 	GFile *location, *parent, *target;
 	char *target_uri;
 
-	if (!nautilus_file_is_symbolic_link (file)) {
+	if (!nemo_file_is_symbolic_link (file)) {
 		g_warning ("File has symlink target, but  is not marked as symlink");
 	}
 
@@ -6752,7 +6793,7 @@ nautilus_file_get_symbolic_link_target_uri (NautilusFile *file)
 	} else {
 		target = NULL;
 		
-		location = nautilus_file_get_location (file);
+		location = nemo_file_get_location (file);
 		parent = g_file_get_parent (location);
 		g_object_unref (location);
 		if (parent) {
@@ -6770,17 +6811,17 @@ nautilus_file_get_symbolic_link_target_uri (NautilusFile *file)
 }
 
 /**
- * nautilus_file_is_nautilus_link
+ * nemo_file_is_nemo_link
  * 
- * Check if this file is a "nautilus link", meaning a historical
- * nautilus xml link file or a desktop file.
- * @file: NautilusFile representing the file in question.
+ * Check if this file is a "nemo link", meaning a historical
+ * nemo xml link file or a desktop file.
+ * @file: NemoFile representing the file in question.
  * 
- * Returns: True if the file is a nautilus link.
+ * Returns: True if the file is a nemo link.
  * 
  **/
 gboolean
-nautilus_file_is_nautilus_link (NautilusFile *file)
+nemo_file_is_nemo_link (NemoFile *file)
 {
 	if (file->details->mime_type == NULL) {
 		return FALSE;
@@ -6790,31 +6831,31 @@ nautilus_file_is_nautilus_link (NautilusFile *file)
 }
 
 /**
- * nautilus_file_is_directory
+ * nemo_file_is_directory
  * 
  * Check if this file is a directory.
- * @file: NautilusFile representing the file in question.
+ * @file: NemoFile representing the file in question.
  * 
  * Returns: TRUE if @file is a directory.
  * 
  **/
 gboolean
-nautilus_file_is_directory (NautilusFile *file)
+nemo_file_is_directory (NemoFile *file)
 {
-	return nautilus_file_get_file_type (file) == G_FILE_TYPE_DIRECTORY;
+	return nemo_file_get_file_type (file) == G_FILE_TYPE_DIRECTORY;
 }
 
 /**
- * nautilus_file_is_user_special_directory
+ * nemo_file_is_user_special_directory
  *
  * Check if this file is a special platform directory.
- * @file: NautilusFile representing the file in question.
+ * @file: NemoFile representing the file in question.
  * @special_directory: GUserDirectory representing the type to test for
  * 
  * Returns: TRUE if @file is a special directory of the given kind.
  */
 gboolean
-nautilus_file_is_user_special_directory (NautilusFile *file,
+nemo_file_is_user_special_directory (NemoFile *file,
 					 GUserDirectory special_directory)
 {
 	gboolean is_special_dir;
@@ -6827,7 +6868,7 @@ nautilus_file_is_user_special_directory (NautilusFile *file,
 		GFile *loc;
 		GFile *special_gfile;
 
-		loc = nautilus_file_get_location (file);
+		loc = nemo_file_get_location (file);
 		special_gfile = g_file_new_for_path (special_dir);
 		is_special_dir = g_file_equal (loc, special_gfile);
 		g_object_unref (special_gfile);
@@ -6838,7 +6879,7 @@ nautilus_file_is_user_special_directory (NautilusFile *file,
 }
 
 gboolean
-nautilus_file_is_archive (NautilusFile *file)
+nemo_file_is_archive (NemoFile *file)
 {
 	char *mime_type;
 	int i;
@@ -6862,7 +6903,7 @@ nautilus_file_is_archive (NautilusFile *file)
 
 	g_return_val_if_fail (file != NULL, FALSE);
 
-	mime_type = nautilus_file_get_mime_type (file);
+	mime_type = nemo_file_get_mime_type (file);
 	for (i = 0; i < G_N_ELEMENTS (archive_mime_types); i++) {
 		if (!strcmp (mime_type, archive_mime_types[i])) {
 			g_free (mime_type);
@@ -6876,24 +6917,24 @@ nautilus_file_is_archive (NautilusFile *file)
 
 
 /**
- * nautilus_file_is_in_trash
+ * nemo_file_is_in_trash
  * 
  * Check if this file is a file in trash.
- * @file: NautilusFile representing the file in question.
+ * @file: NemoFile representing the file in question.
  * 
  * Returns: TRUE if @file is in a trash.
  * 
  **/
 gboolean
-nautilus_file_is_in_trash (NautilusFile *file)
+nemo_file_is_in_trash (NemoFile *file)
 {
-	g_assert (NAUTILUS_IS_FILE (file));
+	g_assert (NEMO_IS_FILE (file));
 
-	return nautilus_directory_is_in_trash (file->details->directory);
+	return nemo_directory_is_in_trash (file->details->directory);
 }
 
 GError *
-nautilus_file_get_file_info_error (NautilusFile *file)
+nemo_file_get_file_info_error (NemoFile *file)
 {
 	if (!file->details->get_info_failed) {
 		return NULL;
@@ -6903,38 +6944,38 @@ nautilus_file_get_file_info_error (NautilusFile *file)
 }
 
 /**
- * nautilus_file_contains_text
+ * nemo_file_contains_text
  * 
  * Check if this file contains text.
  * This is private and is used to decide whether or not to read the top left text.
- * @file: NautilusFile representing the file in question.
+ * @file: NemoFile representing the file in question.
  * 
  * Returns: TRUE if @file has a text MIME type.
  * 
  **/
 gboolean
-nautilus_file_contains_text (NautilusFile *file)
+nemo_file_contains_text (NemoFile *file)
 {
 	if (file == NULL) {
 		return FALSE;
 	}
 
 	/* All text files inherit from text/plain */
-	return nautilus_file_is_mime_type (file, "text/plain");
+	return nemo_file_is_mime_type (file, "text/plain");
 }
 
 /**
- * nautilus_file_is_executable
+ * nemo_file_is_executable
  * 
  * Check if this file is executable at all.
- * @file: NautilusFile representing the file in question.
+ * @file: NemoFile representing the file in question.
  * 
  * Returns: TRUE if any of the execute bits are set. FALSE if
  * not, or if the permissions are unknown.
  * 
  **/
 gboolean
-nautilus_file_is_executable (NautilusFile *file)
+nemo_file_is_executable (NemoFile *file)
 {
 	if (!file->details->has_permissions) {
 		/* File's permissions field is not valid.
@@ -6947,10 +6988,10 @@ nautilus_file_is_executable (NautilusFile *file)
 }
 
 /**
- * nautilus_file_peek_top_left_text
+ * nemo_file_peek_top_left_text
  * 
  * Peek at the text from the top left of the file.
- * @file: NautilusFile representing the file in question.
+ * @file: NemoFile representing the file in question.
  * 
  * Returns: NULL if there is no text readable, otherwise, the text.
  *          This string is owned by the file object and should not
@@ -6958,13 +6999,13 @@ nautilus_file_is_executable (NautilusFile *file)
  * 
  **/
 char *
-nautilus_file_peek_top_left_text (NautilusFile *file,
+nemo_file_peek_top_left_text (NemoFile *file,
 				  gboolean  need_large_text,
 				  gboolean *needs_loading)
 {
-	g_return_val_if_fail (NAUTILUS_IS_FILE (file), NULL);
+	g_return_val_if_fail (NEMO_IS_FILE (file), NULL);
 
-	if (!nautilus_file_should_get_top_left_text (file)) {
+	if (!nemo_file_should_get_top_left_text (file)) {
 		if (needs_loading) {
 			*needs_loading = FALSE;
 		}
@@ -6981,7 +7022,7 @@ nautilus_file_peek_top_left_text (NautilusFile *file,
 	/* Show " ..." in the file until we read the contents in. */
 	if (!file->details->got_top_left_text) {
 		
-		if (nautilus_file_contains_text (file)) {
+		if (nemo_file_contains_text (file)) {
 			return " ...";
 		}
 		return NULL;
@@ -6992,31 +7033,31 @@ nautilus_file_peek_top_left_text (NautilusFile *file,
 }
 
 /**
- * nautilus_file_get_top_left_text
+ * nemo_file_get_top_left_text
  * 
  * Get the text from the top left of the file.
- * @file: NautilusFile representing the file in question.
+ * @file: NemoFile representing the file in question.
  * 
  * Returns: NULL if there is no text readable, otherwise, the text.
  * 
  **/
 char *
-nautilus_file_get_top_left_text (NautilusFile *file)
+nemo_file_get_top_left_text (NemoFile *file)
 {
-	return g_strdup (nautilus_file_peek_top_left_text (file, FALSE, NULL));
+	return g_strdup (nemo_file_peek_top_left_text (file, FALSE, NULL));
 }
 
 char *
-nautilus_file_get_filesystem_id (NautilusFile *file)
+nemo_file_get_filesystem_id (NemoFile *file)
 {
 	return g_strdup (eel_ref_str_peek (file->details->filesystem_id));
 }
 
-NautilusFile *
-nautilus_file_get_trash_original_file (NautilusFile *file)
+NemoFile *
+nemo_file_get_trash_original_file (NemoFile *file)
 {
 	GFile *location;
-	NautilusFile *original_file;
+	NemoFile *original_file;
 	char *filename;
 
 	original_file = NULL;
@@ -7025,7 +7066,7 @@ nautilus_file_get_trash_original_file (NautilusFile *file)
 		/* file name is stored in URL encoding */
 		filename = g_uri_unescape_string (file->details->trash_orig_path, "");
 		location = g_file_new_for_path (filename);
-		original_file = nautilus_file_get (location);
+		original_file = nemo_file_get (location);
 		g_object_unref (G_OBJECT (location));
 		g_free (filename);
 	}
@@ -7035,9 +7076,9 @@ nautilus_file_get_trash_original_file (NautilusFile *file)
 }
 
 void
-nautilus_file_mark_gone (NautilusFile *file)
+nemo_file_mark_gone (NemoFile *file)
 {
-	NautilusDirectory *directory;
+	NemoDirectory *directory;
 
 	if (file->details->is_gone)
 		return;
@@ -7051,11 +7092,11 @@ nautilus_file_mark_gone (NautilusFile *file)
 
 	/* Let the directory know it's gone. */
 	directory = file->details->directory;
-	if (!nautilus_file_is_self_owned (file)) {
-		nautilus_directory_remove_file (directory, file);
+	if (!nemo_file_is_self_owned (file)) {
+		nemo_directory_remove_file (directory, file);
 	}
 
-	nautilus_file_clear_info (file);
+	nemo_file_clear_info (file);
 
 	/* FIXME bugzilla.gnome.org 42429: 
 	 * Maybe we can get rid of the name too eventually, but
@@ -7066,41 +7107,41 @@ nautilus_file_mark_gone (NautilusFile *file)
 }
 
 /**
- * nautilus_file_changed
+ * nemo_file_changed
  * 
  * Notify the user that this file has changed.
- * @file: NautilusFile representing the file in question.
+ * @file: NemoFile representing the file in question.
  **/
 void
-nautilus_file_changed (NautilusFile *file)
+nemo_file_changed (NemoFile *file)
 {
 	GList fake_list;
 
-	g_return_if_fail (NAUTILUS_IS_FILE (file));
+	g_return_if_fail (NEMO_IS_FILE (file));
 
-	if (nautilus_file_is_self_owned (file)) {
-		nautilus_file_emit_changed (file);
+	if (nemo_file_is_self_owned (file)) {
+		nemo_file_emit_changed (file);
 	} else {
 		fake_list.data = file;
 		fake_list.next = NULL;
 		fake_list.prev = NULL;
-		nautilus_directory_emit_change_signals
+		nemo_directory_emit_change_signals
 			(file->details->directory, &fake_list);
 	}
 }
 
 /**
- * nautilus_file_updated_deep_count_in_progress
+ * nemo_file_updated_deep_count_in_progress
  * 
  * Notify clients that a newer deep count is available for
  * the directory in question.
  */
 void
-nautilus_file_updated_deep_count_in_progress (NautilusFile *file) {
+nemo_file_updated_deep_count_in_progress (NemoFile *file) {
 	GList *link_files, *node;
 
-	g_assert (NAUTILUS_IS_FILE (file));
-	g_assert (nautilus_file_is_directory (file));
+	g_assert (NEMO_IS_FILE (file));
+	g_assert (nemo_file_is_directory (file));
 
 	/* Send out a signal. */
 	g_signal_emit (file, signals[UPDATED_DEEP_COUNT_IN_PROGRESS], 0, file);
@@ -7108,26 +7149,26 @@ nautilus_file_updated_deep_count_in_progress (NautilusFile *file) {
 	/* Tell link files pointing to this object about the change. */
 	link_files = get_link_files (file);
 	for (node = link_files; node != NULL; node = node->next) {
-		nautilus_file_updated_deep_count_in_progress (NAUTILUS_FILE (node->data));
+		nemo_file_updated_deep_count_in_progress (NEMO_FILE (node->data));
 	}
-	nautilus_file_list_free (link_files);	
+	nemo_file_list_free (link_files);	
 }
 
 /**
- * nautilus_file_emit_changed
+ * nemo_file_emit_changed
  * 
  * Emit a file changed signal.
  * This can only be called by the directory, since the directory
  * also has to emit a files_changed signal.
  *
- * @file: NautilusFile representing the file in question.
+ * @file: NemoFile representing the file in question.
  **/
 void
-nautilus_file_emit_changed (NautilusFile *file)
+nemo_file_emit_changed (NemoFile *file)
 {
 	GList *link_files, *p;
 
-	g_assert (NAUTILUS_IS_FILE (file));
+	g_assert (NEMO_IS_FILE (file));
 
 	/* Send out a signal. */
 	g_signal_emit (file, signals[CHANGED], 0, file);
@@ -7136,47 +7177,47 @@ nautilus_file_emit_changed (NautilusFile *file)
 	link_files = get_link_files (file);
 	for (p = link_files; p != NULL; p = p->next) {
 		if (p->data != file) {
-			nautilus_file_changed (NAUTILUS_FILE (p->data));
+			nemo_file_changed (NEMO_FILE (p->data));
 		}
 	}
-	nautilus_file_list_free (link_files);
+	nemo_file_list_free (link_files);
 }
 
 /**
- * nautilus_file_is_gone
+ * nemo_file_is_gone
  * 
  * Check if a file has already been deleted.
- * @file: NautilusFile representing the file in question.
+ * @file: NemoFile representing the file in question.
  *
  * Returns: TRUE if the file is already gone.
  **/
 gboolean
-nautilus_file_is_gone (NautilusFile *file)
+nemo_file_is_gone (NemoFile *file)
 {
-	g_return_val_if_fail (NAUTILUS_IS_FILE (file), FALSE);
+	g_return_val_if_fail (NEMO_IS_FILE (file), FALSE);
 
 	return file->details->is_gone;
 }
 
 /**
- * nautilus_file_is_not_yet_confirmed
+ * nemo_file_is_not_yet_confirmed
  * 
  * Check if we're in a state where we don't know if a file really
  * exists or not, before the initial I/O is complete.
- * @file: NautilusFile representing the file in question.
+ * @file: NemoFile representing the file in question.
  *
  * Returns: TRUE if the file is already gone.
  **/
 gboolean
-nautilus_file_is_not_yet_confirmed (NautilusFile *file)
+nemo_file_is_not_yet_confirmed (NemoFile *file)
 {
-	g_return_val_if_fail (NAUTILUS_IS_FILE (file), FALSE);
+	g_return_val_if_fail (NEMO_IS_FILE (file), FALSE);
 
 	return !file->details->got_file_info;
 }
 
 /**
- * nautilus_file_check_if_ready
+ * nemo_file_check_if_ready
  *
  * Check whether the values for a set of file attributes are
  * currently available, without doing any additional work. This
@@ -7190,8 +7231,8 @@ nautilus_file_is_not_yet_confirmed (NautilusFile *file)
  * Return value: TRUE if all of the specified attributes are currently readable.
  */
 gboolean
-nautilus_file_check_if_ready (NautilusFile *file,
-			      NautilusFileAttributes file_attributes)
+nemo_file_check_if_ready (NemoFile *file,
+			      NemoFileAttributes file_attributes)
 {
 	/* To be parallel with call_when_ready, return
 	 * TRUE for NULL file.
@@ -7200,15 +7241,15 @@ nautilus_file_check_if_ready (NautilusFile *file,
 		return TRUE;
 	}
 
-	g_return_val_if_fail (NAUTILUS_IS_FILE (file), FALSE);
+	g_return_val_if_fail (NEMO_IS_FILE (file), FALSE);
 
-	return NAUTILUS_FILE_CLASS (G_OBJECT_GET_CLASS (file))->check_if_ready (file, file_attributes);
+	return NEMO_FILE_CLASS (G_OBJECT_GET_CLASS (file))->check_if_ready (file, file_attributes);
 }			      
 
 void
-nautilus_file_call_when_ready (NautilusFile *file,
-			       NautilusFileAttributes file_attributes,
-			       NautilusFileCallback callback,
+nemo_file_call_when_ready (NemoFile *file,
+			       NemoFileAttributes file_attributes,
+			       NemoFileCallback callback,
 			       gpointer callback_data)
 
 {
@@ -7217,15 +7258,15 @@ nautilus_file_call_when_ready (NautilusFile *file,
 		return;
 	}
 
-	g_return_if_fail (NAUTILUS_IS_FILE (file));
+	g_return_if_fail (NEMO_IS_FILE (file));
 
-	NAUTILUS_FILE_CLASS (G_OBJECT_GET_CLASS (file))->call_when_ready
+	NEMO_FILE_CLASS (G_OBJECT_GET_CLASS (file))->call_when_ready
 		(file, file_attributes, callback, callback_data);
 }
 
 void
-nautilus_file_cancel_call_when_ready (NautilusFile *file,
-				      NautilusFileCallback callback,
+nemo_file_cancel_call_when_ready (NemoFile *file,
+				      NemoFileCallback callback,
 				      gpointer callback_data)
 {
 	g_return_if_fail (callback != NULL);
@@ -7234,73 +7275,73 @@ nautilus_file_cancel_call_when_ready (NautilusFile *file,
 		return;
 	}
 
-	g_return_if_fail (NAUTILUS_IS_FILE (file));
+	g_return_if_fail (NEMO_IS_FILE (file));
 
-	NAUTILUS_FILE_CLASS (G_OBJECT_GET_CLASS (file))->cancel_call_when_ready
+	NEMO_FILE_CLASS (G_OBJECT_GET_CLASS (file))->cancel_call_when_ready
 		(file, callback, callback_data);
 }
 
 static void
-invalidate_directory_count (NautilusFile *file)
+invalidate_directory_count (NemoFile *file)
 {
 	file->details->directory_count_is_up_to_date = FALSE;
 }
 
 static void
-invalidate_deep_counts (NautilusFile *file)
+invalidate_deep_counts (NemoFile *file)
 {
-	file->details->deep_counts_status = NAUTILUS_REQUEST_NOT_STARTED;
+	file->details->deep_counts_status = NEMO_REQUEST_NOT_STARTED;
 }
 
 static void
-invalidate_mime_list (NautilusFile *file)
+invalidate_mime_list (NemoFile *file)
 {
 	file->details->mime_list_is_up_to_date = FALSE;
 }
 
 static void
-invalidate_top_left_text (NautilusFile *file)
+invalidate_top_left_text (NemoFile *file)
 {
 	file->details->top_left_text_is_up_to_date = FALSE;
 }
 
 static void
-invalidate_file_info (NautilusFile *file)
+invalidate_file_info (NemoFile *file)
 {
 	file->details->file_info_is_up_to_date = FALSE;
 }
 
 static void
-invalidate_link_info (NautilusFile *file)
+invalidate_link_info (NemoFile *file)
 {
 	file->details->link_info_is_up_to_date = FALSE;
 }
 
 static void
-invalidate_thumbnail (NautilusFile *file)
+invalidate_thumbnail (NemoFile *file)
 {
 	file->details->thumbnail_is_up_to_date = FALSE;
 }
 
 static void
-invalidate_mount (NautilusFile *file)
+invalidate_mount (NemoFile *file)
 {
 	file->details->mount_is_up_to_date = FALSE;
 }
 
 void
-nautilus_file_invalidate_extension_info_internal (NautilusFile *file)
+nemo_file_invalidate_extension_info_internal (NemoFile *file)
 {
 	if (file->details->pending_info_providers)
 		g_list_free_full (file->details->pending_info_providers, g_object_unref);
 
 	file->details->pending_info_providers =
-		nautilus_module_get_extensions_for_type (NAUTILUS_TYPE_INFO_PROVIDER);
+		nemo_module_get_extensions_for_type (NEMO_TYPE_INFO_PROVIDER);
 }
 
 void
-nautilus_file_invalidate_attributes_internal (NautilusFile *file,
-					      NautilusFileAttributes file_attributes)
+nemo_file_invalidate_attributes_internal (NemoFile *file,
+					      NemoFileAttributes file_attributes)
 {
 	Request request;
 
@@ -7308,7 +7349,7 @@ nautilus_file_invalidate_attributes_internal (NautilusFile *file,
 		return;
 	}
 
-	if (NAUTILUS_IS_DESKTOP_ICON_FILE (file)) {
+	if (NEMO_IS_DESKTOP_ICON_FILE (file)) {
 		/* Desktop icon files are always up to date.
 		 * If we invalidate their attributes they
 		 * will lose data, so we just ignore them.
@@ -7316,7 +7357,7 @@ nautilus_file_invalidate_attributes_internal (NautilusFile *file,
 		return;
 	}
 	
-	request = nautilus_directory_set_up_request (file_attributes);
+	request = nemo_directory_set_up_request (file_attributes);
 
 	if (REQUEST_WANTS_TYPE (request, REQUEST_DIRECTORY_COUNT)) {
 		invalidate_directory_count (file);
@@ -7337,7 +7378,7 @@ nautilus_file_invalidate_attributes_internal (NautilusFile *file,
 		invalidate_link_info (file);
 	}
 	if (REQUEST_WANTS_TYPE (request, REQUEST_EXTENSION_INFO)) {
-		nautilus_file_invalidate_extension_info_internal (file);
+		nemo_file_invalidate_extension_info_internal (file);
 	}
 	if (REQUEST_WANTS_TYPE (request, REQUEST_THUMBNAIL)) {
 		invalidate_thumbnail (file);
@@ -7350,95 +7391,95 @@ nautilus_file_invalidate_attributes_internal (NautilusFile *file,
 }
 
 gboolean
-nautilus_file_has_open_window (NautilusFile *file)
+nemo_file_has_open_window (NemoFile *file)
 {
 	return file->details->has_open_window;
 }
 
 void
-nautilus_file_set_has_open_window (NautilusFile *file,
+nemo_file_set_has_open_window (NemoFile *file,
 				   gboolean has_open_window)
 {
 	has_open_window = (has_open_window != FALSE);
 
 	if (file->details->has_open_window != has_open_window) {
 		file->details->has_open_window = has_open_window;
-		nautilus_file_changed (file);
+		nemo_file_changed (file);
 	}
 }
 
 
 gboolean
-nautilus_file_is_thumbnailing (NautilusFile *file)
+nemo_file_is_thumbnailing (NemoFile *file)
 {
-	g_return_val_if_fail (NAUTILUS_IS_FILE (file), FALSE);
+	g_return_val_if_fail (NEMO_IS_FILE (file), FALSE);
 	
 	return file->details->is_thumbnailing;
 }
 
 void
-nautilus_file_set_is_thumbnailing (NautilusFile *file,
+nemo_file_set_is_thumbnailing (NemoFile *file,
 				   gboolean is_thumbnailing)
 {
-	g_return_if_fail (NAUTILUS_IS_FILE (file));
+	g_return_if_fail (NEMO_IS_FILE (file));
 	
 	file->details->is_thumbnailing = is_thumbnailing;
 }
 
 
 /**
- * nautilus_file_invalidate_attributes
+ * nemo_file_invalidate_attributes
  * 
  * Invalidate the specified attributes and force a reload.
- * @file: NautilusFile representing the file in question.
+ * @file: NemoFile representing the file in question.
  * @file_attributes: attributes to froget.
  **/
 
 void
-nautilus_file_invalidate_attributes (NautilusFile *file,
-				     NautilusFileAttributes file_attributes)
+nemo_file_invalidate_attributes (NemoFile *file,
+				     NemoFileAttributes file_attributes)
 {
 	/* Cancel possible in-progress loads of any of these attributes */
-	nautilus_directory_cancel_loading_file_attributes (file->details->directory,
+	nemo_directory_cancel_loading_file_attributes (file->details->directory,
 							   file,
 							   file_attributes);
 	
 	/* Actually invalidate the values */
-	nautilus_file_invalidate_attributes_internal (file, file_attributes);
+	nemo_file_invalidate_attributes_internal (file, file_attributes);
 
-	nautilus_directory_add_file_to_work_queue (file->details->directory, file);
+	nemo_directory_add_file_to_work_queue (file->details->directory, file);
 	
 	/* Kick off I/O if necessary */
-	nautilus_directory_async_state_changed (file->details->directory);
+	nemo_directory_async_state_changed (file->details->directory);
 }
 
-NautilusFileAttributes 
-nautilus_file_get_all_attributes (void)
+NemoFileAttributes 
+nemo_file_get_all_attributes (void)
 {
-	return  NAUTILUS_FILE_ATTRIBUTE_INFO |
-		NAUTILUS_FILE_ATTRIBUTE_LINK_INFO |
-		NAUTILUS_FILE_ATTRIBUTE_DEEP_COUNTS |
-		NAUTILUS_FILE_ATTRIBUTE_DIRECTORY_ITEM_COUNT | 
-		NAUTILUS_FILE_ATTRIBUTE_DIRECTORY_ITEM_MIME_TYPES | 
-		NAUTILUS_FILE_ATTRIBUTE_TOP_LEFT_TEXT | 
-		NAUTILUS_FILE_ATTRIBUTE_LARGE_TOP_LEFT_TEXT |
-		NAUTILUS_FILE_ATTRIBUTE_EXTENSION_INFO |
-		NAUTILUS_FILE_ATTRIBUTE_THUMBNAIL |
-		NAUTILUS_FILE_ATTRIBUTE_MOUNT;
+	return  NEMO_FILE_ATTRIBUTE_INFO |
+		NEMO_FILE_ATTRIBUTE_LINK_INFO |
+		NEMO_FILE_ATTRIBUTE_DEEP_COUNTS |
+		NEMO_FILE_ATTRIBUTE_DIRECTORY_ITEM_COUNT | 
+		NEMO_FILE_ATTRIBUTE_DIRECTORY_ITEM_MIME_TYPES | 
+		NEMO_FILE_ATTRIBUTE_TOP_LEFT_TEXT | 
+		NEMO_FILE_ATTRIBUTE_LARGE_TOP_LEFT_TEXT |
+		NEMO_FILE_ATTRIBUTE_EXTENSION_INFO |
+		NEMO_FILE_ATTRIBUTE_THUMBNAIL |
+		NEMO_FILE_ATTRIBUTE_MOUNT;
 }
 
 void
-nautilus_file_invalidate_all_attributes (NautilusFile *file)
+nemo_file_invalidate_all_attributes (NemoFile *file)
 {
-	NautilusFileAttributes all_attributes;
+	NemoFileAttributes all_attributes;
 
-	all_attributes = nautilus_file_get_all_attributes ();
-	nautilus_file_invalidate_attributes (file, all_attributes);
+	all_attributes = nemo_file_get_all_attributes ();
+	nemo_file_invalidate_attributes (file, all_attributes);
 }
 
 
 /**
- * nautilus_file_dump
+ * nemo_file_dump
  *
  * Debugging call, prints out the contents of the file
  * fields.
@@ -7446,13 +7487,13 @@ nautilus_file_invalidate_all_attributes (NautilusFile *file)
  * @file: file to dump.
  **/
 void
-nautilus_file_dump (NautilusFile *file)
+nemo_file_dump (NemoFile *file)
 {
 	long size = file->details->deep_size;
 	char *uri;
 	const char *file_kind;
 
-	uri = nautilus_file_get_uri (file);
+	uri = nemo_file_get_uri (file);
 	g_print ("uri: %s \n", uri);
 	if (!file->details->got_file_info) {
 		g_print ("no file info \n");
@@ -7489,57 +7530,57 @@ nautilus_file_dump (NautilusFile *file)
 }
 
 /**
- * nautilus_file_list_ref
+ * nemo_file_list_ref
  *
  * Ref all the files in a list.
  * @list: GList of files.
  **/
 GList *
-nautilus_file_list_ref (GList *list)
+nemo_file_list_ref (GList *list)
 {
-	g_list_foreach (list, (GFunc) nautilus_file_ref, NULL);
+	g_list_foreach (list, (GFunc) nemo_file_ref, NULL);
 	return list;
 }
 
 /**
- * nautilus_file_list_unref
+ * nemo_file_list_unref
  *
  * Unref all the files in a list.
  * @list: GList of files.
  **/
 void
-nautilus_file_list_unref (GList *list)
+nemo_file_list_unref (GList *list)
 {
-	g_list_foreach (list, (GFunc) nautilus_file_unref, NULL);
+	g_list_foreach (list, (GFunc) nemo_file_unref, NULL);
 }
 
 /**
- * nautilus_file_list_free
+ * nemo_file_list_free
  *
  * Free a list of files after unrefing them.
  * @list: GList of files.
  **/
 void
-nautilus_file_list_free (GList *list)
+nemo_file_list_free (GList *list)
 {
-	nautilus_file_list_unref (list);
+	nemo_file_list_unref (list);
 	g_list_free (list);
 }
 
 /**
- * nautilus_file_list_copy
+ * nemo_file_list_copy
  *
  * Copy the list of files, making a new ref of each,
  * @list: GList of files.
  **/
 GList *
-nautilus_file_list_copy (GList *list)
+nemo_file_list_copy (GList *list)
 {
-	return g_list_copy (nautilus_file_list_ref (list));
+	return g_list_copy (nemo_file_list_ref (list));
 }
 
 GList *
-nautilus_file_list_from_uris (GList *uri_list)
+nemo_file_list_from_uris (GList *uri_list)
 {
 	GList *l, *file_list;
 	const char *uri;
@@ -7556,7 +7597,7 @@ nautilus_file_list_from_uris (GList *uri_list)
 }
 
 static gboolean
-get_attributes_for_default_sort_type (NautilusFile *file,
+get_attributes_for_default_sort_type (NemoFile *file,
 				      gboolean *is_download,
 				      gboolean *is_trash)
 {
@@ -7567,13 +7608,13 @@ get_attributes_for_default_sort_type (NautilusFile *file,
 	retval = FALSE;
 
 	/* special handling for certain directories */
-	if (file && nautilus_file_is_directory (file)) {
+	if (file && nemo_file_is_directory (file)) {
 		is_download_dir =
-			nautilus_file_is_user_special_directory (file, G_USER_DIRECTORY_DOWNLOAD);
+			nemo_file_is_user_special_directory (file, G_USER_DIRECTORY_DOWNLOAD);
 		is_desktop_dir =
-			nautilus_file_is_user_special_directory (file, G_USER_DIRECTORY_DESKTOP);
+			nemo_file_is_user_special_directory (file, G_USER_DIRECTORY_DESKTOP);
 		is_trash_dir =
-			nautilus_file_is_in_trash (file);
+			nemo_file_is_in_trash (file);
 
 		if (is_download_dir && !is_desktop_dir) {
 			*is_download = TRUE;
@@ -7587,22 +7628,22 @@ get_attributes_for_default_sort_type (NautilusFile *file,
 	return retval;
 }
 
-NautilusFileSortType
-nautilus_file_get_default_sort_type (NautilusFile *file,
+NemoFileSortType
+nemo_file_get_default_sort_type (NemoFile *file,
 				     gboolean *reversed)
 {
-	NautilusFileSortType retval;
+	NemoFileSortType retval;
 	gboolean is_download, is_trash, res;
 
-	retval = NAUTILUS_FILE_SORT_NONE;
+	retval = NEMO_FILE_SORT_NONE;
 	is_download = is_trash = FALSE;
 	res = get_attributes_for_default_sort_type (file, &is_download, &is_trash);
 
 	if (res) {
 		if (is_download) {
-			retval = NAUTILUS_FILE_SORT_BY_MTIME;
+			retval = NEMO_FILE_SORT_BY_MTIME;
 		} else if (is_trash) {
-			retval = NAUTILUS_FILE_SORT_BY_TRASHED_TIME;
+			retval = NEMO_FILE_SORT_BY_TRASHED_TIME;
 		}
 
 		if (reversed != NULL) {
@@ -7614,7 +7655,7 @@ nautilus_file_get_default_sort_type (NautilusFile *file,
 }
 
 const gchar *
-nautilus_file_get_default_sort_attribute (NautilusFile *file,
+nemo_file_get_default_sort_attribute (NemoFile *file,
 					  gboolean *reversed)
 {
 	const gchar *retval;
@@ -7642,17 +7683,17 @@ nautilus_file_get_default_sort_attribute (NautilusFile *file,
 static int
 compare_by_display_name_cover (gconstpointer a, gconstpointer b)
 {
-	return compare_by_display_name (NAUTILUS_FILE (a), NAUTILUS_FILE (b));
+	return compare_by_display_name (NEMO_FILE (a), NEMO_FILE (b));
 }
 
 /**
- * nautilus_file_list_sort_by_display_name
+ * nemo_file_list_sort_by_display_name
  * 
  * Sort the list of files by file name.
  * @list: GList of files.
  **/
 GList *
-nautilus_file_list_sort_by_display_name (GList *list)
+nemo_file_list_sort_by_display_name (GList *list)
 {
 	return g_list_sort (list, compare_by_display_name_cover);
 }
@@ -7663,7 +7704,7 @@ typedef struct
 {
 	GList *file_list;
 	GList *remaining_files;
-	NautilusFileListCallback callback;
+	NemoFileListCallback callback;
 	gpointer callback_data;
 } FileListReadyData;
 
@@ -7676,7 +7717,7 @@ file_list_ready_data_free (FileListReadyData *data)
 	if (l != NULL) {
 		ready_data_list = g_list_delete_link (ready_data_list, l);
 
-		nautilus_file_list_free (data->file_list);
+		nemo_file_list_free (data->file_list);
 		g_list_free (data->remaining_files);
 		g_free (data);
 	}
@@ -7684,13 +7725,13 @@ file_list_ready_data_free (FileListReadyData *data)
 
 static FileListReadyData *
 file_list_ready_data_new (GList *file_list,
-			  NautilusFileListCallback callback,
+			  NemoFileListCallback callback,
 			  gpointer callback_data)
 {
 	FileListReadyData *data;
 
 	data = g_new0 (FileListReadyData, 1);
-	data->file_list = nautilus_file_list_copy (file_list);
+	data->file_list = nemo_file_list_copy (file_list);
 	data->remaining_files = g_list_copy (file_list);
 	data->callback = callback;
 	data->callback_data = callback_data;
@@ -7701,7 +7742,7 @@ file_list_ready_data_new (GList *file_list,
 }
 
 static void
-file_list_file_ready_callback (NautilusFile *file,
+file_list_file_ready_callback (NemoFile *file,
 			       gpointer user_data)
 {
 	FileListReadyData *data;
@@ -7719,15 +7760,15 @@ file_list_file_ready_callback (NautilusFile *file,
 }
 
 void 
-nautilus_file_list_call_when_ready (GList *file_list,
-				    NautilusFileAttributes attributes,
-				    NautilusFileListHandle **handle,
-				    NautilusFileListCallback callback,
+nemo_file_list_call_when_ready (GList *file_list,
+				    NemoFileAttributes attributes,
+				    NemoFileListHandle **handle,
+				    NemoFileListCallback callback,
 				    gpointer callback_data)
 {
 	GList *l;
 	FileListReadyData *data;
-	NautilusFile *file;
+	NemoFile *file;
 	
 	g_return_if_fail (file_list != NULL);
 
@@ -7735,16 +7776,16 @@ nautilus_file_list_call_when_ready (GList *file_list,
 		(file_list, callback, callback_data);
 
 	if (handle) {
-		*handle = (NautilusFileListHandle *) data;
+		*handle = (NemoFileListHandle *) data;
 	}
 
 
 	l = file_list;
 	while (l != NULL) {
-		file = NAUTILUS_FILE (l->data);
+		file = NEMO_FILE (l->data);
 		/* Need to do this here, as the list can be modified by this call */
 		l = l->next; 
-		nautilus_file_call_when_ready (file,
+		nemo_file_call_when_ready (file,
 					       attributes,
 					       file_list_file_ready_callback,
 					       data);
@@ -7752,10 +7793,10 @@ nautilus_file_list_call_when_ready (GList *file_list,
 }
 
 void
-nautilus_file_list_cancel_call_when_ready (NautilusFileListHandle *handle)
+nemo_file_list_cancel_call_when_ready (NemoFileListHandle *handle)
 {
 	GList *l;
-	NautilusFile *file;
+	NemoFile *file;
 	FileListReadyData *data;
 
 	g_return_if_fail (handle != NULL);
@@ -7765,9 +7806,9 @@ nautilus_file_list_cancel_call_when_ready (NautilusFileListHandle *handle)
 	l = g_list_find (ready_data_list, data);
 	if (l != NULL) {
 		for (l = data->remaining_files; l != NULL; l = l->next) {
-			file = NAUTILUS_FILE (l->data);
+			file = NEMO_FILE (l->data);
 
-			NAUTILUS_FILE_CLASS (G_OBJECT_GET_CLASS (file))->cancel_call_when_ready
+			NEMO_FILE_CLASS (G_OBJECT_GET_CLASS (file))->cancel_call_when_ready
 				(file, file_list_file_ready_callback, data);
 		}
 
@@ -7819,7 +7860,7 @@ try_to_make_utf8 (const char *text, int *length)
 
 /* Extract the top left part of the read-in text. */
 char *
-nautilus_extract_top_left_text (const char *text,
+nemo_extract_top_left_text (const char *text,
 				gboolean large,
 				int length)
 {
@@ -7834,13 +7875,13 @@ nautilus_extract_top_left_text (const char *text,
 	int max_bytes, max_lines, max_cols;
 
 	if (large) {
-		max_bytes = NAUTILUS_FILE_LARGE_TOP_LEFT_TEXT_MAXIMUM_BYTES;
-		max_lines = NAUTILUS_FILE_LARGE_TOP_LEFT_TEXT_MAXIMUM_LINES;
-		max_cols = NAUTILUS_FILE_LARGE_TOP_LEFT_TEXT_MAXIMUM_CHARACTERS_PER_LINE;
+		max_bytes = NEMO_FILE_LARGE_TOP_LEFT_TEXT_MAXIMUM_BYTES;
+		max_lines = NEMO_FILE_LARGE_TOP_LEFT_TEXT_MAXIMUM_LINES;
+		max_cols = NEMO_FILE_LARGE_TOP_LEFT_TEXT_MAXIMUM_CHARACTERS_PER_LINE;
 	} else {
-		max_bytes = NAUTILUS_FILE_TOP_LEFT_TEXT_MAXIMUM_BYTES;
-		max_lines = NAUTILUS_FILE_TOP_LEFT_TEXT_MAXIMUM_LINES;
-		max_cols = NAUTILUS_FILE_TOP_LEFT_TEXT_MAXIMUM_CHARACTERS_PER_LINE;
+		max_bytes = NEMO_FILE_TOP_LEFT_TEXT_MAXIMUM_BYTES;
+		max_lines = NEMO_FILE_TOP_LEFT_TEXT_MAXIMUM_LINES;
+		max_cols = NEMO_FILE_TOP_LEFT_TEXT_MAXIMUM_CHARACTERS_PER_LINE;
 	}
 			
 	
@@ -7908,8 +7949,8 @@ nautilus_extract_top_left_text (const char *text,
 static void
 thumbnail_limit_changed_callback (gpointer user_data)
 {
-	g_settings_get (nautilus_preferences,
-			NAUTILUS_PREFERENCES_IMAGE_FILE_THUMBNAIL_LIMIT,
+	g_settings_get (nemo_preferences,
+			NEMO_PREFERENCES_IMAGE_FILE_THUMBNAIL_LIMIT,
 			"t", &cached_thumbnail_limit);
 
 	/* Tell the world that icons might have changed. We could invent a narrower-scope
@@ -7922,8 +7963,8 @@ thumbnail_limit_changed_callback (gpointer user_data)
 static void
 thumbnail_size_changed_callback (gpointer user_data)
 {
-	cached_thumbnail_size = g_settings_get_int (nautilus_icon_view_preferences,
-						    NAUTILUS_PREFERENCES_ICON_VIEW_THUMBNAIL_SIZE);
+	cached_thumbnail_size = g_settings_get_int (nemo_icon_view_preferences,
+						    NEMO_PREFERENCES_ICON_VIEW_THUMBNAIL_SIZE);
 
 	/* Tell the world that icons might have changed. We could invent a narrower-scope
 	 * signal to mean only "thumbnails might have changed" if this ends up being slow
@@ -7935,7 +7976,7 @@ thumbnail_size_changed_callback (gpointer user_data)
 static void
 show_thumbnails_changed_callback (gpointer user_data)
 {
-	show_image_thumbs = g_settings_get_enum (nautilus_preferences, NAUTILUS_PREFERENCES_SHOW_IMAGE_FILE_THUMBNAILS);
+	show_image_thumbs = g_settings_get_enum (nemo_preferences, NEMO_PREFERENCES_SHOW_IMAGE_FILE_THUMBNAILS);
 
 	/* Tell the world that icons might have changed. We could invent a narrower-scope
 	 * signal to mean only "thumbnails might have changed" if this ends up being slow
@@ -7959,7 +8000,7 @@ icon_theme_changed_callback (GtkIconTheme *icon_theme,
 			     gpointer user_data)
 {
 	/* Clear all pixmap caches as the icon => pixmap lookup changed */
-	nautilus_icon_info_clear_caches ();
+	nemo_icon_info_clear_caches ();
 
 	/* Tell the world that icons might have changed. We could invent a narrower-scope
 	 * signal to mean only "thumbnails might have changed" if this ends up being slow
@@ -7969,7 +8010,7 @@ icon_theme_changed_callback (GtkIconTheme *icon_theme,
 }
 
 static void
-real_set_metadata (NautilusFile  *file,
+real_set_metadata (NemoFile  *file,
 		   const char    *key,
 		   const char    *value)
 {
@@ -7977,7 +8018,7 @@ real_set_metadata (NautilusFile  *file,
 }
 
 static void
-real_set_metadata_as_list (NautilusFile *file,
+real_set_metadata_as_list (NemoFile *file,
 			   const char   *key,
 			   char         **value)
 {
@@ -7985,11 +8026,11 @@ real_set_metadata_as_list (NautilusFile *file,
 }
 
 static void
-nautilus_file_class_init (NautilusFileClass *class)
+nemo_file_class_init (NemoFileClass *class)
 {
 	GtkIconTheme *icon_theme;
 
-	nautilus_file_info_getter = nautilus_file_get_internal;
+	nemo_file_info_getter = nemo_file_get_internal;
 
 	attribute_name_q = g_quark_from_static_string ("name");
 	attribute_size_q = g_quark_from_static_string ("size");
@@ -8020,7 +8061,7 @@ nautilus_file_class_init (NautilusFileClass *class)
 	attribute_free_space_q = g_quark_from_static_string ("free_space");
 	
 	G_OBJECT_CLASS (class)->finalize = finalize;
-	G_OBJECT_CLASS (class)->constructor = nautilus_file_constructor;
+	G_OBJECT_CLASS (class)->constructor = nemo_file_constructor;
 
 	class->set_metadata = real_set_metadata;
 	class->set_metadata_as_list = real_set_metadata_as_list;
@@ -8029,7 +8070,7 @@ nautilus_file_class_init (NautilusFileClass *class)
 		g_signal_new ("changed",
 		              G_TYPE_FROM_CLASS (class),
 		              G_SIGNAL_RUN_LAST,
-		              G_STRUCT_OFFSET (NautilusFileClass, changed),
+		              G_STRUCT_OFFSET (NemoFileClass, changed),
 		              NULL, NULL,
 		              g_cclosure_marshal_VOID__VOID,
 		              G_TYPE_NONE, 0);
@@ -8038,26 +8079,26 @@ nautilus_file_class_init (NautilusFileClass *class)
 		g_signal_new ("updated_deep_count_in_progress",
 		              G_TYPE_FROM_CLASS (class),
 		              G_SIGNAL_RUN_LAST,
-		              G_STRUCT_OFFSET (NautilusFileClass, updated_deep_count_in_progress),
+		              G_STRUCT_OFFSET (NemoFileClass, updated_deep_count_in_progress),
 		              NULL, NULL,
 			      g_cclosure_marshal_VOID__VOID,
 		              G_TYPE_NONE, 0);
 
-	g_type_class_add_private (class, sizeof (NautilusFileDetails));
+	g_type_class_add_private (class, sizeof (NemoFileDetails));
 
 	thumbnail_limit_changed_callback (NULL);
-	g_signal_connect_swapped (nautilus_preferences,
-				  "changed::" NAUTILUS_PREFERENCES_IMAGE_FILE_THUMBNAIL_LIMIT,
+	g_signal_connect_swapped (nemo_preferences,
+				  "changed::" NEMO_PREFERENCES_IMAGE_FILE_THUMBNAIL_LIMIT,
 				  G_CALLBACK (thumbnail_limit_changed_callback),
 				  NULL);
 	thumbnail_size_changed_callback (NULL);
-	g_signal_connect_swapped (nautilus_preferences,
-				  "changed::" NAUTILUS_PREFERENCES_ICON_VIEW_THUMBNAIL_SIZE,
+	g_signal_connect_swapped (nemo_preferences,
+				  "changed::" NEMO_PREFERENCES_ICON_VIEW_THUMBNAIL_SIZE,
 				  G_CALLBACK (thumbnail_size_changed_callback),
 				  NULL);
 	show_thumbnails_changed_callback (NULL);
-	g_signal_connect_swapped (nautilus_preferences,
-				  "changed::" NAUTILUS_PREFERENCES_SHOW_IMAGE_FILE_THUMBNAILS,
+	g_signal_connect_swapped (nemo_preferences,
+				  "changed::" NEMO_PREFERENCES_SHOW_IMAGE_FILE_THUMBNAILS,
 				  G_CALLBACK (show_thumbnails_changed_callback),
 				  NULL);
 
@@ -8067,14 +8108,14 @@ nautilus_file_class_init (NautilusFileClass *class)
 				 G_CALLBACK (icon_theme_changed_callback),
 				 NULL, 0);
 
-	g_signal_connect (nautilus_signaller_get_current (),
+	g_signal_connect (nemo_signaller_get_current (),
 			  "mime_data_changed",
 			  G_CALLBACK (mime_type_data_changed_callback),
 			  NULL);
 }
 
 static void
-nautilus_file_add_emblem (NautilusFile *file,
+nemo_file_add_emblem (NemoFile *file,
 			  const char *emblem_name)
 {
 	if (file->details->pending_info_providers) {
@@ -8085,11 +8126,11 @@ nautilus_file_add_emblem (NautilusFile *file,
 								   g_strdup (emblem_name));
 	}
 
-	nautilus_file_changed (file);
+	nemo_file_changed (file);
 }
 
 static void
-nautilus_file_add_string_attribute (NautilusFile *file,
+nemo_file_add_string_attribute (NemoFile *file,
 				    const char *attribute_name,
 				    const char *value)
 {
@@ -8116,17 +8157,17 @@ nautilus_file_add_string_attribute (NautilusFile *file,
 				     g_strdup (value));
 	}
 
-	nautilus_file_changed (file);
+	nemo_file_changed (file);
 }
 
 static void
-nautilus_file_invalidate_extension_info (NautilusFile *file)
+nemo_file_invalidate_extension_info (NemoFile *file)
 {
-	nautilus_file_invalidate_attributes (file, NAUTILUS_FILE_ATTRIBUTE_EXTENSION_INFO);
+	nemo_file_invalidate_attributes (file, NEMO_FILE_ATTRIBUTE_EXTENSION_INFO);
 }
 
 void
-nautilus_file_info_providers_done (NautilusFile *file)
+nemo_file_info_providers_done (NemoFile *file)
 {
 	g_list_free_full (file->details->extension_emblems, g_free);
 	file->details->extension_emblems = file->details->pending_extension_emblems;
@@ -8139,125 +8180,125 @@ nautilus_file_info_providers_done (NautilusFile *file)
 	file->details->extension_attributes = file->details->pending_extension_attributes;
 	file->details->pending_extension_attributes = NULL;
 
-	nautilus_file_changed (file);
+	nemo_file_changed (file);
 }
 
 static void     
-nautilus_file_info_iface_init (NautilusFileInfoIface *iface)
+nemo_file_info_iface_init (NemoFileInfoIface *iface)
 {
-	iface->is_gone = nautilus_file_is_gone;
-	iface->get_name = nautilus_file_get_name;
-	iface->get_file_type = nautilus_file_get_file_type;
-	iface->get_location = nautilus_file_get_location;
-	iface->get_uri = nautilus_file_get_uri;
-	iface->get_parent_location = nautilus_file_get_parent_location;
-	iface->get_parent_uri = nautilus_file_get_parent_uri;
-	iface->get_parent_info = nautilus_file_get_parent;
-	iface->get_mount = nautilus_file_get_mount;
-	iface->get_uri_scheme = nautilus_file_get_uri_scheme;
-	iface->get_activation_uri = nautilus_file_get_activation_uri;
-	iface->get_mime_type = nautilus_file_get_mime_type;
-	iface->is_mime_type = nautilus_file_is_mime_type;
-	iface->is_directory = nautilus_file_is_directory;
-	iface->can_write = nautilus_file_can_write;
-	iface->add_emblem = nautilus_file_add_emblem;
-	iface->get_string_attribute = nautilus_file_get_string_attribute;
-	iface->add_string_attribute = nautilus_file_add_string_attribute;
-	iface->invalidate_extension_info = nautilus_file_invalidate_extension_info;
+	iface->is_gone = nemo_file_is_gone;
+	iface->get_name = nemo_file_get_name;
+	iface->get_file_type = nemo_file_get_file_type;
+	iface->get_location = nemo_file_get_location;
+	iface->get_uri = nemo_file_get_uri;
+	iface->get_parent_location = nemo_file_get_parent_location;
+	iface->get_parent_uri = nemo_file_get_parent_uri;
+	iface->get_parent_info = nemo_file_get_parent;
+	iface->get_mount = nemo_file_get_mount;
+	iface->get_uri_scheme = nemo_file_get_uri_scheme;
+	iface->get_activation_uri = nemo_file_get_activation_uri;
+	iface->get_mime_type = nemo_file_get_mime_type;
+	iface->is_mime_type = nemo_file_is_mime_type;
+	iface->is_directory = nemo_file_is_directory;
+	iface->can_write = nemo_file_can_write;
+	iface->add_emblem = nemo_file_add_emblem;
+	iface->get_string_attribute = nemo_file_get_string_attribute;
+	iface->add_string_attribute = nemo_file_add_string_attribute;
+	iface->invalidate_extension_info = nemo_file_invalidate_extension_info;
 }
 
-#if !defined (NAUTILUS_OMIT_SELF_CHECK)
+#if !defined (NEMO_OMIT_SELF_CHECK)
 
 void
-nautilus_self_check_file (void)
+nemo_self_check_file (void)
 {
-	NautilusFile *file_1;
-	NautilusFile *file_2;
+	NemoFile *file_1;
+	NemoFile *file_2;
 	GList *list;
 
         /* refcount checks */
 
-        EEL_CHECK_INTEGER_RESULT (nautilus_directory_number_outstanding (), 0);
+        EEL_CHECK_INTEGER_RESULT (nemo_directory_number_outstanding (), 0);
 
-	file_1 = nautilus_file_get_by_uri ("file:///home/");
+	file_1 = nemo_file_get_by_uri ("file:///home/");
 
 	EEL_CHECK_INTEGER_RESULT (G_OBJECT (file_1)->ref_count, 1);
 	EEL_CHECK_INTEGER_RESULT (G_OBJECT (file_1->details->directory)->ref_count, 1);
-        EEL_CHECK_INTEGER_RESULT (nautilus_directory_number_outstanding (), 1);
+        EEL_CHECK_INTEGER_RESULT (nemo_directory_number_outstanding (), 1);
 
-	nautilus_file_unref (file_1);
+	nemo_file_unref (file_1);
 
-        EEL_CHECK_INTEGER_RESULT (nautilus_directory_number_outstanding (), 0);
+        EEL_CHECK_INTEGER_RESULT (nemo_directory_number_outstanding (), 0);
 	
-	file_1 = nautilus_file_get_by_uri ("file:///etc");
-	file_2 = nautilus_file_get_by_uri ("file:///usr");
+	file_1 = nemo_file_get_by_uri ("file:///etc");
+	file_2 = nemo_file_get_by_uri ("file:///usr");
 
         list = NULL;
         list = g_list_prepend (list, file_1);
         list = g_list_prepend (list, file_2);
 
-        nautilus_file_list_ref (list);
+        nemo_file_list_ref (list);
         
 	EEL_CHECK_INTEGER_RESULT (G_OBJECT (file_1)->ref_count, 2);
 	EEL_CHECK_INTEGER_RESULT (G_OBJECT (file_2)->ref_count, 2);
 
-	nautilus_file_list_unref (list);
+	nemo_file_list_unref (list);
         
 	EEL_CHECK_INTEGER_RESULT (G_OBJECT (file_1)->ref_count, 1);
 	EEL_CHECK_INTEGER_RESULT (G_OBJECT (file_2)->ref_count, 1);
 
-	nautilus_file_list_free (list);
+	nemo_file_list_free (list);
 
-        EEL_CHECK_INTEGER_RESULT (nautilus_directory_number_outstanding (), 0);
+        EEL_CHECK_INTEGER_RESULT (nemo_directory_number_outstanding (), 0);
 	
 
         /* name checks */
-	file_1 = nautilus_file_get_by_uri ("file:///home/");
+	file_1 = nemo_file_get_by_uri ("file:///home/");
 
-	EEL_CHECK_STRING_RESULT (nautilus_file_get_name (file_1), "home");
+	EEL_CHECK_STRING_RESULT (nemo_file_get_name (file_1), "home");
 
-	EEL_CHECK_BOOLEAN_RESULT (nautilus_file_get_by_uri ("file:///home/") == file_1, TRUE);
-	nautilus_file_unref (file_1);
+	EEL_CHECK_BOOLEAN_RESULT (nemo_file_get_by_uri ("file:///home/") == file_1, TRUE);
+	nemo_file_unref (file_1);
 
-	EEL_CHECK_BOOLEAN_RESULT (nautilus_file_get_by_uri ("file:///home") == file_1, TRUE);
-	nautilus_file_unref (file_1);
+	EEL_CHECK_BOOLEAN_RESULT (nemo_file_get_by_uri ("file:///home") == file_1, TRUE);
+	nemo_file_unref (file_1);
 
-	nautilus_file_unref (file_1);
+	nemo_file_unref (file_1);
 
-	file_1 = nautilus_file_get_by_uri ("file:///home");
-	EEL_CHECK_STRING_RESULT (nautilus_file_get_name (file_1), "home");
-	nautilus_file_unref (file_1);
+	file_1 = nemo_file_get_by_uri ("file:///home");
+	EEL_CHECK_STRING_RESULT (nemo_file_get_name (file_1), "home");
+	nemo_file_unref (file_1);
 
 #if 0
 	/* ALEX: I removed this, because it was breaking distchecks.
 	 * It used to work, but when canonical uris changed from
 	 * foo: to foo:/// it broke. I don't expect it to matter
 	 * in real life */
-	file_1 = nautilus_file_get_by_uri (":");
-	EEL_CHECK_STRING_RESULT (nautilus_file_get_name (file_1), ":");
-	nautilus_file_unref (file_1);
+	file_1 = nemo_file_get_by_uri (":");
+	EEL_CHECK_STRING_RESULT (nemo_file_get_name (file_1), ":");
+	nemo_file_unref (file_1);
 #endif
 
-	file_1 = nautilus_file_get_by_uri ("eazel:");
-	EEL_CHECK_STRING_RESULT (nautilus_file_get_name (file_1), "eazel");
-	nautilus_file_unref (file_1);
+	file_1 = nemo_file_get_by_uri ("eazel:");
+	EEL_CHECK_STRING_RESULT (nemo_file_get_name (file_1), "eazel");
+	nemo_file_unref (file_1);
 
 	/* sorting */
-	file_1 = nautilus_file_get_by_uri ("file:///etc");
-	file_2 = nautilus_file_get_by_uri ("file:///usr");
+	file_1 = nemo_file_get_by_uri ("file:///etc");
+	file_2 = nemo_file_get_by_uri ("file:///usr");
 
 	EEL_CHECK_INTEGER_RESULT (G_OBJECT (file_1)->ref_count, 1);
 	EEL_CHECK_INTEGER_RESULT (G_OBJECT (file_2)->ref_count, 1);
 
-	EEL_CHECK_BOOLEAN_RESULT (nautilus_file_compare_for_sort (file_1, file_2, NAUTILUS_FILE_SORT_BY_DISPLAY_NAME, FALSE, FALSE) < 0, TRUE);
-	EEL_CHECK_BOOLEAN_RESULT (nautilus_file_compare_for_sort (file_1, file_2, NAUTILUS_FILE_SORT_BY_DISPLAY_NAME, FALSE, TRUE) > 0, TRUE);
-	EEL_CHECK_BOOLEAN_RESULT (nautilus_file_compare_for_sort (file_1, file_1, NAUTILUS_FILE_SORT_BY_DISPLAY_NAME, FALSE, FALSE) == 0, TRUE);
-	EEL_CHECK_BOOLEAN_RESULT (nautilus_file_compare_for_sort (file_1, file_1, NAUTILUS_FILE_SORT_BY_DISPLAY_NAME, TRUE, FALSE) == 0, TRUE);
-	EEL_CHECK_BOOLEAN_RESULT (nautilus_file_compare_for_sort (file_1, file_1, NAUTILUS_FILE_SORT_BY_DISPLAY_NAME, FALSE, TRUE) == 0, TRUE);
-	EEL_CHECK_BOOLEAN_RESULT (nautilus_file_compare_for_sort (file_1, file_1, NAUTILUS_FILE_SORT_BY_DISPLAY_NAME, TRUE, TRUE) == 0, TRUE);
+	EEL_CHECK_BOOLEAN_RESULT (nemo_file_compare_for_sort (file_1, file_2, NEMO_FILE_SORT_BY_DISPLAY_NAME, FALSE, FALSE) < 0, TRUE);
+	EEL_CHECK_BOOLEAN_RESULT (nemo_file_compare_for_sort (file_1, file_2, NEMO_FILE_SORT_BY_DISPLAY_NAME, FALSE, TRUE) > 0, TRUE);
+	EEL_CHECK_BOOLEAN_RESULT (nemo_file_compare_for_sort (file_1, file_1, NEMO_FILE_SORT_BY_DISPLAY_NAME, FALSE, FALSE) == 0, TRUE);
+	EEL_CHECK_BOOLEAN_RESULT (nemo_file_compare_for_sort (file_1, file_1, NEMO_FILE_SORT_BY_DISPLAY_NAME, TRUE, FALSE) == 0, TRUE);
+	EEL_CHECK_BOOLEAN_RESULT (nemo_file_compare_for_sort (file_1, file_1, NEMO_FILE_SORT_BY_DISPLAY_NAME, FALSE, TRUE) == 0, TRUE);
+	EEL_CHECK_BOOLEAN_RESULT (nemo_file_compare_for_sort (file_1, file_1, NEMO_FILE_SORT_BY_DISPLAY_NAME, TRUE, TRUE) == 0, TRUE);
 
-	nautilus_file_unref (file_1);
-	nautilus_file_unref (file_2);
+	nemo_file_unref (file_1);
+	nemo_file_unref (file_2);
 }
 
-#endif /* !NAUTILUS_OMIT_SELF_CHECK */
+#endif /* !NEMO_OMIT_SELF_CHECK */

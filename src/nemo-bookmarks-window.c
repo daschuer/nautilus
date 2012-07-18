@@ -1,16 +1,16 @@
 /* -*- Mode: C; indent-tabs-mode: t; c-basic-offset: 8; tab-width: 8 -*- */
 
 /*
- * Nautilus
+ * Nemo
  *
  * Copyright (C) 1999, 2000 Eazel, Inc.
  *
- * Nautilus is free software; you can redistribute it and/or
+ * Nemo is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
  * published by the Free Software Foundation; either version 2 of the
  * License, or (at your option) any later version.
  *
- * Nautilus is distributed in the hope that it will be useful,
+ * Nemo is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
  * General Public License for more details.
@@ -22,16 +22,16 @@
  * Authors: John Sullivan <sullivan@eazel.com>
  */
 
-/* nautilus-bookmarks-window.c - implementation of bookmark-editing window.
+/* nemo-bookmarks-window.c - implementation of bookmark-editing window.
  */
 
 #include <config.h>
-#include "nautilus-bookmarks-window.h"
-#include "nautilus-window.h"
+#include "nemo-bookmarks-window.h"
+#include "nemo-window.h"
 
-#include <libnautilus-private/nautilus-undo.h>
-#include <libnautilus-private/nautilus-global-preferences.h>
-#include <libnautilus-private/nautilus-undo-signal-handlers.h>
+#include <libnemo-private/nemo-undo.h>
+#include <libnemo-private/nemo-global-preferences.h>
+#include <libnemo-private/nemo-undo-signal-handlers.h>
 
 #include <eel/eel-gtk-extensions.h>
 #include <eel/eel-gnome-extensions.h>
@@ -45,8 +45,8 @@
  * class fields. 
  */
 static int		     bookmark_list_changed_signal_id;
-static NautilusBookmarkList *bookmarks = NULL;
-static GtkTreeView	    *bookmark_list_widget = NULL; /* awkward name to distinguish from NautilusBookmarkList */
+static NemoBookmarkList *bookmarks = NULL;
+static GtkTreeView	    *bookmark_list_widget = NULL; /* awkward name to distinguish from NemoBookmarkList */
 static GtkListStore	    *bookmark_list_store = NULL;
 static GtkListStore	    *bookmark_empty_list_store = NULL;
 static GtkTreeSelection     *bookmark_selection = NULL;
@@ -69,9 +69,9 @@ static int                   jump_button_signal_id;
 /* forward declarations */
 static guint    get_selected_row                            (void);
 static gboolean get_selection_exists                        (void);
-static void     name_or_uri_field_activate                  (NautilusEntry        *entry);
-static void     nautilus_bookmarks_window_restore_geometry  (GtkWidget            *window);
-static void     on_bookmark_list_changed                    (NautilusBookmarkList *list,
+static void     name_or_uri_field_activate                  (NemoEntry        *entry);
+static void     nemo_bookmarks_window_restore_geometry  (GtkWidget            *window);
+static void     on_bookmark_list_changed                    (NemoBookmarkList *list,
 							     gpointer              user_data);
 static void     on_name_field_changed                       (GtkEditable          *editable,
 							     gpointer              user_data);
@@ -119,7 +119,7 @@ static void	update_bookmark_from_text		    (void);
 /* We store a pointer to the bookmark in a column so when an item is moved
    with DnD we know which item it is. However we have to be careful to keep
    this in sync with the actual bookmark. Note that
-   nautilus_bookmark_list_insert_item() makes a copy of the bookmark, so we
+   nemo_bookmark_list_insert_item() makes a copy of the bookmark, so we
    have to fetch the new copy and update our pointer. */
 #define BOOKMARK_LIST_COLUMN_ICON		0
 #define BOOKMARK_LIST_COLUMN_NAME		1
@@ -138,7 +138,7 @@ static void	update_bookmark_from_text		    (void);
 #define BOOKMARKS_WINDOW_INITIAL_HEIGHT	200
 
 static void
-nautilus_bookmarks_window_response_callback (GtkDialog *dialog,
+nemo_bookmarks_window_response_callback (GtkDialog *dialog,
 					     int response_id,
 					     gpointer callback_data)
 {
@@ -146,7 +146,7 @@ nautilus_bookmarks_window_response_callback (GtkDialog *dialog,
 		GError *error = NULL;
 
 		gtk_show_uri (gtk_window_get_screen (GTK_WINDOW (dialog)),
-			      "help:gnome-help/nautilus-bookmarks-edit",
+			      "help:ubuntu-help/nemo-bookmarks-edit",
 			      gtk_get_current_event_time (), &error);
 
 		if (error) {
@@ -208,7 +208,7 @@ bookmarks_set_empty (gboolean empty)
 					 GTK_TREE_MODEL (bookmark_list_store));
 		gtk_widget_set_sensitive (GTK_WIDGET (bookmark_list_widget), TRUE);
 
-		if (nautilus_bookmark_list_length (bookmarks) > 0 &&
+		if (nemo_bookmark_list_length (bookmarks) > 0 &&
 		    !get_selection_exists ()) {
 			gtk_tree_model_iter_nth_child (GTK_TREE_MODEL (bookmark_list_store),
 						       &iter, NULL, 0);
@@ -239,12 +239,12 @@ edit_bookmarks_dialog_reset_signals (gpointer data,
  * create_bookmarks_window:
  * 
  * Create a new bookmark-editing window. 
- * @list: The NautilusBookmarkList that this window will edit.
+ * @list: The NemoBookmarkList that this window will edit.
  *
  * Return value: A pointer to the new window.
  **/
 GtkWindow *
-create_bookmarks_window (NautilusBookmarkList *list, GObject *undo_manager_source)
+create_bookmarks_window (NemoBookmarkList *list, GObject *undo_manager_source)
 {
 	GtkWidget         *window;
 	GtkTreeViewColumn *col;
@@ -255,7 +255,7 @@ create_bookmarks_window (NautilusBookmarkList *list, GObject *undo_manager_sourc
 
 	builder = gtk_builder_new ();
 	if (!gtk_builder_add_from_resource (builder,
-					    "/org/gnome/nautilus/nautilus-bookmarks-window.ui",
+					    "/org/gnome/nemo/nemo-bookmarks-window.ui",
 					    NULL)) {
 		return NULL;
 	}
@@ -266,10 +266,10 @@ create_bookmarks_window (NautilusBookmarkList *list, GObject *undo_manager_sourc
 	jump_button = (GtkWidget *)gtk_builder_get_object (builder, "bookmark_jump_button");
 
 	set_up_close_accelerator (window);
-	nautilus_undo_share_undo_manager (G_OBJECT (window), undo_manager_source);
+	nemo_undo_share_undo_manager (G_OBJECT (window), undo_manager_source);
 
-	gtk_window_set_wmclass (GTK_WINDOW (window), "bookmarks", "Nautilus");
-	nautilus_bookmarks_window_restore_geometry (window);
+	gtk_window_set_wmclass (GTK_WINDOW (window), "bookmarks", "Nemo");
+	nemo_bookmarks_window_restore_geometry (window);
 
 	g_object_weak_ref (G_OBJECT (undo_manager_source), edit_bookmarks_dialog_reset_signals, 
 			   undo_manager_source);
@@ -285,7 +285,7 @@ create_bookmarks_window (NautilusBookmarkList *list, GObject *undo_manager_sourc
 	gtk_tree_view_append_column (bookmark_list_widget,
 				     GTK_TREE_VIEW_COLUMN (col));
 	gtk_tree_view_column_set_fixed_width (GTK_TREE_VIEW_COLUMN (col),
-					      NAUTILUS_ICON_SIZE_SMALLER);
+					      NEMO_ICON_SIZE_SMALLER);
 
 	rend = gtk_cell_renderer_text_new ();
 	g_object_set (rend,
@@ -311,7 +311,7 @@ create_bookmarks_window (NautilusBookmarkList *list, GObject *undo_manager_sourc
 	bookmark_selection =
 		GTK_TREE_SELECTION (gtk_tree_view_get_selection (bookmark_list_widget));
 
-	name_field = nautilus_entry_new ();
+	name_field = nemo_entry_new ();
 	
 	gtk_widget_show (name_field);
 	gtk_box_pack_start (GTK_BOX (gtk_builder_get_object (builder, "bookmark_name_placeholder")),
@@ -321,7 +321,7 @@ create_bookmarks_window (NautilusBookmarkList *list, GObject *undo_manager_sourc
 		GTK_LABEL (gtk_builder_get_object (builder, "bookmark_name_label")),
 		name_field);
 
-	uri_field = nautilus_entry_new ();
+	uri_field = nemo_entry_new ();
 	gtk_widget_show (uri_field);
 	gtk_box_pack_start (GTK_BOX (gtk_builder_get_object (builder, "bookmark_location_placeholder")),
 			    uri_field, TRUE, TRUE, 0);
@@ -359,7 +359,7 @@ create_bookmarks_window (NautilusBookmarkList *list, GObject *undo_manager_sourc
 	g_signal_connect (window, "destroy",
 			  G_CALLBACK (on_window_destroy_event), NULL);
 	g_signal_connect (window, "response",
-			  G_CALLBACK (nautilus_bookmarks_window_response_callback), NULL);
+			  G_CALLBACK (nemo_bookmarks_window_response_callback), NULL);
 
 	name_field_changed_signal_id =
 		g_signal_connect (name_field, "changed",
@@ -414,18 +414,18 @@ edit_bookmarks_dialog_set_signals (GObject *undo_manager_source)
 			   undo_manager_source);
 }
 
-static NautilusBookmark *
+static NemoBookmark *
 get_selected_bookmark (void)
 {
-	g_return_val_if_fail(NAUTILUS_IS_BOOKMARK_LIST(bookmarks), NULL);
+	g_return_val_if_fail(NEMO_IS_BOOKMARK_LIST(bookmarks), NULL);
 
 	if (!get_selection_exists())
 		return NULL;
 
-	if (nautilus_bookmark_list_length (bookmarks) < 1)
+	if (nemo_bookmark_list_length (bookmarks) < 1)
 		return NULL;
 
-	return nautilus_bookmark_list_item_at(bookmarks, get_selected_row ());
+	return nemo_bookmark_list_item_at(bookmarks, get_selected_row ());
 }
 
 static guint
@@ -457,14 +457,14 @@ get_selection_exists (void)
 }
 
 static void
-nautilus_bookmarks_window_restore_geometry (GtkWidget *window)
+nemo_bookmarks_window_restore_geometry (GtkWidget *window)
 {
 	const char *window_geometry;
 	
 	g_return_if_fail (GTK_IS_WINDOW (window));
-	g_return_if_fail (NAUTILUS_IS_BOOKMARK_LIST (bookmarks));
+	g_return_if_fail (NEMO_IS_BOOKMARK_LIST (bookmarks));
 
-	window_geometry = nautilus_bookmark_list_get_window_geometry (bookmarks);
+	window_geometry = nemo_bookmark_list_get_window_geometry (bookmarks);
 
 	if (window_geometry != NULL) {	
 		eel_gtk_window_set_initial_geometry_from_string 
@@ -482,16 +482,16 @@ nautilus_bookmarks_window_restore_geometry (GtkWidget *window)
 }
 
 /**
- * nautilus_bookmarks_window_save_geometry:
+ * nemo_bookmarks_window_save_geometry:
  * 
  * Save window size & position to disk.
  * @window: The bookmarks window whose geometry should be saved.
  **/
 void
-nautilus_bookmarks_window_save_geometry (GtkWindow *window)
+nemo_bookmarks_window_save_geometry (GtkWindow *window)
 {
 	g_return_if_fail (GTK_IS_WINDOW (window));
-	g_return_if_fail (NAUTILUS_IS_BOOKMARK_LIST (bookmarks));
+	g_return_if_fail (NEMO_IS_BOOKMARK_LIST (bookmarks));
 
 	/* Don't bother if window is already closed */
 	if (gtk_widget_get_visible (GTK_WIDGET (window))) {
@@ -499,15 +499,15 @@ nautilus_bookmarks_window_save_geometry (GtkWindow *window)
 		
 		geometry_string = eel_gtk_window_get_geometry_string (window);
 
-		nautilus_bookmark_list_set_window_geometry (bookmarks, geometry_string);
+		nemo_bookmark_list_set_window_geometry (bookmarks, geometry_string);
 		g_free (geometry_string);
 	}
 }
 
 static void
-on_bookmark_list_changed (NautilusBookmarkList *bookmarks, gpointer data)
+on_bookmark_list_changed (NemoBookmarkList *bookmarks, gpointer data)
 {
-	g_return_if_fail (NAUTILUS_IS_BOOKMARK_LIST (bookmarks));
+	g_return_if_fail (NEMO_IS_BOOKMARK_LIST (bookmarks));
 
 	/* maybe add logic here or in repopulate to save/restore selection */
 	repopulate ();
@@ -542,8 +542,8 @@ on_name_field_changed (GtkEditable *editable,
 static void
 open_selected_bookmark (gpointer user_data, GdkScreen *screen)
 {
-	NautilusBookmark *selected;
-	NautilusWindow *window;
+	NemoBookmark *selected;
+	NemoWindow *window;
 	GFile *location;
 	
 	selected = get_selected_bookmark ();
@@ -552,13 +552,13 @@ open_selected_bookmark (gpointer user_data, GdkScreen *screen)
 		return;
 	}
 
-	location = nautilus_bookmark_get_location (selected);
+	location = nemo_bookmark_get_location (selected);
 	if (location == NULL) { 
 		return;
 	}
 
 	window = user_data;
-	nautilus_window_go_to (window, location);
+	nemo_window_go_to (window, location);
 
 	g_object_unref (location);
 }
@@ -627,7 +627,7 @@ on_row_changed (GtkListStore *store,
 		GtkTreeIter *iter,
 		gpointer user_data)
 {
-	NautilusBookmark *bookmark = NULL, *bookmark_in_list;
+	NemoBookmark *bookmark = NULL, *bookmark_in_list;
 	gint *indices, row;
 	gboolean insert_bookmark = TRUE;
 
@@ -641,8 +641,8 @@ on_row_changed (GtkListStore *store,
 
 	/* If the bookmark in the list doesn't match the changed one, it must
 	   have been dragged here, so we insert it into the list. */
-	if (row < (gint) nautilus_bookmark_list_length (bookmarks)) {
-		bookmark_in_list = nautilus_bookmark_list_item_at (bookmarks,
+	if (row < (gint) nemo_bookmark_list_length (bookmarks)) {
+		bookmark_in_list = nemo_bookmark_list_item_at (bookmarks,
 								   row);
 		if (bookmark_in_list == bookmark)
 			insert_bookmark = FALSE;
@@ -651,13 +651,13 @@ on_row_changed (GtkListStore *store,
 	if (insert_bookmark) {
 		g_signal_handler_block (bookmarks,
 					bookmark_list_changed_signal_id);
-		nautilus_bookmark_list_insert_item (bookmarks, bookmark, row);
+		nemo_bookmark_list_insert_item (bookmarks, bookmark, row);
 		g_signal_handler_unblock (bookmarks,
 					  bookmark_list_changed_signal_id);
 
 		/* The bookmark will be copied when inserted into the list, so
 		   we have to update the pointer in the list store. */
-		bookmark = nautilus_bookmark_list_item_at (bookmarks, row);
+		bookmark = nemo_bookmark_list_item_at (bookmarks, row);
 		g_signal_handler_block (store, row_changed_signal_id);
 		gtk_list_store_set (store, iter,
 				    BOOKMARK_LIST_COLUMN_BOOKMARK, bookmark,
@@ -726,7 +726,7 @@ on_row_deleted (GtkListStore *store,
 	row = indices[0];
 
 	g_signal_handler_block (bookmarks, bookmark_list_changed_signal_id);
-	nautilus_bookmark_list_delete_item_at (bookmarks, row);
+	nemo_bookmark_list_delete_item_at (bookmarks, row);
 	g_signal_handler_unblock (bookmarks, bookmark_list_changed_signal_id);
 }
 
@@ -734,7 +734,7 @@ static void
 on_selection_changed (GtkTreeSelection *treeselection,
 		      gpointer user_data)
 {
-	NautilusBookmark *selected;
+	NemoBookmark *selected;
 	const char *name = NULL;
 	char *entry_text = NULL;
 	GFile *location;
@@ -745,8 +745,8 @@ on_selection_changed (GtkTreeSelection *treeselection,
 	selected = get_selected_bookmark ();
 
 	if (selected) {
-		name = nautilus_bookmark_get_name (selected);
-		location = nautilus_bookmark_get_location (selected);
+		name = nemo_bookmark_get_name (selected);
+		location = nemo_bookmark_get_location (selected);
 		entry_text = g_file_get_parse_name (location);
 
 		g_object_unref (location);
@@ -759,12 +759,12 @@ on_selection_changed (GtkTreeSelection *treeselection,
 	gtk_widget_set_sensitive (uri_field, selected != NULL);
 
 	g_signal_handler_block (name_field, name_field_changed_signal_id);
-	nautilus_entry_set_text (NAUTILUS_ENTRY (name_field),
+	nemo_entry_set_text (NEMO_ENTRY (name_field),
 				 name ? name : "");
 	g_signal_handler_unblock (name_field, name_field_changed_signal_id);
 
 	g_signal_handler_block (uri_field, uri_field_changed_signal_id);
-	nautilus_entry_set_text (NAUTILUS_ENTRY (uri_field),
+	nemo_entry_set_text (NEMO_ENTRY (uri_field),
 				 entry_text ? entry_text : "");
 	g_signal_handler_unblock (uri_field, uri_field_changed_signal_id);
 
@@ -779,7 +779,7 @@ static void
 update_bookmark_from_text (void)
 {
 	if (text_changed) {
-		NautilusBookmark *bookmark, *bookmark_in_list;
+		NemoBookmark *bookmark, *bookmark_in_list;
 		const char *name;
 		GIcon *icon;
 		guint selected_row;
@@ -796,7 +796,7 @@ update_bookmark_from_text (void)
 		location = g_file_parse_name 
 			(gtk_entry_get_text (GTK_ENTRY (uri_field)));
 		
-		bookmark = nautilus_bookmark_new (location,
+		bookmark = nemo_bookmark_new (location,
 						  name_text_changed ? gtk_entry_get_text (GTK_ENTRY (name_field)) : NULL,
 						  NULL);
 		
@@ -809,8 +809,8 @@ update_bookmark_from_text (void)
 		 */
 		g_signal_handler_block (bookmarks, 
 					bookmark_list_changed_signal_id);
-		nautilus_bookmark_list_delete_item_at (bookmarks, selected_row);
-		nautilus_bookmark_list_insert_item (bookmarks, bookmark, selected_row);
+		nemo_bookmark_list_delete_item_at (bookmarks, selected_row);
+		nemo_bookmark_list_insert_item (bookmarks, bookmark, selected_row);
 		g_signal_handler_unblock (bookmarks, 
 					  bookmark_list_changed_signal_id);
 		g_object_unref (bookmark);
@@ -822,11 +822,11 @@ update_bookmark_from_text (void)
 		g_signal_handler_block (bookmark_list_store,
 					row_changed_signal_id);
 
-		bookmark_in_list = nautilus_bookmark_list_item_at (bookmarks,
+		bookmark_in_list = nemo_bookmark_list_item_at (bookmarks,
 								   selected_row);
 
-		name = nautilus_bookmark_get_name (bookmark_in_list);
-		icon = nautilus_bookmark_get_icon (bookmark_in_list);
+		name = nemo_bookmark_get_name (bookmark_in_list);
+		icon = nemo_bookmark_get_icon (bookmark_in_list);
 
 		gtk_list_store_set (bookmark_list_store, &iter,
 				    BOOKMARK_LIST_COLUMN_BOOKMARK, bookmark_in_list,
@@ -845,19 +845,19 @@ on_text_field_focus_out_event (GtkWidget *widget,
 			       GdkEventFocus *event,
 			       gpointer user_data)
 {
-	g_assert (NAUTILUS_IS_ENTRY (widget));
+	g_assert (NEMO_IS_ENTRY (widget));
 
 	update_bookmark_from_text ();
 	return FALSE;
 }
 
 static void
-name_or_uri_field_activate (NautilusEntry *entry)
+name_or_uri_field_activate (NemoEntry *entry)
 {
-	g_assert (NAUTILUS_IS_ENTRY (entry));
+	g_assert (NEMO_IS_ENTRY (entry));
 
 	update_bookmark_from_text ();
-	nautilus_entry_select_all_at_idle (entry);
+	nemo_entry_select_all_at_idle (entry);
 }
 
 static void
@@ -884,7 +884,7 @@ restore_geometry (gpointer data)
 {
 	g_assert (GTK_IS_WINDOW (data));
 
-	nautilus_bookmarks_window_restore_geometry (GTK_WIDGET (data));
+	nemo_bookmarks_window_restore_geometry (GTK_WIDGET (data));
 
 	/* Don't call this again */
 	return FALSE;
@@ -894,11 +894,11 @@ static void
 on_window_hide_event (GtkWidget *widget,
 		      gpointer user_data)
 {
-	nautilus_bookmarks_window_save_geometry (GTK_WINDOW (widget));
+	nemo_bookmarks_window_save_geometry (GTK_WINDOW (widget));
 
 	/* Disable undo for entry widgets */
-	nautilus_undo_unregister (G_OBJECT (name_field));
-	nautilus_undo_unregister (G_OBJECT (uri_field));
+	nemo_undo_unregister (G_OBJECT (name_field));
+	nemo_undo_unregister (G_OBJECT (uri_field));
 
 	/* restore_geometry only works after window is hidden */
 	g_idle_add (restore_geometry, widget);
@@ -916,14 +916,14 @@ on_window_destroy_event (GtkWidget *widget,
 static void
 repopulate (void)
 {
-	NautilusBookmark *selected;
+	NemoBookmark *selected;
 	GtkListStore *store;
 	GtkTreePath *path;
 	GtkTreeRowReference *reference;
 	guint index;
 
 	g_assert (GTK_IS_TREE_VIEW (bookmark_list_widget));
-	g_assert (NAUTILUS_IS_BOOKMARK_LIST (bookmarks));
+	g_assert (NEMO_IS_BOOKMARK_LIST (bookmarks));
 	
 	store = GTK_LIST_STORE (bookmark_list_store);
 
@@ -958,15 +958,15 @@ repopulate (void)
 
 	reference = NULL;
 
-	for (index = 0; index < nautilus_bookmark_list_length (bookmarks); ++index) {
-		NautilusBookmark *bookmark;
+	for (index = 0; index < nemo_bookmark_list_length (bookmarks); ++index) {
+		NemoBookmark *bookmark;
 		const char       *bookmark_name;
 		GIcon            *bookmark_icon;
 		GtkTreeIter       iter;
 
-		bookmark = nautilus_bookmark_list_item_at (bookmarks, index);
-		bookmark_name = nautilus_bookmark_get_name (bookmark);
-		bookmark_icon = nautilus_bookmark_get_icon (bookmark);
+		bookmark = nemo_bookmark_list_item_at (bookmarks, index);
+		bookmark_name = nemo_bookmark_get_name (bookmark);
+		bookmark_icon = nemo_bookmark_get_icon (bookmark);
 
 		gtk_list_store_append (store, &iter);
 		gtk_list_store_set (store, &iter, 

@@ -2,12 +2,12 @@
 /*
  * Copyright (C) 2005 Red Hat, Inc.
  *
- * Nautilus is free software; you can redistribute it and/or
+ * Nemo is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
  * published by the Free Software Foundation; either version 2 of the
  * License, or (at your option) any later version.
  *
- * Nautilus is distributed in the hope that it will be useful,
+ * Nemo is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
  * General Public License for more details.
@@ -22,8 +22,8 @@
  */
 
 #include <config.h>
-#include "nautilus-query-editor.h"
-#include "nautilus-window-slot.h"
+#include "nemo-query-editor.h"
+#include "nemo-window-slot.h"
 
 #include <string.h>
 #include <glib/gi18n.h>
@@ -34,35 +34,35 @@
 #include <gtk/gtk.h>
 
 typedef enum {
-	NAUTILUS_QUERY_EDITOR_ROW_LOCATION,
-	NAUTILUS_QUERY_EDITOR_ROW_TYPE,
+	NEMO_QUERY_EDITOR_ROW_LOCATION,
+	NEMO_QUERY_EDITOR_ROW_TYPE,
 	
-	NAUTILUS_QUERY_EDITOR_ROW_LAST
-} NautilusQueryEditorRowType;
+	NEMO_QUERY_EDITOR_ROW_LAST
+} NemoQueryEditorRowType;
 
 typedef struct {
-	NautilusQueryEditorRowType type;
-	NautilusQueryEditor *editor;
+	NemoQueryEditorRowType type;
+	NemoQueryEditor *editor;
 	GtkWidget *hbox;
 	GtkWidget *combo;
 
 	GtkWidget *type_widget;
 	
 	void *data;
-} NautilusQueryEditorRow;
+} NemoQueryEditorRow;
 
 
 typedef struct {
 	const char *name;
-	GtkWidget * (*create_widgets)      (NautilusQueryEditorRow *row);
-	void        (*add_to_query)        (NautilusQueryEditorRow *row,
-					    NautilusQuery          *query);
-	void        (*free_data)           (NautilusQueryEditorRow *row);
-	void        (*add_rows_from_query) (NautilusQueryEditor *editor,
-					    NautilusQuery *query);
-} NautilusQueryEditorRowOps;
+	GtkWidget * (*create_widgets)      (NemoQueryEditorRow *row);
+	void        (*add_to_query)        (NemoQueryEditorRow *row,
+					    NemoQuery          *query);
+	void        (*free_data)           (NemoQueryEditorRow *row);
+	void        (*add_rows_from_query) (NemoQueryEditor *editor,
+					    NemoQuery *query);
+} NemoQueryEditorRowOps;
 
-struct NautilusQueryEditorDetails {
+struct NemoQueryEditorDetails {
 	GtkWidget *entry;
 	gboolean change_frozen;
 	guint typing_timeout_id;
@@ -73,8 +73,8 @@ struct NautilusQueryEditorDetails {
 	GList *rows;
 	char *last_set_query_text;
 	
-	NautilusSearchBar *bar;
-	NautilusWindowSlot *slot;
+	NemoSearchBar *bar;
+	NemoWindowSlot *slot;
 };
 
 enum {
@@ -85,30 +85,30 @@ enum {
 
 static guint signals[LAST_SIGNAL];
 
-static void entry_activate_cb (GtkWidget *entry, NautilusQueryEditor *editor);
-static void entry_changed_cb  (GtkWidget *entry, NautilusQueryEditor *editor);
-static void nautilus_query_editor_changed_force (NautilusQueryEditor *editor,
+static void entry_activate_cb (GtkWidget *entry, NemoQueryEditor *editor);
+static void entry_changed_cb  (GtkWidget *entry, NemoQueryEditor *editor);
+static void nemo_query_editor_changed_force (NemoQueryEditor *editor,
 						 gboolean             force);
-static void nautilus_query_editor_changed (NautilusQueryEditor *editor);
-static NautilusQueryEditorRow * nautilus_query_editor_add_row (NautilusQueryEditor *editor,
-							       NautilusQueryEditorRowType type);
+static void nemo_query_editor_changed (NemoQueryEditor *editor);
+static NemoQueryEditorRow * nemo_query_editor_add_row (NemoQueryEditor *editor,
+							       NemoQueryEditorRowType type);
 
-static GtkWidget *location_row_create_widgets  (NautilusQueryEditorRow *row);
-static void       location_row_add_to_query    (NautilusQueryEditorRow *row,
-					        NautilusQuery          *query);
-static void       location_row_free_data       (NautilusQueryEditorRow *row);
-static void       location_add_rows_from_query (NautilusQueryEditor    *editor,
-					        NautilusQuery          *query);
-static GtkWidget *type_row_create_widgets      (NautilusQueryEditorRow *row);
-static void       type_row_add_to_query        (NautilusQueryEditorRow *row,
-					        NautilusQuery          *query);
-static void       type_row_free_data           (NautilusQueryEditorRow *row);
-static void       type_add_rows_from_query     (NautilusQueryEditor    *editor,
-					        NautilusQuery          *query);
+static GtkWidget *location_row_create_widgets  (NemoQueryEditorRow *row);
+static void       location_row_add_to_query    (NemoQueryEditorRow *row,
+					        NemoQuery          *query);
+static void       location_row_free_data       (NemoQueryEditorRow *row);
+static void       location_add_rows_from_query (NemoQueryEditor    *editor,
+					        NemoQuery          *query);
+static GtkWidget *type_row_create_widgets      (NemoQueryEditorRow *row);
+static void       type_row_add_to_query        (NemoQueryEditorRow *row,
+					        NemoQuery          *query);
+static void       type_row_free_data           (NemoQueryEditorRow *row);
+static void       type_add_rows_from_query     (NemoQueryEditor    *editor,
+					        NemoQuery          *query);
 
 
 
-static NautilusQueryEditorRowOps row_type[] = {
+static NemoQueryEditorRowOps row_type[] = {
 	{ N_("Location"),
 	  location_row_create_widgets,
 	  location_row_add_to_query,
@@ -123,14 +123,14 @@ static NautilusQueryEditorRowOps row_type[] = {
 	},
 };
 
-G_DEFINE_TYPE (NautilusQueryEditor, nautilus_query_editor, GTK_TYPE_BOX);
+G_DEFINE_TYPE (NemoQueryEditor, nemo_query_editor, GTK_TYPE_BOX);
 
 static void
-nautilus_query_editor_dispose (GObject *object)
+nemo_query_editor_dispose (GObject *object)
 {
-	NautilusQueryEditor *editor;
+	NemoQueryEditor *editor;
 
-	editor = NAUTILUS_QUERY_EDITOR (object);
+	editor = NEMO_QUERY_EDITOR (object);
 
 	if (editor->details->typing_timeout_id) {
 		g_source_remove (editor->details->typing_timeout_id);
@@ -145,15 +145,15 @@ nautilus_query_editor_dispose (GObject *object)
 						      entry_changed_cb,
 						      editor);
 		
-		nautilus_search_bar_return_entry (editor->details->bar);
+		nemo_search_bar_return_entry (editor->details->bar);
 		eel_remove_weak_pointer (&editor->details->bar);
 	}
 
-	G_OBJECT_CLASS (nautilus_query_editor_parent_class)->dispose (object);
+	G_OBJECT_CLASS (nemo_query_editor_parent_class)->dispose (object);
 }
 
 static gboolean
-nautilus_query_editor_draw (GtkWidget *widget,
+nemo_query_editor_draw (GtkWidget *widget,
 			    cairo_t *cr)
 {
 	GtkStyleContext *context;
@@ -173,38 +173,38 @@ nautilus_query_editor_draw (GtkWidget *widget,
 
 	gtk_style_context_restore (context);
 
-	GTK_WIDGET_CLASS (nautilus_query_editor_parent_class)->draw (widget, cr);
+	GTK_WIDGET_CLASS (nemo_query_editor_parent_class)->draw (widget, cr);
 
 	return FALSE;
 }
 
 static void
-nautilus_query_editor_class_init (NautilusQueryEditorClass *class)
+nemo_query_editor_class_init (NemoQueryEditorClass *class)
 {
 	GObjectClass *gobject_class;
 	GtkWidgetClass *widget_class;
 	GtkBindingSet *binding_set;
 
 	gobject_class = G_OBJECT_CLASS (class);
-        gobject_class->dispose = nautilus_query_editor_dispose;
+        gobject_class->dispose = nemo_query_editor_dispose;
 
 	widget_class = GTK_WIDGET_CLASS (class);
-	widget_class->draw = nautilus_query_editor_draw;
+	widget_class->draw = nemo_query_editor_draw;
 
 	signals[CHANGED] =
 		g_signal_new ("changed",
 		              G_TYPE_FROM_CLASS (class),
 		              G_SIGNAL_RUN_LAST,
-		              G_STRUCT_OFFSET (NautilusQueryEditorClass, changed),
+		              G_STRUCT_OFFSET (NemoQueryEditorClass, changed),
 		              NULL, NULL,
 		              g_cclosure_marshal_generic,
-		              G_TYPE_NONE, 2, NAUTILUS_TYPE_QUERY, G_TYPE_BOOLEAN);
+		              G_TYPE_NONE, 2, NEMO_TYPE_QUERY, G_TYPE_BOOLEAN);
 
 	signals[CANCEL] =
 		g_signal_new ("cancel",
 		              G_TYPE_FROM_CLASS (class),
 		              G_SIGNAL_RUN_LAST | G_SIGNAL_ACTION,
-		              G_STRUCT_OFFSET (NautilusQueryEditorClass, cancel),
+		              G_STRUCT_OFFSET (NemoQueryEditorClass, cancel),
 		              NULL, NULL,
 		              g_cclosure_marshal_VOID__VOID,
 		              G_TYPE_NONE, 0);
@@ -212,28 +212,28 @@ nautilus_query_editor_class_init (NautilusQueryEditorClass *class)
 	binding_set = gtk_binding_set_by_class (class);
 	gtk_binding_entry_add_signal (binding_set, GDK_KEY_Escape, 0, "cancel", 0);
 
-	g_type_class_add_private (class, sizeof (NautilusQueryEditorDetails));
+	g_type_class_add_private (class, sizeof (NemoQueryEditorDetails));
 }
 
 static void
-entry_activate_cb (GtkWidget *entry, NautilusQueryEditor *editor)
+entry_activate_cb (GtkWidget *entry, NemoQueryEditor *editor)
 {
 	if (editor->details->typing_timeout_id) {
 		g_source_remove (editor->details->typing_timeout_id);
 		editor->details->typing_timeout_id = 0;
 	}
 
-	nautilus_query_editor_changed_force (editor, TRUE);
+	nemo_query_editor_changed_force (editor, TRUE);
 }
 
 static gboolean
 typing_timeout_cb (gpointer user_data)
 {
-	NautilusQueryEditor *editor;
+	NemoQueryEditor *editor;
 
-	editor = NAUTILUS_QUERY_EDITOR (user_data);
+	editor = NEMO_QUERY_EDITOR (user_data);
 
-	nautilus_query_editor_changed (editor);
+	nemo_query_editor_changed (editor);
 
 	editor->details->typing_timeout_id = 0;
 
@@ -243,7 +243,7 @@ typing_timeout_cb (gpointer user_data)
 #define TYPING_TIMEOUT 750
 
 static void
-entry_changed_cb (GtkWidget *entry, NautilusQueryEditor *editor)
+entry_changed_cb (GtkWidget *entry, NemoQueryEditor *editor)
 {
 	if (editor->details->change_frozen) {
 		return;
@@ -260,16 +260,16 @@ entry_changed_cb (GtkWidget *entry, NautilusQueryEditor *editor)
 }
 
 static void
-edit_clicked (GtkButton *button, NautilusQueryEditor *editor)
+edit_clicked (GtkButton *button, NemoQueryEditor *editor)
 {
-	nautilus_query_editor_set_visible (editor, TRUE);
-	nautilus_query_editor_grab_focus (editor);
+	nemo_query_editor_set_visible (editor, TRUE);
+	nemo_query_editor_grab_focus (editor);
 }
 
 /* Location */
 
 static GtkWidget *
-location_row_create_widgets (NautilusQueryEditorRow *row)
+location_row_create_widgets (NemoQueryEditorRow *row)
 {
 	GtkWidget *chooser;
 
@@ -281,7 +281,7 @@ location_row_create_widgets (NautilusQueryEditorRow *row)
 	gtk_widget_show (chooser);
 
 	g_signal_connect_swapped (chooser, "current-folder-changed",
-				  G_CALLBACK (nautilus_query_editor_changed),
+				  G_CALLBACK (nemo_query_editor_changed),
 				  row->editor);
 		
 	gtk_box_pack_start (GTK_BOX (row->hbox), chooser, FALSE, FALSE, 0);
@@ -290,8 +290,8 @@ location_row_create_widgets (NautilusQueryEditorRow *row)
 }
 
 static void
-location_row_add_to_query (NautilusQueryEditorRow *row,
-			   NautilusQuery          *query)
+location_row_add_to_query (NemoQueryEditorRow *row,
+			   NemoQuery          *query)
 {
 	char *folder, *uri;
 	
@@ -305,23 +305,23 @@ location_row_add_to_query (NautilusQueryEditorRow *row,
 	uri = g_filename_to_uri (folder, NULL, NULL);
 	g_free (folder);
 		
-	nautilus_query_set_location (query, uri);
+	nemo_query_set_location (query, uri);
 	g_free (uri);
 }
 
 static void
-location_row_free_data (NautilusQueryEditorRow *row)
+location_row_free_data (NemoQueryEditorRow *row)
 {
 }
 
 static void
-location_add_rows_from_query (NautilusQueryEditor    *editor,
-			      NautilusQuery          *query)
+location_add_rows_from_query (NemoQueryEditor    *editor,
+			      NemoQuery          *query)
 {
-	NautilusQueryEditorRow *row;
+	NemoQueryEditorRow *row;
 	char *uri, *folder;
 	
-	uri = nautilus_query_get_location (query);
+	uri = nemo_query_get_location (query);
 
 	if (uri == NULL) {
 		return;
@@ -332,8 +332,8 @@ location_add_rows_from_query (NautilusQueryEditor    *editor,
 		return;
 	}
 	
-	row = nautilus_query_editor_add_row (editor,
-					     NAUTILUS_QUERY_EDITOR_ROW_LOCATION);
+	row = nemo_query_editor_add_row (editor,
+					     NEMO_QUERY_EDITOR_ROW_LOCATION);
 	gtk_file_chooser_set_current_folder (GTK_FILE_CHOOSER (row->type_widget),
 					     folder);
 	
@@ -487,7 +487,7 @@ struct {
 };
 
 static void
-type_add_custom_type (NautilusQueryEditorRow *row,
+type_add_custom_type (NemoQueryEditorRow *row,
 		      const char *mime_type,
 		      const char *description,
 		      GtkTreeIter *iter)
@@ -507,7 +507,7 @@ type_add_custom_type (NautilusQueryEditorRow *row,
 
 
 static void
-type_combo_changed (GtkComboBox *combo_box, NautilusQueryEditorRow *row)
+type_combo_changed (GtkComboBox *combo_box, NemoQueryEditorRow *row)
 {
 	GtkTreeIter iter;
 	gboolean other;
@@ -616,11 +616,11 @@ type_combo_changed (GtkComboBox *combo_box, NautilusQueryEditorRow *row)
 		gtk_widget_destroy (dialog);
 	}
 	
-	nautilus_query_editor_changed (row->editor);
+	nemo_query_editor_changed (row->editor);
 }
 
 static GtkWidget *
-type_row_create_widgets (NautilusQueryEditorRow *row)
+type_row_create_widgets (NemoQueryEditorRow *row)
 {
 	GtkWidget *combo;
 	GtkCellRenderer *cell;
@@ -673,8 +673,8 @@ type_row_create_widgets (NautilusQueryEditorRow *row)
 }
 
 static void
-type_row_add_to_query (NautilusQueryEditorRow *row,
-		       NautilusQuery          *query)
+type_row_add_to_query (NemoQueryEditorRow *row,
+		       NemoQuery          *query)
 {
 	GtkTreeIter iter;
 	char **mimetypes;
@@ -691,18 +691,18 @@ type_row_add_to_query (NautilusQueryEditorRow *row,
 
 	if (mimetypes != NULL) {
 		while (*mimetypes != NULL) {
-			nautilus_query_add_mime_type (query, *mimetypes);
+			nemo_query_add_mime_type (query, *mimetypes);
 			mimetypes++;
 		}
 	}
 	if (mimetype) {
-		nautilus_query_add_mime_type (query, mimetype);
+		nemo_query_add_mime_type (query, mimetype);
 		g_free (mimetype);
 	}
 }
 
 static void
-type_row_free_data (NautilusQueryEditorRow *row)
+type_row_free_data (NemoQueryEditorRow *row)
 {
 }
 
@@ -762,19 +762,19 @@ remove_group_types_from_list (char **group_types, GList *mime_types)
 
 
 static void
-type_add_rows_from_query (NautilusQueryEditor    *editor,
-			  NautilusQuery          *query)
+type_add_rows_from_query (NemoQueryEditor    *editor,
+			  NemoQuery          *query)
 {
 	GList *mime_types;
 	char *mime_type;
 	const char *desc;
-	NautilusQueryEditorRow *row;
+	NemoQueryEditorRow *row;
 	GtkTreeIter iter;
 	int i;
 	GtkTreeModel *model;
 	GList *l;
 
-	mime_types = nautilus_query_get_mime_types (query);
+	mime_types = nemo_query_get_mime_types (query);
 
 	if (mime_types == NULL) {
 		return;
@@ -786,8 +786,8 @@ type_add_rows_from_query (NautilusQueryEditor    *editor,
 			mime_types = remove_group_types_from_list (mime_type_groups[i].mimetypes,
 								   mime_types);
 
-			row = nautilus_query_editor_add_row (editor,
-							     NAUTILUS_QUERY_EDITOR_ROW_TYPE);
+			row = nemo_query_editor_add_row (editor,
+							     NEMO_QUERY_EDITOR_ROW_TYPE);
 
 			model = gtk_combo_box_get_model (GTK_COMBO_BOX (row->type_widget));
 
@@ -805,8 +805,8 @@ type_add_rows_from_query (NautilusQueryEditor    *editor,
 			desc = mime_type;
 		}
 
-		row = nautilus_query_editor_add_row (editor,
-						     NAUTILUS_QUERY_EDITOR_ROW_TYPE);
+		row = nemo_query_editor_add_row (editor,
+						     NEMO_QUERY_EDITOR_ROW_TYPE);
 		model = gtk_combo_box_get_model (GTK_COMBO_BOX (row->type_widget));
 		
 		type_add_custom_type (row, mime_type, desc, &iter);
@@ -819,16 +819,16 @@ type_add_rows_from_query (NautilusQueryEditor    *editor,
 
 /* End of row types */
 
-static NautilusQueryEditorRowType
-get_next_free_type (NautilusQueryEditor *editor)
+static NemoQueryEditorRowType
+get_next_free_type (NemoQueryEditor *editor)
 {
-	NautilusQueryEditorRow *row;
-	NautilusQueryEditorRowType type;
+	NemoQueryEditorRow *row;
+	NemoQueryEditorRowType type;
 	gboolean found;
 	GList *l;
 
 	
-	for (type = 0; type < NAUTILUS_QUERY_EDITOR_ROW_LAST; type++) {
+	for (type = 0; type < NEMO_QUERY_EDITOR_ROW_LAST; type++) {
 		found = FALSE;
 		for (l = editor->details->rows; l != NULL; l = l->next) {
 			row = l->data;
@@ -841,13 +841,13 @@ get_next_free_type (NautilusQueryEditor *editor)
 			return type;
 		}
 	}
-	return NAUTILUS_QUERY_EDITOR_ROW_TYPE;
+	return NEMO_QUERY_EDITOR_ROW_TYPE;
 }
 
 static void
-remove_row_cb (GtkButton *clicked_button, NautilusQueryEditorRow *row)
+remove_row_cb (GtkButton *clicked_button, NemoQueryEditorRow *row)
 {
-	NautilusQueryEditor *editor;
+	NemoQueryEditor *editor;
 
 	editor = row->editor;
 	gtk_container_remove (GTK_CONTAINER (editor->details->visible_vbox),
@@ -858,19 +858,19 @@ remove_row_cb (GtkButton *clicked_button, NautilusQueryEditorRow *row)
 	row_type[row->type].free_data (row);
 	g_free (row);
 
-	nautilus_query_editor_changed (editor);
+	nemo_query_editor_changed (editor);
 }
 
 static void
-create_type_widgets (NautilusQueryEditorRow *row)
+create_type_widgets (NemoQueryEditorRow *row)
 {
 	row->type_widget = row_type[row->type].create_widgets (row);
 }
 
 static void
-row_type_combo_changed_cb (GtkComboBox *combo_box, NautilusQueryEditorRow *row)
+row_type_combo_changed_cb (GtkComboBox *combo_box, NemoQueryEditorRow *row)
 {
-	NautilusQueryEditorRowType type;
+	NemoQueryEditorRowType type;
 
 	type = gtk_combo_box_get_active (combo_box);
 
@@ -890,18 +890,18 @@ row_type_combo_changed_cb (GtkComboBox *combo_box, NautilusQueryEditorRow *row)
 	
 	create_type_widgets (row);
 
-	nautilus_query_editor_changed (row->editor);
+	nemo_query_editor_changed (row->editor);
 }
 
-static NautilusQueryEditorRow *
-nautilus_query_editor_add_row (NautilusQueryEditor *editor,
-			       NautilusQueryEditorRowType type)
+static NemoQueryEditorRow *
+nemo_query_editor_add_row (NemoQueryEditor *editor,
+			       NemoQueryEditorRowType type)
 {
 	GtkWidget *hbox, *button, *image, *combo;
-	NautilusQueryEditorRow *row;
+	NemoQueryEditorRow *row;
 	int i;
 
-	row = g_new0 (NautilusQueryEditorRow, 1);
+	row = g_new0 (NemoQueryEditorRow, 1);
 	row->editor = editor;
 	row->type = type;
 	
@@ -912,7 +912,7 @@ nautilus_query_editor_add_row (NautilusQueryEditor *editor,
 
 	combo = gtk_combo_box_text_new ();
 	row->combo = combo;
-	for (i = 0; i < NAUTILUS_QUERY_EDITOR_ROW_LAST; i++) {
+	for (i = 0; i < NEMO_QUERY_EDITOR_ROW_LAST; i++) {
 		gtk_combo_box_text_append_text (GTK_COMBO_BOX_TEXT (combo), gettext (row_type[i].name));
 	}
 	gtk_widget_show (combo);
@@ -946,26 +946,26 @@ nautilus_query_editor_add_row (NautilusQueryEditor *editor,
 }
 
 static void
-go_search_cb (GtkButton *clicked_button, NautilusQueryEditor *editor)
+go_search_cb (GtkButton *clicked_button, NemoQueryEditor *editor)
 {
-	nautilus_query_editor_changed_force (editor, TRUE);
+	nemo_query_editor_changed_force (editor, TRUE);
 }
 
 static void
-add_new_row_cb (GtkButton *clicked_button, NautilusQueryEditor *editor)
+add_new_row_cb (GtkButton *clicked_button, NemoQueryEditor *editor)
 {
-	nautilus_query_editor_add_row (editor, get_next_free_type (editor));
-	nautilus_query_editor_changed (editor);
+	nemo_query_editor_add_row (editor, get_next_free_type (editor));
+	nemo_query_editor_changed (editor);
 }
 
 static void
-nautilus_query_editor_init (NautilusQueryEditor *editor)
+nemo_query_editor_init (NemoQueryEditor *editor)
 {
 	GtkWidget *hbox, *label, *button;
 	char *label_markup;
 
-	editor->details = G_TYPE_INSTANCE_GET_PRIVATE (editor, NAUTILUS_TYPE_QUERY_EDITOR,
-						       NautilusQueryEditorDetails);
+	editor->details = G_TYPE_INSTANCE_GET_PRIVATE (editor, NEMO_TYPE_QUERY_EDITOR,
+						       NemoQueryEditorDetails);
 	editor->details->is_visible = TRUE;
 
 	gtk_orientable_set_orientation (GTK_ORIENTABLE (editor), GTK_ORIENTATION_VERTICAL);
@@ -993,7 +993,7 @@ nautilus_query_editor_init (NautilusQueryEditor *editor)
 	g_free (label_markup);
 
 	gtk_style_context_add_class (gtk_widget_get_style_context (label),
-				     "nautilus-cluebar-label");
+				     "nemo-cluebar-label");
 	
 	gtk_box_pack_start (GTK_BOX (hbox), label, FALSE, FALSE, 0);
 	gtk_widget_show (label);
@@ -1010,14 +1010,14 @@ nautilus_query_editor_init (NautilusQueryEditor *editor)
 }
 
 void
-nautilus_query_editor_set_default_query (NautilusQueryEditor *editor)
+nemo_query_editor_set_default_query (NemoQueryEditor *editor)
 {
-	nautilus_query_editor_add_row (editor, NAUTILUS_QUERY_EDITOR_ROW_LOCATION);
-	nautilus_query_editor_changed (editor);
+	nemo_query_editor_add_row (editor, NEMO_QUERY_EDITOR_ROW_LOCATION);
+	nemo_query_editor_changed (editor);
 }
 
 static void
-finish_first_line (NautilusQueryEditor *editor, GtkWidget *hbox, gboolean use_go)
+finish_first_line (NemoQueryEditor *editor, GtkWidget *hbox, gboolean use_go)
 {
 	GtkWidget *button, *image;
 
@@ -1054,7 +1054,7 @@ finish_first_line (NautilusQueryEditor *editor, GtkWidget *hbox, gboolean use_go
 }
 
 static void
-setup_internal_entry (NautilusQueryEditor *editor)
+setup_internal_entry (NemoQueryEditor *editor)
 {
 	GtkWidget *hbox, *label;
 	char *label_markup;
@@ -1071,7 +1071,7 @@ setup_internal_entry (NautilusQueryEditor *editor)
 	gtk_widget_show (label);
 
 	gtk_style_context_add_class (gtk_widget_get_style_context (label),
-				     "nautilus-cluebar-label");
+				     "nemo-cluebar-label");
 	
 	gtk_box_pack_start (GTK_BOX (hbox), label, FALSE, FALSE, 0);
 
@@ -1089,7 +1089,7 @@ setup_internal_entry (NautilusQueryEditor *editor)
 }
 
 static void
-setup_external_entry (NautilusQueryEditor *editor, GtkWidget *entry)
+setup_external_entry (NemoQueryEditor *editor, GtkWidget *entry)
 {
 	GtkWidget *hbox, *label;
 	gchar *label_markup;
@@ -1105,7 +1105,7 @@ setup_external_entry (NautilusQueryEditor *editor, GtkWidget *entry)
 	gtk_widget_show (label);
 
 	gtk_style_context_add_class (gtk_widget_get_style_context (label),
-				     "nautilus-cluebar-label");
+				     "nemo-cluebar-label");
 	
 	gtk_box_pack_start (GTK_BOX (hbox), label, FALSE, FALSE, 0);
 	
@@ -1121,7 +1121,7 @@ setup_external_entry (NautilusQueryEditor *editor, GtkWidget *entry)
 }
 
 void
-nautilus_query_editor_set_visible (NautilusQueryEditor *editor,
+nemo_query_editor_set_visible (NemoQueryEditor *editor,
 				   gboolean visible)
 {
 	editor->details->is_visible = visible;
@@ -1135,7 +1135,7 @@ nautilus_query_editor_set_visible (NautilusQueryEditor *editor,
 }
 
 static gboolean
-query_is_valid (NautilusQueryEditor *editor)
+query_is_valid (NemoQueryEditor *editor)
 {
 	const char *text;
 
@@ -1145,16 +1145,16 @@ query_is_valid (NautilusQueryEditor *editor)
 }
 
 static void
-nautilus_query_editor_changed_force (NautilusQueryEditor *editor, gboolean force_reload)
+nemo_query_editor_changed_force (NemoQueryEditor *editor, gboolean force_reload)
 {
-	NautilusQuery *query;
+	NemoQuery *query;
 
 	if (editor->details->change_frozen) {
 		return;
 	}
 	
 	if (query_is_valid (editor)) {
-		query = nautilus_query_editor_get_query (editor);
+		query = nemo_query_editor_get_query (editor);
 		g_signal_emit (editor, signals[CHANGED], 0,
 			       query, force_reload);
 		g_object_unref (query);
@@ -1162,26 +1162,26 @@ nautilus_query_editor_changed_force (NautilusQueryEditor *editor, gboolean force
 }
 
 static void
-nautilus_query_editor_changed (NautilusQueryEditor *editor)
+nemo_query_editor_changed (NemoQueryEditor *editor)
 {
-	nautilus_query_editor_changed_force (editor, FALSE);
+	nemo_query_editor_changed_force (editor, FALSE);
 }
 
 void
-nautilus_query_editor_grab_focus (NautilusQueryEditor *editor)
+nemo_query_editor_grab_focus (NemoQueryEditor *editor)
 {
 	if (editor->details->is_visible) {
 		gtk_widget_grab_focus (editor->details->entry);
 	}
 }
 
-NautilusQuery *
-nautilus_query_editor_get_query (NautilusQueryEditor *editor)
+NemoQuery *
+nemo_query_editor_get_query (NemoQueryEditor *editor)
 {
 	const char *query_text;
-	NautilusQuery *query;
+	NemoQuery *query;
 	GList *l;
-	NautilusQueryEditorRow *row;
+	NemoQueryEditorRow *row;
 
 	if (editor == NULL || editor->details == NULL || editor->details->entry == NULL) {
 		return NULL;
@@ -1194,8 +1194,8 @@ nautilus_query_editor_get_query (NautilusQueryEditor *editor)
 		return NULL;
 	}
 	
-	query = nautilus_query_new ();
-	nautilus_query_set_text (query, query_text);
+	query = nemo_query_new ();
+	nemo_query_set_text (query, query_text);
 
 	for (l = editor->details->rows; l != NULL; l = l->next) {
 		row = l->data;
@@ -1207,7 +1207,7 @@ nautilus_query_editor_get_query (NautilusQueryEditor *editor)
 }
 
 void
-nautilus_query_editor_clear_query (NautilusQueryEditor *editor)
+nemo_query_editor_clear_query (NemoQueryEditor *editor)
 {
 	editor->details->change_frozen = TRUE;
 	gtk_entry_set_text (GTK_ENTRY (editor->details->entry), "");
@@ -1219,24 +1219,24 @@ nautilus_query_editor_clear_query (NautilusQueryEditor *editor)
 }
 
 GtkWidget *
-nautilus_query_editor_new (gboolean start_hidden)
+nemo_query_editor_new (gboolean start_hidden)
 {
 	GtkWidget *editor;
 
-	editor = g_object_new (NAUTILUS_TYPE_QUERY_EDITOR, NULL);
-	nautilus_query_editor_set_visible (NAUTILUS_QUERY_EDITOR (editor),
+	editor = g_object_new (NEMO_TYPE_QUERY_EDITOR, NULL);
+	nemo_query_editor_set_visible (NEMO_QUERY_EDITOR (editor),
 					   !start_hidden);
 	
-	setup_internal_entry (NAUTILUS_QUERY_EDITOR (editor));
+	setup_internal_entry (NEMO_QUERY_EDITOR (editor));
 		
 	return editor;
 }
 
 static void
-detach_from_external_entry (NautilusQueryEditor *editor)
+detach_from_external_entry (NemoQueryEditor *editor)
 {
 	if (editor->details->bar != NULL) {
-		nautilus_search_bar_return_entry (editor->details->bar);
+		nemo_search_bar_return_entry (editor->details->bar);
 		g_signal_handlers_block_by_func (editor->details->entry,
 						 entry_activate_cb,
 						 editor);
@@ -1247,10 +1247,10 @@ detach_from_external_entry (NautilusQueryEditor *editor)
 }
 
 static void
-attach_to_external_entry (NautilusQueryEditor *editor)
+attach_to_external_entry (NemoQueryEditor *editor)
 {
 	if (editor->details->bar != NULL) {
-		nautilus_search_bar_borrow_entry (editor->details->bar);
+		nemo_search_bar_borrow_entry (editor->details->bar);
 		g_signal_handlers_unblock_by_func (editor->details->entry,
 						   entry_activate_cb,
 						   editor);
@@ -1266,23 +1266,23 @@ attach_to_external_entry (NautilusQueryEditor *editor)
 }
 
 GtkWidget*
-nautilus_query_editor_new_with_bar (gboolean start_hidden,
+nemo_query_editor_new_with_bar (gboolean start_hidden,
 				    gboolean start_attached,
-				    NautilusSearchBar *bar,
-				    NautilusWindowSlot *slot)
+				    NemoSearchBar *bar,
+				    NemoWindowSlot *slot)
 {
 	GtkWidget *entry;
-	NautilusQueryEditor *editor;
+	NemoQueryEditor *editor;
 
-	editor = NAUTILUS_QUERY_EDITOR (g_object_new (NAUTILUS_TYPE_QUERY_EDITOR, NULL));
-	nautilus_query_editor_set_visible (editor, !start_hidden);
+	editor = NEMO_QUERY_EDITOR (g_object_new (NEMO_TYPE_QUERY_EDITOR, NULL));
+	nemo_query_editor_set_visible (editor, !start_hidden);
 
 	editor->details->bar = bar;
 	eel_add_weak_pointer (&editor->details->bar);
 
 	editor->details->slot = slot;
 
-	entry = nautilus_search_bar_borrow_entry (bar);
+	entry = nemo_search_bar_borrow_entry (bar);
 	setup_external_entry (editor, entry);
 	if (!start_attached) {
 		detach_from_external_entry (editor);
@@ -1299,17 +1299,17 @@ nautilus_query_editor_new_with_bar (gboolean start_hidden,
 }
 
 void
-nautilus_query_editor_set_query (NautilusQueryEditor *editor, NautilusQuery *query)
+nemo_query_editor_set_query (NemoQueryEditor *editor, NemoQuery *query)
 {
-	NautilusQueryEditorRowType type;
+	NemoQueryEditorRowType type;
 	char *text;
 
 	if (!query) {
-		nautilus_query_editor_clear_query (editor);
+		nemo_query_editor_clear_query (editor);
 		return;
 	}
 
-	text = nautilus_query_get_text (query);
+	text = nemo_query_get_text (query);
 
 	if (!text) {
 		text = g_strdup ("");
@@ -1318,7 +1318,7 @@ nautilus_query_editor_set_query (NautilusQueryEditor *editor, NautilusQuery *que
 	editor->details->change_frozen = TRUE;
 	gtk_entry_set_text (GTK_ENTRY (editor->details->entry), text);
 
-	for (type = 0; type < NAUTILUS_QUERY_EDITOR_ROW_LAST; type++) {
+	for (type = 0; type < NEMO_QUERY_EDITOR_ROW_LAST; type++) {
 		row_type[type].add_rows_from_query (editor, query);
 	}
 	

@@ -1,6 +1,6 @@
 /* -*- Mode: C; indent-tabs-mode: t; c-basic-offset: 8; tab-width: 8 -*-
 
-   nautilus-desktop-file.h: Subclass of NautilusFile to implement the
+   nemo-desktop-file.h: Subclass of NemoFile to implement the
    the case of a desktop icon file
  
    Copyright (C) 2003 Red Hat, Inc.
@@ -23,40 +23,40 @@
    Author: Alexander Larsson <alexl@redhat.com>
 */
 
-#ifndef NAUTILUS_DESKTOP_ICON_FILE_H
-#define NAUTILUS_DESKTOP_ICON_FILE_H
+#ifndef NEMO_DESKTOP_ICON_FILE_H
+#define NEMO_DESKTOP_ICON_FILE_H
 
-#include <libnautilus-private/nautilus-file.h>
-#include <libnautilus-private/nautilus-desktop-link.h>
+#include <libnemo-private/nemo-file.h>
+#include <libnemo-private/nemo-desktop-link.h>
 
-#define NAUTILUS_TYPE_DESKTOP_ICON_FILE nautilus_desktop_icon_file_get_type()
-#define NAUTILUS_DESKTOP_ICON_FILE(obj) \
-  (G_TYPE_CHECK_INSTANCE_CAST ((obj), NAUTILUS_TYPE_DESKTOP_ICON_FILE, NautilusDesktopIconFile))
-#define NAUTILUS_DESKTOP_ICON_FILE_CLASS(klass) \
-  (G_TYPE_CHECK_CLASS_CAST ((klass), NAUTILUS_TYPE_DESKTOP_ICON_FILE, NautilusDesktopIconFileClass))
-#define NAUTILUS_IS_DESKTOP_ICON_FILE(obj) \
-  (G_TYPE_CHECK_INSTANCE_TYPE ((obj), NAUTILUS_TYPE_DESKTOP_ICON_FILE))
-#define NAUTILUS_IS_DESKTOP_ICON_FILE_CLASS(klass) \
-  (G_TYPE_CHECK_CLASS_TYPE ((klass), NAUTILUS_TYPE_DESKTOP_ICON_FILE))
-#define NAUTILUS_DESKTOP_ICON_FILE_GET_CLASS(obj) \
-  (G_TYPE_INSTANCE_GET_CLASS ((obj), NAUTILUS_TYPE_DESKTOP_ICON_FILE, NautilusDesktopIconFileClass))
+#define NEMO_TYPE_DESKTOP_ICON_FILE nemo_desktop_icon_file_get_type()
+#define NEMO_DESKTOP_ICON_FILE(obj) \
+  (G_TYPE_CHECK_INSTANCE_CAST ((obj), NEMO_TYPE_DESKTOP_ICON_FILE, NemoDesktopIconFile))
+#define NEMO_DESKTOP_ICON_FILE_CLASS(klass) \
+  (G_TYPE_CHECK_CLASS_CAST ((klass), NEMO_TYPE_DESKTOP_ICON_FILE, NemoDesktopIconFileClass))
+#define NEMO_IS_DESKTOP_ICON_FILE(obj) \
+  (G_TYPE_CHECK_INSTANCE_TYPE ((obj), NEMO_TYPE_DESKTOP_ICON_FILE))
+#define NEMO_IS_DESKTOP_ICON_FILE_CLASS(klass) \
+  (G_TYPE_CHECK_CLASS_TYPE ((klass), NEMO_TYPE_DESKTOP_ICON_FILE))
+#define NEMO_DESKTOP_ICON_FILE_GET_CLASS(obj) \
+  (G_TYPE_INSTANCE_GET_CLASS ((obj), NEMO_TYPE_DESKTOP_ICON_FILE, NemoDesktopIconFileClass))
 
-typedef struct NautilusDesktopIconFileDetails NautilusDesktopIconFileDetails;
-
-typedef struct {
-	NautilusFile parent_slot;
-	NautilusDesktopIconFileDetails *details;
-} NautilusDesktopIconFile;
+typedef struct NemoDesktopIconFileDetails NemoDesktopIconFileDetails;
 
 typedef struct {
-	NautilusFileClass parent_slot;
-} NautilusDesktopIconFileClass;
+	NemoFile parent_slot;
+	NemoDesktopIconFileDetails *details;
+} NemoDesktopIconFile;
 
-GType   nautilus_desktop_icon_file_get_type (void);
+typedef struct {
+	NemoFileClass parent_slot;
+} NemoDesktopIconFileClass;
 
-NautilusDesktopIconFile *nautilus_desktop_icon_file_new      (NautilusDesktopLink     *link);
-void                     nautilus_desktop_icon_file_update   (NautilusDesktopIconFile *icon_file);
-void                     nautilus_desktop_icon_file_remove   (NautilusDesktopIconFile *icon_file);
-NautilusDesktopLink     *nautilus_desktop_icon_file_get_link (NautilusDesktopIconFile *icon_file);
+GType   nemo_desktop_icon_file_get_type (void);
 
-#endif /* NAUTILUS_DESKTOP_ICON_FILE_H */
+NemoDesktopIconFile *nemo_desktop_icon_file_new      (NemoDesktopLink     *link);
+void                     nemo_desktop_icon_file_update   (NemoDesktopIconFile *icon_file);
+void                     nemo_desktop_icon_file_remove   (NemoDesktopIconFile *icon_file);
+NemoDesktopLink     *nemo_desktop_icon_file_get_link (NemoDesktopIconFile *icon_file);
+
+#endif /* NEMO_DESKTOP_ICON_FILE_H */

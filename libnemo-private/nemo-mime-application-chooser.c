@@ -1,7 +1,7 @@
 /* -*- Mode: C; indent-tabs-mode: t; c-basic-offset: 8; tab-width: 8 -*- */
 
 /*
- *  nautilus-mime-application-chooser.c: an mime-application chooser
+ *  nemo-mime-application-chooser.c: an mime-application chooser
  *
  *  Copyright (C) 2004 Novell, Inc.
  *  Copyright (C) 2007, 2010 Red Hat, Inc.
@@ -27,10 +27,10 @@
  */
 
 #include <config.h>
-#include "nautilus-mime-application-chooser.h"
+#include "nemo-mime-application-chooser.h"
 
-#include "nautilus-file.h"
-#include "nautilus-signaller.h"
+#include "nemo-file.h"
+#include "nemo-signaller.h"
 #include <eel/eel-stock-dialogs.h>
 
 #include <string.h>
@@ -39,7 +39,7 @@
 #include <gtk/gtk.h>
 #include <gio/gio.h>
 
-struct _NautilusMimeApplicationChooserDetails {
+struct _NemoMimeApplicationChooserDetails {
 	GList *files;
 	char *uri;
 
@@ -61,13 +61,13 @@ enum {
 
 static GParamSpec *properties[NUM_PROPERTIES] = { NULL, };
 
-G_DEFINE_TYPE (NautilusMimeApplicationChooser, nautilus_mime_application_chooser, GTK_TYPE_BOX);
+G_DEFINE_TYPE (NemoMimeApplicationChooser, nemo_mime_application_chooser, GTK_TYPE_BOX);
 
 static void
 add_clicked_cb (GtkButton *button,
 		gpointer user_data)
 {
-	NautilusMimeApplicationChooser *chooser = user_data;
+	NemoMimeApplicationChooser *chooser = user_data;
 	GAppInfo *info;
 	gchar *message;
 	GError *error = NULL;
@@ -89,7 +89,7 @@ add_clicked_cb (GtkButton *button,
 		g_free (message);
 	} else {		
 		gtk_app_chooser_refresh (GTK_APP_CHOOSER (chooser->details->open_with_widget));
-		g_signal_emit_by_name (nautilus_signaller_get_current (), "mime_data_changed");
+		g_signal_emit_by_name (nemo_signaller_get_current (), "mime_data_changed");
 	}
 
 	g_object_unref (info);
@@ -99,7 +99,7 @@ static void
 remove_clicked_cb (GtkMenuItem *item, 
 		   gpointer user_data)
 {
-	NautilusMimeApplicationChooser *chooser = user_data;
+	NemoMimeApplicationChooser *chooser = user_data;
 	GError *error;
 	GAppInfo *info;
 
@@ -121,7 +121,7 @@ remove_clicked_cb (GtkMenuItem *item,
 		g_object_unref (info);
 	}
 
-	g_signal_emit_by_name (nautilus_signaller_get_current (), "mime_data_changed");
+	g_signal_emit_by_name (nemo_signaller_get_current (), "mime_data_changed");
 }
 
 static void
@@ -131,7 +131,7 @@ populate_popup_cb (GtkAppChooserWidget *widget,
 		   gpointer user_data)
 {
 	GtkWidget *item;
-	NautilusMimeApplicationChooser *chooser = user_data;
+	NemoMimeApplicationChooser *chooser = user_data;
 
 	if (g_app_info_can_remove_supports_type (app)) {
 		item = gtk_menu_item_new_with_label (_("Forget association"));
@@ -147,21 +147,21 @@ static void
 reset_clicked_cb (GtkButton *button,
                   gpointer   user_data)
 {
-	NautilusMimeApplicationChooser *chooser;
+	NemoMimeApplicationChooser *chooser;
 	
-	chooser = NAUTILUS_MIME_APPLICATION_CHOOSER (user_data);
+	chooser = NEMO_MIME_APPLICATION_CHOOSER (user_data);
 
 	g_app_info_reset_type_associations (chooser->details->content_type);
 	gtk_app_chooser_refresh (GTK_APP_CHOOSER (chooser->details->open_with_widget));
 
-	g_signal_emit_by_name (nautilus_signaller_get_current (), "mime_data_changed");
+	g_signal_emit_by_name (nemo_signaller_get_current (), "mime_data_changed");
 }
 
 static void
 set_as_default_clicked_cb (GtkButton *button,
 			   gpointer user_data)
 {
-	NautilusMimeApplicationChooser *chooser = user_data;
+	NemoMimeApplicationChooser *chooser = user_data;
 	GAppInfo *info;
 	GError *error = NULL;
 	gchar *message = NULL;
@@ -182,7 +182,7 @@ set_as_default_clicked_cb (GtkButton *button,
 	g_object_unref (info);
 
 	gtk_app_chooser_refresh (GTK_APP_CHOOSER (chooser->details->open_with_widget));
-	g_signal_emit_by_name (nautilus_signaller_get_current (), "mime_data_changed");
+	g_signal_emit_by_name (nemo_signaller_get_current (), "mime_data_changed");
 }
 
 static gint
@@ -224,7 +224,7 @@ application_selected_cb (GtkAppChooserWidget *widget,
 			 GAppInfo *info,
 			 gpointer user_data)
 {
-	NautilusMimeApplicationChooser *chooser = user_data;
+	NemoMimeApplicationChooser *chooser = user_data;
 	GAppInfo *default_app;
 
 	default_app = g_app_info_get_default_for_type (chooser->details->content_type, FALSE);
@@ -252,12 +252,12 @@ get_extension (const char *basename)
 }
 
 static gchar *
-get_extension_from_file (NautilusFile *nfile)
+get_extension_from_file (NemoFile *nfile)
 {
 	char *name;
 	char *extension;
 
-	name = nautilus_file_get_name (nfile);
+	name = nemo_file_get_name (nfile);
 	extension = get_extension (name);
 
 	g_free (name);
@@ -266,14 +266,14 @@ get_extension_from_file (NautilusFile *nfile)
 }
 
 static void
-nautilus_mime_application_chooser_apply_labels (NautilusMimeApplicationChooser *chooser)
+nemo_mime_application_chooser_apply_labels (NemoMimeApplicationChooser *chooser)
 {
 	gchar *label, *extension = NULL, *description = NULL;
 
 	if (chooser->details->files != NULL) {
 		/* here we assume all files are of the same content type */
 		if (g_content_type_is_unknown (chooser->details->content_type)) {
-			extension = get_extension_from_file (NAUTILUS_FILE (chooser->details->files->data));
+			extension = get_extension_from_file (NEMO_FILE (chooser->details->files->data));
 
 			/* the %s here is a file extension */
 			description = g_strdup_printf (_("%s document"), extension);
@@ -320,7 +320,7 @@ static void
 show_more_clicked_cb (GtkWidget *button,
 		      gpointer user_data)
 {
-	NautilusMimeApplicationChooser *chooser = user_data;
+	NemoMimeApplicationChooser *chooser = user_data;
 
 	gtk_app_chooser_widget_set_show_other (GTK_APP_CHOOSER_WIDGET (chooser->details->open_with_widget),
 					       TRUE);
@@ -328,7 +328,7 @@ show_more_clicked_cb (GtkWidget *button,
 }
 
 static void
-nautilus_mime_application_chooser_build_ui (NautilusMimeApplicationChooser *chooser)
+nemo_mime_application_chooser_build_ui (NemoMimeApplicationChooser *chooser)
 {
 	GtkWidget *box, *button;
 	GAppInfo *info;
@@ -411,47 +411,47 @@ nautilus_mime_application_chooser_build_ui (NautilusMimeApplicationChooser *choo
 }
 
 static void
-nautilus_mime_application_chooser_init (NautilusMimeApplicationChooser *chooser)
+nemo_mime_application_chooser_init (NemoMimeApplicationChooser *chooser)
 {
-	chooser->details = G_TYPE_INSTANCE_GET_PRIVATE (chooser, NAUTILUS_TYPE_MIME_APPLICATION_CHOOSER,
-							NautilusMimeApplicationChooserDetails);
+	chooser->details = G_TYPE_INSTANCE_GET_PRIVATE (chooser, NEMO_TYPE_MIME_APPLICATION_CHOOSER,
+							NemoMimeApplicationChooserDetails);
 
 	gtk_orientable_set_orientation (GTK_ORIENTABLE (chooser),
 					GTK_ORIENTATION_VERTICAL);
 }
 
 static void
-nautilus_mime_application_chooser_constructed (GObject *object)
+nemo_mime_application_chooser_constructed (GObject *object)
 {
-	NautilusMimeApplicationChooser *chooser = NAUTILUS_MIME_APPLICATION_CHOOSER (object);
+	NemoMimeApplicationChooser *chooser = NEMO_MIME_APPLICATION_CHOOSER (object);
 
-	if (G_OBJECT_CLASS (nautilus_mime_application_chooser_parent_class)->constructed != NULL)
-		G_OBJECT_CLASS (nautilus_mime_application_chooser_parent_class)->constructed (object);
+	if (G_OBJECT_CLASS (nemo_mime_application_chooser_parent_class)->constructed != NULL)
+		G_OBJECT_CLASS (nemo_mime_application_chooser_parent_class)->constructed (object);
 
-	nautilus_mime_application_chooser_build_ui (chooser);
-	nautilus_mime_application_chooser_apply_labels (chooser);
+	nemo_mime_application_chooser_build_ui (chooser);
+	nemo_mime_application_chooser_apply_labels (chooser);
 }
 
 static void
-nautilus_mime_application_chooser_finalize (GObject *object)
+nemo_mime_application_chooser_finalize (GObject *object)
 {
-	NautilusMimeApplicationChooser *chooser;
+	NemoMimeApplicationChooser *chooser;
 
-	chooser = NAUTILUS_MIME_APPLICATION_CHOOSER (object);
+	chooser = NEMO_MIME_APPLICATION_CHOOSER (object);
 
 	g_free (chooser->details->uri);
 	g_free (chooser->details->content_type);
 
-	G_OBJECT_CLASS (nautilus_mime_application_chooser_parent_class)->finalize (object);
+	G_OBJECT_CLASS (nemo_mime_application_chooser_parent_class)->finalize (object);
 }
 
 static void
-nautilus_mime_application_chooser_get_property (GObject *object,
+nemo_mime_application_chooser_get_property (GObject *object,
 						guint property_id,
 						GValue *value,
 						GParamSpec *pspec)
 {
-	NautilusMimeApplicationChooser *chooser = NAUTILUS_MIME_APPLICATION_CHOOSER (object);
+	NemoMimeApplicationChooser *chooser = NEMO_MIME_APPLICATION_CHOOSER (object);
 
 	switch (property_id) {
 	case PROP_CONTENT_TYPE:
@@ -464,12 +464,12 @@ nautilus_mime_application_chooser_get_property (GObject *object,
 }
 
 static void
-nautilus_mime_application_chooser_set_property (GObject *object,
+nemo_mime_application_chooser_set_property (GObject *object,
 						guint property_id,
 						const GValue *value,
 						GParamSpec *pspec)
 {
-	NautilusMimeApplicationChooser *chooser = NAUTILUS_MIME_APPLICATION_CHOOSER (object);
+	NemoMimeApplicationChooser *chooser = NEMO_MIME_APPLICATION_CHOOSER (object);
 
 	switch (property_id) {
 	case PROP_CONTENT_TYPE:
@@ -488,15 +488,15 @@ nautilus_mime_application_chooser_set_property (GObject *object,
 }
 
 static void
-nautilus_mime_application_chooser_class_init (NautilusMimeApplicationChooserClass *class)
+nemo_mime_application_chooser_class_init (NemoMimeApplicationChooserClass *class)
 {
 	GObjectClass *gobject_class;
 
 	gobject_class = G_OBJECT_CLASS (class);
-	gobject_class->set_property = nautilus_mime_application_chooser_set_property;
-	gobject_class->get_property = nautilus_mime_application_chooser_get_property;
-	gobject_class->finalize = nautilus_mime_application_chooser_finalize;
-	gobject_class->constructed = nautilus_mime_application_chooser_constructed;
+	gobject_class->set_property = nemo_mime_application_chooser_set_property;
+	gobject_class->get_property = nemo_mime_application_chooser_get_property;
+	gobject_class->finalize = nemo_mime_application_chooser_finalize;
+	gobject_class->constructed = nemo_mime_application_chooser_constructed;
 
 	properties[PROP_CONTENT_TYPE] = g_param_spec_string ("content-type",
 							     "Content type",
@@ -518,17 +518,17 @@ nautilus_mime_application_chooser_class_init (NautilusMimeApplicationChooserClas
 
 	g_object_class_install_properties (gobject_class, NUM_PROPERTIES, properties);
 
-	g_type_class_add_private (class, sizeof (NautilusMimeApplicationChooserDetails));
+	g_type_class_add_private (class, sizeof (NemoMimeApplicationChooserDetails));
 }
 
 GtkWidget *
-nautilus_mime_application_chooser_new (const char *uri,
+nemo_mime_application_chooser_new (const char *uri,
 				       GList *files,
 				       const char *mime_type)
 {
 	GtkWidget *chooser;
 
-	chooser = g_object_new (NAUTILUS_TYPE_MIME_APPLICATION_CHOOSER,
+	chooser = g_object_new (NEMO_TYPE_MIME_APPLICATION_CHOOSER,
 				"uri", uri,
 				"files", files,
 				"content-type", mime_type,

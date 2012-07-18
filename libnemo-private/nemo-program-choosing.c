@@ -1,6 +1,6 @@
 /* -*- Mode: C; indent-tabs-mode: t; c-basic-offset: 8; tab-width: 8 -*- */
 
-/* nautilus-program-choosing.c - functions for selecting and activating
+/* nemo-program-choosing.c - functions for selecting and activating
  				 programs for opening/viewing particular files.
 
    Copyright (C) 2000 Eazel, Inc.
@@ -24,12 +24,12 @@
 */
 
 #include <config.h>
-#include "nautilus-program-choosing.h"
+#include "nemo-program-choosing.h"
 
-#include "nautilus-global-preferences.h"
-#include "nautilus-icon-info.h"
-#include "nautilus-recent.h"
-#include "nautilus-desktop-icon-file.h"
+#include "nemo-global-preferences.h"
+#include "nemo-icon-info.h"
+#include "nemo-recent.h"
+#include "nemo-desktop-icon-file.h"
 #include <eel/eel-gnome-extensions.h>
 #include <eel/eel-stock-dialogs.h>
 #include <gtk/gtk.h>
@@ -42,28 +42,28 @@
 #include <gdk/gdkx.h>
 
 void
-nautilus_launch_application_for_mount (GAppInfo *app_info,
+nemo_launch_application_for_mount (GAppInfo *app_info,
 				       GMount *mount,
 				       GtkWindow *parent_window)
 {
 	GFile *root;
-	NautilusFile *file;
+	NemoFile *file;
 	GList *files;
 
 	root = g_mount_get_root (mount);
-	file = nautilus_file_get (root);
+	file = nemo_file_get (root);
 	g_object_unref (root);
 
 	files = g_list_append (NULL, file);
-	nautilus_launch_application (app_info,
+	nemo_launch_application (app_info,
 				     files,
 				     parent_window);
 
-	g_list_free_full (files, (GDestroyNotify) nautilus_file_unref);
+	g_list_free_full (files, (GDestroyNotify) nemo_file_unref);
 }
 
 /**
- * nautilus_launch_application:
+ * nemo_launch_application:
  * 
  * Fork off a process to launch an application with a given file as a
  * parameter. Provide a parent window for error dialogs. 
@@ -73,7 +73,7 @@ nautilus_launch_application_for_mount (GAppInfo *app_info,
  * @parent_window: A window to use as the parent for any error dialogs.
  */
 void
-nautilus_launch_application (GAppInfo *application, 
+nemo_launch_application (GAppInfo *application, 
 			     GList *files,
 			     GtkWindow *parent_window)
 {
@@ -81,28 +81,28 @@ nautilus_launch_application (GAppInfo *application,
 
 	uris = NULL;
 	for (l = files; l != NULL; l = l->next) {
-		uris = g_list_prepend (uris, nautilus_file_get_activation_uri (l->data));
+		uris = g_list_prepend (uris, nemo_file_get_activation_uri (l->data));
 	}
 	uris = g_list_reverse (uris);
-	nautilus_launch_application_by_uri (application, uris,
+	nemo_launch_application_by_uri (application, uris,
 					    parent_window);
 	g_list_free_full (uris, g_free);
 }
 
 void
-nautilus_launch_application_by_uri (GAppInfo *application, 
+nemo_launch_application_by_uri (GAppInfo *application, 
 				    GList *uris,
 				    GtkWindow *parent_window)
 {
 	char *uri;
 	GList *locations, *l;
 	GFile *location;
-	NautilusFile *file;
+	NemoFile *file;
 	gboolean result;
 	GError *error;
 	GdkDisplay *display;
 	GdkAppLaunchContext *launch_context;
-	NautilusIconInfo *icon;
+	NemoIconInfo *icon;
 	int count, total;
 
 	g_assert (uris != NULL);
@@ -135,12 +135,12 @@ nautilus_launch_application_by_uri (GAppInfo *application,
 						   gtk_window_get_screen (parent_window));
 	}
 
-	file = nautilus_file_get_by_uri (uris->data);
-	icon = nautilus_file_get_icon (file, 48, 0);
-	nautilus_file_unref (file);
+	file = nemo_file_get_by_uri (uris->data);
+	icon = nemo_file_get_icon (file, 48, 0);
+	nemo_file_unref (file);
 	if (icon) {
 		gdk_app_launch_context_set_icon_name (launch_context,
-							nautilus_icon_info_get_used_name (icon));
+							nemo_icon_info_get_used_name (icon));
 		g_object_unref (icon);
 	}
 	
@@ -167,9 +167,9 @@ nautilus_launch_application_by_uri (GAppInfo *application,
 
 	if (result) {
 		for (l = uris; l != NULL; l = l->next) {
-			file = nautilus_file_get_by_uri (l->data);
-			nautilus_recent_add_file (file, application);
-			nautilus_file_unref (file);
+			file = nemo_file_get_by_uri (l->data);
+			nemo_recent_add_file (file, application);
+			nemo_file_unref (file);
 		}
 	}
 
@@ -204,7 +204,7 @@ launch_application_from_command_internal (const gchar *full_command,
 }					  
 
 /**
- * nautilus_launch_application_from_command:
+ * nemo_launch_application_from_command:
  * 
  * Fork off a process to launch an application with a given uri as
  * a parameter.
@@ -214,7 +214,7 @@ launch_application_from_command_internal (const gchar *full_command,
  * @...: Passed as parameters to the application after quoting each of them.
  */
 void
-nautilus_launch_application_from_command (GdkScreen  *screen,
+nemo_launch_application_from_command (GdkScreen  *screen,
 					  const char *command_string, 
 					  gboolean use_terminal,
 					  ...)
@@ -246,7 +246,7 @@ nautilus_launch_application_from_command (GdkScreen  *screen,
 }
 
 /**
- * nautilus_launch_application_from_command:
+ * nemo_launch_application_from_command:
  * 
  * Fork off a process to launch an application with a given uri as
  * a parameter.
@@ -256,7 +256,7 @@ nautilus_launch_application_from_command (GdkScreen  *screen,
  * @parameters: Passed as parameters to the application after quoting each of them.
  */
 void
-nautilus_launch_application_from_command_array (GdkScreen  *screen,
+nemo_launch_application_from_command_array (GdkScreen  *screen,
 						const char *command_string,
 						gboolean use_terminal,
 						const char * const * parameters)
@@ -284,7 +284,7 @@ nautilus_launch_application_from_command_array (GdkScreen  *screen,
 }
 
 void
-nautilus_launch_desktop_file (GdkScreen   *screen,
+nemo_launch_desktop_file (GdkScreen   *screen,
 			      const char  *desktop_file_uri,
 			      const GList *parameter_uris,
 			      GtkWindow   *parent_window)

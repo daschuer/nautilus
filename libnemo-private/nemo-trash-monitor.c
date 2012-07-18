@@ -1,7 +1,7 @@
 /* -*- Mode: C; indent-tabs-mode: t; c-basic-offset: 8; tab-width: 8 -*- */
 
 /* 
-   nautilus-trash-monitor.c: Nautilus trash state watcher.
+   nemo-trash-monitor.c: Nemo trash state watcher.
  
    Copyright (C) 2000, 2001 Eazel, Inc.
   
@@ -24,17 +24,17 @@
 */
 
 #include <config.h>
-#include "nautilus-trash-monitor.h"
+#include "nemo-trash-monitor.h"
 
-#include "nautilus-directory-notify.h"
-#include "nautilus-directory.h"
-#include "nautilus-file-attributes.h"
-#include "nautilus-icon-names.h"
+#include "nemo-directory-notify.h"
+#include "nemo-directory.h"
+#include "nemo-file-attributes.h"
+#include "nemo-icon-names.h"
 #include <eel/eel-debug.h>
 #include <gio/gio.h>
 #include <string.h>
 
-struct NautilusTrashMonitorDetails {
+struct NemoTrashMonitorDetails {
 	gboolean empty;
 	GIcon *icon;
 	GFileMonitor *file_monitor;
@@ -46,16 +46,16 @@ enum {
 };
 
 static guint signals[LAST_SIGNAL];
-static NautilusTrashMonitor *nautilus_trash_monitor = NULL;
+static NemoTrashMonitor *nemo_trash_monitor = NULL;
 
-G_DEFINE_TYPE(NautilusTrashMonitor, nautilus_trash_monitor, G_TYPE_OBJECT)
+G_DEFINE_TYPE(NemoTrashMonitor, nemo_trash_monitor, G_TYPE_OBJECT)
 
 static void
-nautilus_trash_monitor_finalize (GObject *object)
+nemo_trash_monitor_finalize (GObject *object)
 {
-	NautilusTrashMonitor *trash_monitor;
+	NemoTrashMonitor *trash_monitor;
 
-	trash_monitor = NAUTILUS_TRASH_MONITOR (object);
+	trash_monitor = NEMO_TRASH_MONITOR (object);
 
 	if (trash_monitor->details->icon) {
 		g_object_unref (trash_monitor->details->icon);
@@ -64,29 +64,29 @@ nautilus_trash_monitor_finalize (GObject *object)
 		g_object_unref (trash_monitor->details->file_monitor);
 	}
 
-	G_OBJECT_CLASS (nautilus_trash_monitor_parent_class)->finalize (object);
+	G_OBJECT_CLASS (nemo_trash_monitor_parent_class)->finalize (object);
 }
 
 static void
-nautilus_trash_monitor_class_init (NautilusTrashMonitorClass *klass)
+nemo_trash_monitor_class_init (NemoTrashMonitorClass *klass)
 {
 	GObjectClass *object_class;
 
 	object_class = G_OBJECT_CLASS (klass);
 
-	object_class->finalize = nautilus_trash_monitor_finalize;
+	object_class->finalize = nemo_trash_monitor_finalize;
 
 	signals[TRASH_STATE_CHANGED] = g_signal_new
 		("trash_state_changed",
 		 G_TYPE_FROM_CLASS (object_class),
 		 G_SIGNAL_RUN_LAST,
-		 G_STRUCT_OFFSET (NautilusTrashMonitorClass, trash_state_changed),
+		 G_STRUCT_OFFSET (NemoTrashMonitorClass, trash_state_changed),
 		 NULL, NULL,
 		 g_cclosure_marshal_VOID__BOOLEAN,
 		 G_TYPE_NONE, 1,
 		 G_TYPE_BOOLEAN);
 
-	g_type_class_add_private (object_class, sizeof(NautilusTrashMonitorDetails));
+	g_type_class_add_private (object_class, sizeof(NemoTrashMonitorDetails));
 }
 
 static void
@@ -94,14 +94,14 @@ update_info_cb (GObject *source_object,
 		GAsyncResult *res,
 		gpointer user_data)
 {
-	NautilusTrashMonitor *trash_monitor;
+	NemoTrashMonitor *trash_monitor;
 	GFileInfo *info;
 	GIcon *icon;
 	const char * const *names;
 	gboolean empty;
 	int i;
 
-	trash_monitor = NAUTILUS_TRASH_MONITOR (user_data);
+	trash_monitor = NEMO_TRASH_MONITOR (user_data);
 	
 	info = g_file_query_info_finish (G_FILE (source_object),
 					 res, NULL);
@@ -116,7 +116,7 @@ update_info_cb (GObject *source_object,
 			if (G_IS_THEMED_ICON (icon)) {
 				names = g_themed_icon_get_names (G_THEMED_ICON (icon));
 				for (i = 0; names[i] != NULL; i++) {
-					if (strcmp (names[i], NAUTILUS_ICON_TRASH_FULL) == 0) {
+					if (strcmp (names[i], NEMO_ICON_TRASH_FULL) == 0) {
 						empty = FALSE;
 						break;
 					}
@@ -138,7 +138,7 @@ update_info_cb (GObject *source_object,
 }
 
 static void
-schedule_update_info (NautilusTrashMonitor *trash_monitor)
+schedule_update_info (NemoTrashMonitor *trash_monitor)
 {
 	GFile *location;
 
@@ -159,24 +159,24 @@ file_changed (GFileMonitor* monitor,
 	      GFileMonitorEvent event_type,
 	      gpointer user_data)
 {
-	NautilusTrashMonitor *trash_monitor;
+	NemoTrashMonitor *trash_monitor;
 
-	trash_monitor = NAUTILUS_TRASH_MONITOR (user_data);
+	trash_monitor = NEMO_TRASH_MONITOR (user_data);
 
 	schedule_update_info (trash_monitor);
 }
 
 static void
-nautilus_trash_monitor_init (NautilusTrashMonitor *trash_monitor)
+nemo_trash_monitor_init (NemoTrashMonitor *trash_monitor)
 {
 	GFile *location;
 
 	trash_monitor->details = G_TYPE_INSTANCE_GET_PRIVATE (trash_monitor,
-							      NAUTILUS_TYPE_TRASH_MONITOR,
-							      NautilusTrashMonitorDetails);
+							      NEMO_TYPE_TRASH_MONITOR,
+							      NemoTrashMonitorDetails);
 
 	trash_monitor->details->empty = TRUE;
-	trash_monitor->details->icon = g_themed_icon_new (NAUTILUS_ICON_TRASH);
+	trash_monitor->details->icon = g_themed_icon_new (NEMO_ICON_TRASH);
 
 	location = g_file_new_for_uri ("trash:///");
 
@@ -193,38 +193,38 @@ nautilus_trash_monitor_init (NautilusTrashMonitor *trash_monitor)
 static void
 unref_trash_monitor (void)
 {
-	g_object_unref (nautilus_trash_monitor);
+	g_object_unref (nemo_trash_monitor);
 }
 
-NautilusTrashMonitor *
-nautilus_trash_monitor_get (void)
+NemoTrashMonitor *
+nemo_trash_monitor_get (void)
 {
-	if (nautilus_trash_monitor == NULL) {
+	if (nemo_trash_monitor == NULL) {
 		/* not running yet, start it up */
 
-		nautilus_trash_monitor = NAUTILUS_TRASH_MONITOR
-			(g_object_new (NAUTILUS_TYPE_TRASH_MONITOR, NULL));
+		nemo_trash_monitor = NEMO_TRASH_MONITOR
+			(g_object_new (NEMO_TYPE_TRASH_MONITOR, NULL));
 		eel_debug_call_at_shutdown (unref_trash_monitor);
 	}
 
-	return nautilus_trash_monitor;
+	return nemo_trash_monitor;
 }
 
 gboolean
-nautilus_trash_monitor_is_empty (void)
+nemo_trash_monitor_is_empty (void)
 {
-	NautilusTrashMonitor *monitor;
+	NemoTrashMonitor *monitor;
 
-	monitor = nautilus_trash_monitor_get ();
+	monitor = nemo_trash_monitor_get ();
 	return monitor->details->empty;
 }
 
 GIcon *
-nautilus_trash_monitor_get_icon (void)
+nemo_trash_monitor_get_icon (void)
 {
-	NautilusTrashMonitor *monitor;
+	NemoTrashMonitor *monitor;
 
-	monitor = nautilus_trash_monitor_get ();
+	monitor = nemo_trash_monitor_get ();
 	if (monitor->details->icon) {
 		return g_object_ref (monitor->details->icon);
 	}
@@ -232,7 +232,7 @@ nautilus_trash_monitor_get_icon (void)
 }
 
 void
-nautilus_trash_monitor_add_new_trash_directories (void)
+nemo_trash_monitor_add_new_trash_directories (void)
 {
 	/* We trashed something... */
 }

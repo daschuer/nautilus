@@ -1,5 +1,5 @@
 /*
- *  Nautilus SendTo
+ *  Nemo SendTo
  *
  *  Copyright (C) 2005 Roberto Majadas
  *
@@ -22,33 +22,33 @@
  */
 
 #include <config.h>
-#include <libnautilus-extension/nautilus-extension-types.h>
-#include <libnautilus-extension/nautilus-column-provider.h>
+#include <libnemo-extension/nemo-extension-types.h>
+#include <libnemo-extension/nemo-column-provider.h>
 #include <glib/gi18n-lib.h>
-#include "nautilus-nste.h"
+#include "nemo-nste.h"
 
 
 void
-nautilus_module_initialize (GTypeModule*module)
+nemo_module_initialize (GTypeModule*module)
 {
-	nautilus_nste_register_type (module);
+	nemo_nste_register_type (module);
 
 	bindtextdomain (GETTEXT_PACKAGE, GNOMELOCALEDIR);
 	bind_textdomain_codeset (GETTEXT_PACKAGE, "UTF-8");
 }
 
 void
-nautilus_module_shutdown (void)
+nemo_module_shutdown (void)
 {
 }
 
 void
-nautilus_module_list_types (const GType **types,
+nemo_module_list_types (const GType **types,
 			    int          *num_types)
 {
 	static GType type_list[1];
 
-	type_list[0] = NAUTILUS_TYPE_NSTE;
+	type_list[0] = NEMO_TYPE_NSTE;
 	*types = type_list;
 
 	*num_types = 1;

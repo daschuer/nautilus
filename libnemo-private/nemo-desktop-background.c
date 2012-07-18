@@ -1,7 +1,7 @@
 /* -*- Mode: C; indent-tabs-mode: t; c-basic-offset: 8; tab-width: 8 -*- */
 
 /*
- * nautilus-desktop-background.c: Helper object to handle desktop background
+ * nemo-desktop-background.c: Helper object to handle desktop background
  *                                changes.
  *
  * Copyright (C) 2000 Eazel, Inc.
@@ -28,12 +28,12 @@
 
 #include <config.h>
 
-#include "nautilus-desktop-background.h"
+#include "nemo-desktop-background.h"
 
 #include <eel/eel-gdk-extensions.h>
 #include <eel/eel-gtk-extensions.h>
 
-#include "nautilus-global-preferences.h"
+#include "nemo-global-preferences.h"
 
 #define GNOME_DESKTOP_USE_UNSTABLE_API
 #include <libgnome-desktop/gnome-bg.h>
@@ -42,20 +42,20 @@
 #include <gtk/gtk.h>
 #include <string.h>
 
-static void init_fade (NautilusDesktopBackground *self);
-static void free_fade (NautilusDesktopBackground *self);
-static void queue_background_change (NautilusDesktopBackground *self);
+static void init_fade (NemoDesktopBackground *self);
+static void free_fade (NemoDesktopBackground *self);
+static void queue_background_change (NemoDesktopBackground *self);
 
-static NautilusDesktopBackground *singleton = NULL;
+static NemoDesktopBackground *singleton = NULL;
 
-G_DEFINE_TYPE (NautilusDesktopBackground, nautilus_desktop_background, G_TYPE_OBJECT);
+G_DEFINE_TYPE (NemoDesktopBackground, nemo_desktop_background, G_TYPE_OBJECT);
 
 enum {
         PROP_WIDGET = 1,
         NUM_PROPERTIES,
 };
 
-struct NautilusDesktopBackgroundDetails {
+struct NemoDesktopBackgroundDetails {
 
 	GtkWidget *widget;
         GnomeBG *bg;
@@ -83,7 +83,7 @@ background_settings_change_event_cb (GSettings *settings,
 
 
 static void
-free_fade (NautilusDesktopBackground *self)
+free_fade (NemoDesktopBackground *self)
 {
 	if (self->details->fade != NULL) {
 		g_object_unref (self->details->fade);
@@ -92,7 +92,7 @@ free_fade (NautilusDesktopBackground *self)
 }
 
 static void
-free_background_surface (NautilusDesktopBackground *self)
+free_background_surface (NemoDesktopBackground *self)
 {
 	cairo_surface_t *surface;
 
@@ -104,11 +104,11 @@ free_background_surface (NautilusDesktopBackground *self)
 }
 
 static void
-nautilus_desktop_background_finalize (GObject *object)
+nemo_desktop_background_finalize (GObject *object)
 {
-	NautilusDesktopBackground *self;
+	NemoDesktopBackground *self;
 
-	self = NAUTILUS_DESKTOP_BACKGROUND (object);
+	self = NEMO_DESKTOP_BACKGROUND (object);
 
 	g_signal_handlers_disconnect_by_func (gnome_background_preferences,
 					      background_settings_change_event_cb,
@@ -119,11 +119,11 @@ nautilus_desktop_background_finalize (GObject *object)
 
 	g_clear_object (&self->details->bg);
 
-	G_OBJECT_CLASS (nautilus_desktop_background_parent_class)->finalize (object);
+	G_OBJECT_CLASS (nemo_desktop_background_parent_class)->finalize (object);
 }
 
 static void
-nautilus_desktop_background_unrealize (NautilusDesktopBackground *self)
+nemo_desktop_background_unrealize (NemoDesktopBackground *self)
 {
 	free_background_surface (self);
 
@@ -135,7 +135,7 @@ nautilus_desktop_background_unrealize (NautilusDesktopBackground *self)
 }
 
 static void
-nautilus_desktop_background_set_image_uri (NautilusDesktopBackground *self,
+nemo_desktop_background_set_image_uri (NemoDesktopBackground *self,
                                            const char *image_uri)
 {
 	char *filename;
@@ -153,7 +153,7 @@ nautilus_desktop_background_set_image_uri (NautilusDesktopBackground *self,
 }
 
 static void
-init_fade (NautilusDesktopBackground *self)
+init_fade (NemoDesktopBackground *self)
 {
 	GtkWidget *widget;
 	gboolean do_fade;
@@ -163,8 +163,8 @@ init_fade (NautilusDesktopBackground *self)
 	if (widget == NULL || !gtk_widget_get_realized (widget))
 		return;
 
-	do_fade = g_settings_get_boolean (nautilus_desktop_preferences,
-					  NAUTILUS_PREFERENCES_DESKTOP_BACKGROUND_FADE);
+	do_fade = g_settings_get_boolean (nemo_desktop_preferences,
+					  NEMO_PREFERENCES_DESKTOP_BACKGROUND_FADE);
 
 	if (!do_fade) {
 		return;
@@ -211,13 +211,13 @@ init_fade (NautilusDesktopBackground *self)
 
 static void
 screen_size_changed (GdkScreen *screen,
-                     NautilusDesktopBackground *self)
+                     NemoDesktopBackground *self)
 {
 	queue_background_change (self);
 }
 
 static gboolean
-nautilus_desktop_background_ensure_realized (NautilusDesktopBackground *self)
+nemo_desktop_background_ensure_realized (NemoDesktopBackground *self)
 {
 	int entire_width;
 	int entire_height;
@@ -258,15 +258,15 @@ on_fade_finished (GnomeBGCrossfade *fade,
 		  GdkWindow *window,
 		  gpointer user_data)
 {
-        NautilusDesktopBackground *self = user_data;
+        NemoDesktopBackground *self = user_data;
 
-	nautilus_desktop_background_ensure_realized (self);
+	nemo_desktop_background_ensure_realized (self);
 	gnome_bg_set_surface_as_root (gdk_window_get_screen (window),
                                       self->details->background_surface);
 }
 
 static gboolean
-fade_to_surface (NautilusDesktopBackground *self,
+fade_to_surface (NemoDesktopBackground *self,
 		 GdkWindow     *window,
 		 cairo_surface_t *surface)
 {
@@ -290,7 +290,7 @@ fade_to_surface (NautilusDesktopBackground *self,
 }
 
 static void
-nautilus_desktop_background_set_up_widget (NautilusDesktopBackground *self)
+nemo_desktop_background_set_up_widget (NemoDesktopBackground *self)
 {
 	GdkWindow *window;
 	gboolean in_fade = FALSE;
@@ -302,7 +302,7 @@ nautilus_desktop_background_set_up_widget (NautilusDesktopBackground *self)
 		return;
 	}
 
-	nautilus_desktop_background_ensure_realized (self);
+	nemo_desktop_background_ensure_realized (self);
         window = gtk_layout_get_bin_window (GTK_LAYOUT (widget));
 
 	in_fade = fade_to_surface (self, window,
@@ -321,12 +321,12 @@ nautilus_desktop_background_set_up_widget (NautilusDesktopBackground *self)
 }
 
 static gboolean
-background_changed_cb (NautilusDesktopBackground *self)
+background_changed_cb (NemoDesktopBackground *self)
 {
 	self->details->change_idle_id = 0;
 
-	nautilus_desktop_background_unrealize (self);
-	nautilus_desktop_background_set_up_widget (self);
+	nemo_desktop_background_unrealize (self);
+	nemo_desktop_background_set_up_widget (self);
 
 	gtk_widget_queue_draw (self->details->widget);
 
@@ -334,7 +334,7 @@ background_changed_cb (NautilusDesktopBackground *self)
 }
 
 static void
-queue_background_change (NautilusDesktopBackground *self)
+queue_background_change (NemoDesktopBackground *self)
 {
 	if (self->details->change_idle_id != 0) {
                 g_source_remove (self->details->change_idle_id);
@@ -345,10 +345,10 @@ queue_background_change (NautilusDesktopBackground *self)
 }
 
 static void
-nautilus_desktop_background_changed (GnomeBG *bg,
+nemo_desktop_background_changed (GnomeBG *bg,
                                      gpointer user_data)
 {
-        NautilusDesktopBackground *self;
+        NemoDesktopBackground *self;
 
         self = user_data;
 	init_fade (self);
@@ -356,10 +356,10 @@ nautilus_desktop_background_changed (GnomeBG *bg,
 }
 
 static void
-nautilus_desktop_background_transitioned (GnomeBG *bg,
+nemo_desktop_background_transitioned (GnomeBG *bg,
                                           gpointer user_data)
 {
-        NautilusDesktopBackground *self;
+        NemoDesktopBackground *self;
 
         self = user_data;
 	free_fade (self);
@@ -371,7 +371,7 @@ widget_realize_cb (GtkWidget *widget,
                    gpointer user_data)
 {
 	GdkScreen *screen;
-        NautilusDesktopBackground *self = user_data;
+        NemoDesktopBackground *self = user_data;
 
 	screen = gtk_widget_get_screen (widget);
 
@@ -390,16 +390,14 @@ widget_realize_cb (GtkWidget *widget,
 	self->details->screen_monitors_handler =
 		g_signal_connect (screen, "monitors-changed",
 				  G_CALLBACK (screen_size_changed), self);
-
-	init_fade (self);
-	nautilus_desktop_background_set_up_widget (self);
+	nemo_desktop_background_set_up_widget (self);
 }
 
 static void
 widget_unrealize_cb (GtkWidget *widget,
                      gpointer user_data)
 {
-        NautilusDesktopBackground *self = user_data;
+        NemoDesktopBackground *self = user_data;
 
 	if (self->details->screen_size_handler > 0) {
 		        g_signal_handler_disconnect (gtk_widget_get_screen (GTK_WIDGET (widget)),
@@ -417,7 +415,7 @@ static void
 on_widget_destroyed (GtkWidget *widget,
                      gpointer user_data)
 {
-        NautilusDesktopBackground *self = user_data;
+        NemoDesktopBackground *self = user_data;
 
 	if (self->details->change_idle_id != 0) {
 		g_source_remove (self->details->change_idle_id);
@@ -429,7 +427,7 @@ on_widget_destroyed (GtkWidget *widget,
 }
 
 static gboolean
-background_change_event_idle_cb (NautilusDesktopBackground *self)
+background_change_event_idle_cb (NemoDesktopBackground *self)
 {
 	gnome_bg_load_from_preferences (self->details->bg,
 					gnome_background_preferences);
@@ -445,7 +443,7 @@ background_settings_change_event_cb (GSettings *settings,
                                      gint       n_keys,
                                      gpointer   user_data)
 {
-	NautilusDesktopBackground *self = user_data;
+	NemoDesktopBackground *self = user_data;
 
 	/* Need to defer signal processing otherwise
 	 * we would make the dconf backend deadlock.
@@ -457,15 +455,15 @@ background_settings_change_event_cb (GSettings *settings,
 }
 
 static void
-nautilus_desktop_background_constructed (GObject *obj)
+nemo_desktop_background_constructed (GObject *obj)
 {
-        NautilusDesktopBackground *self;
+        NemoDesktopBackground *self;
         GtkWidget *widget;
 
-        self = NAUTILUS_DESKTOP_BACKGROUND (obj);
+        self = NEMO_DESKTOP_BACKGROUND (obj);
 
-        if (G_OBJECT_CLASS (nautilus_desktop_background_parent_class)->constructed != NULL) {
-                G_OBJECT_CLASS (nautilus_desktop_background_parent_class)->constructed (obj);
+        if (G_OBJECT_CLASS (nemo_desktop_background_parent_class)->constructed != NULL) {
+                G_OBJECT_CLASS (nemo_desktop_background_parent_class)->constructed (obj);
         }
 
         widget = self->details->widget;
@@ -492,14 +490,14 @@ nautilus_desktop_background_constructed (GObject *obj)
 }
 
 static void
-nautilus_desktop_background_set_property (GObject *object,
+nemo_desktop_background_set_property (GObject *object,
                                           guint property_id,
                                           const GValue *value,
                                           GParamSpec *pspec)
 {
-        NautilusDesktopBackground *self;
+        NemoDesktopBackground *self;
 
-        self = NAUTILUS_DESKTOP_BACKGROUND (object);
+        self = NEMO_DESKTOP_BACKGROUND (object);
 
         switch (property_id) {
         case PROP_WIDGET:
@@ -512,7 +510,7 @@ nautilus_desktop_background_set_property (GObject *object,
 }
 
 static GObject *
-nautilus_desktop_background_constructor (GType type,
+nemo_desktop_background_constructor (GType type,
                                          guint n_construct_params,
                                          GObjectConstructParam *construct_params)
 {
@@ -522,43 +520,43 @@ nautilus_desktop_background_constructor (GType type,
                 return g_object_ref (singleton);
         }
 
-        retval = G_OBJECT_CLASS (nautilus_desktop_background_parent_class)->constructor
+        retval = G_OBJECT_CLASS (nemo_desktop_background_parent_class)->constructor
                 (type, n_construct_params, construct_params);
 
-        singleton = NAUTILUS_DESKTOP_BACKGROUND (retval);
+        singleton = NEMO_DESKTOP_BACKGROUND (retval);
         g_object_add_weak_pointer (retval, (gpointer) &singleton);
 
         return retval;
 }
 
 static void
-nautilus_desktop_background_class_init (NautilusDesktopBackgroundClass *klass)
+nemo_desktop_background_class_init (NemoDesktopBackgroundClass *klass)
 {
 	GObjectClass *object_class;
         GParamSpec *pspec;
 
 	object_class = G_OBJECT_CLASS (klass);
-	object_class->finalize = nautilus_desktop_background_finalize;
-        object_class->set_property = nautilus_desktop_background_set_property;
-        object_class->constructor = nautilus_desktop_background_constructor;
-        object_class->constructed = nautilus_desktop_background_constructed;
+	object_class->finalize = nemo_desktop_background_finalize;
+        object_class->set_property = nemo_desktop_background_set_property;
+        object_class->constructor = nemo_desktop_background_constructor;
+        object_class->constructed = nemo_desktop_background_constructed;
 
         pspec = g_param_spec_object ("widget", "The widget for this background",
                                      "The widget that gets its background set",
-                                     NAUTILUS_TYPE_ICON_CONTAINER,
+                                     NEMO_TYPE_ICON_CONTAINER,
                                      G_PARAM_WRITABLE | G_PARAM_CONSTRUCT_ONLY | G_PARAM_STATIC_STRINGS);
         g_object_class_install_property (object_class, PROP_WIDGET, pspec);
 
-	g_type_class_add_private (klass, sizeof (NautilusDesktopBackgroundDetails));
+	g_type_class_add_private (klass, sizeof (NemoDesktopBackgroundDetails));
 }
 
 static void
-nautilus_desktop_background_init (NautilusDesktopBackground *self)
+nemo_desktop_background_init (NemoDesktopBackground *self)
 {
 	self->details =
 		G_TYPE_INSTANCE_GET_PRIVATE (self,
-					     NAUTILUS_TYPE_DESKTOP_BACKGROUND,
-					     NautilusDesktopBackgroundDetails);
+					     NEMO_TYPE_DESKTOP_BACKGROUND,
+					     NemoDesktopBackgroundDetails);
 
         self->details->bg = gnome_bg_new ();
 	self->details->default_color.red = 0xffff;
@@ -566,13 +564,13 @@ nautilus_desktop_background_init (NautilusDesktopBackground *self)
 	self->details->default_color.blue = 0xffff;
 
 	g_signal_connect (self->details->bg, "changed",
-			  G_CALLBACK (nautilus_desktop_background_changed), self);
+			  G_CALLBACK (nemo_desktop_background_changed), self);
 	g_signal_connect (self->details->bg, "transitioned",
-			  G_CALLBACK (nautilus_desktop_background_transitioned), self);
+			  G_CALLBACK (nemo_desktop_background_transitioned), self);
 }
 
 void
-nautilus_desktop_background_receive_dropped_background_image (NautilusDesktopBackground *self,
+nemo_desktop_background_receive_dropped_background_image (NemoDesktopBackground *self,
                                                               const char *image_uri)
 {
 	/* Currently, we only support tiled images. So we set the placement.
@@ -580,16 +578,16 @@ nautilus_desktop_background_receive_dropped_background_image (NautilusDesktopBac
 	gnome_bg_set_placement (self->details->bg,
 				G_DESKTOP_BACKGROUND_STYLE_WALLPAPER);
 	gnome_bg_set_draw_background (self->details->bg, TRUE);
-	nautilus_desktop_background_set_image_uri (self, image_uri);
+	nemo_desktop_background_set_image_uri (self, image_uri);
 
 	gnome_bg_save_to_preferences (self->details->bg,
 				      gnome_background_preferences);
 }
 
-NautilusDesktopBackground *
-nautilus_desktop_background_new (NautilusIconContainer *container)
+NemoDesktopBackground *
+nemo_desktop_background_new (NemoIconContainer *container)
 {
-        return g_object_new (NAUTILUS_TYPE_DESKTOP_BACKGROUND,
+        return g_object_new (NEMO_TYPE_DESKTOP_BACKGROUND,
                              "widget", container,
                              NULL);
 }

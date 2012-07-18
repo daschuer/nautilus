@@ -1,15 +1,15 @@
 /* -*- Mode: C; indent-tabs-mode: t; c-basic-offset: 8; tab-width: 8 -*- */
 /*
- * Nautilus
+ * Nemo
  *
  * Copyright (C) 2010 Cosimo Cecchi <cosimoc@gnome.org>
  *
- * Nautilus is free software; you can redistribute it and/or
+ * Nemo is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
  * published by the Free Software Foundation; either version 2 of the
  * License, or (at your option) any later version.
  *
- * Nautilus is distributed in the hope that it will be useful,
+ * Nemo is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
  * General Public License for more details.
@@ -22,42 +22,42 @@
  * Author: Cosimo Cecchi <cosimoc@gnome.org>
  */
 
-#ifndef __NAUTILUS_CONNECT_SERVER_OPERATION_H__
-#define __NAUTILUS_CONNECT_SERVER_OPERATION_H__
+#ifndef __NEMO_CONNECT_SERVER_OPERATION_H__
+#define __NEMO_CONNECT_SERVER_OPERATION_H__
 
 #include <gio/gio.h>
 #include <gtk/gtk.h>
 
-#include "nautilus-connect-server-dialog.h"
+#include "nemo-connect-server-dialog.h"
 
-#define NAUTILUS_TYPE_CONNECT_SERVER_OPERATION\
-	(nautilus_connect_server_operation_get_type ())
-#define NAUTILUS_CONNECT_SERVER_OPERATION(obj)\
+#define NEMO_TYPE_CONNECT_SERVER_OPERATION\
+	(nemo_connect_server_operation_get_type ())
+#define NEMO_CONNECT_SERVER_OPERATION(obj)\
   (G_TYPE_CHECK_INSTANCE_CAST ((obj),\
-			       NAUTILUS_TYPE_CONNECT_SERVER_OPERATION,\
-			       NautilusConnectServerOperation))
-#define NAUTILUS_CONNECT_SERVER_OPERATION_CLASS(klass)\
-  (G_TYPE_CHECK_CLASS_CAST ((klass), NAUTILUS_TYPE_CONNECT_SERVER_OPERATION,\
-			    NautilusConnectServerOperationClass))
-#define NAUTILUS_IS_CONNECT_SERVER_OPERATION(obj)\
-  (G_TYPE_CHECK_INSTANCE_TYPE ((obj), NAUTILUS_TYPE_CONNECT_SERVER_OPERATION)
+			       NEMO_TYPE_CONNECT_SERVER_OPERATION,\
+			       NemoConnectServerOperation))
+#define NEMO_CONNECT_SERVER_OPERATION_CLASS(klass)\
+  (G_TYPE_CHECK_CLASS_CAST ((klass), NEMO_TYPE_CONNECT_SERVER_OPERATION,\
+			    NemoConnectServerOperationClass))
+#define NEMO_IS_CONNECT_SERVER_OPERATION(obj)\
+  (G_TYPE_CHECK_INSTANCE_TYPE ((obj), NEMO_TYPE_CONNECT_SERVER_OPERATION)
 
-typedef struct _NautilusConnectServerOperationDetails
-  NautilusConnectServerOperationDetails;
+typedef struct _NemoConnectServerOperationDetails
+  NemoConnectServerOperationDetails;
 
 typedef struct {
 	GtkMountOperation parent;
-	NautilusConnectServerOperationDetails *details;
-} NautilusConnectServerOperation;
+	NemoConnectServerOperationDetails *details;
+} NemoConnectServerOperation;
 
 typedef struct {
 	GtkMountOperationClass parent_class;
-} NautilusConnectServerOperationClass;
+} NemoConnectServerOperationClass;
 
-GType nautilus_connect_server_operation_get_type (void);
+GType nemo_connect_server_operation_get_type (void);
 
 GMountOperation *
-nautilus_connect_server_operation_new (NautilusConnectServerDialog *dialog);
+nemo_connect_server_operation_new (NemoConnectServerDialog *dialog);
 
 
-#endif /* __NAUTILUS_CONNECT_SERVER_OPERATION_H__ */
+#endif /* __NEMO_CONNECT_SERVER_OPERATION_H__ */

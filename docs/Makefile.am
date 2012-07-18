@@ -3,8 +3,8 @@ NULL =
 SUBDIRS = reference
 
 man_MANS = \
-	nautilus.1 \
-	nautilus-connect-server.1 \
+	nemo.1 \
+	nemo-connect-server.1 \
 	$(NULL)
 
 EXTRA_DIST = \
@@ -12,10 +12,10 @@ EXTRA_DIST = \
 	architecture.txt \
 	dnd.txt \
 	load-states.dia \
-	nautilus-internals.sxw \
-	nautilus-internals.pdf \
-	nautilus-io.txt \
-	nautilus.faq \
+	nemo-internals.sxw \
+	nemo-internals.pdf \
+	nemo-io.txt \
+	nemo.faq \
 	recommended-books.html \
 	smoketests.html \
 	state-machines.txt \

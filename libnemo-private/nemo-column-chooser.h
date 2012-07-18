@@ -1,6 +1,6 @@
 /* -*- Mode: C; indent-tabs-mode: t; c-basic-offset: 8; tab-width: 8 -*- */
 
-/* nautilus-column-choose.h - A column chooser widget
+/* nemo-column-choose.h - A column chooser widget
 
    Copyright (C) 2004 Novell, Inc.
 
@@ -22,46 +22,46 @@
    Authors: Dave Camp <dave@ximian.com>
 */
 
-#ifndef NAUTILUS_COLUMN_CHOOSER_H
-#define NAUTILUS_COLUMN_CHOOSER_H
+#ifndef NEMO_COLUMN_CHOOSER_H
+#define NEMO_COLUMN_CHOOSER_H
 
 #include <gtk/gtk.h>
-#include <libnautilus-private/nautilus-file.h>
+#include <libnemo-private/nemo-file.h>
 
-#define NAUTILUS_TYPE_COLUMN_CHOOSER nautilus_column_chooser_get_type()
-#define NAUTILUS_COLUMN_CHOOSER(obj) \
-  (G_TYPE_CHECK_INSTANCE_CAST ((obj), NAUTILUS_TYPE_COLUMN_CHOOSER, NautilusColumnChooser))
-#define NAUTILUS_COLUMN_CHOOSER_CLASS(klass) \
-  (G_TYPE_CHECK_CLASS_CAST ((klass), NAUTILUS_TYPE_COLUMN_CHOOSER, NautilusColumnChooserClass))
-#define NAUTILUS_IS_COLUMN_CHOOSER(obj) \
-  (G_TYPE_CHECK_INSTANCE_TYPE ((obj), NAUTILUS_TYPE_COLUMN_CHOOSER))
-#define NAUTILUS_IS_COLUMN_CHOOSER_CLASS(klass) \
-  (G_TYPE_CHECK_CLASS_TYPE ((klass), NAUTILUS_TYPE_COLUMN_CHOOSER))
-#define NAUTILUS_COLUMN_CHOOSER_GET_CLASS(obj) \
-  (G_TYPE_INSTANCE_GET_CLASS ((obj), NAUTILUS_TYPE_COLUMN_CHOOSER, NautilusColumnChooserClass))
+#define NEMO_TYPE_COLUMN_CHOOSER nemo_column_chooser_get_type()
+#define NEMO_COLUMN_CHOOSER(obj) \
+  (G_TYPE_CHECK_INSTANCE_CAST ((obj), NEMO_TYPE_COLUMN_CHOOSER, NemoColumnChooser))
+#define NEMO_COLUMN_CHOOSER_CLASS(klass) \
+  (G_TYPE_CHECK_CLASS_CAST ((klass), NEMO_TYPE_COLUMN_CHOOSER, NemoColumnChooserClass))
+#define NEMO_IS_COLUMN_CHOOSER(obj) \
+  (G_TYPE_CHECK_INSTANCE_TYPE ((obj), NEMO_TYPE_COLUMN_CHOOSER))
+#define NEMO_IS_COLUMN_CHOOSER_CLASS(klass) \
+  (G_TYPE_CHECK_CLASS_TYPE ((klass), NEMO_TYPE_COLUMN_CHOOSER))
+#define NEMO_COLUMN_CHOOSER_GET_CLASS(obj) \
+  (G_TYPE_INSTANCE_GET_CLASS ((obj), NEMO_TYPE_COLUMN_CHOOSER, NemoColumnChooserClass))
 
-typedef struct _NautilusColumnChooserDetails NautilusColumnChooserDetails;
+typedef struct _NemoColumnChooserDetails NemoColumnChooserDetails;
 
 typedef struct {
 	GtkBox parent;
 	
-	NautilusColumnChooserDetails *details;
-} NautilusColumnChooser;
+	NemoColumnChooserDetails *details;
+} NemoColumnChooser;
 
 typedef struct {
         GtkBoxClass parent_slot;
 
-	void (*changed) (NautilusColumnChooser *chooser);
-	void (*use_default) (NautilusColumnChooser *chooser);
-} NautilusColumnChooserClass;
+	void (*changed) (NemoColumnChooser *chooser);
+	void (*use_default) (NemoColumnChooser *chooser);
+} NemoColumnChooserClass;
 
-GType      nautilus_column_chooser_get_type            (void);
-GtkWidget *nautilus_column_chooser_new                 (NautilusFile *file);
-void       nautilus_column_chooser_set_settings    (NautilusColumnChooser   *chooser,
+GType      nemo_column_chooser_get_type            (void);
+GtkWidget *nemo_column_chooser_new                 (NemoFile *file);
+void       nemo_column_chooser_set_settings    (NemoColumnChooser   *chooser,
 						    char                   **visible_columns, 
 						    char                   **column_order);
-void       nautilus_column_chooser_get_settings    (NautilusColumnChooser *chooser,
+void       nemo_column_chooser_get_settings    (NemoColumnChooser *chooser,
 						    char                  ***visible_columns, 
 						    char                  ***column_order);
 
-#endif /* NAUTILUS_COLUMN_CHOOSER_H */
+#endif /* NEMO_COLUMN_CHOOSER_H */

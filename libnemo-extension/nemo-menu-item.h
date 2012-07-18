@@ -1,5 +1,5 @@
 /*
- *  nautilus-menu-item.h - Menu items exported by NautilusMenuProvider
+ *  nemo-menu-item.h - Menu items exported by NemoMenuProvider
  *                         objects.
  *
  *  Copyright (C) 2003 Novell, Inc.
@@ -22,9 +22,9 @@
  *
  */
 
-#ifndef NAUTILUS_MENU_ITEM_H
-#define NAUTILUS_MENU_ITEM_H
+#ifndef NEMO_MENU_ITEM_H
+#define NEMO_MENU_ITEM_H
 
-#include "nautilus-menu.h"
+#include "nemo-menu.h"
 
 #endif

@@ -1,6 +1,6 @@
 /* -*- Mode: C; indent-tabs-mode: t; c-basic-offset: 8; tab-width: 8 -*-
 
-   nautilus-window-slot.c: Nautilus window slot
+   nemo-window-slot.c: Nemo window slot
  
    Copyright (C) 2008 Free Software Foundation, Inc.
   
@@ -21,22 +21,22 @@
   
    Author: Christian Neumair <cneumair@gnome.org>
 */
-#include "nautilus-window-slot.h"
+#include "nemo-window-slot.h"
 
-#include "nautilus-desktop-window.h"
-#include "nautilus-floating-bar.h"
-#include "nautilus-window-private.h"
-#include "nautilus-window-manage-views.h"
+#include "nemo-desktop-window.h"
+#include "nemo-floating-bar.h"
+#include "nemo-window-private.h"
+#include "nemo-window-manage-views.h"
 
 #include <glib/gi18n.h>
 
-#include <libnautilus-private/nautilus-file.h>
-#include <libnautilus-private/nautilus-file-utilities.h>
-#include <libnautilus-private/nautilus-global-preferences.h>
+#include <libnemo-private/nemo-file.h>
+#include <libnemo-private/nemo-file-utilities.h>
+#include <libnemo-private/nemo-global-preferences.h>
 
 #include <eel/eel-string.h>
 
-G_DEFINE_TYPE (NautilusWindowSlot, nautilus_window_slot, GTK_TYPE_BOX);
+G_DEFINE_TYPE (NemoWindowSlot, nemo_window_slot, GTK_TYPE_BOX);
 
 enum {
 	ACTIVE,
@@ -47,87 +47,87 @@ enum {
 static guint signals[LAST_SIGNAL] = { 0 };
 
 static void
-query_editor_changed_callback (NautilusSearchBar *bar,
-			       NautilusQuery *query,
+query_editor_changed_callback (NemoSearchBar *bar,
+			       NemoQuery *query,
 			       gboolean reload,
-			       NautilusWindowSlot *slot)
+			       NemoWindowSlot *slot)
 {
-	NautilusDirectory *directory;
+	NemoDirectory *directory;
 
-	g_assert (NAUTILUS_IS_FILE (slot->viewed_file));
+	g_assert (NEMO_IS_FILE (slot->viewed_file));
 
-	directory = nautilus_directory_get_for_file (slot->viewed_file);
-	g_assert (NAUTILUS_IS_SEARCH_DIRECTORY (directory));
+	directory = nemo_directory_get_for_file (slot->viewed_file);
+	g_assert (NEMO_IS_SEARCH_DIRECTORY (directory));
 
-	nautilus_search_directory_set_query (NAUTILUS_SEARCH_DIRECTORY (directory),
+	nemo_search_directory_set_query (NEMO_SEARCH_DIRECTORY (directory),
 					     query);
 	if (reload) {
-		nautilus_window_slot_reload (slot);
+		nemo_window_slot_reload (slot);
 	}
 
-	nautilus_directory_unref (directory);
+	nemo_directory_unref (directory);
 }
 
 static void
-real_update_query_editor (NautilusWindowSlot *slot)
+real_update_query_editor (NemoWindowSlot *slot)
 {
-	NautilusDirectory *directory;
-	NautilusSearchDirectory *search_directory;
-	NautilusQuery *query;
+	NemoDirectory *directory;
+	NemoSearchDirectory *search_directory;
+	NemoQuery *query;
 	GtkWidget *query_editor;
 	gboolean slot_is_active;
-	NautilusWindow *window;
+	NemoWindow *window;
 
-	window = nautilus_window_slot_get_window (slot);
+	window = nemo_window_slot_get_window (slot);
 	query_editor = NULL;
-	slot_is_active = (slot == nautilus_window_get_active_slot (window));
+	slot_is_active = (slot == nemo_window_get_active_slot (window));
 
-	directory = nautilus_directory_get (slot->location);
-	if (NAUTILUS_IS_SEARCH_DIRECTORY (directory)) {
-		search_directory = NAUTILUS_SEARCH_DIRECTORY (directory);
+	directory = nemo_directory_get (slot->location);
+	if (NEMO_IS_SEARCH_DIRECTORY (directory)) {
+		search_directory = NEMO_SEARCH_DIRECTORY (directory);
 
-		if (nautilus_search_directory_is_saved_search (search_directory)) {
-			query_editor = nautilus_query_editor_new (TRUE);
-			nautilus_window_pane_sync_search_widgets (slot->pane);
+		if (nemo_search_directory_is_saved_search (search_directory)) {
+			query_editor = nemo_query_editor_new (TRUE);
+			nemo_window_pane_sync_search_widgets (slot->pane);
 		} else {
-			query_editor = nautilus_query_editor_new_with_bar (FALSE,
+			query_editor = nemo_query_editor_new_with_bar (FALSE,
 									   slot_is_active,
-									   NAUTILUS_SEARCH_BAR (slot->pane->search_bar),
+									   NEMO_SEARCH_BAR (slot->pane->search_bar),
 									   slot);
 		}
 	}
 
-	slot->query_editor = NAUTILUS_QUERY_EDITOR (query_editor);
+	slot->query_editor = NEMO_QUERY_EDITOR (query_editor);
 
 	if (query_editor != NULL) {
 		g_signal_connect_object (query_editor, "changed",
 					 G_CALLBACK (query_editor_changed_callback), slot, 0);
 		
-		query = nautilus_search_directory_get_query (search_directory);
+		query = nemo_search_directory_get_query (search_directory);
 		if (query != NULL) {
-			nautilus_query_editor_set_query (NAUTILUS_QUERY_EDITOR (query_editor),
+			nemo_query_editor_set_query (NEMO_QUERY_EDITOR (query_editor),
 							 query);
 			g_object_unref (query);
 		} else {
-			nautilus_query_editor_set_default_query (NAUTILUS_QUERY_EDITOR (query_editor));
+			nemo_query_editor_set_default_query (NEMO_QUERY_EDITOR (query_editor));
 		}
 
-		nautilus_window_slot_add_extra_location_widget (slot, query_editor);
+		nemo_window_slot_add_extra_location_widget (slot, query_editor);
 		gtk_widget_show (query_editor);
-		nautilus_query_editor_grab_focus (NAUTILUS_QUERY_EDITOR (query_editor));
+		nemo_query_editor_grab_focus (NEMO_QUERY_EDITOR (query_editor));
 	}
 
-	nautilus_directory_unref (directory);
+	nemo_directory_unref (directory);
 }
 
 static void
-real_active (NautilusWindowSlot *slot)
+real_active (NemoWindowSlot *slot)
 {
-	NautilusWindow *window;
-	NautilusWindowPane *pane;
+	NemoWindow *window;
+	NemoWindowPane *pane;
 	int page_num;
 
-	window = nautilus_window_slot_get_window (slot);
+	window = nemo_window_slot_get_window (slot);
 	pane = slot->pane;
 	page_num = gtk_notebook_page_num (GTK_NOTEBOOK (pane->notebook),
 					  GTK_WIDGET (slot));
@@ -136,40 +136,40 @@ real_active (NautilusWindowSlot *slot)
 	gtk_notebook_set_current_page (GTK_NOTEBOOK (pane->notebook), page_num);
 
 	/* sync window to new slot */
-	nautilus_window_sync_status (window);
-	nautilus_window_sync_allow_stop (window, slot);
-	nautilus_window_sync_title (window, slot);
-	nautilus_window_sync_zoom_widgets (window);
-	nautilus_window_pane_sync_location_widgets (slot->pane);
-	nautilus_window_pane_sync_search_widgets (slot->pane);
+	nemo_window_sync_status (window);
+	nemo_window_sync_allow_stop (window, slot);
+	nemo_window_sync_title (window, slot);
+	nemo_window_sync_zoom_widgets (window);
+	nemo_window_pane_sync_location_widgets (slot->pane);
+	nemo_window_pane_sync_search_widgets (slot->pane);
 
 	if (slot->viewed_file != NULL) {
-		nautilus_window_load_view_as_menus (window);
-		nautilus_window_load_extension_menus (window);
+		nemo_window_load_view_as_menus (window);
+		nemo_window_load_extension_menus (window);
 	}
 }
 
 static void
-real_inactive (NautilusWindowSlot *slot)
+real_inactive (NemoWindowSlot *slot)
 {
-	NautilusWindow *window;
+	NemoWindow *window;
 
-	window = nautilus_window_slot_get_window (slot);
-	g_assert (slot == nautilus_window_get_active_slot (window));
+	window = nemo_window_slot_get_window (slot);
+	g_assert (slot == nemo_window_get_active_slot (window));
 }
 
 static void
-floating_bar_action_cb (NautilusFloatingBar *floating_bar,
+floating_bar_action_cb (NemoFloatingBar *floating_bar,
 			gint action,
-			NautilusWindowSlot *slot)
+			NemoWindowSlot *slot)
 {
-	if (action == NAUTILUS_FLOATING_BAR_ACTION_ID_STOP) {
-		nautilus_window_slot_stop_loading (slot);
+	if (action == NEMO_FLOATING_BAR_ACTION_ID_STOP) {
+		nemo_window_slot_stop_loading (slot);
 	}
 }
 
 static void
-nautilus_window_slot_init (NautilusWindowSlot *slot)
+nemo_window_slot_init (NemoWindowSlot *slot)
 {
 	GtkWidget *extras_vbox;
 
@@ -189,7 +189,7 @@ nautilus_window_slot_init (NautilusWindowSlot *slot)
 	gtk_box_pack_start (GTK_BOX (slot), slot->view_overlay, TRUE, TRUE, 0);
 	gtk_widget_show (slot->view_overlay);
 
-	slot->floating_bar = nautilus_floating_bar_new ("", FALSE);
+	slot->floating_bar = nemo_floating_bar_new ("", FALSE);
 	gtk_widget_set_halign (slot->floating_bar, GTK_ALIGN_END);
 	gtk_widget_set_valign (slot->floating_bar, GTK_ALIGN_END);
 	gtk_overlay_add_overlay (GTK_OVERLAY (slot->view_overlay),
@@ -202,15 +202,15 @@ nautilus_window_slot_init (NautilusWindowSlot *slot)
 }
 
 static void
-nautilus_window_slot_dispose (GObject *object)
+nemo_window_slot_dispose (GObject *object)
 {
-	NautilusWindowSlot *slot;
+	NemoWindowSlot *slot;
 	GtkWidget *widget;
 
-	slot = NAUTILUS_WINDOW_SLOT (object);
+	slot = NEMO_WINDOW_SLOT (object);
 
-	nautilus_window_slot_clear_forward_list (slot);
-	nautilus_window_slot_clear_back_list (slot);
+	nemo_window_slot_clear_forward_list (slot);
+	nemo_window_slot_clear_back_list (slot);
 
 	if (slot->content_view) {
 		widget = GTK_WIDGET (slot->content_view);
@@ -236,10 +236,10 @@ nautilus_window_slot_dispose (GObject *object)
 		slot->loading_timeout_id = 0;
 	}
 
-	nautilus_window_slot_set_viewed_file (slot, NULL);
+	nemo_window_slot_set_viewed_file (slot, NULL);
 	/* TODO? why do we unref here? the file is NULL.
 	 * It was already here before the slot move, though */
-	nautilus_file_unref (slot->viewed_file);
+	nemo_file_unref (slot->viewed_file);
 
 	if (slot->location) {
 		/* TODO? why do we ref here, instead of unreffing?
@@ -266,24 +266,24 @@ nautilus_window_slot_dispose (GObject *object)
 	g_free (slot->status_text);
 	slot->status_text = NULL;
 
-	G_OBJECT_CLASS (nautilus_window_slot_parent_class)->dispose (object);
+	G_OBJECT_CLASS (nemo_window_slot_parent_class)->dispose (object);
 }
 
 static void
-nautilus_window_slot_class_init (NautilusWindowSlotClass *klass)
+nemo_window_slot_class_init (NemoWindowSlotClass *klass)
 {
 	GObjectClass *oclass = G_OBJECT_CLASS (klass);
 
 	klass->active = real_active;
 	klass->inactive = real_inactive;
 
-	oclass->dispose = nautilus_window_slot_dispose;
+	oclass->dispose = nemo_window_slot_dispose;
 
 	signals[ACTIVE] =
 		g_signal_new ("active",
 			      G_TYPE_FROM_CLASS (klass),
 			      G_SIGNAL_RUN_LAST,
-			      G_STRUCT_OFFSET (NautilusWindowSlotClass, active),
+			      G_STRUCT_OFFSET (NemoWindowSlotClass, active),
 			      NULL, NULL,
 			      g_cclosure_marshal_VOID__VOID,
 			      G_TYPE_NONE, 0);
@@ -292,14 +292,14 @@ nautilus_window_slot_class_init (NautilusWindowSlotClass *klass)
 		g_signal_new ("inactive",
 			      G_TYPE_FROM_CLASS (klass),
 			      G_SIGNAL_RUN_LAST,
-			      G_STRUCT_OFFSET (NautilusWindowSlotClass, inactive),
+			      G_STRUCT_OFFSET (NemoWindowSlotClass, inactive),
 			      NULL, NULL,
 			      g_cclosure_marshal_VOID__VOID,
 			      G_TYPE_NONE, 0);
 }
 
 GFile *
-nautilus_window_slot_get_location (NautilusWindowSlot *slot)
+nemo_window_slot_get_location (NemoWindowSlot *slot)
 {
 	g_assert (slot != NULL);
 
@@ -310,9 +310,9 @@ nautilus_window_slot_get_location (NautilusWindowSlot *slot)
 }
 
 char *
-nautilus_window_slot_get_location_uri (NautilusWindowSlot *slot)
+nemo_window_slot_get_location_uri (NemoWindowSlot *slot)
 {
-	g_assert (NAUTILUS_IS_WINDOW_SLOT (slot));
+	g_assert (NEMO_IS_WINDOW_SLOT (slot));
 
 	if (slot->location) {
 		return g_file_get_uri (slot->location);
@@ -321,37 +321,37 @@ nautilus_window_slot_get_location_uri (NautilusWindowSlot *slot)
 }
 
 void
-nautilus_window_slot_make_hosting_pane_active (NautilusWindowSlot *slot)
+nemo_window_slot_make_hosting_pane_active (NemoWindowSlot *slot)
 {
-	g_assert (NAUTILUS_IS_WINDOW_PANE (slot->pane));
+	g_assert (NEMO_IS_WINDOW_PANE (slot->pane));
 	
-	nautilus_window_set_active_slot (nautilus_window_slot_get_window (slot),
+	nemo_window_set_active_slot (nemo_window_slot_get_window (slot),
 					 slot);
 }
 
-NautilusWindow *
-nautilus_window_slot_get_window (NautilusWindowSlot *slot)
+NemoWindow *
+nemo_window_slot_get_window (NemoWindowSlot *slot)
 {
-	g_assert (NAUTILUS_IS_WINDOW_SLOT (slot));
+	g_assert (NEMO_IS_WINDOW_SLOT (slot));
 	return slot->pane->window;
 }
 
-/* nautilus_window_slot_update_title:
+/* nemo_window_slot_update_title:
  * 
  * Re-calculate the slot title.
  * Called when the location or view has changed.
- * @slot: The NautilusWindowSlot in question.
+ * @slot: The NemoWindowSlot in question.
  * 
  */
 void
-nautilus_window_slot_update_title (NautilusWindowSlot *slot)
+nemo_window_slot_update_title (NemoWindowSlot *slot)
 {
-	NautilusWindow *window;
+	NemoWindow *window;
 	char *title;
 	gboolean do_sync = FALSE;
 
-	title = nautilus_compute_title_for_location (slot->location);
-	window = nautilus_window_slot_get_window (slot);
+	title = nemo_compute_title_for_location (slot->location);
+	window = nemo_window_slot_get_window (slot);
 
 	if (g_strcmp0 (title, slot->title) != 0) {
 		do_sync = TRUE;
@@ -367,7 +367,7 @@ nautilus_window_slot_update_title (NautilusWindowSlot *slot)
 	}
 
 	if (do_sync) {
-		nautilus_window_sync_title (window, slot);
+		nemo_window_sync_title (window, slot);
 	}
 
 	if (title != NULL) {
@@ -375,26 +375,26 @@ nautilus_window_slot_update_title (NautilusWindowSlot *slot)
 	}
 }
 
-/* nautilus_window_slot_update_icon:
+/* nemo_window_slot_update_icon:
  * 
  * Re-calculate the slot icon
  * Called when the location or view or icon set has changed.
- * @slot: The NautilusWindowSlot in question.
+ * @slot: The NemoWindowSlot in question.
  */
 void
-nautilus_window_slot_update_icon (NautilusWindowSlot *slot)
+nemo_window_slot_update_icon (NemoWindowSlot *slot)
 {
-	NautilusWindow *window;
-	NautilusIconInfo *info;
+	NemoWindow *window;
+	NemoIconInfo *info;
 	const char *icon_name;
 	GdkPixbuf *pixbuf;
 
-	window = nautilus_window_slot_get_window (slot);
-	info = NAUTILUS_WINDOW_CLASS (G_OBJECT_GET_CLASS (window))->get_icon (window, slot);
+	window = nemo_window_slot_get_window (slot);
+	info = NEMO_WINDOW_CLASS (G_OBJECT_GET_CLASS (window))->get_icon (window, slot);
 
 	icon_name = NULL;
 	if (info) {
-		icon_name = nautilus_icon_info_get_used_name (info);
+		icon_name = nemo_icon_info_get_used_name (info);
 		if (icon_name != NULL) {
 			/* Gtk+ doesn't short circuit this (yet), so avoid lots of work
 			 * if we're setting to the same icon. This happens a lot e.g. when
@@ -404,7 +404,7 @@ nautilus_window_slot_update_icon (NautilusWindowSlot *slot)
 				gtk_window_set_icon_name (GTK_WINDOW (window), icon_name);
 			}
 		} else {
-			pixbuf = nautilus_icon_info_get_pixbuf_nodefault (info);
+			pixbuf = nemo_icon_info_get_pixbuf_nodefault (info);
 			
 			if (pixbuf) {
 				gtk_window_set_icon (GTK_WINDOW (window), pixbuf);
@@ -417,17 +417,17 @@ nautilus_window_slot_update_icon (NautilusWindowSlot *slot)
 }
 
 void
-nautilus_window_slot_set_content_view_widget (NautilusWindowSlot *slot,
-					      NautilusView *new_view)
+nemo_window_slot_set_content_view_widget (NemoWindowSlot *slot,
+					      NemoView *new_view)
 {
-	NautilusWindow *window;
+	NemoWindow *window;
 	GtkWidget *widget;
 
-	window = nautilus_window_slot_get_window (slot);
+	window = nemo_window_slot_get_window (slot);
 
 	if (slot->content_view != NULL) {
 		/* disconnect old view */
-		nautilus_window_disconnect_content_view (window, slot->content_view);
+		nemo_window_disconnect_content_view (window, slot->content_view);
 
 		widget = GTK_WIDGET (slot->content_view);
 		gtk_widget_destroy (widget);
@@ -444,40 +444,40 @@ nautilus_window_slot_set_content_view_widget (NautilusWindowSlot *slot,
 		g_object_ref (slot->content_view);
 
 		/* connect new view */
-		nautilus_window_connect_content_view (window, new_view);
+		nemo_window_connect_content_view (window, new_view);
 	}
 }
 
 void
-nautilus_window_slot_set_allow_stop (NautilusWindowSlot *slot,
+nemo_window_slot_set_allow_stop (NemoWindowSlot *slot,
 				     gboolean allow)
 {
-	NautilusWindow *window;
+	NemoWindow *window;
 
-	g_assert (NAUTILUS_IS_WINDOW_SLOT (slot));
+	g_assert (NEMO_IS_WINDOW_SLOT (slot));
 
 	slot->allow_stop = allow;
 
-	window = nautilus_window_slot_get_window (slot);
-	nautilus_window_sync_allow_stop (window, slot);
+	window = nemo_window_slot_get_window (slot);
+	nemo_window_sync_allow_stop (window, slot);
 }
 
 static void
-real_slot_set_short_status (NautilusWindowSlot *slot,
+real_slot_set_short_status (NemoWindowSlot *slot,
 			    const gchar *status)
 {
 	
 	gboolean show_statusbar;
 	gboolean disable_chrome;
 
-	nautilus_floating_bar_cleanup_actions (NAUTILUS_FLOATING_BAR (slot->floating_bar));
-	nautilus_floating_bar_set_show_spinner (NAUTILUS_FLOATING_BAR (slot->floating_bar),
+	nemo_floating_bar_cleanup_actions (NEMO_FLOATING_BAR (slot->floating_bar));
+	nemo_floating_bar_set_show_spinner (NEMO_FLOATING_BAR (slot->floating_bar),
 						FALSE);
 
-	show_statusbar = g_settings_get_boolean (nautilus_window_state,
-						 NAUTILUS_WINDOW_STATE_START_WITH_STATUS_BAR);
+	show_statusbar = g_settings_get_boolean (nemo_window_state,
+						 NEMO_WINDOW_STATE_START_WITH_STATUS_BAR);
 
-	g_object_get (nautilus_window_slot_get_window (slot),
+	g_object_get (nemo_window_slot_get_window (slot),
 		      "disable-chrome", &disable_chrome,
 		      NULL);
 
@@ -486,13 +486,13 @@ real_slot_set_short_status (NautilusWindowSlot *slot,
 		return;
 	}
 
-	nautilus_floating_bar_set_label (NAUTILUS_FLOATING_BAR (slot->floating_bar), status);
+	nemo_floating_bar_set_label (NEMO_FLOATING_BAR (slot->floating_bar), status);
 	gtk_widget_show (slot->floating_bar);
 }
 
 typedef struct {
 	gchar *status;
-	NautilusWindowSlot *slot;
+	NemoWindowSlot *slot;
 } SetStatusData;
 
 static void
@@ -517,7 +517,7 @@ set_status_timeout_cb (gpointer data)
 }
 
 static void
-set_floating_bar_status (NautilusWindowSlot *slot,
+set_floating_bar_status (NemoWindowSlot *slot,
 			 const gchar *status)
 {
 	GtkSettings *settings;
@@ -551,13 +551,13 @@ set_floating_bar_status (NautilusWindowSlot *slot,
 }
 
 void
-nautilus_window_slot_set_status (NautilusWindowSlot *slot,
+nemo_window_slot_set_status (NemoWindowSlot *slot,
 				 const char *status,
 				 const char *short_status)
 {
-	NautilusWindow *window;
+	NemoWindow *window;
 
-	g_assert (NAUTILUS_IS_WINDOW_SLOT (slot));
+	g_assert (NEMO_IS_WINDOW_SLOT (slot));
 
 	g_free (slot->status_text);
 	slot->status_text = g_strdup (status);
@@ -566,21 +566,21 @@ nautilus_window_slot_set_status (NautilusWindowSlot *slot,
 		set_floating_bar_status (slot, short_status);
 	}
 
-	window = nautilus_window_slot_get_window (slot);
-	if (slot == nautilus_window_get_active_slot (window)) {
-		nautilus_window_sync_status (window);
+	window = nemo_window_slot_get_window (slot);
+	if (slot == nemo_window_get_active_slot (window)) {
+		nemo_window_sync_status (window);
 	}
 }
 
-/* nautilus_window_slot_update_query_editor:
+/* nemo_window_slot_update_query_editor:
  * 
  * Update the query editor.
  * Called when the location has changed.
  *
- * @slot: The NautilusWindowSlot in question.
+ * @slot: The NemoWindowSlot in question.
  */
 void
-nautilus_window_slot_update_query_editor (NautilusWindowSlot *slot)
+nemo_window_slot_update_query_editor (NemoWindowSlot *slot)
 {
 	if (slot->query_editor != NULL) {
 		gtk_widget_destroy (GTK_WIDGET (slot->query_editor));
@@ -603,7 +603,7 @@ remove_all (GtkWidget *widget,
 }
 
 void
-nautilus_window_slot_remove_extra_location_widgets (NautilusWindowSlot *slot)
+nemo_window_slot_remove_extra_location_widgets (NemoWindowSlot *slot)
 {
 	gtk_container_foreach (GTK_CONTAINER (slot->extra_location_widgets),
 			       remove_all,
@@ -612,7 +612,7 @@ nautilus_window_slot_remove_extra_location_widgets (NautilusWindowSlot *slot)
 }
 
 void
-nautilus_window_slot_add_extra_location_widget (NautilusWindowSlot *slot,
+nemo_window_slot_add_extra_location_widget (NemoWindowSlot *slot,
 						GtkWidget *widget)
 {
 	gtk_box_pack_start (GTK_BOX (slot->extra_location_widgets),
@@ -622,7 +622,7 @@ nautilus_window_slot_add_extra_location_widget (NautilusWindowSlot *slot,
 
 /* returns either the pending or the actual current uri */
 char *
-nautilus_window_slot_get_current_uri (NautilusWindowSlot *slot)
+nemo_window_slot_get_current_uri (NemoWindowSlot *slot)
 {
 	if (slot->pending_location != NULL) {
 		return g_file_get_uri (slot->pending_location);
@@ -636,8 +636,8 @@ nautilus_window_slot_get_current_uri (NautilusWindowSlot *slot)
 	return NULL;
 }
 
-NautilusView *
-nautilus_window_slot_get_current_view (NautilusWindowSlot *slot)
+NemoView *
+nemo_window_slot_get_current_view (NemoWindowSlot *slot)
 {
 	if (slot->content_view != NULL) {
 		return slot->content_view;
@@ -649,33 +649,33 @@ nautilus_window_slot_get_current_view (NautilusWindowSlot *slot)
 }
 
 void
-nautilus_window_slot_go_home (NautilusWindowSlot *slot,
+nemo_window_slot_go_home (NemoWindowSlot *slot,
 			      gboolean new_tab)
 {			      
 	GFile *home;
-	NautilusWindowOpenFlags flags;
+	NemoWindowOpenFlags flags;
 
-	g_return_if_fail (NAUTILUS_IS_WINDOW_SLOT (slot));
+	g_return_if_fail (NEMO_IS_WINDOW_SLOT (slot));
 
 	if (new_tab) {
-		flags = NAUTILUS_WINDOW_OPEN_FLAG_NEW_TAB;
+		flags = NEMO_WINDOW_OPEN_FLAG_NEW_TAB;
 	} else {
 		flags = 0;
 	}
 
 	home = g_file_new_for_path (g_get_home_dir ());
-	nautilus_window_slot_open_location_full (slot, home, 
+	nemo_window_slot_open_location_full (slot, home, 
 						 flags, NULL, NULL, NULL);
 	g_object_unref (home);
 }
 
 void
-nautilus_window_slot_go_up (NautilusWindowSlot *slot,
+nemo_window_slot_go_up (NemoWindowSlot *slot,
 			    gboolean close_behind,
 			    gboolean new_tab)
 {
 	GFile *parent;
-	NautilusWindowOpenFlags flags;
+	NemoWindowOpenFlags flags;
 
 	if (slot->location == NULL) {
 		return;
@@ -688,13 +688,13 @@ nautilus_window_slot_go_up (NautilusWindowSlot *slot,
 
 	flags = 0;
 	if (close_behind) {
-		flags |= NAUTILUS_WINDOW_OPEN_FLAG_CLOSE_BEHIND;
+		flags |= NEMO_WINDOW_OPEN_FLAG_CLOSE_BEHIND;
 	}
 	if (new_tab) {
-		flags |= NAUTILUS_WINDOW_OPEN_FLAG_NEW_TAB;
+		flags |= NEMO_WINDOW_OPEN_FLAG_NEW_TAB;
 	}
 
-	nautilus_window_slot_open_location (slot, parent,
+	nemo_window_slot_open_location (slot, parent,
 					    flags,
 					    NULL);
 
@@ -702,25 +702,25 @@ nautilus_window_slot_go_up (NautilusWindowSlot *slot,
 }
 
 void
-nautilus_window_slot_clear_forward_list (NautilusWindowSlot *slot)
+nemo_window_slot_clear_forward_list (NemoWindowSlot *slot)
 {
-	g_assert (NAUTILUS_IS_WINDOW_SLOT (slot));
+	g_assert (NEMO_IS_WINDOW_SLOT (slot));
 
 	g_list_free_full (slot->forward_list, g_object_unref);
 	slot->forward_list = NULL;
 }
 
 void
-nautilus_window_slot_clear_back_list (NautilusWindowSlot *slot)
+nemo_window_slot_clear_back_list (NemoWindowSlot *slot)
 {
-	g_assert (NAUTILUS_IS_WINDOW_SLOT (slot));
+	g_assert (NEMO_IS_WINDOW_SLOT (slot));
 
 	g_list_free_full (slot->back_list, g_object_unref);
 	slot->back_list = NULL;
 }
 
 gboolean
-nautilus_window_slot_should_close_with_mount (NautilusWindowSlot *slot,
+nemo_window_slot_should_close_with_mount (NemoWindowSlot *slot,
 					      GMount *mount)
 {
 	GFile *mount_location;
@@ -728,20 +728,20 @@ nautilus_window_slot_should_close_with_mount (NautilusWindowSlot *slot,
 
 	mount_location = g_mount_get_root (mount);
 	close_with_mount = 
-		g_file_has_prefix (NAUTILUS_WINDOW_SLOT (slot)->location, mount_location) ||
-		g_file_equal (NAUTILUS_WINDOW_SLOT (slot)->location, mount_location);
+		g_file_has_prefix (NEMO_WINDOW_SLOT (slot)->location, mount_location) ||
+		g_file_equal (NEMO_WINDOW_SLOT (slot)->location, mount_location);
 
 	g_object_unref (mount_location);
 
 	return close_with_mount;
 }
 
-NautilusWindowSlot *
-nautilus_window_slot_new (NautilusWindowPane *pane)
+NemoWindowSlot *
+nemo_window_slot_new (NemoWindowPane *pane)
 {
-	NautilusWindowSlot *slot;
+	NemoWindowSlot *slot;
 
-	slot = g_object_new (NAUTILUS_TYPE_WINDOW_SLOT, NULL);
+	slot = g_object_new (NEMO_TYPE_WINDOW_SLOT, NULL);
 	slot->pane = pane;
 
 	return slot;

@@ -1,16 +1,16 @@
 /* -*- Mode: C; indent-tabs-mode: t; c-basic-offset: 8; tab-width: 8 -*- */
 
 /*
- * Nautilus
+ * Nemo
  *
  * Copyright (C) 2000, 2001 Eazel, Inc.
  *
- * Nautilus is free software; you can redistribute it and/or
+ * Nemo is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
  * published by the Free Software Foundation; either version 2 of the
  * License, or (at your option) any later version.
  *
- * Nautilus is distributed in the hope that it will be useful,
+ * Nemo is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
  * General Public License for more details.
@@ -22,24 +22,24 @@
  * Author: John Sullivan <sullivan@eazel.com>
  */
 
-/* nautilus-window-menus.h - implementation of nautilus window menu operations,
+/* nemo-window-menus.h - implementation of nemo window menu operations,
  *                           split into separate file just for convenience.
  */
 #include <config.h>
 
 #include <locale.h> 
 
-#include "nautilus-actions.h"
-#include "nautilus-application.h"
-#include "nautilus-connect-server-dialog.h"
-#include "nautilus-file-management-properties.h"
-#include "nautilus-navigation-action.h"
-#include "nautilus-notebook.h"
-#include "nautilus-window-manage-views.h"
-#include "nautilus-window-bookmarks.h"
-#include "nautilus-window-private.h"
-#include "nautilus-desktop-window.h"
-#include "nautilus-search-bar.h"
+#include "nemo-actions.h"
+#include "nemo-application.h"
+#include "nemo-connect-server-dialog.h"
+#include "nemo-file-management-properties.h"
+#include "nemo-navigation-action.h"
+#include "nemo-notebook.h"
+#include "nemo-window-manage-views.h"
+#include "nemo-window-bookmarks.h"
+#include "nemo-window-private.h"
+#include "nemo-desktop-window.h"
+#include "nemo-search-bar.h"
 #include <gtk/gtk.h>
 #include <gio/gio.h>
 #include <glib/gi18n.h>
@@ -47,19 +47,20 @@
 #include <eel/eel-gtk-extensions.h>
 #include <eel/eel-stock-dialogs.h>
 
-#include <libnautilus-extension/nautilus-menu-provider.h>
-#include <libnautilus-private/nautilus-file-utilities.h>
-#include <libnautilus-private/nautilus-global-preferences.h>
-#include <libnautilus-private/nautilus-icon-names.h>
-#include <libnautilus-private/nautilus-ui-utilities.h>
-#include <libnautilus-private/nautilus-module.h>
-#include <libnautilus-private/nautilus-undo-manager.h>
-#include <libnautilus-private/nautilus-program-choosing.h>
-#include <libnautilus-private/nautilus-search-directory.h>
-#include <libnautilus-private/nautilus-search-engine.h>
-#include <libnautilus-private/nautilus-signaller.h>
-#include <libnautilus-private/nautilus-trash-monitor.h>
+#include <libnemo-extension/nemo-menu-provider.h>
+#include <libnemo-private/nemo-file-utilities.h>
+#include <libnemo-private/nemo-global-preferences.h>
+#include <libnemo-private/nemo-icon-names.h>
+#include <libnemo-private/nemo-ui-utilities.h>
+#include <libnemo-private/nemo-module.h>
+#include <libnemo-private/nemo-undo-manager.h>
+#include <libnemo-private/nemo-program-choosing.h>
+#include <libnemo-private/nemo-search-directory.h>
+#include <libnemo-private/nemo-search-engine.h>
+#include <libnemo-private/nemo-signaller.h>
+#include <libnemo-private/nemo-trash-monitor.h>
 #include <string.h>
+#include <launchpad-integration.h>
 
 #define MENU_PATH_EXTENSION_ACTIONS                     "/MenuBar/File/Extension Actions"
 #define POPUP_PATH_EXTENSION_ACTIONS                     "/background/Before Zoom Items/Extension Actions"
@@ -72,23 +73,23 @@ static void
 action_close_window_slot_callback (GtkAction *action,
 				   gpointer user_data)
 {
-	NautilusWindow *window;
-	NautilusWindowSlot *slot;
+	NemoWindow *window;
+	NemoWindowSlot *slot;
 
-	window = NAUTILUS_WINDOW (user_data);
-	slot = nautilus_window_get_active_slot (window);
+	window = NEMO_WINDOW (user_data);
+	slot = nemo_window_get_active_slot (window);
 
-	nautilus_window_pane_slot_close (slot->pane, slot);
+	nemo_window_pane_slot_close (slot->pane, slot);
 }
 
 static void
 action_connect_to_server_callback (GtkAction *action, 
 				   gpointer user_data)
 {
-	NautilusWindow *window = NAUTILUS_WINDOW (user_data);
+	NemoWindow *window = NEMO_WINDOW (user_data);
 	GtkWidget *dialog;
 
-	dialog = nautilus_connect_server_dialog_new (window);
+	dialog = nemo_connect_server_dialog_new (window);
 
 	gtk_widget_show (dialog);
 }
@@ -97,13 +98,13 @@ static void
 action_stop_callback (GtkAction *action, 
 		      gpointer user_data)
 {
-	NautilusWindow *window;
-	NautilusWindowSlot *slot;
+	NemoWindow *window;
+	NemoWindowSlot *slot;
 
-	window = NAUTILUS_WINDOW (user_data);
-	slot = nautilus_window_get_active_slot (window);
+	window = NEMO_WINDOW (user_data);
+	slot = nemo_window_get_active_slot (window);
 
-	nautilus_window_slot_stop_loading (slot);
+	nemo_window_slot_stop_loading (slot);
 }
 
 #ifdef TEXT_CHANGE_UNDO
@@ -111,10 +112,10 @@ static void
 action_undo_callback (GtkAction *action, 
 		      gpointer user_data) 
 {
-	NautilusApplication *app;
+	NemoApplication *app;
 
-	app = nautilus_application_get_singleton ();
-	nautilus_undo_manager_undo (app->undo_manager);
+	app = nemo_application_get_singleton ();
+	nemo_undo_manager_undo (app->undo_manager);
 }
 #endif
 
@@ -122,31 +123,31 @@ static void
 action_home_callback (GtkAction *action, 
 		      gpointer user_data) 
 {
-	NautilusWindow *window;
-	NautilusWindowSlot *slot;
+	NemoWindow *window;
+	NemoWindowSlot *slot;
 
-	window = NAUTILUS_WINDOW (user_data);
-	slot = nautilus_window_get_active_slot (window);
+	window = NEMO_WINDOW (user_data);
+	slot = nemo_window_get_active_slot (window);
 
-	nautilus_window_slot_go_home (slot, 
-				      nautilus_event_should_open_in_new_tab ());
+	nemo_window_slot_go_home (slot, 
+				      nemo_event_should_open_in_new_tab ());
 }
 
 static void
 action_go_to_computer_callback (GtkAction *action, 
 				gpointer user_data) 
 {
-	NautilusWindow *window;
-	NautilusWindowSlot *slot;
+	NemoWindow *window;
+	NemoWindowSlot *slot;
 	GFile *computer;
 
-	window = NAUTILUS_WINDOW (user_data);
-	slot = nautilus_window_get_active_slot (window);
+	window = NEMO_WINDOW (user_data);
+	slot = nemo_window_get_active_slot (window);
 
 	computer = g_file_new_for_uri (COMPUTER_URI);
-	nautilus_window_slot_go_to (slot,
+	nemo_window_slot_go_to (slot,
 				    computer,
-				    nautilus_event_should_open_in_new_tab ());
+				    nemo_event_should_open_in_new_tab ());
 	g_object_unref (computer);
 }
 
@@ -154,17 +155,17 @@ static void
 action_go_to_network_callback (GtkAction *action, 
 				gpointer user_data) 
 {
-	NautilusWindow *window;
-	NautilusWindowSlot *slot;
+	NemoWindow *window;
+	NemoWindowSlot *slot;
 	GFile *network;
 
-	window = NAUTILUS_WINDOW (user_data);
-	slot = nautilus_window_get_active_slot (window);
+	window = NEMO_WINDOW (user_data);
+	slot = nemo_window_get_active_slot (window);
 
 	network = g_file_new_for_uri (NETWORK_URI);
-	nautilus_window_slot_go_to (slot,
+	nemo_window_slot_go_to (slot,
 				    network,
-				    nautilus_event_should_open_in_new_tab ());
+				    nemo_event_should_open_in_new_tab ());
 	g_object_unref (network);
 }
 
@@ -172,20 +173,20 @@ static void
 action_go_to_templates_callback (GtkAction *action,
 				 gpointer user_data) 
 {
-	NautilusWindow *window;
-	NautilusWindowSlot *slot;
+	NemoWindow *window;
+	NemoWindowSlot *slot;
 	char *path;
 	GFile *location;
 
-	window = NAUTILUS_WINDOW (user_data);
-	slot = nautilus_window_get_active_slot (window);
+	window = NEMO_WINDOW (user_data);
+	slot = nemo_window_get_active_slot (window);
 
-	path = nautilus_get_templates_directory ();
+	path = nemo_get_templates_directory ();
 	location = g_file_new_for_path (path);
 	g_free (path);
-	nautilus_window_slot_go_to (slot,
+	nemo_window_slot_go_to (slot,
 				    location,
-				    nautilus_event_should_open_in_new_tab ());
+				    nemo_event_should_open_in_new_tab ());
 	g_object_unref (location);
 }
 
@@ -193,17 +194,17 @@ static void
 action_go_to_trash_callback (GtkAction *action, 
 			     gpointer user_data) 
 {
-	NautilusWindow *window;
-	NautilusWindowSlot *slot;
+	NemoWindow *window;
+	NemoWindowSlot *slot;
 	GFile *trash;
 
-	window = NAUTILUS_WINDOW (user_data);
-	slot = nautilus_window_get_active_slot (window);
+	window = NEMO_WINDOW (user_data);
+	slot = nemo_window_get_active_slot (window);
 
 	trash = g_file_new_for_uri ("trash:///");
-	nautilus_window_slot_go_to (slot,
+	nemo_window_slot_go_to (slot,
 				    trash,
-				    nautilus_event_should_open_in_new_tab ());
+				    nemo_event_should_open_in_new_tab ());
 	g_object_unref (trash);
 }
 
@@ -211,20 +212,20 @@ static void
 action_reload_callback (GtkAction *action, 
 			gpointer user_data) 
 {
-	NautilusWindowSlot *slot;
+	NemoWindowSlot *slot;
 
-	slot = nautilus_window_get_active_slot (NAUTILUS_WINDOW (user_data));
-	nautilus_window_slot_reload (slot);
+	slot = nemo_window_get_active_slot (NEMO_WINDOW (user_data));
+	nemo_window_slot_reload (slot);
 }
 
-static NautilusView *
-get_current_view (NautilusWindow *window)
+static NemoView *
+get_current_view (NemoWindow *window)
 {
-	NautilusWindowSlot *slot;
-	NautilusView *view;
+	NemoWindowSlot *slot;
+	NemoView *view;
 
-	slot = nautilus_window_get_active_slot (window);
-	view = nautilus_window_slot_get_current_view (slot);
+	slot = nemo_window_get_active_slot (window);
+	view = nemo_window_slot_get_current_view (slot);
 
 	return view;
 }
@@ -234,61 +235,61 @@ action_zoom_in_callback (GtkAction *action,
 			 gpointer user_data) 
 {
 
-	nautilus_view_bump_zoom_level (get_current_view (user_data), 1);
+	nemo_view_bump_zoom_level (get_current_view (user_data), 1);
 }
 
 static void
 action_zoom_out_callback (GtkAction *action, 
 			  gpointer user_data) 
 {
-	nautilus_view_bump_zoom_level (get_current_view (user_data), -1);
+	nemo_view_bump_zoom_level (get_current_view (user_data), -1);
 }
 
 static void
 action_zoom_normal_callback (GtkAction *action, 
 			     gpointer user_data) 
 {
-	nautilus_view_restore_default_zoom_level (get_current_view (user_data));
+	nemo_view_restore_default_zoom_level (get_current_view (user_data));
 }
 
 static void
 action_show_hidden_files_callback (GtkAction *action, 
 				   gpointer callback_data)
 {
-	NautilusWindow *window;
-	NautilusWindowShowHiddenFilesMode mode;
+	NemoWindow *window;
+	NemoWindowShowHiddenFilesMode mode;
 
-	window = NAUTILUS_WINDOW (callback_data);
+	window = NEMO_WINDOW (callback_data);
 
 	if (gtk_toggle_action_get_active (GTK_TOGGLE_ACTION (action))) {
-		mode = NAUTILUS_WINDOW_SHOW_HIDDEN_FILES_ENABLE;
+		mode = NEMO_WINDOW_SHOW_HIDDEN_FILES_ENABLE;
 	} else {
-		mode = NAUTILUS_WINDOW_SHOW_HIDDEN_FILES_DISABLE;
+		mode = NEMO_WINDOW_SHOW_HIDDEN_FILES_DISABLE;
 	}
 
-	nautilus_window_set_hidden_files_mode (window, mode);
+	nemo_window_set_hidden_files_mode (window, mode);
 }
 
 static void
 show_hidden_files_preference_callback (gpointer callback_data)
 {
-	NautilusWindow *window;
+	NemoWindow *window;
 	GtkAction *action;
 
-	window = NAUTILUS_WINDOW (callback_data);
+	window = NEMO_WINDOW (callback_data);
 
-	if (window->details->show_hidden_files_mode == NAUTILUS_WINDOW_SHOW_HIDDEN_FILES_DEFAULT) {
-		action = gtk_action_group_get_action (nautilus_window_get_main_action_group (window),
-						      NAUTILUS_ACTION_SHOW_HIDDEN_FILES);
+	if (window->details->show_hidden_files_mode == NEMO_WINDOW_SHOW_HIDDEN_FILES_DEFAULT) {
+		action = gtk_action_group_get_action (nemo_window_get_main_action_group (window),
+						      NEMO_ACTION_SHOW_HIDDEN_FILES);
 
 		/* update button */
 		g_signal_handlers_block_by_func (action, action_show_hidden_files_callback, window);
 		gtk_toggle_action_set_active (GTK_TOGGLE_ACTION (action),
-					      g_settings_get_boolean (nautilus_preferences, NAUTILUS_PREFERENCES_SHOW_HIDDEN_FILES));
+					      g_settings_get_boolean (nemo_preferences, NEMO_PREFERENCES_SHOW_HIDDEN_FILES));
 		g_signal_handlers_unblock_by_func (action, action_show_hidden_files_callback, window);
 
 		/* inform views */
-		nautilus_window_set_hidden_files_mode (window, NAUTILUS_WINDOW_SHOW_HIDDEN_FILES_DEFAULT);
+		nemo_window_set_hidden_files_mode (window, NEMO_WINDOW_SHOW_HIDDEN_FILES_DEFAULT);
 
 	}
 }
@@ -301,11 +302,11 @@ action_preferences_callback (GtkAction *action,
 
 	window = GTK_WINDOW (user_data);
 
-	nautilus_file_management_properties_dialog_show (window);
+	nemo_file_management_properties_dialog_show (window);
 }
 
 static void
-action_about_nautilus_callback (GtkAction *action,
+action_about_nemo_callback (GtkAction *action,
 				gpointer user_data)
 {
 	const gchar *authors[] = {
@@ -354,16 +355,16 @@ action_about_nautilus_callback (GtkAction *action,
 		NULL
 	};
 	const gchar *license[] = {
-		N_("Nautilus is free software; you can redistribute it and/or modify "
+		N_("Nemo is free software; you can redistribute it and/or modify "
 		   "it under the terms of the GNU General Public License as published by "
 		   "the Free Software Foundation; either version 2 of the License, or "
 		   "(at your option) any later version."),
-		N_("Nautilus is distributed in the hope that it will be useful, "
+		N_("Nemo is distributed in the hope that it will be useful, "
 		   "but WITHOUT ANY WARRANTY; without even the implied warranty of "
 		   "MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the "
 		   "GNU General Public License for more details."),
 		N_("You should have received a copy of the GNU General Public License "
-		   "along with Nautilus; if not, write to the Free Software Foundation, Inc., "
+		   "along with Nemo; if not, write to the Free Software Foundation, Inc., "
 		   "51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA")
 	};
 	gchar *license_trans, *copyright_str;
@@ -378,12 +379,12 @@ action_about_nautilus_callback (GtkAction *action,
 	 * e.g. 1999-2011.
 	 */
 	copyright_str = g_strdup_printf (_("Copyright \xC2\xA9 %Id\xE2\x80\x93%Id "
-					   "The Nautilus authors"), 1999, g_date_time_get_year (date));
+					   "The Nemo authors"), 1999, g_date_time_get_year (date));
 
 	gtk_show_about_dialog (GTK_WINDOW (user_data),
-			       "program-name", _("Nautilus"),
+			       "program-name", _("Nemo"),
 			       "version", VERSION,
-			       "comments", _("Nautilus lets you organize "
+			       "comments", _("Nemo lets you organize "
 					     "files and folders, both on "
 					     "your computer and online."),
 			       "copyright", copyright_str,
@@ -396,9 +397,9 @@ action_about_nautilus_callback (GtkAction *action,
 				 * box to give credit to the translator(s).
 				 */
 			      "translator-credits", _("translator-credits"),
-			      "logo-icon-name", "nautilus",
-			      "website", "http://live.gnome.org/Nautilus",
-			      "website-label", _("Nautilus Web Site"),
+			      "logo-icon-name", "nemo",
+			      "website", "http://live.gnome.org/Nemo",
+			      "website-label", _("Nemo Web Site"),
 			      NULL);
 
 	g_free (license_trans);
@@ -410,40 +411,40 @@ static void
 action_up_callback (GtkAction *action, 
 		     gpointer user_data) 
 {
-	NautilusWindow *window = user_data;
-	NautilusWindowSlot *slot;
+	NemoWindow *window = user_data;
+	NemoWindowSlot *slot;
 
-	slot = nautilus_window_get_active_slot (window);
-	nautilus_window_slot_go_up (slot, FALSE, nautilus_event_should_open_in_new_tab ());
+	slot = nemo_window_get_active_slot (window);
+	nemo_window_slot_go_up (slot, FALSE, nemo_event_should_open_in_new_tab ());
 }
 
 static void
-action_nautilus_manual_callback (GtkAction *action, 
+action_nemo_manual_callback (GtkAction *action, 
 				 gpointer user_data)
 {
-	NautilusWindow *window;
+	NemoWindow *window;
 	GError *error;
 	GtkWidget *dialog;
 	const char* helpuri;
 	const char* name = gtk_action_get_name (action);
 
 	error = NULL;
-	window = NAUTILUS_WINDOW (user_data);
+	window = NEMO_WINDOW (user_data);
 
-	if (g_str_equal (name, "NautilusHelpSearch")) {
-		helpuri = "help:gnome-help/files-search";
-	} else if (g_str_equal (name,"NautilusHelpSort")) {
-		helpuri = "help:gnome-help/files-sort";
-	} else if (g_str_equal (name, "NautilusHelpLost")) {
-		helpuri = "help:gnome-help/files-lost";
-	} else if (g_str_equal (name, "NautilusHelpShare")) {
-		helpuri = "help:gnome-help/files-share";
+	if (g_str_equal (name, "NemoHelpSearch")) {
+		helpuri = "help:ubuntu-help/files-search";
+	} else if (g_str_equal (name,"NemoHelpSort")) {
+		helpuri = "help:ubuntu-help/files-sort";
+	} else if (g_str_equal (name, "NemoHelpLost")) {
+		helpuri = "help:ubuntu-help/files-lost";
+	} else if (g_str_equal (name, "NemoHelpShare")) {
+		helpuri = "help:ubuntu-help/files-share";
 	} else {
-		helpuri = "help:gnome-help/files";
+		helpuri = "help:ubuntu-help/files";
 	}
 
-	if (NAUTILUS_IS_DESKTOP_WINDOW (window)) {
-		nautilus_launch_application_from_command (gtk_window_get_screen (GTK_WINDOW (window)), "gnome-help", FALSE, NULL);
+	if (NEMO_IS_DESKTOP_WINDOW (window)) {
+		nemo_launch_application_from_command (gtk_window_get_screen (GTK_WINDOW (window)), "ubuntu-help", FALSE, NULL);
 	} else {
 		gtk_show_uri (gtk_window_get_screen (GTK_WINDOW (window)),
 			      helpuri,
@@ -469,7 +470,7 @@ action_nautilus_manual_callback (GtkAction *action,
 
 static void
 menu_item_select_cb (GtkMenuItem *proxy,
-		     NautilusWindow *window)
+		     NemoWindow *window)
 {
 	GtkAction *action;
 	char *message;
@@ -487,7 +488,7 @@ menu_item_select_cb (GtkMenuItem *proxy,
 
 static void
 menu_item_deselect_cb (GtkMenuItem *proxy,
-		       NautilusWindow *window)
+		       NemoWindow *window)
 {
 	gtk_statusbar_pop (GTK_STATUSBAR (window->details->statusbar),
 			   window->details->help_message_cid);
@@ -497,7 +498,7 @@ static void
 disconnect_proxy_cb (GtkUIManager *manager,
 		     GtkAction *action,
 		     GtkWidget *proxy,
-		     NautilusWindow *window)
+		     NemoWindow *window)
 {
 	if (GTK_IS_MENU_ITEM (proxy)) {
 		g_signal_handlers_disconnect_by_func
@@ -508,18 +509,18 @@ disconnect_proxy_cb (GtkUIManager *manager,
 }
 
 static void
-trash_state_changed_cb (NautilusTrashMonitor *monitor,
+trash_state_changed_cb (NemoTrashMonitor *monitor,
 			gboolean state,
-			NautilusWindow *window)
+			NemoWindow *window)
 {
 	GtkActionGroup *action_group;
 	GtkAction *action;
 	GIcon *gicon;
 
-	action_group = nautilus_window_get_main_action_group (window);
+	action_group = nemo_window_get_main_action_group (window);
 	action = gtk_action_group_get_action (action_group, "Go to Trash");
 
-	gicon = nautilus_trash_monitor_get_icon ();
+	gicon = nemo_trash_monitor_get_icon ();
 
 	if (gicon) {
 		g_object_set (action, "gicon", gicon, NULL);
@@ -528,11 +529,11 @@ trash_state_changed_cb (NautilusTrashMonitor *monitor,
 }
 
 static void
-nautilus_window_initialize_trash_icon_monitor (NautilusWindow *window)
+nemo_window_initialize_trash_icon_monitor (NemoWindow *window)
 {
-	NautilusTrashMonitor *monitor;
+	NemoTrashMonitor *monitor;
 
-	monitor = nautilus_trash_monitor_get ();
+	monitor = nemo_trash_monitor_get ();
 
 	trash_state_changed_cb (monitor, TRUE, window);
 
@@ -551,49 +552,49 @@ static void
 action_close_all_windows_callback (GtkAction *action, 
 				   gpointer user_data)
 {
-	nautilus_application_close_all_windows (nautilus_application_get_singleton ());
+	nemo_application_close_all_windows (nemo_application_get_singleton ());
 }
 
 static void
 action_back_callback (GtkAction *action, 
 		      gpointer user_data) 
 {
-	nautilus_window_back_or_forward (NAUTILUS_WINDOW (user_data), 
-					 TRUE, 0, nautilus_event_should_open_in_new_tab ());
+	nemo_window_back_or_forward (NEMO_WINDOW (user_data), 
+					 TRUE, 0, nemo_event_should_open_in_new_tab ());
 }
 
 static void
 action_forward_callback (GtkAction *action, 
 			 gpointer user_data) 
 {
-	nautilus_window_back_or_forward (NAUTILUS_WINDOW (user_data), 
-					 FALSE, 0, nautilus_event_should_open_in_new_tab ());
+	nemo_window_back_or_forward (NEMO_WINDOW (user_data), 
+					 FALSE, 0, nemo_event_should_open_in_new_tab ());
 }
 
 static void
 action_split_view_switch_next_pane_callback(GtkAction *action,
 					    gpointer user_data)
 {
-	nautilus_window_pane_grab_focus (nautilus_window_get_next_pane (NAUTILUS_WINDOW (user_data)));
+	nemo_window_pane_grab_focus (nemo_window_get_next_pane (NEMO_WINDOW (user_data)));
 }
 
 static void
 action_split_view_same_location_callback (GtkAction *action,
 					  gpointer user_data)
 {
-	NautilusWindow *window;
-	NautilusWindowPane *next_pane;
+	NemoWindow *window;
+	NemoWindowPane *next_pane;
 	GFile *location;
 
-	window = NAUTILUS_WINDOW (user_data);
-	next_pane = nautilus_window_get_next_pane (window);
+	window = NEMO_WINDOW (user_data);
+	next_pane = nemo_window_get_next_pane (window);
 
 	if (!next_pane) {
 		return;
 	}
-	location = nautilus_window_slot_get_location (next_pane->active_slot);
+	location = nemo_window_slot_get_location (next_pane->active_slot);
 	if (location) {
-		nautilus_window_slot_go_to (nautilus_window_get_active_slot (window), location, FALSE);
+		nemo_window_slot_go_to (nemo_window_get_active_slot (window), location, FALSE);
 		g_object_unref (location);
 	}
 }
@@ -602,14 +603,14 @@ static void
 action_show_hide_sidebar_callback (GtkAction *action, 
 				   gpointer user_data)
 {
-	NautilusWindow *window;
+	NemoWindow *window;
 
-	window = NAUTILUS_WINDOW (user_data);
+	window = NEMO_WINDOW (user_data);
 
 	if (gtk_toggle_action_get_active (GTK_TOGGLE_ACTION (action))) {
-		nautilus_window_show_sidebar (window);
+		nemo_window_show_sidebar (window);
 	} else {
-		nautilus_window_hide_sidebar (window);
+		nemo_window_hide_sidebar (window);
 	}
 }
 
@@ -617,30 +618,30 @@ static void
 action_split_view_callback (GtkAction *action,
 			    gpointer user_data)
 {
-	NautilusWindow *window;
+	NemoWindow *window;
 	gboolean is_active;
 
-	window = NAUTILUS_WINDOW (user_data);
+	window = NEMO_WINDOW (user_data);
 
 	is_active = gtk_toggle_action_get_active (GTK_TOGGLE_ACTION (action));
-	if (is_active != nautilus_window_split_view_showing (window)) {
-		NautilusWindowSlot *slot;
+	if (is_active != nemo_window_split_view_showing (window)) {
+		NemoWindowSlot *slot;
 
 		if (is_active) {
-			nautilus_window_split_view_on (window);
+			nemo_window_split_view_on (window);
 		} else {
-			nautilus_window_split_view_off (window);
+			nemo_window_split_view_off (window);
 		}
 
-		slot = nautilus_window_get_active_slot (window);
+		slot = nemo_window_get_active_slot (window);
 		if (slot != NULL) {
-			nautilus_view_update_menus (slot->content_view);
+			nemo_view_update_menus (slot->content_view);
 		}
 	}
 }
 
 static void
-nautilus_window_update_split_view_actions_sensitivity (NautilusWindow *window)
+nemo_window_update_split_view_actions_sensitivity (NemoWindow *window)
 {
 	GtkActionGroup *action_group;
 	GtkAction *action;
@@ -648,23 +649,23 @@ nautilus_window_update_split_view_actions_sensitivity (NautilusWindow *window)
 	gboolean next_pane_is_in_same_location;
 	GFile *active_pane_location;
 	GFile *next_pane_location;
-	NautilusWindowPane *next_pane;
-	NautilusWindowSlot *active_slot;
+	NemoWindowPane *next_pane;
+	NemoWindowSlot *active_slot;
 
-	active_slot = nautilus_window_get_active_slot (window);
-	action_group = nautilus_window_get_main_action_group (window);
+	active_slot = nemo_window_get_active_slot (window);
+	action_group = nemo_window_get_main_action_group (window);
 
 	/* collect information */
-	have_multiple_panes = nautilus_window_split_view_showing (window);
+	have_multiple_panes = nemo_window_split_view_showing (window);
 	if (active_slot != NULL) {
-		active_pane_location = nautilus_window_slot_get_location (active_slot);
+		active_pane_location = nemo_window_slot_get_location (active_slot);
 	} else {
 		active_pane_location = NULL;
 	}
 
-	next_pane = nautilus_window_get_next_pane (window);
+	next_pane = nemo_window_get_next_pane (window);
 	if (next_pane && next_pane->active_slot) {
-		next_pane_location = nautilus_window_slot_get_location (next_pane->active_slot);
+		next_pane_location = nemo_window_slot_get_location (next_pane->active_slot);
 		next_pane_is_in_same_location = (active_pane_location && next_pane_location &&
 						 g_file_equal (active_pane_location, next_pane_location));
 	} else {
@@ -691,26 +692,26 @@ sidebar_id_to_value (const gchar *sidebar_id)
 {
 	guint retval = SIDEBAR_PLACES;
 
-	if (g_strcmp0 (sidebar_id, NAUTILUS_WINDOW_SIDEBAR_TREE) == 0)
+	if (g_strcmp0 (sidebar_id, NEMO_WINDOW_SIDEBAR_TREE) == 0)
 		retval = SIDEBAR_TREE;
 
 	return retval;
 }
 
 void
-nautilus_window_update_show_hide_menu_items (NautilusWindow *window) 
+nemo_window_update_show_hide_menu_items (NemoWindow *window) 
 {
 	GtkActionGroup *action_group;
 	GtkAction *action;
 	guint current_value;
 
-	action_group = nautilus_window_get_main_action_group (window);
+	action_group = nemo_window_get_main_action_group (window);
 
 	action = gtk_action_group_get_action (action_group,
-					      NAUTILUS_ACTION_SHOW_HIDE_EXTRA_PANE);
+					      NEMO_ACTION_SHOW_HIDE_EXTRA_PANE);
 	gtk_toggle_action_set_active (GTK_TOGGLE_ACTION (action),
-				      nautilus_window_split_view_showing (window));
-	nautilus_window_update_split_view_actions_sensitivity (window);
+				      nemo_window_split_view_showing (window));
+	nemo_window_update_split_view_actions_sensitivity (window);
 
 	action = gtk_action_group_get_action (action_group,
 					      "Sidebar Places");
@@ -722,21 +723,21 @@ static void
 action_add_bookmark_callback (GtkAction *action,
 			      gpointer user_data)
 {
-        nautilus_window_add_bookmark_for_current_location (NAUTILUS_WINDOW (user_data));
+        nemo_window_add_bookmark_for_current_location (NEMO_WINDOW (user_data));
 }
 
 static void
 action_edit_bookmarks_callback (GtkAction *action, 
 				gpointer user_data)
 {
-        nautilus_window_edit_bookmarks (NAUTILUS_WINDOW (user_data));
+        nemo_window_edit_bookmarks (NEMO_WINDOW (user_data));
 }
 
 static void
 connect_proxy_cb (GtkActionGroup *action_group,
                   GtkAction *action,
                   GtkWidget *proxy,
-                  NautilusWindow *window)
+                  NemoWindow *window)
 {
 	GtkLabel *label;
 
@@ -767,16 +768,16 @@ static const char* icon_entries[] = {
  * refresh_go_menu:
  * 
  * Refresh list of bookmarks at end of Go menu to match centralized history list.
- * @window: The NautilusWindow whose Go menu will be refreshed.
+ * @window: The NemoWindow whose Go menu will be refreshed.
  **/
 static void
-nautilus_window_initialize_go_menu (NautilusWindow *window)
+nemo_window_initialize_go_menu (NemoWindow *window)
 {
 	GtkUIManager *ui_manager;
 	GtkWidget *menuitem;
 	int i;
 
-	ui_manager = nautilus_window_get_ui_manager (NAUTILUS_WINDOW (window));
+	ui_manager = nemo_window_get_ui_manager (NEMO_WINDOW (window));
 
 	for (i = 0; i < G_N_ELEMENTS (icon_entries); i++) {
 		menuitem = gtk_ui_manager_get_widget (
@@ -792,93 +793,93 @@ static void
 action_new_window_callback (GtkAction *action,
 			    gpointer user_data)
 {
-	NautilusApplication *application;
-	NautilusWindow *current_window, *new_window;
+	NemoApplication *application;
+	NemoWindow *current_window, *new_window;
 
-	current_window = NAUTILUS_WINDOW (user_data);
-	application = nautilus_application_get_singleton ();
+	current_window = NEMO_WINDOW (user_data);
+	application = nemo_application_get_singleton ();
 
-	new_window = nautilus_application_create_window (
+	new_window = nemo_application_create_window (
 				application,
 				gtk_window_get_screen (GTK_WINDOW (current_window)));
-	nautilus_window_slot_go_home (nautilus_window_get_active_slot (new_window), FALSE);
+	nemo_window_slot_go_home (nemo_window_get_active_slot (new_window), FALSE);
 }
 
 static void
 action_new_tab_callback (GtkAction *action,
 			 gpointer user_data)
 {
-	NautilusWindow *window;
+	NemoWindow *window;
 
-	window = NAUTILUS_WINDOW (user_data);
-	nautilus_window_new_tab (window);
+	window = NEMO_WINDOW (user_data);
+	nemo_window_new_tab (window);
 }
 
 static void
 action_go_to_location_callback (GtkAction *action,
 				gpointer user_data)
 {
-	NautilusWindow *window = user_data;
-	NautilusWindowPane *pane;
+	NemoWindow *window = user_data;
+	NemoWindowPane *pane;
 
-	pane = nautilus_window_get_active_pane (window);
-	nautilus_window_pane_ensure_location_bar (pane);
+	pane = nemo_window_get_active_pane (window);
+	nemo_window_pane_ensure_location_bar (pane);
 }
 
 static void
 action_tabs_previous_callback (GtkAction *action,
 			       gpointer user_data)
 {
-	NautilusWindowPane *pane;
-	NautilusWindow *window = user_data;
+	NemoWindowPane *pane;
+	NemoWindow *window = user_data;
 
-	pane = nautilus_window_get_active_pane (window);
-	nautilus_notebook_set_current_page_relative (NAUTILUS_NOTEBOOK (pane->notebook), -1);
+	pane = nemo_window_get_active_pane (window);
+	nemo_notebook_set_current_page_relative (NEMO_NOTEBOOK (pane->notebook), -1);
 }
 
 static void
 action_tabs_next_callback (GtkAction *action,
 			   gpointer user_data)
 {
-	NautilusWindowPane *pane;
-	NautilusWindow *window = user_data;
+	NemoWindowPane *pane;
+	NemoWindow *window = user_data;
 
-	pane = nautilus_window_get_active_pane (window);
-	nautilus_notebook_set_current_page_relative (NAUTILUS_NOTEBOOK (pane->notebook), 1);
+	pane = nemo_window_get_active_pane (window);
+	nemo_notebook_set_current_page_relative (NEMO_NOTEBOOK (pane->notebook), 1);
 }
 
 static void
 action_tabs_move_left_callback (GtkAction *action,
 				gpointer user_data)
 {
-	NautilusWindowPane *pane;
-	NautilusWindow *window = user_data;
+	NemoWindowPane *pane;
+	NemoWindow *window = user_data;
 
-	pane = nautilus_window_get_active_pane (window);
-	nautilus_notebook_reorder_current_child_relative (NAUTILUS_NOTEBOOK (pane->notebook), -1);
+	pane = nemo_window_get_active_pane (window);
+	nemo_notebook_reorder_current_child_relative (NEMO_NOTEBOOK (pane->notebook), -1);
 }
 
 static void
 action_tabs_move_right_callback (GtkAction *action,
 				 gpointer user_data)
 {
-	NautilusWindowPane *pane;
-	NautilusWindow *window = user_data;
+	NemoWindowPane *pane;
+	NemoWindow *window = user_data;
 
-	pane = nautilus_window_get_active_pane (window);
-	nautilus_notebook_reorder_current_child_relative (NAUTILUS_NOTEBOOK (pane->notebook), 1);
+	pane = nemo_window_get_active_pane (window);
+	nemo_notebook_reorder_current_child_relative (NEMO_NOTEBOOK (pane->notebook), 1);
 }
 
 static void
 action_tab_change_action_activate_callback (GtkAction *action, 
 					    gpointer user_data)
 {
-	NautilusWindowPane *pane;
-	NautilusWindow *window = user_data;
+	NemoWindowPane *pane;
+	NemoWindow *window = user_data;
 	GtkNotebook *notebook;
 	int num;
 
-	pane = nautilus_window_get_active_pane (window);
+	pane = nemo_window_get_active_pane (window);
 	notebook = GTK_NOTEBOOK (pane->notebook);
 
 	num = GPOINTER_TO_INT (g_object_get_data (G_OBJECT (action), "num"));
@@ -897,13 +898,13 @@ sidebar_radio_entry_changed_cb (GtkAction *action,
 	current_value = gtk_radio_action_get_current_value (current);
 
 	if (current_value == SIDEBAR_PLACES) {
-		g_settings_set_string (nautilus_window_state,
-				       NAUTILUS_WINDOW_STATE_SIDE_PANE_VIEW,
-				       NAUTILUS_WINDOW_SIDEBAR_PLACES);
+		g_settings_set_string (nemo_window_state,
+				       NEMO_WINDOW_STATE_SIDE_PANE_VIEW,
+				       NEMO_WINDOW_SIDEBAR_PLACES);
 	} else if (current_value == SIDEBAR_TREE) {
-		g_settings_set_string (nautilus_window_state,
-				       NAUTILUS_WINDOW_STATE_SIDE_PANE_VIEW,
-				       NAUTILUS_WINDOW_SIDEBAR_TREE);
+		g_settings_set_string (nemo_window_state,
+				       NEMO_WINDOW_STATE_SIDE_PANE_VIEW,
+				       NEMO_WINDOW_SIDEBAR_TREE);
 	}
 }
 
@@ -918,7 +919,7 @@ static const GtkActionEntry main_entries[] = {
                                  G_CALLBACK (action_close_window_slot_callback) },
                                { "Preferences", GTK_STOCK_PREFERENCES,
                                  N_("Prefere_nces"),               
-                                 NULL, N_("Edit Nautilus preferences"),
+                                 NULL, N_("Edit Nemo preferences"),
                                  G_CALLBACK (action_preferences_callback) },
 #ifdef TEXT_CHANGE_UNDO
   /* name, stock id, label */  { "Undo", NULL, N_("_Undo"),
@@ -939,30 +940,30 @@ static const GtkActionEntry main_entries[] = {
   /* label, accelerator */       N_("_Reload"), "<control>R",
   /* tooltip */                  N_("Reload the current location"),
                                  G_CALLBACK (action_reload_callback) },
-  /* name, stock id */         { "NautilusHelp", GTK_STOCK_HELP,
+  /* name, stock id */         { "NemoHelp", GTK_STOCK_HELP,
   /* label, accelerator */       N_("_All Topics"), "F1",
-  /* tooltip */                  N_("Display Nautilus help"),
-                                 G_CALLBACK (action_nautilus_manual_callback) },
-  /* name, stock id */         { "NautilusHelpSearch", NULL,
+  /* tooltip */                  N_("Display Nemo help"),
+                                 G_CALLBACK (action_nemo_manual_callback) },
+  /* name, stock id */         { "NemoHelpSearch", NULL,
   /* label, accelerator */       N_("Search for files"), NULL,
   /* tooltip */                  N_("Locate files based on file name and type. Save your searches for later use."),
-                                 G_CALLBACK (action_nautilus_manual_callback) },
-  /* name, stock id */         { "NautilusHelpSort", NULL,
+                                 G_CALLBACK (action_nemo_manual_callback) },
+  /* name, stock id */         { "NemoHelpSort", NULL,
   /* label, accelerator */       N_("Sort files and folders"), NULL,
   /* tooltip */                  N_("Arrange files by name, size, type, or when they were changed."),
-                                 G_CALLBACK (action_nautilus_manual_callback) },
-  /* name, stock id */         { "NautilusHelpLost", NULL,
+                                 G_CALLBACK (action_nemo_manual_callback) },
+  /* name, stock id */         { "NemoHelpLost", NULL,
   /* label, accelerator */       N_("Find a lost file"), NULL,
   /* tooltip */                  N_("Follow these tips if you can't find a file you created or downloaded."),
-                                 G_CALLBACK (action_nautilus_manual_callback) },
-  /* name, stock id */         { "NautilusHelpShare", NULL,
+                                 G_CALLBACK (action_nemo_manual_callback) },
+  /* name, stock id */         { "NemoHelpShare", NULL,
   /* label, accelerator */       N_("Share and transfer files"), NULL,
   /* tooltip */                  N_("Easily transfer files to your contacts and devices from the file manager."),
-                                 G_CALLBACK (action_nautilus_manual_callback) },
-  /* name, stock id */         { "About Nautilus", GTK_STOCK_ABOUT,
+                                 G_CALLBACK (action_nemo_manual_callback) },
+  /* name, stock id */         { "About Nemo", GTK_STOCK_ABOUT,
   /* label, accelerator */       N_("_About"), NULL,
-  /* tooltip */                  N_("Display credits for the creators of Nautilus"),
-                                 G_CALLBACK (action_about_nautilus_callback) },
+  /* tooltip */                  N_("Display credits for the creators of Nemo"),
+                                 G_CALLBACK (action_about_nemo_callback) },
   /* name, stock id */         { "Zoom In", GTK_STOCK_ZOOM_IN,
   /* label, accelerator */       N_("Zoom _In"), "<control>plus",
   /* tooltip */                  N_("Increase the view size"),
@@ -991,23 +992,23 @@ static const GtkActionEntry main_entries[] = {
   /* label, accelerator */       N_("Connect to _Server..."), NULL,
   /* tooltip */                  N_("Connect to a remote computer or shared disk"),
                                  G_CALLBACK (action_connect_to_server_callback) },
-  /* name, stock id */         { "Home", NAUTILUS_ICON_HOME,
+  /* name, stock id */         { "Home", NEMO_ICON_HOME,
   /* label, accelerator */       N_("_Home"), "<alt>Home",
   /* tooltip */                  N_("Open your personal folder"),
                                  G_CALLBACK (action_home_callback) },
-  /* name, stock id */         { "Go to Computer", NAUTILUS_ICON_COMPUTER,
+  /* name, stock id */         { "Go to Computer", NEMO_ICON_COMPUTER,
   /* label, accelerator */       N_("_Computer"), NULL,
   /* tooltip */                  N_("Browse all local and remote disks and folders accessible from this computer"),
                                  G_CALLBACK (action_go_to_computer_callback) },
-  /* name, stock id */         { "Go to Network", NAUTILUS_ICON_NETWORK,
+  /* name, stock id */         { "Go to Network", NEMO_ICON_NETWORK,
   /* label, accelerator */       N_("_Network"), NULL,
   /* tooltip */                  N_("Browse bookmarked and local network locations"),
                                  G_CALLBACK (action_go_to_network_callback) },
-  /* name, stock id */         { "Go to Templates", NAUTILUS_ICON_TEMPLATE,
+  /* name, stock id */         { "Go to Templates", NEMO_ICON_TEMPLATE,
   /* label, accelerator */       N_("T_emplates"), NULL,
   /* tooltip */                  N_("Open your personal templates folder"),
                                  G_CALLBACK (action_go_to_templates_callback) },
-  /* name, stock id */         { "Go to Trash", NAUTILUS_ICON_TRASH,
+  /* name, stock id */         { "Go to Trash", NEMO_ICON_TRASH,
   /* label, accelerator */       N_("_Trash"), NULL,
   /* tooltip */                  N_("Open your personal trash folder"),
                                  G_CALLBACK (action_go_to_trash_callback) },
@@ -1015,7 +1016,7 @@ static const GtkActionEntry main_entries[] = {
   /* name, stock id, label */  { "Bookmarks", NULL, N_("_Bookmarks") },
   /* name, stock id, label */  { "Tabs", NULL, N_("_Tabs") },
   /* name, stock id, label */  { "New Window", "window-new", N_("New _Window"),
-                                 "<control>N", N_("Open another Nautilus window for the displayed location"),
+                                 "<control>N", N_("Open another Nemo window for the displayed location"),
                                  G_CALLBACK (action_new_window_callback) },
   /* name, stock id, label */  { "New Tab", "tab-new", N_("New _Tab"),
                                  "<control>T", N_("Open another tab for the displayed location"),
@@ -1023,10 +1024,10 @@ static const GtkActionEntry main_entries[] = {
   /* name, stock id, label */  { "Close All Windows", NULL, N_("Close _All Windows"),
                                  "<control>Q", N_("Close all Navigation windows"),
                                  G_CALLBACK (action_close_all_windows_callback) },
-  /* name, stock id, label */  { NAUTILUS_ACTION_BACK, GTK_STOCK_GO_BACK, N_("_Back"),
+  /* name, stock id, label */  { NEMO_ACTION_BACK, GTK_STOCK_GO_BACK, N_("_Back"),
 				 "<alt>Left", N_("Go to the previous visited location"),
 				 G_CALLBACK (action_back_callback) },
-  /* name, stock id, label */  { NAUTILUS_ACTION_FORWARD, GTK_STOCK_GO_FORWARD, N_("_Forward"),
+  /* name, stock id, label */  { NEMO_ACTION_FORWARD, GTK_STOCK_GO_FORWARD, N_("_Forward"),
 				 "<alt>Right", N_("Go to the next visited location"),
 				 G_CALLBACK (action_forward_callback) },
   /* name, stock id, label */  { "Go to Location", NULL, N_("_Location..."),
@@ -1085,7 +1086,7 @@ static const GtkToggleActionEntry main_toggle_entries[] = {
   /* tooltip */              N_("Search documents and folders by name"),
 			     NULL,
   /* is_active */            FALSE },
-  /* name, stock id */     { NAUTILUS_ACTION_SHOW_HIDE_EXTRA_PANE, NULL,
+  /* name, stock id */     { NEMO_ACTION_SHOW_HIDE_EXTRA_PANE, NULL,
   /* label, accelerator */   N_("E_xtra Pane"), "F3",
   /* tooltip */              N_("Open an extra folder view side-by-side"),
                              G_CALLBACK (action_split_view_callback),
@@ -1102,23 +1103,23 @@ static const GtkRadioActionEntry main_radio_entries[] = {
 };
 
 GtkActionGroup *
-nautilus_window_create_toolbar_action_group (NautilusWindow *window)
+nemo_window_create_toolbar_action_group (NemoWindow *window)
 {
-	NautilusNavigationState *navigation_state;
+	NemoNavigationState *navigation_state;
 	GtkActionGroup *action_group;
 	GtkAction *action;
 
 	action_group = gtk_action_group_new ("ToolbarActions");
 	gtk_action_group_set_translation_domain (action_group, GETTEXT_PACKAGE);
 
-	action = g_object_new (NAUTILUS_TYPE_NAVIGATION_ACTION,
-			       "name", NAUTILUS_ACTION_BACK,
+	action = g_object_new (NEMO_TYPE_NAVIGATION_ACTION,
+			       "name", NEMO_ACTION_BACK,
 			       "label", _("_Back"),
 			       "stock_id", GTK_STOCK_GO_BACK,
 			       "tooltip", _("Go to the previous visited location"),
 			       "arrow-tooltip", _("Back history"),
 			       "window", window,
-			       "direction", NAUTILUS_NAVIGATION_DIRECTION_BACK,
+			       "direction", NEMO_NAVIGATION_DIRECTION_BACK,
 			       "sensitive", FALSE,
 			       NULL);
 	g_signal_connect (action, "activate",
@@ -1127,14 +1128,14 @@ nautilus_window_create_toolbar_action_group (NautilusWindow *window)
 
 	g_object_unref (action);
 
-	action = g_object_new (NAUTILUS_TYPE_NAVIGATION_ACTION,
-			       "name", NAUTILUS_ACTION_FORWARD,
+	action = g_object_new (NEMO_TYPE_NAVIGATION_ACTION,
+			       "name", NEMO_ACTION_FORWARD,
 			       "label", _("_Forward"),
 			       "stock_id", GTK_STOCK_GO_FORWARD,
 			       "tooltip", _("Go to the next visited location"),
 			       "arrow-tooltip", _("Forward history"),
 			       "window", window,
-			       "direction", NAUTILUS_NAVIGATION_DIRECTION_FORWARD,
+			       "direction", NEMO_NAVIGATION_DIRECTION_FORWARD,
 			       "sensitive", FALSE,
 			       NULL);
 	g_signal_connect (action, "activate",
@@ -1144,7 +1145,7 @@ nautilus_window_create_toolbar_action_group (NautilusWindow *window)
 	g_object_unref (action);
 
 	action = GTK_ACTION
-		(gtk_toggle_action_new (NAUTILUS_ACTION_SEARCH,
+		(gtk_toggle_action_new (NEMO_ACTION_SEARCH,
 					_("Search"),
 					_("Search documents and folders by name"),
 					NULL));
@@ -1154,77 +1155,77 @@ nautilus_window_create_toolbar_action_group (NautilusWindow *window)
 
 	g_object_unref (action);
 
-	navigation_state = nautilus_window_get_navigation_state (window);
-	nautilus_navigation_state_add_group (navigation_state, action_group);
+	navigation_state = nemo_window_get_navigation_state (window);
+	nemo_navigation_state_add_group (navigation_state, action_group);
 
 	return action_group;
 }
 
 static void
-window_menus_set_bindings (NautilusWindow *window)
+window_menus_set_bindings (NemoWindow *window)
 {
 	GtkActionGroup *action_group;
 	GtkAction *action;
 
-	action_group = nautilus_window_get_main_action_group (window);
+	action_group = nemo_window_get_main_action_group (window);
 
 	action = gtk_action_group_get_action (action_group,
-					      NAUTILUS_ACTION_SHOW_HIDE_TOOLBAR);
+					      NEMO_ACTION_SHOW_HIDE_TOOLBAR);
 
-	g_settings_bind (nautilus_window_state,
-			 NAUTILUS_WINDOW_STATE_START_WITH_TOOLBAR,
+	g_settings_bind (nemo_window_state,
+			 NEMO_WINDOW_STATE_START_WITH_TOOLBAR,
 			 action,
 			 "active",
 			 G_SETTINGS_BIND_DEFAULT);
 
 	action = gtk_action_group_get_action (action_group,
-					      NAUTILUS_ACTION_SHOW_HIDE_STATUSBAR);
+					      NEMO_ACTION_SHOW_HIDE_STATUSBAR);
 
-	g_settings_bind (nautilus_window_state,
-			 NAUTILUS_WINDOW_STATE_START_WITH_STATUS_BAR,
+	g_settings_bind (nemo_window_state,
+			 NEMO_WINDOW_STATE_START_WITH_STATUS_BAR,
 			 action,
 			 "active",
 			 G_SETTINGS_BIND_DEFAULT);
 
 	action = gtk_action_group_get_action (action_group,
-					      NAUTILUS_ACTION_SHOW_HIDE_SIDEBAR);	
+					      NEMO_ACTION_SHOW_HIDE_SIDEBAR);	
 
-	g_settings_bind (nautilus_window_state,
-			 NAUTILUS_WINDOW_STATE_START_WITH_SIDEBAR,
+	g_settings_bind (nemo_window_state,
+			 NEMO_WINDOW_STATE_START_WITH_SIDEBAR,
 			 action,
 			 "active",
 			 G_SETTINGS_BIND_DEFAULT);
 }
 
 void 
-nautilus_window_initialize_actions (NautilusWindow *window)
+nemo_window_initialize_actions (NemoWindow *window)
 {
 	GtkActionGroup *action_group;
 	const gchar *nav_state_actions[] = {
-		NAUTILUS_ACTION_BACK, NAUTILUS_ACTION_FORWARD,
-		NAUTILUS_ACTION_SEARCH, NULL
+		NEMO_ACTION_BACK, NEMO_ACTION_FORWARD,
+		NEMO_ACTION_SEARCH, NULL
 	};
 
-	action_group = nautilus_window_get_main_action_group (window);
-	window->details->nav_state = nautilus_navigation_state_new (action_group,
+	action_group = nemo_window_get_main_action_group (window);
+	window->details->nav_state = nemo_navigation_state_new (action_group,
 								    nav_state_actions);
 
 	window_menus_set_bindings (window);
-	nautilus_window_update_show_hide_menu_items (window);
+	nemo_window_update_show_hide_menu_items (window);
 
 	g_signal_connect (window, "loading_uri",
-			  G_CALLBACK (nautilus_window_update_split_view_actions_sensitivity),
+			  G_CALLBACK (nemo_window_update_split_view_actions_sensitivity),
 			  NULL);
 }
 
 /**
- * nautilus_window_initialize_menus
+ * nemo_window_initialize_menus
  * 
  * Create and install the set of menus for this window.
- * @window: A recently-created NautilusWindow.
+ * @window: A recently-created NemoWindow.
  */
 void 
-nautilus_window_initialize_menus (NautilusWindow *window)
+nemo_window_initialize_menus (NemoWindow *window)
 {
 	GtkActionGroup *action_group;
 	GtkUIManager *ui_manager;
@@ -1249,20 +1250,20 @@ nautilus_window_initialize_menus (NautilusWindow *window)
 					    0, G_CALLBACK (sidebar_radio_entry_changed_cb),
 					    window);
 
-	action = gtk_action_group_get_action (action_group, NAUTILUS_ACTION_UP);
+	action = gtk_action_group_get_action (action_group, NEMO_ACTION_UP);
 	g_object_set (action, "short_label", _("_Up"), NULL);
 
-	action = gtk_action_group_get_action (action_group, NAUTILUS_ACTION_HOME);
+	action = gtk_action_group_get_action (action_group, NEMO_ACTION_HOME);
 	g_object_set (action, "short_label", _("_Home"), NULL);
 
-	action = gtk_action_group_get_action (action_group, NAUTILUS_ACTION_SHOW_HIDDEN_FILES);
+	action = gtk_action_group_get_action (action_group, NEMO_ACTION_SHOW_HIDDEN_FILES);
 	g_signal_handlers_block_by_func (action, action_show_hidden_files_callback, window);
 	gtk_toggle_action_set_active (GTK_TOGGLE_ACTION (action),
-				      g_settings_get_boolean (nautilus_preferences, NAUTILUS_PREFERENCES_SHOW_HIDDEN_FILES));
+				      g_settings_get_boolean (nemo_preferences, NEMO_PREFERENCES_SHOW_HIDDEN_FILES));
 	g_signal_handlers_unblock_by_func (action, action_show_hidden_files_callback, window);
 
 
-	g_signal_connect_swapped (nautilus_preferences, "changed::" NAUTILUS_PREFERENCES_SHOW_HIDDEN_FILES,
+	g_signal_connect_swapped (nemo_preferences, "changed::" NEMO_PREFERENCES_SHOW_HIDDEN_FILES,
 				  G_CALLBACK(show_hidden_files_preference_callback),
 				  window);
 
@@ -1301,57 +1302,59 @@ nautilus_window_initialize_menus (NautilusWindow *window)
 			  G_CALLBACK (disconnect_proxy_cb), window);
 
 	/* add the UI */
-	gtk_ui_manager_add_ui_from_resource (ui_manager, "/org/gnome/nautilus/nautilus-shell-ui.xml", NULL);
+	gtk_ui_manager_add_ui_from_resource (ui_manager, "/org/gnome/nemo/nemo-shell-ui.xml", NULL);
 
-	nautilus_window_initialize_trash_icon_monitor (window);
-	nautilus_window_initialize_go_menu (window);
+	launchpad_integration_add_ui (ui_manager, "/MenuBar/Help/LaunchpadItems");
+
+	nemo_window_initialize_trash_icon_monitor (window);
+	nemo_window_initialize_go_menu (window);
 }
 
 void
-nautilus_window_finalize_menus (NautilusWindow *window)
+nemo_window_finalize_menus (NemoWindow *window)
 {
-	NautilusTrashMonitor *monitor;
+	NemoTrashMonitor *monitor;
 
-	monitor = nautilus_trash_monitor_get ();
+	monitor = nemo_trash_monitor_get ();
 
 	g_signal_handlers_disconnect_by_func (monitor,
 					      trash_state_changed_cb, window);
 
-	g_signal_handlers_disconnect_by_func (nautilus_preferences,
+	g_signal_handlers_disconnect_by_func (nemo_preferences,
 					      show_hidden_files_preference_callback, window);
 }
 
 static GList *
-get_extension_menus (NautilusWindow *window)
+get_extension_menus (NemoWindow *window)
 {
-	NautilusWindowSlot *slot;
+	NemoWindowSlot *slot;
 	GList *providers;
 	GList *items;
 	GList *l;
 	
-	providers = nautilus_module_get_extensions_for_type (NAUTILUS_TYPE_MENU_PROVIDER);
+	providers = nemo_module_get_extensions_for_type (NEMO_TYPE_MENU_PROVIDER);
 	items = NULL;
 
-	slot = nautilus_window_get_active_slot (window);
+	slot = nemo_window_get_active_slot (window);
 
 	for (l = providers; l != NULL; l = l->next) {
-		NautilusMenuProvider *provider;
+		NemoMenuProvider *provider;
 		GList *file_items;
 		
-		provider = NAUTILUS_MENU_PROVIDER (l->data);
-		file_items = nautilus_menu_provider_get_background_items (provider,
+		provider = NEMO_MENU_PROVIDER (l->data);
+		file_items = nemo_menu_provider_get_background_items (provider,
 									  GTK_WIDGET (window),
 									  slot->viewed_file);
 		items = g_list_concat (items, file_items);
 	}
 
-	nautilus_module_extension_list_free (providers);
+	nemo_module_extension_list_free (providers);
 
 	return items;
 }
 
 static void
-add_extension_menu_items (NautilusWindow *window,
+add_extension_menu_items (NemoWindow *window,
 			  guint merge_id,
 			  GtkActionGroup *action_group,
 			  GList *menu_items,
@@ -1363,16 +1366,16 @@ add_extension_menu_items (NautilusWindow *window,
 	ui_manager = window->details->ui_manager;
 	
 	for (l = menu_items; l; l = l->next) {
-		NautilusMenuItem *item;
-		NautilusMenu *menu;
+		NemoMenuItem *item;
+		NemoMenu *menu;
 		GtkAction *action;
 		char *path;
 		
-		item = NAUTILUS_MENU_ITEM (l->data);
+		item = NEMO_MENU_ITEM (l->data);
 		
 		g_object_get (item, "menu", &menu, NULL);
 		
-		action = nautilus_action_from_menu_item (item);
+		action = nemo_action_from_menu_item (item);
 		gtk_action_group_add_action_with_accel (action_group, action, NULL);
 		
 		path = g_build_path ("/", POPUP_PATH_EXTENSION_ACTIONS, subdirectory, NULL);
@@ -1400,7 +1403,7 @@ add_extension_menu_items (NautilusWindow *window,
 			char *subdir;
 			GList *children;
 			
-			children = nautilus_menu_get_items (menu);
+			children = nemo_menu_get_items (menu);
 			
 			subdir = g_build_path ("/", subdirectory, "/", gtk_action_get_name (action), NULL);
 			add_extension_menu_items (window,
@@ -1409,14 +1412,14 @@ add_extension_menu_items (NautilusWindow *window,
 						  children,
 						  subdir);
 
-			nautilus_menu_item_list_free (children);
+			nemo_menu_item_list_free (children);
 			g_free (subdir);
 		}			
 	}
 }
 
 void
-nautilus_window_load_extension_menus (NautilusWindow *window)
+nemo_window_load_extension_menus (NemoWindow *window)
 {
 	GtkActionGroup *action_group;
 	GList *items;

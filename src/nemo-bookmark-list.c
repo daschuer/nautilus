@@ -1,16 +1,16 @@
 /* -*- Mode: C; indent-tabs-mode: t; c-basic-offset: 8; tab-width: 8 -*- */
 
 /*
- * Nautilus
+ * Nemo
  *
  * Copyright (C) 1999, 2000 Eazel, Inc.
  *
- * Nautilus is free software; you can redistribute it and/or
+ * Nemo is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
  * published by the Free Software Foundation; either version 2 of the
  * License, or (at your option) any later version.
  *
- * Nautilus is distributed in the hope that it will be useful,
+ * Nemo is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
  * General Public License for more details.
@@ -22,15 +22,15 @@
  * Authors: John Sullivan <sullivan@eazel.com>
  */
 
-/* nautilus-bookmark-list.c - implementation of centralized list of bookmarks.
+/* nemo-bookmark-list.c - implementation of centralized list of bookmarks.
  */
 
 #include <config.h>
-#include "nautilus-bookmark-list.h"
+#include "nemo-bookmark-list.h"
 
-#include <libnautilus-private/nautilus-file-utilities.h>
-#include <libnautilus-private/nautilus-file.h>
-#include <libnautilus-private/nautilus-icon-names.h>
+#include <libnemo-private/nemo-file-utilities.h>
+#include <libnemo-private/nemo-file.h>
+#include <libnemo-private/nemo-icon-names.h>
 
 #include <gio/gio.h>
 #include <string.h>
@@ -46,19 +46,19 @@ enum {
 
 static guint signals[LAST_SIGNAL];
 static char *window_geometry;
-static NautilusBookmarkList *singleton = NULL;
+static NemoBookmarkList *singleton = NULL;
 
 /* forward declarations */
 
-static void        nautilus_bookmark_list_load_file     (NautilusBookmarkList *bookmarks);
-static void        nautilus_bookmark_list_save_file     (NautilusBookmarkList *bookmarks);
+static void        nemo_bookmark_list_load_file     (NemoBookmarkList *bookmarks);
+static void        nemo_bookmark_list_save_file     (NemoBookmarkList *bookmarks);
 
-G_DEFINE_TYPE(NautilusBookmarkList, nautilus_bookmark_list, G_TYPE_OBJECT)
+G_DEFINE_TYPE(NemoBookmarkList, nemo_bookmark_list, G_TYPE_OBJECT)
 
-static NautilusBookmark *
+static NemoBookmark *
 new_bookmark_from_uri (const char *uri, const char *label)
 {
-	NautilusBookmark *new_bookmark;
+	NemoBookmark *new_bookmark;
 	GFile *location;
 
 	location = NULL;
@@ -69,7 +69,7 @@ new_bookmark_from_uri (const char *uri, const char *label)
 	new_bookmark = NULL;
 
 	if (location) {
-		new_bookmark = nautilus_bookmark_new (location, label, NULL);
+		new_bookmark = nemo_bookmark_new (location, label, NULL);
 		g_object_unref (location);
 	}
 
@@ -77,7 +77,7 @@ new_bookmark_from_uri (const char *uri, const char *label)
 }
 
 static GFile *
-nautilus_bookmark_list_get_file (void)
+nemo_bookmark_list_get_file (void)
 {
 	char *filename;
 	GFile *file;
@@ -95,28 +95,28 @@ nautilus_bookmark_list_get_file (void)
 /* Initialization.  */
 
 static void
-bookmark_in_list_changed_callback (NautilusBookmark     *bookmark,
-				   NautilusBookmarkList *bookmarks)
+bookmark_in_list_changed_callback (NemoBookmark     *bookmark,
+				   NemoBookmarkList *bookmarks)
 {
-	g_assert (NAUTILUS_IS_BOOKMARK (bookmark));
-	g_assert (NAUTILUS_IS_BOOKMARK_LIST (bookmarks));
+	g_assert (NEMO_IS_BOOKMARK (bookmark));
+	g_assert (NEMO_IS_BOOKMARK_LIST (bookmarks));
 
 	/* save changes to the list */
-	nautilus_bookmark_list_save_file (bookmarks);
+	nemo_bookmark_list_save_file (bookmarks);
 }
 
 static void
 bookmark_in_list_notify (GObject *object,
 			 GParamSpec *pspec,
-			 NautilusBookmarkList *bookmarks)
+			 NemoBookmarkList *bookmarks)
 {
 	/* emit the changed signal without saving, as only appearance properties changed */
 	g_signal_emit (bookmarks, signals[CHANGED], 0);
 }
 
 static void
-stop_monitoring_bookmark (NautilusBookmarkList *bookmarks,
-			  NautilusBookmark     *bookmark)
+stop_monitoring_bookmark (NemoBookmarkList *bookmarks,
+			  NemoBookmark     *bookmark)
 {
 	g_signal_handlers_disconnect_by_func (bookmark,
 					      bookmark_in_list_changed_callback,
@@ -126,15 +126,15 @@ stop_monitoring_bookmark (NautilusBookmarkList *bookmarks,
 static void
 stop_monitoring_one (gpointer data, gpointer user_data)
 {
-	g_assert (NAUTILUS_IS_BOOKMARK (data));
-	g_assert (NAUTILUS_IS_BOOKMARK_LIST (user_data));
+	g_assert (NEMO_IS_BOOKMARK (data));
+	g_assert (NEMO_IS_BOOKMARK_LIST (user_data));
 
-	stop_monitoring_bookmark (NAUTILUS_BOOKMARK_LIST (user_data), 
-				  NAUTILUS_BOOKMARK (data));
+	stop_monitoring_bookmark (NEMO_BOOKMARK_LIST (user_data), 
+				  NEMO_BOOKMARK (data));
 }
 
 static void
-clear (NautilusBookmarkList *bookmarks)
+clear (NemoBookmarkList *bookmarks)
 {
 	g_list_foreach (bookmarks->list, stop_monitoring_one, bookmarks);
 	g_list_free_full (bookmarks->list, g_object_unref);
@@ -144,16 +144,16 @@ clear (NautilusBookmarkList *bookmarks)
 static void
 do_finalize (GObject *object)
 {
-	if (NAUTILUS_BOOKMARK_LIST (object)->monitor != NULL) {
-		g_file_monitor_cancel (NAUTILUS_BOOKMARK_LIST (object)->monitor);
-		NAUTILUS_BOOKMARK_LIST (object)->monitor = NULL;
+	if (NEMO_BOOKMARK_LIST (object)->monitor != NULL) {
+		g_file_monitor_cancel (NEMO_BOOKMARK_LIST (object)->monitor);
+		NEMO_BOOKMARK_LIST (object)->monitor = NULL;
 	}
 
-	g_queue_free (NAUTILUS_BOOKMARK_LIST (object)->pending_ops);
+	g_queue_free (NEMO_BOOKMARK_LIST (object)->pending_ops);
 
-	clear (NAUTILUS_BOOKMARK_LIST (object));
+	clear (NEMO_BOOKMARK_LIST (object));
 
-	G_OBJECT_CLASS (nautilus_bookmark_list_parent_class)->finalize (object);
+	G_OBJECT_CLASS (nemo_bookmark_list_parent_class)->finalize (object);
 }
 
 static GObject *
@@ -167,10 +167,10 @@ do_constructor (GType type,
 		return g_object_ref (singleton);
 	}
 
-	retval = G_OBJECT_CLASS (nautilus_bookmark_list_parent_class)->constructor
+	retval = G_OBJECT_CLASS (nemo_bookmark_list_parent_class)->constructor
 		(type, n_construct_params, construct_params);
 
-	singleton = NAUTILUS_BOOKMARK_LIST (retval);
+	singleton = NEMO_BOOKMARK_LIST (retval);
 	g_object_add_weak_pointer (retval, (gpointer) &singleton);
 
 	return retval;
@@ -178,7 +178,7 @@ do_constructor (GType type,
 
 
 static void
-nautilus_bookmark_list_class_init (NautilusBookmarkListClass *class)
+nemo_bookmark_list_class_init (NemoBookmarkListClass *class)
 {
 	GObjectClass *object_class = G_OBJECT_CLASS (class);
 
@@ -189,7 +189,7 @@ nautilus_bookmark_list_class_init (NautilusBookmarkListClass *class)
 		g_signal_new ("changed",
 		              G_TYPE_FROM_CLASS (object_class),
 		              G_SIGNAL_RUN_LAST,
-		              G_STRUCT_OFFSET (NautilusBookmarkListClass, 
+		              G_STRUCT_OFFSET (NemoBookmarkListClass, 
 					       changed),
 		              NULL, NULL,
 		              g_cclosure_marshal_VOID__VOID,
@@ -205,21 +205,21 @@ bookmark_monitor_changed_cb (GFileMonitor      *monitor,
 {
 	if (eflags == G_FILE_MONITOR_EVENT_CHANGED ||
 	    eflags == G_FILE_MONITOR_EVENT_CREATED) {
-		g_return_if_fail (NAUTILUS_IS_BOOKMARK_LIST (NAUTILUS_BOOKMARK_LIST (user_data)));
-		nautilus_bookmark_list_load_file (NAUTILUS_BOOKMARK_LIST (user_data));
+		g_return_if_fail (NEMO_IS_BOOKMARK_LIST (NEMO_BOOKMARK_LIST (user_data)));
+		nemo_bookmark_list_load_file (NEMO_BOOKMARK_LIST (user_data));
 	}
 }
 
 static void
-nautilus_bookmark_list_init (NautilusBookmarkList *bookmarks)
+nemo_bookmark_list_init (NemoBookmarkList *bookmarks)
 {
 	GFile *file;
 
 	bookmarks->pending_ops = g_queue_new ();
 
-	nautilus_bookmark_list_load_file (bookmarks);
+	nemo_bookmark_list_load_file (bookmarks);
 
-	file = nautilus_bookmark_list_get_file ();
+	file = nemo_bookmark_list_get_file ();
 	bookmarks->monitor = g_file_monitor_file (file, 0, NULL, NULL);
 	g_file_monitor_set_rate_limit (bookmarks->monitor, 1000);
 
@@ -230,8 +230,8 @@ nautilus_bookmark_list_init (NautilusBookmarkList *bookmarks)
 }
 
 static void
-insert_bookmark_internal (NautilusBookmarkList *bookmarks,
-			  NautilusBookmark     *bookmark,
+insert_bookmark_internal (NemoBookmarkList *bookmarks,
+			  NemoBookmark     *bookmark,
 			  int                   index)
 {
 	bookmarks->list = g_list_insert (bookmarks->list, bookmark, index);
@@ -245,85 +245,85 @@ insert_bookmark_internal (NautilusBookmarkList *bookmarks,
 }
 
 /**
- * nautilus_bookmark_list_append:
+ * nemo_bookmark_list_append:
  *
  * Append a bookmark to a bookmark list.
- * @bookmarks: NautilusBookmarkList to append to.
+ * @bookmarks: NemoBookmarkList to append to.
  * @bookmark: Bookmark to append a copy of.
  **/
 void
-nautilus_bookmark_list_append (NautilusBookmarkList *bookmarks, 
-			       NautilusBookmark     *bookmark)
+nemo_bookmark_list_append (NemoBookmarkList *bookmarks, 
+			       NemoBookmark     *bookmark)
 {
-	g_return_if_fail (NAUTILUS_IS_BOOKMARK_LIST (bookmarks));
-	g_return_if_fail (NAUTILUS_IS_BOOKMARK (bookmark));
+	g_return_if_fail (NEMO_IS_BOOKMARK_LIST (bookmarks));
+	g_return_if_fail (NEMO_IS_BOOKMARK (bookmark));
 
 	insert_bookmark_internal (bookmarks, 
-				  nautilus_bookmark_copy (bookmark), 
+				  nemo_bookmark_copy (bookmark), 
 				  -1);
 
-	nautilus_bookmark_list_save_file (bookmarks);
+	nemo_bookmark_list_save_file (bookmarks);
 }
 
 /**
- * nautilus_bookmark_list_contains:
+ * nemo_bookmark_list_contains:
  *
  * Check whether a bookmark with matching name and url is already in the list.
- * @bookmarks: NautilusBookmarkList to check contents of.
- * @bookmark: NautilusBookmark to match against.
+ * @bookmarks: NemoBookmarkList to check contents of.
+ * @bookmark: NemoBookmark to match against.
  * 
  * Return value: TRUE if matching bookmark is in list, FALSE otherwise
  **/
 gboolean
-nautilus_bookmark_list_contains (NautilusBookmarkList *bookmarks, 
-				 NautilusBookmark     *bookmark)
+nemo_bookmark_list_contains (NemoBookmarkList *bookmarks, 
+				 NemoBookmark     *bookmark)
 {
-	g_return_val_if_fail (NAUTILUS_IS_BOOKMARK_LIST (bookmarks), FALSE);
-	g_return_val_if_fail (NAUTILUS_IS_BOOKMARK (bookmark), FALSE);
+	g_return_val_if_fail (NEMO_IS_BOOKMARK_LIST (bookmarks), FALSE);
+	g_return_val_if_fail (NEMO_IS_BOOKMARK (bookmark), FALSE);
 
 	return g_list_find_custom (bookmarks->list,
 				   (gpointer)bookmark, 
-				   nautilus_bookmark_compare_with) 
+				   nemo_bookmark_compare_with) 
 		!= NULL;
 }
 
 /**
- * nautilus_bookmark_list_delete_item_at:
+ * nemo_bookmark_list_delete_item_at:
  * 
  * Delete the bookmark at the specified position.
  * @bookmarks: the list of bookmarks.
  * @index: index, must be less than length of list.
  **/
 void
-nautilus_bookmark_list_delete_item_at (NautilusBookmarkList *bookmarks, 
+nemo_bookmark_list_delete_item_at (NemoBookmarkList *bookmarks, 
 				       guint                 index)
 {
 	GList *doomed;
 
-	g_return_if_fail (NAUTILUS_IS_BOOKMARK_LIST (bookmarks));
+	g_return_if_fail (NEMO_IS_BOOKMARK_LIST (bookmarks));
 	g_return_if_fail (index < g_list_length (bookmarks->list));
 
 	doomed = g_list_nth (bookmarks->list, index);
 	bookmarks->list = g_list_remove_link (bookmarks->list, doomed);
 
-	g_assert (NAUTILUS_IS_BOOKMARK (doomed->data));
-	stop_monitoring_bookmark (bookmarks, NAUTILUS_BOOKMARK (doomed->data));
+	g_assert (NEMO_IS_BOOKMARK (doomed->data));
+	stop_monitoring_bookmark (bookmarks, NEMO_BOOKMARK (doomed->data));
 	g_object_unref (doomed->data);
 
 	g_list_free_1 (doomed);
 
-	nautilus_bookmark_list_save_file (bookmarks);
+	nemo_bookmark_list_save_file (bookmarks);
 }
 
 /**
- * nautilus_bookmark_list_move_item:
+ * nemo_bookmark_list_move_item:
  *
  * Move the item from the given position to the destination.
  * @index: the index of the first bookmark.
  * @destination: the index of the second bookmark.
  **/
 void
-nautilus_bookmark_list_move_item (NautilusBookmarkList *bookmarks,
+nemo_bookmark_list_move_item (NemoBookmarkList *bookmarks,
 				  guint index,
 				  guint destination)
 {
@@ -347,35 +347,35 @@ nautilus_bookmark_list_move_item (NautilusBookmarkList *bookmarks,
 						 destination);
 	}
 
-	nautilus_bookmark_list_save_file (bookmarks);
+	nemo_bookmark_list_save_file (bookmarks);
 }
 
 /**
- * nautilus_bookmark_list_delete_items_with_uri:
+ * nemo_bookmark_list_delete_items_with_uri:
  * 
  * Delete all bookmarks with the given uri.
  * @bookmarks: the list of bookmarks.
  * @uri: The uri to match.
  **/
 void
-nautilus_bookmark_list_delete_items_with_uri (NautilusBookmarkList *bookmarks, 
+nemo_bookmark_list_delete_items_with_uri (NemoBookmarkList *bookmarks, 
 				      	      const char           *uri)
 {
 	GList *node, *next;
 	gboolean list_changed;
 	char *bookmark_uri;
 
-	g_return_if_fail (NAUTILUS_IS_BOOKMARK_LIST (bookmarks));
+	g_return_if_fail (NEMO_IS_BOOKMARK_LIST (bookmarks));
 	g_return_if_fail (uri != NULL);
 
 	list_changed = FALSE;
 	for (node = bookmarks->list; node != NULL;  node = next) {
 		next = node->next;
 
-		bookmark_uri = nautilus_bookmark_get_uri (NAUTILUS_BOOKMARK (node->data));
+		bookmark_uri = nemo_bookmark_get_uri (NEMO_BOOKMARK (node->data));
 		if (g_strcmp0 (bookmark_uri, uri) == 0) {
 			bookmarks->list = g_list_remove_link (bookmarks->list, node);
-			stop_monitoring_bookmark (bookmarks, NAUTILUS_BOOKMARK (node->data));
+			stop_monitoring_bookmark (bookmarks, NEMO_BOOKMARK (node->data));
 			g_object_unref (node->data);
 			g_list_free_1 (node);
 			list_changed = TRUE;
@@ -384,28 +384,28 @@ nautilus_bookmark_list_delete_items_with_uri (NautilusBookmarkList *bookmarks,
 	}
 
 	if (list_changed) {
-		nautilus_bookmark_list_save_file (bookmarks);
+		nemo_bookmark_list_save_file (bookmarks);
 	}
 }
 
 /**
- * nautilus_bookmark_list_get_window_geometry:
+ * nemo_bookmark_list_get_window_geometry:
  * 
  * Get a string representing the bookmark_list's window's geometry.
- * This is the value set earlier by nautilus_bookmark_list_set_window_geometry.
+ * This is the value set earlier by nemo_bookmark_list_set_window_geometry.
  * @bookmarks: the list of bookmarks associated with the window.
  * Return value: string representation of window's geometry, suitable for
  * passing to gnome_parse_geometry(), or NULL if
  * no window geometry has yet been saved for this bookmark list.
  **/
 const char *
-nautilus_bookmark_list_get_window_geometry (NautilusBookmarkList *bookmarks)
+nemo_bookmark_list_get_window_geometry (NemoBookmarkList *bookmarks)
 {
 	return window_geometry;
 }
 
 /**
- * nautilus_bookmark_list_insert_item:
+ * nemo_bookmark_list_insert_item:
  * 
  * Insert a bookmark at a specified position.
  * @bookmarks: the list of bookmarks.
@@ -413,22 +413,22 @@ nautilus_bookmark_list_get_window_geometry (NautilusBookmarkList *bookmarks)
  * @new_bookmark: the bookmark to insert a copy of.
  **/
 void
-nautilus_bookmark_list_insert_item (NautilusBookmarkList *bookmarks,
-				    NautilusBookmark     *new_bookmark,
+nemo_bookmark_list_insert_item (NemoBookmarkList *bookmarks,
+				    NemoBookmark     *new_bookmark,
 				    guint                 index)
 {
-	g_return_if_fail (NAUTILUS_IS_BOOKMARK_LIST (bookmarks));
+	g_return_if_fail (NEMO_IS_BOOKMARK_LIST (bookmarks));
 	g_return_if_fail (index <= g_list_length (bookmarks->list));
 
 	insert_bookmark_internal (bookmarks,
-				  nautilus_bookmark_copy (new_bookmark), 
+				  nemo_bookmark_copy (new_bookmark), 
 				  index);
 
-	nautilus_bookmark_list_save_file (bookmarks);
+	nemo_bookmark_list_save_file (bookmarks);
 }
 
 /**
- * nautilus_bookmark_list_item_at:
+ * nemo_bookmark_list_item_at:
  * 
  * Get the bookmark at the specified position.
  * @bookmarks: the list of bookmarks.
@@ -436,17 +436,17 @@ nautilus_bookmark_list_insert_item (NautilusBookmarkList *bookmarks,
  * 
  * Return value: the bookmark at position @index in @bookmarks.
  **/
-NautilusBookmark *
-nautilus_bookmark_list_item_at (NautilusBookmarkList *bookmarks, guint index)
+NemoBookmark *
+nemo_bookmark_list_item_at (NemoBookmarkList *bookmarks, guint index)
 {
-	g_return_val_if_fail (NAUTILUS_IS_BOOKMARK_LIST (bookmarks), NULL);
+	g_return_val_if_fail (NEMO_IS_BOOKMARK_LIST (bookmarks), NULL);
 	g_return_val_if_fail (index < g_list_length (bookmarks->list), NULL);
 
-	return NAUTILUS_BOOKMARK (g_list_nth_data (bookmarks->list, index));
+	return NEMO_BOOKMARK (g_list_nth_data (bookmarks->list, index));
 }
 
 /**
- * nautilus_bookmark_list_length:
+ * nemo_bookmark_list_length:
  * 
  * Get the number of bookmarks in the list.
  * @bookmarks: the list of bookmarks.
@@ -454,15 +454,15 @@ nautilus_bookmark_list_item_at (NautilusBookmarkList *bookmarks, guint index)
  * Return value: the length of the bookmark list.
  **/
 guint
-nautilus_bookmark_list_length (NautilusBookmarkList *bookmarks)
+nemo_bookmark_list_length (NemoBookmarkList *bookmarks)
 {
-	g_return_val_if_fail (NAUTILUS_IS_BOOKMARK_LIST(bookmarks), 0);
+	g_return_val_if_fail (NEMO_IS_BOOKMARK_LIST(bookmarks), 0);
 
 	return g_list_length (bookmarks->list);
 }
 
 static void
-load_file_finish (NautilusBookmarkList *bookmarks,
+load_file_finish (NemoBookmarkList *bookmarks,
 		  GObject *source,
 		  GAsyncResult *res)
 {
@@ -508,12 +508,12 @@ load_file_finish (NautilusBookmarkList *bookmarks,
 }
 
 static void
-load_file_async (NautilusBookmarkList *self,
+load_file_async (NemoBookmarkList *self,
 		 GAsyncReadyCallback callback)
 {
 	GFile *file;
 
-	file = nautilus_bookmark_list_get_file ();
+	file = nemo_bookmark_list_get_file ();
 
 	/* Wipe out old list. */
 	clear (self);
@@ -526,7 +526,7 @@ load_file_async (NautilusBookmarkList *self,
 }
 
 static void
-save_file_finish (NautilusBookmarkList *bookmarks,
+save_file_finish (NemoBookmarkList *bookmarks,
 		  GObject *source,
 		  GAsyncResult *res)
 {
@@ -542,7 +542,7 @@ save_file_finish (NautilusBookmarkList *bookmarks,
 		g_error_free (error);
 	}
 
-	file = nautilus_bookmark_list_get_file ();
+	file = nemo_bookmark_list_get_file ();
 
 	/* re-enable bookmark file monitoring */
 	bookmarks->monitor = g_file_monitor_file (file, 0, NULL, NULL);
@@ -554,7 +554,7 @@ save_file_finish (NautilusBookmarkList *bookmarks,
 }
 
 static void
-save_file_async (NautilusBookmarkList *bookmarks,
+save_file_async (NemoBookmarkList *bookmarks,
 		 GAsyncReadyCallback callback)
 {
 	GFile *file;
@@ -567,26 +567,26 @@ save_file_async (NautilusBookmarkList *bookmarks,
 		bookmarks->monitor = NULL;
 	}
 
-	file = nautilus_bookmark_list_get_file ();
+	file = nemo_bookmark_list_get_file ();
 	bookmark_string = g_string_new (NULL);
 
 	for (l = bookmarks->list; l; l = l->next) {
-		NautilusBookmark *bookmark;
+		NemoBookmark *bookmark;
 
-		bookmark = NAUTILUS_BOOKMARK (l->data);
+		bookmark = NEMO_BOOKMARK (l->data);
 
 		/* make sure we save label if it has one for compatibility with GTK 2.7 and 2.8 */
-		if (nautilus_bookmark_get_has_custom_name (bookmark)) {
+		if (nemo_bookmark_get_has_custom_name (bookmark)) {
 			const char *label;
 			char *uri;
-			label = nautilus_bookmark_get_name (bookmark);
-			uri = nautilus_bookmark_get_uri (bookmark);
+			label = nemo_bookmark_get_name (bookmark);
+			uri = nemo_bookmark_get_uri (bookmark);
 			g_string_append_printf (bookmark_string,
 						"%s %s\n", uri, label);
 			g_free (uri);
 		} else {
 			char *uri;
-			uri = nautilus_bookmark_get_uri (bookmark);
+			uri = nemo_bookmark_get_uri (bookmark);
 			g_string_append_printf (bookmark_string, "%s\n", uri);
 			g_free (uri);
 		}
@@ -603,14 +603,14 @@ save_file_async (NautilusBookmarkList *bookmarks,
 }
 
 static void
-process_next_op (NautilusBookmarkList *bookmarks);
+process_next_op (NemoBookmarkList *bookmarks);
 
 static void
 op_processed_cb (GObject *source,
 		 GAsyncResult *res,
 		 gpointer user_data)
 {
-	NautilusBookmarkList *self = user_data;
+	NemoBookmarkList *self = user_data;
 	int op;
 
 	op = GPOINTER_TO_INT (g_queue_pop_tail (self->pending_ops));
@@ -630,7 +630,7 @@ op_processed_cb (GObject *source,
 }
 
 static void
-process_next_op (NautilusBookmarkList *bookmarks)
+process_next_op (NemoBookmarkList *bookmarks)
 {
 	gint op;
 
@@ -644,13 +644,13 @@ process_next_op (NautilusBookmarkList *bookmarks)
 }
 
 /**
- * nautilus_bookmark_list_load_file:
+ * nemo_bookmark_list_load_file:
  * 
  * Reads bookmarks from file, clobbering contents in memory.
  * @bookmarks: the list of bookmarks to fill with file contents.
  **/
 static void
-nautilus_bookmark_list_load_file (NautilusBookmarkList *bookmarks)
+nemo_bookmark_list_load_file (NemoBookmarkList *bookmarks)
 {
 	g_queue_push_head (bookmarks->pending_ops, GINT_TO_POINTER (LOAD_JOB));
 
@@ -660,13 +660,13 @@ nautilus_bookmark_list_load_file (NautilusBookmarkList *bookmarks)
 }
 
 /**
- * nautilus_bookmark_list_save_file:
+ * nemo_bookmark_list_save_file:
  * 
  * Save bookmarks to disk.
  * @bookmarks: the list of bookmarks to save.
  **/
 static void
-nautilus_bookmark_list_save_file (NautilusBookmarkList *bookmarks)
+nemo_bookmark_list_save_file (NemoBookmarkList *bookmarks)
 {
 	g_signal_emit (bookmarks, signals[CHANGED], 0);
 
@@ -678,24 +678,24 @@ nautilus_bookmark_list_save_file (NautilusBookmarkList *bookmarks)
 }
 
 /**
- * nautilus_bookmark_list_new:
+ * nemo_bookmark_list_new:
  * 
  * Create a new bookmark_list, with contents read from disk.
  * 
  * Return value: A pointer to the new widget.
  **/
-NautilusBookmarkList *
-nautilus_bookmark_list_new (void)
+NemoBookmarkList *
+nemo_bookmark_list_new (void)
 {
-	NautilusBookmarkList *list;
+	NemoBookmarkList *list;
 
-	list = NAUTILUS_BOOKMARK_LIST (g_object_new (NAUTILUS_TYPE_BOOKMARK_LIST, NULL));
+	list = NEMO_BOOKMARK_LIST (g_object_new (NEMO_TYPE_BOOKMARK_LIST, NULL));
 
 	return list;
 }
 
 /**
- * nautilus_bookmark_list_set_window_geometry:
+ * nemo_bookmark_list_set_window_geometry:
  * 
  * Set a bookmarks window's geometry (position & size), in string form. This is
  * stored to disk by this class, and can be retrieved later in
@@ -704,15 +704,15 @@ nautilus_bookmark_list_new (void)
  * @geometry: the new window geometry string.
  **/
 void
-nautilus_bookmark_list_set_window_geometry (NautilusBookmarkList *bookmarks,
+nemo_bookmark_list_set_window_geometry (NemoBookmarkList *bookmarks,
 					    const char           *geometry)
 {
-	g_return_if_fail (NAUTILUS_IS_BOOKMARK_LIST (bookmarks));
+	g_return_if_fail (NEMO_IS_BOOKMARK_LIST (bookmarks));
 	g_return_if_fail (geometry != NULL);
 
 	g_free (window_geometry);
 	window_geometry = g_strdup (geometry);
 
-	nautilus_bookmark_list_save_file (bookmarks);
+	nemo_bookmark_list_save_file (bookmarks);
 }
 

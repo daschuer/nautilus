@@ -1,14 +1,14 @@
 /*
- * nautilus-dbus-manager: nautilus DBus interface
+ * nemo-dbus-manager: nemo DBus interface
  *
  * Copyright (C) 2010, Red Hat, Inc.
  *
- * Nautilus is free software; you can redistribute it and/or
+ * Nemo is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
  * published by the Free Software Foundation; either version 2 of the
  * License, or (at your option) any later version.
  *
- * Nautilus is distributed in the hope that it will be useful,
+ * Nemo is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
  * General Public License for more details.
@@ -21,13 +21,13 @@
  *
  */
 
-#ifndef __NAUTILUS_DBUS_MANAGER_H__
-#define __NAUTILUS_DBUS_MANAGER_H__
+#ifndef __NEMO_DBUS_MANAGER_H__
+#define __NEMO_DBUS_MANAGER_H__
 
 #include <glib-object.h>
 #include <gio/gio.h>
 
-void nautilus_dbus_manager_start (GApplication *application);
-void nautilus_dbus_manager_stop (void);
+void nemo_dbus_manager_start (GApplication *application);
+void nemo_dbus_manager_stop (void);
 
-#endif /* __NAUTILUS_DBUS_MANAGER_H__ */
+#endif /* __NEMO_DBUS_MANAGER_H__ */

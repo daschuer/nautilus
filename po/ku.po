@@ -1,5 +1,5 @@
-# #-#-#-#-#  ku.po (nautilus.HEAD)  #-#-#-#-#
-# translation of nautilus.HEAD.po to Kurdish
+# #-#-#-#-#  ku.po (nemo.HEAD)  #-#-#-#-#
+# translation of nemo.HEAD.po to Kurdish
 # This file is distributed under the same license as the PACKAGE package.
 # Copyright (C) 2005 THE PACKAGE'S COPYRIGHT HOLDER.
 # Erdal Ronahi <erdal.ronahi@gmail.com, pckurd@hotmail.com>, 2005.
@@ -28,7 +28,7 @@ msgstr ""
 "X-Poedit-SourceCharset: utf-8\n"
 "X-Rosetta-Export-Date: 2007-03-14 16:38+0000\n"
 
-#: ../data/nautilus.xml.in.h:1
+#: ../data/nemo.xml.in.h:1
 msgid "Saved search"
 msgstr "Lêgeranina tomarkirî"
 
@@ -107,177 +107,177 @@ msgstr " (Unikoda nederbasdar)"
 #. name, stock id
 #. label, accelerator
 #. tooltip
-#: ../libnautilus-private/nautilus-clipboard.c:436
+#: ../libnemo-private/nemo-clipboard.c:436
 msgid "Cut the selected text to the clipboard"
 msgstr "Nivîsa hilbijartî jê bike û bi panoyê ve bike"
 
 #. name, stock id
 #. label, accelerator
 #. tooltip
-#: ../libnautilus-private/nautilus-clipboard.c:440
+#: ../libnemo-private/nemo-clipboard.c:440
 msgid "Copy the selected text to the clipboard"
 msgstr ""
 
 #. name, stock id
 #. label, accelerator
 #. tooltip
-#: ../libnautilus-private/nautilus-clipboard.c:444
+#: ../libnemo-private/nemo-clipboard.c:444
 msgid "Paste the text stored on the clipboard"
 msgstr "Wêneyê ku di panoyê de hatiye veşartin pê ve bike"
 
 #. name, stock id
 #. label, accelerator
-#: ../libnautilus-private/nautilus-clipboard.c:447
+#: ../libnemo-private/nemo-clipboard.c:447
 #: ../src/file-manager/fm-directory-view.c:7112
 msgid "Select _All"
 msgstr "Hemûyî _Hilbijêre"
 
 #. tooltip
-#: ../libnautilus-private/nautilus-clipboard.c:448
+#: ../libnemo-private/nemo-clipboard.c:448
 msgid "Select all the text in a text field"
 msgstr "Hemû nivîsa ku li qada nivîsê ye hilbijêre"
 
-#: ../libnautilus-private/nautilus-column-chooser.c:368
+#: ../libnemo-private/nemo-column-chooser.c:368
 msgid "Move _Up"
 msgstr "_Berjor"
 
-#: ../libnautilus-private/nautilus-column-chooser.c:378
+#: ../libnemo-private/nemo-column-chooser.c:378
 msgid "Move Dow_n"
 msgstr "Ber_jêr"
 
-#: ../libnautilus-private/nautilus-column-chooser.c:391
+#: ../libnemo-private/nemo-column-chooser.c:391
 msgid "Use De_fault"
 msgstr "Yên _asayî bi kar bîne"
 
-#: ../libnautilus-private/nautilus-column-utilities.c:43
+#: ../libnemo-private/nemo-column-utilities.c:43
 #: ../src/file-manager/fm-list-view.c:1652
 msgid "Name"
 msgstr "Nav"
 
-#: ../libnautilus-private/nautilus-column-utilities.c:44
+#: ../libnemo-private/nemo-column-utilities.c:44
 msgid "The name and icon of the file."
 msgstr "Îkon û navê pelgehê."
 
-#: ../libnautilus-private/nautilus-column-utilities.c:50
+#: ../libnemo-private/nemo-column-utilities.c:50
 msgid "Size"
 msgstr "Mezinahî"
 
-#: ../libnautilus-private/nautilus-column-utilities.c:51
+#: ../libnemo-private/nemo-column-utilities.c:51
 msgid "The size of the file."
 msgstr "Mezinahiya pelgehê."
 
-#: ../libnautilus-private/nautilus-column-utilities.c:58
+#: ../libnemo-private/nemo-column-utilities.c:58
 msgid "Type"
 msgstr "Cure"
 
-#: ../libnautilus-private/nautilus-column-utilities.c:59
+#: ../libnemo-private/nemo-column-utilities.c:59
 msgid "The type of the file."
 msgstr "Cureyê pelgehê."
 
-#: ../libnautilus-private/nautilus-column-utilities.c:65
-#: ../src/nautilus-image-properties-page.c:270
+#: ../libnemo-private/nemo-column-utilities.c:65
+#: ../src/nemo-image-properties-page.c:270
 msgid "Date Modified"
 msgstr "Dîroka Guherandinê"
 
-#: ../libnautilus-private/nautilus-column-utilities.c:66
+#: ../libnemo-private/nemo-column-utilities.c:66
 msgid "The date the file was modified."
 msgstr "Dîroka ku pelgeh hatiye guherandin."
 
-#: ../libnautilus-private/nautilus-column-utilities.c:73
+#: ../libnemo-private/nemo-column-utilities.c:73
 msgid "Date Accessed"
 msgstr "Dîroka Gihiştinê"
 
-#: ../libnautilus-private/nautilus-column-utilities.c:74
+#: ../libnemo-private/nemo-column-utilities.c:74
 msgid "The date the file was accessed."
 msgstr "Dîroka herî dawî pel hate bikaranîn."
 
-#: ../libnautilus-private/nautilus-column-utilities.c:81
+#: ../libnemo-private/nemo-column-utilities.c:81
 msgid "Owner"
 msgstr "Xwedî"
 
-#: ../libnautilus-private/nautilus-column-utilities.c:82
+#: ../libnemo-private/nemo-column-utilities.c:82
 msgid "The owner of the file."
 msgstr "Xwediyê pel."
 
-#: ../libnautilus-private/nautilus-column-utilities.c:89
+#: ../libnemo-private/nemo-column-utilities.c:89
 msgid "Group"
 msgstr "Kom"
 
-#: ../libnautilus-private/nautilus-column-utilities.c:90
+#: ../libnemo-private/nemo-column-utilities.c:90
 msgid "The group of the file."
 msgstr "Koma pel."
 
-#: ../libnautilus-private/nautilus-column-utilities.c:97
+#: ../libnemo-private/nemo-column-utilities.c:97
 #: ../src/file-manager/fm-properties-window.c:4528
 msgid "Permissions"
 msgstr "Destûr"
 
-#: ../libnautilus-private/nautilus-column-utilities.c:98
+#: ../libnemo-private/nemo-column-utilities.c:98
 msgid "The permissions of the file."
 msgstr "Mafê gihiştina pel."
 
-#: ../libnautilus-private/nautilus-column-utilities.c:105
+#: ../libnemo-private/nemo-column-utilities.c:105
 msgid "Octal Permissions"
 msgstr ""
 
-#: ../libnautilus-private/nautilus-column-utilities.c:106
+#: ../libnemo-private/nemo-column-utilities.c:106
 msgid "The permissions of the file, in octal notation."
 msgstr ""
 
-#: ../libnautilus-private/nautilus-column-utilities.c:113
+#: ../libnemo-private/nemo-column-utilities.c:113
 msgid "MIME Type"
 msgstr "Cureyê MIME"
 
-#: ../libnautilus-private/nautilus-column-utilities.c:114
+#: ../libnemo-private/nemo-column-utilities.c:114
 msgid "The mime type of the file."
 msgstr "Cureyê mime yê pel."
 
-#: ../libnautilus-private/nautilus-column-utilities.c:121
+#: ../libnemo-private/nemo-column-utilities.c:121
 msgid "SELinux Context"
 msgstr "Naveroka SELinuxê"
 
-#: ../libnautilus-private/nautilus-column-utilities.c:122
+#: ../libnemo-private/nemo-column-utilities.c:122
 msgid "The SELinux security context of the file."
 msgstr "Naveroka ewlekariya SELinux ya pel."
 
-#: ../libnautilus-private/nautilus-column-utilities.c:129
-#: ../src/nautilus-image-properties-page.c:342
-#: ../src/nautilus-query-editor.c:117
+#: ../libnemo-private/nemo-column-utilities.c:129
+#: ../src/nemo-image-properties-page.c:342
+#: ../src/nemo-query-editor.c:117
 msgid "Location"
 msgstr "Cih"
 
-#: ../libnautilus-private/nautilus-column-utilities.c:130
+#: ../libnemo-private/nemo-column-utilities.c:130
 msgid "The location of the file."
 msgstr "Cihê pelî."
 
-#: ../libnautilus-private/nautilus-column-utilities.c:171
+#: ../libnemo-private/nemo-column-utilities.c:171
 msgid "Trashed On"
 msgstr "Dema çû çopê"
 
-#: ../libnautilus-private/nautilus-column-utilities.c:172
+#: ../libnemo-private/nemo-column-utilities.c:172
 msgid "Date when file was moved to the Trash"
 msgstr ""
 
-#: ../libnautilus-private/nautilus-column-utilities.c:178
+#: ../libnemo-private/nemo-column-utilities.c:178
 msgid "Original Location"
 msgstr "Cihê orijînal"
 
-#: ../libnautilus-private/nautilus-column-utilities.c:179
+#: ../libnemo-private/nemo-column-utilities.c:179
 #, fuzzy
 msgid "Original location of file before moved to the Trash"
 msgstr "Pel û peldank tenê dikare di hundirê çopê de werine kişandin."
 
-#: ../libnautilus-private/nautilus-desktop-directory-file.c:440
-#: ../libnautilus-private/nautilus-desktop-icon-file.c:150
+#: ../libnemo-private/nemo-desktop-directory-file.c:440
+#: ../libnemo-private/nemo-desktop-icon-file.c:150
 msgid "on the desktop"
 msgstr "li sermaseyê"
 
-#: ../libnautilus-private/nautilus-desktop-link-monitor.c:101
+#: ../libnemo-private/nemo-desktop-link-monitor.c:101
 #, c-format
 msgid "You cannot move the volume \"%s\" to the trash."
 msgstr "Tu nikarî pergala \"%s\" biavêjî çopê."
 
-#: ../libnautilus-private/nautilus-desktop-link-monitor.c:111
+#: ../libnemo-private/nemo-desktop-link-monitor.c:111
 msgid ""
 "If you want to eject the volume, please use \"Eject\" in the popup menu of "
 "the volume."
@@ -285,7 +285,7 @@ msgstr ""
 "Heke tu dixwazî pergalê derxî, ji kerema xwe re biçe ser pergalê û bişkoka "
 "rastê ya mişk bitikîne û pêl \"Derxe\" bike."
 
-#: ../libnautilus-private/nautilus-desktop-link-monitor.c:120
+#: ../libnemo-private/nemo-desktop-link-monitor.c:120
 msgid ""
 "If you want to unmount the volume, please use \"Unmount Volume\" in the "
 "popup menu of the volume."
@@ -299,216 +299,216 @@ msgstr ""
 #. * match the user name string passed by the C code, but not
 #. * put the user name in the final string.
 #.
-#: ../libnautilus-private/nautilus-desktop-link.c:128
+#: ../libnemo-private/nemo-desktop-link.c:128
 #, c-format
 msgid "%s's Home"
 msgstr "Mala %s"
 
-#: ../libnautilus-private/nautilus-dnd.c:776
+#: ../libnemo-private/nemo-dnd.c:776
 msgid "_Move Here"
 msgstr "_Bikşîne Vê Derê"
 
-#: ../libnautilus-private/nautilus-dnd.c:781
+#: ../libnemo-private/nemo-dnd.c:781
 msgid "_Copy Here"
 msgstr "_Ji Ber Bigire Vir"
 
-#: ../libnautilus-private/nautilus-dnd.c:786
+#: ../libnemo-private/nemo-dnd.c:786
 msgid "_Link Here"
 msgstr "Li Vê Derê _Girê Bide"
 
-#: ../libnautilus-private/nautilus-dnd.c:791
+#: ../libnemo-private/nemo-dnd.c:791
 msgid "Set as _Background"
 msgstr "Wekî _Rûerd Mîheng Bike"
 
-#: ../libnautilus-private/nautilus-dnd.c:798
+#: ../libnemo-private/nemo-dnd.c:798
 msgid "Cancel"
 msgstr "Betal"
 
-#: ../libnautilus-private/nautilus-file-conflict-dialog.c:144
+#: ../libnemo-private/nemo-file-conflict-dialog.c:144
 #, c-format
 msgid "Merge folder \"%s\"?"
 msgstr ""
 
-#: ../libnautilus-private/nautilus-file-conflict-dialog.c:148
+#: ../libnemo-private/nemo-file-conflict-dialog.c:148
 msgid ""
 "Merging will ask for confirmation before replacing any files in the folder "
 "that conflict with the files being copied."
 msgstr ""
 
-#: ../libnautilus-private/nautilus-file-conflict-dialog.c:153
+#: ../libnemo-private/nemo-file-conflict-dialog.c:153
 #, c-format
 msgid "An older folder with the same name already exists in \"%s\"."
 msgstr ""
 
-#: ../libnautilus-private/nautilus-file-conflict-dialog.c:157
+#: ../libnemo-private/nemo-file-conflict-dialog.c:157
 #, c-format
 msgid "A newer folder with the same name already exists in \"%s\"."
 msgstr ""
 
-#: ../libnautilus-private/nautilus-file-conflict-dialog.c:161
+#: ../libnemo-private/nemo-file-conflict-dialog.c:161
 #, c-format
 msgid "Another folder with the same name already exists in \"%s\"."
 msgstr ""
 
-#: ../libnautilus-private/nautilus-file-conflict-dialog.c:166
+#: ../libnemo-private/nemo-file-conflict-dialog.c:166
 msgid "Replacing it will remove all files in the folder."
 msgstr ""
 
-#: ../libnautilus-private/nautilus-file-conflict-dialog.c:168
+#: ../libnemo-private/nemo-file-conflict-dialog.c:168
 #, c-format
 msgid "Replace folder \"%s\"?"
 msgstr ""
 
-#: ../libnautilus-private/nautilus-file-conflict-dialog.c:170
+#: ../libnemo-private/nemo-file-conflict-dialog.c:170
 #, c-format
 msgid "A folder with the same name already exists in \"%s\"."
 msgstr ""
 
-#: ../libnautilus-private/nautilus-file-conflict-dialog.c:175
+#: ../libnemo-private/nemo-file-conflict-dialog.c:175
 #, c-format
 msgid "Replace file \"%s\"?"
 msgstr "Pelê \"%s\" were guherandin?"
 
-#: ../libnautilus-private/nautilus-file-conflict-dialog.c:177
+#: ../libnemo-private/nemo-file-conflict-dialog.c:177
 msgid "Replacing it will overwrite its content."
 msgstr "Heke were guherandin dê li ser naveroka pelê berê were nivisandin."
 
-#: ../libnautilus-private/nautilus-file-conflict-dialog.c:181
+#: ../libnemo-private/nemo-file-conflict-dialog.c:181
 #, c-format
 msgid "An older file with the same name already exists in \"%s\"."
 msgstr ""
 
-#: ../libnautilus-private/nautilus-file-conflict-dialog.c:185
+#: ../libnemo-private/nemo-file-conflict-dialog.c:185
 #, c-format
 msgid "A newer file with the same name already exists in \"%s\"."
 msgstr ""
 
-#: ../libnautilus-private/nautilus-file-conflict-dialog.c:189
+#: ../libnemo-private/nemo-file-conflict-dialog.c:189
 #, c-format
 msgid "Another file with the same name already exists in \"%s\"."
 msgstr ""
 
-#: ../libnautilus-private/nautilus-file-conflict-dialog.c:256
+#: ../libnemo-private/nemo-file-conflict-dialog.c:256
 msgid "Original file"
 msgstr ""
 
-#: ../libnautilus-private/nautilus-file-conflict-dialog.c:257
-#: ../libnautilus-private/nautilus-file-conflict-dialog.c:288
+#: ../libnemo-private/nemo-file-conflict-dialog.c:257
+#: ../libnemo-private/nemo-file-conflict-dialog.c:288
 #: ../src/file-manager/fm-properties-window.c:3125
 msgid "Size:"
 msgstr "Mezinahî:"
 
 #. second row: type combobox
-#: ../libnautilus-private/nautilus-file-conflict-dialog.c:260
-#: ../libnautilus-private/nautilus-file-conflict-dialog.c:291
+#: ../libnemo-private/nemo-file-conflict-dialog.c:260
+#: ../libnemo-private/nemo-file-conflict-dialog.c:291
 #: ../src/file-manager/fm-properties-window.c:3107
-#: ../src/nautilus-connect-server-dialog.c:911
+#: ../src/nemo-connect-server-dialog.c:911
 msgid "Type:"
 msgstr "Cure:"
 
-#: ../libnautilus-private/nautilus-file-conflict-dialog.c:263
-#: ../libnautilus-private/nautilus-file-conflict-dialog.c:294
+#: ../libnemo-private/nemo-file-conflict-dialog.c:263
+#: ../libnemo-private/nemo-file-conflict-dialog.c:294
 msgid "Last modified:"
 msgstr "Guherandina dawî:"
 
-#: ../libnautilus-private/nautilus-file-conflict-dialog.c:287
+#: ../libnemo-private/nemo-file-conflict-dialog.c:287
 msgid "Replace with"
 msgstr "Biguherîne bi"
 
-#: ../libnautilus-private/nautilus-file-conflict-dialog.c:316
+#: ../libnemo-private/nemo-file-conflict-dialog.c:316
 msgid "Merge"
 msgstr ""
 
 #. Setup the expander for the rename action
-#: ../libnautilus-private/nautilus-file-conflict-dialog.c:509
+#: ../libnemo-private/nemo-file-conflict-dialog.c:509
 #, fuzzy
 msgid "_Select a new name for the destination"
 msgstr "Di hedefê de têra xwe cihê vala tuneye."
 
-#: ../libnautilus-private/nautilus-file-conflict-dialog.c:523
-#: ../libnautilus-private/nautilus-mime-application-chooser.c:379
+#: ../libnemo-private/nemo-file-conflict-dialog.c:523
+#: ../libnemo-private/nemo-mime-application-chooser.c:379
 msgid "Reset"
 msgstr "Ji nû dest pê bike"
 
 #. Setup the checkbox to apply the action to all files
-#: ../libnautilus-private/nautilus-file-conflict-dialog.c:535
+#: ../libnemo-private/nemo-file-conflict-dialog.c:535
 #, fuzzy
 msgid "Apply this action to all files"
 msgstr "Li pelên ku hatine dorpêçkirin destûran bisepîne"
 
-#: ../libnautilus-private/nautilus-file-conflict-dialog.c:546
-#: ../libnautilus-private/nautilus-file-operations.c:183
+#: ../libnemo-private/nemo-file-conflict-dialog.c:546
+#: ../libnemo-private/nemo-file-operations.c:183
 msgid "_Skip"
 msgstr "_Derbas be"
 
-#: ../libnautilus-private/nautilus-file-conflict-dialog.c:551
+#: ../libnemo-private/nemo-file-conflict-dialog.c:551
 msgid "Re_name"
 msgstr "_Nav biguherîne"
 
-#: ../libnautilus-private/nautilus-file-conflict-dialog.c:557
+#: ../libnemo-private/nemo-file-conflict-dialog.c:557
 msgid "Replace"
 msgstr "Guherandin"
 
-#: ../libnautilus-private/nautilus-file-conflict-dialog.c:629
+#: ../libnemo-private/nemo-file-conflict-dialog.c:629
 msgid "File conflict"
 msgstr "Têkçuna pelan"
 
-#: ../libnautilus-private/nautilus-file-operations.c:184
+#: ../libnemo-private/nemo-file-operations.c:184
 msgid "S_kip All"
 msgstr "Li ser hemûyan biqevize"
 
-#: ../libnautilus-private/nautilus-file-operations.c:185
+#: ../libnemo-private/nemo-file-operations.c:185
 msgid "_Retry"
 msgstr "_Careke din biceribîne"
 
-#: ../libnautilus-private/nautilus-file-operations.c:186
+#: ../libnemo-private/nemo-file-operations.c:186
 msgid "Delete _All"
 msgstr "Hemûyan _jê bibe"
 
-#: ../libnautilus-private/nautilus-file-operations.c:187
+#: ../libnemo-private/nemo-file-operations.c:187
 msgid "_Replace"
 msgstr "_Biguherîne"
 
-#: ../libnautilus-private/nautilus-file-operations.c:188
+#: ../libnemo-private/nemo-file-operations.c:188
 msgid "Replace _All"
 msgstr "Hemûyî _Biguherîne"
 
-#: ../libnautilus-private/nautilus-file-operations.c:189
+#: ../libnemo-private/nemo-file-operations.c:189
 msgid "_Merge"
 msgstr ""
 
-#: ../libnautilus-private/nautilus-file-operations.c:190
+#: ../libnemo-private/nemo-file-operations.c:190
 #, fuzzy
 msgid "Merge _All"
 msgstr "Hemûyî _Hilbijêre"
 
-#: ../libnautilus-private/nautilus-file-operations.c:191
+#: ../libnemo-private/nemo-file-operations.c:191
 msgid "Copy _Anyway"
 msgstr ""
 
-#: ../libnautilus-private/nautilus-file-operations.c:276
+#: ../libnemo-private/nemo-file-operations.c:276
 #, c-format
 msgid "%'d second"
 msgid_plural "%'d seconds"
 msgstr[0] ""
 msgstr[1] ""
 
-#: ../libnautilus-private/nautilus-file-operations.c:281
-#: ../libnautilus-private/nautilus-file-operations.c:292
+#: ../libnemo-private/nemo-file-operations.c:281
+#: ../libnemo-private/nemo-file-operations.c:292
 #, c-format
 msgid "%'d minute"
 msgid_plural "%'d minutes"
 msgstr[0] ""
 msgstr[1] ""
 
-#: ../libnautilus-private/nautilus-file-operations.c:291
+#: ../libnemo-private/nemo-file-operations.c:291
 #, c-format
 msgid "%'d hour"
 msgid_plural "%'d hours"
 msgstr[0] ""
 msgstr[1] ""
 
-#: ../libnautilus-private/nautilus-file-operations.c:299
+#: ../libnemo-private/nemo-file-operations.c:299
 #, c-format
 msgid "approximately %'d hour"
 msgid_plural "approximately %'d hours"
@@ -520,15 +520,15 @@ msgstr[1] ""
 #. * (e.g. "folder", "plain text") to file type for symbolic link
 #. * to that kind of file (e.g. "link to folder").
 #.
-#: ../libnautilus-private/nautilus-file-operations.c:375
-#: ../libnautilus-private/nautilus-file.c:6265
+#: ../libnemo-private/nemo-file-operations.c:375
+#: ../libnemo-private/nemo-file.c:6265
 #: ../src/file-manager/fm-directory-view.c:10290
 #, c-format
 msgid "Link to %s"
 msgstr "Girêdan bi %s re"
 
 #. appended to new link file
-#: ../libnautilus-private/nautilus-file-operations.c:379
+#: ../libnemo-private/nemo-file-operations.c:379
 #, c-format
 msgid "Another link to %s"
 msgstr "Girêdaneke din bi %s re"
@@ -537,25 +537,25 @@ msgstr "Girêdaneke din bi %s re"
 #. * if there's no way to do that nicely for a
 #. * particular language.
 #.
-#: ../libnautilus-private/nautilus-file-operations.c:395
+#: ../libnemo-private/nemo-file-operations.c:395
 #, c-format
 msgid "%'dst link to %s"
 msgstr "%demîn girêdan bi %s re"
 
 #. appended to new link file
-#: ../libnautilus-private/nautilus-file-operations.c:399
+#: ../libnemo-private/nemo-file-operations.c:399
 #, c-format
 msgid "%'dnd link to %s"
 msgstr "%demîn girêdan bi %s re"
 
 #. appended to new link file
-#: ../libnautilus-private/nautilus-file-operations.c:403
+#: ../libnemo-private/nemo-file-operations.c:403
 #, c-format
 msgid "%'drd link to %s"
 msgstr "%demîn girêdan bi %s re"
 
 #. appended to new link file
-#: ../libnautilus-private/nautilus-file-operations.c:407
+#: ../libnemo-private/nemo-file-operations.c:407
 #, c-format
 msgid "%'dth link to %s"
 msgstr "%demîn girêdan bi %s re"
@@ -565,12 +565,12 @@ msgstr "%demîn girêdan bi %s re"
 #. * make some or all of them match.
 #.
 #. localizers: tag used to detect the first copy of a file
-#: ../libnautilus-private/nautilus-file-operations.c:446
+#: ../libnemo-private/nemo-file-operations.c:446
 msgid " (copy)"
 msgstr " (kopî)"
 
 #. localizers: tag used to detect the second copy of a file
-#: ../libnautilus-private/nautilus-file-operations.c:448
+#: ../libnemo-private/nemo-file-operations.c:448
 msgid " (another copy)"
 msgstr " (kopiya din)"
 
@@ -578,36 +578,36 @@ msgstr " (kopiya din)"
 #. localizers: tag used to detect the x12th copy of a file
 #. localizers: tag used to detect the x13th copy of a file
 #. localizers: tag used to detect the xxth copy of a file
-#: ../libnautilus-private/nautilus-file-operations.c:451
-#: ../libnautilus-private/nautilus-file-operations.c:453
-#: ../libnautilus-private/nautilus-file-operations.c:455
-#: ../libnautilus-private/nautilus-file-operations.c:465
+#: ../libnemo-private/nemo-file-operations.c:451
+#: ../libnemo-private/nemo-file-operations.c:453
+#: ../libnemo-private/nemo-file-operations.c:455
+#: ../libnemo-private/nemo-file-operations.c:465
 msgid "th copy)"
 msgstr "emîn kopî)"
 
 #. localizers: tag used to detect the x1st copy of a file
-#: ../libnautilus-private/nautilus-file-operations.c:458
+#: ../libnemo-private/nemo-file-operations.c:458
 msgid "st copy)"
 msgstr "emîn kopî)"
 
 #. localizers: tag used to detect the x2nd copy of a file
-#: ../libnautilus-private/nautilus-file-operations.c:460
+#: ../libnemo-private/nemo-file-operations.c:460
 msgid "nd copy)"
 msgstr "emîn kopî)"
 
 #. localizers: tag used to detect the x3rd copy of a file
-#: ../libnautilus-private/nautilus-file-operations.c:462
+#: ../libnemo-private/nemo-file-operations.c:462
 msgid "rd copy)"
 msgstr "emîn kopî)"
 
 #. localizers: appended to first file copy
-#: ../libnautilus-private/nautilus-file-operations.c:479
+#: ../libnemo-private/nemo-file-operations.c:479
 #, c-format
 msgid "%s (copy)%s"
 msgstr "%s (kopî)%s"
 
 #. localizers: appended to second file copy
-#: ../libnautilus-private/nautilus-file-operations.c:481
+#: ../libnemo-private/nemo-file-operations.c:481
 #, c-format
 msgid "%s (another copy)%s"
 msgstr "%s (kopiya din)%s"
@@ -616,10 +616,10 @@ msgstr "%s (kopiya din)%s"
 #. localizers: appended to x12th file copy
 #. localizers: appended to x13th file copy
 #. localizers: appended to xxth file copy
-#: ../libnautilus-private/nautilus-file-operations.c:484
-#: ../libnautilus-private/nautilus-file-operations.c:486
-#: ../libnautilus-private/nautilus-file-operations.c:488
-#: ../libnautilus-private/nautilus-file-operations.c:502
+#: ../libnemo-private/nemo-file-operations.c:484
+#: ../libnemo-private/nemo-file-operations.c:486
+#: ../libnemo-private/nemo-file-operations.c:488
+#: ../libnemo-private/nemo-file-operations.c:502
 #, c-format
 msgid "%s (%'dth copy)%s"
 msgstr "%s (kopiya %demîn)%s"
@@ -629,39 +629,39 @@ msgstr "%s (kopiya %demîn)%s"
 #. * strings look like "%s (copy %'d)%s".
 #.
 #. localizers: appended to x1st file copy
-#: ../libnautilus-private/nautilus-file-operations.c:496
+#: ../libnemo-private/nemo-file-operations.c:496
 #, c-format
 msgid "%s (%'dst copy)%s"
 msgstr "%s (kopiya %demîn)%s"
 
 #. localizers: appended to x2nd file copy
-#: ../libnautilus-private/nautilus-file-operations.c:498
+#: ../libnemo-private/nemo-file-operations.c:498
 #, c-format
 msgid "%s (%'dnd copy)%s"
 msgstr "%s (kopiya %demîn)%s"
 
 #. localizers: appended to x3rd file copy
-#: ../libnautilus-private/nautilus-file-operations.c:500
+#: ../libnemo-private/nemo-file-operations.c:500
 #, c-format
 msgid "%s (%'drd copy)%s"
 msgstr "%s (kopiya %demîn)%s"
 
 #. localizers: opening parentheses to match the "th copy)" string
-#: ../libnautilus-private/nautilus-file-operations.c:600
+#: ../libnemo-private/nemo-file-operations.c:600
 msgid " ("
 msgstr " ("
 
 #. localizers: opening parentheses of the "th copy)" string
-#: ../libnautilus-private/nautilus-file-operations.c:608
+#: ../libnemo-private/nemo-file-operations.c:608
 #, c-format
 msgid " (%'d"
 msgstr " (%'d"
 
-#: ../libnautilus-private/nautilus-file-operations.c:1301
+#: ../libnemo-private/nemo-file-operations.c:1301
 msgid "Are you sure you want to permanently delete \"%B\" from the trash?"
 msgstr "Tu bawer î ku pelê \"B\" mayinde ji çopê jê bibî?"
 
-#: ../libnautilus-private/nautilus-file-operations.c:1304
+#: ../libnemo-private/nemo-file-operations.c:1304
 #, fuzzy, c-format
 msgid ""
 "Are you sure you want to permanently delete the %'d selected item from the "
@@ -672,33 +672,33 @@ msgid_plural ""
 msgstr[0] "Tu bawer î ku pelê \"%s\" mayinde jê bibî?"
 msgstr[1] "Tu bawer î ku pelê \"%s\" mayinde jê bibî?"
 
-#: ../libnautilus-private/nautilus-file-operations.c:1314
-#: ../libnautilus-private/nautilus-file-operations.c:1380
+#: ../libnemo-private/nemo-file-operations.c:1314
+#: ../libnemo-private/nemo-file-operations.c:1380
 msgid "If you delete an item, it will be permanently lost."
 msgstr ""
 
-#: ../libnautilus-private/nautilus-file-operations.c:1334
+#: ../libnemo-private/nemo-file-operations.c:1334
 #, fuzzy
 msgid "Empty all items from Trash?"
 msgstr "Tu bawer î ku hemû hêmanên di çopê de ye vala bike?"
 
-#: ../libnautilus-private/nautilus-file-operations.c:1338
+#: ../libnemo-private/nemo-file-operations.c:1338
 #, fuzzy
 msgid "All items in the Trash will be permanently deleted."
 msgstr "Heke tu lîsteya fermanan jê bibî, wê mayînde werine jêbirin."
 
 #. Empty Trash menu item
-#: ../libnautilus-private/nautilus-file-operations.c:1341
-#: ../libnautilus-private/nautilus-file-operations.c:2191
-#: ../src/nautilus-places-sidebar.c:2554 ../src/nautilus-trash-bar.c:190
+#: ../libnemo-private/nemo-file-operations.c:1341
+#: ../libnemo-private/nemo-file-operations.c:2191
+#: ../src/nemo-places-sidebar.c:2554 ../src/nemo-trash-bar.c:190
 msgid "Empty _Trash"
 msgstr "Çopê _vala bike"
 
-#: ../libnautilus-private/nautilus-file-operations.c:1368
+#: ../libnemo-private/nemo-file-operations.c:1368
 msgid "Are you sure you want to permanently delete \"%B\"?"
 msgstr "Tu bawer î ku pelê \"%B\" mayinde jê bibî?"
 
-#: ../libnautilus-private/nautilus-file-operations.c:1371
+#: ../libnemo-private/nemo-file-operations.c:1371
 #, fuzzy, c-format
 msgid "Are you sure you want to permanently delete the %'d selected item?"
 msgid_plural ""
@@ -706,290 +706,290 @@ msgid_plural ""
 msgstr[0] "Tu bawer î ku pelê \"%s\" mayinde jê bibî?"
 msgstr[1] "Tu bawer î ku pelê \"%s\" mayinde jê bibî?"
 
-#: ../libnautilus-private/nautilus-file-operations.c:1414
+#: ../libnemo-private/nemo-file-operations.c:1414
 #, c-format
 msgid "%'d file left to delete"
 msgid_plural "%'d files left to delete"
 msgstr[0] ""
 msgstr[1] ""
 
-#: ../libnautilus-private/nautilus-file-operations.c:1420
+#: ../libnemo-private/nemo-file-operations.c:1420
 msgid "Deleting files"
 msgstr "Pelan radike"
 
 #. To translators: %T will expand to a time like "2 minutes".
 #. * The singular/plural form will be used depending on the remaining time (i.e. the %T argument).
 #.
-#: ../libnautilus-private/nautilus-file-operations.c:1434
+#: ../libnemo-private/nemo-file-operations.c:1434
 msgid "%T left"
 msgid_plural "%T left"
 msgstr[0] ""
 msgstr[1] ""
 
-#: ../libnautilus-private/nautilus-file-operations.c:1501
-#: ../libnautilus-private/nautilus-file-operations.c:1535
-#: ../libnautilus-private/nautilus-file-operations.c:1574
-#: ../libnautilus-private/nautilus-file-operations.c:1651
-#: ../libnautilus-private/nautilus-file-operations.c:2431
+#: ../libnemo-private/nemo-file-operations.c:1501
+#: ../libnemo-private/nemo-file-operations.c:1535
+#: ../libnemo-private/nemo-file-operations.c:1574
+#: ../libnemo-private/nemo-file-operations.c:1651
+#: ../libnemo-private/nemo-file-operations.c:2431
 msgid "Error while deleting."
 msgstr "Di jêbirinê de çewtî."
 
-#: ../libnautilus-private/nautilus-file-operations.c:1505
+#: ../libnemo-private/nemo-file-operations.c:1505
 msgid ""
 "Files in the folder \"%B\" cannot be deleted because you do not have "
 "permissions to see them."
 msgstr ""
 
-#: ../libnautilus-private/nautilus-file-operations.c:1508
-#: ../libnautilus-private/nautilus-file-operations.c:2490
-#: ../libnautilus-private/nautilus-file-operations.c:3477
+#: ../libnemo-private/nemo-file-operations.c:1508
+#: ../libnemo-private/nemo-file-operations.c:2490
+#: ../libnemo-private/nemo-file-operations.c:3477
 msgid ""
 "There was an error getting information about the files in the folder \"%B\"."
 msgstr ""
 
-#: ../libnautilus-private/nautilus-file-operations.c:1517
-#: ../libnautilus-private/nautilus-file-operations.c:3486
+#: ../libnemo-private/nemo-file-operations.c:1517
+#: ../libnemo-private/nemo-file-operations.c:3486
 #, fuzzy
 msgid "_Skip files"
 msgstr "_Derbas be"
 
-#: ../libnautilus-private/nautilus-file-operations.c:1538
+#: ../libnemo-private/nemo-file-operations.c:1538
 #, fuzzy
 msgid ""
 "The folder \"%B\" cannot be deleted because you do not have permissions to "
 "read it."
 msgstr "Ji ber ku \"%s\" li ser dîska tenê tê xwendin de ye nehate jêbirin."
 
-#: ../libnautilus-private/nautilus-file-operations.c:1541
-#: ../libnautilus-private/nautilus-file-operations.c:2529
-#: ../libnautilus-private/nautilus-file-operations.c:3522
+#: ../libnemo-private/nemo-file-operations.c:1541
+#: ../libnemo-private/nemo-file-operations.c:2529
+#: ../libnemo-private/nemo-file-operations.c:3522
 #, fuzzy
 msgid "There was an error reading the folder \"%B\"."
 msgstr "Dema alîkarî dihate nîşandan çewtiyek çêbû."
 
-#: ../libnautilus-private/nautilus-file-operations.c:1575
+#: ../libnemo-private/nemo-file-operations.c:1575
 #, fuzzy
 msgid "Could not remove the folder %B."
 msgstr "Tu nikarî vî peldankê Çop biguhezîne."
 
-#: ../libnautilus-private/nautilus-file-operations.c:1652
+#: ../libnemo-private/nemo-file-operations.c:1652
 #, fuzzy
 msgid "There was an error deleting %B."
 msgstr "Dema alîkarî dihate nîşandan çewtiyek çêbû."
 
-#: ../libnautilus-private/nautilus-file-operations.c:1732
+#: ../libnemo-private/nemo-file-operations.c:1732
 #, fuzzy
 msgid "Moving files to trash"
 msgstr "Pel têne kişandin"
 
-#: ../libnautilus-private/nautilus-file-operations.c:1734
+#: ../libnemo-private/nemo-file-operations.c:1734
 #, c-format
 msgid "%'d file left to trash"
 msgid_plural "%'d files left to trash"
 msgstr[0] ""
 msgstr[1] ""
 
-#: ../libnautilus-private/nautilus-file-operations.c:1784
+#: ../libnemo-private/nemo-file-operations.c:1784
 msgid "Cannot move file to trash, do you want to delete immediately?"
 msgstr "Pel neçû çopê, tu dixwazî bi awayekî mayînde jê bibî?"
 
-#: ../libnautilus-private/nautilus-file-operations.c:1785
+#: ../libnemo-private/nemo-file-operations.c:1785
 #, fuzzy
 msgid "The file \"%B\" cannot be moved to the trash."
 msgstr "Pelê \"%s\" neçû çopê."
 
-#: ../libnautilus-private/nautilus-file-operations.c:1958
+#: ../libnemo-private/nemo-file-operations.c:1958
 msgid "Trashing Files"
 msgstr "Pel diçin çopê"
 
-#: ../libnautilus-private/nautilus-file-operations.c:1960
+#: ../libnemo-private/nemo-file-operations.c:1960
 msgid "Deleting Files"
 msgstr "Pel tên jêbirin"
 
-#: ../libnautilus-private/nautilus-file-operations.c:2024
+#: ../libnemo-private/nemo-file-operations.c:2024
 msgid "Unable to eject %V"
 msgstr "Avêtina %V bi ser neket"
 
-#: ../libnautilus-private/nautilus-file-operations.c:2026
+#: ../libnemo-private/nemo-file-operations.c:2026
 msgid "Unable to unmount %V"
 msgstr "Qutkirina %V bi ser neket"
 
-#: ../libnautilus-private/nautilus-file-operations.c:2181
+#: ../libnemo-private/nemo-file-operations.c:2181
 msgid "Do you want to empty the trash before you unmount?"
 msgstr "Berê qutkirinê dixwazî çopê vala bikî?"
 
-#: ../libnautilus-private/nautilus-file-operations.c:2183
+#: ../libnemo-private/nemo-file-operations.c:2183
 msgid ""
 "In order to regain the free space on this volume the trash must be emptied. "
 "All trashed items on the volume will be permanently lost."
 msgstr ""
 
-#: ../libnautilus-private/nautilus-file-operations.c:2189
+#: ../libnemo-private/nemo-file-operations.c:2189
 msgid "Do _not Empty Trash"
 msgstr "Çopê vala _neke"
 
-#: ../libnautilus-private/nautilus-file-operations.c:2304
+#: ../libnemo-private/nemo-file-operations.c:2304
 #, c-format
 msgid "Unable to mount %s"
 msgstr "Girêdana %s bi ser neket"
 
-#: ../libnautilus-private/nautilus-file-operations.c:2378
+#: ../libnemo-private/nemo-file-operations.c:2378
 #, fuzzy, c-format
 msgid "Preparing to copy %'d file (%S)"
 msgid_plural "Preparing to copy %'d files (%S)"
 msgstr[0] ""
 msgstr[1] ""
 
-#: ../libnautilus-private/nautilus-file-operations.c:2384
+#: ../libnemo-private/nemo-file-operations.c:2384
 #, fuzzy, c-format
 msgid "Preparing to move %'d file (%S)"
 msgid_plural "Preparing to move %'d files (%S)"
 msgstr[0] ""
 msgstr[1] ""
 
-#: ../libnautilus-private/nautilus-file-operations.c:2390
+#: ../libnemo-private/nemo-file-operations.c:2390
 #, fuzzy, c-format
 msgid "Preparing to delete %'d file (%S)"
 msgid_plural "Preparing to delete %'d files (%S)"
 msgstr[0] "\t"
 msgstr[1] ""
 
-#: ../libnautilus-private/nautilus-file-operations.c:2396
+#: ../libnemo-private/nemo-file-operations.c:2396
 #, fuzzy, c-format
 msgid "Preparing to trash %'d file"
 msgid_plural "Preparing to trash %'d files"
 msgstr[0] ""
 msgstr[1] ""
 
-#: ../libnautilus-private/nautilus-file-operations.c:2427
-#: ../libnautilus-private/nautilus-file-operations.c:3343
-#: ../libnautilus-private/nautilus-file-operations.c:3469
-#: ../libnautilus-private/nautilus-file-operations.c:3514
+#: ../libnemo-private/nemo-file-operations.c:2427
+#: ../libnemo-private/nemo-file-operations.c:3343
+#: ../libnemo-private/nemo-file-operations.c:3469
+#: ../libnemo-private/nemo-file-operations.c:3514
 msgid "Error while copying."
 msgstr "Di kopîkirinê de çewtî."
 
-#: ../libnautilus-private/nautilus-file-operations.c:2429
-#: ../libnautilus-private/nautilus-file-operations.c:3467
-#: ../libnautilus-private/nautilus-file-operations.c:3512
+#: ../libnemo-private/nemo-file-operations.c:2429
+#: ../libnemo-private/nemo-file-operations.c:3467
+#: ../libnemo-private/nemo-file-operations.c:3512
 msgid "Error while moving."
 msgstr "Dema dihate guheztin çewtî çêbû."
 
-#: ../libnautilus-private/nautilus-file-operations.c:2433
+#: ../libnemo-private/nemo-file-operations.c:2433
 msgid "Error while moving files to trash."
 msgstr "Dema pel hatin avêtin copê çewtî çêbû."
 
-#: ../libnautilus-private/nautilus-file-operations.c:2487
+#: ../libnemo-private/nemo-file-operations.c:2487
 msgid ""
 "Files in the folder \"%B\" cannot be handled because you do not have "
 "permissions to see them."
 msgstr ""
 
-#: ../libnautilus-private/nautilus-file-operations.c:2526
+#: ../libnemo-private/nemo-file-operations.c:2526
 #, fuzzy
 msgid ""
 "The folder \"%B\" cannot be handled because you do not have permissions to "
 "read it."
 msgstr "Ji ber ku \"%s\" li ser dîska tenê tê xwendin de ye nehate jêbirin."
 
-#: ../libnautilus-private/nautilus-file-operations.c:2603
+#: ../libnemo-private/nemo-file-operations.c:2603
 #, fuzzy
 msgid ""
 "The file \"%B\" cannot be handled because you do not have permissions to "
 "read it."
 msgstr "Ji ber ku \"%s\" li ser dîska tenê tê xwendin de ye nehate jêbirin."
 
-#: ../libnautilus-private/nautilus-file-operations.c:2606
+#: ../libnemo-private/nemo-file-operations.c:2606
 #, fuzzy
 msgid "There was an error getting information about \"%B\"."
 msgstr "Dema sepan hate destpêkirin çewtiyek çêbû."
 
-#: ../libnautilus-private/nautilus-file-operations.c:2706
-#: ../libnautilus-private/nautilus-file-operations.c:2748
-#: ../libnautilus-private/nautilus-file-operations.c:2781
-#: ../libnautilus-private/nautilus-file-operations.c:2811
+#: ../libnemo-private/nemo-file-operations.c:2706
+#: ../libnemo-private/nemo-file-operations.c:2748
+#: ../libnemo-private/nemo-file-operations.c:2781
+#: ../libnemo-private/nemo-file-operations.c:2811
 #, fuzzy
 msgid "Error while copying to \"%B\"."
 msgstr "Dema \"%s\" ji ber dihate girtin çewtî."
 
-#: ../libnautilus-private/nautilus-file-operations.c:2710
+#: ../libnemo-private/nemo-file-operations.c:2710
 #, fuzzy
 msgid "You do not have permissions to access the destination folder."
 msgstr "Ji bo nivîsîna vê peldankê têta xwe mafê te yê gihiştinê tuneye."
 
-#: ../libnautilus-private/nautilus-file-operations.c:2712
+#: ../libnemo-private/nemo-file-operations.c:2712
 #, fuzzy
 msgid "There was an error getting information about the destination."
 msgstr "Di hedefê de têra xwe cihê vala tuneye."
 
-#: ../libnautilus-private/nautilus-file-operations.c:2749
+#: ../libnemo-private/nemo-file-operations.c:2749
 #, fuzzy
 msgid "The destination is not a folder."
 msgstr "Ev cih ne peldankek e."
 
-#: ../libnautilus-private/nautilus-file-operations.c:2782
+#: ../libnemo-private/nemo-file-operations.c:2782
 #, fuzzy
 msgid ""
 "There is not enough space on the destination. Try to remove files to make "
 "space."
 msgstr "Di hedefê de têra xwe cihê vala tuneye."
 
-#: ../libnautilus-private/nautilus-file-operations.c:2784
+#: ../libnemo-private/nemo-file-operations.c:2784
 #, c-format
 msgid "There is %S available, but %S is required."
 msgstr ""
 
-#: ../libnautilus-private/nautilus-file-operations.c:2812
+#: ../libnemo-private/nemo-file-operations.c:2812
 #, fuzzy
 msgid "The destination is read-only."
 msgstr "Peldanka hedef di hundirê peldanka çavkanî de ye."
 
-#: ../libnautilus-private/nautilus-file-operations.c:2871
+#: ../libnemo-private/nemo-file-operations.c:2871
 #, fuzzy
 msgid "Moving \"%B\" to \"%B\""
 msgstr "Navê \"%s\" dibe \"%s\"."
 
-#: ../libnautilus-private/nautilus-file-operations.c:2872
+#: ../libnemo-private/nemo-file-operations.c:2872
 #, fuzzy
 msgid "Copying \"%B\" to \"%B\""
 msgstr "Navê \"%s\" dibe \"%s\"."
 
-#: ../libnautilus-private/nautilus-file-operations.c:2879
+#: ../libnemo-private/nemo-file-operations.c:2879
 msgid "Duplicating \"%B\""
 msgstr ""
 
-#: ../libnautilus-private/nautilus-file-operations.c:2887
+#: ../libnemo-private/nemo-file-operations.c:2887
 msgid "Moving %'d file (in \"%B\") to \"%B\""
 msgid_plural "Moving %'d files (in \"%B\") to \"%B\""
 msgstr[0] ""
 msgstr[1] ""
 
-#: ../libnautilus-private/nautilus-file-operations.c:2891
+#: ../libnemo-private/nemo-file-operations.c:2891
 msgid "Copying %'d file (in \"%B\") to \"%B\""
 msgid_plural "Copying %'d files (in \"%B\") to \"%B\""
 msgstr[0] ""
 msgstr[1] ""
 
-#: ../libnautilus-private/nautilus-file-operations.c:2899
+#: ../libnemo-private/nemo-file-operations.c:2899
 msgid "Duplicating %'d file (in \"%B\")"
 msgid_plural "Duplicating %'d files (in \"%B\")"
 msgstr[0] ""
 msgstr[1] ""
 
-#: ../libnautilus-private/nautilus-file-operations.c:2909
+#: ../libnemo-private/nemo-file-operations.c:2909
 #, fuzzy
 msgid "Moving %'d file to \"%B\""
 msgid_plural "Moving %'d files to \"%B\""
 msgstr[0] "Pel têne kişandin"
 msgstr[1] "Pel têne kişandin"
 
-#: ../libnautilus-private/nautilus-file-operations.c:2913
+#: ../libnemo-private/nemo-file-operations.c:2913
 #, fuzzy
 msgid "Copying %'d file to \"%B\""
 msgid_plural "Copying %'d files to \"%B\""
 msgstr[0] "Pelan ji ber digire"
 msgstr[1] "Pelan ji ber digire"
 
-#: ../libnautilus-private/nautilus-file-operations.c:2919
+#: ../libnemo-private/nemo-file-operations.c:2919
 #, fuzzy, c-format
 msgid "Duplicating %'d file"
 msgid_plural "Duplicating %'d files"
@@ -997,7 +997,7 @@ msgstr[0] "Pelan radike"
 msgstr[1] "Pelan radike"
 
 #. To translators: %S will expand to a size like "2 bytes" or "3 MB", so something like "4 kb of 4 MB"
-#: ../libnautilus-private/nautilus-file-operations.c:2939
+#: ../libnemo-private/nemo-file-operations.c:2939
 #, c-format
 msgid "%S of %S"
 msgstr ""
@@ -1007,265 +1007,265 @@ msgstr ""
 #. *
 #. * The singular/plural form will be used depending on the remaining time (i.e. the %T argument).
 #.
-#: ../libnautilus-private/nautilus-file-operations.c:2950
+#: ../libnemo-private/nemo-file-operations.c:2950
 msgid "%S of %S — %T left (%S/sec)"
 msgid_plural "%S of %S — %T left (%S/sec)"
 msgstr[0] ""
 msgstr[1] ""
 
-#: ../libnautilus-private/nautilus-file-operations.c:3347
+#: ../libnemo-private/nemo-file-operations.c:3347
 msgid ""
 "The folder \"%B\" cannot be copied because you do not have permissions to "
 "create it in the destination."
 msgstr ""
 
-#: ../libnautilus-private/nautilus-file-operations.c:3350
+#: ../libnemo-private/nemo-file-operations.c:3350
 #, fuzzy
 msgid "There was an error creating the folder \"%B\"."
 msgstr "Dema alîkarî dihate nîşandan çewtiyek çêbû."
 
-#: ../libnautilus-private/nautilus-file-operations.c:3474
+#: ../libnemo-private/nemo-file-operations.c:3474
 msgid ""
 "Files in the folder \"%B\" cannot be copied because you do not have "
 "permissions to see them."
 msgstr ""
 
-#: ../libnautilus-private/nautilus-file-operations.c:3519
+#: ../libnemo-private/nemo-file-operations.c:3519
 #, fuzzy
 msgid ""
 "The folder \"%B\" cannot be copied because you do not have permissions to "
 "read it."
 msgstr "Ji ber ku \"%s\" li ser dîska tenê tê xwendin de ye nehate guheztin."
 
-#: ../libnautilus-private/nautilus-file-operations.c:3564
-#: ../libnautilus-private/nautilus-file-operations.c:4250
-#: ../libnautilus-private/nautilus-file-operations.c:4846
+#: ../libnemo-private/nemo-file-operations.c:3564
+#: ../libnemo-private/nemo-file-operations.c:4250
+#: ../libnemo-private/nemo-file-operations.c:4846
 #, fuzzy
 msgid "Error while moving \"%B\"."
 msgstr "Dema \"%s\" dihate kişandin çewtî çêbû."
 
-#: ../libnautilus-private/nautilus-file-operations.c:3565
+#: ../libnemo-private/nemo-file-operations.c:3565
 #, fuzzy
 msgid "Could not remove the source folder."
 msgstr "Tu nikarî vî peldankê Çop biguhezîne."
 
-#: ../libnautilus-private/nautilus-file-operations.c:3650
-#: ../libnautilus-private/nautilus-file-operations.c:3691
-#: ../libnautilus-private/nautilus-file-operations.c:4252
-#: ../libnautilus-private/nautilus-file-operations.c:4323
+#: ../libnemo-private/nemo-file-operations.c:3650
+#: ../libnemo-private/nemo-file-operations.c:3691
+#: ../libnemo-private/nemo-file-operations.c:4252
+#: ../libnemo-private/nemo-file-operations.c:4323
 #, fuzzy
 msgid "Error while copying \"%B\"."
 msgstr "Dema \"%s\" ji ber dihate girtin çewtî."
 
-#: ../libnautilus-private/nautilus-file-operations.c:3651
+#: ../libnemo-private/nemo-file-operations.c:3651
 #, c-format
 msgid "Could not remove files from the already existing folder %F."
 msgstr ""
 
-#: ../libnautilus-private/nautilus-file-operations.c:3692
+#: ../libnemo-private/nemo-file-operations.c:3692
 #, fuzzy, c-format
 msgid "Could not remove the already existing file %F."
 msgstr "Amblema bi navê '%s' nehate jêbirin."
 
 #. the run_warning() frees all strings passed in automatically
-#: ../libnautilus-private/nautilus-file-operations.c:4010
-#: ../libnautilus-private/nautilus-file-operations.c:4696
+#: ../libnemo-private/nemo-file-operations.c:4010
+#: ../libnemo-private/nemo-file-operations.c:4696
 msgid "You cannot move a folder into itself."
 msgstr "Tu nikarî peldankekê di hundirê wê de bikşîne."
 
-#: ../libnautilus-private/nautilus-file-operations.c:4011
-#: ../libnautilus-private/nautilus-file-operations.c:4697
+#: ../libnemo-private/nemo-file-operations.c:4011
+#: ../libnemo-private/nemo-file-operations.c:4697
 msgid "You cannot copy a folder into itself."
 msgstr "Tu nikarî peldankekê di hundirê de ji ber bigire."
 
-#: ../libnautilus-private/nautilus-file-operations.c:4012
-#: ../libnautilus-private/nautilus-file-operations.c:4698
+#: ../libnemo-private/nemo-file-operations.c:4012
+#: ../libnemo-private/nemo-file-operations.c:4698
 msgid "The destination folder is inside the source folder."
 msgstr "Peldanka hedef di hundirê peldanka çavkanî de ye."
 
 #. the run_warning() frees all strings passed in automatically
-#: ../libnautilus-private/nautilus-file-operations.c:4043
+#: ../libnemo-private/nemo-file-operations.c:4043
 #, fuzzy
 msgid "You cannot move a file over itself."
 msgstr "Tu nikarî peldankekê di hundirê wê de bikşîne."
 
-#: ../libnautilus-private/nautilus-file-operations.c:4044
+#: ../libnemo-private/nemo-file-operations.c:4044
 msgid "You cannot copy a file over itself."
 msgstr ""
 
-#: ../libnautilus-private/nautilus-file-operations.c:4045
+#: ../libnemo-private/nemo-file-operations.c:4045
 #, fuzzy
 msgid "The source file would be overwritten by the destination."
 msgstr "Di hedefê de têra xwe cihê vala tuneye."
 
-#: ../libnautilus-private/nautilus-file-operations.c:4254
+#: ../libnemo-private/nemo-file-operations.c:4254
 #, c-format
 msgid "Could not remove the already existing file with the same name in %F."
 msgstr ""
 
-#: ../libnautilus-private/nautilus-file-operations.c:4324
+#: ../libnemo-private/nemo-file-operations.c:4324
 #, fuzzy, c-format
 msgid "There was an error copying the file into %F."
 msgstr "Dema sepan hate destpêkirin çewtiyek çêbû."
 
-#: ../libnautilus-private/nautilus-file-operations.c:4554
-#: ../libnautilus-private/nautilus-file-operations.c:4588
+#: ../libnemo-private/nemo-file-operations.c:4554
+#: ../libnemo-private/nemo-file-operations.c:4588
 msgid "Copying Files"
 msgstr "Pel tên kopîkirin"
 
-#: ../libnautilus-private/nautilus-file-operations.c:4605
+#: ../libnemo-private/nemo-file-operations.c:4605
 #, fuzzy
 msgid "Preparing to Move to \"%B\""
 msgstr "Ji bo Avêtina Çopê Tê Amadekirin..."
 
-#: ../libnautilus-private/nautilus-file-operations.c:4609
+#: ../libnemo-private/nemo-file-operations.c:4609
 #, fuzzy, c-format
 msgid "Preparing to move %'d file"
 msgid_plural "Preparing to move %'d files"
 msgstr[0] "Jêbirina pelan tê amade kirin..."
 msgstr[1] "Jêbirina pelan tê amade kirin..."
 
-#: ../libnautilus-private/nautilus-file-operations.c:4847
+#: ../libnemo-private/nemo-file-operations.c:4847
 #, fuzzy, c-format
 msgid "There was an error moving the file into %F."
 msgstr "Dema sepan hate destpêkirin çewtiyek çêbû."
 
-#: ../libnautilus-private/nautilus-file-operations.c:5107
+#: ../libnemo-private/nemo-file-operations.c:5107
 #, fuzzy
 msgid "Moving Files"
 msgstr "Pel têne kişandin"
 
-#: ../libnautilus-private/nautilus-file-operations.c:5124
+#: ../libnemo-private/nemo-file-operations.c:5124
 #, fuzzy
 msgid "Creating links in \"%B\""
 msgstr "Li pelan girêdan tê çêkirin"
 
-#: ../libnautilus-private/nautilus-file-operations.c:5128
+#: ../libnemo-private/nemo-file-operations.c:5128
 #, fuzzy, c-format
 msgid "Making link to %'d file"
 msgid_plural "Making links to %'d files"
 msgstr[0] "Li pelan girêdan tê çêkirin"
 msgstr[1] "Li pelan girêdan tê çêkirin"
 
-#: ../libnautilus-private/nautilus-file-operations.c:5257
+#: ../libnemo-private/nemo-file-operations.c:5257
 #, fuzzy
 msgid "Error while creating link to %B."
 msgstr "Dema di hundirê \"%s\" de girêdan dihate avakirin çewtî çêbû."
 
-#: ../libnautilus-private/nautilus-file-operations.c:5259
+#: ../libnemo-private/nemo-file-operations.c:5259
 #, fuzzy
 msgid "Symbolic links only supported for local files"
 msgstr "Xwêr bikşîne û berde tenê di pergala pelên herêmî de tê destekkirin."
 
-#: ../libnautilus-private/nautilus-file-operations.c:5262
+#: ../libnemo-private/nemo-file-operations.c:5262
 msgid "The target doesn't support symbolic links."
 msgstr ""
 
-#: ../libnautilus-private/nautilus-file-operations.c:5265
+#: ../libnemo-private/nemo-file-operations.c:5265
 #, fuzzy, c-format
 msgid "There was an error creating the symlink in %F."
 msgstr "Dema sepan hate destpêkirin çewtiyek çêbû."
 
-#: ../libnautilus-private/nautilus-file-operations.c:5559
+#: ../libnemo-private/nemo-file-operations.c:5559
 #, fuzzy
 msgid "Setting permissions"
 msgstr "maf"
 
 #. localizers: the initial name of a new folder
-#: ../libnautilus-private/nautilus-file-operations.c:5809
+#: ../libnemo-private/nemo-file-operations.c:5809
 msgid "untitled folder"
 msgstr "peldanka bênav"
 
 #. localizers: the initial name of a new empty file
-#: ../libnautilus-private/nautilus-file-operations.c:5817
+#: ../libnemo-private/nemo-file-operations.c:5817
 msgid "new file"
 msgstr "pelekî nû"
 
-#: ../libnautilus-private/nautilus-file-operations.c:5967
+#: ../libnemo-private/nemo-file-operations.c:5967
 #, fuzzy
 msgid "Error while creating directory %B."
 msgstr "Dema di hundirê \"%s\" de girêdan dihate avakirin çewtî çêbû."
 
-#: ../libnautilus-private/nautilus-file-operations.c:5969
+#: ../libnemo-private/nemo-file-operations.c:5969
 #, fuzzy
 msgid "Error while creating file %B."
 msgstr "Dema di hundirê \"%s\" de girêdan dihate avakirin çewtî çêbû."
 
-#: ../libnautilus-private/nautilus-file-operations.c:5971
+#: ../libnemo-private/nemo-file-operations.c:5971
 #, fuzzy, c-format
 msgid "There was an error creating the directory in %F."
 msgstr "Dema sepan hate destpêkirin çewtiyek çêbû."
 
-#: ../libnautilus-private/nautilus-file-operations.c:6227
+#: ../libnemo-private/nemo-file-operations.c:6227
 msgid "Emptying Trash"
 msgstr "Çop te valakirin"
 
-#: ../libnautilus-private/nautilus-file-operations.c:6274
-#: ../libnautilus-private/nautilus-file-operations.c:6315
-#: ../libnautilus-private/nautilus-file-operations.c:6350
-#: ../libnautilus-private/nautilus-file-operations.c:6385
+#: ../libnemo-private/nemo-file-operations.c:6274
+#: ../libnemo-private/nemo-file-operations.c:6315
+#: ../libnemo-private/nemo-file-operations.c:6350
+#: ../libnemo-private/nemo-file-operations.c:6385
 msgid "Unable to mark launcher trusted (executable)"
 msgstr ""
 
-#: ../libnautilus-private/nautilus-file-utilities.c:1260
+#: ../libnemo-private/nemo-file-utilities.c:1260
 #, c-format
 msgid "Could not determine original location of \"%s\" "
 msgstr ""
 
-#: ../libnautilus-private/nautilus-file-utilities.c:1264
+#: ../libnemo-private/nemo-file-utilities.c:1264
 #, fuzzy
 msgid "The item cannot be restored from trash"
 msgstr "Pelê \"%s\" neçû çopê."
 
-#: ../libnautilus-private/nautilus-file.c:1212
-#: ../libnautilus-private/nautilus-vfs-file.c:389
+#: ../libnemo-private/nemo-file.c:1212
+#: ../libnemo-private/nemo-vfs-file.c:389
 #, fuzzy
 msgid "This file cannot be mounted"
 msgstr "Amblem nehate sazkirin."
 
-#: ../libnautilus-private/nautilus-file.c:1257
+#: ../libnemo-private/nemo-file.c:1257
 #, fuzzy
 msgid "This file cannot be unmounted"
 msgstr "Amblem nehate sazkirin."
 
-#: ../libnautilus-private/nautilus-file.c:1291
+#: ../libnemo-private/nemo-file.c:1291
 #, fuzzy
 msgid "This file cannot be ejected"
 msgstr "Amblem lê nehate zêdekirin."
 
-#: ../libnautilus-private/nautilus-file.c:1324
-#: ../libnautilus-private/nautilus-vfs-file.c:567
+#: ../libnemo-private/nemo-file.c:1324
+#: ../libnemo-private/nemo-vfs-file.c:567
 #, fuzzy
 msgid "This file cannot be started"
 msgstr "Amblem nehate sazkirin."
 
-#: ../libnautilus-private/nautilus-file.c:1376
-#: ../libnautilus-private/nautilus-file.c:1407
+#: ../libnemo-private/nemo-file.c:1376
+#: ../libnemo-private/nemo-file.c:1407
 #, fuzzy
 msgid "This file cannot be stopped"
 msgstr "Amblem nehate sazkirin."
 
-#: ../libnautilus-private/nautilus-file.c:1808
+#: ../libnemo-private/nemo-file.c:1808
 #, c-format
 msgid "Slashes are not allowed in filenames"
 msgstr ""
 
-#: ../libnautilus-private/nautilus-file.c:1826
+#: ../libnemo-private/nemo-file.c:1826
 #, c-format
 msgid "File not found"
 msgstr ""
 
-#: ../libnautilus-private/nautilus-file.c:1854
+#: ../libnemo-private/nemo-file.c:1854
 #, fuzzy, c-format
 msgid "Toplevel files cannot be renamed"
 msgstr "Hêman ji nû ve nehate binavkirin."
 
-#: ../libnautilus-private/nautilus-file.c:1877
+#: ../libnemo-private/nemo-file.c:1877
 #, c-format
 msgid "Unable to rename desktop icon"
 msgstr ""
 
-#: ../libnautilus-private/nautilus-file.c:1906
+#: ../libnemo-private/nemo-file.c:1906
 #, c-format
 msgid "Unable to rename desktop file"
 msgstr ""
@@ -1279,71 +1279,71 @@ msgstr ""
 #. * the specifiers from the C standard, not extensions.
 #. * These include "%" followed by one of
 #. * "aAbBcdHIjmMpSUwWxXyYZ". There are two extensions
-#. * in the Nautilus version of strftime that can be
+#. * in the Nemo version of strftime that can be
 #. * used (and match GNU extensions). Putting a "-"
 #. * between the "%" and any numeric directive will turn
 #. * off zero padding, and putting a "_" there will use
 #. * space padding instead of zero padding.
 #.
-#: ../libnautilus-private/nautilus-file.c:4344
+#: ../libnemo-private/nemo-file.c:4344
 msgid "today at 00:00:00 PM"
 msgstr "îro dema 00:00:00 PN"
 
-#: ../libnautilus-private/nautilus-file.c:4345
-#: ../src/nautilus-file-management-properties.c:478
+#: ../libnemo-private/nemo-file.c:4345
+#: ../src/nemo-file-management-properties.c:478
 msgid "today at %-I:%M:%S %p"
 msgstr "îro dema %-I:%M:%S %p"
 
-#: ../libnautilus-private/nautilus-file.c:4347
+#: ../libnemo-private/nemo-file.c:4347
 msgid "today at 00:00 PM"
 msgstr "îro dema 00:00 PN"
 
-#: ../libnautilus-private/nautilus-file.c:4348
+#: ../libnemo-private/nemo-file.c:4348
 msgid "today at %-I:%M %p"
 msgstr "îro dema %-I:%M %p"
 
-#: ../libnautilus-private/nautilus-file.c:4350
+#: ../libnemo-private/nemo-file.c:4350
 msgid "today, 00:00 PM"
 msgstr "îro, 00:00 PN"
 
-#: ../libnautilus-private/nautilus-file.c:4351
+#: ../libnemo-private/nemo-file.c:4351
 msgid "today, %-I:%M %p"
 msgstr "îro, %-I:%M %p"
 
-#: ../libnautilus-private/nautilus-file.c:4353
-#: ../libnautilus-private/nautilus-file.c:4354
+#: ../libnemo-private/nemo-file.c:4353
+#: ../libnemo-private/nemo-file.c:4354
 msgid "today"
 msgstr "îro"
 
 #. Yesterday, use special word.
 #. * Note to localizers: Same issues as "today" string.
 #.
-#: ../libnautilus-private/nautilus-file.c:4363
+#: ../libnemo-private/nemo-file.c:4363
 msgid "yesterday at 00:00:00 PM"
 msgstr "do dema 00:00:00 PN"
 
-#: ../libnautilus-private/nautilus-file.c:4364
+#: ../libnemo-private/nemo-file.c:4364
 msgid "yesterday at %-I:%M:%S %p"
 msgstr "do dema %-I:%M:%S %p"
 
-#: ../libnautilus-private/nautilus-file.c:4366
+#: ../libnemo-private/nemo-file.c:4366
 msgid "yesterday at 00:00 PM"
 msgstr "do dema 00:00 PN"
 
-#: ../libnautilus-private/nautilus-file.c:4367
+#: ../libnemo-private/nemo-file.c:4367
 msgid "yesterday at %-I:%M %p"
 msgstr "do dema %-I:%M %p"
 
-#: ../libnautilus-private/nautilus-file.c:4369
+#: ../libnemo-private/nemo-file.c:4369
 msgid "yesterday, 00:00 PM"
 msgstr "do, 00:00 PN"
 
-#: ../libnautilus-private/nautilus-file.c:4370
+#: ../libnemo-private/nemo-file.c:4370
 msgid "yesterday, %-I:%M %p"
 msgstr "do, %-I:%M %p"
 
-#: ../libnautilus-private/nautilus-file.c:4372
-#: ../libnautilus-private/nautilus-file.c:4373
+#: ../libnemo-private/nemo-file.c:4372
+#: ../libnemo-private/nemo-file.c:4373
 msgid "yesterday"
 msgstr "do"
 
@@ -1352,88 +1352,88 @@ msgstr "do"
 #. * The width measurement templates correspond to
 #. * the day/month name with the most letters.
 #.
-#: ../libnautilus-private/nautilus-file.c:4384
+#: ../libnemo-private/nemo-file.c:4384
 msgid "Wednesday, September 00 0000 at 00:00:00 PM"
 msgstr ""
 
-#: ../libnautilus-private/nautilus-file.c:4385
+#: ../libnemo-private/nemo-file.c:4385
 msgid "%A, %B %-d %Y at %-I:%M:%S %p"
 msgstr "%A, %B %-d %Y saet %-I:%M:%S %p"
 
-#: ../libnautilus-private/nautilus-file.c:4387
+#: ../libnemo-private/nemo-file.c:4387
 msgid "Mon, Oct 00 0000 at 00:00:00 PM"
 msgstr "Yş, Teb 00 0000 saet 00:00:00 PN"
 
-#: ../libnautilus-private/nautilus-file.c:4388
+#: ../libnemo-private/nemo-file.c:4388
 msgid "%a, %b %-d %Y at %-I:%M:%S %p"
 msgstr "%a, %b %-d %Y saet %-I:%M:%S %p"
 
-#: ../libnautilus-private/nautilus-file.c:4390
+#: ../libnemo-private/nemo-file.c:4390
 msgid "Mon, Oct 00 0000 at 00:00 PM"
 msgstr "Yş, Teb 00 0000 saet 00:00 PN"
 
-#: ../libnautilus-private/nautilus-file.c:4391
+#: ../libnemo-private/nemo-file.c:4391
 msgid "%a, %b %-d %Y at %-I:%M %p"
 msgstr "%a, %b %-d %Y saet %-I:%M %p"
 
-#: ../libnautilus-private/nautilus-file.c:4393
+#: ../libnemo-private/nemo-file.c:4393
 msgid "Oct 00 0000 at 00:00 PM"
 msgstr "Teb 00 0000 saet 00:00 PN"
 
-#: ../libnautilus-private/nautilus-file.c:4394
+#: ../libnemo-private/nemo-file.c:4394
 msgid "%b %-d %Y at %-I:%M %p"
 msgstr "%b %-d %Y saet %-I:%M %p"
 
-#: ../libnautilus-private/nautilus-file.c:4396
+#: ../libnemo-private/nemo-file.c:4396
 msgid "Oct 00 0000, 00:00 PM"
 msgstr "Teb 00 0000, 00:00 PN"
 
-#: ../libnautilus-private/nautilus-file.c:4397
+#: ../libnemo-private/nemo-file.c:4397
 msgid "%b %-d %Y, %-I:%M %p"
 msgstr "%b %-d %Y, %-I:%M %p"
 
-#: ../libnautilus-private/nautilus-file.c:4399
+#: ../libnemo-private/nemo-file.c:4399
 msgid "00/00/00, 00:00 PM"
 msgstr "00/00/00, 00:00 PN"
 
-#: ../libnautilus-private/nautilus-file.c:4400
+#: ../libnemo-private/nemo-file.c:4400
 msgid "%m/%-d/%y, %-I:%M %p"
 msgstr "%m/%-d/%y, %-I:%M %p"
 
-#: ../libnautilus-private/nautilus-file.c:4402
+#: ../libnemo-private/nemo-file.c:4402
 msgid "00/00/00"
 msgstr "00/00/00"
 
-#: ../libnautilus-private/nautilus-file.c:4403
+#: ../libnemo-private/nemo-file.c:4403
 msgid "%m/%d/%y"
 msgstr "%m/%d/%y"
 
-#: ../libnautilus-private/nautilus-file.c:5044
+#: ../libnemo-private/nemo-file.c:5044
 #, fuzzy, c-format
 msgid "Not allowed to set permissions"
 msgstr "Destûrên Peldankan:"
 
-#: ../libnautilus-private/nautilus-file.c:5329
+#: ../libnemo-private/nemo-file.c:5329
 #, c-format
 msgid "Not allowed to set owner"
 msgstr ""
 
-#: ../libnautilus-private/nautilus-file.c:5347
+#: ../libnemo-private/nemo-file.c:5347
 #, fuzzy, c-format
 msgid "Specified owner '%s' doesn't exist"
 msgstr "Cihê \"%s\" tune."
 
-#: ../libnautilus-private/nautilus-file.c:5596
+#: ../libnemo-private/nemo-file.c:5596
 #, c-format
 msgid "Not allowed to set group"
 msgstr ""
 
-#: ../libnautilus-private/nautilus-file.c:5614
+#: ../libnemo-private/nemo-file.c:5614
 #, c-format
 msgid "Specified group '%s' doesn't exist"
 msgstr ""
 
-#: ../libnautilus-private/nautilus-file.c:5758
+#: ../libnemo-private/nemo-file.c:5758
 #: ../src/file-manager/fm-directory-view.c:2291
 #, fuzzy, c-format
 msgid "%'u item"
@@ -1441,14 +1441,14 @@ msgid_plural "%'u items"
 msgstr[0] "%u hêman"
 msgstr[1] "%u hêman"
 
-#: ../libnautilus-private/nautilus-file.c:5759
+#: ../libnemo-private/nemo-file.c:5759
 #, fuzzy, c-format
 msgid "%'u folder"
 msgid_plural "%'u folders"
 msgstr[0] "%u peldank"
 msgstr[1] "%u peldank"
 
-#: ../libnautilus-private/nautilus-file.c:5760
+#: ../libnemo-private/nemo-file.c:5760
 #, fuzzy, c-format
 msgid "%'u file"
 msgid_plural "%'u files"
@@ -1456,368 +1456,368 @@ msgstr[0] "%u pel"
 msgstr[1] "%u pel"
 
 #. Do this in a separate stage so that we don't have to put G_GUINT64_FORMAT in the translated string
-#: ../libnautilus-private/nautilus-file.c:5839
+#: ../libnemo-private/nemo-file.c:5839
 msgid "%"
 msgstr ""
 
-#: ../libnautilus-private/nautilus-file.c:5840
+#: ../libnemo-private/nemo-file.c:5840
 #, fuzzy, c-format
 msgid "%s (%s bytes)"
 msgstr "%s (%lld bayt)"
 
 #. This means no contents at all were readable
-#: ../libnautilus-private/nautilus-file.c:6151
-#: ../libnautilus-private/nautilus-file.c:6167
+#: ../libnemo-private/nemo-file.c:6151
+#: ../libnemo-private/nemo-file.c:6167
 msgid "? items"
 msgstr "? tist"
 
 #. This means no contents at all were readable
-#: ../libnautilus-private/nautilus-file.c:6157
+#: ../libnemo-private/nemo-file.c:6157
 msgid "? bytes"
 msgstr "? bayt"
 
-#: ../libnautilus-private/nautilus-file.c:6172
+#: ../libnemo-private/nemo-file.c:6172
 msgid "unknown type"
 msgstr "cureyê nenas"
 
-#: ../libnautilus-private/nautilus-file.c:6175
+#: ../libnemo-private/nemo-file.c:6175
 msgid "unknown MIME type"
 msgstr "cureyê MIME yê nenas"
 
 #. Fallback, use for both unknown attributes and attributes
 #. * for which we have no more appropriate default.
 #.
-#: ../libnautilus-private/nautilus-file.c:6189
+#: ../libnemo-private/nemo-file.c:6189
 #: ../src/file-manager/fm-properties-window.c:1136
 msgid "unknown"
 msgstr "nenas"
 
-#: ../libnautilus-private/nautilus-file.c:6239
+#: ../libnemo-private/nemo-file.c:6239
 msgid "program"
 msgstr "bername"
 
-#: ../libnautilus-private/nautilus-file.c:6259
+#: ../libnemo-private/nemo-file.c:6259
 msgid "link"
 msgstr "lînk"
 
-#: ../libnautilus-private/nautilus-file.c:6281
+#: ../libnemo-private/nemo-file.c:6281
 msgid "link (broken)"
 msgstr "lînk (şikestî)"
 
-#: ../libnautilus-private/nautilus-icon-container.c:2701
+#: ../libnemo-private/nemo-icon-container.c:2701
 msgid "The selection rectangle"
 msgstr ""
 
-#: ../libnautilus-private/nautilus-mime-actions.c:624
+#: ../libnemo-private/nemo-mime-actions.c:624
 #, c-format
 msgid "The Link \"%s\" is Broken."
 msgstr "Lînka \"%s\" şikestî ye"
 
-#: ../libnautilus-private/nautilus-mime-actions.c:626
+#: ../libnemo-private/nemo-mime-actions.c:626
 #, c-format
 msgid "The Link \"%s\" is Broken. Move it to Trash?"
 msgstr "Lînka \"%s\" şikestî ye. Tu dixwazî wê biavêjî çopê?"
 
-#: ../libnautilus-private/nautilus-mime-actions.c:632
+#: ../libnemo-private/nemo-mime-actions.c:632
 #, fuzzy
 msgid "This link cannot be used, because it has no target."
 msgstr "Ev girêdan nayê bikaranîn, ji ber ku hedefa wê tuneye."
 
-#: ../libnautilus-private/nautilus-mime-actions.c:634
+#: ../libnemo-private/nemo-mime-actions.c:634
 #, fuzzy, c-format
 msgid "This link cannot be used, because its target \"%s\" doesn't exist."
 msgstr "Ev girêdan nayê bikaranîn, ji ber ku hedefa \"%s\" nayê dîtin."
 
 #. name, stock id
 #. label, accelerator
-#: ../libnautilus-private/nautilus-mime-actions.c:644
+#: ../libnemo-private/nemo-mime-actions.c:644
 #: ../src/file-manager/fm-directory-view.c:7140
 #: ../src/file-manager/fm-directory-view.c:7263
 #: ../src/file-manager/fm-directory-view.c:8360
 #: ../src/file-manager/fm-directory-view.c:8691
-#: ../src/nautilus-tree-sidebar.c:1225
+#: ../src/nemo-tree-sidebar.c:1225
 msgid "Mo_ve to Trash"
 msgstr "Bavêje _çopê"
 
-#: ../libnautilus-private/nautilus-mime-actions.c:704
+#: ../libnemo-private/nemo-mime-actions.c:704
 #, c-format
 msgid "Do you want to run \"%s\", or display its contents?"
 msgstr "Tu dixwazî \"%s\" bimeşîne, an dixwazî naveroka wê nîşan bidî?"
 
-#: ../libnautilus-private/nautilus-mime-actions.c:706
+#: ../libnemo-private/nemo-mime-actions.c:706
 #, c-format
 msgid "\"%s\" is an executable text file."
 msgstr ""
 
-#: ../libnautilus-private/nautilus-mime-actions.c:712
+#: ../libnemo-private/nemo-mime-actions.c:712
 msgid "Run in _Terminal"
 msgstr "Di _Termînalê de Bixebitîne"
 
-#: ../libnautilus-private/nautilus-mime-actions.c:713
+#: ../libnemo-private/nemo-mime-actions.c:713
 msgid "_Display"
 msgstr "_Nîşandayîn"
 
-#: ../libnautilus-private/nautilus-mime-actions.c:716
-#: ../src/nautilus-autorun-software.c:229
+#: ../libnemo-private/nemo-mime-actions.c:716
+#: ../src/nemo-autorun-software.c:229
 msgid "_Run"
 msgstr "_Meşandin"
 
-#: ../libnautilus-private/nautilus-mime-actions.c:1040
-#: ../libnautilus-private/nautilus-mime-actions.c:1786
+#: ../libnemo-private/nemo-mime-actions.c:1040
+#: ../libnemo-private/nemo-mime-actions.c:1786
 #: ../src/file-manager/fm-directory-view.c:621
 msgid "Are you sure you want to open all files?"
 msgstr "Tu bawer î ku hemû pelan vekî?"
 
-#: ../libnautilus-private/nautilus-mime-actions.c:1042
+#: ../libnemo-private/nemo-mime-actions.c:1042
 #, fuzzy, c-format
 msgid "This will open %d separate tab."
 msgid_plural "This will open %d separate tabs."
 msgstr[0] "Ev %d paceya cuda vedike"
 msgstr[1] "Ev %d paceyên cuda vedike"
 
-#: ../libnautilus-private/nautilus-mime-actions.c:1045
-#: ../src/nautilus-location-bar.c:149
+#: ../libnemo-private/nemo-mime-actions.c:1045
+#: ../src/nemo-location-bar.c:149
 #, c-format
 msgid "This will open %d separate window."
 msgid_plural "This will open %d separate windows."
 msgstr[0] "Ev %d paceya cuda vedike"
 msgstr[1] "Ev %d paceyên cuda vedike"
 
-#: ../libnautilus-private/nautilus-mime-actions.c:1116
-#: ../src/nautilus-window-manage-views.c:1919
-#: ../src/nautilus-window-manage-views.c:1925
-#: ../src/nautilus-window-manage-views.c:1942
-#: ../src/nautilus-window-manage-views.c:1953
-#: ../src/nautilus-window-manage-views.c:1959
-#: ../src/nautilus-window-manage-views.c:1985
+#: ../libnemo-private/nemo-mime-actions.c:1116
+#: ../src/nemo-window-manage-views.c:1919
+#: ../src/nemo-window-manage-views.c:1925
+#: ../src/nemo-window-manage-views.c:1942
+#: ../src/nemo-window-manage-views.c:1953
+#: ../src/nemo-window-manage-views.c:1959
+#: ../src/nemo-window-manage-views.c:1985
 #, fuzzy, c-format
 msgid "Could not display \"%s\"."
 msgstr "Nîşandana \"%s\" bi ser neket."
 
-#: ../libnautilus-private/nautilus-mime-actions.c:1211
+#: ../libnemo-private/nemo-mime-actions.c:1211
 #, fuzzy
 msgid "The file is of an unknown type"
 msgstr "Ev pel ne ya wêneyan e."
 
-#: ../libnautilus-private/nautilus-mime-actions.c:1215
+#: ../libnemo-private/nemo-mime-actions.c:1215
 #, c-format
 msgid "There is no application installed for %s files"
 msgstr ""
 
-#: ../libnautilus-private/nautilus-mime-actions.c:1230
+#: ../libnemo-private/nemo-mime-actions.c:1230
 #, fuzzy
 msgid "_Select Application"
 msgstr "Sepanekê Hilbijêre"
 
-#: ../libnautilus-private/nautilus-mime-actions.c:1266
+#: ../libnemo-private/nemo-mime-actions.c:1266
 #, fuzzy
 msgid "There was an internal error trying to search for applications:"
 msgstr "Dema sepan hate destpêkirin çewtiyek çêbû."
 
-#: ../libnautilus-private/nautilus-mime-actions.c:1268
+#: ../libnemo-private/nemo-mime-actions.c:1268
 #, fuzzy
 msgid "Unable to search for application"
 msgstr "Sepana nivîsîna CD'yan nehate destpêkirin."
 
-#: ../libnautilus-private/nautilus-mime-actions.c:1388
+#: ../libnemo-private/nemo-mime-actions.c:1388
 #, c-format
 msgid ""
 "There is no application installed for %s files.\n"
 "Do you want to search for an application to open this file?"
 msgstr ""
 
-#: ../libnautilus-private/nautilus-mime-actions.c:1542
+#: ../libnemo-private/nemo-mime-actions.c:1542
 msgid "Untrusted application launcher"
 msgstr ""
 
-#: ../libnautilus-private/nautilus-mime-actions.c:1545
+#: ../libnemo-private/nemo-mime-actions.c:1545
 #, c-format
 msgid ""
 "The application launcher \"%s\" has not been marked as trusted. If you do "
 "not know the source of this file, launching it may be unsafe."
 msgstr ""
 
-#: ../libnautilus-private/nautilus-mime-actions.c:1560
+#: ../libnemo-private/nemo-mime-actions.c:1560
 msgid "_Launch Anyway"
 msgstr ""
 
-#: ../libnautilus-private/nautilus-mime-actions.c:1563
+#: ../libnemo-private/nemo-mime-actions.c:1563
 msgid "Mark as _Trusted"
 msgstr ""
 
-#: ../libnautilus-private/nautilus-mime-actions.c:1787
+#: ../libnemo-private/nemo-mime-actions.c:1787
 #, fuzzy, c-format
 msgid "This will open %d separate application."
 msgid_plural "This will open %d separate applications."
 msgstr[0] "Ev %d paceya cuda vedike"
 msgstr[1] "Ev %d paceyên cuda vedike"
 
-#: ../libnautilus-private/nautilus-mime-actions.c:1865
-#: ../libnautilus-private/nautilus-mime-actions.c:2139
+#: ../libnemo-private/nemo-mime-actions.c:1865
+#: ../libnemo-private/nemo-mime-actions.c:2139
 #: ../src/file-manager/fm-directory-view.c:6160
 #, fuzzy
 msgid "Unable to mount location"
 msgstr "Here cihê komputerê"
 
-#: ../libnautilus-private/nautilus-mime-actions.c:2218
+#: ../libnemo-private/nemo-mime-actions.c:2218
 #: ../src/file-manager/fm-directory-view.c:6334
 #, fuzzy
 msgid "Unable to start location"
 msgstr "Bila cih were daxistin?"
 
-#: ../libnautilus-private/nautilus-mime-actions.c:2304
+#: ../libnemo-private/nemo-mime-actions.c:2304
 #, c-format
 msgid "Opening \"%s\"."
 msgstr "\"%s\" tê vekirin."
 
-#: ../libnautilus-private/nautilus-mime-actions.c:2307
+#: ../libnemo-private/nemo-mime-actions.c:2307
 #, c-format
 msgid "Opening %d item."
 msgid_plural "Opening %d items."
 msgstr[0] "%d hêman tê vekirin."
 msgstr[1] "%d hêman tên vekirin."
 
-#: ../libnautilus-private/nautilus-mime-application-chooser.c:83
+#: ../libnemo-private/nemo-mime-application-chooser.c:83
 #, fuzzy, c-format
 msgid "Error while adding \"%s\": %s"
 msgstr "Dema \"%s\" dihate kişandin çewtî çêbû."
 
-#: ../libnautilus-private/nautilus-mime-application-chooser.c:85
+#: ../libnemo-private/nemo-mime-application-chooser.c:85
 msgid "Could not add application"
 msgstr "Sepan lê nehate zêdekirin"
 
-#: ../libnautilus-private/nautilus-mime-application-chooser.c:113
+#: ../libnemo-private/nemo-mime-application-chooser.c:113
 #, fuzzy
 msgid "Could not forget association"
 msgstr "Sepan nehate xebitandin"
 
-#: ../libnautilus-private/nautilus-mime-application-chooser.c:137
+#: ../libnemo-private/nemo-mime-application-chooser.c:137
 msgid "Forget association"
 msgstr ""
 
-#: ../libnautilus-private/nautilus-mime-application-chooser.c:175
+#: ../libnemo-private/nemo-mime-application-chooser.c:175
 #, c-format
 msgid "Error while setting \"%s\" as default application: %s"
 msgstr ""
 
-#: ../libnautilus-private/nautilus-mime-application-chooser.c:177
+#: ../libnemo-private/nemo-mime-application-chooser.c:177
 #, fuzzy
 msgid "Could not set as default"
 msgstr "Sepan lê nehate zêdekirin"
 
 #. the %s here is a file extension
-#: ../libnautilus-private/nautilus-mime-application-chooser.c:279
-#: ../libnautilus-private/nautilus-mime-application-chooser.c:297
+#: ../libnemo-private/nemo-mime-application-chooser.c:279
+#: ../libnemo-private/nemo-mime-application-chooser.c:297
 #, c-format
 msgid "%s document"
 msgstr "%s belge"
 
-#: ../libnautilus-private/nautilus-mime-application-chooser.c:284
+#: ../libnemo-private/nemo-mime-application-chooser.c:284
 #, fuzzy, c-format
 msgid "Open all files of type \"%s\" with"
 msgstr "%s û pelên din yên di cureyê \"%s\" de ye, bi hev re veke"
 
-#: ../libnautilus-private/nautilus-mime-application-chooser.c:304
+#: ../libnemo-private/nemo-mime-application-chooser.c:304
 #, fuzzy, c-format
 msgid "Select an application to open %s and other files of type \"%s\""
 msgstr ""
 "Ji bo vekirina %s û pelên ku di cureyê \"%s\" de ye, sepanekê hilbijêre"
 
-#: ../libnautilus-private/nautilus-mime-application-chooser.c:366
+#: ../libnemo-private/nemo-mime-application-chooser.c:366
 #, fuzzy
 msgid "Show other applications"
 msgstr "Sepan nehate xebitandin"
 
-#: ../libnautilus-private/nautilus-mime-application-chooser.c:395
+#: ../libnemo-private/nemo-mime-application-chooser.c:395
 #, fuzzy
 msgid "Set as default"
 msgstr "Yên _asayî bi kar bîne"
 
-#: ../libnautilus-private/nautilus-program-choosing.c:308
+#: ../libnemo-private/nemo-program-choosing.c:308
 #, fuzzy
 msgid "Sorry, but you cannot execute commands from a remote site."
 msgstr "Xemgîn im, lê tu nikarî fermanên malpera dûr bixebitîne."
 
-#: ../libnautilus-private/nautilus-program-choosing.c:310
+#: ../libnemo-private/nemo-program-choosing.c:310
 msgid "This is disabled due to security considerations."
 msgstr "Ji ber tasewasa ewlekariyê hatiye girtin."
 
-#: ../libnautilus-private/nautilus-program-choosing.c:321
-#: ../libnautilus-private/nautilus-program-choosing.c:389
+#: ../libnemo-private/nemo-program-choosing.c:321
+#: ../libnemo-private/nemo-program-choosing.c:389
 msgid "There was an error launching the application."
 msgstr "Dema sepan hate destpêkirin çewtiyek çêbû."
 
-#: ../libnautilus-private/nautilus-program-choosing.c:346
-#: ../libnautilus-private/nautilus-program-choosing.c:357
+#: ../libnemo-private/nemo-program-choosing.c:346
+#: ../libnemo-private/nemo-program-choosing.c:357
 msgid "This drop target only supports local files."
 msgstr ""
 
-#: ../libnautilus-private/nautilus-program-choosing.c:347
+#: ../libnemo-private/nemo-program-choosing.c:347
 msgid ""
 "To open non-local files copy them to a local folder and then drop them again."
 msgstr ""
 
-#: ../libnautilus-private/nautilus-program-choosing.c:358
+#: ../libnemo-private/nemo-program-choosing.c:358
 msgid ""
 "To open non-local files copy them to a local folder and then drop them "
 "again. The local files you dropped have already been opened."
 msgstr ""
 
-#: ../libnautilus-private/nautilus-program-choosing.c:387
+#: ../libnemo-private/nemo-program-choosing.c:387
 msgid "Details: "
 msgstr "Hûragahî: "
 
-#: ../libnautilus-private/nautilus-progress-info.c:223
+#: ../libnemo-private/nemo-progress-info.c:223
 #, fuzzy
 msgid "File Operations"
 msgstr "Destûrên Pelan:"
 
-#: ../libnautilus-private/nautilus-progress-info.c:304
+#: ../libnemo-private/nemo-progress-info.c:304
 #, c-format
 msgid "%'d file operation active"
 msgid_plural "%'d file operations active"
 msgstr[0] ""
 msgstr[1] ""
 
-#: ../libnautilus-private/nautilus-progress-info.c:495
-#: ../libnautilus-private/nautilus-progress-info.c:513
+#: ../libnemo-private/nemo-progress-info.c:495
+#: ../libnemo-private/nemo-progress-info.c:513
 msgid "Preparing"
 msgstr "Amade dike"
 
-#: ../libnautilus-private/nautilus-query.c:135
-#: ../libnautilus-private/nautilus-search-directory-file.c:166
-#: ../libnautilus-private/nautilus-search-directory-file.c:192
-#: ../libnautilus-private/nautilus-search-directory-file.c:224
+#: ../libnemo-private/nemo-query.c:135
+#: ../libnemo-private/nemo-search-directory-file.c:166
+#: ../libnemo-private/nemo-search-directory-file.c:192
+#: ../libnemo-private/nemo-search-directory-file.c:224
 msgid "Search"
 msgstr "Lêgerîn"
 
-#: ../libnautilus-private/nautilus-query.c:138
+#: ../libnemo-private/nemo-query.c:138
 #, c-format
 msgid "Search for \"%s\""
 msgstr "Li \"%s\" bigere"
 
-#: ../libnautilus-private/nautilus-undo-signal-handlers.c:174
-#: ../src/nautilus-query-editor.c:983
+#: ../libnemo-private/nemo-undo-signal-handlers.c:174
+#: ../src/nemo-query-editor.c:983
 msgid "Edit"
 msgstr "Sererastkirin"
 
-#: ../libnautilus-private/nautilus-undo-signal-handlers.c:175
+#: ../libnemo-private/nemo-undo-signal-handlers.c:175
 msgid "Undo Edit"
 msgstr "Sererastkirinê paş de vegerîne"
 
-#: ../libnautilus-private/nautilus-undo-signal-handlers.c:176
+#: ../libnemo-private/nemo-undo-signal-handlers.c:176
 msgid "Undo the edit"
 msgstr "Sererastkirinê paş de vegerîne"
 
-#: ../libnautilus-private/nautilus-undo-signal-handlers.c:177
+#: ../libnemo-private/nemo-undo-signal-handlers.c:177
 msgid "Redo Edit"
 msgstr "Guherandinê dubare bike"
 
-#: ../libnautilus-private/nautilus-undo-signal-handlers.c:178
+#: ../libnemo-private/nemo-undo-signal-handlers.c:178
 msgid "Redo the edit"
 msgstr "Guherandinê dubare bike"
 
-#: ../libnautilus-private/org.gnome.nautilus.gschema.xml.in.h:1
+#: ../libnemo-private/org.gnome.nemo.gschema.xml.in.h:1
 #, fuzzy
 msgid ""
 "A list of captions below an icon in the icon view and the desktop. The "
@@ -1832,13 +1832,13 @@ msgstr ""
 "\"date_accessed\", \"owner\", \"group\", \"permissions\", \"octal_permission"
 "\" û \"mime_type\" ye."
 
-#: ../libnautilus-private/org.gnome.nautilus.gschema.xml.in.h:2
+#: ../libnemo-private/org.gnome.nemo.gschema.xml.in.h:2
 msgid ""
 "A string containing the saved geometry and coordinates string for navigation "
 "windows."
 msgstr ""
 
-#: ../libnautilus-private/org.gnome.nautilus.gschema.xml.in.h:4
+#: ../libnemo-private/org.gnome.nemo.gschema.xml.in.h:4
 #, no-c-format
 msgid ""
 "A string specifying how parts of overlong file names should be replaced by "
@@ -1857,15 +1857,15 @@ msgid ""
 "larger (200%), largest (400%)"
 msgstr ""
 
-#: ../libnautilus-private/org.gnome.nautilus.gschema.xml.in.h:5
+#: ../libnemo-private/org.gnome.nemo.gschema.xml.in.h:5
 msgid "All columns have same width"
 msgstr ""
 
-#: ../libnautilus-private/org.gnome.nautilus.gschema.xml.in.h:6
+#: ../libnemo-private/org.gnome.nemo.gschema.xml.in.h:6
 msgid "Always use the location entry, instead of the pathbar"
 msgstr "Dêvila darikê rê her dem têketina cih bikar bîne"
 
-#: ../libnautilus-private/org.gnome.nautilus.gschema.xml.in.h:7
+#: ../libnemo-private/org.gnome.nemo.gschema.xml.in.h:7
 msgid ""
 "An integer specifying how parts of overlong file names should be replaced by "
 "ellipses on the desktop. If the number is larger than 0, the file name will "
@@ -1873,239 +1873,239 @@ msgid ""
 "limit is imposed on the number of displayed lines."
 msgstr ""
 
-#: ../libnautilus-private/org.gnome.nautilus.gschema.xml.in.h:8
+#: ../libnemo-private/org.gnome.nemo.gschema.xml.in.h:8
 msgid "Bulk rename utility"
 msgstr ""
 
-#: ../libnautilus-private/org.gnome.nautilus.gschema.xml.in.h:9
+#: ../libnemo-private/org.gnome.nemo.gschema.xml.in.h:9
 msgid "Computer icon visible on desktop"
 msgstr "Sembola kompîtorl li sermasê dixwûye."
 
-#: ../libnautilus-private/org.gnome.nautilus.gschema.xml.in.h:10
+#: ../libnemo-private/org.gnome.nemo.gschema.xml.in.h:10
 msgid "Date Format"
 msgstr "Formata Dîrokê"
 
-#: ../libnautilus-private/org.gnome.nautilus.gschema.xml.in.h:11
+#: ../libnemo-private/org.gnome.nemo.gschema.xml.in.h:11
 #, fuzzy
 msgid "Default Thumbnail Icon Size"
 msgstr "Asta nêzîkanîna îkonên standard"
 
-#: ../libnautilus-private/org.gnome.nautilus.gschema.xml.in.h:12
+#: ../libnemo-private/org.gnome.nemo.gschema.xml.in.h:12
 msgid "Default column order in the list view"
 msgstr "Di nîşandana lîsteyan de rêza stûnên standard"
 
-#: ../libnautilus-private/org.gnome.nautilus.gschema.xml.in.h:13
+#: ../libnemo-private/org.gnome.nemo.gschema.xml.in.h:13
 msgid "Default column order in the list view."
 msgstr "Dorvegeriya stûnên standard yên di nîşandana lîsteyê de"
 
-#: ../libnautilus-private/org.gnome.nautilus.gschema.xml.in.h:14
+#: ../libnemo-private/org.gnome.nemo.gschema.xml.in.h:14
 #, fuzzy
 msgid "Default compact view zoom level"
 msgstr "Asta nêzîkanîna îkonên standard"
 
-#: ../libnautilus-private/org.gnome.nautilus.gschema.xml.in.h:15
+#: ../libnemo-private/org.gnome.nemo.gschema.xml.in.h:15
 msgid "Default folder viewer"
 msgstr "Nîşanderê peldankên standard"
 
-#: ../libnautilus-private/org.gnome.nautilus.gschema.xml.in.h:16
+#: ../libnemo-private/org.gnome.nemo.gschema.xml.in.h:16
 msgid "Default icon zoom level"
 msgstr "Asta nêzîkanîna îkonên standard"
 
-#: ../libnautilus-private/org.gnome.nautilus.gschema.xml.in.h:17
+#: ../libnemo-private/org.gnome.nemo.gschema.xml.in.h:17
 msgid "Default list of columns visible in the list view"
 msgstr "Lîsteya stûnên standard yên di nîşandana lîsteyê de dixuyin"
 
-#: ../libnautilus-private/org.gnome.nautilus.gschema.xml.in.h:18
+#: ../libnemo-private/org.gnome.nemo.gschema.xml.in.h:18
 msgid "Default list of columns visible in the list view."
 msgstr "Lîsteya stûnên standard yên di nîşandana lîsteyê de dixuyin"
 
-#: ../libnautilus-private/org.gnome.nautilus.gschema.xml.in.h:19
+#: ../libnemo-private/org.gnome.nemo.gschema.xml.in.h:19
 msgid "Default list zoom level"
 msgstr "Asta nêzikanîna lîsteya standard"
 
-#: ../libnautilus-private/org.gnome.nautilus.gschema.xml.in.h:20
+#: ../libnemo-private/org.gnome.nemo.gschema.xml.in.h:20
 msgid "Default sort order"
 msgstr "Pergala rêzkirinê ya standard"
 
-#: ../libnautilus-private/org.gnome.nautilus.gschema.xml.in.h:21
+#: ../libnemo-private/org.gnome.nemo.gschema.xml.in.h:21
 #, fuzzy
 msgid "Default zoom level used by the compact view."
 msgstr "Asta nêzîkanîna standard ya wê nîşandana îkonê wê bikar bîne."
 
-#: ../libnautilus-private/org.gnome.nautilus.gschema.xml.in.h:22
+#: ../libnemo-private/org.gnome.nemo.gschema.xml.in.h:22
 msgid "Default zoom level used by the icon view."
 msgstr "Asta nêzîkanîna standard ya wê nîşandana îkonê wê bikar bîne."
 
-#: ../libnautilus-private/org.gnome.nautilus.gschema.xml.in.h:23
+#: ../libnemo-private/org.gnome.nemo.gschema.xml.in.h:23
 msgid "Default zoom level used by the list view."
 msgstr "Asta nêzîkanîna standard ya wê nîşandana îkonê wê bikar bîne."
 
-#: ../libnautilus-private/org.gnome.nautilus.gschema.xml.in.h:24
+#: ../libnemo-private/org.gnome.nemo.gschema.xml.in.h:24
 msgid "Desktop computer icon name"
 msgstr "Navê sembola Kompîtora li sermasê"
 
-#: ../libnautilus-private/org.gnome.nautilus.gschema.xml.in.h:25
+#: ../libnemo-private/org.gnome.nemo.gschema.xml.in.h:25
 msgid "Desktop font"
 msgstr "Curenivîsa sermasê"
 
-#: ../libnautilus-private/org.gnome.nautilus.gschema.xml.in.h:26
+#: ../libnemo-private/org.gnome.nemo.gschema.xml.in.h:26
 msgid "Desktop home icon name"
 msgstr "Navê nîşana mala sermasê"
 
-#: ../libnautilus-private/org.gnome.nautilus.gschema.xml.in.h:27
+#: ../libnemo-private/org.gnome.nemo.gschema.xml.in.h:27
 msgid "Desktop trash icon name"
 msgstr "Navê nîşana Çopyê sermasê"
 
-#: ../libnautilus-private/org.gnome.nautilus.gschema.xml.in.h:28
-msgid "Enables the classic Nautilus behavior, where all windows are browsers"
+#: ../libnemo-private/org.gnome.nemo.gschema.xml.in.h:28
+msgid "Enables the classic Nemo behavior, where all windows are browsers"
 msgstr ""
-"Karkirina Nautilusa klasîk ya hemû pace wekî gerokan dixebite çalak bike"
+"Karkirina Nemoa klasîk ya hemû pace wekî gerokan dixebite çalak bike"
 
-#: ../libnautilus-private/org.gnome.nautilus.gschema.xml.in.h:29
+#: ../libnemo-private/org.gnome.nemo.gschema.xml.in.h:29
 msgid "Fade the background on change"
 msgstr ""
 
-#: ../libnautilus-private/org.gnome.nautilus.gschema.xml.in.h:30
+#: ../libnemo-private/org.gnome.nemo.gschema.xml.in.h:30
 msgid ""
 "For users with mice that have \"Forward\" and \"Back\" buttons, this key "
-"will determine if any action is taken inside of Nautilus when either is "
+"will determine if any action is taken inside of Nemo when either is "
 "pressed."
 msgstr ""
 
-#: ../libnautilus-private/org.gnome.nautilus.gschema.xml.in.h:31
+#: ../libnemo-private/org.gnome.nemo.gschema.xml.in.h:31
 msgid ""
 "For users with mice that have buttons for \"Forward\" and \"Back\", this key "
 "will set which button activates the \"Back\" command in a browser window. "
 "Possible values range between 6 and 14."
 msgstr ""
 
-#: ../libnautilus-private/org.gnome.nautilus.gschema.xml.in.h:32
+#: ../libnemo-private/org.gnome.nemo.gschema.xml.in.h:32
 msgid ""
 "For users with mice that have buttons for \"Forward\" and \"Back\", this key "
 "will set which button activates the \"Forward\" command in a browser window. "
 "Possible values range between 6 and 14."
 msgstr ""
 
-#: ../libnautilus-private/org.gnome.nautilus.gschema.xml.in.h:33
+#: ../libnemo-private/org.gnome.nemo.gschema.xml.in.h:33
 msgid "Home icon visible on desktop"
 msgstr "Sembola malê li sermasê dixwûye"
 
-#: ../libnautilus-private/org.gnome.nautilus.gschema.xml.in.h:34
+#: ../libnemo-private/org.gnome.nemo.gschema.xml.in.h:34
 msgid ""
 "If set to \"after-current-tab\", then new tabs are inserted after the "
 "current tab. If set to \"end\", then new tabs are appended to the end of the "
 "tab list."
 msgstr ""
 
-#: ../libnautilus-private/org.gnome.nautilus.gschema.xml.in.h:35
+#: ../libnemo-private/org.gnome.nemo.gschema.xml.in.h:35
 msgid ""
-"If set to true, Nautilus will only show folders in the tree side pane. "
+"If set to true, Nemo will only show folders in the tree side pane. "
 "Otherwise it will show both folders and files."
 msgstr ""
-"Heke hatibe hilbijartin, nautilus peldankan tenê di panela kêlekê ya darê de "
+"Heke hatibe hilbijartin, nemo peldankan tenê di panela kêlekê ya darê de "
 "nişan dide. Yan na jî him peldankan û him jî pelan nîşan dide."
 
-#: ../libnautilus-private/org.gnome.nautilus.gschema.xml.in.h:36
+#: ../libnemo-private/org.gnome.nemo.gschema.xml.in.h:36
 msgid ""
 "If set to true, newly opened windows will have the location bar visible."
 msgstr ""
 "Heke hatibe hilbijartin, darikên cih yên paceyên nû hatine vekirin di rewşa "
 "dixuye de tê nîşandan."
 
-#: ../libnautilus-private/org.gnome.nautilus.gschema.xml.in.h:37
+#: ../libnemo-private/org.gnome.nemo.gschema.xml.in.h:37
 msgid "If set to true, newly opened windows will have the side pane visible."
 msgstr ""
 "Heke hatibe hilbijartin, wê panela kêlekê ya paceyên ku nû hatine vekirin "
 "were nîşandan."
 
-#: ../libnautilus-private/org.gnome.nautilus.gschema.xml.in.h:38
+#: ../libnemo-private/org.gnome.nemo.gschema.xml.in.h:38
 msgid "If set to true, newly opened windows will have the status bar visible."
 msgstr ""
 "Heke hatibe hilbijartin, wê darikê rewşê ya paceyên ku nû hatine vekirin "
 "were nîşandan."
 
-#: ../libnautilus-private/org.gnome.nautilus.gschema.xml.in.h:39
+#: ../libnemo-private/org.gnome.nemo.gschema.xml.in.h:39
 msgid "If set to true, newly opened windows will have toolbars visible."
 msgstr ""
 "Heke hatine hilbijartin, wê darikê amûran ya paceyên ku nû hatine vekirin "
 "were nîşandan."
 
-#: ../libnautilus-private/org.gnome.nautilus.gschema.xml.in.h:40
+#: ../libnemo-private/org.gnome.nemo.gschema.xml.in.h:40
 msgid ""
-"If set to true, then Nautilus browser windows will always use a textual "
+"If set to true, then Nemo browser windows will always use a textual "
 "input entry for the location toolbar, instead of the pathbar."
 msgstr ""
 
-#: ../libnautilus-private/org.gnome.nautilus.gschema.xml.in.h:41
+#: ../libnemo-private/org.gnome.nemo.gschema.xml.in.h:41
 msgid ""
-"If set to true, then Nautilus lets you edit and display file permissions in "
+"If set to true, then Nemo lets you edit and display file permissions in "
 "a more unix-like way, accessing some more esoteric options."
 msgstr ""
 
-#: ../libnautilus-private/org.gnome.nautilus.gschema.xml.in.h:42
+#: ../libnemo-private/org.gnome.nemo.gschema.xml.in.h:42
 msgid ""
-"If set to true, then Nautilus shows folders prior to showing files in the "
+"If set to true, then Nemo shows folders prior to showing files in the "
 "icon and list views."
 msgstr ""
 
-#: ../libnautilus-private/org.gnome.nautilus.gschema.xml.in.h:43
+#: ../libnemo-private/org.gnome.nemo.gschema.xml.in.h:43
 #, fuzzy
 msgid ""
-"If set to true, then Nautilus will ask for confirmation when you attempt to "
+"If set to true, then Nemo will ask for confirmation when you attempt to "
 "delete files, or empty the Trash."
 msgstr ""
-"Ger hibijartî be, dema Nautilus pelekî bişîne Çop pirsa erêkirinê dipirse."
+"Ger hibijartî be, dema Nemo pelekî bişîne Çop pirsa erêkirinê dipirse."
 
-#: ../libnautilus-private/org.gnome.nautilus.gschema.xml.in.h:44
+#: ../libnemo-private/org.gnome.nemo.gschema.xml.in.h:44
 msgid ""
-"If set to true, then Nautilus will have a feature allowing you to delete a "
+"If set to true, then Nemo will have a feature allowing you to delete a "
 "file immediately and in-place, instead of moving it to the trash. This "
 "feature can be dangerous, so use caution."
 msgstr ""
 
-#: ../libnautilus-private/org.gnome.nautilus.gschema.xml.in.h:45
+#: ../libnemo-private/org.gnome.nemo.gschema.xml.in.h:45
 #, fuzzy
 msgid ""
-"If set to true, then Nautilus will use a fade effect to change the desktop "
+"If set to true, then Nemo will use a fade effect to change the desktop "
 "background."
-msgstr "Ger hibijartî be, Nautilus sembolên sermasê bicîh dike."
+msgstr "Ger hibijartî be, Nemo sembolên sermasê bicîh dike."
 
-#: ../libnautilus-private/org.gnome.nautilus.gschema.xml.in.h:46
+#: ../libnemo-private/org.gnome.nemo.gschema.xml.in.h:46
 msgid ""
-"If set to true, then Nautilus will use the user's home folder as the "
+"If set to true, then Nemo will use the user's home folder as the "
 "desktop. If it is false, then it will use ~/Desktop as the desktop."
 msgstr ""
 
-#: ../libnautilus-private/org.gnome.nautilus.gschema.xml.in.h:47
+#: ../libnemo-private/org.gnome.nemo.gschema.xml.in.h:47
 msgid ""
-"If set to true, then all Nautilus windows will be browser windows. This is "
-"how Nautilus used to behave before version 2.6, and some people prefer this "
+"If set to true, then all Nemo windows will be browser windows. This is "
+"how Nemo used to behave before version 2.6, and some people prefer this "
 "behavior."
 msgstr ""
 
-#: ../libnautilus-private/org.gnome.nautilus.gschema.xml.in.h:48
+#: ../libnemo-private/org.gnome.nemo.gschema.xml.in.h:48
 msgid ""
 "If set to true, then hidden files are shown by default in the file manager. "
 "Hidden files are either dotfiles, listed in the folder's .hidden file or "
 "backup files ending with a tilde (~)."
 msgstr ""
 
-#: ../libnautilus-private/org.gnome.nautilus.gschema.xml.in.h:49
+#: ../libnemo-private/org.gnome.nemo.gschema.xml.in.h:49
 msgid ""
-"If set, Nautilus will append URIs of selected files and treat the result as "
+"If set, Nemo will append URIs of selected files and treat the result as "
 "a command line for bulk renaming. Bulk rename applications can register "
 "themselves in this key by setting the key to a space-separated string of "
 "their executable name and any command line options. If the executable name "
 "is not set to a full path, it will be searched for in the search path."
 msgstr ""
 
-#: ../libnautilus-private/org.gnome.nautilus.gschema.xml.in.h:50
+#: ../libnemo-private/org.gnome.nemo.gschema.xml.in.h:50
 msgid ""
 "If this is set to true, an icon linking to the Network Servers view will be "
 "put on the desktop."
 msgstr ""
 
-#: ../libnautilus-private/org.gnome.nautilus.gschema.xml.in.h:51
+#: ../libnemo-private/org.gnome.nemo.gschema.xml.in.h:51
 msgid ""
 "If this is set to true, an icon linking to the computer location will be put "
 "on the desktop."
@@ -2113,7 +2113,7 @@ msgstr ""
 "Heke ev hatibe hilbijartin, girêdana îkonê ya girêdayî cihê kompîturê ye wê "
 "here ser maseyê."
 
-#: ../libnautilus-private/org.gnome.nautilus.gschema.xml.in.h:52
+#: ../libnemo-private/org.gnome.nemo.gschema.xml.in.h:52
 msgid ""
 "If this is set to true, an icon linking to the home folder will be put on "
 "the desktop."
@@ -2121,7 +2121,7 @@ msgstr ""
 "Heke ev hatibe hilbijartin, girêdana îkonê ya girêdayî peldanka malê ye wê "
 "here sermaseyê."
 
-#: ../libnautilus-private/org.gnome.nautilus.gschema.xml.in.h:53
+#: ../libnemo-private/org.gnome.nemo.gschema.xml.in.h:53
 msgid ""
 "If this is set to true, an icon linking to the trash will be put on the "
 "desktop."
@@ -2129,19 +2129,19 @@ msgstr ""
 "Heke ev hatibe hilbijartin, girêdana îkonê ya girêdayî çopê ye wê here "
 "sermaseyê."
 
-#: ../libnautilus-private/org.gnome.nautilus.gschema.xml.in.h:54
+#: ../libnemo-private/org.gnome.nemo.gschema.xml.in.h:54
 msgid ""
 "If this is set to true, icons linking to mounted volumes will be put on the "
 "desktop."
 msgstr ""
 
-#: ../libnautilus-private/org.gnome.nautilus.gschema.xml.in.h:55
+#: ../libnemo-private/org.gnome.nemo.gschema.xml.in.h:55
 msgid ""
 "If this preference is set, all columns in the compact view have the same "
 "width. Otherwise, the width of each column is determined seperately."
 msgstr ""
 
-#: ../libnautilus-private/org.gnome.nautilus.gschema.xml.in.h:56
+#: ../libnemo-private/org.gnome.nemo.gschema.xml.in.h:56
 msgid ""
 "If true, files in new windows will be sorted in reverse order. ie, if sorted "
 "by name, then instead of sorting the files from \"a\" to \"z\", they will be "
@@ -2149,108 +2149,108 @@ msgid ""
 "incrementally they will be sorted decrementally."
 msgstr ""
 
-#: ../libnautilus-private/org.gnome.nautilus.gschema.xml.in.h:57
+#: ../libnemo-private/org.gnome.nemo.gschema.xml.in.h:57
 msgid "If true, icons will be laid out tighter by default in new windows."
 msgstr ""
 
-#: ../libnautilus-private/org.gnome.nautilus.gschema.xml.in.h:58
+#: ../libnemo-private/org.gnome.nemo.gschema.xml.in.h:58
 msgid ""
 "If true, labels will be placed beside icons rather than underneath them."
 msgstr ""
 
-#: ../libnautilus-private/org.gnome.nautilus.gschema.xml.in.h:59
+#: ../libnemo-private/org.gnome.nemo.gschema.xml.in.h:59
 msgid ""
 "Images over this size (in bytes) won't be thumbnailed. The purpose of this "
 "setting is to avoid thumbnailing large images that may take a long time to "
 "load or use lots of memory."
 msgstr ""
 
-#: ../libnautilus-private/org.gnome.nautilus.gschema.xml.in.h:60
+#: ../libnemo-private/org.gnome.nemo.gschema.xml.in.h:60
 msgid "List of possible captions on icons"
 msgstr ""
 
-#: ../libnautilus-private/org.gnome.nautilus.gschema.xml.in.h:61
+#: ../libnemo-private/org.gnome.nemo.gschema.xml.in.h:61
 msgid "Maximum image size for thumbnailing"
 msgstr ""
 
-#: ../libnautilus-private/org.gnome.nautilus.gschema.xml.in.h:62
+#: ../libnemo-private/org.gnome.nemo.gschema.xml.in.h:62
 msgid "Mouse button to activate the \"Back\" command in browser window"
 msgstr ""
 
-#: ../libnautilus-private/org.gnome.nautilus.gschema.xml.in.h:63
+#: ../libnemo-private/org.gnome.nemo.gschema.xml.in.h:63
 msgid "Mouse button to activate the \"Forward\" command in browser window"
 msgstr ""
 
-#: ../libnautilus-private/org.gnome.nautilus.gschema.xml.in.h:64
-msgid "Nautilus uses the users home folder as the desktop"
+#: ../libnemo-private/org.gnome.nemo.gschema.xml.in.h:64
+msgid "Nemo uses the users home folder as the desktop"
 msgstr ""
 
-#: ../libnautilus-private/org.gnome.nautilus.gschema.xml.in.h:65
+#: ../libnemo-private/org.gnome.nemo.gschema.xml.in.h:65
 msgid "Network Servers icon visible on the desktop"
 msgstr "Îkona Pêşkêşkerên Torê li sermaseyê dixuye"
 
-#: ../libnautilus-private/org.gnome.nautilus.gschema.xml.in.h:66
+#: ../libnemo-private/org.gnome.nemo.gschema.xml.in.h:66
 #, fuzzy
 msgid "Network servers icon name"
 msgstr "Pêşkêşkerên Torê"
 
-#: ../libnautilus-private/org.gnome.nautilus.gschema.xml.in.h:67
+#: ../libnemo-private/org.gnome.nemo.gschema.xml.in.h:67
 #, fuzzy
 msgid "Only show folders in the tree side pane"
 msgstr "Li ser panela dara kêlekê de tenê peldankan nîşan bide"
 
-#: ../libnautilus-private/org.gnome.nautilus.gschema.xml.in.h:68
+#: ../libnemo-private/org.gnome.nemo.gschema.xml.in.h:68
 msgid ""
 "Possible values are \"single\" to launch files on a single click, or \"double"
 "\" to launch them on a double click."
 msgstr ""
 
-#: ../libnautilus-private/org.gnome.nautilus.gschema.xml.in.h:69
+#: ../libnemo-private/org.gnome.nemo.gschema.xml.in.h:69
 msgid "Put labels beside icons"
 msgstr "Nivîsê li kêleka îkonê bi cih bike"
 
-#: ../libnautilus-private/org.gnome.nautilus.gschema.xml.in.h:70
+#: ../libnemo-private/org.gnome.nemo.gschema.xml.in.h:70
 msgid "Reverse sort order in new windows"
 msgstr "Pergala rêzkirina vajî ya di paceyên nû de"
 
-#: ../libnautilus-private/org.gnome.nautilus.gschema.xml.in.h:71
+#: ../libnemo-private/org.gnome.nemo.gschema.xml.in.h:71
 #, fuzzy
 msgid "Show advanced permissions in the file property dialog"
 msgstr "Di paceya taybetmendiyên pel de destûrên pêşketî nîşan bide"
 
-#: ../libnautilus-private/org.gnome.nautilus.gschema.xml.in.h:72
+#: ../libnemo-private/org.gnome.nemo.gschema.xml.in.h:72
 msgid "Show folders first in windows"
 msgstr "Di hundirê paceyan de berê peldankan nîşan bide"
 
-#: ../libnautilus-private/org.gnome.nautilus.gschema.xml.in.h:73
+#: ../libnemo-private/org.gnome.nemo.gschema.xml.in.h:73
 msgid "Show location bar in new windows"
 msgstr "Di paceyên nû de darikê cih nîşan bide"
 
-#: ../libnautilus-private/org.gnome.nautilus.gschema.xml.in.h:74
+#: ../libnemo-private/org.gnome.nemo.gschema.xml.in.h:74
 msgid "Show mounted volumes on the desktop"
 msgstr "Pergalên ku hatine girêdan di sermaseyê de nîşan bide"
 
-#: ../libnautilus-private/org.gnome.nautilus.gschema.xml.in.h:75
+#: ../libnemo-private/org.gnome.nemo.gschema.xml.in.h:75
 msgid "Show side pane in new windows"
 msgstr "Di paceyên nû de panela kêlekê nîşan bide"
 
-#: ../libnautilus-private/org.gnome.nautilus.gschema.xml.in.h:76
+#: ../libnemo-private/org.gnome.nemo.gschema.xml.in.h:76
 msgid "Show status bar in new windows"
 msgstr "Di paceyên nû de darikê rewşê nîşan bide"
 
-#: ../libnautilus-private/org.gnome.nautilus.gschema.xml.in.h:77
+#: ../libnemo-private/org.gnome.nemo.gschema.xml.in.h:77
 msgid "Show the package installer for unknown mime types"
 msgstr ""
 
-#: ../libnautilus-private/org.gnome.nautilus.gschema.xml.in.h:78
+#: ../libnemo-private/org.gnome.nemo.gschema.xml.in.h:78
 msgid "Show toolbar in new windows"
 msgstr "Di paceyeya nû de darikê amûran nîşan bide"
 
-#: ../libnautilus-private/org.gnome.nautilus.gschema.xml.in.h:79
+#: ../libnemo-private/org.gnome.nemo.gschema.xml.in.h:79
 msgid "Side pane view"
 msgstr "Nîşandana panela kêlekê"
 
-#: ../libnautilus-private/org.gnome.nautilus.gschema.xml.in.h:80
+#: ../libnemo-private/org.gnome.nemo.gschema.xml.in.h:80
 msgid ""
 "Speed tradeoff for when to preview a sound file when mousing over a files "
 "icon. If set to \"always\" then always plays the sound, even if the file is "
@@ -2258,7 +2258,7 @@ msgid ""
 "local file systems. If set to \"never\" then it never previews sound."
 msgstr ""
 
-#: ../libnautilus-private/org.gnome.nautilus.gschema.xml.in.h:81
+#: ../libnemo-private/org.gnome.nemo.gschema.xml.in.h:81
 msgid ""
 "Speed tradeoff for when to show a preview of text file contents in the "
 "file's icon. If set to \"always\" then always show previews, even if the "
@@ -2267,7 +2267,7 @@ msgid ""
 "read preview data."
 msgstr ""
 
-#: ../libnautilus-private/org.gnome.nautilus.gschema.xml.in.h:82
+#: ../libnemo-private/org.gnome.nemo.gschema.xml.in.h:82
 msgid ""
 "Speed tradeoff for when to show an image file as a thumbnail. If set to "
 "\"always\" then always thumbnail, even if the folder is on a remote server. "
@@ -2276,7 +2276,7 @@ msgid ""
 "generic icon."
 msgstr ""
 
-#: ../libnautilus-private/org.gnome.nautilus.gschema.xml.in.h:83
+#: ../libnemo-private/org.gnome.nemo.gschema.xml.in.h:83
 msgid ""
 "Speed tradeoff for when to show the number of items in a folder. If set to "
 "\"always\" then always show item counts, even if the folder is on a remote "
@@ -2284,16 +2284,16 @@ msgid ""
 "systems. If set to \"never\" then never bother to compute item counts."
 msgstr ""
 
-#: ../libnautilus-private/org.gnome.nautilus.gschema.xml.in.h:84
+#: ../libnemo-private/org.gnome.nemo.gschema.xml.in.h:84
 msgid "Text Ellipsis Limit"
 msgstr ""
 
-#: ../libnautilus-private/org.gnome.nautilus.gschema.xml.in.h:85
+#: ../libnemo-private/org.gnome.nemo.gschema.xml.in.h:85
 #, fuzzy
 msgid "The default size of an icon for a thumbnail in the icon view."
 msgstr "Lîsteya stûnên standard yên di nîşandana lîsteyê de dixuyin"
 
-#: ../libnautilus-private/org.gnome.nautilus.gschema.xml.in.h:86
+#: ../libnemo-private/org.gnome.nemo.gschema.xml.in.h:86
 #, fuzzy
 msgid ""
 "The default sort-order for items in the icon view. Possible values are \"name"
@@ -2301,31 +2301,31 @@ msgid ""
 msgstr ""
 "Celebê dîrokên pelan. Nirxên derbasdar \"locale\", \"iso\" û \"informal\" e."
 
-#: ../libnautilus-private/org.gnome.nautilus.gschema.xml.in.h:87
+#: ../libnemo-private/org.gnome.nemo.gschema.xml.in.h:87
 msgid "The default width of the side pane in new windows."
 msgstr "Di paceyên nû de firehiya panele kêlekê."
 
-#: ../libnautilus-private/org.gnome.nautilus.gschema.xml.in.h:88
+#: ../libnemo-private/org.gnome.nemo.gschema.xml.in.h:88
 #, fuzzy
 msgid "The font _description used for the icons on the desktop."
 msgstr "Daxuyaniya curenivîsên ku di îkonên sermaseyê de têne bikaranîn."
 
-#: ../libnautilus-private/org.gnome.nautilus.gschema.xml.in.h:89
+#: ../libnemo-private/org.gnome.nemo.gschema.xml.in.h:89
 msgid ""
 "The format of file dates. Possible values are \"locale\", \"iso\", and "
 "\"informal\"."
 msgstr ""
 "Celebê dîrokên pelan. Nirxên derbasdar \"locale\", \"iso\" û \"informal\" e."
 
-#: ../libnautilus-private/org.gnome.nautilus.gschema.xml.in.h:90
+#: ../libnemo-private/org.gnome.nemo.gschema.xml.in.h:90
 msgid "The geometry string for a navigation window."
 msgstr ""
 
-#: ../libnautilus-private/org.gnome.nautilus.gschema.xml.in.h:91
+#: ../libnemo-private/org.gnome.nemo.gschema.xml.in.h:91
 msgid "The side pane view to show in newly opened windows."
 msgstr "Panela kêlekê ya di paceyên nû de têne vekirin."
 
-#: ../libnautilus-private/org.gnome.nautilus.gschema.xml.in.h:92
+#: ../libnemo-private/org.gnome.nemo.gschema.xml.in.h:92
 msgid ""
 "This name can be set if you want a custom name for the computer icon on the "
 "desktop."
@@ -2333,7 +2333,7 @@ msgstr ""
 "Heke tu dixwazî navekî taybet bide îkona komputera ya li ser sermaseyê ji vê "
 "derê binasîne."
 
-#: ../libnautilus-private/org.gnome.nautilus.gschema.xml.in.h:93
+#: ../libnemo-private/org.gnome.nemo.gschema.xml.in.h:93
 msgid ""
 "This name can be set if you want a custom name for the home icon on the "
 "desktop."
@@ -2341,7 +2341,7 @@ msgstr ""
 "Heke tu dixwazî navekî taybet bide îkona malê ya li ser sermaseyê ji vê derê "
 "binasîne."
 
-#: ../libnautilus-private/org.gnome.nautilus.gschema.xml.in.h:94
+#: ../libnemo-private/org.gnome.nemo.gschema.xml.in.h:94
 #, fuzzy
 msgid ""
 "This name can be set if you want a custom name for the network servers icon "
@@ -2350,7 +2350,7 @@ msgstr ""
 "Heke tu dixwazî navekî taybet bide îkona qutiya çopê ya li ser sermaseyê ji "
 "vê derê binasîne."
 
-#: ../libnautilus-private/org.gnome.nautilus.gschema.xml.in.h:95
+#: ../libnemo-private/org.gnome.nemo.gschema.xml.in.h:95
 msgid ""
 "This name can be set if you want a custom name for the trash icon on the "
 "desktop."
@@ -2358,27 +2358,27 @@ msgstr ""
 "Heke tu dixwazî navekî taybet bide îkona qutiya çopê ya li ser sermaseyê ji "
 "vê derê binasîne."
 
-#: ../libnautilus-private/org.gnome.nautilus.gschema.xml.in.h:96
+#: ../libnemo-private/org.gnome.nemo.gschema.xml.in.h:96
 msgid "Trash icon visible on desktop"
 msgstr "Bila qutiya çopê li sermaseyê were nîşandan"
 
-#: ../libnautilus-private/org.gnome.nautilus.gschema.xml.in.h:97
+#: ../libnemo-private/org.gnome.nemo.gschema.xml.in.h:97
 msgid "Type of click used to launch/open files"
 msgstr ""
 
-#: ../libnautilus-private/org.gnome.nautilus.gschema.xml.in.h:98
-msgid "Use extra mouse button events in Nautilus' browser window"
+#: ../libnemo-private/org.gnome.nemo.gschema.xml.in.h:98
+msgid "Use extra mouse button events in Nemo' browser window"
 msgstr ""
 
-#: ../libnautilus-private/org.gnome.nautilus.gschema.xml.in.h:99
+#: ../libnemo-private/org.gnome.nemo.gschema.xml.in.h:99
 msgid "Use tighter layout in new windows"
 msgstr ""
 
-#: ../libnautilus-private/org.gnome.nautilus.gschema.xml.in.h:100
+#: ../libnemo-private/org.gnome.nemo.gschema.xml.in.h:100
 msgid "What to do with executable text files when activated"
 msgstr ""
 
-#: ../libnautilus-private/org.gnome.nautilus.gschema.xml.in.h:101
+#: ../libnemo-private/org.gnome.nemo.gschema.xml.in.h:101
 msgid ""
 "What to do with executable text files when they are activated (single or "
 "double clicked). Possible values are \"launch\" to launch them as programs, "
@@ -2386,102 +2386,102 @@ msgid ""
 "text files."
 msgstr ""
 
-#: ../libnautilus-private/org.gnome.nautilus.gschema.xml.in.h:102
+#: ../libnemo-private/org.gnome.nemo.gschema.xml.in.h:102
 msgid ""
 "When a folder is visited this viewer is used unless you have selected "
 "another view for that particular folder. Possible values are \"list-view\", "
 "\"icon-view\" and \"compact-view\"."
 msgstr ""
 
-#: ../libnautilus-private/org.gnome.nautilus.gschema.xml.in.h:103
+#: ../libnemo-private/org.gnome.nemo.gschema.xml.in.h:103
 msgid "When to show number of items in a folder"
 msgstr ""
 
-#: ../libnautilus-private/org.gnome.nautilus.gschema.xml.in.h:104
+#: ../libnemo-private/org.gnome.nemo.gschema.xml.in.h:104
 msgid "When to show preview text in icons"
 msgstr ""
 
-#: ../libnautilus-private/org.gnome.nautilus.gschema.xml.in.h:105
+#: ../libnemo-private/org.gnome.nemo.gschema.xml.in.h:105
 msgid "When to show thumbnails of image files"
 msgstr ""
 
-#: ../libnautilus-private/org.gnome.nautilus.gschema.xml.in.h:106
+#: ../libnemo-private/org.gnome.nemo.gschema.xml.in.h:106
 msgid "Where to position newly open tabs in browser windows."
 msgstr ""
 
-#: ../libnautilus-private/org.gnome.nautilus.gschema.xml.in.h:107
+#: ../libnemo-private/org.gnome.nemo.gschema.xml.in.h:107
 msgid "Whether the navigation window should be maximized by default."
 msgstr ""
 
-#: ../libnautilus-private/org.gnome.nautilus.gschema.xml.in.h:108
+#: ../libnemo-private/org.gnome.nemo.gschema.xml.in.h:108
 msgid "Whether the navigation window should be maximized."
 msgstr ""
 
-#: ../libnautilus-private/org.gnome.nautilus.gschema.xml.in.h:109
+#: ../libnemo-private/org.gnome.nemo.gschema.xml.in.h:109
 msgid "Whether to ask for confirmation when deleting files, or emptying Trash"
 msgstr ""
 
-#: ../libnautilus-private/org.gnome.nautilus.gschema.xml.in.h:110
+#: ../libnemo-private/org.gnome.nemo.gschema.xml.in.h:110
 msgid "Whether to enable immediate deletion"
 msgstr ""
 
-#: ../libnautilus-private/org.gnome.nautilus.gschema.xml.in.h:111
+#: ../libnemo-private/org.gnome.nemo.gschema.xml.in.h:111
 msgid "Whether to preview sounds when mousing over an icon"
 msgstr "Dema mişk hate ser, pêşguhdarkirina pelên deng"
 
-#: ../libnautilus-private/org.gnome.nautilus.gschema.xml.in.h:112
+#: ../libnemo-private/org.gnome.nemo.gschema.xml.in.h:112
 msgid "Whether to show hidden files"
 msgstr "Nîşandana pelgehên veşartî"
 
-#: ../libnautilus-private/org.gnome.nautilus.gschema.xml.in.h:113
+#: ../libnemo-private/org.gnome.nemo.gschema.xml.in.h:113
 msgid ""
 "Whether to show the user a package installer dialog in case an unknown mime "
 "type is opened, in order to search for an application to handle it."
 msgstr ""
 
-#: ../libnautilus-private/org.gnome.nautilus.gschema.xml.in.h:114
+#: ../libnemo-private/org.gnome.nemo.gschema.xml.in.h:114
 msgid "Width of the side pane"
 msgstr "Firehiya panela kêlekê"
 
-#: ../data/nautilus-autorun-software.desktop.in.in.h:1
+#: ../data/nemo-autorun-software.desktop.in.in.h:1
 msgid "Autorun Prompt"
 msgstr ""
 
-#: ../data/nautilus-browser.desktop.in.in.h:1
+#: ../data/nemo-browser.desktop.in.in.h:1
 msgid "Browse the file system with the file manager"
 msgstr "Bi rêveberê pelan re çav li pergala pelan bigerîne"
 
-#: ../data/nautilus-browser.desktop.in.in.h:2
+#: ../data/nemo-browser.desktop.in.in.h:2
 msgid "File Browser"
 msgstr "Geroka Pelan"
 
 #. tooltip
-#: ../data/nautilus-computer.desktop.in.in.h:1
-#: ../src/nautilus-window-menus.c:828
+#: ../data/nemo-computer.desktop.in.in.h:1
+#: ../src/nemo-window-menus.c:828
 msgid ""
 "Browse all local and remote disks and folders accessible from this computer"
 msgstr ""
 
-#: ../data/nautilus-computer.desktop.in.in.h:2
-#: ../src/nautilus-places-sidebar.c:627
+#: ../data/nemo-computer.desktop.in.in.h:2
+#: ../src/nemo-places-sidebar.c:627
 msgid "Computer"
 msgstr "Komputer"
 
-#: ../data/nautilus-folder-handler.desktop.in.in.h:1
+#: ../data/nemo-folder-handler.desktop.in.in.h:1
 msgid "Open Folder"
 msgstr "Peldankê Veke"
 
-#: ../data/nautilus-home.desktop.in.in.h:1 ../src/nautilus-tree-sidebar.c:1316
+#: ../data/nemo-home.desktop.in.in.h:1 ../src/nemo-tree-sidebar.c:1316
 msgid "Home Folder"
 msgstr "Peldanka Mal"
 
 #. tooltip
-#: ../data/nautilus-home.desktop.in.in.h:2
-#: ../src/nautilus-places-sidebar.c:643 ../src/nautilus-window-menus.c:824
+#: ../data/nemo-home.desktop.in.in.h:2
+#: ../src/nemo-places-sidebar.c:643 ../src/nemo-window-menus.c:824
 msgid "Open your personal folder"
 msgstr "Peldanka şexsî veke"
 
-#: ../data/nautilus.desktop.in.in.h:1
+#: ../data/nemo.desktop.in.in.h:1
 msgid "File Manager"
 msgstr "Rêveberiya Pelan"
 
@@ -2526,7 +2526,7 @@ msgstr "Çop Vala bike"
 #. tooltip
 #: ../src/file-manager/fm-desktop-icon-view.c:750
 #: ../src/file-manager/fm-directory-view.c:7089
-#: ../src/nautilus-trash-bar.c:197
+#: ../src/nemo-trash-bar.c:197
 msgid "Delete all items in the Trash"
 msgstr "Hemû tiştên di Çopyî de jê bibe"
 
@@ -2554,8 +2554,8 @@ msgstr[1] "Ev %d paceyên cuda vedike"
 
 #: ../src/file-manager/fm-directory-view.c:1151
 #: ../src/file-manager/fm-properties-window.c:5163
-#: ../src/nautilus-connect-server-dialog.c:687
-#: ../src/nautilus-location-dialog.c:98
+#: ../src/nemo-connect-server-dialog.c:687
+#: ../src/nemo-location-dialog.c:98
 msgid "There was an error displaying help."
 msgstr "Dema alîkarî dihate nîşandan çewtiyek çêbû."
 
@@ -2733,36 +2733,36 @@ msgid ""
 "names. When executed from a remote folder (e.g. a folder showing web or ftp "
 "content), scripts will be passed no parameters.\n"
 "\n"
-"In all cases, the following environment variables will be set by Nautilus, "
+"In all cases, the following environment variables will be set by Nemo, "
 "which the scripts may use:\n"
 "\n"
-"NAUTILUS_SCRIPT_SELECTED_FILE_PATHS: newline-delimited paths for selected "
+"NEMO_SCRIPT_SELECTED_FILE_PATHS: newline-delimited paths for selected "
 "files (only if local)\n"
 "\n"
-"NAUTILUS_SCRIPT_SELECTED_URIS: newline-delimited URIs for selected files\n"
+"NEMO_SCRIPT_SELECTED_URIS: newline-delimited URIs for selected files\n"
 "\n"
-"NAUTILUS_SCRIPT_CURRENT_URI: URI for current location\n"
+"NEMO_SCRIPT_CURRENT_URI: URI for current location\n"
 "\n"
-"NAUTILUS_SCRIPT_WINDOW_GEOMETRY: position and size of current window\n"
+"NEMO_SCRIPT_WINDOW_GEOMETRY: position and size of current window\n"
 "\n"
-"NAUTILUS_SCRIPT_NEXT_PANE_SELECTED_FILE_PATHS: newline-delimited paths for "
+"NEMO_SCRIPT_NEXT_PANE_SELECTED_FILE_PATHS: newline-delimited paths for "
 "selected files in the inactive pane of a split-view window (only if local)\n"
 "\n"
-"NAUTILUS_SCRIPT_NEXT_PANE_SELECTED_URIS: newline-delimited URIs for selected "
+"NEMO_SCRIPT_NEXT_PANE_SELECTED_URIS: newline-delimited URIs for selected "
 "files in the inactive pane of a split-view window\n"
 "\n"
-"NAUTILUS_SCRIPT_NEXT_PANE_CURRENT_URI: URI for current location in the "
+"NEMO_SCRIPT_NEXT_PANE_CURRENT_URI: URI for current location in the "
 "inactive pane of a split-view window"
 msgstr ""
 
 #: ../src/file-manager/fm-directory-view.c:5756
-#: ../src/nautilus-tree-sidebar.c:904
+#: ../src/nemo-tree-sidebar.c:904
 #, c-format
 msgid "\"%s\" will be moved if you select the Paste command"
 msgstr "Heke tu fermana Pê Ve Bike hilbijêrî dê \"%s\" were kişandin"
 
 #: ../src/file-manager/fm-directory-view.c:5760
-#: ../src/nautilus-tree-sidebar.c:908
+#: ../src/nemo-tree-sidebar.c:908
 #, c-format
 msgid "\"%s\" will be copied if you select the Paste command"
 msgstr "Heke tu fermana Pê ve Bike hilbijêrî wê \"%s\" were jibergirtin."
@@ -2788,7 +2788,7 @@ msgstr[1] ""
 "Heke tu fermana Pê Ve Bike hilbijêrî dê %d hêmanên hilbijarî were kişandin"
 
 #: ../src/file-manager/fm-directory-view.c:5954
-#: ../src/nautilus-tree-sidebar.c:947
+#: ../src/nemo-tree-sidebar.c:947
 msgid "There is nothing on the clipboard to paste."
 msgstr ""
 
@@ -2852,7 +2852,7 @@ msgstr ""
 #. label, accelerator
 #. add the "create folder" menu item
 #: ../src/file-manager/fm-directory-view.c:7042
-#: ../src/nautilus-tree-sidebar.c:1177
+#: ../src/nemo-tree-sidebar.c:1177
 msgid "Create _Folder"
 msgstr "_Peldankê Çêke"
 
@@ -2883,7 +2883,7 @@ msgstr "Di hundirê vê peldankê de pelekî vala çêbike"
 #. label, accelerator
 #: ../src/file-manager/fm-directory-view.c:7056
 #: ../src/file-manager/fm-directory-view.c:8560
-#: ../src/nautilus-places-sidebar.c:2459 ../src/nautilus-tree-sidebar.c:1146
+#: ../src/nemo-places-sidebar.c:2459 ../src/nemo-tree-sidebar.c:1146
 msgid "_Open"
 msgstr "_Veke"
 
@@ -2914,7 +2914,7 @@ msgstr ""
 #: ../src/file-manager/fm-directory-view.c:7240
 #: ../src/file-manager/fm-directory-view.c:8305
 #: ../src/file-manager/fm-directory-view.c:8637
-#: ../src/nautilus-places-sidebar.c:2467 ../src/nautilus-tree-sidebar.c:1157
+#: ../src/nemo-places-sidebar.c:2467 ../src/nemo-tree-sidebar.c:1157
 #, fuzzy
 msgid "Open in New _Tab"
 msgstr "Di Paceyeke Nû de veke"
@@ -2999,7 +2999,7 @@ msgstr ""
 #. label, accelerator
 #: ../src/file-manager/fm-directory-view.c:7106
 #: ../src/file-manager/fm-directory-view.c:7258
-#: ../src/nautilus-tree-sidebar.c:1209
+#: ../src/nemo-tree-sidebar.c:1209
 msgid "_Paste Into Folder"
 msgstr "_Bi Peldankê Ve Ke"
 
@@ -3094,7 +3094,7 @@ msgstr "Hemû hêmanên ku hatine hilbijartin biavêjî çopê"
 #: ../src/file-manager/fm-directory-view.c:7144
 #: ../src/file-manager/fm-directory-view.c:7267
 #: ../src/file-manager/fm-directory-view.c:8712
-#: ../src/nautilus-tree-sidebar.c:1239
+#: ../src/nemo-tree-sidebar.c:1239
 msgid "_Delete"
 msgstr "_Rake"
 
@@ -3143,7 +3143,7 @@ msgstr "Girêdaneke mayinde bi vê pêşkêşkerê ava bike"
 #: ../src/file-manager/fm-directory-view.c:7166
 #: ../src/file-manager/fm-directory-view.c:7194
 #: ../src/file-manager/fm-directory-view.c:7275
-#: ../src/nautilus-places-sidebar.c:2503
+#: ../src/nemo-places-sidebar.c:2503
 msgid "_Mount"
 msgstr "_Girêdan"
 
@@ -3158,7 +3158,7 @@ msgstr "Pergala ku hatiye hilbijartin girê bide"
 #: ../src/file-manager/fm-directory-view.c:7170
 #: ../src/file-manager/fm-directory-view.c:7198
 #: ../src/file-manager/fm-directory-view.c:7279
-#: ../src/nautilus-places-sidebar.c:2510 ../src/nautilus-tree-sidebar.c:1252
+#: ../src/nemo-places-sidebar.c:2510 ../src/nemo-tree-sidebar.c:1252
 msgid "_Unmount"
 msgstr "_Girêdanê Rake"
 
@@ -3173,7 +3173,7 @@ msgstr "Pergala ku hatiye hilbijartin veqetîne"
 #: ../src/file-manager/fm-directory-view.c:7174
 #: ../src/file-manager/fm-directory-view.c:7202
 #: ../src/file-manager/fm-directory-view.c:7283
-#: ../src/nautilus-places-sidebar.c:2517 ../src/nautilus-tree-sidebar.c:1261
+#: ../src/nemo-places-sidebar.c:2517 ../src/nemo-tree-sidebar.c:1261
 msgid "_Eject"
 msgstr "_Avêtin"
 
@@ -3187,7 +3187,7 @@ msgstr "Pergala ku hatiye hilbijartin derxe"
 #: ../src/file-manager/fm-directory-view.c:7178
 #: ../src/file-manager/fm-directory-view.c:7206
 #: ../src/file-manager/fm-directory-view.c:7287
-#: ../src/nautilus-places-sidebar.c:2531
+#: ../src/nemo-places-sidebar.c:2531
 msgid "_Format"
 msgstr "_Teşe"
 
@@ -3208,7 +3208,7 @@ msgstr "Pergalal ku hatiye hilbijartin teşe bike"
 #: ../src/file-manager/fm-directory-view.c:8061
 #: ../src/file-manager/fm-directory-view.c:8167
 #: ../src/file-manager/fm-directory-view.c:8171
-#: ../src/nautilus-places-sidebar.c:1682 ../src/nautilus-places-sidebar.c:2538
+#: ../src/nemo-places-sidebar.c:1682 ../src/nemo-places-sidebar.c:2538
 msgid "_Start"
 msgstr "_Destpêkirin"
 
@@ -3226,8 +3226,8 @@ msgstr "Pergalal ku hatiye hilbijartin teşe bike"
 #: ../src/file-manager/fm-directory-view.c:7994
 #: ../src/file-manager/fm-directory-view.c:8086
 #: ../src/file-manager/fm-directory-view.c:8196
-#: ../src/nautilus-places-sidebar.c:1683 ../src/nautilus-places-sidebar.c:2545
-#: ../src/nautilus-window-menus.c:779
+#: ../src/nemo-places-sidebar.c:1683 ../src/nemo-places-sidebar.c:2545
+#: ../src/nemo-window-menus.c:779
 msgid "_Stop"
 msgstr "_Sekinandin"
 
@@ -3243,7 +3243,7 @@ msgstr "Pergala ku hatiye hilbijartin girê bide"
 #: ../src/file-manager/fm-directory-view.c:7190
 #: ../src/file-manager/fm-directory-view.c:7218
 #: ../src/file-manager/fm-directory-view.c:7299
-#: ../src/nautilus-places-sidebar.c:2524
+#: ../src/nemo-places-sidebar.c:2524
 msgid "_Detect Media"
 msgstr ""
 
@@ -3429,7 +3429,7 @@ msgstr "Pelê hilbijartî di vê paceyê de veke"
 #. label, accelerator
 #: ../src/file-manager/fm-directory-view.c:7315
 #: ../src/file-manager/fm-directory-view.c:7319
-#: ../src/nautilus-window-menus.c:823
+#: ../src/nemo-window-menus.c:823
 msgid "_Home Folder"
 msgstr "Peldanka _mal"
 
@@ -3560,7 +3560,7 @@ msgstr "Pergala ku hatiye hilbijartin girê bide"
 #: ../src/file-manager/fm-directory-view.c:7998
 #: ../src/file-manager/fm-directory-view.c:8090
 #: ../src/file-manager/fm-directory-view.c:8200
-#: ../src/nautilus-places-sidebar.c:1689
+#: ../src/nemo-places-sidebar.c:1689
 #, fuzzy
 msgid "_Safely Remove Drive"
 msgstr "Rakirinê Betal bike"
@@ -3597,7 +3597,7 @@ msgstr ""
 #: ../src/file-manager/fm-directory-view.c:8010
 #: ../src/file-manager/fm-directory-view.c:8102
 #: ../src/file-manager/fm-directory-view.c:8212
-#: ../src/nautilus-places-sidebar.c:1702
+#: ../src/nemo-places-sidebar.c:1702
 msgid "_Lock Drive"
 msgstr ""
 
@@ -3626,7 +3626,7 @@ msgstr "Pergala ku têkildarî peldanka vekirî ye teşe bike"
 #. stop() for type G_DRIVE_START_STOP_TYPE_PASSWORD is normally not used
 #: ../src/file-manager/fm-directory-view.c:8073
 #: ../src/file-manager/fm-directory-view.c:8183
-#: ../src/nautilus-places-sidebar.c:1701
+#: ../src/nemo-places-sidebar.c:1701
 msgid "_Unlock Drive"
 msgstr ""
 
@@ -3663,7 +3663,7 @@ msgstr "Pergala ku têkildarî peldanka ku niha vekirî ye girê bide"
 #. add the "open in new window" menu item
 #: ../src/file-manager/fm-directory-view.c:8282
 #: ../src/file-manager/fm-directory-view.c:8598
-#: ../src/nautilus-places-sidebar.c:2474 ../src/nautilus-tree-sidebar.c:1166
+#: ../src/nemo-places-sidebar.c:2474 ../src/nemo-tree-sidebar.c:1166
 #, fuzzy
 msgid "Open in New _Window"
 msgstr "Di Paceyeke Nû de veke"
@@ -3795,7 +3795,7 @@ msgstr "URL"
 
 #: ../src/file-manager/fm-ditem-page.c:417
 #: ../src/file-manager/fm-ditem-page.c:427
-#: ../src/nautilus-image-properties-page.c:343
+#: ../src/nemo-image-properties-page.c:343
 msgid "Description"
 msgstr "Rave"
 
@@ -3914,7 +3914,7 @@ msgstr "Navê \"%s\" dibe \"%s\"."
 #. * of navigation windows and in the preferences dialog
 #: ../src/file-manager/fm-icon-container.c:593
 #: ../src/file-manager/fm-icon-view.c:3172
-#: ../src/nautilus-file-management-properties.ui.h:60
+#: ../src/nemo-file-management-properties.ui.h:60
 msgid "Icon View"
 msgstr "Bergeha Îkonan"
 
@@ -4098,7 +4098,7 @@ msgstr "Vî cihî tevî nîşandana îkonê nîşan bide."
 #. translators: this is used in the view selection dropdown
 #. * of navigation windows and in the preferences dialog
 #: ../src/file-manager/fm-icon-view.c:3186
-#: ../src/nautilus-file-management-properties.ui.h:53
+#: ../src/nemo-file-management-properties.ui.h:53
 #, fuzzy
 msgid "Compact View"
 msgstr "Dîtina Naverokê"
@@ -4125,12 +4125,12 @@ msgid "Display this location with the compact view."
 msgstr "Vî cihî tevî nîşandana îkonê nîşan bide."
 
 #: ../src/file-manager/fm-list-model.c:391
-#: ../src/nautilus-tree-sidebar-model.c:1258
+#: ../src/nemo-tree-sidebar-model.c:1258
 msgid "(Empty)"
 msgstr "(Vala)"
 
 #: ../src/file-manager/fm-list-model.c:393
-#: ../src/nautilus-tree-sidebar-model.c:1258 ../src/nautilus-window-slot.c:201
+#: ../src/nemo-tree-sidebar-model.c:1258 ../src/nemo-window-slot.c:201
 msgid "Loading..."
 msgstr "Bar dike..."
 
@@ -4138,7 +4138,7 @@ msgstr "Bar dike..."
 #. * of navigation windows and in the preferences dialog
 #: ../src/file-manager/fm-list-view.c:1706
 #: ../src/file-manager/fm-list-view.c:3201
-#: ../src/nautilus-file-management-properties.ui.h:62
+#: ../src/nemo-file-management-properties.ui.h:62
 msgid "List View"
 msgstr "Nîşandana Lîsteyê"
 
@@ -4291,7 +4291,7 @@ msgid "Link target:"
 msgstr "Hedefa lînkê:"
 
 #: ../src/file-manager/fm-properties-window.c:3134
-#: ../src/nautilus-location-bar.c:56
+#: ../src/nemo-location-bar.c:56
 msgid "Location:"
 msgstr "Cih:"
 
@@ -4370,7 +4370,7 @@ msgstr "Gihiştina pelan:"
 #. Translators: this is referred to captions under icons.
 #: ../src/file-manager/fm-properties-window.c:3942
 #: ../src/file-manager/fm-properties-window.c:3953
-#: ../src/nautilus-file-management-properties.c:295
+#: ../src/nemo-file-management-properties.c:295
 msgid "None"
 msgstr "Tune"
 
@@ -4500,78 +4500,78 @@ msgstr "Paceya Taybetmendiyan Tê Çêkirin."
 msgid "Select Custom Icon"
 msgstr "Îkoneke Taybet Hilbijêrî"
 
-#: ../src/nautilus-application.c:156
+#: ../src/nemo-application.c:156
 #, c-format
-msgid "Nautilus could not create the required folder \"%s\"."
-msgstr "Nautilus peldanka pêwist ya \"%s\" çênekir."
+msgid "Nemo could not create the required folder \"%s\"."
+msgstr "Nemo peldanka pêwist ya \"%s\" çênekir."
 
-#: ../src/nautilus-application.c:158
+#: ../src/nemo-application.c:158
 msgid ""
-"Before running Nautilus, please create the following folder, or set "
-"permissions such that Nautilus can create it."
+"Before running Nemo, please create the following folder, or set "
+"permissions such that Nemo can create it."
 msgstr ""
-"Berî ku tu Nautilusê bixebitîne, ji kerema xwe peldanka jêr ava bike, yan jî "
-"bi awayê ku wê Nautilus bikaribe pêk bîne mafên gihiştinê mîheng bike."
+"Berî ku tu Nemoê bixebitîne, ji kerema xwe peldanka jêr ava bike, yan jî "
+"bi awayê ku wê Nemo bikaribe pêk bîne mafên gihiştinê mîheng bike."
 
-#: ../src/nautilus-application.c:161
+#: ../src/nemo-application.c:161
 #, c-format
-msgid "Nautilus could not create the following required folders: %s."
-msgstr "Nautilus peldankên pêwist yên li jêr pêk neanî: %s"
+msgid "Nemo could not create the following required folders: %s."
+msgstr "Nemo peldankên pêwist yên li jêr pêk neanî: %s"
 
-#: ../src/nautilus-application.c:163
+#: ../src/nemo-application.c:163
 msgid ""
-"Before running Nautilus, please create these folders, or set permissions "
-"such that Nautilus can create them."
+"Before running Nemo, please create these folders, or set permissions "
+"such that Nemo can create them."
 msgstr ""
-"Berî ku tu Nautilusê bixebitîne, ji kerema xwe peldanka jêr ava bike, yan jî "
-"bi awayê ku wê Nautilus bikaribe pêk bîne mafên gihiştinê mîheng bike."
+"Berî ku tu Nemoê bixebitîne, ji kerema xwe peldanka jêr ava bike, yan jî "
+"bi awayê ku wê Nemo bikaribe pêk bîne mafên gihiştinê mîheng bike."
 
-#: ../src/nautilus-application.c:442
+#: ../src/nemo-application.c:442
 msgid ""
-"Nautilus 3.0 deprecated this directory and tried migrating this "
-"configuration to ~/.config/nautilus"
+"Nemo 3.0 deprecated this directory and tried migrating this "
+"configuration to ~/.config/nemo"
 msgstr ""
 
-#: ../src/nautilus-application.c:1307
+#: ../src/nemo-application.c:1307
 msgid "Perform a quick set of self-check tests."
 msgstr ""
 
-#: ../src/nautilus-application.c:1310
+#: ../src/nemo-application.c:1310
 #, fuzzy
 msgid "Show the version of the program."
 msgstr "Mafê gihiştina pel."
 
-#: ../src/nautilus-application.c:1312
+#: ../src/nemo-application.c:1312
 msgid "Create the initial window with the given geometry."
 msgstr "Di geometriya hatiye dayîn de paceya têketinê çêbike."
 
-#: ../src/nautilus-application.c:1312
+#: ../src/nemo-application.c:1312
 msgid "GEOMETRY"
 msgstr "GEOMETRÎ"
 
-#: ../src/nautilus-application.c:1314
+#: ../src/nemo-application.c:1314
 msgid "Only create windows for explicitly specified URIs."
 msgstr "Tenê ji bo URIyên ku wekî vekirî hatine destnîşankirin pêk bîne."
 
-#: ../src/nautilus-application.c:1316
+#: ../src/nemo-application.c:1316
 msgid ""
 "Do not manage the desktop (ignore the preference set in the preferences "
 "dialog)."
 msgstr ""
 
-#: ../src/nautilus-application.c:1318
+#: ../src/nemo-application.c:1318
 msgid "Open a browser window."
 msgstr "Paceya gerokê veke."
 
-#: ../src/nautilus-application.c:1320
-msgid "Quit Nautilus."
-msgstr "Ji Nautilusê derkeve."
+#: ../src/nemo-application.c:1320
+msgid "Quit Nemo."
+msgstr "Ji Nemoê derkeve."
 
-#: ../src/nautilus-application.c:1321
+#: ../src/nemo-application.c:1321
 msgid "[URI...]"
 msgstr "[URI...]"
 
-#: ../src/nautilus-application.c:1332
+#: ../src/nemo-application.c:1332
 msgid ""
 "\n"
 "\n"
@@ -4581,42 +4581,42 @@ msgstr ""
 "\n"
 "Bi rêveberê pelan re çav li pergala pelan bigerîne"
 
-#: ../src/nautilus-application.c:1357
+#: ../src/nemo-application.c:1357
 #, fuzzy
 msgid "--check cannot be used with other options."
 msgstr "Cih bi vê nîşanderê nayê nîşandan."
 
-#: ../src/nautilus-application.c:1363
+#: ../src/nemo-application.c:1363
 #, fuzzy
 msgid "--quit cannot be used with URIs."
-msgstr "nautilus: %s bi URIyan re naxebite.\n"
+msgstr "nemo: %s bi URIyan re naxebite.\n"
 
-#: ../src/nautilus-application.c:1370
+#: ../src/nemo-application.c:1370
 msgid "--geometry cannot be used with more than one URI."
 msgstr ""
 
-#: ../src/nautilus-autorun-software.c:143
-#: ../src/nautilus-autorun-software.c:146
+#: ../src/nemo-autorun-software.c:143
+#: ../src/nemo-autorun-software.c:146
 #, c-format
 msgid "Error starting autorun program: %s"
 msgstr ""
 
-#: ../src/nautilus-autorun-software.c:149
+#: ../src/nemo-autorun-software.c:149
 #, c-format
 msgid "Cannot find the autorun program"
 msgstr ""
 
-#: ../src/nautilus-autorun-software.c:167
+#: ../src/nemo-autorun-software.c:167
 msgid "<big><b>Error autorunning software</b></big>"
 msgstr ""
 
-#: ../src/nautilus-autorun-software.c:193
+#: ../src/nemo-autorun-software.c:193
 msgid ""
 "<big><b>This medium contains software intended to be automatically started. "
 "Would you like to run it?</b></big>"
 msgstr ""
 
-#: ../src/nautilus-autorun-software.c:195
+#: ../src/nemo-autorun-software.c:195
 #, c-format
 msgid ""
 "The software will run directly from the medium \"%s\". You should never run "
@@ -4625,9 +4625,9 @@ msgid ""
 "If in doubt, press Cancel."
 msgstr ""
 
-#: ../src/nautilus-bookmarks-window.c:158
-#: ../src/nautilus-file-management-properties.c:208
-#: ../src/nautilus-window-menus.c:562
+#: ../src/nemo-bookmarks-window.c:158
+#: ../src/nemo-file-management-properties.c:208
+#: ../src/nemo-window-menus.c:562
 #, c-format
 msgid ""
 "There was an error displaying help: \n"
@@ -4636,33 +4636,33 @@ msgstr ""
 "Dema alîkarî dihate nîşandan çewtî çêbû:\n"
 "%s"
 
-#: ../src/nautilus-bookmarks-window.c:192
+#: ../src/nemo-bookmarks-window.c:192
 msgid "No bookmarks defined"
 msgstr "Bijare nehatiye danasîn"
 
-#: ../src/nautilus-bookmarks-window.ui.h:1
+#: ../src/nemo-bookmarks-window.ui.h:1
 msgid "<b>_Bookmarks</b>"
 msgstr "<b>_Bijare:</b>"
 
-#: ../src/nautilus-bookmarks-window.ui.h:2
+#: ../src/nemo-bookmarks-window.ui.h:2
 msgid "<b>_Location</b>"
 msgstr "<b>_Cih</b>"
 
-#: ../src/nautilus-bookmarks-window.ui.h:3
+#: ../src/nemo-bookmarks-window.ui.h:3
 msgid "<b>_Name</b>"
 msgstr "<b>_Nav</b>"
 
-#: ../src/nautilus-bookmarks-window.ui.h:4
+#: ../src/nemo-bookmarks-window.ui.h:4
 msgid "Edit Bookmarks"
 msgstr "Bijareyan Biguherîne"
 
-#: ../src/nautilus-connect-server-dialog-main.c:121
+#: ../src/nemo-connect-server-dialog-main.c:121
 msgid "Print but do not open the URI"
 msgstr ""
 
 #. Translators: This is the --help description for the connect to server app,
 #. the initial newlines are between the command line arg and the description
-#: ../src/nautilus-connect-server-dialog-main.c:132
+#: ../src/nemo-connect-server-dialog-main.c:132
 msgid ""
 "\n"
 "\n"
@@ -4672,784 +4672,784 @@ msgstr ""
 "\n"
 "Girêdana li pêşkêşkerê were girêdan lê zêde bike"
 
-#: ../src/nautilus-connect-server-dialog.c:129
+#: ../src/nemo-connect-server-dialog.c:129
 msgid "SSH"
 msgstr "SSH"
 
-#: ../src/nautilus-connect-server-dialog.c:132
+#: ../src/nemo-connect-server-dialog.c:132
 msgid "Public FTP"
 msgstr "FTPya Giştî"
 
-#: ../src/nautilus-connect-server-dialog.c:134
+#: ../src/nemo-connect-server-dialog.c:134
 msgid "FTP (with login)"
 msgstr "FTP (bi têketin)"
 
-#: ../src/nautilus-connect-server-dialog.c:137
+#: ../src/nemo-connect-server-dialog.c:137
 msgid "Windows share"
 msgstr "Parvekirina Windowsê"
 
-#: ../src/nautilus-connect-server-dialog.c:139
+#: ../src/nemo-connect-server-dialog.c:139
 msgid "WebDAV (HTTP)"
 msgstr "WebDAV (HTTP)"
 
-#: ../src/nautilus-connect-server-dialog.c:141
+#: ../src/nemo-connect-server-dialog.c:141
 msgid "Secure WebDAV (HTTPS)"
 msgstr "WebDAV (HTTPS) ya Ewle"
 
-#: ../src/nautilus-connect-server-dialog.c:188
+#: ../src/nemo-connect-server-dialog.c:188
 msgid "Connecting..."
 msgstr "Tê girêdan..."
 
-#: ../src/nautilus-connect-server-dialog.c:212
+#: ../src/nemo-connect-server-dialog.c:212
 msgid ""
 "Can't load the supported server method list.\n"
 "Please check your gvfs installation."
 msgstr ""
 
-#: ../src/nautilus-connect-server-dialog.c:290
+#: ../src/nemo-connect-server-dialog.c:290
 #, fuzzy, c-format
 msgid "The folder \"%s\" cannot be opened on \"%s\"."
 msgstr "Pelê \"%s\" neçû çopê."
 
-#: ../src/nautilus-connect-server-dialog.c:300
+#: ../src/nemo-connect-server-dialog.c:300
 #, fuzzy, c-format
 msgid "The server at \"%s\" cannot be found."
 msgstr "Pelê \"%s\" neçû çopê."
 
-#: ../src/nautilus-connect-server-dialog.c:335
+#: ../src/nemo-connect-server-dialog.c:335
 msgid "Try Again"
 msgstr ""
 
-#: ../src/nautilus-connect-server-dialog.c:401
+#: ../src/nemo-connect-server-dialog.c:401
 msgid "Please verify your user details."
 msgstr ""
 
-#: ../src/nautilus-connect-server-dialog.c:431
+#: ../src/nemo-connect-server-dialog.c:431
 msgid "Continue"
 msgstr "Bidomîne"
 
-#: ../src/nautilus-connect-server-dialog.c:705
-#: ../src/nautilus-connect-server-dialog.c:1118
+#: ../src/nemo-connect-server-dialog.c:705
+#: ../src/nemo-connect-server-dialog.c:1118
 msgid "C_onnect"
 msgstr "_Girêdan"
 
 #. set dialog properties
-#: ../src/nautilus-connect-server-dialog.c:830
+#: ../src/nemo-connect-server-dialog.c:830
 msgid "Connect to Server"
 msgstr "Bi Pêşkêşkarê Girê Bide"
 
-#: ../src/nautilus-connect-server-dialog.c:848
+#: ../src/nemo-connect-server-dialog.c:848
 #, fuzzy
 msgid "Server Details"
 msgstr "Hîn zêde _kîtekîtan nîşan bide"
 
 #. first row: server entry + port spinbutton
-#: ../src/nautilus-connect-server-dialog.c:869
+#: ../src/nemo-connect-server-dialog.c:869
 msgid "_Server:"
 msgstr "_Pêşkêşker:"
 
 #. port
-#: ../src/nautilus-connect-server-dialog.c:893
+#: ../src/nemo-connect-server-dialog.c:893
 msgid "_Port:"
 msgstr "_Port:"
 
 #. third row: share entry
-#: ../src/nautilus-connect-server-dialog.c:984
+#: ../src/nemo-connect-server-dialog.c:984
 #, fuzzy
 msgid "Share:"
 msgstr "_Parve bike:"
 
 #. fourth row: folder entry
-#: ../src/nautilus-connect-server-dialog.c:1003
+#: ../src/nemo-connect-server-dialog.c:1003
 #, fuzzy
 msgid "Folder:"
 msgstr "_Peldank:"
 
-#: ../src/nautilus-connect-server-dialog.c:1024
+#: ../src/nemo-connect-server-dialog.c:1024
 #, fuzzy
 msgid "User Details"
 msgstr "Hûragahî: "
 
 #. first row: domain entry
-#: ../src/nautilus-connect-server-dialog.c:1044
+#: ../src/nemo-connect-server-dialog.c:1044
 #, fuzzy
 msgid "Domain Name:"
 msgstr "Navê _Domainê:"
 
 #. second row: username entry
-#: ../src/nautilus-connect-server-dialog.c:1063
+#: ../src/nemo-connect-server-dialog.c:1063
 #, fuzzy
 msgid "User Name:"
 msgstr "_Navê Bikarhênerê/î:"
 
 #. third row: password entry
-#: ../src/nautilus-connect-server-dialog.c:1082
+#: ../src/nemo-connect-server-dialog.c:1082
 msgid "Password:"
 msgstr "Şîfre:"
 
 #. fourth row: remember checkbox
-#: ../src/nautilus-connect-server-dialog.c:1102
+#: ../src/nemo-connect-server-dialog.c:1102
 msgid "Remember this password"
 msgstr "Şîfreyê bi bîr bîne"
 
-#: ../src/nautilus-desktop-window.c:82 ../src/nautilus-desktop-window.c:254
-#: ../src/nautilus-pathbar.c:1289 ../src/nautilus-places-sidebar.c:657
+#: ../src/nemo-desktop-window.c:82 ../src/nemo-desktop-window.c:254
+#: ../src/nemo-pathbar.c:1289 ../src/nemo-places-sidebar.c:657
 msgid "Desktop"
 msgstr "Sermase"
 
-#: ../src/nautilus-file-management-properties.ui.h:1
+#: ../src/nemo-file-management-properties.ui.h:1
 msgid "1 GB"
 msgstr "1 GB"
 
-#: ../src/nautilus-file-management-properties.ui.h:2
+#: ../src/nemo-file-management-properties.ui.h:2
 msgid "1 MB"
 msgstr "1 MB"
 
-#: ../src/nautilus-file-management-properties.ui.h:3
+#: ../src/nemo-file-management-properties.ui.h:3
 msgid "10 MB"
 msgstr "10 MB"
 
-#: ../src/nautilus-file-management-properties.ui.h:4
+#: ../src/nemo-file-management-properties.ui.h:4
 msgid "100 KB"
 msgstr "100 KB"
 
-#: ../src/nautilus-file-management-properties.ui.h:5
+#: ../src/nemo-file-management-properties.ui.h:5
 msgid "100 MB"
 msgstr "100 MB"
 
-#: ../src/nautilus-file-management-properties.ui.h:7
+#: ../src/nemo-file-management-properties.ui.h:7
 #, no-c-format
 msgid "100%"
 msgstr "%100"
 
-#: ../src/nautilus-file-management-properties.ui.h:9
+#: ../src/nemo-file-management-properties.ui.h:9
 #, no-c-format
 msgid "150%"
 msgstr "%150"
 
-#: ../src/nautilus-file-management-properties.ui.h:10
+#: ../src/nemo-file-management-properties.ui.h:10
 msgid "2 GB"
 msgstr "2 GB"
 
-#: ../src/nautilus-file-management-properties.ui.h:12
+#: ../src/nemo-file-management-properties.ui.h:12
 #, no-c-format
 msgid "200%"
 msgstr "%200"
 
-#: ../src/nautilus-file-management-properties.ui.h:13
+#: ../src/nemo-file-management-properties.ui.h:13
 msgid "3 MB"
 msgstr "3 MB"
 
-#: ../src/nautilus-file-management-properties.ui.h:15
+#: ../src/nemo-file-management-properties.ui.h:15
 #, no-c-format
 msgid "33%"
 msgstr "%33"
 
-#: ../src/nautilus-file-management-properties.ui.h:16
+#: ../src/nemo-file-management-properties.ui.h:16
 msgid "4 GB"
 msgstr "4 GB"
 
-#: ../src/nautilus-file-management-properties.ui.h:18
+#: ../src/nemo-file-management-properties.ui.h:18
 #, no-c-format
 msgid "400%"
 msgstr "%400"
 
-#: ../src/nautilus-file-management-properties.ui.h:19
+#: ../src/nemo-file-management-properties.ui.h:19
 msgid "5 MB"
 msgstr "5 MB"
 
-#: ../src/nautilus-file-management-properties.ui.h:21
+#: ../src/nemo-file-management-properties.ui.h:21
 #, no-c-format
 msgid "50%"
 msgstr "%50"
 
-#: ../src/nautilus-file-management-properties.ui.h:22
+#: ../src/nemo-file-management-properties.ui.h:22
 msgid "500 KB"
 msgstr "500 KB"
 
-#: ../src/nautilus-file-management-properties.ui.h:24
+#: ../src/nemo-file-management-properties.ui.h:24
 #, no-c-format
 msgid "66%"
 msgstr "%66"
 
-#: ../src/nautilus-file-management-properties.ui.h:25
+#: ../src/nemo-file-management-properties.ui.h:25
 msgid "<b>Behavior</b>"
 msgstr "<b>Helwest</b>"
 
-#: ../src/nautilus-file-management-properties.ui.h:26
+#: ../src/nemo-file-management-properties.ui.h:26
 msgid "<b>Compact View Defaults</b>"
 msgstr ""
 
-#: ../src/nautilus-file-management-properties.ui.h:27
+#: ../src/nemo-file-management-properties.ui.h:27
 msgid "<b>Date</b>"
 msgstr "<b>Roj</b>"
 
-#: ../src/nautilus-file-management-properties.ui.h:28
+#: ../src/nemo-file-management-properties.ui.h:28
 msgid "<b>Default View</b>"
 msgstr "<b>Dîtina asayî</b>"
 
-#: ../src/nautilus-file-management-properties.ui.h:29
+#: ../src/nemo-file-management-properties.ui.h:29
 msgid "<b>Executable Text Files</b>"
 msgstr ""
 
-#: ../src/nautilus-file-management-properties.ui.h:30
+#: ../src/nemo-file-management-properties.ui.h:30
 msgid "<b>Folders</b>"
 msgstr "<b>Peldank</b>"
 
-#: ../src/nautilus-file-management-properties.ui.h:31
+#: ../src/nemo-file-management-properties.ui.h:31
 msgid "<b>Icon Captions</b>"
 msgstr ""
 
-#: ../src/nautilus-file-management-properties.ui.h:32
+#: ../src/nemo-file-management-properties.ui.h:32
 msgid "<b>Icon View Defaults</b>"
 msgstr ""
 
-#: ../src/nautilus-file-management-properties.ui.h:33
+#: ../src/nemo-file-management-properties.ui.h:33
 #, fuzzy
 msgid "<b>List Columns</b>"
 msgstr "Sitûnan Lîste bike"
 
-#: ../src/nautilus-file-management-properties.ui.h:34
+#: ../src/nemo-file-management-properties.ui.h:34
 msgid "<b>List View Defaults</b>"
 msgstr ""
 
-#: ../src/nautilus-file-management-properties.ui.h:35
+#: ../src/nemo-file-management-properties.ui.h:35
 msgid "<b>Other Previewable Files</b>"
 msgstr ""
 
-#: ../src/nautilus-file-management-properties.ui.h:36
+#: ../src/nemo-file-management-properties.ui.h:36
 #, fuzzy
 msgid "<b>Sound Files</b>"
 msgstr "<span weight=\"bold\">Pelên Deng</span>"
 
-#: ../src/nautilus-file-management-properties.ui.h:37
+#: ../src/nemo-file-management-properties.ui.h:37
 msgid "<b>Text Files</b>"
 msgstr "<b>Pelên nivîsar</b>"
 
-#: ../src/nautilus-file-management-properties.ui.h:38
+#: ../src/nemo-file-management-properties.ui.h:38
 msgid "<b>Trash</b>"
 msgstr "<b>Çop</b>"
 
-#: ../src/nautilus-file-management-properties.ui.h:39
+#: ../src/nemo-file-management-properties.ui.h:39
 msgid "<b>Tree View Defaults</b>"
 msgstr ""
 
-#: ../src/nautilus-file-management-properties.ui.h:40
+#: ../src/nemo-file-management-properties.ui.h:40
 msgid "A_ll columns have the same width"
 msgstr ""
 
-#: ../src/nautilus-file-management-properties.ui.h:41
+#: ../src/nemo-file-management-properties.ui.h:41
 msgid "Always"
 msgstr "Her dem"
 
-#: ../src/nautilus-file-management-properties.ui.h:42
+#: ../src/nemo-file-management-properties.ui.h:42
 msgid "Ask before _emptying the Trash or deleting files"
 msgstr "Berî ku çopê vala bike yan jî pelan jê bibe bipirse"
 
-#: ../src/nautilus-file-management-properties.ui.h:43
+#: ../src/nemo-file-management-properties.ui.h:43
 msgid "Behavior"
 msgstr "Helwest"
 
-#: ../src/nautilus-file-management-properties.ui.h:44
+#: ../src/nemo-file-management-properties.ui.h:44
 msgid "By Access Date"
 msgstr "Bi roja gihiştinê"
 
-#: ../src/nautilus-file-management-properties.ui.h:45
+#: ../src/nemo-file-management-properties.ui.h:45
 msgid "By Modification Date"
 msgstr "Bi dîroka guherandinê"
 
-#: ../src/nautilus-file-management-properties.ui.h:46
+#: ../src/nemo-file-management-properties.ui.h:46
 msgid "By Name"
 msgstr "Bi navî"
 
-#: ../src/nautilus-file-management-properties.ui.h:47
+#: ../src/nemo-file-management-properties.ui.h:47
 msgid "By Path"
 msgstr "Bi rêçê"
 
-#: ../src/nautilus-file-management-properties.ui.h:48
+#: ../src/nemo-file-management-properties.ui.h:48
 msgid "By Size"
 msgstr "Bi mezinahiyê"
 
-#: ../src/nautilus-file-management-properties.ui.h:49
+#: ../src/nemo-file-management-properties.ui.h:49
 msgid "By Trashed Date"
 msgstr "Bi dîroka avêtina çopê"
 
-#: ../src/nautilus-file-management-properties.ui.h:50
+#: ../src/nemo-file-management-properties.ui.h:50
 msgid "By Type"
 msgstr "Bi cureyî"
 
-#: ../src/nautilus-file-management-properties.ui.h:51
+#: ../src/nemo-file-management-properties.ui.h:51
 msgid ""
 "Choose the order of information to appear beneath icon names. More "
 "information will appear when zooming in closer."
 msgstr ""
 
-#: ../src/nautilus-file-management-properties.ui.h:52
+#: ../src/nemo-file-management-properties.ui.h:52
 msgid "Choose the order of information to appear in the list view."
 msgstr ""
 
-#: ../src/nautilus-file-management-properties.ui.h:54
+#: ../src/nemo-file-management-properties.ui.h:54
 msgid "Count _number of items:"
 msgstr "_Hejmara hêmanan hesab bike:"
 
-#: ../src/nautilus-file-management-properties.ui.h:55
+#: ../src/nemo-file-management-properties.ui.h:55
 #, fuzzy
 msgid "D_efault zoom level:"
 msgstr "Asta nêzikanîna lîsteya standard"
 
-#: ../src/nautilus-file-management-properties.ui.h:56
+#: ../src/nemo-file-management-properties.ui.h:56
 msgid "Default _zoom level:"
 msgstr ""
 
-#: ../src/nautilus-file-management-properties.ui.h:57
+#: ../src/nemo-file-management-properties.ui.h:57
 msgid "Display"
 msgstr "Dîmen"
 
-#: ../src/nautilus-file-management-properties.ui.h:58
+#: ../src/nemo-file-management-properties.ui.h:58
 msgid "File Management Preferences"
 msgstr "Tercîhên Rêveberiya Pelan"
 
-#: ../src/nautilus-file-management-properties.ui.h:59
+#: ../src/nemo-file-management-properties.ui.h:59
 msgid "I_nclude a Delete command that bypasses Trash"
 msgstr ""
 
-#: ../src/nautilus-file-management-properties.ui.h:61
+#: ../src/nemo-file-management-properties.ui.h:61
 msgid "List Columns"
 msgstr "Sitûnan Lîste bike"
 
-#: ../src/nautilus-file-management-properties.ui.h:63
+#: ../src/nemo-file-management-properties.ui.h:63
 #, fuzzy
 msgid "Local Files Only"
 msgstr "Tenê Pelên _Herêmî"
 
-#: ../src/nautilus-file-management-properties.ui.h:64
+#: ../src/nemo-file-management-properties.ui.h:64
 msgid "Never"
 msgstr "Tu car"
 
-#: ../src/nautilus-file-management-properties.ui.h:65
+#: ../src/nemo-file-management-properties.ui.h:65
 #, fuzzy
 msgid "Open each _folder in its own window"
 msgstr "Pelê hilbijartî di vê paceyê de veke"
 
-#: ../src/nautilus-file-management-properties.ui.h:66
+#: ../src/nemo-file-management-properties.ui.h:66
 msgid "Preview"
 msgstr "Pêşdîtin"
 
-#: ../src/nautilus-file-management-properties.ui.h:67
+#: ../src/nemo-file-management-properties.ui.h:67
 msgid "Preview _sound files:"
 msgstr "Pêşdîtina pelên _deng:"
 
-#: ../src/nautilus-file-management-properties.ui.h:68
+#: ../src/nemo-file-management-properties.ui.h:68
 msgid "Show _only folders"
 msgstr "_Tenê peldankan nîşan bide"
 
-#: ../src/nautilus-file-management-properties.ui.h:69
+#: ../src/nemo-file-management-properties.ui.h:69
 msgid "Show _thumbnails:"
 msgstr ""
 
-#: ../src/nautilus-file-management-properties.ui.h:70
+#: ../src/nemo-file-management-properties.ui.h:70
 msgid "Show hidden and _backup files"
 msgstr "_Pelên nepen û cîgir nîşan bide"
 
-#: ../src/nautilus-file-management-properties.ui.h:71
+#: ../src/nemo-file-management-properties.ui.h:71
 msgid "Show te_xt in icons:"
 msgstr "Di î_konan de nivîsê nîşan bide:"
 
-#: ../src/nautilus-file-management-properties.ui.h:72
+#: ../src/nemo-file-management-properties.ui.h:72
 msgid "Sort _folders before files"
 msgstr "_Peldankan berî pelan rêz bike"
 
-#: ../src/nautilus-file-management-properties.ui.h:73
+#: ../src/nemo-file-management-properties.ui.h:73
 msgid "View _new folders using:"
 msgstr "Peldankên _nû bi vê re nîşan bide:"
 
-#: ../src/nautilus-file-management-properties.ui.h:74
+#: ../src/nemo-file-management-properties.ui.h:74
 msgid "Views"
 msgstr "Dîtin"
 
-#: ../src/nautilus-file-management-properties.ui.h:75
+#: ../src/nemo-file-management-properties.ui.h:75
 msgid "_Arrange items:"
 msgstr "Hêmanan _sererast bike:"
 
-#: ../src/nautilus-file-management-properties.ui.h:76
+#: ../src/nemo-file-management-properties.ui.h:76
 msgid "_Ask each time"
 msgstr "_Her car bipirse"
 
-#: ../src/nautilus-file-management-properties.ui.h:77
+#: ../src/nemo-file-management-properties.ui.h:77
 msgid "_Default zoom level:"
 msgstr ""
 
-#: ../src/nautilus-file-management-properties.ui.h:78
+#: ../src/nemo-file-management-properties.ui.h:78
 #, fuzzy
 msgid "_Double click to open items"
 msgstr "Ji bo çalakkirina îkonan du caran bitikîne"
 
-#: ../src/nautilus-file-management-properties.ui.h:79
+#: ../src/nemo-file-management-properties.ui.h:79
 msgid "_Format:"
 msgstr "_Format:"
 
-#: ../src/nautilus-file-management-properties.ui.h:80
+#: ../src/nemo-file-management-properties.ui.h:80
 msgid "_Only for files smaller than:"
 msgstr "_Tenê pelên ji vê biçûktir:"
 
-#: ../src/nautilus-file-management-properties.ui.h:81
+#: ../src/nemo-file-management-properties.ui.h:81
 #, fuzzy
 msgid "_Run executable text files when they are opened"
 msgstr "_Dema hate tikandin pelan bide xebitandin."
 
-#: ../src/nautilus-file-management-properties.ui.h:82
+#: ../src/nemo-file-management-properties.ui.h:82
 #, fuzzy
 msgid "_Single click to open items"
 msgstr "_Ji bo çalakkirina îkonan carekê bitikîne"
 
-#: ../src/nautilus-file-management-properties.ui.h:83
+#: ../src/nemo-file-management-properties.ui.h:83
 msgid "_Text beside icons"
 msgstr "Li kêleka _nivîsan îkon"
 
-#: ../src/nautilus-file-management-properties.ui.h:84
+#: ../src/nemo-file-management-properties.ui.h:84
 msgid "_Use compact layout"
 msgstr ""
 
-#: ../src/nautilus-file-management-properties.ui.h:85
+#: ../src/nemo-file-management-properties.ui.h:85
 #, fuzzy
 msgid "_View executable text files when they are opened"
 msgstr "_Dema hate tikandin pelan bide xebitandin."
 
-#: ../src/nautilus-image-properties-page.c:262
+#: ../src/nemo-image-properties-page.c:262
 msgid "Camera Brand"
 msgstr "Markaya Kamerayê"
 
-#: ../src/nautilus-image-properties-page.c:263
+#: ../src/nemo-image-properties-page.c:263
 msgid "Camera Model"
 msgstr "Modele Kamerayê"
 
 #. Choose which date to show in order of relevance
-#: ../src/nautilus-image-properties-page.c:266
+#: ../src/nemo-image-properties-page.c:266
 msgid "Date Taken"
 msgstr "Dîroka Kişandinê"
 
-#: ../src/nautilus-image-properties-page.c:268
+#: ../src/nemo-image-properties-page.c:268
 msgid "Date Digitized"
 msgstr ""
 
-#: ../src/nautilus-image-properties-page.c:274
+#: ../src/nemo-image-properties-page.c:274
 msgid "Exposure Time"
 msgstr ""
 
-#: ../src/nautilus-image-properties-page.c:275
+#: ../src/nemo-image-properties-page.c:275
 msgid "Aperture Value"
 msgstr ""
 
-#: ../src/nautilus-image-properties-page.c:276
+#: ../src/nemo-image-properties-page.c:276
 msgid "ISO Speed Rating"
 msgstr "Rêjeya Leza ISO"
 
-#: ../src/nautilus-image-properties-page.c:277
+#: ../src/nemo-image-properties-page.c:277
 msgid "Flash Fired"
 msgstr "Flaş Vêket"
 
-#: ../src/nautilus-image-properties-page.c:278
+#: ../src/nemo-image-properties-page.c:278
 msgid "Metering Mode"
 msgstr ""
 
-#: ../src/nautilus-image-properties-page.c:279
+#: ../src/nemo-image-properties-page.c:279
 msgid "Exposure Program"
 msgstr ""
 
-#: ../src/nautilus-image-properties-page.c:280
+#: ../src/nemo-image-properties-page.c:280
 msgid "Focal Length"
 msgstr ""
 
-#: ../src/nautilus-image-properties-page.c:281
+#: ../src/nemo-image-properties-page.c:281
 msgid "Software"
 msgstr "Nivîsbarî"
 
-#: ../src/nautilus-image-properties-page.c:344
+#: ../src/nemo-image-properties-page.c:344
 msgid "Keywords"
 msgstr "Peyva mifte:"
 
-#: ../src/nautilus-image-properties-page.c:345
+#: ../src/nemo-image-properties-page.c:345
 msgid "Creator"
 msgstr "Afirandêr"
 
-#: ../src/nautilus-image-properties-page.c:346
+#: ../src/nemo-image-properties-page.c:346
 msgid "Copyright"
 msgstr "Mafê telîfê"
 
-#: ../src/nautilus-image-properties-page.c:347
+#: ../src/nemo-image-properties-page.c:347
 msgid "Rating"
 msgstr "Nirxandin"
 
-#: ../src/nautilus-image-properties-page.c:377
+#: ../src/nemo-image-properties-page.c:377
 msgid "Image Type:"
 msgstr "Cureyê wêneyê:"
 
-#: ../src/nautilus-image-properties-page.c:380
+#: ../src/nemo-image-properties-page.c:380
 #, c-format
 msgid "<b>Width:</b> %d pixel"
 msgid_plural "<b>Width:</b> %d pixels"
 msgstr[0] "<b>Firehî:</b> %d pîksel"
 msgstr[1] "<b>Firehî:</b> %d pîksel"
 
-#: ../src/nautilus-image-properties-page.c:386
+#: ../src/nemo-image-properties-page.c:386
 #, c-format
 msgid "<b>Height:</b> %d pixel"
 msgid_plural "<b>Height:</b> %d pixels"
 msgstr[0] "<b>Bilindahî:</b> %d pîksel"
 msgstr[1] "<b>Bilindahî:</b> %d pîksel"
 
-#: ../src/nautilus-image-properties-page.c:403
+#: ../src/nemo-image-properties-page.c:403
 msgid "Failed to load image information"
 msgstr "Dema agahiya wêne dihate barkirin çewtî çêbû"
 
-#: ../src/nautilus-image-properties-page.c:616
+#: ../src/nemo-image-properties-page.c:616
 msgid "loading..."
 msgstr "tê barkirin..."
 
-#: ../src/nautilus-image-properties-page.c:668
+#: ../src/nemo-image-properties-page.c:668
 msgid "Image"
 msgstr "Wêne"
 
-#: ../src/nautilus-location-bar.c:57
+#: ../src/nemo-location-bar.c:57
 msgid "Go To:"
 msgstr "Biçe:"
 
-#: ../src/nautilus-location-bar.c:145
+#: ../src/nemo-location-bar.c:145
 #, c-format
 msgid "Do you want to view %d location?"
 msgid_plural "Do you want to view %d locations?"
 msgstr[0] "Tu dixwazî cihê %d nîşan bide?"
 msgstr[1] "Tu dixwazî cihê %d nîşan bide?"
 
-#: ../src/nautilus-location-dialog.c:152
+#: ../src/nemo-location-dialog.c:152
 msgid "Open Location"
 msgstr "Cihî veke"
 
-#: ../src/nautilus-location-dialog.c:162
+#: ../src/nemo-location-dialog.c:162
 msgid "_Location:"
 msgstr "_Cih:"
 
-#: ../src/nautilus-navigation-window-menus.c:129
+#: ../src/nemo-navigation-window-menus.c:129
 msgid "Are you sure you want to clear the list of locations you have visited?"
 msgstr "Tu bawer î ku fermanên te ziyaret kiribû jê bibe?"
 
-#: ../src/nautilus-navigation-window-menus.c:401
-#: ../src/nautilus-window-bookmarks.c:83
+#: ../src/nemo-navigation-window-menus.c:401
+#: ../src/nemo-window-bookmarks.c:83
 #, c-format
 msgid "The location \"%s\" does not exist."
 msgstr "Cihê \"%s\" tune."
 
-#: ../src/nautilus-navigation-window-menus.c:403
+#: ../src/nemo-navigation-window-menus.c:403
 msgid "The history location doesn't exist."
 msgstr "Cihê raboriyê ne mevcûd e."
 
 #. name, stock id, label
-#: ../src/nautilus-navigation-window-menus.c:810
+#: ../src/nemo-navigation-window-menus.c:810
 msgid "_Go"
 msgstr "_Biçe"
 
 #. name, stock id, label
-#: ../src/nautilus-navigation-window-menus.c:811
+#: ../src/nemo-navigation-window-menus.c:811
 msgid "_Bookmarks"
 msgstr "_Bijare"
 
 #. name, stock id, label
-#: ../src/nautilus-navigation-window-menus.c:812
+#: ../src/nemo-navigation-window-menus.c:812
 msgid "_Tabs"
 msgstr "_Hilpekîn"
 
 #. name, stock id, label
-#: ../src/nautilus-navigation-window-menus.c:813
+#: ../src/nemo-navigation-window-menus.c:813
 msgid "New _Window"
 msgstr "_Paceyeke nû"
 
-#: ../src/nautilus-navigation-window-menus.c:814
-msgid "Open another Nautilus window for the displayed location"
-msgstr "Ji bo cihê ku tê nîşandan paceyeke din ya Nautilus veke"
+#: ../src/nemo-navigation-window-menus.c:814
+msgid "Open another Nemo window for the displayed location"
+msgstr "Ji bo cihê ku tê nîşandan paceyeke din ya Nemo veke"
 
 #. name, stock id, label
-#: ../src/nautilus-navigation-window-menus.c:816
+#: ../src/nemo-navigation-window-menus.c:816
 msgid "New _Tab"
 msgstr ""
 
-#: ../src/nautilus-navigation-window-menus.c:817
+#: ../src/nemo-navigation-window-menus.c:817
 #, fuzzy
 msgid "Open another tab for the displayed location"
-msgstr "Ji bo cihê ku tê nîşandan paceyeke din ya Nautilus veke"
+msgstr "Ji bo cihê ku tê nîşandan paceyeke din ya Nemo veke"
 
 #. name, stock id, label
-#: ../src/nautilus-navigation-window-menus.c:819
+#: ../src/nemo-navigation-window-menus.c:819
 #, fuzzy
 msgid "Open Folder W_indow"
 msgstr "_Paceyeke nû veke"
 
-#: ../src/nautilus-navigation-window-menus.c:820
+#: ../src/nemo-navigation-window-menus.c:820
 #, fuzzy
 msgid "Open a folder window for the displayed location"
-msgstr "Ji bo cihê ku tê nîşandan paceyeke din ya Nautilus veke"
+msgstr "Ji bo cihê ku tê nîşandan paceyeke din ya Nemo veke"
 
 #. name, stock id, label
-#: ../src/nautilus-navigation-window-menus.c:822
+#: ../src/nemo-navigation-window-menus.c:822
 msgid "Close _All Windows"
 msgstr "Hemû Paceyan Bi_gire"
 
-#: ../src/nautilus-navigation-window-menus.c:823
+#: ../src/nemo-navigation-window-menus.c:823
 msgid "Close all Navigation windows"
 msgstr "Hemû paceyên navîgasyonê bigire"
 
 #. name, stock id, label
-#: ../src/nautilus-navigation-window-menus.c:825
+#: ../src/nemo-navigation-window-menus.c:825
 msgid "_Location..."
 msgstr "_Cih..."
 
-#: ../src/nautilus-navigation-window-menus.c:826
-#: ../src/nautilus-spatial-window.c:904
+#: ../src/nemo-navigation-window-menus.c:826
+#: ../src/nemo-spatial-window.c:904
 msgid "Specify a location to open"
 msgstr "Ji bo vekirinê cihekî diyar bike"
 
 #. name, stock id, label
-#: ../src/nautilus-navigation-window-menus.c:828
+#: ../src/nemo-navigation-window-menus.c:828
 msgid "Clea_r History"
 msgstr "Dîrokê _Jê Bibe"
 
-#: ../src/nautilus-navigation-window-menus.c:829
+#: ../src/nemo-navigation-window-menus.c:829
 msgid "Clear contents of Go menu and Back/Forward lists"
 msgstr "Naveroka pêşeka Biçe û lîsteya Pêş/Paş paqij bike"
 
 #. name, stock id, label
-#: ../src/nautilus-navigation-window-menus.c:831
+#: ../src/nemo-navigation-window-menus.c:831
 msgid "S_witch to Other Pane"
 msgstr ""
 
-#: ../src/nautilus-navigation-window-menus.c:832
+#: ../src/nemo-navigation-window-menus.c:832
 #, fuzzy
 msgid "Move focus to the other pane in a split view window"
 msgstr "Di paceyên nû de firehiya panele kêlekê."
 
 #. name, stock id, label
-#: ../src/nautilus-navigation-window-menus.c:834
+#: ../src/nemo-navigation-window-menus.c:834
 msgid "Sa_me Location as Other Pane"
 msgstr ""
 
-#: ../src/nautilus-navigation-window-menus.c:835
+#: ../src/nemo-navigation-window-menus.c:835
 msgid "Go to the same location as in the extra pane"
 msgstr ""
 
 #. name, stock id, label
-#: ../src/nautilus-navigation-window-menus.c:837
-#: ../src/nautilus-spatial-window.c:912
+#: ../src/nemo-navigation-window-menus.c:837
+#: ../src/nemo-spatial-window.c:912
 msgid "_Add Bookmark"
 msgstr "Bijareyê _zêde bike"
 
-#: ../src/nautilus-navigation-window-menus.c:838
-#: ../src/nautilus-spatial-window.c:913
+#: ../src/nemo-navigation-window-menus.c:838
+#: ../src/nemo-spatial-window.c:913
 msgid "Add a bookmark for the current location to this menu"
 msgstr "Ji bo cihê mevcûd bijareyekê têxe pêşekê"
 
 #. name, stock id, label
-#: ../src/nautilus-navigation-window-menus.c:840
-#: ../src/nautilus-spatial-window.c:915
+#: ../src/nemo-navigation-window-menus.c:840
+#: ../src/nemo-spatial-window.c:915
 #, fuzzy
 msgid "_Edit Bookmarks..."
 msgstr "Bijareyan _Biguherîne"
 
-#: ../src/nautilus-navigation-window-menus.c:841
-#: ../src/nautilus-spatial-window.c:916
+#: ../src/nemo-navigation-window-menus.c:841
+#: ../src/nemo-spatial-window.c:916
 msgid "Display a window that allows editing the bookmarks in this menu"
 msgstr "Ji bo sererastkirina bijareyên di vê pêşekê de ye paceyekê nîşan bide"
 
-#: ../src/nautilus-navigation-window-menus.c:843
+#: ../src/nemo-navigation-window-menus.c:843
 msgid "_Previous Tab"
 msgstr ""
 
-#: ../src/nautilus-navigation-window-menus.c:844
+#: ../src/nemo-navigation-window-menus.c:844
 msgid "Activate previous tab"
 msgstr ""
 
-#: ../src/nautilus-navigation-window-menus.c:846
+#: ../src/nemo-navigation-window-menus.c:846
 msgid "_Next Tab"
 msgstr ""
 
-#: ../src/nautilus-navigation-window-menus.c:847
+#: ../src/nemo-navigation-window-menus.c:847
 msgid "Activate next tab"
 msgstr ""
 
-#: ../src/nautilus-navigation-window-menus.c:849
-#: ../src/nautilus-navigation-window-pane.c:394
+#: ../src/nemo-navigation-window-menus.c:849
+#: ../src/nemo-navigation-window-pane.c:394
 msgid "Move Tab _Left"
 msgstr ""
 
-#: ../src/nautilus-navigation-window-menus.c:850
+#: ../src/nemo-navigation-window-menus.c:850
 msgid "Move current tab to left"
 msgstr ""
 
-#: ../src/nautilus-navigation-window-menus.c:852
-#: ../src/nautilus-navigation-window-pane.c:402
+#: ../src/nemo-navigation-window-menus.c:852
+#: ../src/nemo-navigation-window-pane.c:402
 msgid "Move Tab _Right"
 msgstr ""
 
-#: ../src/nautilus-navigation-window-menus.c:853
+#: ../src/nemo-navigation-window-menus.c:853
 msgid "Move current tab to right"
 msgstr ""
 
-#: ../src/nautilus-navigation-window-menus.c:855
+#: ../src/nemo-navigation-window-menus.c:855
 #, fuzzy
 msgid "S_how Search"
 msgstr "Lêgerînê To_mar Bike"
 
-#: ../src/nautilus-navigation-window-menus.c:856
+#: ../src/nemo-navigation-window-menus.c:856
 #, fuzzy
 msgid "Show search"
 msgstr "Lêbigere"
 
-#: ../src/nautilus-navigation-window-menus.c:858
+#: ../src/nemo-navigation-window-menus.c:858
 msgid "Sidebar"
 msgstr "Darika kelekê"
 
 #. name, stock id
 #. label, accelerator
-#: ../src/nautilus-navigation-window-menus.c:863
+#: ../src/nemo-navigation-window-menus.c:863
 msgid "_Main Toolbar"
 msgstr "Darika Amûran ya Serekî"
 
 #. tooltip
-#: ../src/nautilus-navigation-window-menus.c:864
+#: ../src/nemo-navigation-window-menus.c:864
 msgid "Change the visibility of this window's main toolbar"
 msgstr ""
 
 #. is_active
 #. name, stock id
 #. label, accelerator
-#: ../src/nautilus-navigation-window-menus.c:868
+#: ../src/nemo-navigation-window-menus.c:868
 msgid "_Show Sidebar"
 msgstr ""
 
 #. tooltip
-#: ../src/nautilus-navigation-window-menus.c:869
+#: ../src/nemo-navigation-window-menus.c:869
 msgid "Change the visibility of this window's side pane"
 msgstr ""
 
 #. is_active
 #. name, stock id
 #. label, accelerator
-#: ../src/nautilus-navigation-window-menus.c:873
+#: ../src/nemo-navigation-window-menus.c:873
 msgid "Location _Bar"
 msgstr "Darika Cihan"
 
 #. tooltip
-#: ../src/nautilus-navigation-window-menus.c:874
+#: ../src/nemo-navigation-window-menus.c:874
 msgid "Change the visibility of this window's location bar"
 msgstr ""
 
 #. is_active
 #. name, stock id
 #. label, accelerator
-#: ../src/nautilus-navigation-window-menus.c:878
+#: ../src/nemo-navigation-window-menus.c:878
 msgid "St_atusbar"
 msgstr "Darika Rewşê"
 
 #. tooltip
-#: ../src/nautilus-navigation-window-menus.c:879
+#: ../src/nemo-navigation-window-menus.c:879
 msgid "Change the visibility of this window's statusbar"
 msgstr ""
 
@@ -5457,14 +5457,14 @@ msgstr ""
 #. name, stock id
 #. label, accelerator
 #. name, stock id, label
-#: ../src/nautilus-navigation-window-menus.c:883
-#: ../src/nautilus-spatial-window.c:918
+#: ../src/nemo-navigation-window-menus.c:883
+#: ../src/nemo-spatial-window.c:918
 msgid "_Search for Files..."
 msgstr "Li Pelan Bi_gere..."
 
 #. Accelerator is in ShowSearch
 #. tooltip
-#: ../src/nautilus-navigation-window-menus.c:885
+#: ../src/nemo-navigation-window-menus.c:885
 #, fuzzy
 msgid "Search documents and folders by name"
 msgstr "Tenê gorî navan li pelan bigere"
@@ -5472,387 +5472,387 @@ msgstr "Tenê gorî navan li pelan bigere"
 #. is_active
 #. name, stock id
 #. label, accelerator
-#: ../src/nautilus-navigation-window-menus.c:889
+#: ../src/nemo-navigation-window-menus.c:889
 msgid "E_xtra Pane"
 msgstr ""
 
 #. tooltip
-#: ../src/nautilus-navigation-window-menus.c:890
+#: ../src/nemo-navigation-window-menus.c:890
 msgid "Open an extra folder view side-by-side"
 msgstr ""
 
-#: ../src/nautilus-navigation-window-menus.c:897
+#: ../src/nemo-navigation-window-menus.c:897
 msgid "Places"
 msgstr "Cih"
 
-#: ../src/nautilus-navigation-window-menus.c:897
+#: ../src/nemo-navigation-window-menus.c:897
 msgid "Select Places as the default sidebar"
 msgstr ""
 
-#: ../src/nautilus-navigation-window-menus.c:900
+#: ../src/nemo-navigation-window-menus.c:900
 msgid "Tree"
 msgstr "Dar"
 
-#: ../src/nautilus-navigation-window-menus.c:900
+#: ../src/nemo-navigation-window-menus.c:900
 msgid "Select Tree as the default sidebar"
 msgstr ""
 
-#: ../src/nautilus-navigation-window-menus.c:928
+#: ../src/nemo-navigation-window-menus.c:928
 msgid "_Back"
 msgstr "P_aş"
 
-#: ../src/nautilus-navigation-window-menus.c:930
+#: ../src/nemo-navigation-window-menus.c:930
 msgid "Go to the previous visited location"
 msgstr "Biçe cihê ku berê hatiye ziyaretkirin"
 
-#: ../src/nautilus-navigation-window-menus.c:931
+#: ../src/nemo-navigation-window-menus.c:931
 msgid "Back history"
 msgstr "Di dîrokê de paş"
 
-#: ../src/nautilus-navigation-window-menus.c:945
+#: ../src/nemo-navigation-window-menus.c:945
 msgid "_Forward"
 msgstr "_Pêş"
 
-#: ../src/nautilus-navigation-window-menus.c:947
+#: ../src/nemo-navigation-window-menus.c:947
 msgid "Go to the next visited location"
 msgstr "Biçe cihê ku dû re hatiye ziyaretkir"
 
-#: ../src/nautilus-navigation-window-menus.c:948
+#: ../src/nemo-navigation-window-menus.c:948
 msgid "Forward history"
 msgstr "Di dîrokê de pêş"
 
-#: ../src/nautilus-navigation-window-menus.c:963
+#: ../src/nemo-navigation-window-menus.c:963
 msgid "_Zoom"
 msgstr "_Nêzîkkirin"
 
-#: ../src/nautilus-navigation-window-menus.c:973
+#: ../src/nemo-navigation-window-menus.c:973
 msgid "_View As"
 msgstr "_Bibîne wekî"
 
-#: ../src/nautilus-navigation-window-menus.c:1007
+#: ../src/nemo-navigation-window-menus.c:1007
 msgid "_Search"
 msgstr "_Lêgerîn"
 
-#: ../src/nautilus-navigation-window-pane.c:384
+#: ../src/nemo-navigation-window-pane.c:384
 msgid "_New Tab"
 msgstr "Hilpekîna _nû"
 
-#: ../src/nautilus-navigation-window-pane.c:413
+#: ../src/nemo-navigation-window-pane.c:413
 msgid "_Close Tab"
 msgstr "Hilpekînê bi_gire"
 
-#: ../src/nautilus-navigation-window.c:434
+#: ../src/nemo-navigation-window.c:434
 #, c-format
 msgid "%s - File Browser"
 msgstr "%s - Geroka pelan"
 
-#: ../src/nautilus-notebook.c:370
+#: ../src/nemo-notebook.c:370
 msgid "Close tab"
 msgstr "Hilpekînê bi_gire"
 
-#: ../src/nautilus-places-sidebar.c:293
+#: ../src/nemo-places-sidebar.c:293
 msgid "Devices"
 msgstr "Amûr"
 
-#: ../src/nautilus-places-sidebar.c:301
+#: ../src/nemo-places-sidebar.c:301
 msgid "Bookmarks"
 msgstr "Bijare"
 
-#: ../src/nautilus-places-sidebar.c:502 ../src/nautilus-places-sidebar.c:527
+#: ../src/nemo-places-sidebar.c:502 ../src/nemo-places-sidebar.c:527
 #, c-format
 msgid "Mount and open %s"
 msgstr "%s girêbide û veke"
 
-#: ../src/nautilus-places-sidebar.c:659
+#: ../src/nemo-places-sidebar.c:659
 msgid "Open the contents of your desktop in a folder"
 msgstr "Naveroka sermaseya xwe di peldankekê de veke"
 
-#: ../src/nautilus-places-sidebar.c:672 ../src/nautilus-tree-sidebar.c:1320
+#: ../src/nemo-places-sidebar.c:672 ../src/nemo-tree-sidebar.c:1320
 msgid "File System"
 msgstr "Pergala pelan"
 
-#: ../src/nautilus-places-sidebar.c:674
+#: ../src/nemo-places-sidebar.c:674
 msgid "Open the contents of the File System"
 msgstr "Naveroka pergala pelan veke"
 
-#: ../src/nautilus-places-sidebar.c:764 ../src/nautilus-trash-bar.c:186
+#: ../src/nemo-places-sidebar.c:764 ../src/nemo-trash-bar.c:186
 msgid "Trash"
 msgstr "Çop"
 
-#: ../src/nautilus-places-sidebar.c:766
+#: ../src/nemo-places-sidebar.c:766
 msgid "Open the trash"
 msgstr "Çopê veke"
 
-#: ../src/nautilus-places-sidebar.c:774 ../src/network-scheme.desktop.in.h:2
+#: ../src/nemo-places-sidebar.c:774 ../src/network-scheme.desktop.in.h:2
 msgid "Network"
 msgstr "Tor"
 
-#: ../src/nautilus-places-sidebar.c:806
+#: ../src/nemo-places-sidebar.c:806
 msgid "Browse Network"
 msgstr "Li torê bigerîne"
 
-#: ../src/nautilus-places-sidebar.c:808
+#: ../src/nemo-places-sidebar.c:808
 #, fuzzy
 msgid "Browse the contents of the network"
 msgstr "Hêmanan di mezinahiya asayî de nîşan bide"
 
 #. start() for type G_DRIVE_START_STOP_TYPE_SHUTDOWN is normally not used
-#: ../src/nautilus-places-sidebar.c:1688
+#: ../src/nemo-places-sidebar.c:1688
 msgid "_Power On"
 msgstr ""
 
-#: ../src/nautilus-places-sidebar.c:1692
+#: ../src/nemo-places-sidebar.c:1692
 msgid "_Connect Drive"
 msgstr "_Ajogerê girêbide"
 
-#: ../src/nautilus-places-sidebar.c:1693
+#: ../src/nemo-places-sidebar.c:1693
 msgid "_Disconnect Drive"
 msgstr ""
 
-#: ../src/nautilus-places-sidebar.c:1696
+#: ../src/nemo-places-sidebar.c:1696
 msgid "_Start Multi-disk Device"
 msgstr ""
 
-#: ../src/nautilus-places-sidebar.c:1697
+#: ../src/nemo-places-sidebar.c:1697
 msgid "_Stop Multi-disk Device"
 msgstr ""
 
-#: ../src/nautilus-places-sidebar.c:1777 ../src/nautilus-places-sidebar.c:2312
+#: ../src/nemo-places-sidebar.c:1777 ../src/nemo-places-sidebar.c:2312
 #, c-format
 msgid "Unable to start %s"
 msgstr ""
 
-#: ../src/nautilus-places-sidebar.c:2059 ../src/nautilus-places-sidebar.c:2088
-#: ../src/nautilus-places-sidebar.c:2117
+#: ../src/nemo-places-sidebar.c:2059 ../src/nemo-places-sidebar.c:2088
+#: ../src/nemo-places-sidebar.c:2117
 #, c-format
 msgid "Unable to eject %s"
 msgstr ""
 
-#: ../src/nautilus-places-sidebar.c:2260
+#: ../src/nemo-places-sidebar.c:2260
 #, c-format
 msgid "Unable to poll %s for media changes"
 msgstr ""
 
-#: ../src/nautilus-places-sidebar.c:2368
+#: ../src/nemo-places-sidebar.c:2368
 #, c-format
 msgid "Unable to stop %s"
 msgstr ""
 
-#: ../src/nautilus-places-sidebar.c:2482
+#: ../src/nemo-places-sidebar.c:2482
 msgid "Remove"
 msgstr "Rake"
 
-#: ../src/nautilus-places-sidebar.c:2491
+#: ../src/nemo-places-sidebar.c:2491
 msgid "Rename..."
 msgstr "Ji Nû Ve Binavîne..."
 
-#: ../src/nautilus-query-editor.c:123
+#: ../src/nemo-query-editor.c:123
 msgid "File Type"
 msgstr "Pergala Pelan"
 
-#: ../src/nautilus-query-editor.c:264
+#: ../src/nemo-query-editor.c:264
 msgid "Select folder to search in"
 msgstr "Peldanka ku wê lêgerîn pêk were hilbijêrî"
 
-#: ../src/nautilus-query-editor.c:354
+#: ../src/nemo-query-editor.c:354
 msgid "Documents"
 msgstr "Pelge"
 
-#: ../src/nautilus-query-editor.c:372
+#: ../src/nemo-query-editor.c:372
 msgid "Music"
 msgstr "Muzîk"
 
-#: ../src/nautilus-query-editor.c:387
+#: ../src/nemo-query-editor.c:387
 msgid "Video"
 msgstr "Vîdeo"
 
-#: ../src/nautilus-query-editor.c:403
+#: ../src/nemo-query-editor.c:403
 msgid "Picture"
 msgstr "Wêne"
 
-#: ../src/nautilus-query-editor.c:423
+#: ../src/nemo-query-editor.c:423
 msgid "Illustration"
 msgstr "Mînakdan"
 
-#: ../src/nautilus-query-editor.c:437
+#: ../src/nemo-query-editor.c:437
 msgid "Spreadsheet"
 msgstr "Tabloya hesêb"
 
-#: ../src/nautilus-query-editor.c:453
+#: ../src/nemo-query-editor.c:453
 msgid "Presentation"
 msgstr "Pêşkêşî"
 
-#: ../src/nautilus-query-editor.c:462
+#: ../src/nemo-query-editor.c:462
 msgid "Pdf / Postscript"
 msgstr "Pdf / Postscript"
 
-#: ../src/nautilus-query-editor.c:470
+#: ../src/nemo-query-editor.c:470
 msgid "Text File"
 msgstr "Pelê nivîsar"
 
-#: ../src/nautilus-query-editor.c:549
+#: ../src/nemo-query-editor.c:549
 msgid "Select type"
 msgstr "Cure hilbijêre"
 
-#: ../src/nautilus-query-editor.c:633
+#: ../src/nemo-query-editor.c:633
 msgid "Any"
 msgstr "Hema yek"
 
-#: ../src/nautilus-query-editor.c:648
+#: ../src/nemo-query-editor.c:648
 msgid "Other Type..."
 msgstr "Cureyê din..."
 
-#: ../src/nautilus-query-editor.c:932
+#: ../src/nemo-query-editor.c:932
 msgid "Remove this criterion from the search"
 msgstr ""
 
-#: ../src/nautilus-query-editor.c:977
+#: ../src/nemo-query-editor.c:977
 msgid "Search Folder"
 msgstr "Peldanka Lêgerînê"
 
-#: ../src/nautilus-query-editor.c:991
+#: ../src/nemo-query-editor.c:991
 msgid "Edit the saved search"
 msgstr "Lêgerîna tomarbûyî sererast bike"
 
-#: ../src/nautilus-query-editor.c:1022
+#: ../src/nemo-query-editor.c:1022
 msgid "Add a new criterion to this search"
 msgstr ""
 
-#: ../src/nautilus-query-editor.c:1026
+#: ../src/nemo-query-editor.c:1026
 msgid "Go"
 msgstr "Biçe"
 
-#: ../src/nautilus-query-editor.c:1028
+#: ../src/nemo-query-editor.c:1028
 msgid "Reload"
 msgstr "Ji nû ve bar bike"
 
-#: ../src/nautilus-query-editor.c:1033
+#: ../src/nemo-query-editor.c:1033
 msgid "Perform or update the search"
 msgstr "Lê bigere yan jî rojane bike"
 
-#: ../src/nautilus-query-editor.c:1054
+#: ../src/nemo-query-editor.c:1054
 msgid "_Search for:"
 msgstr "_Lê gerîne:"
 
-#: ../src/nautilus-query-editor.c:1083
+#: ../src/nemo-query-editor.c:1083
 msgid "Search results"
 msgstr "Encamên lêgerînê"
 
-#: ../src/nautilus-search-bar.c:169
+#: ../src/nemo-search-bar.c:169
 msgid "Search:"
 msgstr "Lêgerîn:"
 
 #. Set initial window title
-#: ../src/nautilus-spatial-window.c:356 ../src/nautilus-window-menus.c:506
-#: ../src/nautilus-window.c:148
-msgid "Nautilus"
-msgstr "Nautilus"
+#: ../src/nemo-spatial-window.c:356 ../src/nemo-window-menus.c:506
+#: ../src/nemo-window.c:148
+msgid "Nemo"
+msgstr "Nemo"
 
 #. name, stock id, label
-#: ../src/nautilus-spatial-window.c:902
+#: ../src/nemo-spatial-window.c:902
 msgid "_Places"
 msgstr "_Cih"
 
 #. name, stock id, label
-#: ../src/nautilus-spatial-window.c:903
+#: ../src/nemo-spatial-window.c:903
 msgid "Open _Location..."
 msgstr "_Cihî veke..."
 
 #. name, stock id, label
-#: ../src/nautilus-spatial-window.c:906
+#: ../src/nemo-spatial-window.c:906
 msgid "Close P_arent Folders"
 msgstr "Peldankên _Jor Bigire"
 
-#: ../src/nautilus-spatial-window.c:907
+#: ../src/nemo-spatial-window.c:907
 msgid "Close this folder's parents"
 msgstr "Jêrepeldankên vê peldankê bigire"
 
 #. name, stock id, label
-#: ../src/nautilus-spatial-window.c:909
+#: ../src/nemo-spatial-window.c:909
 msgid "Clos_e All Folders"
 msgstr "Hemû peldankan bi_gire"
 
-#: ../src/nautilus-spatial-window.c:910
+#: ../src/nemo-spatial-window.c:910
 msgid "Close all folder windows"
 msgstr "Hemû paceyên peldankan bigire"
 
-#: ../src/nautilus-spatial-window.c:919
+#: ../src/nemo-spatial-window.c:919
 msgid "Locate documents and folders on this computer by name or content"
 msgstr ""
 
-#: ../src/nautilus-trash-bar.c:204
+#: ../src/nemo-trash-bar.c:204
 #, fuzzy
 msgid "Restore Selected Items"
 msgstr "Hêmana ku hatiye hilbijartin ji nû ve binavîne"
 
-#: ../src/nautilus-trash-bar.c:210
+#: ../src/nemo-trash-bar.c:210
 #, fuzzy
 msgid "Restore selected items to their original position"
 msgstr "Hemû hêmanên ku hatine hilbijartin biavêjî çopê"
 
-#: ../src/nautilus-tree-sidebar.c:1324
+#: ../src/nemo-tree-sidebar.c:1324
 msgid "Network Neighbourhood"
 msgstr "Cîranên Torê"
 
-#: ../src/nautilus-window-bookmarks.c:81
+#: ../src/nemo-window-bookmarks.c:81
 msgid ""
 "Do you want to remove any bookmarks with the non-existing location from your "
 "list?"
 msgstr "Tu dixwazî bijareyên ku cihên wan tuneye jê bibî?"
 
-#: ../src/nautilus-window-bookmarks.c:86
+#: ../src/nemo-window-bookmarks.c:86
 msgid "Bookmark for Nonexistent Location"
 msgstr "Ji Bo Cihê Ku Nayê Dîtin Bijare"
 
-#: ../src/nautilus-window-manage-views.c:762
+#: ../src/nemo-window-manage-views.c:762
 msgid "You can choose another view or go to a different location."
 msgstr "Tu dikarî bergeheke din hilbijêrî yan jî biçe cihekî din."
 
-#: ../src/nautilus-window-manage-views.c:781
+#: ../src/nemo-window-manage-views.c:781
 msgid "The location cannot be displayed with this viewer."
 msgstr "Cih bi vê nîşanderê nayê nîşandan."
 
-#: ../src/nautilus-window-manage-views.c:1287
+#: ../src/nemo-window-manage-views.c:1287
 msgid "Content View"
 msgstr "Dîtina Naverokê"
 
-#: ../src/nautilus-window-manage-views.c:1288
+#: ../src/nemo-window-manage-views.c:1288
 msgid "View of the current folder"
 msgstr "Nîşandana peldanka heyî"
 
-#: ../src/nautilus-window-manage-views.c:1922
-msgid "Nautilus has no installed viewer capable of displaying the folder."
+#: ../src/nemo-window-manage-views.c:1922
+msgid "Nemo has no installed viewer capable of displaying the folder."
 msgstr ""
 
-#: ../src/nautilus-window-manage-views.c:1928
+#: ../src/nemo-window-manage-views.c:1928
 msgid "The location is not a folder."
 msgstr "Ev cih ne peldankek e."
 
-#: ../src/nautilus-window-manage-views.c:1934
+#: ../src/nemo-window-manage-views.c:1934
 #, fuzzy, c-format
 msgid "Could not find \"%s\"."
 msgstr "\"%s\" nehat dîtin."
 
-#: ../src/nautilus-window-manage-views.c:1937
+#: ../src/nemo-window-manage-views.c:1937
 msgid "Please check the spelling and try again."
 msgstr "Ji kerema xwe re rastnivîsa wê kontrol bike û dîsa biceribîne."
 
-#: ../src/nautilus-window-manage-views.c:1945
+#: ../src/nemo-window-manage-views.c:1945
 #, fuzzy, c-format
-msgid "Nautilus cannot handle \"%s\" locations."
-msgstr "Nautilus cihên %s nas nake."
+msgid "Nemo cannot handle \"%s\" locations."
+msgstr "Nemo cihên %s nas nake."
 
-#: ../src/nautilus-window-manage-views.c:1948
+#: ../src/nemo-window-manage-views.c:1948
 #, fuzzy
-msgid "Nautilus cannot handle this kind of location."
-msgstr "Nautilus cihên %s nas nake."
+msgid "Nemo cannot handle this kind of location."
+msgstr "Nemo cihên %s nas nake."
 
-#: ../src/nautilus-window-manage-views.c:1955
+#: ../src/nemo-window-manage-views.c:1955
 #, fuzzy
 msgid "Unable to mount the location."
 msgstr "Sepana nivîsîna CD'yan nehate destpêkirin."
 
-#: ../src/nautilus-window-manage-views.c:1961
+#: ../src/nemo-window-manage-views.c:1961
 msgid "Access was denied."
 msgstr "Destûra gihiştinê nehat dayîn."
 
@@ -5861,358 +5861,358 @@ msgstr "Destûra gihiştinê nehat dayîn."
 #. * But this case is also hit for legitimate web addresses when
 #. * the proxy is set up wrong.
 #.
-#: ../src/nautilus-window-manage-views.c:1970
+#: ../src/nemo-window-manage-views.c:1970
 #, fuzzy, c-format
 msgid "Could not display \"%s\", because the host could not be found."
 msgstr "\"%s\" nayê nîşandan, ji ber ku makîneya \"%s\" nehate dîtin."
 
-#: ../src/nautilus-window-manage-views.c:1972
+#: ../src/nemo-window-manage-views.c:1972
 msgid ""
 "Check that the spelling is correct and that your proxy settings are correct."
 msgstr "Çewtiyên nivîsînê û rastbûna mîhengên cîgir kontrol bike."
 
-#: ../src/nautilus-window-manage-views.c:1987
+#: ../src/nemo-window-manage-views.c:1987
 #, fuzzy, c-format
 msgid ""
 "Error: %s\n"
 "Please select another viewer and try again."
 msgstr "Ji kerema xwe re nîşlandereke din hilbijêrî û dîsa biceribîne."
 
-#: ../src/nautilus-window-menus.c:187
+#: ../src/nemo-window-menus.c:187
 msgid "Go to the location specified by this bookmark"
 msgstr "Biçe cihê ku vê bijareyê diyar kiriye."
 
-#: ../src/nautilus-window-menus.c:488
+#: ../src/nemo-window-menus.c:488
 msgid ""
-"Nautilus is free software; you can redistribute it and/or modify it under "
+"Nemo is free software; you can redistribute it and/or modify it under "
 "the terms of the GNU General Public License as published by the Free "
 "Software Foundation; either version 2 of the License, or (at your option) "
 "any later version."
 msgstr ""
 
-#: ../src/nautilus-window-menus.c:492
+#: ../src/nemo-window-menus.c:492
 msgid ""
-"Nautilus is distributed in the hope that it will be useful, but WITHOUT ANY "
+"Nemo is distributed in the hope that it will be useful, but WITHOUT ANY "
 "WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS "
 "FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more "
 "details."
 msgstr ""
 
-#: ../src/nautilus-window-menus.c:496
+#: ../src/nemo-window-menus.c:496
 msgid ""
 "You should have received a copy of the GNU General Public License along with "
-"Nautilus; if not, write to the Free Software Foundation, Inc., 51 Franklin "
+"Nemo; if not, write to the Free Software Foundation, Inc., 51 Franklin "
 "Street, Fifth Floor, Boston, MA 02110-1301 USA"
 msgstr ""
 
-#: ../src/nautilus-window-menus.c:508
+#: ../src/nemo-window-menus.c:508
 msgid ""
-"Nautilus lets you organize files and folders, both on your computer and "
+"Nemo lets you organize files and folders, both on your computer and "
 "online."
 msgstr ""
 
-#: ../src/nautilus-window-menus.c:511
-msgid "Copyright © 1999-2010 The Nautilus authors"
-msgstr "Mafê telîfê © 1999-2010 nivîskarên Nautilusê"
+#: ../src/nemo-window-menus.c:511
+msgid "Copyright © 1999-2010 The Nemo authors"
+msgstr "Mafê telîfê © 1999-2010 nivîskarên Nemoê"
 
 #. Translators should localize the following string
 #. * which will be displayed at the bottom of the about
 #. * box to give credit to the translator(s).
 #.
-#: ../src/nautilus-window-menus.c:521
+#: ../src/nemo-window-menus.c:521
 msgid "translator-credits"
 msgstr "Koma PCKurd"
 
-#: ../src/nautilus-window-menus.c:524
-msgid "Nautilus Web Site"
-msgstr "Malpera Nautilusê"
+#: ../src/nemo-window-menus.c:524
+msgid "Nemo Web Site"
+msgstr "Malpera Nemoê"
 
 #. name, stock id, label
-#: ../src/nautilus-window-menus.c:757
+#: ../src/nemo-window-menus.c:757
 msgid "_File"
 msgstr "_Pel"
 
 #. name, stock id, label
-#: ../src/nautilus-window-menus.c:758
+#: ../src/nemo-window-menus.c:758
 msgid "_Edit"
 msgstr "_Sererastkirin"
 
 #. name, stock id, label
-#: ../src/nautilus-window-menus.c:759
+#: ../src/nemo-window-menus.c:759
 msgid "_View"
 msgstr "_Dîtin"
 
 #. name, stock id, label
-#: ../src/nautilus-window-menus.c:760
+#: ../src/nemo-window-menus.c:760
 msgid "_Help"
 msgstr "_Alîkarî"
 
 #. name, stock id
 #. label, accelerator
-#: ../src/nautilus-window-menus.c:762
+#: ../src/nemo-window-menus.c:762
 msgid "_Close"
 msgstr "_Bigire"
 
 #. tooltip
-#: ../src/nautilus-window-menus.c:763
+#: ../src/nemo-window-menus.c:763
 msgid "Close this folder"
 msgstr "Vê peldankê bigire"
 
-#: ../src/nautilus-window-menus.c:766
+#: ../src/nemo-window-menus.c:766
 msgid "Prefere_nces"
 msgstr "_Vebijêrk"
 
-#: ../src/nautilus-window-menus.c:767
-msgid "Edit Nautilus preferences"
-msgstr "Vebijêrkên Nautilusê biguherîne"
+#: ../src/nemo-window-menus.c:767
+msgid "Edit Nemo preferences"
+msgstr "Vebijêrkên Nemoê biguherîne"
 
 #. name, stock id, label
-#: ../src/nautilus-window-menus.c:769
+#: ../src/nemo-window-menus.c:769
 msgid "_Undo"
 msgstr "_Vegerîne"
 
-#: ../src/nautilus-window-menus.c:770
+#: ../src/nemo-window-menus.c:770
 msgid "Undo the last text change"
 msgstr "Guherandina nivîsê ya dawîn paş de vegerîne"
 
 #. name, stock id, label
-#: ../src/nautilus-window-menus.c:772
+#: ../src/nemo-window-menus.c:772
 msgid "Open _Parent"
 msgstr "_Jorepeldankekê Veke"
 
-#: ../src/nautilus-window-menus.c:773
+#: ../src/nemo-window-menus.c:773
 msgid "Open the parent folder"
 msgstr "Peldanka jor veke"
 
 #. tooltip
-#: ../src/nautilus-window-menus.c:780
+#: ../src/nemo-window-menus.c:780
 #, fuzzy
 msgid "Stop loading the current location"
 msgstr "Here cihê komputerê"
 
 #. name, stock id
 #. label, accelerator
-#: ../src/nautilus-window-menus.c:783
+#: ../src/nemo-window-menus.c:783
 msgid "_Reload"
 msgstr "_Rojane bike"
 
 #. tooltip
-#: ../src/nautilus-window-menus.c:784
+#: ../src/nemo-window-menus.c:784
 #, fuzzy
 msgid "Reload the current location"
 msgstr "Here cihê komputerê"
 
 #. name, stock id
 #. label, accelerator
-#: ../src/nautilus-window-menus.c:787
+#: ../src/nemo-window-menus.c:787
 msgid "_Contents"
 msgstr "_Naverok"
 
 #. tooltip
-#: ../src/nautilus-window-menus.c:788
-msgid "Display Nautilus help"
-msgstr "Alîkariya Nautilusê nîşan bide"
+#: ../src/nemo-window-menus.c:788
+msgid "Display Nemo help"
+msgstr "Alîkariya Nemoê nîşan bide"
 
 #. name, stock id
 #. label, accelerator
-#: ../src/nautilus-window-menus.c:791
+#: ../src/nemo-window-menus.c:791
 msgid "_About"
 msgstr "_Der barê"
 
 #. tooltip
-#: ../src/nautilus-window-menus.c:792
-msgid "Display credits for the creators of Nautilus"
-msgstr "Der barê kesên ku nautilus nivîsandiye agahiyan bide"
+#: ../src/nemo-window-menus.c:792
+msgid "Display credits for the creators of Nemo"
+msgstr "Der barê kesên ku nemo nivîsandiye agahiyan bide"
 
 #. name, stock id
 #. label, accelerator
-#: ../src/nautilus-window-menus.c:795
+#: ../src/nemo-window-menus.c:795
 msgid "Zoom _In"
 msgstr "Nê_zîk bibe"
 
 #. tooltip
-#: ../src/nautilus-window-menus.c:796 ../src/nautilus-zoom-control.c:90
-#: ../src/nautilus-zoom-control.c:348
+#: ../src/nemo-window-menus.c:796 ../src/nemo-zoom-control.c:90
+#: ../src/nemo-zoom-control.c:348
 msgid "Increase the view size"
 msgstr ""
 
 #. name, stock id
 #. label, accelerator
-#: ../src/nautilus-window-menus.c:807
+#: ../src/nemo-window-menus.c:807
 msgid "Zoom _Out"
 msgstr "Dûr bi_keve"
 
 #. tooltip
-#: ../src/nautilus-window-menus.c:808 ../src/nautilus-zoom-control.c:91
-#: ../src/nautilus-zoom-control.c:297
+#: ../src/nemo-window-menus.c:808 ../src/nemo-zoom-control.c:91
+#: ../src/nemo-zoom-control.c:297
 msgid "Decrease the view size"
 msgstr ""
 
 #. name, stock id
 #. label, accelerator
-#: ../src/nautilus-window-menus.c:815
+#: ../src/nemo-window-menus.c:815
 msgid "Normal Si_ze"
 msgstr "Mezinahiya _Asayî"
 
 #. tooltip
-#: ../src/nautilus-window-menus.c:816 ../src/nautilus-zoom-control.c:92
-#: ../src/nautilus-zoom-control.c:310
+#: ../src/nemo-window-menus.c:816 ../src/nemo-zoom-control.c:92
+#: ../src/nemo-zoom-control.c:310
 msgid "Use the normal view size"
 msgstr ""
 
 #. name, stock id
 #. label, accelerator
-#: ../src/nautilus-window-menus.c:819
+#: ../src/nemo-window-menus.c:819
 msgid "Connect to _Server..."
 msgstr "Bi Pêşkêşkerê Girê Bide"
 
 #. tooltip
-#: ../src/nautilus-window-menus.c:820
+#: ../src/nemo-window-menus.c:820
 msgid "Connect to a remote computer or shared disk"
 msgstr ""
 
 #. name, stock id
 #. label, accelerator
-#: ../src/nautilus-window-menus.c:827
+#: ../src/nemo-window-menus.c:827
 msgid "_Computer"
 msgstr "_Kompîtur"
 
 #. name, stock id
 #. label, accelerator
-#: ../src/nautilus-window-menus.c:831
+#: ../src/nemo-window-menus.c:831
 msgid "_Network"
 msgstr "_Tor"
 
 #. tooltip
-#: ../src/nautilus-window-menus.c:832 ../src/network-scheme.desktop.in.h:1
+#: ../src/nemo-window-menus.c:832 ../src/network-scheme.desktop.in.h:1
 msgid "Browse bookmarked and local network locations"
 msgstr ""
 
 #. name, stock id
 #. label, accelerator
-#: ../src/nautilus-window-menus.c:835
+#: ../src/nemo-window-menus.c:835
 msgid "T_emplates"
 msgstr "Şab_lon"
 
 #. tooltip
-#: ../src/nautilus-window-menus.c:836
+#: ../src/nemo-window-menus.c:836
 msgid "Open your personal templates folder"
 msgstr "Peldanka şablonan ya şexsî veke "
 
 #. name, stock id
 #. label, accelerator
-#: ../src/nautilus-window-menus.c:839
+#: ../src/nemo-window-menus.c:839
 msgid "_Trash"
 msgstr "_Çop"
 
 #. tooltip
-#: ../src/nautilus-window-menus.c:840
+#: ../src/nemo-window-menus.c:840
 msgid "Open your personal trash folder"
 msgstr "Peldanka çop ya şexsî veke"
 
 #. name, stock id
 #. label, accelerator
-#: ../src/nautilus-window-menus.c:846
+#: ../src/nemo-window-menus.c:846
 msgid "Show _Hidden Files"
 msgstr "Pelên _veşartî nîşan bide"
 
 #. tooltip
-#: ../src/nautilus-window-menus.c:847
+#: ../src/nemo-window-menus.c:847
 msgid "Toggle the display of hidden files in the current window"
 msgstr ""
 
-#: ../src/nautilus-window-menus.c:877
+#: ../src/nemo-window-menus.c:877
 msgid "_Up"
 msgstr "_Jor"
 
-#: ../src/nautilus-window-menus.c:880
+#: ../src/nemo-window-menus.c:880
 msgid "_Home"
 msgstr "_Mal"
 
-#: ../src/nautilus-x-content-bar.c:68
+#: ../src/nemo-x-content-bar.c:68
 #, fuzzy
 msgid "These files are on an Audio CD."
 msgstr "Ev pel ne ya wêneyan e."
 
-#: ../src/nautilus-x-content-bar.c:70
+#: ../src/nemo-x-content-bar.c:70
 msgid "These files are on an Audio DVD."
 msgstr ""
 
-#: ../src/nautilus-x-content-bar.c:72
+#: ../src/nemo-x-content-bar.c:72
 #, fuzzy
 msgid "These files are on a Video DVD."
 msgstr "Ev pel ne ya wêneyan e."
 
-#: ../src/nautilus-x-content-bar.c:74
+#: ../src/nemo-x-content-bar.c:74
 #, fuzzy
 msgid "These files are on a Video CD."
 msgstr "Ev pel ne ya wêneyan e."
 
-#: ../src/nautilus-x-content-bar.c:76
+#: ../src/nemo-x-content-bar.c:76
 msgid "These files are on a Super Video CD."
 msgstr ""
 
-#: ../src/nautilus-x-content-bar.c:78
+#: ../src/nemo-x-content-bar.c:78
 msgid "These files are on a Photo CD."
 msgstr ""
 
-#: ../src/nautilus-x-content-bar.c:80
+#: ../src/nemo-x-content-bar.c:80
 msgid "These files are on a Picture CD."
 msgstr ""
 
-#: ../src/nautilus-x-content-bar.c:82
+#: ../src/nemo-x-content-bar.c:82
 msgid "The media contains digital photos."
 msgstr ""
 
-#: ../src/nautilus-x-content-bar.c:84
+#: ../src/nemo-x-content-bar.c:84
 msgid "These files are on a digital audio player."
 msgstr ""
 
-#: ../src/nautilus-x-content-bar.c:86
+#: ../src/nemo-x-content-bar.c:86
 msgid "The media contains software."
 msgstr ""
 
 #. fallback to generic greeting
-#: ../src/nautilus-x-content-bar.c:89
+#: ../src/nemo-x-content-bar.c:89
 #, c-format
 msgid "The media has been detected as \"%s\"."
 msgstr ""
 
-#: ../src/nautilus-x-content-bar.c:122
+#: ../src/nemo-x-content-bar.c:122
 #, c-format
 msgid "Open %s"
 msgstr "%s veke"
 
-#: ../src/nautilus-zoom-control.c:78
+#: ../src/nemo-zoom-control.c:78
 msgid "Zoom In"
 msgstr "Nezîk bibe"
 
-#: ../src/nautilus-zoom-control.c:79
+#: ../src/nemo-zoom-control.c:79
 msgid "Zoom Out"
 msgstr "Dûr bikeve"
 
-#: ../src/nautilus-zoom-control.c:80
+#: ../src/nemo-zoom-control.c:80
 msgid "Zoom to Default"
 msgstr "Mezinkirina Standard"
 
-#: ../src/nautilus-zoom-control.c:891
+#: ../src/nemo-zoom-control.c:891
 msgid "Zoom"
 msgstr "Nêzîkkirin"
 
-#: ../src/nautilus-zoom-control.c:897
+#: ../src/nemo-zoom-control.c:897
 msgid "Set the zoom level of the current view"
 msgstr "Mîhengî asta mezinkirina xuyeneka rojane bike"
 
-#: ../nautilus-sendto-extension/nautilus-nste.c:83
-#: ../nautilus-sendto-extension/nautilus-nste.c:88
+#: ../nemo-sendto-extension/nemo-nste.c:83
+#: ../nemo-sendto-extension/nemo-nste.c:88
 msgid "Send To..."
 msgstr "Bişine..."
 
-#: ../nautilus-sendto-extension/nautilus-nste.c:84
+#: ../nemo-sendto-extension/nemo-nste.c:84
 msgid "Send file by mail, instant message..."
 msgstr ""
 
-#: ../nautilus-sendto-extension/nautilus-nste.c:89
+#: ../nemo-sendto-extension/nemo-nste.c:89
 msgid "Send files by mail, instant message..."
 msgstr ""
 
@@ -6428,8 +6428,8 @@ msgstr ""
 #~ msgid "Criteria for search bar searching"
 #~ msgstr "Krîterên lêgerînê yên di darikê lêgerînê de ye"
 
-#~ msgid "Current Nautilus theme (deprecated)"
-#~ msgstr "Tema Nautilus ê a niha(naye bikaranîn)"
+#~ msgid "Current Nemo theme (deprecated)"
+#~ msgstr "Tema Nemo ê a niha(naye bikaranîn)"
 
 #~ msgid "Custom Background Set"
 #~ msgstr "Mîhenga Rûerd ya Taybet"
@@ -6463,8 +6463,8 @@ msgstr ""
 #~ "Ji bo rûerdê panela kêlekê ya standard navê pel. Tenê dema "
 #~ "side_pane_background_set hatine hilbijartin tê bikaranîn"
 
-#~ msgid "Nautilus handles drawing the desktop"
-#~ msgstr "Ji bo xêzkirina sermaseyê Nautilusê bikar bîne"
+#~ msgid "Nemo handles drawing the desktop"
+#~ msgstr "Ji bo xêzkirina sermaseyê Nemoê bikar bîne"
 
 #~ msgid "Sans 10"
 #~ msgstr "Sans 10"
@@ -6735,9 +6735,9 @@ msgstr ""
 #~ msgid "\"%s\" selected (%s)"
 #~ msgstr "%s\" hatiye hilbijartin (%s)"
 
-#~ msgid "The folder \"%s\" contains more files than Nautilus can handle."
+#~ msgid "The folder \"%s\" contains more files than Nemo can handle."
 #~ msgstr ""
-#~ "Di hundirê \"%s\" de ewqasî pel heye ku Nautilus nikare gişî bixebitîne."
+#~ "Di hundirê \"%s\" de ewqasî pel heye ku Nemo nikare gişî bixebitîne."
 
 #~ msgid "Some files will not be displayed."
 #~ msgstr "Çend pel nayên nîşandan."
@@ -6821,8 +6821,8 @@ msgstr ""
 #~ "Girêdana bi navê \"Li Sermaseya Kevn Girê Bide\" li sermaseya te hate "
 #~ "avakirin."
 
-#~ msgid "Nautilus can't be used now, due to an unexpected error."
-#~ msgstr "Nautilus ji ber çewtiyeke nenas nayç bikaranîn."
+#~ msgid "Nemo can't be used now, due to an unexpected error."
+#~ msgstr "Nemo ji ber çewtiyeke nenas nayç bikaranîn."
 
 #~ msgid "Can't display location \"%s\""
 #~ msgstr "Cihê \"%s\" nayê nîşan dan"
@@ -6999,8 +6999,8 @@ msgstr ""
 #~ msgid "You can only use images as custom icons."
 #~ msgstr "Tu dikarî wêneyan tenê wekî îkonên taybet bikar bîne."
 
-#~ msgid "Restart Nautilus."
-#~ msgstr "Ji nû ve dest bi Nautilusê bike."
+#~ msgid "Restart Nemo."
+#~ msgstr "Ji nû ve dest bi Nemoê bike."
 
 #~ msgid "FILENAME"
 #~ msgstr "NAVÊPEL"
@@ -7139,23 +7139,23 @@ msgstr ""
 #~ msgstr "Kontrol bike bê ka mîhengên te yên cîgiriyê rast e yan na."
 
 #~ msgid ""
-#~ "Couldn't display \"%s\", because Nautilus cannot contact the SMB master "
+#~ "Couldn't display \"%s\", because Nemo cannot contact the SMB master "
 #~ "browser."
 #~ msgstr ""
-#~ "\"%s\" nayê nîşandan, ji ber ku Nautilus SMB xwe nagihîne geroka mak."
+#~ "\"%s\" nayê nîşandan, ji ber ku Nemo SMB xwe nagihîne geroka mak."
 
 #~ msgid "Check that an SMB server is running in the local network."
 #~ msgstr ""
 #~ "Kontrol bike bê ka di tora herêmî de pêşkêşkera SMB dixebite yan na."
 
-#~ msgid "Nautilus cannot display \"%s\"."
-#~ msgstr "Nautilus nikare \"%s\" nîşan bike."
+#~ msgid "Nemo cannot display \"%s\"."
+#~ msgstr "Nemo nikare \"%s\" nîşan bike."
 
 #~ msgid ""
-#~ "Nautilus is a graphical shell for GNOME that makes it easy to manage your "
+#~ "Nemo is a graphical shell for GNOME that makes it easy to manage your "
 #~ "files and the rest of your system."
 #~ msgstr ""
-#~ "Nautilus, sepaneke GNOME ye, ev sepan rê li ber vedike ku tu bi hêsanî "
+#~ "Nemo, sepaneke GNOME ye, ev sepan rê li ber vedike ku tu bi hêsanî "
 #~ "xwe bigihîne pel û pelrêçan."
 
 #~ msgid "_Backgrounds and Emblems..."
@@ -7328,8 +7328,8 @@ msgstr ""
 #~ msgid "Number view:"
 #~ msgstr "Dîtina hejmaran:"
 
-#~ msgid "Copyright © 1999-2005 The Nautilus authors"
-#~ msgstr "Copyright © 1999-2005 Nivîskarên Nautilus"
+#~ msgid "Copyright © 1999-2005 The Nemo authors"
+#~ msgstr "Copyright © 1999-2005 Nivîskarên Nemo"
 
 #~ msgid "Art"
 #~ msgstr "Huner"

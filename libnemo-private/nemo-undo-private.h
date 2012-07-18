@@ -22,15 +22,15 @@
  * Boston, MA 02111-1307, USA.
  */
 
-#ifndef NAUTILUS_UNDO_PRIVATE_H
-#define NAUTILUS_UNDO_PRIVATE_H
+#ifndef NEMO_UNDO_PRIVATE_H
+#define NEMO_UNDO_PRIVATE_H
 
-#include <libnautilus-private/nautilus-undo.h>
-#include <libnautilus-private/nautilus-undo-manager.h>
+#include <libnemo-private/nemo-undo.h>
+#include <libnemo-private/nemo-undo-manager.h>
 #include <glib-object.h>
 
-NautilusUndoManager * nautilus_undo_get_undo_manager    (GObject               *attached_object);
-void                  nautilus_undo_attach_undo_manager (GObject               *object,
-							 NautilusUndoManager   *manager);
+NemoUndoManager * nemo_undo_get_undo_manager    (GObject               *attached_object);
+void                  nemo_undo_attach_undo_manager (GObject               *object,
+							 NemoUndoManager   *manager);
 
-#endif /* NAUTILUS_UNDO_PRIVATE_H */
+#endif /* NEMO_UNDO_PRIVATE_H */

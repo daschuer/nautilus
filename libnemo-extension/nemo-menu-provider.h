@@ -1,5 +1,5 @@
 /*
- *  nautilus-menu-provider.h - Interface for Nautilus extensions that 
+ *  nemo-menu-provider.h - Interface for Nemo extensions that 
  *                             provide context menu items.
  *
  *  Copyright (C) 2003 Novell, Inc.
@@ -22,52 +22,52 @@
  *
  */
 
-/* This interface is implemented by Nautilus extensions that want to
+/* This interface is implemented by Nemo extensions that want to
  * add context menu entries to files.  Extensions are called when
- * Nautilus constructs the context menu for a file.  They are passed a
- * list of NautilusFileInfo objects which holds the current selection */
+ * Nemo constructs the context menu for a file.  They are passed a
+ * list of NemoFileInfo objects which holds the current selection */
 
-#ifndef NAUTILUS_MENU_PROVIDER_H
-#define NAUTILUS_MENU_PROVIDER_H
+#ifndef NEMO_MENU_PROVIDER_H
+#define NEMO_MENU_PROVIDER_H
 
 #include <glib-object.h>
 #include <gtk/gtk.h>
-#include "nautilus-extension-types.h"
-#include "nautilus-file-info.h"
-#include "nautilus-menu.h"
+#include "nemo-extension-types.h"
+#include "nemo-file-info.h"
+#include "nemo-menu.h"
 
 G_BEGIN_DECLS
 
-#define NAUTILUS_TYPE_MENU_PROVIDER           (nautilus_menu_provider_get_type ())
-#define NAUTILUS_MENU_PROVIDER(obj)           (G_TYPE_CHECK_INSTANCE_CAST ((obj), NAUTILUS_TYPE_MENU_PROVIDER, NautilusMenuProvider))
-#define NAUTILUS_IS_MENU_PROVIDER(obj)        (G_TYPE_CHECK_INSTANCE_TYPE ((obj), NAUTILUS_TYPE_MENU_PROVIDER))
-#define NAUTILUS_MENU_PROVIDER_GET_IFACE(obj) (G_TYPE_INSTANCE_GET_INTERFACE ((obj), NAUTILUS_TYPE_MENU_PROVIDER, NautilusMenuProviderIface))
+#define NEMO_TYPE_MENU_PROVIDER           (nemo_menu_provider_get_type ())
+#define NEMO_MENU_PROVIDER(obj)           (G_TYPE_CHECK_INSTANCE_CAST ((obj), NEMO_TYPE_MENU_PROVIDER, NemoMenuProvider))
+#define NEMO_IS_MENU_PROVIDER(obj)        (G_TYPE_CHECK_INSTANCE_TYPE ((obj), NEMO_TYPE_MENU_PROVIDER))
+#define NEMO_MENU_PROVIDER_GET_IFACE(obj) (G_TYPE_INSTANCE_GET_INTERFACE ((obj), NEMO_TYPE_MENU_PROVIDER, NemoMenuProviderIface))
 
-typedef struct _NautilusMenuProvider       NautilusMenuProvider;
-typedef struct _NautilusMenuProviderIface  NautilusMenuProviderIface;
+typedef struct _NemoMenuProvider       NemoMenuProvider;
+typedef struct _NemoMenuProviderIface  NemoMenuProviderIface;
 
-struct _NautilusMenuProviderIface {
+struct _NemoMenuProviderIface {
 	GTypeInterface g_iface;
 
-	GList *(*get_file_items)       (NautilusMenuProvider *provider,
+	GList *(*get_file_items)       (NemoMenuProvider *provider,
 					GtkWidget            *window,
 					GList                *files);
-	GList *(*get_background_items) (NautilusMenuProvider *provider,
+	GList *(*get_background_items) (NemoMenuProvider *provider,
 					GtkWidget            *window,
-					NautilusFileInfo     *current_folder);
+					NemoFileInfo     *current_folder);
 };
 
 /* Interface Functions */
-GType                   nautilus_menu_provider_get_type             (void);
-GList                  *nautilus_menu_provider_get_file_items       (NautilusMenuProvider *provider,
+GType                   nemo_menu_provider_get_type             (void);
+GList                  *nemo_menu_provider_get_file_items       (NemoMenuProvider *provider,
 								     GtkWidget            *window,
 								     GList                *files);
-GList                  *nautilus_menu_provider_get_background_items (NautilusMenuProvider *provider,
+GList                  *nemo_menu_provider_get_background_items (NemoMenuProvider *provider,
 								     GtkWidget            *window,
-								     NautilusFileInfo     *current_folder);
+								     NemoFileInfo     *current_folder);
 
-/* This function emit a signal to inform nautilus that its item list has changed. */
-void                    nautilus_menu_provider_emit_items_updated_signal (NautilusMenuProvider *provider);
+/* This function emit a signal to inform nemo that its item list has changed. */
+void                    nemo_menu_provider_emit_items_updated_signal (NemoMenuProvider *provider);
 
 G_END_DECLS
 

@@ -31,23 +31,23 @@
 
 #include <config.h>
 
-#include "nautilus-tree-sidebar.h"
+#include "nemo-tree-sidebar.h"
 
-#include "nautilus-tree-sidebar-model.h"
-#include "nautilus-properties-window.h"
-#include "nautilus-window-slot.h"
+#include "nemo-tree-sidebar-model.h"
+#include "nemo-properties-window.h"
+#include "nemo-window-slot.h"
 
-#include <libnautilus-private/nautilus-clipboard.h>
-#include <libnautilus-private/nautilus-clipboard-monitor.h>
-#include <libnautilus-private/nautilus-desktop-icon-file.h>
-#include <libnautilus-private/nautilus-file-attributes.h>
-#include <libnautilus-private/nautilus-file-operations.h>
-#include <libnautilus-private/nautilus-file-utilities.h>
-#include <libnautilus-private/nautilus-global-preferences.h>
-#include <libnautilus-private/nautilus-icon-names.h>
-#include <libnautilus-private/nautilus-program-choosing.h>
-#include <libnautilus-private/nautilus-tree-view-drag-dest.h>
-#include <libnautilus-private/nautilus-module.h>
+#include <libnemo-private/nemo-clipboard.h>
+#include <libnemo-private/nemo-clipboard-monitor.h>
+#include <libnemo-private/nemo-desktop-icon-file.h>
+#include <libnemo-private/nemo-file-attributes.h>
+#include <libnemo-private/nemo-file-operations.h>
+#include <libnemo-private/nemo-file-utilities.h>
+#include <libnemo-private/nemo-global-preferences.h>
+#include <libnemo-private/nemo-icon-names.h>
+#include <libnemo-private/nemo-program-choosing.h>
+#include <libnemo-private/nemo-tree-view-drag-dest.h>
+#include <libnemo-private/nemo-module.h>
 
 #include <string.h>
 #include <eel/eel-gtk-extensions.h>
@@ -55,8 +55,8 @@
 #include <glib/gi18n.h>
 #include <gio/gio.h>
 
-#define DEBUG_FLAG NAUTILUS_DEBUG_LIST_VIEW
-#include <libnautilus-private/nautilus-debug.h>
+#define DEBUG_FLAG NEMO_DEBUG_LIST_VIEW
+#include <libnemo-private/nemo-debug.h>
 
 typedef struct {
         GObject parent;
@@ -68,17 +68,17 @@ typedef struct {
 
 
 struct FMTreeViewDetails {
-	NautilusWindow *window;
+	NemoWindow *window;
 	GtkTreeView *tree_widget;
 	GtkTreeModelSort *sort_model;
 	FMTreeModel *child_model;
 
 	GVolumeMonitor *volume_monitor;
 
-	NautilusFile *activation_file;
-	NautilusWindowOpenFlags activation_flags;
+	NemoFile *activation_file;
+	NemoWindowOpenFlags activation_flags;
 
-	NautilusTreeViewDragDest *drag_dest;
+	NemoTreeViewDragDest *drag_dest;
 
 	char *selection_location;
 	gboolean selecting;
@@ -101,7 +101,7 @@ struct FMTreeViewDetails {
 	GtkWidget *popup_unmount_separator;
 	GtkWidget *popup_unmount;
 	GtkWidget *popup_eject;
-	NautilusFile *popup_file;
+	NemoFile *popup_file;
 	guint popup_file_idle_handler;
 	
 	guint selection_changed_timer;
@@ -115,8 +115,8 @@ typedef struct {
 static GdkAtom copied_files_atom;
 
 static void  fm_tree_view_activate_file     (FMTreeView *view, 
-			    		     NautilusFile *file,
-					     NautilusWindowOpenFlags flags);
+			    		     NemoFile *file,
+					     NemoWindowOpenFlags flags);
 
 static void create_popup_menu (FMTreeView *view);
 
@@ -124,8 +124,8 @@ G_DEFINE_TYPE (FMTreeView, fm_tree_view, GTK_TYPE_SCROLLED_WINDOW)
 #define parent_class fm_tree_view_parent_class
 
 static void
-notify_clipboard_info (NautilusClipboardMonitor *monitor,
-                       NautilusClipboardInfo *info,
+notify_clipboard_info (NemoClipboardMonitor *monitor,
+                       NemoClipboardInfo *info,
                        FMTreeView *view)
 {
 	if (info != NULL && info->cut) {
@@ -137,10 +137,10 @@ notify_clipboard_info (NautilusClipboardMonitor *monitor,
 
 
 static gboolean
-show_iter_for_file (FMTreeView *view, NautilusFile *file, GtkTreeIter *iter)
+show_iter_for_file (FMTreeView *view, NemoFile *file, GtkTreeIter *iter)
 {
 	GtkTreeModel *model;
-	NautilusFile *parent_file;
+	NemoFile *parent_file;
 	GtkTreeIter parent_iter;
 	GtkTreePath *path, *sort_path;
 	GtkTreeIter cur_iter;
@@ -167,16 +167,16 @@ show_iter_for_file (FMTreeView *view, NautilusFile *file, GtkTreeIter *iter)
 		return TRUE;
 	}
 
-	parent_file = nautilus_file_get_parent (file);
+	parent_file = nemo_file_get_parent (file);
 
 	if (parent_file == NULL) {
 		return FALSE;
 	}
 	if (!show_iter_for_file (view, parent_file, &parent_iter)) {
-		nautilus_file_unref (parent_file);
+		nemo_file_unref (parent_file);
 		return FALSE;
 	}
-	nautilus_file_unref (parent_file);
+	nemo_file_unref (parent_file);
 
 	if (parent_iter.user_data == NULL || parent_iter.stamp == 0) {
 		return FALSE;
@@ -194,11 +194,11 @@ show_iter_for_file (FMTreeView *view, NautilusFile *file, GtkTreeIter *iter)
 static void
 refresh_highlight (FMTreeView *view)
 {
-	NautilusClipboardMonitor *monitor;
-	NautilusClipboardInfo *info;
+	NemoClipboardMonitor *monitor;
+	NemoClipboardInfo *info;
 
-	monitor = nautilus_clipboard_monitor_get ();
-	info = nautilus_clipboard_monitor_get_clipboard_info (monitor);
+	monitor = nemo_clipboard_monitor_get ();
+	info = nemo_clipboard_monitor_get_clipboard_info (monitor);
 
 	notify_clipboard_info (monitor, info, view);
 }
@@ -207,7 +207,7 @@ static gboolean
 show_selection_idle_callback (gpointer callback_data)
 {
 	FMTreeView *view;
-	NautilusFile *file, *old_file;
+	NemoFile *file, *old_file;
 	GtkTreeIter iter;
 	GtkTreePath *path, *sort_path;
 
@@ -215,15 +215,15 @@ show_selection_idle_callback (gpointer callback_data)
 
 	view->details->show_selection_idle_id = 0;
 
-	file = nautilus_file_get_by_uri (view->details->selection_location);
+	file = nemo_file_get_by_uri (view->details->selection_location);
 	if (file == NULL) {
 		return FALSE;
 	}
 
-	if (!nautilus_file_is_directory (file)) {
+	if (!nemo_file_is_directory (file)) {
 		old_file = file;
-		file = nautilus_file_get_parent (file);
-		nautilus_file_unref (old_file);
+		file = nemo_file_get_parent (file);
+		nemo_file_unref (old_file);
 		if (file == NULL) {
 			return FALSE;
 		}
@@ -231,7 +231,7 @@ show_selection_idle_callback (gpointer callback_data)
 	
 	view->details->selecting = TRUE;
 	if (!show_iter_for_file (view, file, &iter)) {
-		nautilus_file_unref (file);
+		nemo_file_unref (file);
 		return FALSE;
 	}
 	view->details->selecting = FALSE;
@@ -246,7 +246,7 @@ show_selection_idle_callback (gpointer callback_data)
 	}
 	gtk_tree_path_free (sort_path);
 
-	nautilus_file_unref (file);
+	nemo_file_unref (file);
 	refresh_highlight (view);	
 
 	return FALSE;
@@ -275,7 +275,7 @@ row_loaded_callback (GtkTreeModel     *tree_model,
 		     GtkTreeIter      *iter,
 		     FMTreeView *view)
 {
-	NautilusFile *file, *tmp_file, *selection_file;
+	NemoFile *file, *tmp_file, *selection_file;
 
 	if (view->details->selection_location == NULL
 	    || !view->details->selecting
@@ -287,29 +287,29 @@ row_loaded_callback (GtkTreeModel     *tree_model,
 	if (file == NULL) {
 		return;
 	}
-	if (!nautilus_file_is_directory (file)) {
-		nautilus_file_unref(file);
+	if (!nemo_file_is_directory (file)) {
+		nemo_file_unref(file);
 		return;
 	}
 
 	/* if iter is ancestor of wanted selection_location then update selection */
-	selection_file = nautilus_file_get_by_uri (view->details->selection_location);
+	selection_file = nemo_file_get_by_uri (view->details->selection_location);
 	while (selection_file != NULL) {
 		if (file == selection_file) {
-			nautilus_file_unref (file);
-			nautilus_file_unref (selection_file);
+			nemo_file_unref (file);
+			nemo_file_unref (selection_file);
 
 			schedule_show_selection (view);
 			return;
 		}
-		tmp_file = nautilus_file_get_parent (selection_file);
-		nautilus_file_unref (selection_file);
+		tmp_file = nemo_file_get_parent (selection_file);
+		nemo_file_unref (selection_file);
 		selection_file = tmp_file;
 	}
-	nautilus_file_unref (file);
+	nemo_file_unref (file);
 }
 
-static NautilusFile *
+static NemoFile *
 sort_model_iter_to_file (FMTreeView *view, GtkTreeIter *iter)
 {
 	GtkTreeIter child_iter;
@@ -318,7 +318,7 @@ sort_model_iter_to_file (FMTreeView *view, GtkTreeIter *iter)
 	return fm_tree_model_iter_get_file (view->details->child_model, &child_iter);
 }
 
-static NautilusFile *
+static NemoFile *
 sort_model_path_to_file (FMTreeView *view, GtkTreePath *path)
 {
 	GtkTreeIter iter;
@@ -330,13 +330,13 @@ sort_model_path_to_file (FMTreeView *view, GtkTreePath *path)
 }
 
 static void
-got_activation_uri_callback (NautilusFile *file, gpointer callback_data)
+got_activation_uri_callback (NemoFile *file, gpointer callback_data)
 {
         char *uri, *file_uri;
         FMTreeView *view;
 	GdkScreen *screen;
 	GFile *location;
-	NautilusWindowSlot *slot;
+	NemoWindowSlot *slot;
 	gboolean open_in_same_slot;
 	
         view = FM_TREE_VIEW (callback_data);
@@ -347,21 +347,21 @@ got_activation_uri_callback (NautilusFile *file, gpointer callback_data)
 
 	open_in_same_slot =
 		(view->details->activation_flags &
-		 (NAUTILUS_WINDOW_OPEN_FLAG_NEW_WINDOW |
-		  NAUTILUS_WINDOW_OPEN_FLAG_NEW_TAB)) == 0;
+		 (NEMO_WINDOW_OPEN_FLAG_NEW_WINDOW |
+		  NEMO_WINDOW_OPEN_FLAG_NEW_TAB)) == 0;
 
-	slot = nautilus_window_get_active_slot (view->details->window);
+	slot = nemo_window_get_active_slot (view->details->window);
 
-	uri = nautilus_file_get_activation_uri (file);
-	if (nautilus_file_is_launcher (file)) {
-		file_uri = nautilus_file_get_uri (file);
+	uri = nemo_file_get_activation_uri (file);
+	if (nemo_file_is_launcher (file)) {
+		file_uri = nemo_file_get_uri (file);
 		DEBUG ("Tree sidebar, launching %s", file_uri);
-		nautilus_launch_desktop_file (screen, file_uri, NULL, NULL);
+		nemo_launch_desktop_file (screen, file_uri, NULL, NULL);
 		g_free (file_uri);
 	} else if (uri != NULL
-		   && nautilus_file_is_executable (file)
-		   && nautilus_file_can_execute (file)
-		   && !nautilus_file_is_directory (file)) {	
+		   && nemo_file_is_executable (file)
+		   && nemo_file_can_execute (file)
+		   && !nemo_file_is_directory (file)) {	
 		   
 		file_uri = g_filename_from_uri (uri, NULL, NULL);
 
@@ -370,7 +370,7 @@ got_activation_uri_callback (NautilusFile *file, gpointer callback_data)
 			DEBUG ("Tree sidebar, opening location %s", uri);
 
 			location = g_file_new_for_uri (uri);
-			nautilus_window_slot_open_location
+			nemo_window_slot_open_location
 				(slot,
 				 location, 
 				 view->details->activation_flags,
@@ -378,7 +378,7 @@ got_activation_uri_callback (NautilusFile *file, gpointer callback_data)
 			g_object_unref (location);
 		} else {
 			DEBUG ("Tree sidebar, launching application for %s", file_uri);
-			nautilus_launch_application_from_command (screen, file_uri, FALSE, NULL);
+			nemo_launch_application_from_command (screen, file_uri, FALSE, NULL);
 			g_free (file_uri);
 		}
 		   
@@ -396,7 +396,7 @@ got_activation_uri_callback (NautilusFile *file, gpointer callback_data)
 			DEBUG ("Tree sidebar, opening location %s", uri);
 
 			location = g_file_new_for_uri (uri);
-			nautilus_window_slot_open_location
+			nemo_window_slot_open_location
 				(slot,
 				 location,
 				 view->details->activation_flags,
@@ -406,7 +406,7 @@ got_activation_uri_callback (NautilusFile *file, gpointer callback_data)
 	}
 
 	g_free (uri);
-	nautilus_file_unref (view->details->activation_file);
+	nemo_file_unref (view->details->activation_file);
 	view->details->activation_file = NULL;
 }
 
@@ -417,10 +417,10 @@ cancel_activation (FMTreeView *view)
 		return;
 	}
 	
-	nautilus_file_cancel_call_when_ready
+	nemo_file_cancel_call_when_ready
 		(view->details->activation_file,
 		 got_activation_uri_callback, view);
-	nautilus_file_unref (view->details->activation_file);
+	nemo_file_unref (view->details->activation_file);
         view->details->activation_file = NULL;
 }
 
@@ -439,7 +439,7 @@ row_activated_callback (GtkTreeView *treeview, GtkTreePath *path,
 static gboolean 
 selection_changed_timer_callback(FMTreeView *view)
 {
-	NautilusFileAttributes attributes;
+	NemoFileAttributes attributes;
 	GtkTreeIter iter;
 	GtkTreeSelection *selection;
 	
@@ -462,8 +462,8 @@ selection_changed_timer_callback(FMTreeView *view)
 	}
 	view->details->activation_flags = 0;
 		
-	attributes = NAUTILUS_FILE_ATTRIBUTE_INFO | NAUTILUS_FILE_ATTRIBUTE_LINK_INFO;
-	nautilus_file_call_when_ready (view->details->activation_file, attributes,
+	attributes = NEMO_FILE_ATTRIBUTE_INFO | NEMO_FILE_ATTRIBUTE_LINK_INFO;
+	nemo_file_call_when_ready (view->details->activation_file, attributes,
 				       got_activation_uri_callback, view);
 	return FALSE; /* remove timeout */
 }
@@ -499,7 +499,7 @@ selection_changed_callback (GtkTreeSelection *selection,
 static int
 compare_rows (GtkTreeModel *model, GtkTreeIter *a, GtkTreeIter *b, gpointer callback_data)
 {
-	NautilusFile *file_a, *file_b;
+	NemoFile *file_a, *file_b;
 	int result;
 
 	/* Dummy rows are always first */
@@ -526,28 +526,28 @@ compare_rows (GtkTreeModel *model, GtkTreeIter *a, GtkTreeIter *b, gpointer call
 	} else if (file_b == NULL) {
 		result = +1;
 	} else {
-		result = nautilus_file_compare_for_sort (file_a, file_b,
-							 NAUTILUS_FILE_SORT_BY_DISPLAY_NAME,
+		result = nemo_file_compare_for_sort (file_a, file_b,
+							 NEMO_FILE_SORT_BY_DISPLAY_NAME,
 							 FALSE, FALSE);
 	}
 
-	nautilus_file_unref (file_a);
-	nautilus_file_unref (file_b);
+	nemo_file_unref (file_a);
+	nemo_file_unref (file_b);
 
 	return result;
 }
 
 
 static char *
-get_root_uri_callback (NautilusTreeViewDragDest *dest,
+get_root_uri_callback (NemoTreeViewDragDest *dest,
 		       gpointer user_data)
 {
 	/* Don't allow drops on background */
 	return NULL;
 }
 
-static NautilusFile *
-get_file_for_path_callback (NautilusTreeViewDragDest *dest,
+static NemoFile *
+get_file_for_path_callback (NemoTreeViewDragDest *dest,
 			    GtkTreePath *path,
 			    gpointer user_data)
 {
@@ -559,7 +559,7 @@ get_file_for_path_callback (NautilusTreeViewDragDest *dest,
 }
 
 static void
-move_copy_items_callback (NautilusTreeViewDragDest *dest,
+move_copy_items_callback (NemoTreeViewDragDest *dest,
 			  const GList *item_uris,
 			  const char *target_uri,
 			  GdkDragAction action,
@@ -571,10 +571,10 @@ move_copy_items_callback (NautilusTreeViewDragDest *dest,
 
 	view = FM_TREE_VIEW (user_data);
 	
-	nautilus_clipboard_clear_if_colliding_uris (GTK_WIDGET (view),
+	nemo_clipboard_clear_if_colliding_uris (GTK_WIDGET (view),
 						    item_uris,
 						    copied_files_atom);
-	nautilus_file_operations_copy_move
+	nemo_file_operations_copy_move
 		(item_uris,
 		 NULL,
 		 target_uri,
@@ -652,20 +652,20 @@ clipboard_contents_received_callback (GtkClipboard     *clipboard,
 }
 
 static gboolean
-is_parent_writable (NautilusFile *file)
+is_parent_writable (NemoFile *file)
 {
-	NautilusFile *parent;
+	NemoFile *parent;
 	gboolean result;
 	
-	parent = nautilus_file_get_parent (file);
+	parent = nemo_file_get_parent (file);
 	
 	/* No parent directory, return FALSE */
 	if (parent == NULL) {
 		return FALSE;
 	}
 	
-	result = nautilus_file_can_write (parent);
-	nautilus_file_unref (parent);
+	result = nemo_file_can_write (parent);
+	nemo_file_unref (parent);
 	
 	return result;	
 }
@@ -682,8 +682,8 @@ button_pressed_callback (GtkTreeView *treeview, GdkEventButton *event,
 	gboolean can_delete_file;
 	gboolean using_browser;
 
-	using_browser = g_settings_get_boolean (nautilus_preferences,
-						NAUTILUS_PREFERENCES_ALWAYS_USE_BROWSER);
+	using_browser = g_settings_get_boolean (nemo_preferences,
+						NEMO_PREFERENCES_ALWAYS_USE_BROWSER);
 
 	if (event->button == 3) {
 		gboolean show_unmount = FALSE;
@@ -712,29 +712,29 @@ button_pressed_callback (GtkTreeView *treeview, GdkEventButton *event,
 
 		if (using_browser) {
 			gtk_widget_set_sensitive (view->details->popup_open_in_new_window,
-						  nautilus_file_is_directory (view->details->popup_file));
+						  nemo_file_is_directory (view->details->popup_file));
 			gtk_widget_set_sensitive (view->details->popup_open_in_new_tab,
-						  nautilus_file_is_directory (view->details->popup_file));
+						  nemo_file_is_directory (view->details->popup_file));
 		}
 
 		gtk_widget_set_sensitive (view->details->popup_create_folder,
-			nautilus_file_is_directory (view->details->popup_file) &&
-			nautilus_file_can_write (view->details->popup_file));
+			nemo_file_is_directory (view->details->popup_file) &&
+			nemo_file_can_write (view->details->popup_file));
 		gtk_widget_set_sensitive (view->details->popup_paste, FALSE);
-		if (nautilus_file_is_directory (view->details->popup_file) &&
-			nautilus_file_can_write (view->details->popup_file)) {
-			gtk_clipboard_request_contents (nautilus_clipboard_get (GTK_WIDGET (view->details->tree_widget)),
+		if (nemo_file_is_directory (view->details->popup_file) &&
+			nemo_file_can_write (view->details->popup_file)) {
+			gtk_clipboard_request_contents (nemo_clipboard_get (GTK_WIDGET (view->details->tree_widget)),
 							copied_files_atom,
 							clipboard_contents_received_callback, g_object_ref (view));
 		}
-		can_move_file_to_trash = nautilus_file_can_trash (view->details->popup_file);
+		can_move_file_to_trash = nemo_file_can_trash (view->details->popup_file);
 		gtk_widget_set_sensitive (view->details->popup_trash, can_move_file_to_trash);
 		
-		if (g_settings_get_boolean (nautilus_preferences, NAUTILUS_PREFERENCES_ENABLE_DELETE)) {
+		if (g_settings_get_boolean (nemo_preferences, NEMO_PREFERENCES_ENABLE_DELETE)) {
 			parent_file_is_writable = is_parent_writable (view->details->popup_file);
-			file_is_home_or_desktop = nautilus_file_is_home (view->details->popup_file)
-				|| nautilus_file_is_desktop_directory (view->details->popup_file);
-			file_is_special_link = NAUTILUS_IS_DESKTOP_ICON_FILE (view->details->popup_file);
+			file_is_home_or_desktop = nemo_file_is_home (view->details->popup_file)
+				|| nemo_file_is_desktop_directory (view->details->popup_file);
+			file_is_special_link = NEMO_IS_DESKTOP_ICON_FILE (view->details->popup_file);
 			
 			can_delete_file = parent_file_is_writable 
 				&& !file_is_home_or_desktop
@@ -779,8 +779,8 @@ button_pressed_callback (GtkTreeView *treeview, GdkEventButton *event,
 
 		return FALSE;
 	} else if (event->button == 2 && event->type == GDK_BUTTON_PRESS) {
-		NautilusFile *file;
-		NautilusWindowOpenFlags flags = 0;
+		NemoFile *file;
+		NemoWindowOpenFlags flags = 0;
 
 		if (!gtk_tree_view_get_path_at_pos (treeview, event->x, event->y,
 						    &path, NULL, NULL, NULL)) {
@@ -791,15 +791,15 @@ button_pressed_callback (GtkTreeView *treeview, GdkEventButton *event,
 
 		if (using_browser) {
 			flags = (event->state & GDK_CONTROL_MASK) ?
-				NAUTILUS_WINDOW_OPEN_FLAG_NEW_WINDOW :
-				NAUTILUS_WINDOW_OPEN_FLAG_NEW_TAB;
+				NEMO_WINDOW_OPEN_FLAG_NEW_WINDOW :
+				NEMO_WINDOW_OPEN_FLAG_NEW_TAB;
 		} else {
-			flags = NAUTILUS_WINDOW_OPEN_FLAG_CLOSE_BEHIND;
+			flags = NEMO_WINDOW_OPEN_FLAG_CLOSE_BEHIND;
 		}
 
 		if (file) {
 			fm_tree_view_activate_file (view, file, flags);
-			nautilus_file_unref (file);
+			nemo_file_unref (file);
 		}
 
 		gtk_tree_path_free (path);
@@ -812,18 +812,18 @@ button_pressed_callback (GtkTreeView *treeview, GdkEventButton *event,
 
 static void
 fm_tree_view_activate_file (FMTreeView *view, 
-			    NautilusFile *file,
-			    NautilusWindowOpenFlags flags)
+			    NemoFile *file,
+			    NemoWindowOpenFlags flags)
 {
-	NautilusFileAttributes attributes;
+	NemoFileAttributes attributes;
 
 	cancel_activation (view);
 
-	view->details->activation_file = nautilus_file_ref (file);
+	view->details->activation_file = nemo_file_ref (file);
 	view->details->activation_flags = flags;
 		
-	attributes = NAUTILUS_FILE_ATTRIBUTE_INFO | NAUTILUS_FILE_ATTRIBUTE_LINK_INFO;
-	nautilus_file_call_when_ready (view->details->activation_file, attributes,
+	attributes = NEMO_FILE_ATTRIBUTE_INFO | NEMO_FILE_ATTRIBUTE_LINK_INFO;
+	nemo_file_call_when_ready (view->details->activation_file, attributes,
 				       got_activation_uri_callback, view);
 }
 
@@ -838,14 +838,14 @@ static void
 fm_tree_view_open_in_new_tab_cb (GtkWidget *menu_item,
 				    FMTreeView *view)
 {
-	fm_tree_view_activate_file (view, view->details->popup_file, NAUTILUS_WINDOW_OPEN_FLAG_NEW_TAB);
+	fm_tree_view_activate_file (view, view->details->popup_file, NEMO_WINDOW_OPEN_FLAG_NEW_TAB);
 }
 
 static void
 fm_tree_view_open_in_new_window_cb (GtkWidget *menu_item,
 				    FMTreeView *view)
 {
-	fm_tree_view_activate_file (view, view->details->popup_file, NAUTILUS_WINDOW_OPEN_FLAG_NEW_WINDOW);
+	fm_tree_view_activate_file (view, view->details->popup_file, NEMO_WINDOW_OPEN_FLAG_NEW_WINDOW);
 }
 
 static void
@@ -858,11 +858,11 @@ new_folder_done (GFile *new_folder,
 	/* show the properties window for the newly created
 	 * folder so the user can change its name
 	 */
-	list = g_list_prepend (NULL, nautilus_file_get (new_folder));
+	list = g_list_prepend (NULL, nemo_file_get (new_folder));
 
-	nautilus_properties_window_present (list, GTK_WIDGET (data), NULL);
+	nemo_properties_window_present (list, GTK_WIDGET (data), NULL);
 
-        nautilus_file_list_free (list);
+        nemo_file_list_free (list);
 }
 
 static void
@@ -871,8 +871,8 @@ fm_tree_view_create_folder_cb (GtkWidget *menu_item,
 {
 	char *parent_uri;
 
-	parent_uri = nautilus_file_get_uri (view->details->popup_file);
-	nautilus_file_operations_new_folder (GTK_WIDGET (view->details->tree_widget),
+	parent_uri = nemo_file_get_uri (view->details->popup_file);
+	nemo_file_operations_new_folder (GTK_WIDGET (view->details->tree_widget),
 					     NULL,
 					     parent_uri,
 					     new_folder_done, view->details->tree_widget);
@@ -885,7 +885,7 @@ copy_or_cut_files (FMTreeView *view,
 		   gboolean cut)
 {
 	char *status_string, *name;
-	NautilusClipboardInfo info;
+	NemoClipboardInfo info;
         GtkTargetList *target_list;
         GtkTargetEntry *targets;
         int n_targets;
@@ -901,17 +901,17 @@ copy_or_cut_files (FMTreeView *view,
         targets = gtk_target_table_new_from_list (target_list, &n_targets);
         gtk_target_list_unref (target_list);
 
-	gtk_clipboard_set_with_data (nautilus_clipboard_get (GTK_WIDGET (view->details->tree_widget)),
+	gtk_clipboard_set_with_data (nemo_clipboard_get (GTK_WIDGET (view->details->tree_widget)),
 				     targets, n_targets,
-				     nautilus_get_clipboard_callback, nautilus_clear_clipboard_callback,
+				     nemo_get_clipboard_callback, nemo_clear_clipboard_callback,
 				     NULL);
         gtk_target_table_free (targets, n_targets);
 
-	nautilus_clipboard_monitor_set_clipboard_info (nautilus_clipboard_monitor_get (),
+	nemo_clipboard_monitor_set_clipboard_info (nemo_clipboard_monitor_get (),
 	                                               &info);
 	g_list_free (info.files);
 
-	name = nautilus_file_get_display_name (view->details->popup_file);
+	name = nemo_file_get_display_name (view->details->popup_file);
 	if (cut) {
 		status_string = g_strdup_printf (_("\"%s\" will be moved "
 						   "if you select the Paste command"),
@@ -923,7 +923,7 @@ copy_or_cut_files (FMTreeView *view,
 	}
 	g_free (name);
 	
-	nautilus_window_push_status (view->details->window,
+	nemo_window_push_status (view->details->window,
 					  status_string);
 	g_free (status_string);
 }
@@ -951,14 +951,14 @@ paste_clipboard_data (FMTreeView *view,
 	GList *item_uris;
 
 	cut = FALSE;
-	item_uris = nautilus_clipboard_get_uri_list_from_selection_data (selection_data, &cut,
+	item_uris = nemo_clipboard_get_uri_list_from_selection_data (selection_data, &cut,
 									 copied_files_atom);
 
 	if (item_uris == NULL|| destination_uri == NULL) {
-		nautilus_window_push_status (view->details->window,
+		nemo_window_push_status (view->details->window,
 						  _("There is nothing on the clipboard to paste."));
 	} else {
-		nautilus_file_operations_copy_move
+		nemo_file_operations_copy_move
 			(item_uris, NULL, destination_uri,
 			 cut ? GDK_ACTION_MOVE : GDK_ACTION_COPY,
 			 GTK_WIDGET (view->details->tree_widget),
@@ -966,7 +966,7 @@ paste_clipboard_data (FMTreeView *view,
 
 		/* If items are cut then remove from clipboard */
 		if (cut) {
-			gtk_clipboard_clear (nautilus_clipboard_get (GTK_WIDGET (view)));
+			gtk_clipboard_clear (nemo_clipboard_get (GTK_WIDGET (view)));
 		}
 
 		g_list_free_full (item_uris, g_free);
@@ -983,7 +983,7 @@ paste_into_clipboard_received_callback (GtkClipboard     *clipboard,
 
 	view = FM_TREE_VIEW (data);
 
-	directory_uri = nautilus_file_get_uri (view->details->popup_file);
+	directory_uri = nemo_file_get_uri (view->details->popup_file);
 
 	paste_clipboard_data (view, selection_data, directory_uri);
 
@@ -994,7 +994,7 @@ static void
 fm_tree_view_paste_cb (GtkWidget *menu_item,
 		       FMTreeView *view)
 {
-	gtk_clipboard_request_contents (nautilus_clipboard_get (GTK_WIDGET (view->details->tree_widget)),
+	gtk_clipboard_request_contents (nemo_clipboard_get (GTK_WIDGET (view->details->tree_widget)),
 					copied_files_atom,
 					paste_into_clipboard_received_callback, view);
 }
@@ -1020,14 +1020,14 @@ fm_tree_view_trash_cb (GtkWidget *menu_item,
 {
 	GList *list;
 
-	if (!nautilus_file_can_trash (view->details->popup_file)) {
+	if (!nemo_file_can_trash (view->details->popup_file)) {
 		return;
 	}
 	
 	list = g_list_prepend (NULL,
-			       nautilus_file_get_location (view->details->popup_file));
+			       nemo_file_get_location (view->details->popup_file));
 	
-	nautilus_file_operations_trash_or_delete (list, 
+	nemo_file_operations_trash_or_delete (list, 
 						  fm_tree_view_get_containing_window (view),
 						  NULL, NULL);
 	g_list_free_full (list, g_object_unref);
@@ -1039,14 +1039,14 @@ fm_tree_view_delete_cb (GtkWidget *menu_item,
 {
 	GList *location_list;
 		
-	if (!g_settings_get_boolean (nautilus_preferences, NAUTILUS_PREFERENCES_ENABLE_DELETE)) {
+	if (!g_settings_get_boolean (nemo_preferences, NEMO_PREFERENCES_ENABLE_DELETE)) {
 		return;
 	}
 	
 	location_list = g_list_prepend (NULL,
-					nautilus_file_get_location (view->details->popup_file));
+					nemo_file_get_location (view->details->popup_file));
 	
-	nautilus_file_operations_delete (location_list, fm_tree_view_get_containing_window (view), NULL, NULL);
+	nemo_file_operations_delete (location_list, fm_tree_view_get_containing_window (view), NULL, NULL);
 	g_list_free_full (location_list, g_object_unref);
 }
 
@@ -1056,18 +1056,18 @@ fm_tree_view_properties_cb (GtkWidget *menu_item,
 {
 	GList *list;
         
-	list = g_list_prepend (NULL, nautilus_file_ref (view->details->popup_file));
+	list = g_list_prepend (NULL, nemo_file_ref (view->details->popup_file));
 
-	nautilus_properties_window_present (list, GTK_WIDGET (view->details->tree_widget), NULL);
+	nemo_properties_window_present (list, GTK_WIDGET (view->details->tree_widget), NULL);
 
-        nautilus_file_list_free (list);
+        nemo_file_list_free (list);
 }
 
 static void
 fm_tree_view_unmount_cb (GtkWidget *menu_item,
 			 FMTreeView *view)
 {
-	NautilusFile *file = view->details->popup_file;
+	NemoFile *file = view->details->popup_file;
 	GMount *mount;
 	
 	if (file == NULL) {
@@ -1077,7 +1077,7 @@ fm_tree_view_unmount_cb (GtkWidget *menu_item,
 	mount = fm_tree_model_get_mount_for_root_node_file (view->details->child_model, file);
 	
 	if (mount != NULL) {
-		nautilus_file_operations_unmount_mount (fm_tree_view_get_containing_window (view),
+		nemo_file_operations_unmount_mount (fm_tree_view_get_containing_window (view),
 							mount, FALSE, TRUE);
 	}
 }
@@ -1086,7 +1086,7 @@ static void
 fm_tree_view_eject_cb (GtkWidget *menu_item,
 		       FMTreeView *view)
 {
-	NautilusFile *file = view->details->popup_file;
+	NemoFile *file = view->details->popup_file;
 	GMount *mount;
 	
 	if (file == NULL) {
@@ -1096,7 +1096,7 @@ fm_tree_view_eject_cb (GtkWidget *menu_item,
 	mount = fm_tree_model_get_mount_for_root_node_file (view->details->child_model, file);
 	
 	if (mount != NULL) {
-		nautilus_file_operations_unmount_mount (fm_tree_view_get_containing_window (view),
+		nemo_file_operations_unmount_mount (fm_tree_view_get_containing_window (view),
 							mount, TRUE, TRUE);
 	}
 }
@@ -1109,7 +1109,7 @@ free_popup_file_in_idle_cb (gpointer data)
 	view = FM_TREE_VIEW (data);
 
 	if (view->details->popup_file != NULL) {
-		nautilus_file_unref (view->details->popup_file);
+		nemo_file_unref (view->details->popup_file);
 		view->details->popup_file = NULL;
 	}
 	view->details->popup_file_idle_handler = 0;
@@ -1170,8 +1170,8 @@ create_popup_menu (FMTreeView *view)
 	g_signal_connect (menu_item, "activate",
 			  G_CALLBACK (fm_tree_view_open_in_new_tab_cb),
 			  view);
-	g_settings_bind (nautilus_preferences,
-			 NAUTILUS_PREFERENCES_ALWAYS_USE_BROWSER,
+	g_settings_bind (nemo_preferences,
+			 NEMO_PREFERENCES_ALWAYS_USE_BROWSER,
 			 menu_item,
 			 "visible",
 			 G_SETTINGS_BIND_GET);
@@ -1184,8 +1184,8 @@ create_popup_menu (FMTreeView *view)
 	g_signal_connect (menu_item, "activate",
 			  G_CALLBACK (fm_tree_view_open_in_new_window_cb),
 			  view);
-	g_settings_bind (nautilus_preferences,
-			 NAUTILUS_PREFERENCES_ALWAYS_USE_BROWSER,
+	g_settings_bind (nemo_preferences,
+			 NEMO_PREFERENCES_ALWAYS_USE_BROWSER,
 			 menu_item,
 			 "visible",
 			 G_SETTINGS_BIND_GET);
@@ -1241,7 +1241,7 @@ create_popup_menu (FMTreeView *view)
 	eel_gtk_menu_append_separator (GTK_MENU (popup));
 	
 	/* add the "move to trash" menu item */
-	menu_image = gtk_image_new_from_icon_name (NAUTILUS_ICON_TRASH_FULL,
+	menu_image = gtk_image_new_from_icon_name (NEMO_ICON_TRASH_FULL,
 						   GTK_ICON_SIZE_MENU);
 	gtk_widget_show (menu_image);
 	menu_item = gtk_image_menu_item_new_with_mnemonic (_("Mo_ve to Trash"));
@@ -1255,7 +1255,7 @@ create_popup_menu (FMTreeView *view)
 	view->details->popup_trash = menu_item;
 	
 	/* add the "delete" menu item */
-	menu_image = gtk_image_new_from_icon_name (NAUTILUS_ICON_DELETE,
+	menu_image = gtk_image_new_from_icon_name (NEMO_ICON_DELETE,
 						   GTK_ICON_SIZE_MENU);
 	gtk_widget_show (menu_image);
 	menu_item = gtk_image_menu_item_new_with_mnemonic (_("_Delete"));
@@ -1314,7 +1314,7 @@ create_tree (FMTreeView *view)
 	GList *mounts, *l;
 	char *location;
 	GIcon *icon;
-	NautilusWindowSlot *slot;
+	NemoWindowSlot *slot;
 	
 	view->details->child_model = fm_tree_model_new ();
 	view->details->sort_model = GTK_TREE_MODEL_SORT
@@ -1324,7 +1324,7 @@ create_tree (FMTreeView *view)
 	g_object_unref (view->details->sort_model);
 
 	gtk_style_context_add_class (gtk_widget_get_style_context (GTK_WIDGET (view->details->tree_widget)),
-				     "NautilusSidebar");
+				     "NemoSidebar");
 
 	gtk_tree_sortable_set_default_sort_func (GTK_TREE_SORTABLE (view->details->sort_model),
 						 compare_rows, view, NULL);
@@ -1333,16 +1333,16 @@ create_tree (FMTreeView *view)
 		(view->details->child_model, "row_loaded",
 		 G_CALLBACK (row_loaded_callback),
 		 view, G_CONNECT_AFTER);
-	home_uri = nautilus_get_home_directory_uri ();
-	icon = g_themed_icon_new (NAUTILUS_ICON_HOME);
+	home_uri = nemo_get_home_directory_uri ();
+	icon = g_themed_icon_new (NEMO_ICON_HOME);
 	fm_tree_model_add_root_uri (view->details->child_model, home_uri, _("Home"), icon, NULL);
 	g_object_unref (icon);
 	g_free (home_uri);
-	icon = g_themed_icon_new (NAUTILUS_ICON_FILESYSTEM);
+	icon = g_themed_icon_new (NEMO_ICON_FILESYSTEM);
 	fm_tree_model_add_root_uri (view->details->child_model, "file:///", _("File System"), icon, NULL);
 	g_object_unref (icon);
 #ifdef NOT_YET_USABLE /* Do we really want this? */
-	icon = g_themed_icon_new (NAUTILUS_ICON_NETWORK);
+	icon = g_themed_icon_new (NEMO_ICON_NETWORK);
 	fm_tree_model_add_root_uri (view->details->child_model, "network:///", _("Network Neighbourhood"), icon, NULL);
 	g_object_unref (icon);
 #endif
@@ -1366,7 +1366,7 @@ create_tree (FMTreeView *view)
 	gtk_tree_view_set_headers_visible (view->details->tree_widget, FALSE);
 
 	view->details->drag_dest = 
-		nautilus_tree_view_drag_dest_new (view->details->tree_widget);
+		nemo_tree_view_drag_dest_new (view->details->tree_widget);
 	g_signal_connect_object (view->details->drag_dest, 
 				 "get_root_uri",
 				 G_CALLBACK (get_root_uri_callback),
@@ -1416,8 +1416,8 @@ create_tree (FMTreeView *view)
 			  "button_press_event", G_CALLBACK (button_pressed_callback),
 			  view);
 
-	slot = nautilus_window_get_active_slot (view->details->window);
-	location = nautilus_window_slot_get_current_uri (slot);
+	slot = nemo_window_get_active_slot (view->details->window);
+	location = nemo_window_slot_get_current_uri (slot);
 	schedule_select_and_show_location (view, location);
 	g_free (location);
 }
@@ -1425,27 +1425,27 @@ create_tree (FMTreeView *view)
 static void
 update_filtering_from_preferences (FMTreeView *view)
 {
-	NautilusWindowShowHiddenFilesMode mode;
+	NemoWindowShowHiddenFilesMode mode;
 
 	if (view->details->child_model == NULL) {
 		return;
 	}
 
-	mode = nautilus_window_get_hidden_files_mode (view->details->window);
+	mode = nemo_window_get_hidden_files_mode (view->details->window);
 
-	if (mode == NAUTILUS_WINDOW_SHOW_HIDDEN_FILES_DEFAULT) {
+	if (mode == NEMO_WINDOW_SHOW_HIDDEN_FILES_DEFAULT) {
 		fm_tree_model_set_show_hidden_files
 			(view->details->child_model,
-			 g_settings_get_boolean (nautilus_preferences, NAUTILUS_PREFERENCES_SHOW_HIDDEN_FILES));
+			 g_settings_get_boolean (nemo_preferences, NEMO_PREFERENCES_SHOW_HIDDEN_FILES));
 	} else {
 		fm_tree_model_set_show_hidden_files
 			(view->details->child_model,
-			 mode == NAUTILUS_WINDOW_SHOW_HIDDEN_FILES_ENABLE);
+			 mode == NEMO_WINDOW_SHOW_HIDDEN_FILES_ENABLE);
 	}
 	fm_tree_model_set_show_only_directories
 		(view->details->child_model,
-		 g_settings_get_boolean (nautilus_tree_sidebar_preferences,
-					 NAUTILUS_PREFERENCES_TREE_SHOW_ONLY_DIRECTORIES));
+		 g_settings_get_boolean (nemo_tree_sidebar_preferences,
+					 NEMO_PREFERENCES_TREE_SHOW_ONLY_DIRECTORIES));
 }
 
 static void
@@ -1470,7 +1470,7 @@ filtering_changed_callback (gpointer callback_data)
 }
 
 static void
-loading_uri_callback (NautilusWindow *window,
+loading_uri_callback (NemoWindow *window,
 		      char *location,
 		      gpointer callback_data)
 {
@@ -1501,19 +1501,19 @@ fm_tree_view_init (FMTreeView *view)
 	
 	view->details->selecting = FALSE;
 
-	g_signal_connect_swapped (nautilus_preferences,
-				  "changed::" NAUTILUS_PREFERENCES_SHOW_HIDDEN_FILES,
+	g_signal_connect_swapped (nemo_preferences,
+				  "changed::" NEMO_PREFERENCES_SHOW_HIDDEN_FILES,
 				  G_CALLBACK(filtering_changed_callback),
 				  view);
 
-	g_signal_connect_swapped (nautilus_tree_sidebar_preferences,
-				  "changed::" NAUTILUS_PREFERENCES_TREE_SHOW_ONLY_DIRECTORIES,
+	g_signal_connect_swapped (nemo_tree_sidebar_preferences,
+				  "changed::" NEMO_PREFERENCES_TREE_SHOW_ONLY_DIRECTORIES,
 				  G_CALLBACK (filtering_changed_callback), view);
 
 	view->details->popup_file = NULL;
 
 	view->details->clipboard_handler_id =
-		g_signal_connect (nautilus_clipboard_monitor_get (),
+		g_signal_connect (nemo_clipboard_monitor_get (),
 				  "clipboard_info",
 				  G_CALLBACK (notify_clipboard_info), view);
 }
@@ -1541,7 +1541,7 @@ fm_tree_view_dispose (GObject *object)
 	}
 
 	if (view->details->clipboard_handler_id != 0) {
-		g_signal_handler_disconnect (nautilus_clipboard_monitor_get (),
+		g_signal_handler_disconnect (nemo_clipboard_monitor_get (),
 		                             view->details->clipboard_handler_id);
 		view->details->clipboard_handler_id = 0;
 	}
@@ -1559,7 +1559,7 @@ fm_tree_view_dispose (GObject *object)
 	}
 	
 	if (view->details->popup_file != NULL) {
-		nautilus_file_unref (view->details->popup_file);
+		nemo_file_unref (view->details->popup_file);
 		view->details->popup_file = NULL;
 	}
 
@@ -1573,10 +1573,10 @@ fm_tree_view_dispose (GObject *object)
 		view->details->volume_monitor = NULL;
 	}
 
-	g_signal_handlers_disconnect_by_func (nautilus_preferences,
+	g_signal_handlers_disconnect_by_func (nemo_preferences,
 					      G_CALLBACK(filtering_changed_callback),
 					      view);
-	g_signal_handlers_disconnect_by_func (nautilus_tree_sidebar_preferences,
+	g_signal_handlers_disconnect_by_func (nemo_tree_sidebar_preferences,
 					      G_CALLBACK(filtering_changed_callback),
 					      view);
 
@@ -1606,7 +1606,7 @@ fm_tree_view_class_init (FMTreeViewClass *class)
 	copied_files_atom = gdk_atom_intern ("x-special/gnome-copied-files", FALSE);
 }
 static void 
-hidden_files_mode_changed_callback (NautilusWindow *window,
+hidden_files_mode_changed_callback (NemoWindow *window,
 				    FMTreeView *view)
 {
 	update_filtering_from_preferences (view);
@@ -1614,18 +1614,18 @@ hidden_files_mode_changed_callback (NautilusWindow *window,
 
 static void
 fm_tree_view_set_parent_window (FMTreeView *sidebar,
-				NautilusWindow *window)
+				NemoWindow *window)
 {
 	char *location;
-	NautilusWindowSlot *slot;
+	NemoWindowSlot *slot;
 	
 	sidebar->details->window = window;
 
-	slot = nautilus_window_get_active_slot (window);
+	slot = nemo_window_get_active_slot (window);
 
 	g_signal_connect_object (window, "loading_uri",
 				 G_CALLBACK (loading_uri_callback), sidebar, 0);
-	location = nautilus_window_slot_get_current_uri (slot);
+	location = nemo_window_slot_get_current_uri (slot);
 	loading_uri_callback (window, location, sidebar);
 	g_free (location);
 
@@ -1635,7 +1635,7 @@ fm_tree_view_set_parent_window (FMTreeView *sidebar,
 }
 
 GtkWidget *
-nautilus_tree_sidebar_new (NautilusWindow *window)
+nemo_tree_sidebar_new (NemoWindow *window)
 {
 	FMTreeView *sidebar;
 	

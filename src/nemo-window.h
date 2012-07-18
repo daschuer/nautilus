@@ -1,17 +1,17 @@
 /* -*- Mode: C; tab-width: 8; indent-tabs-mode: nil; c-basic-offset: 8 -*- */
 
 /*
- *  Nautilus
+ *  Nemo
  *
  *  Copyright (C) 1999, 2000 Red Hat, Inc.
  *  Copyright (C) 1999, 2000, 2001 Eazel, Inc.
  *
- *  Nautilus is free software; you can redistribute it and/or
+ *  Nemo is free software; you can redistribute it and/or
  *  modify it under the terms of the GNU General Public License as
  *  published by the Free Software Foundation; either version 2 of the
  *  License, or (at your option) any later version.
  *
- *  Nautilus is distributed in the hope that it will be useful,
+ *  Nemo is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
  *  General Public License for more details.
@@ -24,127 +24,127 @@
  *           Darin Adler <darin@bentspoon.com>
  *
  */
-/* nautilus-window.h: Interface of the main window object */
+/* nemo-window.h: Interface of the main window object */
 
-#ifndef NAUTILUS_WINDOW_H
-#define NAUTILUS_WINDOW_H
+#ifndef NEMO_WINDOW_H
+#define NEMO_WINDOW_H
 
 #include <gtk/gtk.h>
 #include <eel/eel-glib-extensions.h>
-#include <libnautilus-private/nautilus-bookmark.h>
-#include <libnautilus-private/nautilus-search-directory.h>
+#include <libnemo-private/nemo-bookmark.h>
+#include <libnemo-private/nemo-search-directory.h>
 
-#include "nautilus-navigation-state.h"
-#include "nautilus-view.h"
-#include "nautilus-window-types.h"
+#include "nemo-navigation-state.h"
+#include "nemo-view.h"
+#include "nemo-window-types.h"
 
-#define NAUTILUS_TYPE_WINDOW nautilus_window_get_type()
-#define NAUTILUS_WINDOW(obj) \
-  (G_TYPE_CHECK_INSTANCE_CAST ((obj), NAUTILUS_TYPE_WINDOW, NautilusWindow))
-#define NAUTILUS_WINDOW_CLASS(klass) \
-  (G_TYPE_CHECK_CLASS_CAST ((klass), NAUTILUS_TYPE_WINDOW, NautilusWindowClass))
-#define NAUTILUS_IS_WINDOW(obj) \
-  (G_TYPE_CHECK_INSTANCE_TYPE ((obj), NAUTILUS_TYPE_WINDOW))
-#define NAUTILUS_IS_WINDOW_CLASS(klass) \
-  (G_TYPE_CHECK_CLASS_TYPE ((klass), NAUTILUS_TYPE_WINDOW))
-#define NAUTILUS_WINDOW_GET_CLASS(obj) \
-  (G_TYPE_INSTANCE_GET_CLASS ((obj), NAUTILUS_TYPE_WINDOW, NautilusWindowClass))
-
-typedef enum {
-        NAUTILUS_WINDOW_SHOW_HIDDEN_FILES_DEFAULT,
-        NAUTILUS_WINDOW_SHOW_HIDDEN_FILES_ENABLE,
-        NAUTILUS_WINDOW_SHOW_HIDDEN_FILES_DISABLE
-} NautilusWindowShowHiddenFilesMode;
+#define NEMO_TYPE_WINDOW nemo_window_get_type()
+#define NEMO_WINDOW(obj) \
+  (G_TYPE_CHECK_INSTANCE_CAST ((obj), NEMO_TYPE_WINDOW, NemoWindow))
+#define NEMO_WINDOW_CLASS(klass) \
+  (G_TYPE_CHECK_CLASS_CAST ((klass), NEMO_TYPE_WINDOW, NemoWindowClass))
+#define NEMO_IS_WINDOW(obj) \
+  (G_TYPE_CHECK_INSTANCE_TYPE ((obj), NEMO_TYPE_WINDOW))
+#define NEMO_IS_WINDOW_CLASS(klass) \
+  (G_TYPE_CHECK_CLASS_TYPE ((klass), NEMO_TYPE_WINDOW))
+#define NEMO_WINDOW_GET_CLASS(obj) \
+  (G_TYPE_INSTANCE_GET_CLASS ((obj), NEMO_TYPE_WINDOW, NemoWindowClass))
 
 typedef enum {
-        NAUTILUS_WINDOW_NOT_SHOWN,
-        NAUTILUS_WINDOW_POSITION_SET,
-        NAUTILUS_WINDOW_SHOULD_SHOW
-} NautilusWindowShowState;
+        NEMO_WINDOW_SHOW_HIDDEN_FILES_DEFAULT,
+        NEMO_WINDOW_SHOW_HIDDEN_FILES_ENABLE,
+        NEMO_WINDOW_SHOW_HIDDEN_FILES_DISABLE
+} NemoWindowShowHiddenFilesMode;
 
 typedef enum {
-	NAUTILUS_WINDOW_OPEN_SLOT_NONE = 0,
-	NAUTILUS_WINDOW_OPEN_SLOT_APPEND = 1
-}  NautilusWindowOpenSlotFlags;
+        NEMO_WINDOW_NOT_SHOWN,
+        NEMO_WINDOW_POSITION_SET,
+        NEMO_WINDOW_SHOULD_SHOW
+} NemoWindowShowState;
 
-#define NAUTILUS_WINDOW_SIDEBAR_PLACES "places"
-#define NAUTILUS_WINDOW_SIDEBAR_TREE "tree"
+typedef enum {
+	NEMO_WINDOW_OPEN_SLOT_NONE = 0,
+	NEMO_WINDOW_OPEN_SLOT_APPEND = 1
+}  NemoWindowOpenSlotFlags;
 
-typedef struct NautilusWindowDetails NautilusWindowDetails;
+#define NEMO_WINDOW_SIDEBAR_PLACES "places"
+#define NEMO_WINDOW_SIDEBAR_TREE "tree"
+
+typedef struct NemoWindowDetails NemoWindowDetails;
 
 typedef struct {
         GtkWindowClass parent_spot;
 
 	/* Function pointers for overriding, without corresponding signals */
 
-        void   (* sync_title) (NautilusWindow *window,
-			       NautilusWindowSlot *slot);
-        NautilusIconInfo * (* get_icon) (NautilusWindow *window,
-                                         NautilusWindowSlot *slot);
+        void   (* sync_title) (NemoWindow *window,
+			       NemoWindowSlot *slot);
+        NemoIconInfo * (* get_icon) (NemoWindow *window,
+                                         NemoWindowSlot *slot);
 
-        void   (* prompt_for_location) (NautilusWindow *window, const char *initial);
-        void   (* close) (NautilusWindow *window);
+        void   (* prompt_for_location) (NemoWindow *window, const char *initial);
+        void   (* close) (NemoWindow *window);
 
         /* Signals used only for keybindings */
-        gboolean (* go_up)  (NautilusWindow *window,
+        gboolean (* go_up)  (NemoWindow *window,
                              gboolean close);
-	void     (* reload) (NautilusWindow *window);
-} NautilusWindowClass;
+	void     (* reload) (NemoWindow *window);
+} NemoWindowClass;
 
-struct NautilusWindow {
+struct NemoWindow {
         GtkWindow parent_object;
         
-        NautilusWindowDetails *details;
+        NemoWindowDetails *details;
 };
 
-GType            nautilus_window_get_type             (void);
-void             nautilus_window_close                (NautilusWindow    *window);
+GType            nemo_window_get_type             (void);
+void             nemo_window_close                (NemoWindow    *window);
 
-void             nautilus_window_connect_content_view (NautilusWindow    *window,
-						       NautilusView      *view);
-void             nautilus_window_disconnect_content_view (NautilusWindow    *window,
-							  NautilusView      *view);
+void             nemo_window_connect_content_view (NemoWindow    *window,
+						       NemoView      *view);
+void             nemo_window_disconnect_content_view (NemoWindow    *window,
+							  NemoView      *view);
 
-void             nautilus_window_go_to                (NautilusWindow    *window,
+void             nemo_window_go_to                (NemoWindow    *window,
                                                        GFile             *location);
-void             nautilus_window_go_to_full           (NautilusWindow    *window,
+void             nemo_window_go_to_full           (NemoWindow    *window,
                                                        GFile             *location,
-                                                       NautilusWindowGoToCallback callback,
+                                                       NemoWindowGoToCallback callback,
                                                        gpointer           user_data);
-void             nautilus_window_new_tab              (NautilusWindow    *window);
+void             nemo_window_new_tab              (NemoWindow    *window);
 
-GtkUIManager *   nautilus_window_get_ui_manager       (NautilusWindow    *window);
-GtkActionGroup * nautilus_window_get_main_action_group (NautilusWindow   *window);
-NautilusNavigationState * 
-                 nautilus_window_get_navigation_state (NautilusWindow    *window);
+GtkUIManager *   nemo_window_get_ui_manager       (NemoWindow    *window);
+GtkActionGroup * nemo_window_get_main_action_group (NemoWindow   *window);
+NemoNavigationState * 
+                 nemo_window_get_navigation_state (NemoWindow    *window);
 
-void                 nautilus_window_report_load_complete     (NautilusWindow *window,
-                                                               NautilusView *view);
+void                 nemo_window_report_load_complete     (NemoWindow *window,
+                                                               NemoView *view);
 
-NautilusWindowSlot * nautilus_window_get_extra_slot       (NautilusWindow *window);
-NautilusWindowShowHiddenFilesMode
-                     nautilus_window_get_hidden_files_mode (NautilusWindow *window);
-void                 nautilus_window_set_hidden_files_mode (NautilusWindow *window,
-                                                            NautilusWindowShowHiddenFilesMode  mode);
-void                 nautilus_window_report_load_underway  (NautilusWindow *window,
-                                                            NautilusView *view);
-void                 nautilus_window_view_visible          (NautilusWindow *window,
-                                                            NautilusView *view);
-NautilusWindowSlot * nautilus_window_get_active_slot       (NautilusWindow *window);
-void                 nautilus_window_push_status           (NautilusWindow *window,
+NemoWindowSlot * nemo_window_get_extra_slot       (NemoWindow *window);
+NemoWindowShowHiddenFilesMode
+                     nemo_window_get_hidden_files_mode (NemoWindow *window);
+void                 nemo_window_set_hidden_files_mode (NemoWindow *window,
+                                                            NemoWindowShowHiddenFilesMode  mode);
+void                 nemo_window_report_load_underway  (NemoWindow *window,
+                                                            NemoView *view);
+void                 nemo_window_view_visible          (NemoWindow *window,
+                                                            NemoView *view);
+NemoWindowSlot * nemo_window_get_active_slot       (NemoWindow *window);
+void                 nemo_window_push_status           (NemoWindow *window,
                                                             const char *text);
 
-void     nautilus_window_hide_sidebar         (NautilusWindow *window);
-void     nautilus_window_show_sidebar         (NautilusWindow *window);
-void     nautilus_window_back_or_forward      (NautilusWindow *window,
+void     nemo_window_hide_sidebar         (NemoWindow *window);
+void     nemo_window_show_sidebar         (NemoWindow *window);
+void     nemo_window_back_or_forward      (NemoWindow *window,
                                                gboolean        back,
                                                guint           distance,
                                                gboolean        new_tab);
-void     nautilus_window_split_view_on        (NautilusWindow *window);
-void     nautilus_window_split_view_off       (NautilusWindow *window);
-gboolean nautilus_window_split_view_showing   (NautilusWindow *window);
+void     nemo_window_split_view_on        (NemoWindow *window);
+void     nemo_window_split_view_off       (NemoWindow *window);
+gboolean nemo_window_split_view_showing   (NemoWindow *window);
 
-gboolean nautilus_window_disable_chrome_mapping (GValue *value,
+gboolean nemo_window_disable_chrome_mapping (GValue *value,
                                                  GVariant *variant,
                                                  gpointer user_data);
 

@@ -1,6 +1,6 @@
 /* -*- Mode: C; indent-tabs-mode: t; c-basic-offset: 8; tab-width: 8 -*-
 
-   nautilus-file-attributes.h: #defines and other file-attribute-related info
+   nemo-file-attributes.h: #defines and other file-attribute-related info
  
    Copyright (C) 2000 Eazel, Inc.
   
@@ -22,25 +22,25 @@
    Author: Darin Adler <darin@bentspoon.com>
 */
 
-#ifndef NAUTILUS_FILE_ATTRIBUTES_H
-#define NAUTILUS_FILE_ATTRIBUTES_H
+#ifndef NEMO_FILE_ATTRIBUTES_H
+#define NEMO_FILE_ATTRIBUTES_H
 
-/* Names for NautilusFile attributes. These are used when registering
+/* Names for NemoFile attributes. These are used when registering
  * interest in changes to the attributes or when waiting for them.
  */
 
 typedef enum {
-	NAUTILUS_FILE_ATTRIBUTE_INFO = 1 << 0, /* All standard info */
-	NAUTILUS_FILE_ATTRIBUTE_LINK_INFO = 1 << 1, /* info from desktop links */
-	NAUTILUS_FILE_ATTRIBUTE_DEEP_COUNTS = 1 << 2,
-	NAUTILUS_FILE_ATTRIBUTE_DIRECTORY_ITEM_COUNT = 1 << 3,
-	NAUTILUS_FILE_ATTRIBUTE_DIRECTORY_ITEM_MIME_TYPES = 1 << 4,
-	NAUTILUS_FILE_ATTRIBUTE_TOP_LEFT_TEXT = 1 << 5,
-	NAUTILUS_FILE_ATTRIBUTE_LARGE_TOP_LEFT_TEXT = 1 << 6,
-	NAUTILUS_FILE_ATTRIBUTE_EXTENSION_INFO = 1 << 7,
-	NAUTILUS_FILE_ATTRIBUTE_THUMBNAIL = 1 << 8,
-	NAUTILUS_FILE_ATTRIBUTE_MOUNT = 1 << 9,
-	NAUTILUS_FILE_ATTRIBUTE_FILESYSTEM_INFO = 1 << 10,
-} NautilusFileAttributes;
+	NEMO_FILE_ATTRIBUTE_INFO = 1 << 0, /* All standard info */
+	NEMO_FILE_ATTRIBUTE_LINK_INFO = 1 << 1, /* info from desktop links */
+	NEMO_FILE_ATTRIBUTE_DEEP_COUNTS = 1 << 2,
+	NEMO_FILE_ATTRIBUTE_DIRECTORY_ITEM_COUNT = 1 << 3,
+	NEMO_FILE_ATTRIBUTE_DIRECTORY_ITEM_MIME_TYPES = 1 << 4,
+	NEMO_FILE_ATTRIBUTE_TOP_LEFT_TEXT = 1 << 5,
+	NEMO_FILE_ATTRIBUTE_LARGE_TOP_LEFT_TEXT = 1 << 6,
+	NEMO_FILE_ATTRIBUTE_EXTENSION_INFO = 1 << 7,
+	NEMO_FILE_ATTRIBUTE_THUMBNAIL = 1 << 8,
+	NEMO_FILE_ATTRIBUTE_MOUNT = 1 << 9,
+	NEMO_FILE_ATTRIBUTE_FILESYSTEM_INFO = 1 << 10,
+} NemoFileAttributes;
 
-#endif /* NAUTILUS_FILE_ATTRIBUTES_H */
+#endif /* NEMO_FILE_ATTRIBUTES_H */

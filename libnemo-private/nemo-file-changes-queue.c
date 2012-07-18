@@ -21,9 +21,9 @@
 */
 
 #include <config.h>
-#include "nautilus-file-changes-queue.h"
+#include "nemo-file-changes-queue.h"
 
-#include "nautilus-directory-notify.h"
+#include "nemo-directory-notify.h"
 
 typedef enum {
 	CHANGE_FILE_INITIAL,
@@ -33,48 +33,48 @@ typedef enum {
 	CHANGE_FILE_MOVED,
 	CHANGE_POSITION_SET,
 	CHANGE_POSITION_REMOVE
-} NautilusFileChangeKind;
+} NemoFileChangeKind;
 
 typedef struct {
-	NautilusFileChangeKind kind;
+	NemoFileChangeKind kind;
 	GFile *from;
 	GFile *to;
 	GdkPoint point;
 	int screen;
-} NautilusFileChange;
+} NemoFileChange;
 
 typedef struct {
 	GList *head;
 	GList *tail;
 	GMutex mutex;
-} NautilusFileChangesQueue;
+} NemoFileChangesQueue;
 
-static NautilusFileChangesQueue *
-nautilus_file_changes_queue_new (void)
+static NemoFileChangesQueue *
+nemo_file_changes_queue_new (void)
 {
-	NautilusFileChangesQueue *result;
+	NemoFileChangesQueue *result;
 
-	result = g_new0 (NautilusFileChangesQueue, 1);
+	result = g_new0 (NemoFileChangesQueue, 1);
 	g_mutex_init (&result->mutex);
 
 	return result;
 }
 
-static NautilusFileChangesQueue *
-nautilus_file_changes_queue_get (void)
+static NemoFileChangesQueue *
+nemo_file_changes_queue_get (void)
 {
-	static NautilusFileChangesQueue *file_changes_queue;
+	static NemoFileChangesQueue *file_changes_queue;
 
 	if (file_changes_queue == NULL) {
-		file_changes_queue = nautilus_file_changes_queue_new ();
+		file_changes_queue = nemo_file_changes_queue_new ();
 	}
 
 	return file_changes_queue;
 }
 
 static void
-nautilus_file_changes_queue_add_common (NautilusFileChangesQueue *queue, 
-	NautilusFileChange *new_item)
+nemo_file_changes_queue_add_common (NemoFileChangesQueue *queue, 
+	NemoFileChange *new_item)
 {
 	/* enqueue the new queue item while locking down the list */
 	g_mutex_lock (&queue->mutex);
@@ -87,100 +87,100 @@ nautilus_file_changes_queue_add_common (NautilusFileChangesQueue *queue,
 }
 
 void
-nautilus_file_changes_queue_file_added (GFile *location)
+nemo_file_changes_queue_file_added (GFile *location)
 {
-	NautilusFileChange *new_item;
-	NautilusFileChangesQueue *queue;
+	NemoFileChange *new_item;
+	NemoFileChangesQueue *queue;
 
-	queue = nautilus_file_changes_queue_get();
+	queue = nemo_file_changes_queue_get();
 
-	new_item = g_new0 (NautilusFileChange, 1);
+	new_item = g_new0 (NemoFileChange, 1);
 	new_item->kind = CHANGE_FILE_ADDED;
 	new_item->from = g_object_ref (location);
-	nautilus_file_changes_queue_add_common (queue, new_item);
+	nemo_file_changes_queue_add_common (queue, new_item);
 }
 
 void
-nautilus_file_changes_queue_file_changed (GFile *location)
+nemo_file_changes_queue_file_changed (GFile *location)
 {
-	NautilusFileChange *new_item;
-	NautilusFileChangesQueue *queue;
+	NemoFileChange *new_item;
+	NemoFileChangesQueue *queue;
 
-	queue = nautilus_file_changes_queue_get();
+	queue = nemo_file_changes_queue_get();
 
-	new_item = g_new0 (NautilusFileChange, 1);
+	new_item = g_new0 (NemoFileChange, 1);
 	new_item->kind = CHANGE_FILE_CHANGED;
 	new_item->from = g_object_ref (location);
-	nautilus_file_changes_queue_add_common (queue, new_item);
+	nemo_file_changes_queue_add_common (queue, new_item);
 }
 
 void
-nautilus_file_changes_queue_file_removed (GFile *location)
+nemo_file_changes_queue_file_removed (GFile *location)
 {
-	NautilusFileChange *new_item;
-	NautilusFileChangesQueue *queue;
+	NemoFileChange *new_item;
+	NemoFileChangesQueue *queue;
 
-	queue = nautilus_file_changes_queue_get();
+	queue = nemo_file_changes_queue_get();
 
-	new_item = g_new0 (NautilusFileChange, 1);
+	new_item = g_new0 (NemoFileChange, 1);
 	new_item->kind = CHANGE_FILE_REMOVED;
 	new_item->from = g_object_ref (location);
-	nautilus_file_changes_queue_add_common (queue, new_item);
+	nemo_file_changes_queue_add_common (queue, new_item);
 }
 
 void
-nautilus_file_changes_queue_file_moved (GFile *from,
+nemo_file_changes_queue_file_moved (GFile *from,
 					GFile *to)
 {
-	NautilusFileChange *new_item;
-	NautilusFileChangesQueue *queue;
+	NemoFileChange *new_item;
+	NemoFileChangesQueue *queue;
 
-	queue = nautilus_file_changes_queue_get ();
+	queue = nemo_file_changes_queue_get ();
 
-	new_item = g_new (NautilusFileChange, 1);
+	new_item = g_new (NemoFileChange, 1);
 	new_item->kind = CHANGE_FILE_MOVED;
 	new_item->from = g_object_ref (from);
 	new_item->to = g_object_ref (to);
-	nautilus_file_changes_queue_add_common (queue, new_item);
+	nemo_file_changes_queue_add_common (queue, new_item);
 }
 
 void
-nautilus_file_changes_queue_schedule_position_set (GFile *location, 
+nemo_file_changes_queue_schedule_position_set (GFile *location, 
 						   GdkPoint point,
 						   int screen)
 {
-	NautilusFileChange *new_item;
-	NautilusFileChangesQueue *queue;
+	NemoFileChange *new_item;
+	NemoFileChangesQueue *queue;
 
-	queue = nautilus_file_changes_queue_get ();
+	queue = nemo_file_changes_queue_get ();
 
-	new_item = g_new (NautilusFileChange, 1);
+	new_item = g_new (NemoFileChange, 1);
 	new_item->kind = CHANGE_POSITION_SET;
 	new_item->from = g_object_ref (location);
 	new_item->point = point;
 	new_item->screen = screen;
-	nautilus_file_changes_queue_add_common (queue, new_item);
+	nemo_file_changes_queue_add_common (queue, new_item);
 }
 
 void
-nautilus_file_changes_queue_schedule_position_remove (GFile *location)
+nemo_file_changes_queue_schedule_position_remove (GFile *location)
 {
-	NautilusFileChange *new_item;
-	NautilusFileChangesQueue *queue;
+	NemoFileChange *new_item;
+	NemoFileChangesQueue *queue;
 
-	queue = nautilus_file_changes_queue_get ();
+	queue = nemo_file_changes_queue_get ();
 
-	new_item = g_new (NautilusFileChange, 1);
+	new_item = g_new (NemoFileChange, 1);
 	new_item->kind = CHANGE_POSITION_REMOVE;
 	new_item->from = g_object_ref (location);
-	nautilus_file_changes_queue_add_common (queue, new_item);
+	nemo_file_changes_queue_add_common (queue, new_item);
 }
 
-static NautilusFileChange *
-nautilus_file_changes_queue_get_change (NautilusFileChangesQueue *queue)
+static NemoFileChange *
+nemo_file_changes_queue_get_change (NemoFileChangesQueue *queue)
 {
 	GList *new_tail;
-	NautilusFileChange *result;
+	NemoFileChange *result;
 
 	g_assert (queue != NULL);
 	
@@ -230,7 +230,7 @@ static void
 position_set_list_free (GList *list)
 {
 	GList *p;
-	NautilusFileChangesQueuePosition *item;
+	NemoFileChangesQueuePosition *item;
 
 	for (p = list; p != NULL; p = p->next) {
 		item = p->data;
@@ -241,18 +241,18 @@ position_set_list_free (GList *list)
 }
 
 /* go through changes in the change queue, send ones with the same kind
- * in a list to the different nautilus_directory_notify calls
+ * in a list to the different nemo_directory_notify calls
  */ 
 void
-nautilus_file_changes_consume_changes (gboolean consume_all)
+nemo_file_changes_consume_changes (gboolean consume_all)
 {
-	NautilusFileChange *change;
+	NemoFileChange *change;
 	GList *additions, *changes, *deletions, *moves;
 	GList *position_set_requests;
 	GFilePair *pair;
-	NautilusFileChangesQueuePosition *position_set;
+	NemoFileChangesQueuePosition *position_set;
 	guint chunk_count;
-	NautilusFileChangesQueue *queue;
+	NemoFileChangesQueue *queue;
 	gboolean flush_needed;
 	
 
@@ -262,7 +262,7 @@ nautilus_file_changes_consume_changes (gboolean consume_all)
 	moves = NULL;
 	position_set_requests = NULL;
 
-	queue = nautilus_file_changes_queue_get();
+	queue = nemo_file_changes_queue_get();
 		
 	/* Consume changes from the queue, stuffing them into one of three lists,
 	 * keep doing it while the changes are of the same kind, then send them off.
@@ -270,7 +270,7 @@ nautilus_file_changes_consume_changes (gboolean consume_all)
 	 * arrived.
 	 */
 	for (chunk_count = 0; ; chunk_count++) {
-		change = nautilus_file_changes_queue_get_change (queue);
+		change = nemo_file_changes_queue_get_change (queue);
 
 		/* figure out if we need to flush the pending changes that we collected sofar */
 
@@ -312,31 +312,31 @@ nautilus_file_changes_consume_changes (gboolean consume_all)
 			
 			if (deletions != NULL) {
 				deletions = g_list_reverse (deletions);
-				nautilus_directory_notify_files_removed (deletions);
+				nemo_directory_notify_files_removed (deletions);
 				g_list_free_full (deletions, g_object_unref);
 				deletions = NULL;
 			}
 			if (moves != NULL) {
 				moves = g_list_reverse (moves);
-				nautilus_directory_notify_files_moved (moves);
+				nemo_directory_notify_files_moved (moves);
 				pairs_list_free (moves);
 				moves = NULL;
 			}
 			if (additions != NULL) {
 				additions = g_list_reverse (additions);
-				nautilus_directory_notify_files_added (additions);
+				nemo_directory_notify_files_added (additions);
 				g_list_free_full (additions, g_object_unref);
 				additions = NULL;
 			}
 			if (changes != NULL) {
 				changes = g_list_reverse (changes);
-				nautilus_directory_notify_files_changed (changes);
+				nemo_directory_notify_files_changed (changes);
 				g_list_free_full (changes, g_object_unref);
 				changes = NULL;
 			}
 			if (position_set_requests != NULL) {
 				position_set_requests = g_list_reverse (position_set_requests);
-				nautilus_directory_schedule_position_set (position_set_requests);
+				nemo_directory_schedule_position_set (position_set_requests);
 				position_set_list_free (position_set_requests);
 				position_set_requests = NULL;
 			}
@@ -369,7 +369,7 @@ nautilus_file_changes_consume_changes (gboolean consume_all)
 			break;
 
 		case CHANGE_POSITION_SET:
-			position_set = g_new (NautilusFileChangesQueuePosition, 1);
+			position_set = g_new (NemoFileChangesQueuePosition, 1);
 			position_set->location = change->from;
 			position_set->set = TRUE;
 			position_set->point = change->point;
@@ -379,7 +379,7 @@ nautilus_file_changes_consume_changes (gboolean consume_all)
 			break;
 
 		case CHANGE_POSITION_REMOVE:
-			position_set = g_new (NautilusFileChangesQueuePosition, 1);
+			position_set = g_new (NemoFileChangesQueuePosition, 1);
 			position_set->location = change->from;
 			position_set->set = FALSE;
 			position_set_requests = g_list_prepend (position_set_requests,

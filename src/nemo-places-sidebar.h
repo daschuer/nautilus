@@ -1,7 +1,7 @@
 /* -*- Mode: C; indent-tabs-mode: t; c-basic-offset: 8; tab-width: 8 -*- */
 
 /*
- *  Nautilus
+ *  Nemo
  *
  *
  *  This library is free software; you can redistribute it and/or
@@ -21,30 +21,30 @@
  *  Author : Mr Jamie McCracken (jamiemcc at blueyonder dot co dot uk)
  *
  */
-#ifndef _NAUTILUS_PLACES_SIDEBAR_H
-#define _NAUTILUS_PLACES_SIDEBAR_H
+#ifndef _NEMO_PLACES_SIDEBAR_H
+#define _NEMO_PLACES_SIDEBAR_H
 
-#include "nautilus-window.h"
+#include "nemo-window.h"
 
 #include <gtk/gtk.h>
 
-#define NAUTILUS_PLACES_SIDEBAR_ID    "places"
+#define NEMO_PLACES_SIDEBAR_ID    "places"
 
-#define NAUTILUS_TYPE_PLACES_SIDEBAR nautilus_places_sidebar_get_type()
-#define NAUTILUS_PLACES_SIDEBAR(obj) \
-  (G_TYPE_CHECK_INSTANCE_CAST ((obj), NAUTILUS_TYPE_PLACES_SIDEBAR, NautilusPlacesSidebar))
-#define NAUTILUS_PLACES_SIDEBAR_CLASS(klass) \
-  (G_TYPE_CHECK_CLASS_CAST ((klass), NAUTILUS_TYPE_PLACES_SIDEBAR, NautilusPlacesSidebarClass))
-#define NAUTILUS_IS_PLACES_SIDEBAR(obj) \
-  (G_TYPE_CHECK_INSTANCE_TYPE ((obj), NAUTILUS_TYPE_PLACES_SIDEBAR))
-#define NAUTILUS_IS_PLACES_SIDEBAR_CLASS(klass) \
-  (G_TYPE_CHECK_CLASS_TYPE ((klass), NAUTILUS_TYPE_PLACES_SIDEBAR))
-#define NAUTILUS_PLACES_SIDEBAR_GET_CLASS(obj) \
-  (G_TYPE_INSTANCE_GET_CLASS ((obj), NAUTILUS_TYPE_PLACES_SIDEBAR, NautilusPlacesSidebarClass))
+#define NEMO_TYPE_PLACES_SIDEBAR nemo_places_sidebar_get_type()
+#define NEMO_PLACES_SIDEBAR(obj) \
+  (G_TYPE_CHECK_INSTANCE_CAST ((obj), NEMO_TYPE_PLACES_SIDEBAR, NemoPlacesSidebar))
+#define NEMO_PLACES_SIDEBAR_CLASS(klass) \
+  (G_TYPE_CHECK_CLASS_CAST ((klass), NEMO_TYPE_PLACES_SIDEBAR, NemoPlacesSidebarClass))
+#define NEMO_IS_PLACES_SIDEBAR(obj) \
+  (G_TYPE_CHECK_INSTANCE_TYPE ((obj), NEMO_TYPE_PLACES_SIDEBAR))
+#define NEMO_IS_PLACES_SIDEBAR_CLASS(klass) \
+  (G_TYPE_CHECK_CLASS_TYPE ((klass), NEMO_TYPE_PLACES_SIDEBAR))
+#define NEMO_PLACES_SIDEBAR_GET_CLASS(obj) \
+  (G_TYPE_INSTANCE_GET_CLASS ((obj), NEMO_TYPE_PLACES_SIDEBAR, NemoPlacesSidebarClass))
 
 
-GType nautilus_places_sidebar_get_type (void);
-GtkWidget * nautilus_places_sidebar_new (NautilusWindow *window);
+GType nemo_places_sidebar_get_type (void);
+GtkWidget * nemo_places_sidebar_new (NemoWindow *window);
 
 
 #endif

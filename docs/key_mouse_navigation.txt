@@ -1,7 +1,7 @@
 This document describes the keyboard and mouse navigation model used
-in the default Nautilus views in detail. This is useful as a a guide
-for people implementing a Nautilus view or something else that wants
-to have a feel that is compatible with Nautilus.
+in the default Nemo views in detail. This is useful as a a guide
+for people implementing a Nemo view or something else that wants
+to have a feel that is compatible with Nemo.
 
 *********** Icon view ********************
 

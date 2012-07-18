@@ -1,6 +1,6 @@
 /* -*- Mode: C; indent-tabs-mode: t; c-basic-offset: 8; tab-width: 8 -*- */
 
-/* nautilus-file-utilities.c - implementation of file manipulation routines.
+/* nemo-file-utilities.c - implementation of file manipulation routines.
 
    Copyright (C) 1999, 2000, 2001 Eazel, Inc.
 
@@ -23,15 +23,15 @@
 */
 
 #include <config.h>
-#include "nautilus-file-utilities.h"
+#include "nemo-file-utilities.h"
 
-#include "nautilus-global-preferences.h"
-#include "nautilus-lib-self-check-functions.h"
-#include "nautilus-metadata.h"
-#include "nautilus-file.h"
-#include "nautilus-file-operations.h"
-#include "nautilus-search-directory.h"
-#include "nautilus-signaller.h"
+#include "nemo-global-preferences.h"
+#include "nemo-lib-self-check-functions.h"
+#include "nemo-metadata.h"
+#include "nemo-file.h"
+#include "nemo-file-operations.h"
+#include "nemo-search-directory.h"
+#include "nemo-signaller.h"
 #include <eel/eel-glib-extensions.h>
 #include <eel/eel-stock-dialogs.h>
 #include <eel/eel-string.h>
@@ -43,8 +43,8 @@
 #include <unistd.h>
 #include <stdlib.h>
 
-#define NAUTILUS_USER_DIRECTORY_NAME "nautilus"
-#define DEFAULT_NAUTILUS_DIRECTORY_MODE (0755)
+#define NEMO_USER_DIRECTORY_NAME "nemo"
+#define DEFAULT_NEMO_DIRECTORY_MODE (0755)
 
 #define DESKTOP_DIRECTORY_NAME "Desktop"
 #define LEGACY_DESKTOP_DIRECTORY_NAME ".gnome-desktop"
@@ -53,29 +53,29 @@
 static void update_xdg_dir_cache (void);
 static void schedule_user_dirs_changed (void);
 static void desktop_dir_changed (void);
-static GFile *nautilus_find_file_insensitive_next (GFile *parent, const gchar *name);
+static GFile *nemo_find_file_insensitive_next (GFile *parent, const gchar *name);
 
 char *
-nautilus_compute_title_for_location (GFile *location)
+nemo_compute_title_for_location (GFile *location)
 {
-	NautilusFile *file;
+	NemoFile *file;
 	char *title;
 
 	/* TODO-gio: This doesn't really work all that great if the
 	   info about the file isn't known atm... */
 
-	if (nautilus_is_home_directory (location)) {
+	if (nemo_is_home_directory (location)) {
 		return g_strdup (_("Home"));
 	}
 	
 	title = NULL;
 	if (location) {
-		file = nautilus_file_get (location);
-		title = nautilus_file_get_description (file);
+		file = nemo_file_get (location);
+		title = nemo_file_get_description (file);
 		if (title == NULL) {
-			title = nautilus_file_get_display_name (file);
+			title = nemo_file_get_display_name (file);
 		}
-		nautilus_file_unref (file);
+		nemo_file_unref (file);
 	}
 
 	if (title == NULL) {
@@ -87,28 +87,28 @@ nautilus_compute_title_for_location (GFile *location)
 
 
 /**
- * nautilus_get_user_directory:
+ * nemo_get_user_directory:
  * 
- * Get the path for the directory containing nautilus settings.
+ * Get the path for the directory containing nemo settings.
  *
  * Return value: the directory path.
  **/
 char *
-nautilus_get_user_directory (void)
+nemo_get_user_directory (void)
 {
 	char *user_directory = NULL;
 
 	user_directory = g_build_filename (g_get_user_config_dir (),
-					   NAUTILUS_USER_DIRECTORY_NAME,
+					   NEMO_USER_DIRECTORY_NAME,
 					   NULL);
 	
 	if (!g_file_test (user_directory, G_FILE_TEST_EXISTS)) {
-		g_mkdir (user_directory, DEFAULT_NAUTILUS_DIRECTORY_MODE);
+		g_mkdir (user_directory, DEFAULT_NEMO_DIRECTORY_MODE);
 		/* FIXME bugzilla.gnome.org 41286: 
 		 * How should we handle the case where this mkdir fails? 
-		 * Note that nautilus_application_startup will refuse to launch if this 
+		 * Note that nemo_application_startup will refuse to launch if this 
 		 * directory doesn't get created, so that case is OK. But the directory 
-		 * could be deleted after Nautilus was launched, and perhaps
+		 * could be deleted after Nemo was launched, and perhaps
 		 * there is some bad side-effect of not handling that case.
 		 */
 	}
@@ -117,31 +117,31 @@ nautilus_get_user_directory (void)
 }
 
 /**
- * nautilus_get_accel_map_file:
+ * nemo_get_accel_map_file:
  * 
- * Get the path for the filename containing nautilus accelerator map.
+ * Get the path for the filename containing nemo accelerator map.
  * The filename need not exist.
  *
  * Return value: the filename path, or NULL if the home directory could not be found
  **/
 char *
-nautilus_get_accel_map_file (void)
+nemo_get_accel_map_file (void)
 {
 	const gchar *override;
 
 	override = g_getenv ("GNOME22_USER_DIR");
 
 	if (override) {
-		return g_build_filename (override, "accels/nautilus", NULL);
+		return g_build_filename (override, "accels/nemo", NULL);
 	} else {
-		return g_build_filename (g_get_home_dir (), ".gnome2/accels/nautilus", NULL);
+		return g_build_filename (g_get_home_dir (), ".gnome2/accels/nemo", NULL);
 	}
 }
 
 typedef struct {
 	char *type;
 	char *path;
-	NautilusFile *file;
+	NemoFile *file;
 } XdgDirEntry;
 
 
@@ -246,13 +246,13 @@ static XdgDirEntry *cached_xdg_dirs = NULL;
 static GFileMonitor *cached_xdg_dirs_monitor = NULL;
 
 static void
-xdg_dir_changed (NautilusFile *file,
+xdg_dir_changed (NemoFile *file,
 		 XdgDirEntry *dir)
 {
 	GFile *location, *dir_location;
 	char *path;
 
-	location = nautilus_file_get_location (file);
+	location = nemo_file_get_location (file);
 	dir_location = g_file_new_for_path (dir->path);
 	if (!g_file_equal (location, dir_location)) {
 		path = g_file_get_path (location);
@@ -286,7 +286,7 @@ xdg_dir_changed (NautilusFile *file,
 			schedule_user_dirs_changed ();
 			desktop_dir_changed ();
 			/* Icon might have changed */
-			nautilus_file_invalidate_attributes (file, NAUTILUS_FILE_ATTRIBUTE_INFO);
+			nemo_file_invalidate_attributes (file, NEMO_FILE_ATTRIBUTE_INFO);
 		}
 	}
 	g_object_unref (location);
@@ -310,7 +310,7 @@ static int user_dirs_changed_tag = 0;
 static gboolean
 emit_user_dirs_changed_idle (gpointer data)
 {
-	g_signal_emit_by_name (nautilus_signaller_get_current (),
+	g_signal_emit_by_name (nemo_signaller_get_current (),
 			       "user_dirs_changed");
 	user_dirs_changed_tag = 0;
 	return FALSE;
@@ -341,12 +341,12 @@ free_xdg_dir_cache (void)
 	if (cached_xdg_dirs != NULL) {
 		for (i = 0; cached_xdg_dirs[i].type != NULL; i++) {
 			if (cached_xdg_dirs[i].file != NULL) {
-				nautilus_file_monitor_remove (cached_xdg_dirs[i].file,
+				nemo_file_monitor_remove (cached_xdg_dirs[i].file,
 							      &cached_xdg_dirs[i]);
 				g_signal_handlers_disconnect_by_func (cached_xdg_dirs[i].file,
 								      G_CALLBACK (xdg_dir_changed),
 								      &cached_xdg_dirs[i]);
-				nautilus_file_unref (cached_xdg_dirs[i].file);
+				nemo_file_unref (cached_xdg_dirs[i].file);
 			}
 			g_free (cached_xdg_dirs[i].type);
 			g_free (cached_xdg_dirs[i].path);
@@ -386,10 +386,10 @@ update_xdg_dir_cache (void)
 		cached_xdg_dirs[i].file = NULL;
 		if (strcmp (cached_xdg_dirs[i].path, g_get_home_dir ()) != 0) {
 			uri = g_filename_to_uri (cached_xdg_dirs[i].path, NULL, NULL);
-			cached_xdg_dirs[i].file = nautilus_file_get_by_uri (uri);
-			nautilus_file_monitor_add (cached_xdg_dirs[i].file,
+			cached_xdg_dirs[i].file = nemo_file_get_by_uri (uri);
+			nemo_file_monitor_add (cached_xdg_dirs[i].file,
 						   &cached_xdg_dirs[i],
-						   NAUTILUS_FILE_ATTRIBUTE_INFO);
+						   NEMO_FILE_ATTRIBUTE_INFO);
 			g_signal_connect (cached_xdg_dirs[i].file,
 					  "changed", G_CALLBACK (xdg_dir_changed), &cached_xdg_dirs[i]);
 			g_free (uri);
@@ -411,7 +411,7 @@ update_xdg_dir_cache (void)
 }
 
 char *
-nautilus_get_xdg_dir (const char *type)
+nemo_get_xdg_dir (const char *type)
 {
 	int i;
 
@@ -437,36 +437,36 @@ nautilus_get_xdg_dir (const char *type)
 static char *
 get_desktop_path (void)
 {
-	if (g_settings_get_boolean (nautilus_preferences, NAUTILUS_PREFERENCES_DESKTOP_IS_HOME_DIR)) {
+	if (g_settings_get_boolean (nemo_preferences, NEMO_PREFERENCES_DESKTOP_IS_HOME_DIR)) {
 		return g_strdup (g_get_home_dir());
 	} else {
-		return nautilus_get_xdg_dir ("DESKTOP");
+		return nemo_get_xdg_dir ("DESKTOP");
 	}
 }
 
 /**
- * nautilus_get_desktop_directory:
+ * nemo_get_desktop_directory:
  * 
  * Get the path for the directory containing files on the desktop.
  *
  * Return value: the directory path.
  **/
 char *
-nautilus_get_desktop_directory (void)
+nemo_get_desktop_directory (void)
 {
 	char *desktop_directory;
 	
 	desktop_directory = get_desktop_path ();
 
 	/* Don't try to create a home directory */
-	if (!g_settings_get_boolean (nautilus_preferences, NAUTILUS_PREFERENCES_DESKTOP_IS_HOME_DIR)) {
+	if (!g_settings_get_boolean (nemo_preferences, NEMO_PREFERENCES_DESKTOP_IS_HOME_DIR)) {
 		if (!g_file_test (desktop_directory, G_FILE_TEST_EXISTS)) {
 			g_mkdir (desktop_directory, DEFAULT_DESKTOP_DIRECTORY_MODE);
 			/* FIXME bugzilla.gnome.org 41286: 
 			 * How should we handle the case where this mkdir fails? 
-			 * Note that nautilus_application_startup will refuse to launch if this 
+			 * Note that nemo_application_startup will refuse to launch if this 
 			 * directory doesn't get created, so that case is OK. But the directory 
-			 * could be deleted after Nautilus was launched, and perhaps
+			 * could be deleted after Nemo was launched, and perhaps
 			 * there is some bad side-effect of not handling that case.
 			 */
 		}
@@ -476,7 +476,7 @@ nautilus_get_desktop_directory (void)
 }
 
 GFile *
-nautilus_get_desktop_location (void)
+nemo_get_desktop_location (void)
 {
 	char *desktop_directory;
 	GFile *res;
@@ -490,19 +490,19 @@ nautilus_get_desktop_location (void)
 
 
 /**
- * nautilus_get_desktop_directory_uri:
+ * nemo_get_desktop_directory_uri:
  * 
  * Get the uri for the directory containing files on the desktop.
  *
  * Return value: the directory path.
  **/
 char *
-nautilus_get_desktop_directory_uri (void)
+nemo_get_desktop_directory_uri (void)
 {
 	char *desktop_path;
 	char *desktop_uri;
 	
-	desktop_path = nautilus_get_desktop_directory ();
+	desktop_path = nemo_get_desktop_directory ();
 	desktop_uri = g_filename_to_uri (desktop_path, NULL, NULL);
 	g_free (desktop_path);
 
@@ -510,7 +510,7 @@ nautilus_get_desktop_directory_uri (void)
 }
 
 char *
-nautilus_get_desktop_directory_uri_no_create (void)
+nemo_get_desktop_directory_uri_no_create (void)
 {
 	char *desktop_path;
 	char *desktop_uri;
@@ -523,65 +523,65 @@ nautilus_get_desktop_directory_uri_no_create (void)
 }
 
 char *
-nautilus_get_home_directory_uri (void)
+nemo_get_home_directory_uri (void)
 {
 	return  g_filename_to_uri (g_get_home_dir (), NULL, NULL);
 }
 
 
 gboolean
-nautilus_should_use_templates_directory (void)
+nemo_should_use_templates_directory (void)
 {
 	char *dir;
 	gboolean res;
 	
-	dir = nautilus_get_xdg_dir ("TEMPLATES");
+	dir = nemo_get_xdg_dir ("TEMPLATES");
 	res = strcmp (dir, g_get_home_dir ()) != 0;
 	g_free (dir);
 	return res;
 }
 
 char *
-nautilus_get_templates_directory (void)
+nemo_get_templates_directory (void)
 {
-	return nautilus_get_xdg_dir ("TEMPLATES");
+	return nemo_get_xdg_dir ("TEMPLATES");
 }
 
 void
-nautilus_create_templates_directory (void)
+nemo_create_templates_directory (void)
 {
 	char *dir;
 
-	dir = nautilus_get_templates_directory ();
+	dir = nemo_get_templates_directory ();
 	if (!g_file_test (dir, G_FILE_TEST_EXISTS)) {
-		g_mkdir (dir, DEFAULT_NAUTILUS_DIRECTORY_MODE);
+		g_mkdir (dir, DEFAULT_NEMO_DIRECTORY_MODE);
 	}
 	g_free (dir);
 }
 
 char *
-nautilus_get_templates_directory_uri (void)
+nemo_get_templates_directory_uri (void)
 {
 	char *directory, *uri;
 
-	directory = nautilus_get_templates_directory ();
+	directory = nemo_get_templates_directory ();
 	uri = g_filename_to_uri (directory, NULL, NULL);
 	g_free (directory);
 	return uri;
 }
 
 char *
-nautilus_get_searches_directory (void)
+nemo_get_searches_directory (void)
 {
 	char *user_dir;
 	char *searches_dir;
 
-	user_dir = nautilus_get_user_directory ();
+	user_dir = nemo_get_user_directory ();
 	searches_dir = g_build_filename (user_dir, "searches", NULL);
 	g_free (user_dir);
 	
 	if (!g_file_test (searches_dir, G_FILE_TEST_EXISTS))
-		g_mkdir (searches_dir, DEFAULT_NAUTILUS_DIRECTORY_MODE);
+		g_mkdir (searches_dir, DEFAULT_NEMO_DIRECTORY_MODE);
 
 	return searches_dir;
 }
@@ -631,7 +631,7 @@ update_desktop_dir (void)
 }
 
 gboolean
-nautilus_is_home_directory_file (GFile *dir,
+nemo_is_home_directory_file (GFile *dir,
 				 const char *filename)
 {
 	char *dirname;
@@ -650,7 +650,7 @@ nautilus_is_home_directory_file (GFile *dir,
 }
 
 gboolean
-nautilus_is_home_directory (GFile *dir)
+nemo_is_home_directory (GFile *dir)
 {
 	static GFile *home_dir = NULL;
 	
@@ -662,7 +662,7 @@ nautilus_is_home_directory (GFile *dir)
 }
 
 gboolean
-nautilus_is_root_directory (GFile *dir)
+nemo_is_root_directory (GFile *dir)
 {
 	static GFile *root_dir = NULL;
 	
@@ -675,12 +675,12 @@ nautilus_is_root_directory (GFile *dir)
 		
 		
 gboolean
-nautilus_is_desktop_directory_file (GFile *dir,
+nemo_is_desktop_directory_file (GFile *dir,
 				    const char *file)
 {
 
 	if (!desktop_dir_changed_callback_installed) {
-		g_signal_connect_swapped (nautilus_preferences, "changed::" NAUTILUS_PREFERENCES_DESKTOP_IS_HOME_DIR,
+		g_signal_connect_swapped (nemo_preferences, "changed::" NEMO_PREFERENCES_DESKTOP_IS_HOME_DIR,
 					  G_CALLBACK(desktop_dir_changed_callback),
 					  NULL);
 		desktop_dir_changed_callback_installed = TRUE;
@@ -695,11 +695,11 @@ nautilus_is_desktop_directory_file (GFile *dir,
 }
 
 gboolean
-nautilus_is_desktop_directory (GFile *dir)
+nemo_is_desktop_directory (GFile *dir)
 {
 
 	if (!desktop_dir_changed_callback_installed) {
-		g_signal_connect_swapped (nautilus_preferences, "changed::" NAUTILUS_PREFERENCES_DESKTOP_IS_HOME_DIR,
+		g_signal_connect_swapped (nemo_preferences, "changed::" NEMO_PREFERENCES_DESKTOP_IS_HOME_DIR,
 					  G_CALLBACK(desktop_dir_changed_callback),
 					  NULL);
 		desktop_dir_changed_callback_installed = TRUE;
@@ -714,26 +714,26 @@ nautilus_is_desktop_directory (GFile *dir)
 
 
 /**
- * nautilus_get_gmc_desktop_directory:
+ * nemo_get_gmc_desktop_directory:
  * 
  * Get the path for the directory containing the legacy gmc desktop.
  *
  * Return value: the directory path.
  **/
 char *
-nautilus_get_gmc_desktop_directory (void)
+nemo_get_gmc_desktop_directory (void)
 {
 	return g_build_filename (g_get_home_dir (), LEGACY_DESKTOP_DIRECTORY_NAME, NULL);
 }
 
 char *
-nautilus_get_data_file_path (const char *partial_path)
+nemo_get_data_file_path (const char *partial_path)
 {
 	char *path;
 	char *user_directory;
 
 	/* first try the user's home directory */
-	user_directory = nautilus_get_user_directory ();
+	user_directory = nemo_get_user_directory ();
 	path = g_build_filename (user_directory, partial_path, NULL);
 	g_free (user_directory);
 	if (g_file_test (path, G_FILE_TEST_EXISTS)) {
@@ -742,7 +742,7 @@ nautilus_get_data_file_path (const char *partial_path)
 	g_free (path);
 	
 	/* next try the shared directory */
-	path = g_build_filename (NAUTILUS_DATADIR, partial_path, NULL);
+	path = g_build_filename (NEMO_DATADIR, partial_path, NULL);
 	if (g_file_test (path, G_FILE_TEST_EXISTS)) {
 		return path;
 	}
@@ -752,7 +752,7 @@ nautilus_get_data_file_path (const char *partial_path)
 }
 
 char *
-nautilus_ensure_unique_file_name (const char *directory_uri,
+nemo_ensure_unique_file_name (const char *directory_uri,
 				  const char *base_name,
 				  const char *extension)
 {
@@ -800,9 +800,9 @@ nautilus_ensure_unique_file_name (const char *directory_uri,
 }
 
 char *
-nautilus_unique_temporary_file_name (void)
+nemo_unique_temporary_file_name (void)
 {
-	const char *prefix = "/tmp/nautilus-temp-file";
+	const char *prefix = "/tmp/nemo-temp-file";
 	char *file_name;
 	int fd;
 
@@ -820,7 +820,7 @@ nautilus_unique_temporary_file_name (void)
 }
 
 GFile *
-nautilus_find_existing_uri_in_hierarchy (GFile *location)
+nemo_find_existing_uri_in_hierarchy (GFile *location)
 {
 	GFileInfo *info;
 	GFile *tmp;
@@ -845,7 +845,7 @@ nautilus_find_existing_uri_in_hierarchy (GFile *location)
 }
 
 /**
- * nautilus_find_file_insensitive
+ * nemo_find_file_insensitive
  * 
  * Attempt to find a file case-insentively. If the path can be found, the
  * returned file maps directly to it. Otherwise, a file using the
@@ -855,7 +855,7 @@ nautilus_find_existing_uri_in_hierarchy (GFile *location)
  * Return value: a #GFile to a child specified by @name.
  **/
 GFile *
-nautilus_find_file_insensitive (GFile *parent, const gchar *name)
+nemo_find_file_insensitive (GFile *parent, const gchar *name)
 {
 	gchar **split_path;
 	gchar *component;
@@ -867,7 +867,7 @@ nautilus_find_file_insensitive (GFile *parent, const gchar *name)
 	file = g_object_ref (parent);
 	
 	for (i = 0; (component = split_path[i]) != NULL; i++) {
-		if (!(next = nautilus_find_file_insensitive_next (file,
+		if (!(next = nemo_find_file_insensitive_next (file,
 		                                                  component))) {
 			/* File does not exist */
 			g_object_unref (file);
@@ -886,7 +886,7 @@ nautilus_find_file_insensitive (GFile *parent, const gchar *name)
 }
 
 static GFile *
-nautilus_find_file_insensitive_next (GFile *parent, const gchar *name)
+nemo_find_file_insensitive_next (GFile *parent, const gchar *name)
 {
 	GFileEnumerator *children;
 	GFileInfo *info;
@@ -956,7 +956,7 @@ nautilus_find_file_insensitive_next (GFile *parent, const gchar *name)
 }
 
 gboolean
-nautilus_is_file_roller_installed (void)
+nemo_is_file_roller_installed (void)
 {
 	static int installed = - 1;
 
@@ -1001,19 +1001,19 @@ get_dbus_connection (void)
 }
 
 /**
- * nautilus_inhibit_power_manager:
+ * nemo_inhibit_power_manager:
  * @message: a human readable message for the reason why power management
  *       is being suspended.
  *
  * Inhibits the power manager from logging out or suspending the machine
- * (e.g. whenever Nautilus is doing file operations).
+ * (e.g. whenever Nemo is doing file operations).
  *
  * Returns: an integer cookie, which must be passed to
- *    nautilus_uninhibit_power_manager() to resume
+ *    nemo_uninhibit_power_manager() to resume
  *    normal power management.
  */
 int
-nautilus_inhibit_power_manager (const char *message)
+nemo_inhibit_power_manager (const char *message)
 {
 	GDBusConnection *connection;
 	GVariant *result;
@@ -1034,7 +1034,7 @@ nautilus_inhibit_power_manager (const char *message)
 					      GSM_INTERFACE,
 					      "Inhibit",
 					      g_variant_new ("(susu)",
-							     "Nautilus",
+							     "Nemo",
 							     (guint) 0,
 							     message,
 							     (guint) (INHIBIT_LOGOUT | INHIBIT_SUSPEND)),
@@ -1057,15 +1057,15 @@ nautilus_inhibit_power_manager (const char *message)
 }
 
 /**
- * nautilus_uninhibit_power_manager:
- * @cookie: the cookie value returned by nautilus_inhibit_power_manager()
+ * nemo_uninhibit_power_manager:
+ * @cookie: the cookie value returned by nemo_inhibit_power_manager()
  *
  * Uninhibits power management. This function must be called after the task
  * which inhibited power management has finished, or the system will not
  * return to normal power management.
  */
 void
-nautilus_uninhibit_power_manager (gint cookie)
+nemo_uninhibit_power_manager (gint cookie)
 {
 	GDBusConnection *connection;
 	GVariant *result;
@@ -1104,7 +1104,7 @@ nautilus_uninhibit_power_manager (gint cookie)
    in "~/.gnome2/". This is used for deciding
    if a desktop file is "trusted" based on the path */
 gboolean
-nautilus_is_in_system_dir (GFile *file)
+nemo_is_in_system_dir (GFile *file)
 {
 	const char * const * data_dirs; 
 	char *path, *gnome2;
@@ -1142,11 +1142,11 @@ nautilus_is_in_system_dir (GFile *file)
 }
 
 GHashTable *
-nautilus_trashed_files_get_original_directories (GList *files,
+nemo_trashed_files_get_original_directories (GList *files,
 						 GList **unhandled_files)
 {
 	GHashTable *directories;
-	NautilusFile *file, *original_file, *original_dir;
+	NemoFile *file, *original_file, *original_dir;
 	GList *l, *m;
 
 	directories = NULL;
@@ -1156,38 +1156,38 @@ nautilus_trashed_files_get_original_directories (GList *files,
 	}
 
 	for (l = files; l != NULL; l = l->next) {
-		file = NAUTILUS_FILE (l->data);
-		original_file = nautilus_file_get_trash_original_file (file);
+		file = NEMO_FILE (l->data);
+		original_file = nemo_file_get_trash_original_file (file);
 
 		original_dir = NULL;
 		if (original_file != NULL) {
-			original_dir = nautilus_file_get_parent (original_file);
+			original_dir = nemo_file_get_parent (original_file);
 		}
 
 		if (original_dir != NULL) {
 			if (directories == NULL) {
 				directories = g_hash_table_new_full (g_direct_hash, g_direct_equal,
-								     (GDestroyNotify) nautilus_file_unref,
-								     (GDestroyNotify) nautilus_file_list_unref);
+								     (GDestroyNotify) nemo_file_unref,
+								     (GDestroyNotify) nemo_file_list_unref);
 			}
-			nautilus_file_ref (original_dir);
+			nemo_file_ref (original_dir);
 			m = g_hash_table_lookup (directories, original_dir);
 			if (m != NULL) {
 				g_hash_table_steal (directories, original_dir);
-				nautilus_file_unref (original_dir);
+				nemo_file_unref (original_dir);
 			}
-			m = g_list_append (m, nautilus_file_ref (file));
+			m = g_list_append (m, nemo_file_ref (file));
 			g_hash_table_insert (directories, original_dir, m);
 		} else if (unhandled_files != NULL) {
-			*unhandled_files = g_list_append (*unhandled_files, nautilus_file_ref (file));
+			*unhandled_files = g_list_append (*unhandled_files, nemo_file_ref (file));
 		}
 
 		if (original_file != NULL) {
-			nautilus_file_unref (original_file);
+			nemo_file_unref (original_file);
 		}
 
 		if (original_dir != NULL) {
-			nautilus_file_unref (original_dir);
+			nemo_file_unref (original_dir);
 		}
 	}
 
@@ -1197,35 +1197,35 @@ nautilus_trashed_files_get_original_directories (GList *files,
 static GList *
 locations_from_file_list (GList *file_list)
 {
-	NautilusFile *file;
+	NemoFile *file;
 	GList *l, *ret;
 
 	ret = NULL;
 
 	for (l = file_list; l != NULL; l = l->next) {
-		file = NAUTILUS_FILE (l->data);
-		ret = g_list_prepend (ret, nautilus_file_get_location (file));
+		file = NEMO_FILE (l->data);
+		ret = g_list_prepend (ret, nemo_file_get_location (file));
 	}
 
 	return g_list_reverse (ret);
 }
 
 void
-nautilus_restore_files_from_trash (GList *files,
+nemo_restore_files_from_trash (GList *files,
 				   GtkWindow *parent_window)
 {
-	NautilusFile *file, *original_dir;
+	NemoFile *file, *original_dir;
 	GHashTable *original_dirs_hash;
 	GList *original_dirs, *unhandled_files;
 	GFile *original_dir_location;
 	GList *locations, *l;
 	char *message, *file_name;
 
-	original_dirs_hash = nautilus_trashed_files_get_original_directories (files, &unhandled_files);
+	original_dirs_hash = nemo_trashed_files_get_original_directories (files, &unhandled_files);
 
 	for (l = unhandled_files; l != NULL; l = l->next) {
-		file = NAUTILUS_FILE (l->data);
-		file_name = nautilus_file_get_display_name (file);
+		file = NEMO_FILE (l->data);
+		file_name = nemo_file_get_display_name (file);
 		message = g_strdup_printf (_("Could not determine original location of \"%s\" "), file_name);
 		g_free (file_name);
 
@@ -1238,13 +1238,13 @@ nautilus_restore_files_from_trash (GList *files,
 	if (original_dirs_hash != NULL) {
 		original_dirs = g_hash_table_get_keys (original_dirs_hash);
 		for (l = original_dirs; l != NULL; l = l->next) {
-			original_dir = NAUTILUS_FILE (l->data);
-			original_dir_location = nautilus_file_get_location (original_dir);
+			original_dir = NEMO_FILE (l->data);
+			original_dir_location = nemo_file_get_location (original_dir);
 
 			files = g_hash_table_lookup (original_dirs_hash, original_dir);
 			locations = locations_from_file_list (files);
 
-			nautilus_file_operations_move
+			nemo_file_operations_move
 				(locations, NULL, 
 				 original_dir_location,
 				 parent_window,
@@ -1258,11 +1258,11 @@ nautilus_restore_files_from_trash (GList *files,
 		g_hash_table_destroy (original_dirs_hash);
 	}
 
-	nautilus_file_list_unref (unhandled_files);
+	nemo_file_list_unref (unhandled_files);
 }
 
 typedef struct {
-	NautilusMountGetContent callback;
+	NemoMountGetContent callback;
 	gpointer user_data;
 } GetContentTypesData;
 
@@ -1278,7 +1278,7 @@ get_types_cb (GObject *source_object,
 	types = g_mount_guess_content_type_finish (G_MOUNT (source_object), res, NULL);
 
 	g_object_set_data_full (source_object,
-				"nautilus-content-type-cache",
+				"nemo-content-type-cache",
 				g_strdupv (types),
 				(GDestroyNotify)g_strfreev);
 
@@ -1290,8 +1290,8 @@ get_types_cb (GObject *source_object,
 }
 
 void
-nautilus_get_x_content_types_for_mount_async (GMount *mount,
-					      NautilusMountGetContent callback,
+nemo_get_x_content_types_for_mount_async (GMount *mount,
+					      NemoMountGetContent callback,
 					      GCancellable *cancellable,
 					      gpointer user_data)
 {
@@ -1305,7 +1305,7 @@ nautilus_get_x_content_types_for_mount_async (GMount *mount,
 		return;
 	}
 
-	cached = g_object_get_data (G_OBJECT (mount), "nautilus-content-type-cache");
+	cached = g_object_get_data (G_OBJECT (mount), "nemo-content-type-cache");
 	if (cached != NULL) {
 		if (callback) {
 			callback ((const char **) cached, user_data);
@@ -1325,7 +1325,7 @@ nautilus_get_x_content_types_for_mount_async (GMount *mount,
 }
 
 char **
-nautilus_get_cached_x_content_types_for_mount (GMount *mount)
+nemo_get_cached_x_content_types_for_mount (GMount *mount)
 {
 	char **cached;
 
@@ -1333,7 +1333,7 @@ nautilus_get_cached_x_content_types_for_mount (GMount *mount)
 		return NULL;
 	}
 
-	cached = g_object_get_data (G_OBJECT (mount), "nautilus-content-type-cache");
+	cached = g_object_get_data (G_OBJECT (mount), "nemo-content-type-cache");
 	if (cached != NULL) {
 		return g_strdupv (cached);
 	}
@@ -1341,11 +1341,11 @@ nautilus_get_cached_x_content_types_for_mount (GMount *mount)
 	return NULL;
 }
 
-#if !defined (NAUTILUS_OMIT_SELF_CHECK)
+#if !defined (NEMO_OMIT_SELF_CHECK)
 
 void
-nautilus_self_check_file_utilities (void)
+nemo_self_check_file_utilities (void)
 {
 }
 
-#endif /* !NAUTILUS_OMIT_SELF_CHECK */
+#endif /* !NEMO_OMIT_SELF_CHECK */

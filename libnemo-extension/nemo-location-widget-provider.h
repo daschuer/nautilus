@@ -1,5 +1,5 @@
 /*
- *  nautilus-info-provider.h - Interface for Nautilus extensions that 
+ *  nemo-info-provider.h - Interface for Nemo extensions that 
  *                             provide info about files.
  *
  *  Copyright (C) 2003 Novell, Inc.
@@ -24,39 +24,39 @@
  *
  */
 
-/* This interface is implemented by Nautilus extensions that want to 
+/* This interface is implemented by Nemo extensions that want to 
  * provide extra location widgets for a particular location.
- * Extensions are called when Nautilus displays a location.
+ * Extensions are called when Nemo displays a location.
  */
 
-#ifndef NAUTILUS_LOCATION_WIDGET_PROVIDER_H
-#define NAUTILUS_LOCATION_WIDGET_PROVIDER_H
+#ifndef NEMO_LOCATION_WIDGET_PROVIDER_H
+#define NEMO_LOCATION_WIDGET_PROVIDER_H
 
 #include <glib-object.h>
 #include <gtk/gtk.h>
-#include "nautilus-extension-types.h"
+#include "nemo-extension-types.h"
 
 G_BEGIN_DECLS
 
-#define NAUTILUS_TYPE_LOCATION_WIDGET_PROVIDER           (nautilus_location_widget_provider_get_type ())
-#define NAUTILUS_LOCATION_WIDGET_PROVIDER(obj)           (G_TYPE_CHECK_INSTANCE_CAST ((obj), NAUTILUS_TYPE_LOCATION_WIDGET_PROVIDER, NautilusLocationWidgetProvider))
-#define NAUTILUS_IS_LOCATION_WIDGET_PROVIDER(obj)        (G_TYPE_CHECK_INSTANCE_TYPE ((obj), NAUTILUS_TYPE_LOCATION_WIDGET_PROVIDER))
-#define NAUTILUS_LOCATION_WIDGET_PROVIDER_GET_IFACE(obj) (G_TYPE_INSTANCE_GET_INTERFACE ((obj), NAUTILUS_TYPE_LOCATION_WIDGET_PROVIDER, NautilusLocationWidgetProviderIface))
+#define NEMO_TYPE_LOCATION_WIDGET_PROVIDER           (nemo_location_widget_provider_get_type ())
+#define NEMO_LOCATION_WIDGET_PROVIDER(obj)           (G_TYPE_CHECK_INSTANCE_CAST ((obj), NEMO_TYPE_LOCATION_WIDGET_PROVIDER, NemoLocationWidgetProvider))
+#define NEMO_IS_LOCATION_WIDGET_PROVIDER(obj)        (G_TYPE_CHECK_INSTANCE_TYPE ((obj), NEMO_TYPE_LOCATION_WIDGET_PROVIDER))
+#define NEMO_LOCATION_WIDGET_PROVIDER_GET_IFACE(obj) (G_TYPE_INSTANCE_GET_INTERFACE ((obj), NEMO_TYPE_LOCATION_WIDGET_PROVIDER, NemoLocationWidgetProviderIface))
 
-typedef struct _NautilusLocationWidgetProvider       NautilusLocationWidgetProvider;
-typedef struct _NautilusLocationWidgetProviderIface  NautilusLocationWidgetProviderIface;
+typedef struct _NemoLocationWidgetProvider       NemoLocationWidgetProvider;
+typedef struct _NemoLocationWidgetProviderIface  NemoLocationWidgetProviderIface;
 
-struct _NautilusLocationWidgetProviderIface {
+struct _NemoLocationWidgetProviderIface {
 	GTypeInterface g_iface;
 
-	GtkWidget * (*get_widget) (NautilusLocationWidgetProvider *provider,
+	GtkWidget * (*get_widget) (NemoLocationWidgetProvider *provider,
 				   const char                     *uri,
 				   GtkWidget                      *window);
 };
 
 /* Interface Functions */
-GType       nautilus_location_widget_provider_get_type      (void);
-GtkWidget * nautilus_location_widget_provider_get_widget    (NautilusLocationWidgetProvider     *provider,
+GType       nemo_location_widget_provider_get_type      (void);
+GtkWidget * nemo_location_widget_provider_get_widget    (NemoLocationWidgetProvider     *provider,
 							     const char                         *uri,
 							     GtkWidget                          *window);
 G_END_DECLS

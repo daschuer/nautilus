@@ -1,6 +1,6 @@
 /* -*- Mode: C; indent-tabs-mode: t; c-basic-offset: 8; tab-width: 8 -*-
 
-   nautilus-desktop-link.h: Class that handles the links on the desktop
+   nemo-desktop-link.h: Class that handles the links on the desktop
     
    Copyright (C) 2003 Red Hat, Inc.
   
@@ -22,60 +22,60 @@
    Author: Alexander Larsson <alexl@redhat.com>
 */
 
-#ifndef NAUTILUS_DESKTOP_LINK_H
-#define NAUTILUS_DESKTOP_LINK_H
+#ifndef NEMO_DESKTOP_LINK_H
+#define NEMO_DESKTOP_LINK_H
 
-#include <libnautilus-private/nautilus-file.h>
+#include <libnemo-private/nemo-file.h>
 #include <gio/gio.h>
 
-#define NAUTILUS_TYPE_DESKTOP_LINK nautilus_desktop_link_get_type()
-#define NAUTILUS_DESKTOP_LINK(obj) \
-  (G_TYPE_CHECK_INSTANCE_CAST ((obj), NAUTILUS_TYPE_DESKTOP_LINK, NautilusDesktopLink))
-#define NAUTILUS_DESKTOP_LINK_CLASS(klass) \
-  (G_TYPE_CHECK_CLASS_CAST ((klass), NAUTILUS_TYPE_DESKTOP_LINK, NautilusDesktopLinkClass))
-#define NAUTILUS_IS_DESKTOP_LINK(obj) \
-  (G_TYPE_CHECK_INSTANCE_TYPE ((obj), NAUTILUS_TYPE_DESKTOP_LINK))
-#define NAUTILUS_IS_DESKTOP_LINK_CLASS(klass) \
-  (G_TYPE_CHECK_CLASS_TYPE ((klass), NAUTILUS_TYPE_DESKTOP_LINK))
-#define NAUTILUS_DESKTOP_LINK_GET_CLASS(obj) \
-  (G_TYPE_INSTANCE_GET_CLASS ((obj), NAUTILUS_TYPE_DESKTOP_LINK, NautilusDesktopLinkClass))
+#define NEMO_TYPE_DESKTOP_LINK nemo_desktop_link_get_type()
+#define NEMO_DESKTOP_LINK(obj) \
+  (G_TYPE_CHECK_INSTANCE_CAST ((obj), NEMO_TYPE_DESKTOP_LINK, NemoDesktopLink))
+#define NEMO_DESKTOP_LINK_CLASS(klass) \
+  (G_TYPE_CHECK_CLASS_CAST ((klass), NEMO_TYPE_DESKTOP_LINK, NemoDesktopLinkClass))
+#define NEMO_IS_DESKTOP_LINK(obj) \
+  (G_TYPE_CHECK_INSTANCE_TYPE ((obj), NEMO_TYPE_DESKTOP_LINK))
+#define NEMO_IS_DESKTOP_LINK_CLASS(klass) \
+  (G_TYPE_CHECK_CLASS_TYPE ((klass), NEMO_TYPE_DESKTOP_LINK))
+#define NEMO_DESKTOP_LINK_GET_CLASS(obj) \
+  (G_TYPE_INSTANCE_GET_CLASS ((obj), NEMO_TYPE_DESKTOP_LINK, NemoDesktopLinkClass))
 
-typedef struct NautilusDesktopLinkDetails NautilusDesktopLinkDetails;
+typedef struct NemoDesktopLinkDetails NemoDesktopLinkDetails;
 
 typedef struct {
 	GObject parent_slot;
-	NautilusDesktopLinkDetails *details;
-} NautilusDesktopLink;
+	NemoDesktopLinkDetails *details;
+} NemoDesktopLink;
 
 typedef struct {
 	GObjectClass parent_slot;
-} NautilusDesktopLinkClass;
+} NemoDesktopLinkClass;
 
 typedef enum {
-	NAUTILUS_DESKTOP_LINK_HOME,
-	NAUTILUS_DESKTOP_LINK_COMPUTER,
-	NAUTILUS_DESKTOP_LINK_TRASH,
-	NAUTILUS_DESKTOP_LINK_MOUNT,
-	NAUTILUS_DESKTOP_LINK_NETWORK
-} NautilusDesktopLinkType;
+	NEMO_DESKTOP_LINK_HOME,
+	NEMO_DESKTOP_LINK_COMPUTER,
+	NEMO_DESKTOP_LINK_TRASH,
+	NEMO_DESKTOP_LINK_MOUNT,
+	NEMO_DESKTOP_LINK_NETWORK
+} NemoDesktopLinkType;
 
-GType   nautilus_desktop_link_get_type (void);
+GType   nemo_desktop_link_get_type (void);
 
-NautilusDesktopLink *   nautilus_desktop_link_new                     (NautilusDesktopLinkType  type);
-NautilusDesktopLink *   nautilus_desktop_link_new_from_mount          (GMount                 *mount);
-NautilusDesktopLinkType nautilus_desktop_link_get_link_type           (NautilusDesktopLink     *link);
-char *                  nautilus_desktop_link_get_file_name           (NautilusDesktopLink     *link);
-char *                  nautilus_desktop_link_get_display_name        (NautilusDesktopLink     *link);
-GIcon *                 nautilus_desktop_link_get_icon                (NautilusDesktopLink     *link);
-GFile *                 nautilus_desktop_link_get_activation_location (NautilusDesktopLink     *link);
-char *                  nautilus_desktop_link_get_activation_uri      (NautilusDesktopLink     *link);
-gboolean                nautilus_desktop_link_get_date                (NautilusDesktopLink     *link,
-								       NautilusDateType         date_type,
+NemoDesktopLink *   nemo_desktop_link_new                     (NemoDesktopLinkType  type);
+NemoDesktopLink *   nemo_desktop_link_new_from_mount          (GMount                 *mount);
+NemoDesktopLinkType nemo_desktop_link_get_link_type           (NemoDesktopLink     *link);
+char *                  nemo_desktop_link_get_file_name           (NemoDesktopLink     *link);
+char *                  nemo_desktop_link_get_display_name        (NemoDesktopLink     *link);
+GIcon *                 nemo_desktop_link_get_icon                (NemoDesktopLink     *link);
+GFile *                 nemo_desktop_link_get_activation_location (NemoDesktopLink     *link);
+char *                  nemo_desktop_link_get_activation_uri      (NemoDesktopLink     *link);
+gboolean                nemo_desktop_link_get_date                (NemoDesktopLink     *link,
+								       NemoDateType         date_type,
 								       time_t                  *date);
-GMount *                nautilus_desktop_link_get_mount               (NautilusDesktopLink     *link);
-gboolean                nautilus_desktop_link_can_rename              (NautilusDesktopLink     *link);
-gboolean                nautilus_desktop_link_rename                  (NautilusDesktopLink     *link,
+GMount *                nemo_desktop_link_get_mount               (NemoDesktopLink     *link);
+gboolean                nemo_desktop_link_can_rename              (NemoDesktopLink     *link);
+gboolean                nemo_desktop_link_rename                  (NemoDesktopLink     *link,
 								       const char              *name);
 
 
-#endif /* NAUTILUS_DESKTOP_LINK_H */
+#endif /* NEMO_DESKTOP_LINK_H */

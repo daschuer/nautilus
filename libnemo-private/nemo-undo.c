@@ -1,6 +1,6 @@
 /* -*- Mode: C; indent-tabs-mode: t; c-basic-offset: 8; tab-width: 8 -*- */
 
-/* nautilus-undo.c - public interface for objects that implement
+/* nemo-undo.c - public interface for objects that implement
  *                   undoable actions -- works across components
  *
  * Copyright (C) 2000 Eazel, Inc.
@@ -24,18 +24,18 @@
  */
 
 #include <config.h>
-#include "nautilus-undo.h"
+#include "nemo-undo.h"
 
-#include "nautilus-undo-private.h"
-#include "nautilus-undo-transaction.h"
+#include "nemo-undo-private.h"
+#include "nemo-undo-transaction.h"
 #include <gtk/gtk.h>
 
-#define NAUTILUS_UNDO_MANAGER_DATA "Nautilus undo manager"
+#define NEMO_UNDO_MANAGER_DATA "Nemo undo manager"
 
-/* Register a simple undo action by calling nautilus_undo_register_full. */
+/* Register a simple undo action by calling nemo_undo_register_full. */
 void
-nautilus_undo_register (GObject *target,
-			NautilusUndoCallback callback,
+nemo_undo_register (GObject *target,
+			NemoUndoCallback callback,
 			gpointer callback_data,
 			GDestroyNotify callback_data_destroy_notify,
 			const char *operation_name,
@@ -44,7 +44,7 @@ nautilus_undo_register (GObject *target,
 			const char *redo_menu_item_label,
 			const char *redo_menu_item_hint)
 {
-	NautilusUndoAtom atom;
+	NemoUndoAtom atom;
 	GList single_atom_list;
 
 	g_return_if_fail (G_IS_OBJECT (target));
@@ -65,7 +65,7 @@ nautilus_undo_register (GObject *target,
 	 * using the undo target as the place to search for the
 	 * undo manager.
 	 */
-	nautilus_undo_register_full (&single_atom_list,
+	nemo_undo_register_full (&single_atom_list,
 				     target,
 				     operation_name,
 				     undo_menu_item_label,
@@ -76,7 +76,7 @@ nautilus_undo_register (GObject *target,
 
 /* Register an undo action. */
 void
-nautilus_undo_register_full (GList *atoms,
+nemo_undo_register_full (GList *atoms,
 			     GObject *undo_manager_search_start_object,
 			     const char *operation_name,
 			     const char *undo_menu_item_label,
@@ -84,24 +84,24 @@ nautilus_undo_register_full (GList *atoms,
 			     const char *redo_menu_item_label,
 			     const char *redo_menu_item_hint)
 {
-	NautilusUndoTransaction *transaction;
+	NemoUndoTransaction *transaction;
 	GList *p;
 
 	g_return_if_fail (atoms != NULL);
 	g_return_if_fail (G_IS_OBJECT (undo_manager_search_start_object));
 
 	/* Create an undo transaction */
-	transaction = nautilus_undo_transaction_new (operation_name,
+	transaction = nemo_undo_transaction_new (operation_name,
 						     undo_menu_item_label,
 						     undo_menu_item_hint, 
 						     redo_menu_item_label,
 						     redo_menu_item_hint);
 	for (p = atoms; p != NULL; p = p->next) {
-		nautilus_undo_transaction_add_atom (transaction, p->data);
+		nemo_undo_transaction_add_atom (transaction, p->data);
 	}
-	nautilus_undo_transaction_add_to_undo_manager
+	nemo_undo_transaction_add_to_undo_manager
 		(transaction,
-		 nautilus_undo_get_undo_manager (undo_manager_search_start_object));
+		 nemo_undo_get_undo_manager (undo_manager_search_start_object));
 
 	/* Now we are done with the transaction.
 	 * If the undo manager is holding it, then this will not destroy it.
@@ -111,31 +111,31 @@ nautilus_undo_register_full (GList *atoms,
 
 /* Cover for forgetting about all undo relating to a particular target. */
 void
-nautilus_undo_unregister (GObject *target)
+nemo_undo_unregister (GObject *target)
 {
 	/* Perhaps this should also unregister all children if called on a
 	 * GtkContainer? That might be handy.
 	 */
-	nautilus_undo_transaction_unregister_object (target);
+	nemo_undo_transaction_unregister_object (target);
 }
 
 void
-nautilus_undo (GObject *undo_manager_search_start_object)
+nemo_undo (GObject *undo_manager_search_start_object)
 {
-	NautilusUndoManager *manager;
+	NemoUndoManager *manager;
 
 	g_return_if_fail (G_IS_OBJECT (undo_manager_search_start_object));
 
-	manager = nautilus_undo_get_undo_manager (undo_manager_search_start_object);
+	manager = nemo_undo_get_undo_manager (undo_manager_search_start_object);
 	if (manager != NULL) {
-		nautilus_undo_manager_undo (manager);
+		nemo_undo_manager_undo (manager);
 	}
 }
 
-NautilusUndoManager *
-nautilus_undo_get_undo_manager (GObject *start_object)
+NemoUndoManager *
+nemo_undo_get_undo_manager (GObject *start_object)
 {
-	NautilusUndoManager *manager;
+	NemoUndoManager *manager;
 	GtkWidget *parent;
 	GtkWindow *transient_parent;
 
@@ -146,7 +146,7 @@ nautilus_undo_get_undo_manager (GObject *start_object)
 	g_return_val_if_fail (G_IS_OBJECT (start_object), NULL);
 
 	/* Check for an undo manager right here. */
-	manager = g_object_get_data (start_object, NAUTILUS_UNDO_MANAGER_DATA);
+	manager = g_object_get_data (start_object, NEMO_UNDO_MANAGER_DATA);
 	if (manager != NULL) {
 		return manager;
 	}
@@ -155,7 +155,7 @@ nautilus_undo_get_undo_manager (GObject *start_object)
 	if (GTK_IS_WIDGET (start_object)) {
 		parent = gtk_widget_get_parent (GTK_WIDGET (start_object));
 		if (parent != NULL) {
-			manager = nautilus_undo_get_undo_manager (G_OBJECT (parent));
+			manager = nemo_undo_get_undo_manager (G_OBJECT (parent));
 			if (manager != NULL) {
 				return manager;
 			}
@@ -165,7 +165,7 @@ nautilus_undo_get_undo_manager (GObject *start_object)
 		if (GTK_IS_WINDOW (start_object)) {
 			transient_parent = gtk_window_get_transient_for (GTK_WINDOW (start_object));
 			if (transient_parent != NULL) {
-				manager = nautilus_undo_get_undo_manager (G_OBJECT (transient_parent));
+				manager = nemo_undo_get_undo_manager (G_OBJECT (transient_parent));
 				if (manager != NULL) {
 					return manager;
 				}
@@ -178,28 +178,28 @@ nautilus_undo_get_undo_manager (GObject *start_object)
 }
 
 void
-nautilus_undo_attach_undo_manager (GObject *object,
-				   NautilusUndoManager *manager)
+nemo_undo_attach_undo_manager (GObject *object,
+				   NemoUndoManager *manager)
 {
 	g_return_if_fail (G_IS_OBJECT (object));
 
 	if (manager == NULL) {
-		g_object_set_data (object, NAUTILUS_UNDO_MANAGER_DATA, NULL);
+		g_object_set_data (object, NEMO_UNDO_MANAGER_DATA, NULL);
 	} else {
 		g_object_ref (manager);
 		g_object_set_data_full
-			(object, NAUTILUS_UNDO_MANAGER_DATA,
+			(object, NEMO_UNDO_MANAGER_DATA,
 			 manager, g_object_unref);
 	}
 }
 
 /* Copy a reference to the undo manager fromone object to another. */
 void
-nautilus_undo_share_undo_manager (GObject *destination_object,
+nemo_undo_share_undo_manager (GObject *destination_object,
 				  GObject *source_object)
 {
-	NautilusUndoManager *manager;
+	NemoUndoManager *manager;
 
-	manager = nautilus_undo_get_undo_manager (source_object);
-	nautilus_undo_attach_undo_manager (destination_object, manager);
+	manager = nemo_undo_get_undo_manager (source_object);
+	nemo_undo_attach_undo_manager (destination_object, manager);
 }

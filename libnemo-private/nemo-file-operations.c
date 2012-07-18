@@ -1,6 +1,6 @@
 /* -*- Mode: C; indent-tabs-mode: t; c-basic-offset: 8; tab-width: 8 -*- */
 
-/* nautilus-file-operations.c - Nautilus file operations.
+/* nemo-file-operations.c - Nemo file operations.
 
    Copyright (C) 1999, 2000 Free Software Foundation
    Copyright (C) 2000, 2001 Eazel, Inc.
@@ -36,12 +36,12 @@
 #include <sys/types.h>
 #include <stdlib.h>
 
-#include "nautilus-file-operations.h"
+#include "nemo-file-operations.h"
 
-#include "nautilus-file-changes-queue.h"
-#include "nautilus-lib-self-check-functions.h"
+#include "nemo-file-changes-queue.h"
+#include "nemo-lib-self-check-functions.h"
 
-#include "nautilus-progress-info.h"
+#include "nemo-progress-info.h"
 
 #include <eel/eel-glib-extensions.h>
 #include <eel/eel-gtk-extensions.h>
@@ -54,17 +54,19 @@
 #include <gtk/gtk.h>
 #include <gio/gio.h>
 #include <glib.h>
-#include "nautilus-file-changes-queue.h"
-#include "nautilus-file-private.h"
-#include "nautilus-desktop-icon-file.h"
-#include "nautilus-desktop-link-monitor.h"
-#include "nautilus-global-preferences.h"
-#include "nautilus-link.h"
-#include "nautilus-trash-monitor.h"
-#include "nautilus-file-utilities.h"
-#include "nautilus-file-conflict-dialog.h"
-#include "nautilus-file-undo-operations.h"
-#include "nautilus-file-undo-manager.h"
+#include "nemo-file-changes-queue.h"
+#include "nemo-file-private.h"
+#include "nemo-desktop-icon-file.h"
+#include "nemo-desktop-link-monitor.h"
+#include "nemo-global-preferences.h"
+#include "nemo-link.h"
+#include "nemo-trash-monitor.h"
+#include "nemo-file-utilities.h"
+#include "nemo-file-conflict-dialog.h"
+#include "nemo-file-undo-operations.h"
+#include "nemo-file-undo-manager.h"
+
+#include <zeitgeist.h>
 
 /* TODO: TESTING!!! */
 
@@ -74,11 +76,11 @@ typedef struct {
 	GtkWindow *parent_window;
 	int screen_num;
 	int inhibit_cookie;
-	NautilusProgressInfo *progress;
+	NemoProgressInfo *progress;
 	GCancellable *cancellable;
 	GHashTable *skip_files;
 	GHashTable *skip_readdir_error;
-	NautilusFileUndoInfo *undo_info;
+	NemoFileUndoInfo *undo_info;
 	gboolean skip_all_error;
 	gboolean skip_all_conflict;
 	gboolean merge_all;
@@ -97,7 +99,7 @@ typedef struct {
 	int n_icon_positions;
 	GHashTable *debuting_files;
 	gchar *target_name;
-	NautilusCopyCallback  done_callback;
+	NemoCopyCallback  done_callback;
 	gpointer done_callback_data;
 } CopyMoveJob;
 
@@ -106,7 +108,7 @@ typedef struct {
 	GList *files;
 	gboolean try_trash;
 	gboolean user_cancel;
-	NautilusDeleteCallback done_callback;
+	NemoDeleteCallback done_callback;
 	gpointer done_callback_data;
 } DeleteJob;
 
@@ -121,7 +123,7 @@ typedef struct {
 	GdkPoint position;
 	gboolean has_position;
 	GFile *created_file;
-	NautilusCreateCallback done_callback;
+	NemoCreateCallback done_callback;
 	gpointer done_callback_data;
 } CreateJob;
 
@@ -130,7 +132,7 @@ typedef struct {
 	CommonJob common;
 	GList *trash_dirs;
 	gboolean should_confirm;
-	NautilusOpCallback done_callback;
+	NemoOpCallback done_callback;
 	gpointer done_callback_data;
 } EmptyTrashJob;
 
@@ -138,14 +140,14 @@ typedef struct {
 	CommonJob common;
 	GFile *file;
 	gboolean interactive;
-	NautilusOpCallback done_callback;
+	NemoOpCallback done_callback;
 	gpointer done_callback_data;
 } MarkTrustedJob;
 
 typedef struct {
 	CommonJob common;
 	GFile *file;
-	NautilusOpCallback done_callback;
+	NemoOpCallback done_callback;
 	gpointer done_callback_data;
 	guint32 file_permissions;
 	guint32 file_mask;
@@ -191,6 +193,104 @@ typedef struct {
 #define MERGE _("_Merge")
 #define MERGE_ALL _("Merge _All")
 #define COPY_FORCE _("Copy _Anyway")
+
+#define ZEITGEIST_NEMO_ACTOR "application://nemo.desktop"
+
+static void
+send_event_to_zeitgeist (ZeitgeistEvent *event)
+{
+    ZeitgeistLog *log = zeitgeist_log_get_default ();
+    zeitgeist_log_insert_events_no_reply (log, event, NULL);
+}
+
+typedef struct {
+    const char *event_interpretation;
+    //char *event_origin;
+    GFile *file;
+    gchar *original_uri; // for MOVE_EVENT
+} _ZeitgeistFileEventData;
+
+static void
+_log_zeitgeist_event_for_file_cb (GObject *source_object,
+        GAsyncResult *res, gpointer user_data)
+{
+    _ZeitgeistFileEventData *data;
+    GError *error;
+    GFileInfo *info;
+    gchar *uri;
+    gchar *origin;
+    const gchar *display_name;
+    const gchar *mimetype;
+    
+    data = user_data;
+
+    error = NULL;
+    info = g_file_query_info_finish (G_FILE (source_object), res, &error);
+
+    if (info) {
+        uri = g_file_get_uri (data->file);
+        origin = g_path_get_dirname (uri);
+        display_name = g_file_info_get_display_name (info);
+        mimetype = g_file_info_get_content_type (info);
+    } else {
+        g_warning ("Error getting info: %s\n", error->message);
+        g_error_free (error);
+        g_object_unref (data->file);
+        g_free (data->original_uri);
+        g_free (data);
+        return; // skip this event
+    }
+
+    ZeitgeistSubject *subject = zeitgeist_subject_new_full (
+        (data->original_uri) ? (data->original_uri) : uri,
+        NULL, // subject interpretation - auto-guess
+        NULL, // suject manifestation - auto-guess
+        mimetype,
+        origin,
+        display_name,
+        NULL // storage - auto-guess
+    );
+
+    if (data->original_uri)
+        zeitgeist_subject_set_current_uri (subject, uri);
+
+    g_free (uri);
+    g_free (origin);
+    g_object_unref (info);
+
+    if (subject) {
+        ZeitgeistEvent *event = zeitgeist_event_new_full (
+            data->event_interpretation,
+            ZEITGEIST_ZG_USER_ACTIVITY,
+            ZEITGEIST_NEMO_ACTOR,
+            subject, NULL);
+        send_event_to_zeitgeist (event);
+    }
+
+    g_object_unref (data->file);
+    g_free (data->original_uri);
+    g_free (data);
+}
+
+static void
+log_zeitgeist_event_for_file_no_reply (const char *event_interpretation,
+    GFile *file, gchar *original_uri)
+{
+    _ZeitgeistFileEventData *data;
+    data = g_new0 (_ZeitgeistFileEventData, 1);
+
+    data->event_interpretation = event_interpretation;
+    data->original_uri = original_uri;
+    data->file = file;
+
+    g_file_query_info_async (file,
+        G_FILE_ATTRIBUTE_STANDARD_DISPLAY_NAME ","
+            G_FILE_ATTRIBUTE_STANDARD_CONTENT_TYPE,
+        G_FILE_QUERY_INFO_NONE,
+        G_PRIORITY_DEFAULT,
+        NULL,
+        _log_zeitgeist_event_for_file_cb, data);
+}
 
 static void
 mark_desktop_file_trusted (CommonJob *common,
@@ -925,8 +1025,8 @@ init_common (gsize job_size,
 		common->parent_window = parent_window;
 		eel_add_weak_pointer (&common->parent_window);
 	}
-	common->progress = nautilus_progress_info_new ();
-	common->cancellable = nautilus_progress_info_get_cancellable (common->progress);
+	common->progress = nemo_progress_info_new ();
+	common->cancellable = nemo_progress_info_get_cancellable (common->progress);
 	common->time = g_timer_new ();
 	common->inhibit_cookie = -1;
 	common->screen_num = 0;
@@ -941,10 +1041,10 @@ init_common (gsize job_size,
 static void
 finalize_common (CommonJob *common)
 {
-	nautilus_progress_info_finish (common->progress);
+	nemo_progress_info_finish (common->progress);
 
 	if (common->inhibit_cookie != -1) {
-		nautilus_uninhibit_power_manager (common->inhibit_cookie);
+		nemo_uninhibit_power_manager (common->inhibit_cookie);
 	}
 
 	common->inhibit_cookie = -1;
@@ -958,7 +1058,7 @@ finalize_common (CommonJob *common)
 	}
 
 	if (common->undo_info != NULL) {
-		nautilus_file_undo_manager_set_action (common->undo_info);
+		nemo_file_undo_manager_set_action (common->undo_info);
 		g_object_unref (common->undo_info);
 	}
 
@@ -1015,7 +1115,7 @@ static gboolean
 can_delete_without_confirm (GFile *file)
 {
 	if (g_file_has_uri_scheme (file, "burn") ||
-	    g_file_has_uri_scheme (file, "x-nautilus-desktop")) {
+	    g_file_has_uri_scheme (file, "x-nemo-desktop")) {
 		return TRUE;
 	}
 
@@ -1139,12 +1239,12 @@ run_simple_dialog_va (CommonJob *job,
 	g_ptr_array_add (ptr_array, NULL);
 	data->button_titles = (const char **)g_ptr_array_free (ptr_array, FALSE);
 
-	nautilus_progress_info_pause (job->progress);
+	nemo_progress_info_pause (job->progress);
 	g_io_scheduler_job_send_to_mainloop (job->io_job,
 					     do_run_simple_dialog,
 					     data,
 					     NULL);
-	nautilus_progress_info_resume (job->progress);
+	nemo_progress_info_resume (job->progress);
 	res = data->result;
 
 	g_free (data->button_titles);
@@ -1259,7 +1359,7 @@ run_question (CommonJob *job,
 static void
 inhibit_power_manager (CommonJob *job, const char *message)
 {
-	job->inhibit_cookie = nautilus_inhibit_power_manager (message);
+	job->inhibit_cookie = nemo_inhibit_power_manager (message);
 }
 
 static void
@@ -1284,8 +1384,8 @@ should_confirm_trash (void)
 	GSettings *prefs;
 	gboolean confirm_trash;
 
-	prefs = g_settings_new ("org.gnome.nautilus.preferences");
-	confirm_trash = g_settings_get_boolean (prefs, NAUTILUS_PREFERENCES_CONFIRM_TRASH);
+	prefs = g_settings_new ("org.gnome.nemo.preferences");
+	confirm_trash = g_settings_get_boolean (prefs, NEMO_PREFERENCES_CONFIRM_TRASH);
 	g_object_unref (prefs);
 	return confirm_trash;
 }
@@ -1425,13 +1525,13 @@ report_delete_progress (CommonJob *job,
 				    files_left),
 			  files_left);
 
-	nautilus_progress_info_take_status (job->progress,
+	nemo_progress_info_take_status (job->progress,
 					    f (_("Deleting files")));
 
 	elapsed = g_timer_elapsed (job->time, NULL);
 	if (elapsed < SECONDS_NEEDED_FOR_RELIABLE_TRANSFER_RATE) {
 
-		nautilus_progress_info_set_details (job->progress, files_left_s);
+		nemo_progress_info_set_details (job->progress, files_left_s);
 	} else {
 		char *details, *time_left_s;
 		transfer_rate = transfer_info->num_files / elapsed;
@@ -1446,7 +1546,7 @@ report_delete_progress (CommonJob *job,
 				 remaining_time);
 
 		details = g_strconcat (files_left_s, "\xE2\x80\x94", time_left_s, NULL);
-		nautilus_progress_info_take_details (job->progress, details);
+		nemo_progress_info_take_details (job->progress, details);
 
 		g_free (time_left_s);
 	}
@@ -1454,7 +1554,7 @@ report_delete_progress (CommonJob *job,
 	g_free (files_left_s);
 
 	if (source_info->num_files != 0) {
-		nautilus_progress_info_set_progress (job->progress, transfer_info->num_files, source_info->num_files);
+		nemo_progress_info_set_progress (job->progress, transfer_info->num_files, source_info->num_files);
 	}
 }
 
@@ -1606,7 +1706,7 @@ delete_dir (CommonJob *job, GFile *dir,
 		skip:
 			g_error_free (error);
 		} else {
-			nautilus_file_changes_queue_file_removed (dir);
+			nemo_file_changes_queue_file_removed (dir);
 			transfer_info->num_files ++;
 			report_delete_progress (job, source_info, transfer_info);
 			return;
@@ -1636,7 +1736,7 @@ delete_file (CommonJob *job, GFile *file,
 	
 	error = NULL;
 	if (g_file_delete (file, job->cancellable, &error)) {
-		nautilus_file_changes_queue_file_removed (file);
+		nemo_file_changes_queue_file_removed (file);
 		transfer_info->num_files ++;
 		report_delete_progress (job, source_info, transfer_info);
 		return;
@@ -1737,17 +1837,17 @@ report_trash_progress (CommonJob *job,
 
 	files_left = total_files - files_trashed;
 
-	nautilus_progress_info_take_status (job->progress,
+	nemo_progress_info_take_status (job->progress,
 					    f (_("Moving files to trash")));
 
 	s = f (ngettext ("%'d file left to trash",
 			 "%'d files left to trash",
 			 files_left),
 	       files_left);
-	nautilus_progress_info_take_details (job->progress, s);
+	nemo_progress_info_take_details (job->progress, s);
 
 	if (total_files != 0) {
-		nautilus_progress_info_set_progress (job->progress, files_trashed, total_files);
+		nemo_progress_info_set_progress (job->progress, files_trashed, total_files);
 	}
 }
 
@@ -1825,10 +1925,10 @@ trash_files (CommonJob *job, GList *files, int *files_skipped)
 			g_error_free (error);
 			total_files--;
 		} else {
-			nautilus_file_changes_queue_file_removed (file);
+			nemo_file_changes_queue_file_removed (file);
 
 			if (job->undo_info != NULL) {
-				nautilus_file_undo_info_trash_add_file (NAUTILUS_FILE_UNDO_INFO_TRASH (job->undo_info), file);
+				nemo_file_undo_info_trash_add_file (NEMO_FILE_UNDO_INFO_TRASH (job->undo_info), file);
 			}
 
 			files_trashed++;
@@ -1851,6 +1951,35 @@ delete_job_done (gpointer user_data)
 
 	job = user_data;
 
+	// Send event to Zeitgeist for deletions/trash
+    GList *file_iter = job->files;
+	while (file_iter != NULL) {
+		gchar *uri = g_file_get_uri (file_iter->data);
+		gchar *origin = g_path_get_dirname (uri);
+        gchar *parse_name = g_file_get_parse_name (file_iter->data);
+		gchar *display_name = g_path_get_basename (parse_name);
+		ZeitgeistEvent *event = zeitgeist_event_new_full (
+			ZEITGEIST_ZG_DELETE_EVENT,
+			ZEITGEIST_ZG_USER_ACTIVITY,
+			ZEITGEIST_NEMO_ACTOR,
+			zeitgeist_subject_new_full (
+				uri,
+				NULL, // subject interpretation - auto-guess
+				NULL, // suject manifestation - auto-guess
+				NULL, // mime-type
+				origin,
+				display_name,
+				NULL // storage - auto-guess
+			), NULL);
+		send_event_to_zeitgeist (event);
+		g_free (uri);
+		g_free (origin);
+        g_free (parse_name);
+		g_free (display_name);
+        file_iter = g_list_next (file_iter);
+	}
+	// ---
+
 	g_list_free_full (job->files, g_object_unref);
 
 	if (job->done_callback) {
@@ -1861,7 +1990,7 @@ delete_job_done (gpointer user_data)
 	
 	finalize_common ((CommonJob *)job);
 
-	nautilus_file_changes_consume_changes (TRUE);
+	nemo_file_changes_consume_changes (TRUE);
 
 	return FALSE;
 }
@@ -1885,7 +2014,7 @@ delete_job (GIOSchedulerJob *io_job,
 	common = (CommonJob *)job;
 	common->io_job = io_job;
 
-	nautilus_progress_info_start (job->common.progress);
+	nemo_progress_info_start (job->common.progress);
 	
 	to_trash_files = NULL;
 	to_delete_files = NULL;
@@ -1954,7 +2083,7 @@ static void
 trash_or_delete_internal (GList                  *files,
 			  GtkWindow              *parent_window,
 			  gboolean                try_trash,			  
-			  NautilusDeleteCallback  done_callback,
+			  NemoDeleteCallback  done_callback,
 			  gpointer                done_callback_data)
 {
 	DeleteJob *job;
@@ -1974,8 +2103,8 @@ trash_or_delete_internal (GList                  *files,
 		inhibit_power_manager ((CommonJob *)job, _("Deleting Files"));
 	}
 	
-	if (try_trash && !nautilus_file_undo_manager_pop_flag ()) {
-		job->common.undo_info = nautilus_file_undo_info_trash_new (g_list_length (files));
+	if (try_trash && !nemo_file_undo_manager_pop_flag ()) {
+		job->common.undo_info = nemo_file_undo_info_trash_new (g_list_length (files));
 	}
 
 	g_io_scheduler_push_job (delete_job,
@@ -1986,9 +2115,9 @@ trash_or_delete_internal (GList                  *files,
 }
 
 void
-nautilus_file_operations_trash_or_delete (GList                  *files,
+nemo_file_operations_trash_or_delete (GList                  *files,
 					  GtkWindow              *parent_window,
-					  NautilusDeleteCallback  done_callback,
+					  NemoDeleteCallback  done_callback,
 					  gpointer                done_callback_data)
 {
 	trash_or_delete_internal (files, parent_window,
@@ -1997,9 +2126,9 @@ nautilus_file_operations_trash_or_delete (GList                  *files,
 }
 
 void
-nautilus_file_operations_delete (GList                  *files, 
+nemo_file_operations_delete (GList                  *files, 
 				 GtkWindow              *parent_window,
-				 NautilusDeleteCallback  done_callback,
+				 NemoDeleteCallback  done_callback,
 				 gpointer                done_callback_data)
 {
 	trash_or_delete_internal (files, parent_window,
@@ -2013,7 +2142,7 @@ typedef struct {
 	gboolean eject;
 	GMount *mount;
 	GtkWindow *parent_window;
-	NautilusUnmountCallback callback;
+	NemoUnmountCallback callback;
 	gpointer callback_data;
 } UnmountData;
 
@@ -2215,7 +2344,7 @@ prompt_empty_trash (GtkWindow *parent_window)
 	}
 	atk_object_set_role (gtk_widget_get_accessible (dialog), ATK_ROLE_ALERT);
 	gtk_window_set_wmclass (GTK_WINDOW (dialog), "empty_trash",
-				"Nautilus");
+				"Nemo");
 	
 	/* Make transient for the window group */
 	gtk_widget_realize (dialog);
@@ -2238,11 +2367,11 @@ empty_trash_for_unmount_done (gboolean success,
 }
 
 void
-nautilus_file_operations_unmount_mount_full (GtkWindow                      *parent_window,
+nemo_file_operations_unmount_mount_full (GtkWindow                      *parent_window,
 					     GMount                         *mount,
 					     gboolean                        eject,
 					     gboolean                        check_trash,
-					     NautilusUnmountCallback         callback,
+					     NemoUnmountCallback         callback,
 					     gpointer                        callback_data)
 {
 	UnmountData *data;
@@ -2291,12 +2420,12 @@ nautilus_file_operations_unmount_mount_full (GtkWindow                      *par
 }
 
 void
-nautilus_file_operations_unmount_mount (GtkWindow                      *parent_window,
+nemo_file_operations_unmount_mount (GtkWindow                      *parent_window,
 					GMount                         *mount,
 					gboolean                        eject,
 					gboolean                        check_trash)
 {
-	nautilus_file_operations_unmount_mount_full (parent_window, mount, eject,
+	nemo_file_operations_unmount_mount_full (parent_window, mount, eject,
 						     check_trash, NULL, NULL);
 }
 
@@ -2316,7 +2445,7 @@ volume_mount_cb (GObject *source_object,
 		 GAsyncResult *res,
 		 gpointer user_data)
 {
-	NautilusMountCallback mount_callback;
+	NemoMountCallback mount_callback;
 	GObject *mount_callback_data_object;
 	GMountOperation *mount_op = user_data;
 	GError *error;
@@ -2341,7 +2470,7 @@ volume_mount_cb (GObject *source_object,
 		g_error_free (error);
 	}
 
-	mount_callback = (NautilusMountCallback)
+	mount_callback = (NemoMountCallback)
 		g_object_get_data (G_OBJECT (mount_op), "mount-callback");
 	mount_callback_data_object =
 		g_object_get_data (G_OBJECT (mount_op), "mount-callback-data");
@@ -2363,17 +2492,17 @@ volume_mount_cb (GObject *source_object,
 
 
 void
-nautilus_file_operations_mount_volume (GtkWindow *parent_window,
+nemo_file_operations_mount_volume (GtkWindow *parent_window,
 				       GVolume *volume)
 {
-	nautilus_file_operations_mount_volume_full (parent_window, volume,
+	nemo_file_operations_mount_volume_full (parent_window, volume,
 						    NULL, NULL);
 }
 
 void
-nautilus_file_operations_mount_volume_full (GtkWindow *parent_window,
+nemo_file_operations_mount_volume_full (GtkWindow *parent_window,
 					    GVolume *volume,
-					    NautilusMountCallback mount_callback,
+					    NemoMountCallback mount_callback,
 					    GObject *mount_callback_data_object)
 {
 	GMountOperation *mount_op;
@@ -2431,8 +2560,8 @@ report_count_progress (CommonJob *job,
 		break;
 	} 
 
-	nautilus_progress_info_take_details (job->progress, s);
-	nautilus_progress_info_pulse_progress (job->progress);
+	nemo_progress_info_take_details (job->progress, s);
+	nemo_progress_info_pulse_progress (job->progress);
 }
 
 static void
@@ -2899,7 +3028,7 @@ report_copy_progress (CopyMoveJob *copy_job,
 		
 		if (source_info->num_files == 1) {
 			if (copy_job->destination != NULL) {
-				nautilus_progress_info_take_status (job->progress,
+				nemo_progress_info_take_status (job->progress,
 								    f (is_move ?
 								       _("Moving \"%B\" to \"%B\""):
 								       _("Copying \"%B\" to \"%B\""),
@@ -2908,14 +3037,14 @@ report_copy_progress (CopyMoveJob *copy_job,
 								       (GFile *)copy_job->files->data,
 								       copy_job->destination));
 			} else {
-				nautilus_progress_info_take_status (job->progress,
+				nemo_progress_info_take_status (job->progress,
 								    f (_("Duplicating \"%B\""),
 								       (GFile *)copy_job->files->data));
 			}
 		} else if (copy_job->files != NULL &&
 			   copy_job->files->next == NULL) {
 			if (copy_job->destination != NULL) {
-				nautilus_progress_info_take_status (job->progress,
+				nemo_progress_info_take_status (job->progress,
 								    f (is_move ?
 								       _("Moving file %'d of %'d (in \"%B\") to \"%B\"")
 								       :
@@ -2925,7 +3054,7 @@ report_copy_progress (CopyMoveJob *copy_job,
 								       (GFile *)copy_job->files->data,
 								       copy_job->destination));
 			} else {
-				nautilus_progress_info_take_status (job->progress,
+				nemo_progress_info_take_status (job->progress,
 								    f (_("Duplicating file %'d of %'d (in \"%B\")"),
 								       transfer_info->num_files + 1,
 								       source_info->num_files,
@@ -2933,7 +3062,7 @@ report_copy_progress (CopyMoveJob *copy_job,
 			}
 		} else {
 			if (copy_job->destination != NULL) {
-				nautilus_progress_info_take_status (job->progress,
+				nemo_progress_info_take_status (job->progress,
 								    f (is_move ?
 								       _("Moving file %'d of %'d to \"%B\"")
 								       :
@@ -2942,7 +3071,7 @@ report_copy_progress (CopyMoveJob *copy_job,
 								       source_info->num_files,
 								       copy_job->destination));
 			} else {
-				nautilus_progress_info_take_status (job->progress,
+				nemo_progress_info_take_status (job->progress,
 								    f (_("Duplicating file %'d of %'d"),
 								       transfer_info->num_files + 1,
 								       source_info->num_files));
@@ -2963,7 +3092,7 @@ report_copy_progress (CopyMoveJob *copy_job,
 		char *s;
 		/* To translators: %S will expand to a size like "2 bytes" or "3 MB", so something like "4 kb of 4 MB" */		
 		s = f (_("%S of %S"), transfer_info->num_bytes, total_size);
-		nautilus_progress_info_take_details (job->progress, s);
+		nemo_progress_info_take_details (job->progress, s);
 	} else {
 		char *s;
 		remaining_time = (total_size - transfer_info->num_bytes) / transfer_rate;
@@ -2979,10 +3108,10 @@ report_copy_progress (CopyMoveJob *copy_job,
 		       transfer_info->num_bytes, total_size,
 		       remaining_time,
 		       (goffset)transfer_rate);
-		nautilus_progress_info_take_details (job->progress, s);
+		nemo_progress_info_take_details (job->progress, s);
 	}
 
-	nautilus_progress_info_set_progress (job->progress, transfer_info->num_bytes, total_size);
+	nemo_progress_info_set_progress (job->progress, transfer_info->num_bytes, total_size);
 }
 
 static int
@@ -3398,10 +3527,10 @@ create_dest_dir (CommonJob *job,
 		}
 		return CREATE_DEST_DIR_FAILED;
 	}
-	nautilus_file_changes_queue_file_added (*dest);
+	nemo_file_changes_queue_file_added (*dest);
 
 	if (job->undo_info != NULL) {
-		nautilus_file_undo_info_ext_add_origin_target_pair (NAUTILUS_FILE_UNDO_INFO_EXT (job->undo_info),
+		nemo_file_undo_info_ext_add_origin_target_pair (NEMO_FILE_UNDO_INFO_EXT (job->undo_info),
 								    src, *dest);
 	}
 
@@ -3750,7 +3879,7 @@ remove_target_recursively (CommonJob *job,
 		
 		return FALSE;
 	}
-	nautilus_file_changes_queue_file_removed (file);
+	nemo_file_changes_queue_file_removed (file);
 	
 	return TRUE;
 	
@@ -3869,7 +3998,7 @@ is_trusted_desktop_file (GFile *file,
 	if (g_file_info_get_file_type (info) == G_FILE_TYPE_REGULAR &&
 	    !g_file_info_get_attribute_boolean (info,
 						G_FILE_ATTRIBUTE_ACCESS_CAN_EXECUTE) &&
-	    nautilus_is_in_system_dir (file)) {
+	    nemo_is_in_system_dir (file)) {
 		res = TRUE;
 	}
 	g_object_unref (info);
@@ -3898,7 +4027,7 @@ do_run_conflict_dialog (gpointer _data)
 	GtkWidget *dialog;
 	int response;
 
-	dialog = nautilus_file_conflict_dialog_new (data->parent,
+	dialog = nemo_file_conflict_dialog_new (data->parent,
 						    data->src,
 						    data->dest,
 						    data->dest_dir);
@@ -3906,12 +4035,12 @@ do_run_conflict_dialog (gpointer _data)
 
 	if (response == CONFLICT_RESPONSE_RENAME) {
 		data->resp_data->new_name = 
-			nautilus_file_conflict_dialog_get_new_name (NAUTILUS_FILE_CONFLICT_DIALOG (dialog));
+			nemo_file_conflict_dialog_get_new_name (NEMO_FILE_CONFLICT_DIALOG (dialog));
 	} else if (response != GTK_RESPONSE_CANCEL ||
 		   response != GTK_RESPONSE_NONE) {
 		   data->resp_data->apply_to_all =
-			   nautilus_file_conflict_dialog_get_apply_to_all 
-				(NAUTILUS_FILE_CONFLICT_DIALOG (dialog));
+			   nemo_file_conflict_dialog_get_apply_to_all 
+				(NEMO_FILE_CONFLICT_DIALOG (dialog));
 	}
 
 	data->resp_data->id = response;
@@ -3942,12 +4071,12 @@ run_conflict_dialog (CommonJob *job,
 	resp_data->new_name = NULL;
 	data->resp_data = resp_data;
 
-	nautilus_progress_info_pause (job->progress);
+	nemo_progress_info_pause (job->progress);
 	g_io_scheduler_job_send_to_mainloop (job->io_job,
 					     do_run_conflict_dialog,
 					     data,
 					     NULL);
-	nautilus_progress_info_resume (job->progress);
+	nemo_progress_info_resume (job->progress);
 
 	g_slice_free (ConflictDialogData, data);
 
@@ -4136,17 +4265,17 @@ copy_move_file (CopyMoveJob *copy_job,
 
 		if (debuting_files) {
 			if (position) {
-				nautilus_file_changes_queue_schedule_position_set (dest, *position, job->screen_num);
+				nemo_file_changes_queue_schedule_position_set (dest, *position, job->screen_num);
 			} else {
-				nautilus_file_changes_queue_schedule_position_remove (dest);
+				nemo_file_changes_queue_schedule_position_remove (dest);
 			}
 			
 			g_hash_table_replace (debuting_files, g_object_ref (dest), GINT_TO_POINTER (TRUE));
 		}
 		if (copy_job->is_move) {
-			nautilus_file_changes_queue_file_moved (src, dest);
+			nemo_file_changes_queue_file_moved (src, dest);
 		} else {
-			nautilus_file_changes_queue_file_added (dest);
+			nemo_file_changes_queue_file_added (dest);
 		}
 
 		/* If copying a trusted desktop file to the desktop,
@@ -4161,7 +4290,7 @@ copy_move_file (CopyMoveJob *copy_job,
 		}
 
 		if (job->undo_info != NULL) {
-			nautilus_file_undo_info_ext_add_origin_target_pair (NAUTILUS_FILE_UNDO_INFO_EXT (job->undo_info),
+			nemo_file_undo_info_ext_add_origin_target_pair (NEMO_FILE_UNDO_INFO_EXT (job->undo_info),
 									    src, dest);
 		}
 
@@ -4320,7 +4449,7 @@ copy_move_file (CopyMoveJob *copy_job,
 				g_error_free (error);
 				error = NULL;
 			}
-			nautilus_file_changes_queue_file_removed (dest);
+			nemo_file_changes_queue_file_removed (dest);
 		}
 
 		if (is_merge) {
@@ -4478,6 +4607,23 @@ copy_job_done (gpointer user_data)
 				    job->done_callback_data);
 	}
 
+	// Send event to Zeitgeist
+	GHashTableIter iter;
+	GFile *file;
+	gpointer done;
+	g_hash_table_iter_init (&iter, job->debuting_files);
+	while (g_hash_table_iter_next (&iter, (gpointer *) &file, &done)) {
+		if (GPOINTER_TO_INT (done)) {
+            // operation was completed successfully for this file
+            g_object_ref (file);
+            // FIXME: Set event origin to the original file URI, if we
+            //        can somehow figure out which one it is.
+            log_zeitgeist_event_for_file_no_reply (
+                ZEITGEIST_ZG_CREATE_EVENT, file, NULL);
+		}
+	}
+	// ---
+
 	g_list_free_full (job->files, g_object_unref);
 	if (job->destination) {
 		g_object_unref (job->destination);
@@ -4493,7 +4639,7 @@ copy_job_done (gpointer user_data)
 	
 	finalize_common ((CommonJob *)job);
 
-	nautilus_file_changes_consume_changes (TRUE);
+	nemo_file_changes_consume_changes (TRUE);
 	return FALSE;
 }
 
@@ -4515,7 +4661,7 @@ copy_job (GIOSchedulerJob *io_job,
 
 	dest_fs_id = NULL;
 	
-	nautilus_progress_info_start (job->common.progress);
+	nemo_progress_info_start (job->common.progress);
 	
 	scan_sources (job->files,
 		      &source_info,
@@ -4563,12 +4709,12 @@ copy_job (GIOSchedulerJob *io_job,
 }
 
 void
-nautilus_file_operations_copy_file (GFile *source_file,
+nemo_file_operations_copy_file (GFile *source_file,
 				    GFile *target_dir,
 				    const gchar *source_display_name,
 				    const gchar *new_name,
 				    GtkWindow *parent_window,
-				    NautilusCopyCallback done_callback,
+				    NemoCopyCallback done_callback,
 				    gpointer done_callback_data)
 {
 	CopyMoveJob *job;
@@ -4600,17 +4746,17 @@ nautilus_file_operations_copy_file (GFile *source_file,
 }
 
 void
-nautilus_file_operations_copy (GList *files,
+nemo_file_operations_copy (GList *files,
 			       GArray *relative_item_points,
 			       GFile *target_dir,
 			       GtkWindow *parent_window,
-			       NautilusCopyCallback  done_callback,
+			       NemoCopyCallback  done_callback,
 			       gpointer done_callback_data)
 {
 	CopyMoveJob *job;
 
 	job = op_job_new (CopyMoveJob, parent_window);
-	job->desktop_location = nautilus_get_desktop_location ();
+	job->desktop_location = nemo_get_desktop_location ();
 	job->done_callback = done_callback;
 	job->done_callback_data = done_callback_data;
 	job->files = eel_g_object_list_copy (files);
@@ -4626,11 +4772,11 @@ nautilus_file_operations_copy (GList *files,
 
 	inhibit_power_manager ((CommonJob *)job, _("Copying Files"));
 
-	if (!nautilus_file_undo_manager_pop_flag ()) {
+	if (!nemo_file_undo_manager_pop_flag ()) {
 		GFile* src_dir;
 
 		src_dir = g_file_get_parent (files->data);
-		job->common.undo_info = nautilus_file_undo_info_ext_new (NAUTILUS_FILE_UNDO_OP_COPY,
+		job->common.undo_info = nemo_file_undo_info_ext_new (NEMO_FILE_UNDO_OP_COPY,
 									 g_list_length (files),
 									 src_dir, target_dir);
 
@@ -4651,16 +4797,16 @@ report_move_progress (CopyMoveJob *move_job, int total, int left)
 
 	job = (CommonJob *)move_job;
 	
-	nautilus_progress_info_take_status (job->progress,
+	nemo_progress_info_take_status (job->progress,
 					    f (_("Preparing to Move to \"%B\""),
 					       move_job->destination));
 
-	nautilus_progress_info_take_details (job->progress,
+	nemo_progress_info_take_details (job->progress,
 					     f (ngettext ("Preparing to move %'d file",
 							  "Preparing to move %'d files",
 							  left), left));
 
-	nautilus_progress_info_pulse_progress (job->progress);
+	nemo_progress_info_pulse_progress (job->progress);
 }
 
 typedef struct {
@@ -4786,16 +4932,16 @@ move_file_prepare (CopyMoveJob *move_job,
 			g_hash_table_replace (debuting_files, g_object_ref (dest), GINT_TO_POINTER (TRUE));
 		}
 
-		nautilus_file_changes_queue_file_moved (src, dest);
+		nemo_file_changes_queue_file_moved (src, dest);
 
 		if (position) {
-			nautilus_file_changes_queue_schedule_position_set (dest, *position, job->screen_num);
+			nemo_file_changes_queue_schedule_position_set (dest, *position, job->screen_num);
 		} else {
-			nautilus_file_changes_queue_schedule_position_remove (dest);
+			nemo_file_changes_queue_schedule_position_remove (dest);
 		}
 
 		if (job->undo_info != NULL) {
-			nautilus_file_undo_info_ext_add_origin_target_pair (NAUTILUS_FILE_UNDO_INFO_EXT (job->undo_info),
+			nemo_file_undo_info_ext_add_origin_target_pair (NEMO_FILE_UNDO_INFO_EXT (job->undo_info),
 									    src, dest);
 		}
 
@@ -5041,6 +5187,19 @@ move_job_done (gpointer user_data)
 				    job->done_callback_data);
 	}
 
+	// Send event to Zeitgeist for moved files (not renaming)
+    GList *file_iter = job->files;
+	while (file_iter != NULL) {
+        char *basename = g_file_get_basename (file_iter->data);
+        GFile *new_file = g_file_get_child (job->destination, basename);
+        g_free (basename);
+
+        log_zeitgeist_event_for_file_no_reply (ZEITGEIST_ZG_MOVE_EVENT,
+            new_file, g_file_get_uri (file_iter->data));
+        file_iter = g_list_next (file_iter);
+	}
+	// ---
+
 	g_list_free_full (job->files, g_object_unref);
 	g_object_unref (job->destination);
 	g_hash_table_unref (job->debuting_files);
@@ -5048,7 +5207,7 @@ move_job_done (gpointer user_data)
 	
 	finalize_common ((CommonJob *)job);
 
-	nautilus_file_changes_consume_changes (TRUE);
+	nemo_file_changes_consume_changes (TRUE);
 	return FALSE;
 }
 
@@ -5075,7 +5234,7 @@ move_job (GIOSchedulerJob *io_job,
 
 	fallbacks = NULL;
 	
-	nautilus_progress_info_start (job->common.progress);
+	nemo_progress_info_start (job->common.progress);
 	
 	verify_destination (&job->common,
 			    job->destination,
@@ -5135,11 +5294,11 @@ move_job (GIOSchedulerJob *io_job,
 }
 
 void
-nautilus_file_operations_move (GList *files,
+nemo_file_operations_move (GList *files,
 			       GArray *relative_item_points,
 			       GFile *target_dir,
 			       GtkWindow *parent_window,
-			       NautilusCopyCallback  done_callback,
+			       NemoCopyCallback  done_callback,
 			       gpointer done_callback_data)
 {
 	CopyMoveJob *job;
@@ -5161,17 +5320,17 @@ nautilus_file_operations_move (GList *files,
 
 	inhibit_power_manager ((CommonJob *)job, _("Moving Files"));
 
-	if (!nautilus_file_undo_manager_pop_flag ()) {
+	if (!nemo_file_undo_manager_pop_flag ()) {
 		GFile* src_dir;
 
 		src_dir = g_file_get_parent (files->data);
 
 		if (g_file_has_uri_scheme (g_list_first (files)->data, "trash")) {
-			job->common.undo_info = nautilus_file_undo_info_ext_new (NAUTILUS_FILE_UNDO_OP_RESTORE_FROM_TRASH,
+			job->common.undo_info = nemo_file_undo_info_ext_new (NEMO_FILE_UNDO_OP_RESTORE_FROM_TRASH,
 										 g_list_length (files),
 										 src_dir, target_dir);
 		} else {
-			job->common.undo_info = nautilus_file_undo_info_ext_new (NAUTILUS_FILE_UNDO_OP_MOVE,
+			job->common.undo_info = nemo_file_undo_info_ext_new (NEMO_FILE_UNDO_OP_MOVE,
 										 g_list_length (files),
 										 src_dir, target_dir);
 		}
@@ -5193,16 +5352,16 @@ report_link_progress (CopyMoveJob *link_job, int total, int left)
 
 	job = (CommonJob *)link_job;
 	
-	nautilus_progress_info_take_status (job->progress,
+	nemo_progress_info_take_status (job->progress,
 					    f (_("Creating links in \"%B\""),
 					       link_job->destination));
 
-	nautilus_progress_info_take_details (job->progress,
+	nemo_progress_info_take_details (job->progress,
 					     f (ngettext ("Making link to %'d file",
 							  "Making links to %'d files",
 							  left), left));
 
-	nautilus_progress_info_set_progress (job->progress, left, total);
+	nemo_progress_info_set_progress (job->progress, left, total);
 }
 
 static char *
@@ -5274,7 +5433,7 @@ link_file (CopyMoveJob *job,
 					      &error)) {
 
 		if (common->undo_info != NULL) {
-			nautilus_file_undo_info_ext_add_origin_target_pair (NAUTILUS_FILE_UNDO_INFO_EXT (common->undo_info),
+			nemo_file_undo_info_ext_add_origin_target_pair (NEMO_FILE_UNDO_INFO_EXT (common->undo_info),
 									    src, dest);
 		}
 
@@ -5283,11 +5442,11 @@ link_file (CopyMoveJob *job,
 			g_hash_table_replace (debuting_files, g_object_ref (dest), GINT_TO_POINTER (TRUE));
 		}
 		
-		nautilus_file_changes_queue_file_added (dest);
+		nemo_file_changes_queue_file_added (dest);
 		if (position) {
-			nautilus_file_changes_queue_schedule_position_set (dest, *position, common->screen_num);
+			nemo_file_changes_queue_schedule_position_set (dest, *position, common->screen_num);
 		} else {
-			nautilus_file_changes_queue_schedule_position_remove (dest);
+			nemo_file_changes_queue_schedule_position_remove (dest);
 		}
 
 		g_object_unref (dest);
@@ -5384,6 +5543,23 @@ link_job_done (gpointer user_data)
 				    job->done_callback_data);
 	}
 
+	// Send event to Zeitgeist
+	GHashTableIter iter;
+	GFile *file;
+	gpointer done;
+	g_hash_table_iter_init (&iter, job->debuting_files);
+	while (g_hash_table_iter_next (&iter, (gpointer *) &file, &done)) {
+		if (GPOINTER_TO_INT (done)) {
+            // operation was completed successfully for this file
+            g_object_ref (file);
+            // FIXME: Set event origin to the original file URI, if we
+            //        can somehow figure out which one it is.
+            log_zeitgeist_event_for_file_no_reply (
+                ZEITGEIST_ZG_CREATE_EVENT, file, NULL);
+		}
+	}
+	// ---
+
 	g_list_free_full (job->files, g_object_unref);
 	g_object_unref (job->destination);
 	g_hash_table_unref (job->debuting_files);
@@ -5391,7 +5567,7 @@ link_job_done (gpointer user_data)
 	
 	finalize_common ((CommonJob *)job);
 
-	nautilus_file_changes_consume_changes (TRUE);
+	nemo_file_changes_consume_changes (TRUE);
 	return FALSE;
 }
 
@@ -5415,7 +5591,7 @@ link_job (GIOSchedulerJob *io_job,
 
 	dest_fs_type = NULL;
 	
-	nautilus_progress_info_start (job->common.progress);
+	nemo_progress_info_start (job->common.progress);
 	
 	verify_destination (&job->common,
 			    job->destination,
@@ -5462,11 +5638,11 @@ link_job (GIOSchedulerJob *io_job,
 }
 
 void
-nautilus_file_operations_link (GList *files,
+nemo_file_operations_link (GList *files,
 			       GArray *relative_item_points,
 			       GFile *target_dir,
 			       GtkWindow *parent_window,
-			       NautilusCopyCallback  done_callback,
+			       NemoCopyCallback  done_callback,
 			       gpointer done_callback_data)
 {
 	CopyMoveJob *job;
@@ -5485,11 +5661,11 @@ nautilus_file_operations_link (GList *files,
 	}
 	job->debuting_files = g_hash_table_new_full (g_file_hash, (GEqualFunc)g_file_equal, g_object_unref, NULL);
 
-	if (!nautilus_file_undo_manager_pop_flag ()) {
+	if (!nemo_file_undo_manager_pop_flag ()) {
 		GFile* src_dir;
 
 		src_dir = g_file_get_parent (files->data);
-		job->common.undo_info = nautilus_file_undo_info_ext_new (NAUTILUS_FILE_UNDO_OP_CREATE_LINK,
+		job->common.undo_info = nemo_file_undo_info_ext_new (NEMO_FILE_UNDO_OP_CREATE_LINK,
 									 g_list_length (files),
 									 src_dir, target_dir);
 		g_object_unref (src_dir);
@@ -5504,10 +5680,10 @@ nautilus_file_operations_link (GList *files,
 
 
 void
-nautilus_file_operations_duplicate (GList *files,
+nemo_file_operations_duplicate (GList *files,
 				    GArray *relative_item_points,
 				    GtkWindow *parent_window,
-				    NautilusCopyCallback  done_callback,
+				    NemoCopyCallback  done_callback,
 				    gpointer done_callback_data)
 {
 	CopyMoveJob *job;
@@ -5526,12 +5702,12 @@ nautilus_file_operations_duplicate (GList *files,
 	}
 	job->debuting_files = g_hash_table_new_full (g_file_hash, (GEqualFunc)g_file_equal, g_object_unref, NULL);
 
-	if (!nautilus_file_undo_manager_pop_flag ()) {
+	if (!nemo_file_undo_manager_pop_flag ()) {
 		GFile* src_dir;
 
 		src_dir = g_file_get_parent (files->data);
 		job->common.undo_info =
-			nautilus_file_undo_info_ext_new (NAUTILUS_FILE_UNDO_OP_DUPLICATE,
+			nemo_file_undo_info_ext_new (NEMO_FILE_UNDO_OP_DUPLICATE,
 							 g_list_length (files),
 							 src_dir, src_dir);
 		g_object_unref (src_dir);
@@ -5578,7 +5754,7 @@ set_permissions_file (SetPermissionsJob *job,
 	
 	common = (CommonJob *)job;
 
-	nautilus_progress_info_pulse_progress (common->progress);
+	nemo_progress_info_pulse_progress (common->progress);
 	
 	free_info = FALSE;
 	if (info == NULL) {
@@ -5609,7 +5785,7 @@ set_permissions_file (SetPermissionsJob *job,
 		current = g_file_info_get_attribute_uint32 (info, G_FILE_ATTRIBUTE_UNIX_MODE);
 
 		if (common->undo_info != NULL) {
-			nautilus_file_undo_info_rec_permissions_add_file (NAUTILUS_FILE_UNDO_INFO_REC_PERMISSIONS (common->undo_info),
+			nemo_file_undo_info_rec_permissions_add_file (NEMO_FILE_UNDO_INFO_REC_PERMISSIONS (common->undo_info),
 									  file, current);
 		}
 
@@ -5659,10 +5835,10 @@ set_permissions_job (GIOSchedulerJob *io_job,
 	common = (CommonJob *)job;
 	common->io_job = io_job;
 	
-	nautilus_progress_info_set_status (common->progress,
+	nemo_progress_info_set_status (common->progress,
 					   _("Setting permissions"));
 
-	nautilus_progress_info_start (job->common.progress);
+	nemo_progress_info_start (job->common.progress);
 
 	set_permissions_file (job, job->file, NULL);
 
@@ -5677,12 +5853,12 @@ set_permissions_job (GIOSchedulerJob *io_job,
 
 
 void
-nautilus_file_set_permissions_recursive (const char *directory,
+nemo_file_set_permissions_recursive (const char *directory,
 					 guint32         file_permissions,
 					 guint32         file_mask,
 					 guint32         dir_permissions,
 					 guint32         dir_mask,
-					 NautilusOpCallback  callback,
+					 NemoOpCallback  callback,
 					 gpointer  callback_data)
 {
 	SetPermissionsJob *job;
@@ -5696,9 +5872,9 @@ nautilus_file_set_permissions_recursive (const char *directory,
 	job->done_callback = callback;
 	job->done_callback_data = callback_data;
 
-	if (!nautilus_file_undo_manager_pop_flag ()) {
+	if (!nemo_file_undo_manager_pop_flag ()) {
 		job->common.undo_info = 
-			nautilus_file_undo_info_rec_permissions_new (job->file,
+			nemo_file_undo_info_rec_permissions_new (job->file,
 								     file_permissions, file_mask,
 								     dir_permissions, dir_mask);
 	}
@@ -5727,7 +5903,7 @@ location_list_from_uri_list (const GList *uris)
 }
 
 typedef struct {
-	NautilusCopyCallback real_callback;
+	NemoCopyCallback real_callback;
 	gpointer real_data;
 } MoveTrashCBData;
 
@@ -5742,12 +5918,12 @@ callback_for_move_to_trash (GHashTable *debuting_uris,
 }
 
 void
-nautilus_file_operations_copy_move (const GList *item_uris,
+nemo_file_operations_copy_move (const GList *item_uris,
 				    GArray *relative_item_points,
 				    const char *target_dir,
 				    GdkDragAction copy_action,
 				    GtkWidget *parent_view,
-				    NautilusCopyCallback  done_callback,
+				    NemoCopyCallback  done_callback,
 				    gpointer done_callback_data)
 {
 	GList *locations;
@@ -5794,12 +5970,12 @@ nautilus_file_operations_copy_move (const GList *item_uris,
 		    (src_dir != NULL &&
 		     g_file_equal (src_dir, dest))) {
 
-			nautilus_file_operations_duplicate (locations,
+			nemo_file_operations_duplicate (locations,
 							    relative_item_points,
 							    parent_window,
 							    done_callback, done_callback_data);
 		} else {
-			nautilus_file_operations_copy (locations,
+			nemo_file_operations_copy (locations,
 						       relative_item_points,
 						       dest,
 						       parent_window,
@@ -5817,13 +5993,13 @@ nautilus_file_operations_copy_move (const GList *item_uris,
 			cb_data->real_callback = done_callback;
 			cb_data->real_data = done_callback_data;
 
-			nautilus_file_operations_trash_or_delete (locations,
+			nemo_file_operations_trash_or_delete (locations,
 								  parent_window,
-								  (NautilusDeleteCallback) callback_for_move_to_trash,
+								  (NemoDeleteCallback) callback_for_move_to_trash,
 								  cb_data);
 		} else {
 
-			nautilus_file_operations_move (locations,
+			nemo_file_operations_move (locations,
 						       relative_item_points,
 						       dest,
 						       parent_window,
@@ -5831,7 +6007,7 @@ nautilus_file_operations_copy_move (const GList *item_uris,
 		}
 	} else {
 
-		nautilus_file_operations_link (locations,
+		nemo_file_operations_link (locations,
 					       relative_item_points,
 					       dest,
 					       parent_window,
@@ -5856,6 +6032,14 @@ create_job_done (gpointer user_data)
 				    job->done_callback_data);
 	}
 
+	// Send event to Zeitgeist
+    if (job->created_file) {
+        g_object_ref (job->created_file);
+        log_zeitgeist_event_for_file_no_reply (
+            ZEITGEIST_ZG_CREATE_EVENT, job->created_file, NULL);
+    }
+    // ---
+
 	g_object_unref (job->dest_dir);
 	if (job->src) {
 		g_object_unref (job->src);
@@ -5868,7 +6052,7 @@ create_job_done (gpointer user_data)
 	
 	finalize_common ((CommonJob *)job);
 
-	nautilus_file_changes_consume_changes (TRUE);
+	nemo_file_changes_consume_changes (TRUE);
 	return FALSE;
 }
 
@@ -5900,7 +6084,7 @@ create_job (GIOSchedulerJob *io_job,
 	common = &job->common;
 	common->io_job = io_job;
 
-	nautilus_progress_info_start (job->common.progress);
+	nemo_progress_info_start (job->common.progress);
 
 	handled_invalid_filename = FALSE;
 
@@ -5961,7 +6145,7 @@ create_job (GIOSchedulerJob *io_job,
 					     &error);
 
 		if (res && common->undo_info != NULL) {
-			nautilus_file_undo_info_create_set_data (NAUTILUS_FILE_UNDO_INFO_CREATE (common->undo_info),
+			nemo_file_undo_info_create_set_data (NEMO_FILE_UNDO_INFO_CREATE (common->undo_info),
 								 dest, NULL, 0);
 		}
 
@@ -5978,7 +6162,7 @@ create_job (GIOSchedulerJob *io_job,
 				gchar *uri;
 
 				uri = g_file_get_uri (job->src);
-				nautilus_file_undo_info_create_set_data (NAUTILUS_FILE_UNDO_INFO_CREATE (common->undo_info),
+				nemo_file_undo_info_create_set_data (NEMO_FILE_UNDO_INFO_CREATE (common->undo_info),
 									 dest, uri, 0);
 
 				g_free (uri);
@@ -6008,7 +6192,7 @@ create_job (GIOSchedulerJob *io_job,
 								     &error);
 
 					if (res && common->undo_info != NULL) {
-						nautilus_file_undo_info_create_set_data (NAUTILUS_FILE_UNDO_INFO_CREATE (common->undo_info),
+						nemo_file_undo_info_create_set_data (NEMO_FILE_UNDO_INFO_CREATE (common->undo_info),
 											 dest, data, length);
 					}
 				}
@@ -6023,11 +6207,11 @@ create_job (GIOSchedulerJob *io_job,
 
 	if (res) {
 		job->created_file = g_object_ref (dest);
-		nautilus_file_changes_queue_file_added (dest);
+		nemo_file_changes_queue_file_added (dest);
 		if (job->has_position) {
-			nautilus_file_changes_queue_schedule_position_set (dest, job->position, common->screen_num);
+			nemo_file_changes_queue_schedule_position_set (dest, job->position, common->screen_num);
 		} else {
-			nautilus_file_changes_queue_schedule_position_remove (dest);
+			nemo_file_changes_queue_schedule_position_remove (dest);
 		}
 	} else {
 		g_assert (error != NULL);
@@ -6157,10 +6341,10 @@ create_job (GIOSchedulerJob *io_job,
 }
 
 void 
-nautilus_file_operations_new_folder (GtkWidget *parent_view, 
+nemo_file_operations_new_folder (GtkWidget *parent_view, 
 				     GdkPoint *target_point,
 				     const char *parent_dir,
-				     NautilusCreateCallback done_callback,
+				     NemoCreateCallback done_callback,
 				     gpointer done_callback_data)
 {
 	CreateJob *job;
@@ -6181,8 +6365,8 @@ nautilus_file_operations_new_folder (GtkWidget *parent_view,
 		job->has_position = TRUE;
 	}
 
-	if (!nautilus_file_undo_manager_pop_flag ()) {
-		job->common.undo_info = nautilus_file_undo_info_create_new (NAUTILUS_FILE_UNDO_OP_CREATE_FOLDER);
+	if (!nemo_file_undo_manager_pop_flag ()) {
+		job->common.undo_info = nemo_file_undo_info_create_new (NEMO_FILE_UNDO_OP_CREATE_FOLDER);
 	}
 
 	g_io_scheduler_push_job (create_job,
@@ -6193,12 +6377,12 @@ nautilus_file_operations_new_folder (GtkWidget *parent_view,
 }
 
 void 
-nautilus_file_operations_new_file_from_template (GtkWidget *parent_view, 
+nemo_file_operations_new_file_from_template (GtkWidget *parent_view, 
 						 GdkPoint *target_point,
 						 const char *parent_dir,
 						 const char *target_filename,
 						 const char *template_uri,
-						 NautilusCreateCallback done_callback,
+						 NemoCreateCallback done_callback,
 						 gpointer done_callback_data)
 {
 	CreateJob *job;
@@ -6223,8 +6407,8 @@ nautilus_file_operations_new_file_from_template (GtkWidget *parent_view,
 		job->src = g_file_new_for_uri (template_uri);
 	}
 
-	if (!nautilus_file_undo_manager_pop_flag ()) {
-		job->common.undo_info = nautilus_file_undo_info_create_new (NAUTILUS_FILE_UNDO_OP_CREATE_FILE_FROM_TEMPLATE);
+	if (!nemo_file_undo_manager_pop_flag ()) {
+		job->common.undo_info = nemo_file_undo_info_create_new (NEMO_FILE_UNDO_OP_CREATE_FILE_FROM_TEMPLATE);
 	}
 
 	g_io_scheduler_push_job (create_job,
@@ -6235,13 +6419,13 @@ nautilus_file_operations_new_file_from_template (GtkWidget *parent_view,
 }
 
 void 
-nautilus_file_operations_new_file (GtkWidget *parent_view, 
+nemo_file_operations_new_file (GtkWidget *parent_view, 
 				   GdkPoint *target_point,
 				   const char *parent_dir,
 				   const char *target_filename,
 				   const char *initial_contents,
 				   int length,
-				   NautilusCreateCallback done_callback,
+				   NemoCreateCallback done_callback,
 				   gpointer done_callback_data)
 {
 	CreateJob *job;
@@ -6264,8 +6448,8 @@ nautilus_file_operations_new_file (GtkWidget *parent_view,
 	job->length = length;
 	job->filename = g_strdup (target_filename);
 
-	if (!nautilus_file_undo_manager_pop_flag ()) {
-		job->common.undo_info = nautilus_file_undo_info_create_new (NAUTILUS_FILE_UNDO_OP_CREATE_EMPTY_FILE);
+	if (!nemo_file_undo_manager_pop_flag ()) {
+		job->common.undo_info = nemo_file_undo_info_create_new (NEMO_FILE_UNDO_OP_CREATE_EMPTY_FILE);
 	}
 
 	g_io_scheduler_push_job (create_job,
@@ -6349,7 +6533,7 @@ empty_trash_job (GIOSchedulerJob *io_job,
 	common = (CommonJob *)job;
 	common->io_job = io_job;
 	
-	nautilus_progress_info_start (job->common.progress);
+	nemo_progress_info_start (job->common.progress);
 
 	if (job->should_confirm) {
 		confirmed = confirm_empty_trash (common);
@@ -6373,7 +6557,7 @@ empty_trash_job (GIOSchedulerJob *io_job,
 }
 
 void 
-nautilus_file_operations_empty_trash (GtkWidget *parent_view)
+nemo_file_operations_empty_trash (GtkWidget *parent_view)
 {
 	EmptyTrashJob *job;
 	GtkWindow *parent_window;
@@ -6584,7 +6768,7 @@ mark_trusted_job (GIOSchedulerJob *io_job,
 	common = (CommonJob *)job;
 	common->io_job = io_job;
 	
-	nautilus_progress_info_start (job->common.progress);
+	nemo_progress_info_start (job->common.progress);
 
 	mark_desktop_file_trusted (common,
 				   cancellable,
@@ -6600,10 +6784,10 @@ mark_trusted_job (GIOSchedulerJob *io_job,
 }
 
 void
-nautilus_file_mark_desktop_file_trusted (GFile *file,
+nemo_file_mark_desktop_file_trusted (GFile *file,
 					 GtkWindow *parent_window,
 					 gboolean interactive,
-					 NautilusOpCallback done_callback,
+					 NemoOpCallback done_callback,
 					 gpointer done_callback_data)
 {
 	MarkTrustedJob *job;
@@ -6621,10 +6805,10 @@ nautilus_file_mark_desktop_file_trusted (GFile *file,
 				 NULL);
 }
 
-#if !defined (NAUTILUS_OMIT_SELF_CHECK)
+#if !defined (NEMO_OMIT_SELF_CHECK)
 
 void
-nautilus_self_check_file_operations (void)
+nemo_self_check_file_operations (void)
 {
 	setlocale (LC_MESSAGES, "C");
 

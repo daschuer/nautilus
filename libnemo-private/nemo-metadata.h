@@ -1,6 +1,6 @@
 /* -*- Mode: C; indent-tabs-mode: t; c-basic-offset: 8; tab-width: 8 -*-
 
-   nautilus-metadata.h: #defines and other metadata-related info
+   nemo-metadata.h: #defines and other metadata-related info
  
    Copyright (C) 2000 Eazel, Inc.
   
@@ -22,58 +22,58 @@
    Author: John Sullivan <sullivan@eazel.com>
 */
 
-#ifndef NAUTILUS_METADATA_H
-#define NAUTILUS_METADATA_H
+#ifndef NEMO_METADATA_H
+#define NEMO_METADATA_H
 
-/* Keys for getting/setting Nautilus metadata. All metadata used in Nautilus
+/* Keys for getting/setting Nemo metadata. All metadata used in Nemo
  * should define its key here, so we can keep track of the whole set easily.
- * Any updates here needs to be added in nautilus-metadata.c too.
+ * Any updates here needs to be added in nemo-metadata.c too.
  */
 
 #include <glib.h>
 
 /* Per-file */
 
-#define NAUTILUS_METADATA_KEY_DEFAULT_VIEW		 	"nautilus-default-view"
+#define NEMO_METADATA_KEY_DEFAULT_VIEW		 	"nemo-default-view"
 
-#define NAUTILUS_METADATA_KEY_LOCATION_BACKGROUND_COLOR 	"folder-background-color"
-#define NAUTILUS_METADATA_KEY_LOCATION_BACKGROUND_IMAGE 	"folder-background-image"
+#define NEMO_METADATA_KEY_LOCATION_BACKGROUND_COLOR 	"folder-background-color"
+#define NEMO_METADATA_KEY_LOCATION_BACKGROUND_IMAGE 	"folder-background-image"
 
-#define NAUTILUS_METADATA_KEY_ICON_VIEW_ZOOM_LEVEL       	"nautilus-icon-view-zoom-level"
-#define NAUTILUS_METADATA_KEY_ICON_VIEW_AUTO_LAYOUT      	"nautilus-icon-view-auto-layout"
-#define NAUTILUS_METADATA_KEY_ICON_VIEW_SORT_BY          	"nautilus-icon-view-sort-by"
-#define NAUTILUS_METADATA_KEY_ICON_VIEW_SORT_REVERSED    	"nautilus-icon-view-sort-reversed"
-#define NAUTILUS_METADATA_KEY_ICON_VIEW_KEEP_ALIGNED            "nautilus-icon-view-keep-aligned"
-#define NAUTILUS_METADATA_KEY_ICON_VIEW_LAYOUT_TIMESTAMP	"nautilus-icon-view-layout-timestamp"
+#define NEMO_METADATA_KEY_ICON_VIEW_ZOOM_LEVEL       	"nemo-icon-view-zoom-level"
+#define NEMO_METADATA_KEY_ICON_VIEW_AUTO_LAYOUT      	"nemo-icon-view-auto-layout"
+#define NEMO_METADATA_KEY_ICON_VIEW_SORT_BY          	"nemo-icon-view-sort-by"
+#define NEMO_METADATA_KEY_ICON_VIEW_SORT_REVERSED    	"nemo-icon-view-sort-reversed"
+#define NEMO_METADATA_KEY_ICON_VIEW_KEEP_ALIGNED            "nemo-icon-view-keep-aligned"
+#define NEMO_METADATA_KEY_ICON_VIEW_LAYOUT_TIMESTAMP	"nemo-icon-view-layout-timestamp"
 
-#define NAUTILUS_METADATA_KEY_LIST_VIEW_ZOOM_LEVEL       	"nautilus-list-view-zoom-level"
-#define NAUTILUS_METADATA_KEY_LIST_VIEW_SORT_COLUMN      	"nautilus-list-view-sort-column"
-#define NAUTILUS_METADATA_KEY_LIST_VIEW_SORT_REVERSED    	"nautilus-list-view-sort-reversed"
-#define NAUTILUS_METADATA_KEY_LIST_VIEW_VISIBLE_COLUMNS    	"nautilus-list-view-visible-columns"
-#define NAUTILUS_METADATA_KEY_LIST_VIEW_COLUMN_ORDER    	"nautilus-list-view-column-order"
+#define NEMO_METADATA_KEY_LIST_VIEW_ZOOM_LEVEL       	"nemo-list-view-zoom-level"
+#define NEMO_METADATA_KEY_LIST_VIEW_SORT_COLUMN      	"nemo-list-view-sort-column"
+#define NEMO_METADATA_KEY_LIST_VIEW_SORT_REVERSED    	"nemo-list-view-sort-reversed"
+#define NEMO_METADATA_KEY_LIST_VIEW_VISIBLE_COLUMNS    	"nemo-list-view-visible-columns"
+#define NEMO_METADATA_KEY_LIST_VIEW_COLUMN_ORDER    	"nemo-list-view-column-order"
 
-#define NAUTILUS_METADATA_KEY_COMPACT_VIEW_ZOOM_LEVEL		"nautilus-compact-view-zoom-level"
+#define NEMO_METADATA_KEY_COMPACT_VIEW_ZOOM_LEVEL		"nemo-compact-view-zoom-level"
 
-#define NAUTILUS_METADATA_KEY_WINDOW_GEOMETRY			"nautilus-window-geometry"
-#define NAUTILUS_METADATA_KEY_WINDOW_SCROLL_POSITION		"nautilus-window-scroll-position"
-#define NAUTILUS_METADATA_KEY_WINDOW_SHOW_HIDDEN_FILES		"nautilus-window-show-hidden-files"
-#define NAUTILUS_METADATA_KEY_WINDOW_MAXIMIZED			"nautilus-window-maximized"
-#define NAUTILUS_METADATA_KEY_WINDOW_STICKY			"nautilus-window-sticky"
-#define NAUTILUS_METADATA_KEY_WINDOW_KEEP_ABOVE			"nautilus-window-keep-above"
+#define NEMO_METADATA_KEY_WINDOW_GEOMETRY			"nemo-window-geometry"
+#define NEMO_METADATA_KEY_WINDOW_SCROLL_POSITION		"nemo-window-scroll-position"
+#define NEMO_METADATA_KEY_WINDOW_SHOW_HIDDEN_FILES		"nemo-window-show-hidden-files"
+#define NEMO_METADATA_KEY_WINDOW_MAXIMIZED			"nemo-window-maximized"
+#define NEMO_METADATA_KEY_WINDOW_STICKY			"nemo-window-sticky"
+#define NEMO_METADATA_KEY_WINDOW_KEEP_ABOVE			"nemo-window-keep-above"
 
-#define NAUTILUS_METADATA_KEY_SIDEBAR_BACKGROUND_COLOR   	"nautilus-sidebar-background-color"
-#define NAUTILUS_METADATA_KEY_SIDEBAR_BACKGROUND_IMAGE   	"nautilus-sidebar-background-image"
-#define NAUTILUS_METADATA_KEY_SIDEBAR_BUTTONS			"nautilus-sidebar-buttons"
+#define NEMO_METADATA_KEY_SIDEBAR_BACKGROUND_COLOR   	"nemo-sidebar-background-color"
+#define NEMO_METADATA_KEY_SIDEBAR_BACKGROUND_IMAGE   	"nemo-sidebar-background-image"
+#define NEMO_METADATA_KEY_SIDEBAR_BUTTONS			"nemo-sidebar-buttons"
 
-#define NAUTILUS_METADATA_KEY_ICON_POSITION              	"nautilus-icon-position"
-#define NAUTILUS_METADATA_KEY_ICON_POSITION_TIMESTAMP		"nautilus-icon-position-timestamp"
-#define NAUTILUS_METADATA_KEY_ANNOTATION                 	"annotation"
-#define NAUTILUS_METADATA_KEY_ICON_SCALE                 	"icon-scale"
-#define NAUTILUS_METADATA_KEY_CUSTOM_ICON                	"custom-icon"
-#define NAUTILUS_METADATA_KEY_CUSTOM_ICON_NAME                	"custom-icon-name"
-#define NAUTILUS_METADATA_KEY_SCREEN				"screen"
-#define NAUTILUS_METADATA_KEY_EMBLEMS				"emblems"
+#define NEMO_METADATA_KEY_ICON_POSITION              	"nemo-icon-position"
+#define NEMO_METADATA_KEY_ICON_POSITION_TIMESTAMP		"nemo-icon-position-timestamp"
+#define NEMO_METADATA_KEY_ANNOTATION                 	"annotation"
+#define NEMO_METADATA_KEY_ICON_SCALE                 	"icon-scale"
+#define NEMO_METADATA_KEY_CUSTOM_ICON                	"custom-icon"
+#define NEMO_METADATA_KEY_CUSTOM_ICON_NAME                	"custom-icon-name"
+#define NEMO_METADATA_KEY_SCREEN				"screen"
+#define NEMO_METADATA_KEY_EMBLEMS				"emblems"
 
-guint nautilus_metadata_get_id (const char *metadata);
+guint nemo_metadata_get_id (const char *metadata);
 
-#endif /* NAUTILUS_METADATA_H */
+#endif /* NEMO_METADATA_H */

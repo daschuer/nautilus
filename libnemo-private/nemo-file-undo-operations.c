@@ -1,6 +1,6 @@
 /* -*- Mode: C; indent-tabs-mode: t; c-basic-offset: 8; tab-width: 8 -*- */
 
-/* nautilus-file-undo-operations.c - Manages undo/redo of file operations
+/* nemo-file-undo-operations.c - Manages undo/redo of file operations
  *
  * Copyright (C) 2007-2011 Amos Brocco
  * Copyright (C) 2010, 2012 Red Hat, Inc.
@@ -27,15 +27,15 @@
 
 #include <config.h>
 
-#include "nautilus-file-undo-operations.h"
+#include "nemo-file-undo-operations.h"
 
 #include <glib/gi18n.h>
 
-#include "nautilus-file-operations.h"
-#include "nautilus-file.h"
-#include "nautilus-file-undo-manager.h"
+#include "nemo-file-operations.h"
+#include "nemo-file.h"
+#include "nemo-file-undo-manager.h"
 
-G_DEFINE_TYPE (NautilusFileUndoInfo, nautilus_file_undo_info, G_TYPE_OBJECT)
+G_DEFINE_TYPE (NemoFileUndoInfo, nemo_file_undo_info, G_TYPE_OBJECT)
 
 enum {
 	PROP_OP_TYPE = 1,
@@ -45,8 +45,8 @@ enum {
 
 static GParamSpec *properties[N_PROPERTIES] = { NULL, };
 
-struct _NautilusFileUndoInfoDetails {
-	NautilusFileUndoOp op_type;
+struct _NemoFileUndoInfoDetails {
+	NemoFileUndoOp op_type;
 	guint count;		/* Number of items */
 
 	GSimpleAsyncResult *apply_async_result;
@@ -59,20 +59,20 @@ struct _NautilusFileUndoInfoDetails {
 
 /* description helpers */
 static void
-nautilus_file_undo_info_init (NautilusFileUndoInfo *self)
+nemo_file_undo_info_init (NemoFileUndoInfo *self)
 {
-	self->priv = G_TYPE_INSTANCE_GET_PRIVATE (self, NAUTILUS_TYPE_FILE_UNDO_INFO,
-						  NautilusFileUndoInfoDetails);
+	self->priv = G_TYPE_INSTANCE_GET_PRIVATE (self, NEMO_TYPE_FILE_UNDO_INFO,
+						  NemoFileUndoInfoDetails);
 	self->priv->apply_async_result = NULL;
 }
 
 static void
-nautilus_file_undo_info_get_property (GObject *object,
+nemo_file_undo_info_get_property (GObject *object,
 				      guint property_id,
 				      GValue *value,
 				      GParamSpec *pspec)
 {
-	NautilusFileUndoInfo *self = NAUTILUS_FILE_UNDO_INFO (object);
+	NemoFileUndoInfo *self = NEMO_FILE_UNDO_INFO (object);
 
 	switch (property_id) {
 	case PROP_OP_TYPE:
@@ -88,12 +88,12 @@ nautilus_file_undo_info_get_property (GObject *object,
 }
 
 static void
-nautilus_file_undo_info_set_property (GObject *object,
+nemo_file_undo_info_set_property (GObject *object,
 				      guint property_id,
 				      const GValue *value,
 				      GParamSpec *pspec)
 {
-	NautilusFileUndoInfo *self = NAUTILUS_FILE_UNDO_INFO (object);
+	NemoFileUndoInfo *self = NEMO_FILE_UNDO_INFO (object);
 
 	switch (property_id) {
 	case PROP_OP_TYPE:
@@ -109,7 +109,7 @@ nautilus_file_undo_info_set_property (GObject *object,
 }
 
 static void
-nautilus_file_redo_info_warn_redo (NautilusFileUndoInfo *self,
+nemo_file_redo_info_warn_redo (NemoFileUndoInfo *self,
 				   GtkWindow *parent_window)
 {
 	g_critical ("Object %p of type %s does not implement redo_func!!", 
@@ -117,7 +117,7 @@ nautilus_file_redo_info_warn_redo (NautilusFileUndoInfo *self,
 }
 
 static void
-nautilus_file_undo_info_warn_undo (NautilusFileUndoInfo *self,
+nemo_file_undo_info_warn_undo (NemoFileUndoInfo *self,
 				   GtkWindow *parent_window)
 {
 	g_critical ("Object %p of type %s does not implement undo_func!!", 
@@ -125,7 +125,7 @@ nautilus_file_undo_info_warn_undo (NautilusFileUndoInfo *self,
 }
 
 static void
-nautilus_file_undo_info_strings_func (NautilusFileUndoInfo *self,
+nemo_file_undo_info_strings_func (NemoFileUndoInfo *self,
 				      gchar **undo_label,
 				      gchar **undo_description,
 				      gchar **redo_label,
@@ -147,33 +147,33 @@ nautilus_file_undo_info_strings_func (NautilusFileUndoInfo *self,
 }
 
 static void
-nautilus_file_undo_info_finalize (GObject *obj)
+nemo_file_undo_info_finalize (GObject *obj)
 {
-	NautilusFileUndoInfo *self = NAUTILUS_FILE_UNDO_INFO (obj);
+	NemoFileUndoInfo *self = NEMO_FILE_UNDO_INFO (obj);
 
 	g_clear_object (&self->priv->apply_async_result);
 
-	G_OBJECT_CLASS (nautilus_file_undo_info_parent_class)->finalize (obj);
+	G_OBJECT_CLASS (nemo_file_undo_info_parent_class)->finalize (obj);
 }
 
 static void
-nautilus_file_undo_info_class_init (NautilusFileUndoInfoClass *klass)
+nemo_file_undo_info_class_init (NemoFileUndoInfoClass *klass)
 {
 	GObjectClass *oclass = G_OBJECT_CLASS (klass);
 
-	oclass->finalize = nautilus_file_undo_info_finalize;
-	oclass->get_property = nautilus_file_undo_info_get_property;
-	oclass->set_property = nautilus_file_undo_info_set_property;
+	oclass->finalize = nemo_file_undo_info_finalize;
+	oclass->get_property = nemo_file_undo_info_get_property;
+	oclass->set_property = nemo_file_undo_info_set_property;
 
-	klass->undo_func = nautilus_file_undo_info_warn_undo;
-	klass->redo_func = nautilus_file_redo_info_warn_redo;
-	klass->strings_func = nautilus_file_undo_info_strings_func;
+	klass->undo_func = nemo_file_undo_info_warn_undo;
+	klass->redo_func = nemo_file_redo_info_warn_redo;
+	klass->strings_func = nemo_file_undo_info_strings_func;
 
 	properties[PROP_OP_TYPE] =
 		g_param_spec_int ("op-type",
 				  "Undo info op type",
 				  "Type of undo operation",
-				  0, NAUTILUS_FILE_UNDO_OP_NUM_TYPES - 1, 0,
+				  0, NEMO_FILE_UNDO_OP_NUM_TYPES - 1, 0,
 				  G_PARAM_READWRITE |
 				  G_PARAM_CONSTRUCT_ONLY);
 	properties[PROP_ITEM_COUNT] =
@@ -184,24 +184,24 @@ nautilus_file_undo_info_class_init (NautilusFileUndoInfoClass *klass)
 				  G_PARAM_READWRITE |
 				  G_PARAM_CONSTRUCT_ONLY);
 
-	g_type_class_add_private (klass, sizeof (NautilusFileUndoInfoDetails));
+	g_type_class_add_private (klass, sizeof (NemoFileUndoInfoDetails));
 	g_object_class_install_properties (oclass, N_PROPERTIES, properties);
 }
 
-static NautilusFileUndoOp
-nautilus_file_undo_info_get_op_type (NautilusFileUndoInfo *self)
+static NemoFileUndoOp
+nemo_file_undo_info_get_op_type (NemoFileUndoInfo *self)
 {
 	return self->priv->op_type;
 }
 
 static gint
-nautilus_file_undo_info_get_item_count (NautilusFileUndoInfo *self)
+nemo_file_undo_info_get_item_count (NemoFileUndoInfo *self)
 {
 	return self->priv->count;
 }
 
 void
-nautilus_file_undo_info_apply_async (NautilusFileUndoInfo *self,
+nemo_file_undo_info_apply_async (NemoFileUndoInfo *self,
 				     gboolean undo,
 				     GtkWindow *parent_window,
 				     GAsyncReadyCallback callback,
@@ -212,12 +212,12 @@ nautilus_file_undo_info_apply_async (NautilusFileUndoInfo *self,
 	self->priv->apply_async_result = 
 		g_simple_async_result_new (G_OBJECT (self),
 					   callback, user_data,
-					   nautilus_file_undo_info_apply_async);
+					   nemo_file_undo_info_apply_async);
 
 	if (undo) {
-		NAUTILUS_FILE_UNDO_INFO_CLASS (G_OBJECT_GET_CLASS (self))->undo_func (self, parent_window);
+		NEMO_FILE_UNDO_INFO_CLASS (G_OBJECT_GET_CLASS (self))->undo_func (self, parent_window);
 	} else {
-		NAUTILUS_FILE_UNDO_INFO_CLASS (G_OBJECT_GET_CLASS (self))->redo_func (self, parent_window);
+		NEMO_FILE_UNDO_INFO_CLASS (G_OBJECT_GET_CLASS (self))->redo_func (self, parent_window);
 	}
 }
 
@@ -233,7 +233,7 @@ file_undo_info_op_res_free (gpointer data)
 }
 
 gboolean
-nautilus_file_undo_info_apply_finish (NautilusFileUndoInfo *self,
+nemo_file_undo_info_apply_finish (NemoFileUndoInfo *self,
 				      GAsyncResult *res,
 				      gboolean *user_cancel,
 				      GError **error)
@@ -251,19 +251,19 @@ nautilus_file_undo_info_apply_finish (NautilusFileUndoInfo *self,
 }
 
 void
-nautilus_file_undo_info_get_strings (NautilusFileUndoInfo *self,
+nemo_file_undo_info_get_strings (NemoFileUndoInfo *self,
 				     gchar **undo_label,
 				     gchar **undo_description,
 				     gchar **redo_label,
 				     gchar **redo_description)
 {
-	return NAUTILUS_FILE_UNDO_INFO_CLASS (G_OBJECT_GET_CLASS (self))->strings_func (self,
+	return NEMO_FILE_UNDO_INFO_CLASS (G_OBJECT_GET_CLASS (self))->strings_func (self,
 											undo_label, undo_description,
 											redo_label, redo_description);
 }
 
 static void
-file_undo_info_complete_apply (NautilusFileUndoInfo *self,
+file_undo_info_complete_apply (NemoFileUndoInfo *self,
 			       gboolean success,
 			       gboolean user_cancel)
 {
@@ -285,7 +285,7 @@ file_undo_info_transfer_callback (GHashTable * debuting_uris,
 				  gboolean success,
                                   gpointer user_data)
 {
-	NautilusFileUndoInfo *self = user_data;
+	NemoFileUndoInfo *self = user_data;
 
 	/* TODO: we need to forward the cancelled state from 
 	 * the file operation to the file undo info object.
@@ -294,12 +294,12 @@ file_undo_info_transfer_callback (GHashTable * debuting_uris,
 }
 
 static void
-file_undo_info_operation_callback (NautilusFile * file,
+file_undo_info_operation_callback (NemoFile * file,
 				   GFile * result_location,
 				   GError * error,
 				   gpointer user_data)
 {
-	NautilusFileUndoInfo *self = user_data;
+	NemoFileUndoInfo *self = user_data;
 
 	file_undo_info_complete_apply (self, (error == NULL),
 				       g_error_matches (error, G_IO_ERROR, G_IO_ERROR_CANCELLED));
@@ -310,7 +310,7 @@ file_undo_info_delete_callback (GHashTable *debuting_uris,
                                 gboolean user_cancel,
                                 gpointer user_data)
 {
-	NautilusFileUndoInfo *self = user_data;
+	NemoFileUndoInfo *self = user_data;
 
 	file_undo_info_complete_apply (self,
 				       !user_cancel,
@@ -318,9 +318,9 @@ file_undo_info_delete_callback (GHashTable *debuting_uris,
 }
 
 /* copy/move/duplicate/link/restore from trash */
-G_DEFINE_TYPE (NautilusFileUndoInfoExt, nautilus_file_undo_info_ext, NAUTILUS_TYPE_FILE_UNDO_INFO)
+G_DEFINE_TYPE (NemoFileUndoInfoExt, nemo_file_undo_info_ext, NEMO_TYPE_FILE_UNDO_INFO)
 
-struct _NautilusFileUndoInfoExtDetails {
+struct _NemoFileUndoInfoExtDetails {
 	GFile *src_dir;
 	GFile *dest_dir;
 	GList *sources;	     /* Relative to src_dir */
@@ -328,7 +328,7 @@ struct _NautilusFileUndoInfoExtDetails {
 };
 
 static char *
-ext_get_first_target_short_name (NautilusFileUndoInfoExt *self)
+ext_get_first_target_short_name (NemoFileUndoInfoExt *self)
 {
 	GList *targets_first;
 	char *file_name = NULL;
@@ -344,15 +344,15 @@ ext_get_first_target_short_name (NautilusFileUndoInfoExt *self)
 }
 
 static void
-ext_strings_func (NautilusFileUndoInfo *info,
+ext_strings_func (NemoFileUndoInfo *info,
 		  gchar **undo_label,
 		  gchar **undo_description,
 		  gchar **redo_label,
 		  gchar **redo_description)
 {
-	NautilusFileUndoInfoExt *self = NAUTILUS_FILE_UNDO_INFO_EXT (info);
-	NautilusFileUndoOp op_type = nautilus_file_undo_info_get_op_type (info);
-	gint count = nautilus_file_undo_info_get_item_count (info);
+	NemoFileUndoInfoExt *self = NEMO_FILE_UNDO_INFO_EXT (info);
+	NemoFileUndoOp op_type = nemo_file_undo_info_get_op_type (info);
+	gint count = nemo_file_undo_info_get_item_count (info);
 	gchar *name = NULL, *source, *destination;
 
 	source = g_file_get_path (self->priv->src_dir);
@@ -362,7 +362,7 @@ ext_strings_func (NautilusFileUndoInfo *info,
 		name = ext_get_first_target_short_name (self);
 	}
 
-	if (op_type == NAUTILUS_FILE_UNDO_OP_MOVE) {
+	if (op_type == NEMO_FILE_UNDO_OP_MOVE) {
 		if (count > 1) {
 			*undo_description = g_strdup_printf (ngettext ("Move %d item back to '%s'",
 								       "Move %d items back to '%s'", count),
@@ -384,7 +384,7 @@ ext_strings_func (NautilusFileUndoInfo *info,
 			*undo_label = g_strdup (_("_Undo Move"));
 			*redo_label = g_strdup (_("_Redo Move"));
 		}
-	} else if (op_type == NAUTILUS_FILE_UNDO_OP_RESTORE_FROM_TRASH)  {
+	} else if (op_type == NEMO_FILE_UNDO_OP_RESTORE_FROM_TRASH)  {
 		*undo_label = g_strdup (_("_Undo Restore from Trash"));
 		*redo_label = g_strdup (_("_Redo Restore from Trash"));
 
@@ -399,7 +399,7 @@ ext_strings_func (NautilusFileUndoInfo *info,
 			*undo_description = g_strdup_printf (_("Move '%s' back to trash"), name);
 			*redo_description = g_strdup_printf (_("Restore '%s' from trash"), name);
 		}
-	} else if (op_type == NAUTILUS_FILE_UNDO_OP_COPY) {
+	} else if (op_type == NEMO_FILE_UNDO_OP_COPY) {
 		if (count > 1) {
 			*undo_description = g_strdup_printf (ngettext ("Delete %d copied item",
 								       "Delete %d copied items", count),
@@ -421,7 +421,7 @@ ext_strings_func (NautilusFileUndoInfo *info,
 			*undo_label = g_strdup (_("_Undo Copy"));
 			*redo_label = g_strdup (_("_Redo Copy"));
 		}
-	} else if (op_type == NAUTILUS_FILE_UNDO_OP_DUPLICATE) {
+	} else if (op_type == NEMO_FILE_UNDO_OP_DUPLICATE) {
 		if (count > 1) {
 			*undo_description = g_strdup_printf (ngettext ("Delete %d duplicated item",
 								       "Delete %d duplicated items", count),
@@ -444,7 +444,7 @@ ext_strings_func (NautilusFileUndoInfo *info,
 			*undo_label = g_strdup (_("_Undo Duplicate"));
 			*redo_label = g_strdup (_("_Redo Duplicate"));
 		}
-	} else if (op_type == NAUTILUS_FILE_UNDO_OP_CREATE_LINK) {
+	} else if (op_type == NEMO_FILE_UNDO_OP_CREATE_LINK) {
 		if (count > 1) {
 			*undo_description = g_strdup_printf (ngettext ("Delete links to %d item",
 								       "Delete links to %d items", count),
@@ -469,55 +469,55 @@ ext_strings_func (NautilusFileUndoInfo *info,
 }
 
 static void
-ext_create_link_redo_func (NautilusFileUndoInfoExt *self,
+ext_create_link_redo_func (NemoFileUndoInfoExt *self,
 			   GtkWindow *parent_window)
 {
-	nautilus_file_operations_link (self->priv->sources, NULL,
+	nemo_file_operations_link (self->priv->sources, NULL,
 				       self->priv->dest_dir, parent_window,
 				       file_undo_info_transfer_callback, self);
 }
 
 static void
-ext_duplicate_redo_func (NautilusFileUndoInfoExt *self,
+ext_duplicate_redo_func (NemoFileUndoInfoExt *self,
 			 GtkWindow *parent_window)
 {
-	nautilus_file_operations_duplicate (self->priv->sources, NULL, parent_window,
+	nemo_file_operations_duplicate (self->priv->sources, NULL, parent_window,
 					    file_undo_info_transfer_callback, self);
 }
 
 static void
-ext_copy_redo_func (NautilusFileUndoInfoExt *self,
+ext_copy_redo_func (NemoFileUndoInfoExt *self,
 		    GtkWindow *parent_window)
 {
-	nautilus_file_operations_copy (self->priv->sources, NULL,
+	nemo_file_operations_copy (self->priv->sources, NULL,
 				       self->priv->dest_dir, parent_window,
 				       file_undo_info_transfer_callback, self);
 }
 
 static void
-ext_move_restore_redo_func (NautilusFileUndoInfoExt *self,
+ext_move_restore_redo_func (NemoFileUndoInfoExt *self,
 			    GtkWindow *parent_window)
 {
-	nautilus_file_operations_move (self->priv->sources, NULL,
+	nemo_file_operations_move (self->priv->sources, NULL,
 				       self->priv->dest_dir, parent_window,
 				       file_undo_info_transfer_callback, self);
 }
 
 static void
-ext_redo_func (NautilusFileUndoInfo *info,
+ext_redo_func (NemoFileUndoInfo *info,
 	       GtkWindow *parent_window)
 {
-	NautilusFileUndoInfoExt *self = NAUTILUS_FILE_UNDO_INFO_EXT (info);
-	NautilusFileUndoOp op_type = nautilus_file_undo_info_get_op_type (info);
+	NemoFileUndoInfoExt *self = NEMO_FILE_UNDO_INFO_EXT (info);
+	NemoFileUndoOp op_type = nemo_file_undo_info_get_op_type (info);
 
-	if (op_type == NAUTILUS_FILE_UNDO_OP_MOVE ||
-	    op_type == NAUTILUS_FILE_UNDO_OP_RESTORE_FROM_TRASH)  {
+	if (op_type == NEMO_FILE_UNDO_OP_MOVE ||
+	    op_type == NEMO_FILE_UNDO_OP_RESTORE_FROM_TRASH)  {
 		ext_move_restore_redo_func (self, parent_window);
-	} else if (op_type == NAUTILUS_FILE_UNDO_OP_COPY) {
+	} else if (op_type == NEMO_FILE_UNDO_OP_COPY) {
 		ext_copy_redo_func (self, parent_window);
-	} else if (op_type == NAUTILUS_FILE_UNDO_OP_DUPLICATE) {
+	} else if (op_type == NEMO_FILE_UNDO_OP_DUPLICATE) {
 		ext_duplicate_redo_func (self, parent_window);
-	} else if (op_type == NAUTILUS_FILE_UNDO_OP_CREATE_LINK) {
+	} else if (op_type == NEMO_FILE_UNDO_OP_CREATE_LINK) {
 		ext_create_link_redo_func (self, parent_window);
 	} else {
 		g_assert_not_reached ();
@@ -525,25 +525,25 @@ ext_redo_func (NautilusFileUndoInfo *info,
 }
 
 static void
-ext_restore_undo_func (NautilusFileUndoInfoExt *self,
+ext_restore_undo_func (NemoFileUndoInfoExt *self,
 		       GtkWindow *parent_window)
 {
-	nautilus_file_operations_trash_or_delete (self->priv->destinations, parent_window,
+	nemo_file_operations_trash_or_delete (self->priv->destinations, parent_window,
 						  file_undo_info_delete_callback, self);
 }
 
 
 static void
-ext_move_undo_func (NautilusFileUndoInfoExt *self,
+ext_move_undo_func (NemoFileUndoInfoExt *self,
 		    GtkWindow *parent_window)
 {
-	nautilus_file_operations_move (self->priv->destinations, NULL,
+	nemo_file_operations_move (self->priv->destinations, NULL,
 				       self->priv->src_dir, parent_window,
 				       file_undo_info_transfer_callback, self);
 }
 
 static void
-ext_copy_duplicate_undo_func (NautilusFileUndoInfoExt *self,
+ext_copy_duplicate_undo_func (NemoFileUndoInfoExt *self,
 			      GtkWindow *parent_window)
 {
 	GList *files;
@@ -551,26 +551,26 @@ ext_copy_duplicate_undo_func (NautilusFileUndoInfoExt *self,
 	files = g_list_copy (self->priv->destinations);
 	files = g_list_reverse (files); /* Deleting must be done in reverse */
 
-	nautilus_file_operations_delete (files, parent_window,
+	nemo_file_operations_delete (files, parent_window,
 					 file_undo_info_delete_callback, self);
 
 	g_list_free (files);
 }
 
 static void
-ext_undo_func (NautilusFileUndoInfo *info,
+ext_undo_func (NemoFileUndoInfo *info,
 	       GtkWindow *parent_window)
 {
-	NautilusFileUndoInfoExt *self = NAUTILUS_FILE_UNDO_INFO_EXT (info);
-	NautilusFileUndoOp op_type = nautilus_file_undo_info_get_op_type (info);
+	NemoFileUndoInfoExt *self = NEMO_FILE_UNDO_INFO_EXT (info);
+	NemoFileUndoOp op_type = nemo_file_undo_info_get_op_type (info);
 
-	if (op_type == NAUTILUS_FILE_UNDO_OP_COPY ||
-	    op_type == NAUTILUS_FILE_UNDO_OP_DUPLICATE ||
-	    op_type == NAUTILUS_FILE_UNDO_OP_CREATE_LINK) {
+	if (op_type == NEMO_FILE_UNDO_OP_COPY ||
+	    op_type == NEMO_FILE_UNDO_OP_DUPLICATE ||
+	    op_type == NEMO_FILE_UNDO_OP_CREATE_LINK) {
 		ext_copy_duplicate_undo_func (self, parent_window);
-	} else if (op_type == NAUTILUS_FILE_UNDO_OP_MOVE) {
+	} else if (op_type == NEMO_FILE_UNDO_OP_MOVE) {
 		ext_move_undo_func (self, parent_window);
-	} else if (op_type == NAUTILUS_FILE_UNDO_OP_RESTORE_FROM_TRASH) {
+	} else if (op_type == NEMO_FILE_UNDO_OP_RESTORE_FROM_TRASH) {
 		ext_restore_undo_func (self, parent_window);
 	} else {
 		g_assert_not_reached ();
@@ -578,16 +578,16 @@ ext_undo_func (NautilusFileUndoInfo *info,
 }
 
 static void
-nautilus_file_undo_info_ext_init (NautilusFileUndoInfoExt *self)
+nemo_file_undo_info_ext_init (NemoFileUndoInfoExt *self)
 {
-	self->priv = G_TYPE_INSTANCE_GET_PRIVATE (self, nautilus_file_undo_info_ext_get_type (),
-						  NautilusFileUndoInfoExtDetails);
+	self->priv = G_TYPE_INSTANCE_GET_PRIVATE (self, nemo_file_undo_info_ext_get_type (),
+						  NemoFileUndoInfoExtDetails);
 }
 
 static void
-nautilus_file_undo_info_ext_finalize (GObject *obj)
+nemo_file_undo_info_ext_finalize (GObject *obj)
 {
-	NautilusFileUndoInfoExt *self = NAUTILUS_FILE_UNDO_INFO_EXT (obj);
+	NemoFileUndoInfoExt *self = NEMO_FILE_UNDO_INFO_EXT (obj);
 
 	if (self->priv->sources) {
 		g_list_free_full (self->priv->sources, g_object_unref);
@@ -600,33 +600,33 @@ nautilus_file_undo_info_ext_finalize (GObject *obj)
 	g_clear_object (&self->priv->src_dir);
 	g_clear_object (&self->priv->dest_dir);
 
-	G_OBJECT_CLASS (nautilus_file_undo_info_ext_parent_class)->finalize (obj);
+	G_OBJECT_CLASS (nemo_file_undo_info_ext_parent_class)->finalize (obj);
 }
 
 static void
-nautilus_file_undo_info_ext_class_init (NautilusFileUndoInfoExtClass *klass)
+nemo_file_undo_info_ext_class_init (NemoFileUndoInfoExtClass *klass)
 {
 	GObjectClass *oclass = G_OBJECT_CLASS (klass);
-	NautilusFileUndoInfoClass *iclass = NAUTILUS_FILE_UNDO_INFO_CLASS (klass);
+	NemoFileUndoInfoClass *iclass = NEMO_FILE_UNDO_INFO_CLASS (klass);
 
-	oclass->finalize = nautilus_file_undo_info_ext_finalize;
+	oclass->finalize = nemo_file_undo_info_ext_finalize;
 
 	iclass->undo_func = ext_undo_func;
 	iclass->redo_func = ext_redo_func;
 	iclass->strings_func = ext_strings_func;
 
-	g_type_class_add_private (klass, sizeof (NautilusFileUndoInfoExtDetails));
+	g_type_class_add_private (klass, sizeof (NemoFileUndoInfoExtDetails));
 }
 
-NautilusFileUndoInfo *
-nautilus_file_undo_info_ext_new (NautilusFileUndoOp op_type,
+NemoFileUndoInfo *
+nemo_file_undo_info_ext_new (NemoFileUndoOp op_type,
 				 gint item_count,
 				 GFile *src_dir,
 				 GFile *target_dir)
 {
-	NautilusFileUndoInfoExt *retval;
+	NemoFileUndoInfoExt *retval;
 
-	retval = g_object_new (NAUTILUS_TYPE_FILE_UNDO_INFO_EXT,
+	retval = g_object_new (NEMO_TYPE_FILE_UNDO_INFO_EXT,
 			       "op-type", op_type,
 			       "item-count", item_count,
 			       NULL);
@@ -634,11 +634,11 @@ nautilus_file_undo_info_ext_new (NautilusFileUndoOp op_type,
 	retval->priv->src_dir = g_object_ref (src_dir);
 	retval->priv->dest_dir = g_object_ref (target_dir);
 
-	return NAUTILUS_FILE_UNDO_INFO (retval);
+	return NEMO_FILE_UNDO_INFO (retval);
 }
 
 void
-nautilus_file_undo_info_ext_add_origin_target_pair (NautilusFileUndoInfoExt *self,
+nemo_file_undo_info_ext_add_origin_target_pair (NemoFileUndoInfoExt *self,
 						    GFile                   *origin,
 						    GFile                   *target)
 {
@@ -649,40 +649,40 @@ nautilus_file_undo_info_ext_add_origin_target_pair (NautilusFileUndoInfoExt *sel
 }
 
 /* create new file/folder */
-G_DEFINE_TYPE (NautilusFileUndoInfoCreate, nautilus_file_undo_info_create, NAUTILUS_TYPE_FILE_UNDO_INFO)
+G_DEFINE_TYPE (NemoFileUndoInfoCreate, nemo_file_undo_info_create, NEMO_TYPE_FILE_UNDO_INFO)
 
-struct _NautilusFileUndoInfoCreateDetails {
+struct _NemoFileUndoInfoCreateDetails {
 	char *template;
 	GFile *target_file;
 	gint length;
 };
 
 static void
-create_strings_func (NautilusFileUndoInfo *info,
+create_strings_func (NemoFileUndoInfo *info,
 		     gchar **undo_label,
 		     gchar **undo_description,
 		     gchar **redo_label,
 		     gchar **redo_description)
 
 {
-	NautilusFileUndoInfoCreate *self = NAUTILUS_FILE_UNDO_INFO_CREATE (info);
-	NautilusFileUndoOp op_type = nautilus_file_undo_info_get_op_type (info);
+	NemoFileUndoInfoCreate *self = NEMO_FILE_UNDO_INFO_CREATE (info);
+	NemoFileUndoOp op_type = nemo_file_undo_info_get_op_type (info);
 	char *name;
 
 	name = g_file_get_parse_name (self->priv->target_file);
 	*undo_description = g_strdup_printf (_("Delete '%s'"), name);
 
-	if (op_type == NAUTILUS_FILE_UNDO_OP_CREATE_EMPTY_FILE) {
+	if (op_type == NEMO_FILE_UNDO_OP_CREATE_EMPTY_FILE) {
 		*redo_description = g_strdup_printf (_("Create an empty file '%s'"), name);
 
 		*undo_label = g_strdup (_("_Undo Create Empty File"));
 		*redo_label = g_strdup (_("_Redo Create Empty File"));
-	} else if (op_type == NAUTILUS_FILE_UNDO_OP_CREATE_FOLDER) {
+	} else if (op_type == NEMO_FILE_UNDO_OP_CREATE_FOLDER) {
 		*redo_description = g_strdup_printf (_("Create a new folder '%s'"), name);
 
 		*undo_label = g_strdup (_("_Undo Create Folder"));
 		*redo_label = g_strdup (_("_Redo Create Folder"));
-	} else if (op_type == NAUTILUS_FILE_UNDO_OP_CREATE_FILE_FROM_TEMPLATE) {
+	} else if (op_type == NEMO_FILE_UNDO_OP_CREATE_FILE_FROM_TEMPLATE) {
 		*redo_description = g_strdup_printf (_("Create new file '%s' from template "), name);
 
 		*undo_label = g_strdup (_("_Undo Create from Template"));
@@ -703,7 +703,7 @@ create_callback (GFile * new_file,
 }
 
 static void
-create_from_template_redo_func (NautilusFileUndoInfoCreate *self,
+create_from_template_redo_func (NemoFileUndoInfoCreate *self,
 				GtkWindow *parent_window)
 {
 	GFile *parent;
@@ -712,7 +712,7 @@ create_from_template_redo_func (NautilusFileUndoInfoCreate *self,
 	parent = g_file_get_parent (self->priv->target_file);
 	parent_uri = g_file_get_uri (parent);
 	new_name = g_file_get_parse_name (self->priv->target_file);
-	nautilus_file_operations_new_file_from_template (NULL, NULL,
+	nemo_file_operations_new_file_from_template (NULL, NULL,
 							 parent_uri, new_name,
 							 self->priv->template,
 							 create_callback, self);
@@ -723,7 +723,7 @@ create_from_template_redo_func (NautilusFileUndoInfoCreate *self,
 }
 
 static void
-create_folder_redo_func (NautilusFileUndoInfoCreate *self,
+create_folder_redo_func (NemoFileUndoInfoCreate *self,
 			 GtkWindow *parent_window)
 {
 	GFile *parent;
@@ -731,7 +731,7 @@ create_folder_redo_func (NautilusFileUndoInfoCreate *self,
 
 	parent = g_file_get_parent (self->priv->target_file);
 	parent_uri = g_file_get_uri (parent);
-	nautilus_file_operations_new_folder (NULL, NULL, parent_uri,
+	nemo_file_operations_new_folder (NULL, NULL, parent_uri,
 					     create_callback, self);
 
 	g_free (parent_uri);
@@ -739,7 +739,7 @@ create_folder_redo_func (NautilusFileUndoInfoCreate *self,
 }
 
 static void
-create_empty_redo_func (NautilusFileUndoInfoCreate *self,
+create_empty_redo_func (NemoFileUndoInfoCreate *self,
 			GtkWindow *parent_window)
 
 {
@@ -750,7 +750,7 @@ create_empty_redo_func (NautilusFileUndoInfoCreate *self,
 	parent = g_file_get_parent (self->priv->target_file);
 	parent_uri = g_file_get_uri (parent);
 	new_name = g_file_get_parse_name (self->priv->target_file);
-	nautilus_file_operations_new_file (NULL, NULL, parent_uri,
+	nemo_file_operations_new_file (NULL, NULL, parent_uri,
 					   new_name,
 					   self->priv->template,
 					   self->priv->length,
@@ -762,17 +762,17 @@ create_empty_redo_func (NautilusFileUndoInfoCreate *self,
 }
 
 static void
-create_redo_func (NautilusFileUndoInfo *info,
+create_redo_func (NemoFileUndoInfo *info,
 		  GtkWindow *parent_window)
 {
-	NautilusFileUndoInfoCreate *self = NAUTILUS_FILE_UNDO_INFO_CREATE (info);
-	NautilusFileUndoOp op_type = nautilus_file_undo_info_get_op_type (info);
+	NemoFileUndoInfoCreate *self = NEMO_FILE_UNDO_INFO_CREATE (info);
+	NemoFileUndoOp op_type = nemo_file_undo_info_get_op_type (info);
 
-	if (op_type == NAUTILUS_FILE_UNDO_OP_CREATE_EMPTY_FILE) {
+	if (op_type == NEMO_FILE_UNDO_OP_CREATE_EMPTY_FILE) {
 		create_empty_redo_func (self, parent_window);
-	} else if (op_type == NAUTILUS_FILE_UNDO_OP_CREATE_FOLDER) {
+	} else if (op_type == NEMO_FILE_UNDO_OP_CREATE_FOLDER) {
 		create_folder_redo_func (self, parent_window);
-	} else if (op_type == NAUTILUS_FILE_UNDO_OP_CREATE_FILE_FROM_TEMPLATE) {
+	} else if (op_type == NEMO_FILE_UNDO_OP_CREATE_FILE_FROM_TEMPLATE) {
 		create_from_template_redo_func (self, parent_window);
 	} else {
 		g_assert_not_reached ();
@@ -780,62 +780,62 @@ create_redo_func (NautilusFileUndoInfo *info,
 }
 
 static void
-create_undo_func (NautilusFileUndoInfo *info,
+create_undo_func (NemoFileUndoInfo *info,
 		  GtkWindow *parent_window)
 {
-	NautilusFileUndoInfoCreate *self = NAUTILUS_FILE_UNDO_INFO_CREATE (info);
+	NemoFileUndoInfoCreate *self = NEMO_FILE_UNDO_INFO_CREATE (info);
 	GList *files = NULL;
 
 	files = g_list_append (files, g_object_ref (self->priv->target_file));
-	nautilus_file_operations_delete (files, parent_window,
+	nemo_file_operations_delete (files, parent_window,
 					 file_undo_info_delete_callback, self);
 
 	g_list_free_full (files, g_object_unref);
 }
 
 static void
-nautilus_file_undo_info_create_init (NautilusFileUndoInfoCreate *self)
+nemo_file_undo_info_create_init (NemoFileUndoInfoCreate *self)
 {
-	self->priv = G_TYPE_INSTANCE_GET_PRIVATE (self, nautilus_file_undo_info_create_get_type (),
-						  NautilusFileUndoInfoCreateDetails);
+	self->priv = G_TYPE_INSTANCE_GET_PRIVATE (self, nemo_file_undo_info_create_get_type (),
+						  NemoFileUndoInfoCreateDetails);
 }
 
 static void
-nautilus_file_undo_info_create_finalize (GObject *obj)
+nemo_file_undo_info_create_finalize (GObject *obj)
 {
-	NautilusFileUndoInfoCreate *self = NAUTILUS_FILE_UNDO_INFO_CREATE (obj);
+	NemoFileUndoInfoCreate *self = NEMO_FILE_UNDO_INFO_CREATE (obj);
 	g_clear_object (&self->priv->target_file);
 	g_free (self->priv->template);	
 
-	G_OBJECT_CLASS (nautilus_file_undo_info_create_parent_class)->finalize (obj);
+	G_OBJECT_CLASS (nemo_file_undo_info_create_parent_class)->finalize (obj);
 }
 
 static void
-nautilus_file_undo_info_create_class_init (NautilusFileUndoInfoCreateClass *klass)
+nemo_file_undo_info_create_class_init (NemoFileUndoInfoCreateClass *klass)
 {
 	GObjectClass *oclass = G_OBJECT_CLASS (klass);
-	NautilusFileUndoInfoClass *iclass = NAUTILUS_FILE_UNDO_INFO_CLASS (klass);
+	NemoFileUndoInfoClass *iclass = NEMO_FILE_UNDO_INFO_CLASS (klass);
 
-	oclass->finalize = nautilus_file_undo_info_create_finalize;
+	oclass->finalize = nemo_file_undo_info_create_finalize;
 
 	iclass->undo_func = create_undo_func;
 	iclass->redo_func = create_redo_func;
 	iclass->strings_func = create_strings_func;
 
-	g_type_class_add_private (klass, sizeof (NautilusFileUndoInfoCreateDetails));
+	g_type_class_add_private (klass, sizeof (NemoFileUndoInfoCreateDetails));
 }
 
-NautilusFileUndoInfo *
-nautilus_file_undo_info_create_new (NautilusFileUndoOp op_type)
+NemoFileUndoInfo *
+nemo_file_undo_info_create_new (NemoFileUndoOp op_type)
 {
-	return g_object_new (NAUTILUS_TYPE_FILE_UNDO_INFO_CREATE,
+	return g_object_new (NEMO_TYPE_FILE_UNDO_INFO_CREATE,
 			     "op-type", op_type,
 			     "item-count", 1,
 			     NULL);
 }
 
 void
-nautilus_file_undo_info_create_set_data (NautilusFileUndoInfoCreate *self,
+nemo_file_undo_info_create_set_data (NemoFileUndoInfoCreate *self,
                                          GFile                      *file,
                                          const char                 *template,
 					 gint                        length)
@@ -846,21 +846,21 @@ nautilus_file_undo_info_create_set_data (NautilusFileUndoInfoCreate *self,
 }
 
 /* rename */
-G_DEFINE_TYPE (NautilusFileUndoInfoRename, nautilus_file_undo_info_rename, NAUTILUS_TYPE_FILE_UNDO_INFO)
+G_DEFINE_TYPE (NemoFileUndoInfoRename, nemo_file_undo_info_rename, NEMO_TYPE_FILE_UNDO_INFO)
 
-struct _NautilusFileUndoInfoRenameDetails {
+struct _NemoFileUndoInfoRenameDetails {
 	GFile *old_file;
 	GFile *new_file;
 };
 
 static void
-rename_strings_func (NautilusFileUndoInfo *info,
+rename_strings_func (NemoFileUndoInfo *info,
 		     gchar **undo_label,
 		     gchar **undo_description,
 		     gchar **redo_label,
 		     gchar **redo_description)
 {
-	NautilusFileUndoInfoRename *self = NAUTILUS_FILE_UNDO_INFO_RENAME (info);
+	NemoFileUndoInfoRename *self = NEMO_FILE_UNDO_INFO_RENAME (info);
 	gchar *new_name, *old_name;
 
 	new_name = g_file_get_parse_name (self->priv->new_file);
@@ -877,82 +877,82 @@ rename_strings_func (NautilusFileUndoInfo *info,
 }
 
 static void
-rename_redo_func (NautilusFileUndoInfo *info,
+rename_redo_func (NemoFileUndoInfo *info,
 		  GtkWindow *parent_window)
 {
-	NautilusFileUndoInfoRename *self = NAUTILUS_FILE_UNDO_INFO_RENAME (info);
+	NemoFileUndoInfoRename *self = NEMO_FILE_UNDO_INFO_RENAME (info);
 	gchar *new_name;
-	NautilusFile *file;
+	NemoFile *file;
 
 	new_name = g_file_get_basename (self->priv->new_file);
-	file = nautilus_file_get (self->priv->old_file);
-	nautilus_file_rename (file, new_name,
+	file = nemo_file_get (self->priv->old_file);
+	nemo_file_rename (file, new_name,
 			      file_undo_info_operation_callback, self);
 
-	nautilus_file_unref (file);
+	nemo_file_unref (file);
 	g_free (new_name);
 }
 
 static void
-rename_undo_func (NautilusFileUndoInfo *info,
+rename_undo_func (NemoFileUndoInfo *info,
 		  GtkWindow *parent_window)
 {
-	NautilusFileUndoInfoRename *self = NAUTILUS_FILE_UNDO_INFO_RENAME (info);
+	NemoFileUndoInfoRename *self = NEMO_FILE_UNDO_INFO_RENAME (info);
 	gchar *new_name;
-	NautilusFile *file;
+	NemoFile *file;
 
 	new_name = g_file_get_basename (self->priv->old_file);
-	file = nautilus_file_get (self->priv->new_file);
-	nautilus_file_rename (file, new_name,
+	file = nemo_file_get (self->priv->new_file);
+	nemo_file_rename (file, new_name,
 			      file_undo_info_operation_callback, self);
 
-	nautilus_file_unref (file);
+	nemo_file_unref (file);
 	g_free (new_name);
 }
 
 static void
-nautilus_file_undo_info_rename_init (NautilusFileUndoInfoRename *self)
+nemo_file_undo_info_rename_init (NemoFileUndoInfoRename *self)
 {
-	self->priv = G_TYPE_INSTANCE_GET_PRIVATE (self, nautilus_file_undo_info_rename_get_type (),
-						  NautilusFileUndoInfoRenameDetails);
+	self->priv = G_TYPE_INSTANCE_GET_PRIVATE (self, nemo_file_undo_info_rename_get_type (),
+						  NemoFileUndoInfoRenameDetails);
 }
 
 static void
-nautilus_file_undo_info_rename_finalize (GObject *obj)
+nemo_file_undo_info_rename_finalize (GObject *obj)
 {
-	NautilusFileUndoInfoRename *self = NAUTILUS_FILE_UNDO_INFO_RENAME (obj);
+	NemoFileUndoInfoRename *self = NEMO_FILE_UNDO_INFO_RENAME (obj);
 	g_clear_object (&self->priv->old_file);
 	g_clear_object (&self->priv->new_file);
 
-	G_OBJECT_CLASS (nautilus_file_undo_info_rename_parent_class)->finalize (obj);
+	G_OBJECT_CLASS (nemo_file_undo_info_rename_parent_class)->finalize (obj);
 }
 
 static void
-nautilus_file_undo_info_rename_class_init (NautilusFileUndoInfoRenameClass *klass)
+nemo_file_undo_info_rename_class_init (NemoFileUndoInfoRenameClass *klass)
 {
 	GObjectClass *oclass = G_OBJECT_CLASS (klass);
-	NautilusFileUndoInfoClass *iclass = NAUTILUS_FILE_UNDO_INFO_CLASS (klass);
+	NemoFileUndoInfoClass *iclass = NEMO_FILE_UNDO_INFO_CLASS (klass);
 
-	oclass->finalize = nautilus_file_undo_info_rename_finalize;
+	oclass->finalize = nemo_file_undo_info_rename_finalize;
 
 	iclass->undo_func = rename_undo_func;
 	iclass->redo_func = rename_redo_func;
 	iclass->strings_func = rename_strings_func;
 
-	g_type_class_add_private (klass, sizeof (NautilusFileUndoInfoRenameDetails));
+	g_type_class_add_private (klass, sizeof (NemoFileUndoInfoRenameDetails));
 }
 
-NautilusFileUndoInfo *
-nautilus_file_undo_info_rename_new (void)
+NemoFileUndoInfo *
+nemo_file_undo_info_rename_new (void)
 {
-	return g_object_new (NAUTILUS_TYPE_FILE_UNDO_INFO_RENAME,
-			     "op-type", NAUTILUS_FILE_UNDO_OP_RENAME,
+	return g_object_new (NEMO_TYPE_FILE_UNDO_INFO_RENAME,
+			     "op-type", NEMO_FILE_UNDO_OP_RENAME,
 			     "item-count", 1,
 			     NULL);
 }
 
 void
-nautilus_file_undo_info_rename_set_data (NautilusFileUndoInfoRename *self,
+nemo_file_undo_info_rename_set_data (NemoFileUndoInfoRename *self,
 					 GFile                      *old_file,
 					 GFile                      *new_file)
 {
@@ -961,20 +961,20 @@ nautilus_file_undo_info_rename_set_data (NautilusFileUndoInfoRename *self,
 }
 
 /* trash */
-G_DEFINE_TYPE (NautilusFileUndoInfoTrash, nautilus_file_undo_info_trash, NAUTILUS_TYPE_FILE_UNDO_INFO)
+G_DEFINE_TYPE (NemoFileUndoInfoTrash, nemo_file_undo_info_trash, NEMO_TYPE_FILE_UNDO_INFO)
 
-struct _NautilusFileUndoInfoTrashDetails {
+struct _NemoFileUndoInfoTrashDetails {
 	GHashTable *trashed;
 };
 
 static void
-trash_strings_func (NautilusFileUndoInfo *info,
+trash_strings_func (NemoFileUndoInfo *info,
 		    gchar **undo_label,
 		    gchar **undo_description,
 		    gchar **redo_label,
 		    gchar **redo_description)
 {
-	NautilusFileUndoInfoTrash *self = NAUTILUS_FILE_UNDO_INFO_TRASH (info);
+	NemoFileUndoInfoTrash *self = NEMO_FILE_UNDO_INFO_TRASH (info);
 	gint count = g_hash_table_size (self->priv->trashed);
 
 	if (count != 1) {
@@ -1014,7 +1014,7 @@ trash_redo_func_callback (GHashTable *debuting_uris,
 			  gboolean user_cancel,
 			  gpointer user_data)
 {
-	NautilusFileUndoInfoTrash *self = user_data;
+	NemoFileUndoInfoTrash *self = user_data;
 	GHashTable *new_trashed_files;
 	GTimeVal current_time;
 	gsize updated_trash_time;
@@ -1047,16 +1047,16 @@ trash_redo_func_callback (GHashTable *debuting_uris,
 }
 
 static void
-trash_redo_func (NautilusFileUndoInfo *info,
+trash_redo_func (NemoFileUndoInfo *info,
 		 GtkWindow *parent_window)
 {
-	NautilusFileUndoInfoTrash *self = NAUTILUS_FILE_UNDO_INFO_TRASH (info);
+	NemoFileUndoInfoTrash *self = NEMO_FILE_UNDO_INFO_TRASH (info);
 
 	if (g_hash_table_size (self->priv->trashed) > 0) {
 		GList *locations;
 
 		locations = g_hash_table_get_keys (self->priv->trashed);
-		nautilus_file_operations_trash_or_delete (locations, parent_window,
+		nemo_file_operations_trash_or_delete (locations, parent_window,
 							  trash_redo_func_callback, self);
 
 		g_list_free (locations);
@@ -1064,7 +1064,7 @@ trash_redo_func (NautilusFileUndoInfo *info,
 }
 
 static GHashTable *
-trash_retrieve_files_to_restore_finish (NautilusFileUndoInfoTrash *self,
+trash_retrieve_files_to_restore_finish (NemoFileUndoInfoTrash *self,
 					GAsyncResult *res,
 					GError **error)
 {
@@ -1082,7 +1082,7 @@ trash_retrieve_files_to_restore_thread (GSimpleAsyncResult *res,
 					GObject *object,
 					GCancellable *cancellable)
 {
-	NautilusFileUndoInfoTrash *self = NAUTILUS_FILE_UNDO_INFO_TRASH (object);
+	NemoFileUndoInfoTrash *self = NEMO_FILE_UNDO_INFO_TRASH (object);
 	GFileEnumerator *enumerator;
 	GHashTable *to_restore;
 	GFile *trash;
@@ -1151,7 +1151,7 @@ trash_retrieve_files_to_restore_thread (GSimpleAsyncResult *res,
 }
 
 static void
-trash_retrieve_files_to_restore_async (NautilusFileUndoInfoTrash *self,
+trash_retrieve_files_to_restore_async (NemoFileUndoInfoTrash *self,
 				 GAsyncReadyCallback callback,
 				 gpointer user_data)
 {
@@ -1170,7 +1170,7 @@ trash_retrieve_files_ready (GObject *source,
 			    GAsyncResult *res,
 			    gpointer user_data)
 {
-	NautilusFileUndoInfoTrash *self = NAUTILUS_FILE_UNDO_INFO_TRASH (source);
+	NemoFileUndoInfoTrash *self = NEMO_FILE_UNDO_INFO_TRASH (source);
 	GHashTable *files_to_restore;
 	GError *error = NULL;
 
@@ -1206,62 +1206,62 @@ trash_retrieve_files_ready (GObject *source,
 }
 
 static void
-trash_undo_func (NautilusFileUndoInfo *info,
+trash_undo_func (NemoFileUndoInfo *info,
 		 GtkWindow *parent_window)
 {
-	NautilusFileUndoInfoTrash *self = NAUTILUS_FILE_UNDO_INFO_TRASH (info);
+	NemoFileUndoInfoTrash *self = NEMO_FILE_UNDO_INFO_TRASH (info);
 
 	/* Internally managed op, pop flag. */
-	nautilus_file_undo_manager_pop_flag ();
+	nemo_file_undo_manager_pop_flag ();
 
 	trash_retrieve_files_to_restore_async (self, trash_retrieve_files_ready, NULL);
 }
 
 static void
-nautilus_file_undo_info_trash_init (NautilusFileUndoInfoTrash *self)
+nemo_file_undo_info_trash_init (NemoFileUndoInfoTrash *self)
 {
-	self->priv = G_TYPE_INSTANCE_GET_PRIVATE (self, nautilus_file_undo_info_trash_get_type (),
-						  NautilusFileUndoInfoTrashDetails);
+	self->priv = G_TYPE_INSTANCE_GET_PRIVATE (self, nemo_file_undo_info_trash_get_type (),
+						  NemoFileUndoInfoTrashDetails);
 	self->priv->trashed =
 		g_hash_table_new_full (g_file_hash, (GEqualFunc) g_file_equal, 
 				       g_object_unref, NULL);
 }
 
 static void
-nautilus_file_undo_info_trash_finalize (GObject *obj)
+nemo_file_undo_info_trash_finalize (GObject *obj)
 {
-	NautilusFileUndoInfoTrash *self = NAUTILUS_FILE_UNDO_INFO_TRASH (obj);
+	NemoFileUndoInfoTrash *self = NEMO_FILE_UNDO_INFO_TRASH (obj);
 	g_hash_table_destroy (self->priv->trashed);
 
-	G_OBJECT_CLASS (nautilus_file_undo_info_trash_parent_class)->finalize (obj);
+	G_OBJECT_CLASS (nemo_file_undo_info_trash_parent_class)->finalize (obj);
 }
 
 static void
-nautilus_file_undo_info_trash_class_init (NautilusFileUndoInfoTrashClass *klass)
+nemo_file_undo_info_trash_class_init (NemoFileUndoInfoTrashClass *klass)
 {
 	GObjectClass *oclass = G_OBJECT_CLASS (klass);
-	NautilusFileUndoInfoClass *iclass = NAUTILUS_FILE_UNDO_INFO_CLASS (klass);
+	NemoFileUndoInfoClass *iclass = NEMO_FILE_UNDO_INFO_CLASS (klass);
 
-	oclass->finalize = nautilus_file_undo_info_trash_finalize;
+	oclass->finalize = nemo_file_undo_info_trash_finalize;
 
 	iclass->undo_func = trash_undo_func;
 	iclass->redo_func = trash_redo_func;
 	iclass->strings_func = trash_strings_func;
 
-	g_type_class_add_private (klass, sizeof (NautilusFileUndoInfoTrashDetails));
+	g_type_class_add_private (klass, sizeof (NemoFileUndoInfoTrashDetails));
 }
 
-NautilusFileUndoInfo *
-nautilus_file_undo_info_trash_new (gint item_count)
+NemoFileUndoInfo *
+nemo_file_undo_info_trash_new (gint item_count)
 {
-	return g_object_new (NAUTILUS_TYPE_FILE_UNDO_INFO_TRASH,
-			     "op-type", NAUTILUS_FILE_UNDO_OP_MOVE_TO_TRASH,
+	return g_object_new (NEMO_TYPE_FILE_UNDO_INFO_TRASH,
+			     "op-type", NEMO_FILE_UNDO_OP_MOVE_TO_TRASH,
 			     "item-count", item_count,
 			     NULL);
 }
 
 void
-nautilus_file_undo_info_trash_add_file (NautilusFileUndoInfoTrash *self,
+nemo_file_undo_info_trash_add_file (NemoFileUndoInfoTrash *self,
 					GFile                     *file)
 {
 	GTimeVal current_time;
@@ -1274,9 +1274,9 @@ nautilus_file_undo_info_trash_add_file (NautilusFileUndoInfoTrash *self,
 }
 
 /* recursive permissions */
-G_DEFINE_TYPE (NautilusFileUndoInfoRecPermissions, nautilus_file_undo_info_rec_permissions, NAUTILUS_TYPE_FILE_UNDO_INFO)
+G_DEFINE_TYPE (NemoFileUndoInfoRecPermissions, nemo_file_undo_info_rec_permissions, NEMO_TYPE_FILE_UNDO_INFO)
 
-struct _NautilusFileUndoInfoRecPermissionsDetails {
+struct _NemoFileUndoInfoRecPermissionsDetails {
 	GFile *dest_dir;
 	GHashTable *original_permissions;
 	guint32 dir_mask;
@@ -1286,13 +1286,13 @@ struct _NautilusFileUndoInfoRecPermissionsDetails {
 };
 
 static void
-rec_permissions_strings_func (NautilusFileUndoInfo *info,
+rec_permissions_strings_func (NemoFileUndoInfo *info,
 			      gchar **undo_label,
 			      gchar **undo_description,
 			      gchar **redo_label,
 			      gchar **redo_description)
 {
-	NautilusFileUndoInfoRecPermissions *self = NAUTILUS_FILE_UNDO_INFO_REC_PERMISSIONS (info);
+	NemoFileUndoInfoRecPermissions *self = NEMO_FILE_UNDO_INFO_REC_PERMISSIONS (info);
 	char *name;
 
 	name = g_file_get_path (self->priv->dest_dir);
@@ -1314,14 +1314,14 @@ rec_permissions_callback (gboolean success,
 }
 
 static void
-rec_permissions_redo_func (NautilusFileUndoInfo *info,
+rec_permissions_redo_func (NemoFileUndoInfo *info,
 			   GtkWindow *parent_window)
 {
-	NautilusFileUndoInfoRecPermissions *self = NAUTILUS_FILE_UNDO_INFO_REC_PERMISSIONS (info);
+	NemoFileUndoInfoRecPermissions *self = NEMO_FILE_UNDO_INFO_REC_PERMISSIONS (info);
 	gchar *parent_uri;
 
 	parent_uri = g_file_get_uri (self->priv->dest_dir);
-	nautilus_file_set_permissions_recursive (parent_uri,
+	nemo_file_set_permissions_recursive (parent_uri,
 						 self->priv->file_permissions,
 						 self->priv->file_mask,
 						 self->priv->dir_permissions,
@@ -1331,14 +1331,14 @@ rec_permissions_redo_func (NautilusFileUndoInfo *info,
 }
 
 static void
-rec_permissions_undo_func (NautilusFileUndoInfo *info,
+rec_permissions_undo_func (NemoFileUndoInfo *info,
 			   GtkWindow *parent_window)
 {
-	NautilusFileUndoInfoRecPermissions *self = NAUTILUS_FILE_UNDO_INFO_REC_PERMISSIONS (info);
+	NemoFileUndoInfoRecPermissions *self = NEMO_FILE_UNDO_INFO_REC_PERMISSIONS (info);
 
 	/* Internally managed op, pop flag. */
 	/* TODO: why? */
-	nautilus_file_undo_manager_pop_flag ();
+	nemo_file_undo_manager_pop_flag ();
 
 	if (g_hash_table_size (self->priv->original_permissions) > 0) {
 		GList *gfiles_list;
@@ -1365,52 +1365,52 @@ rec_permissions_undo_func (NautilusFileUndoInfo *info,
 }
 
 static void
-nautilus_file_undo_info_rec_permissions_init (NautilusFileUndoInfoRecPermissions *self)
+nemo_file_undo_info_rec_permissions_init (NemoFileUndoInfoRecPermissions *self)
 {
-	self->priv = G_TYPE_INSTANCE_GET_PRIVATE (self, nautilus_file_undo_info_rec_permissions_get_type (),
-						  NautilusFileUndoInfoRecPermissionsDetails);
+	self->priv = G_TYPE_INSTANCE_GET_PRIVATE (self, nemo_file_undo_info_rec_permissions_get_type (),
+						  NemoFileUndoInfoRecPermissionsDetails);
 
 	self->priv->original_permissions =
 		g_hash_table_new_full (g_str_hash, g_str_equal, g_free, NULL);
 }
 
 static void
-nautilus_file_undo_info_rec_permissions_finalize (GObject *obj)
+nemo_file_undo_info_rec_permissions_finalize (GObject *obj)
 {
-	NautilusFileUndoInfoRecPermissions *self = NAUTILUS_FILE_UNDO_INFO_REC_PERMISSIONS (obj);
+	NemoFileUndoInfoRecPermissions *self = NEMO_FILE_UNDO_INFO_REC_PERMISSIONS (obj);
 
 	g_hash_table_destroy (self->priv->original_permissions);
 	g_clear_object (&self->priv->dest_dir);
 
-	G_OBJECT_CLASS (nautilus_file_undo_info_rec_permissions_parent_class)->finalize (obj);
+	G_OBJECT_CLASS (nemo_file_undo_info_rec_permissions_parent_class)->finalize (obj);
 }
 
 static void
-nautilus_file_undo_info_rec_permissions_class_init (NautilusFileUndoInfoRecPermissionsClass *klass)
+nemo_file_undo_info_rec_permissions_class_init (NemoFileUndoInfoRecPermissionsClass *klass)
 {
 	GObjectClass *oclass = G_OBJECT_CLASS (klass);
-	NautilusFileUndoInfoClass *iclass = NAUTILUS_FILE_UNDO_INFO_CLASS (klass);
+	NemoFileUndoInfoClass *iclass = NEMO_FILE_UNDO_INFO_CLASS (klass);
 
-	oclass->finalize = nautilus_file_undo_info_rec_permissions_finalize;
+	oclass->finalize = nemo_file_undo_info_rec_permissions_finalize;
 
 	iclass->undo_func = rec_permissions_undo_func;
 	iclass->redo_func = rec_permissions_redo_func;
 	iclass->strings_func = rec_permissions_strings_func;
 
-	g_type_class_add_private (klass, sizeof (NautilusFileUndoInfoRecPermissionsDetails));
+	g_type_class_add_private (klass, sizeof (NemoFileUndoInfoRecPermissionsDetails));
 }
 
-NautilusFileUndoInfo *
-nautilus_file_undo_info_rec_permissions_new (GFile   *dest,
+NemoFileUndoInfo *
+nemo_file_undo_info_rec_permissions_new (GFile   *dest,
 					     guint32 file_permissions,
 					     guint32 file_mask,
 					     guint32 dir_permissions,
 					     guint32 dir_mask)
 {
-	NautilusFileUndoInfoRecPermissions *retval;
+	NemoFileUndoInfoRecPermissions *retval;
 
-	retval = g_object_new (NAUTILUS_TYPE_FILE_UNDO_INFO_REC_PERMISSIONS,
-			       "op-type", NAUTILUS_FILE_UNDO_OP_RECURSIVE_SET_PERMISSIONS,
+	retval = g_object_new (NEMO_TYPE_FILE_UNDO_INFO_REC_PERMISSIONS,
+			       "op-type", NEMO_FILE_UNDO_OP_RECURSIVE_SET_PERMISSIONS,
 			       "item-count", 1,
 			       NULL);
 
@@ -1420,11 +1420,11 @@ nautilus_file_undo_info_rec_permissions_new (GFile   *dest,
 	retval->priv->dir_permissions = dir_permissions;
 	retval->priv->dir_mask = dir_mask;
 
-	return NAUTILUS_FILE_UNDO_INFO (retval);
+	return NEMO_FILE_UNDO_INFO (retval);
 }
 
 void
-nautilus_file_undo_info_rec_permissions_add_file (NautilusFileUndoInfoRecPermissions *self,
+nemo_file_undo_info_rec_permissions_add_file (NemoFileUndoInfoRecPermissions *self,
 						  GFile                              *file,
 						  guint32                             permission)
 {
@@ -1433,22 +1433,22 @@ nautilus_file_undo_info_rec_permissions_add_file (NautilusFileUndoInfoRecPermiss
 }
 
 /* single file change permissions */
-G_DEFINE_TYPE (NautilusFileUndoInfoPermissions, nautilus_file_undo_info_permissions, NAUTILUS_TYPE_FILE_UNDO_INFO)
+G_DEFINE_TYPE (NemoFileUndoInfoPermissions, nemo_file_undo_info_permissions, NEMO_TYPE_FILE_UNDO_INFO)
 
-struct _NautilusFileUndoInfoPermissionsDetails {
+struct _NemoFileUndoInfoPermissionsDetails {
 	GFile *target_file;
 	guint32 current_permissions;
 	guint32 new_permissions;
 };
 
 static void
-permissions_strings_func (NautilusFileUndoInfo *info,
+permissions_strings_func (NemoFileUndoInfo *info,
 			  gchar **undo_label,
 			  gchar **undo_description,
 			  gchar **redo_label,
 			  gchar **redo_description)
 {
-	NautilusFileUndoInfoPermissions *self = NAUTILUS_FILE_UNDO_INFO_PERMISSIONS (info);
+	NemoFileUndoInfoPermissions *self = NEMO_FILE_UNDO_INFO_PERMISSIONS (info);
 	gchar *name;
 
 	name = g_file_get_parse_name (self->priv->target_file);
@@ -1462,74 +1462,74 @@ permissions_strings_func (NautilusFileUndoInfo *info,
 }
 
 static void
-permissions_real_func (NautilusFileUndoInfoPermissions *self,
+permissions_real_func (NemoFileUndoInfoPermissions *self,
 		       guint32 permissions)
 {
-	NautilusFile *file;
+	NemoFile *file;
 
-	file = nautilus_file_get (self->priv->target_file);
-	nautilus_file_set_permissions (file, permissions,
+	file = nemo_file_get (self->priv->target_file);
+	nemo_file_set_permissions (file, permissions,
 				       file_undo_info_operation_callback, self);
 
-	nautilus_file_unref (file);
+	nemo_file_unref (file);
 }
 
 static void
-permissions_redo_func (NautilusFileUndoInfo *info, 
+permissions_redo_func (NemoFileUndoInfo *info, 
 		       GtkWindow *parent_window)
 {
-	NautilusFileUndoInfoPermissions *self = NAUTILUS_FILE_UNDO_INFO_PERMISSIONS (info);
+	NemoFileUndoInfoPermissions *self = NEMO_FILE_UNDO_INFO_PERMISSIONS (info);
 	permissions_real_func (self, self->priv->new_permissions);
 }
 
 static void
-permissions_undo_func (NautilusFileUndoInfo *info, 
+permissions_undo_func (NemoFileUndoInfo *info, 
 		       GtkWindow *parent_window)
 {
-	NautilusFileUndoInfoPermissions *self = NAUTILUS_FILE_UNDO_INFO_PERMISSIONS (info);
+	NemoFileUndoInfoPermissions *self = NEMO_FILE_UNDO_INFO_PERMISSIONS (info);
 	permissions_real_func (self, self->priv->current_permissions);
 }
 
 static void
-nautilus_file_undo_info_permissions_init (NautilusFileUndoInfoPermissions *self)
+nemo_file_undo_info_permissions_init (NemoFileUndoInfoPermissions *self)
 {
-	self->priv = G_TYPE_INSTANCE_GET_PRIVATE (self, nautilus_file_undo_info_permissions_get_type (),
-						  NautilusFileUndoInfoPermissionsDetails);
+	self->priv = G_TYPE_INSTANCE_GET_PRIVATE (self, nemo_file_undo_info_permissions_get_type (),
+						  NemoFileUndoInfoPermissionsDetails);
 }
 
 static void
-nautilus_file_undo_info_permissions_finalize (GObject *obj)
+nemo_file_undo_info_permissions_finalize (GObject *obj)
 {
-	NautilusFileUndoInfoPermissions *self = NAUTILUS_FILE_UNDO_INFO_PERMISSIONS (obj);
+	NemoFileUndoInfoPermissions *self = NEMO_FILE_UNDO_INFO_PERMISSIONS (obj);
 	g_clear_object (&self->priv->target_file);
 
-	G_OBJECT_CLASS (nautilus_file_undo_info_permissions_parent_class)->finalize (obj);
+	G_OBJECT_CLASS (nemo_file_undo_info_permissions_parent_class)->finalize (obj);
 }
 
 static void
-nautilus_file_undo_info_permissions_class_init (NautilusFileUndoInfoPermissionsClass *klass)
+nemo_file_undo_info_permissions_class_init (NemoFileUndoInfoPermissionsClass *klass)
 {
 	GObjectClass *oclass = G_OBJECT_CLASS (klass);
-	NautilusFileUndoInfoClass *iclass = NAUTILUS_FILE_UNDO_INFO_CLASS (klass);
+	NemoFileUndoInfoClass *iclass = NEMO_FILE_UNDO_INFO_CLASS (klass);
 
-	oclass->finalize = nautilus_file_undo_info_permissions_finalize;
+	oclass->finalize = nemo_file_undo_info_permissions_finalize;
 
 	iclass->undo_func = permissions_undo_func;
 	iclass->redo_func = permissions_redo_func;
 	iclass->strings_func = permissions_strings_func;
 
-	g_type_class_add_private (klass, sizeof (NautilusFileUndoInfoPermissionsDetails));
+	g_type_class_add_private (klass, sizeof (NemoFileUndoInfoPermissionsDetails));
 }
 
-NautilusFileUndoInfo *
-nautilus_file_undo_info_permissions_new (GFile   *file,
+NemoFileUndoInfo *
+nemo_file_undo_info_permissions_new (GFile   *file,
 					 guint32  current_permissions,
 					 guint32  new_permissions)
 {
-	NautilusFileUndoInfoPermissions *retval;
+	NemoFileUndoInfoPermissions *retval;
 
-	retval = g_object_new (NAUTILUS_TYPE_FILE_UNDO_INFO_PERMISSIONS,
-			     "op-type", NAUTILUS_FILE_UNDO_OP_SET_PERMISSIONS,
+	retval = g_object_new (NEMO_TYPE_FILE_UNDO_INFO_PERMISSIONS,
+			     "op-type", NEMO_FILE_UNDO_OP_SET_PERMISSIONS,
 			     "item-count", 1,
 			     NULL);
 
@@ -1537,32 +1537,32 @@ nautilus_file_undo_info_permissions_new (GFile   *file,
 	retval->priv->current_permissions = current_permissions;
 	retval->priv->new_permissions = new_permissions;
 
-	return NAUTILUS_FILE_UNDO_INFO (retval);
+	return NEMO_FILE_UNDO_INFO (retval);
 }
 
 /* group and owner change */
-G_DEFINE_TYPE (NautilusFileUndoInfoOwnership, nautilus_file_undo_info_ownership, NAUTILUS_TYPE_FILE_UNDO_INFO)
+G_DEFINE_TYPE (NemoFileUndoInfoOwnership, nemo_file_undo_info_ownership, NEMO_TYPE_FILE_UNDO_INFO)
 
-struct _NautilusFileUndoInfoOwnershipDetails {
+struct _NemoFileUndoInfoOwnershipDetails {
 	GFile *target_file;
 	char *original_ownership;
 	char *new_ownership;
 };
 
 static void
-ownership_strings_func (NautilusFileUndoInfo *info,
+ownership_strings_func (NemoFileUndoInfo *info,
 			gchar **undo_label,
 			gchar **undo_description,
 			gchar **redo_label,
 			gchar **redo_description)
 {
-	NautilusFileUndoInfoOwnership *self = NAUTILUS_FILE_UNDO_INFO_OWNERSHIP (info);
-	NautilusFileUndoOp op_type = nautilus_file_undo_info_get_op_type (info);
+	NemoFileUndoInfoOwnership *self = NEMO_FILE_UNDO_INFO_OWNERSHIP (info);
+	NemoFileUndoOp op_type = nemo_file_undo_info_get_op_type (info);
 	gchar *name;
 
 	name = g_file_get_parse_name (self->priv->target_file);
 
-	if (op_type == NAUTILUS_FILE_UNDO_OP_CHANGE_OWNER) {
+	if (op_type == NEMO_FILE_UNDO_OP_CHANGE_OWNER) {
 		*undo_description = g_strdup_printf (_("Restore group of '%s' to '%s'"),
 						     name, self->priv->original_ownership);
 		*redo_description = g_strdup_printf (_("Set group of '%s' to '%s'"),
@@ -1570,7 +1570,7 @@ ownership_strings_func (NautilusFileUndoInfo *info,
 
 		*undo_label = g_strdup (_("_Undo Change Group"));
 		*redo_label = g_strdup (_("_Redo Change Group"));
-	} else if (op_type == NAUTILUS_FILE_UNDO_OP_CHANGE_GROUP) {
+	} else if (op_type == NEMO_FILE_UNDO_OP_CHANGE_GROUP) {
 		*undo_description = g_strdup_printf (_("Restore owner of '%s' to '%s'"),
 						     name, self->priv->original_ownership);
 		*redo_description = g_strdup_printf (_("Set owner of '%s' to '%s'"),
@@ -1584,86 +1584,86 @@ ownership_strings_func (NautilusFileUndoInfo *info,
 }
 
 static void
-ownership_real_func (NautilusFileUndoInfoOwnership *self,
+ownership_real_func (NemoFileUndoInfoOwnership *self,
 		     const gchar *ownership)
 {
-	NautilusFileUndoOp op_type = nautilus_file_undo_info_get_op_type (NAUTILUS_FILE_UNDO_INFO (self));
-	NautilusFile *file;
+	NemoFileUndoOp op_type = nemo_file_undo_info_get_op_type (NEMO_FILE_UNDO_INFO (self));
+	NemoFile *file;
 
-	file = nautilus_file_get (self->priv->target_file);
+	file = nemo_file_get (self->priv->target_file);
 
-	if (op_type == NAUTILUS_FILE_UNDO_OP_CHANGE_OWNER) {
-		nautilus_file_set_owner (file,
+	if (op_type == NEMO_FILE_UNDO_OP_CHANGE_OWNER) {
+		nemo_file_set_owner (file,
 					 ownership,
 					 file_undo_info_operation_callback, self);
-	} else if (op_type == NAUTILUS_FILE_UNDO_OP_CHANGE_GROUP) {
-		nautilus_file_set_group (file,
+	} else if (op_type == NEMO_FILE_UNDO_OP_CHANGE_GROUP) {
+		nemo_file_set_group (file,
 					 ownership,
 					 file_undo_info_operation_callback, self);
 	}
 
-	nautilus_file_unref (file);
+	nemo_file_unref (file);
 }
 
 static void
-ownership_redo_func (NautilusFileUndoInfo *info,
+ownership_redo_func (NemoFileUndoInfo *info,
 		     GtkWindow *parent_window)
 {
-	NautilusFileUndoInfoOwnership *self = NAUTILUS_FILE_UNDO_INFO_OWNERSHIP (info);
+	NemoFileUndoInfoOwnership *self = NEMO_FILE_UNDO_INFO_OWNERSHIP (info);
 	ownership_real_func (self, self->priv->new_ownership);
 }
 
 static void
-ownership_undo_func (NautilusFileUndoInfo *info,
+ownership_undo_func (NemoFileUndoInfo *info,
 		     GtkWindow *parent_window)
 {
-	NautilusFileUndoInfoOwnership *self = NAUTILUS_FILE_UNDO_INFO_OWNERSHIP (info);
+	NemoFileUndoInfoOwnership *self = NEMO_FILE_UNDO_INFO_OWNERSHIP (info);
 	ownership_real_func (self, self->priv->original_ownership);
 }
 
 static void
-nautilus_file_undo_info_ownership_init (NautilusFileUndoInfoOwnership *self)
+nemo_file_undo_info_ownership_init (NemoFileUndoInfoOwnership *self)
 {
-	self->priv = G_TYPE_INSTANCE_GET_PRIVATE (self, nautilus_file_undo_info_ownership_get_type (),
-						  NautilusFileUndoInfoOwnershipDetails);
+	self->priv = G_TYPE_INSTANCE_GET_PRIVATE (self, nemo_file_undo_info_ownership_get_type (),
+						  NemoFileUndoInfoOwnershipDetails);
 }
 
 static void
-nautilus_file_undo_info_ownership_finalize (GObject *obj)
+nemo_file_undo_info_ownership_finalize (GObject *obj)
 {
-	NautilusFileUndoInfoOwnership *self = NAUTILUS_FILE_UNDO_INFO_OWNERSHIP (obj);
+	NemoFileUndoInfoOwnership *self = NEMO_FILE_UNDO_INFO_OWNERSHIP (obj);
 
 	g_clear_object (&self->priv->target_file);
 	g_free (self->priv->original_ownership);
 	g_free (self->priv->new_ownership);
 
-	G_OBJECT_CLASS (nautilus_file_undo_info_ownership_parent_class)->finalize (obj);
+	G_OBJECT_CLASS (nemo_file_undo_info_ownership_parent_class)->finalize (obj);
 }
 
 static void
-nautilus_file_undo_info_ownership_class_init (NautilusFileUndoInfoOwnershipClass *klass)
+nemo_file_undo_info_ownership_class_init (NemoFileUndoInfoOwnershipClass *klass)
 {
 	GObjectClass *oclass = G_OBJECT_CLASS (klass);
-	NautilusFileUndoInfoClass *iclass = NAUTILUS_FILE_UNDO_INFO_CLASS (klass);
+	NemoFileUndoInfoClass *iclass = NEMO_FILE_UNDO_INFO_CLASS (klass);
 
-	oclass->finalize = nautilus_file_undo_info_ownership_finalize;
+	oclass->finalize = nemo_file_undo_info_ownership_finalize;
 
 	iclass->undo_func = ownership_undo_func;
 	iclass->redo_func = ownership_redo_func;
 	iclass->strings_func = ownership_strings_func;
 
-	g_type_class_add_private (klass, sizeof (NautilusFileUndoInfoOwnershipDetails));
+	g_type_class_add_private (klass, sizeof (NemoFileUndoInfoOwnershipDetails));
 }
 
-NautilusFileUndoInfo *
-nautilus_file_undo_info_ownership_new (NautilusFileUndoOp  op_type,
+NemoFileUndoInfo *
+nemo_file_undo_info_ownership_new (NemoFileUndoOp  op_type,
 				       GFile              *file,
 				       const char         *current_data,
 				       const char         *new_data)
 {
-	NautilusFileUndoInfoOwnership *retval;
+	NemoFileUndoInfoOwnership *retval;
 
-	retval = g_object_new (NAUTILUS_TYPE_FILE_UNDO_INFO_OWNERSHIP,
+	retval = g_object_new (NEMO_TYPE_FILE_UNDO_INFO_OWNERSHIP,
 			       "item-count", 1,
 			       "op-type", op_type,
 			       NULL);
@@ -1672,5 +1672,5 @@ nautilus_file_undo_info_ownership_new (NautilusFileUndoOp  op_type,
 	retval->priv->original_ownership = g_strdup (current_data);
 	retval->priv->new_ownership = g_strdup (new_data);
 
-	return NAUTILUS_FILE_UNDO_INFO (retval);
+	return NEMO_FILE_UNDO_INFO (retval);
 }

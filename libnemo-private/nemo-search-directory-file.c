@@ -1,6 +1,6 @@
 /* -*- Mode: C; indent-tabs-mode: t; c-basic-offset: 8; tab-width: 8 -*-
 
-   nautilus-search-directory-file.c: Subclass of NautilusFile to help implement the
+   nemo-search-directory-file.c: Subclass of NemoFile to help implement the
    searches
  
    Copyright (C) 2005 Novell, Inc.
@@ -24,110 +24,110 @@
 */
 
 #include <config.h>
-#include "nautilus-search-directory-file.h"
+#include "nemo-search-directory-file.h"
 
-#include "nautilus-directory-notify.h"
-#include "nautilus-directory-private.h"
-#include "nautilus-file-attributes.h"
-#include "nautilus-file-private.h"
-#include "nautilus-file-utilities.h"
+#include "nemo-directory-notify.h"
+#include "nemo-directory-private.h"
+#include "nemo-file-attributes.h"
+#include "nemo-file-private.h"
+#include "nemo-file-utilities.h"
 #include <eel/eel-glib-extensions.h>
-#include "nautilus-search-directory.h"
+#include "nemo-search-directory.h"
 #include <gtk/gtk.h>
 #include <glib/gi18n.h>
 #include <string.h>
 
-struct NautilusSearchDirectoryFileDetails {
-	NautilusSearchDirectory *search_directory;
+struct NemoSearchDirectoryFileDetails {
+	NemoSearchDirectory *search_directory;
 };
 
-G_DEFINE_TYPE(NautilusSearchDirectoryFile, nautilus_search_directory_file, NAUTILUS_TYPE_FILE);
+G_DEFINE_TYPE(NemoSearchDirectoryFile, nemo_search_directory_file, NEMO_TYPE_FILE);
 
 
 static void
-search_directory_file_monitor_add (NautilusFile *file,
+search_directory_file_monitor_add (NemoFile *file,
 				   gconstpointer client,
-				   NautilusFileAttributes attributes)
+				   NemoFileAttributes attributes)
 {
 	/* No need for monitoring, we always emit changed when files
 	   are added/removed, and no other metadata changes */
 
 	/* Update display name, in case this didn't happen yet */
-	nautilus_search_directory_file_update_display_name (NAUTILUS_SEARCH_DIRECTORY_FILE (file));
+	nemo_search_directory_file_update_display_name (NEMO_SEARCH_DIRECTORY_FILE (file));
 }
 
 static void
-search_directory_file_monitor_remove (NautilusFile *file,
+search_directory_file_monitor_remove (NemoFile *file,
 				      gconstpointer client)
 {
 	/* Do nothing here, we don't have any monitors */
 }
 
 static void
-search_directory_file_call_when_ready (NautilusFile *file,
-				       NautilusFileAttributes file_attributes,
-				       NautilusFileCallback callback,
+search_directory_file_call_when_ready (NemoFile *file,
+				       NemoFileAttributes file_attributes,
+				       NemoFileCallback callback,
 				       gpointer callback_data)
 
 {
 	/* Update display name, in case this didn't happen yet */
-	nautilus_search_directory_file_update_display_name (NAUTILUS_SEARCH_DIRECTORY_FILE (file));
+	nemo_search_directory_file_update_display_name (NEMO_SEARCH_DIRECTORY_FILE (file));
 	
 	/* All data for directory-as-file is always uptodate */
 	(* callback) (file, callback_data);
 }
  
 static void
-search_directory_file_cancel_call_when_ready (NautilusFile *file,
-					       NautilusFileCallback callback,
+search_directory_file_cancel_call_when_ready (NemoFile *file,
+					       NemoFileCallback callback,
 					       gpointer callback_data)
 {
 	/* Do nothing here, we don't have any pending calls */
 }
 
 static gboolean
-search_directory_file_check_if_ready (NautilusFile *file,
-				      NautilusFileAttributes attributes)
+search_directory_file_check_if_ready (NemoFile *file,
+				      NemoFileAttributes attributes)
 {
 	return TRUE;
 }
 
 static gboolean
-search_directory_file_get_item_count (NautilusFile *file, 
+search_directory_file_get_item_count (NemoFile *file, 
 				      guint *count,
 				      gboolean *count_unreadable)
 {
 	GList *file_list;
 
 	if (count) {
-		file_list = nautilus_directory_get_file_list (file->details->directory);
+		file_list = nemo_directory_get_file_list (file->details->directory);
 
 		*count = g_list_length (file_list);
 
-		nautilus_file_list_free (file_list);
+		nemo_file_list_free (file_list);
 	}
 
 	return TRUE;
 }
 
-static NautilusRequestStatus
-search_directory_file_get_deep_counts (NautilusFile *file,
+static NemoRequestStatus
+search_directory_file_get_deep_counts (NemoFile *file,
 				       guint *directory_count,
 				       guint *file_count,
 				       guint *unreadable_directory_count,
 				       goffset *total_size)
 {
-	NautilusFile *dir_file;
+	NemoFile *dir_file;
 	GList *file_list, *l;
 	guint dirs, files;
 	GFileType type;
 
-	file_list = nautilus_directory_get_file_list (file->details->directory);
+	file_list = nemo_directory_get_file_list (file->details->directory);
 
 	dirs = files = 0;
 	for (l = file_list; l != NULL; l = l->next) {
-		dir_file = NAUTILUS_FILE (l->data);
-		type = nautilus_file_get_file_type (dir_file);
+		dir_file = NEMO_FILE (l->data);
+		type = nemo_file_get_file_type (dir_file);
 		if (type == G_FILE_TYPE_DIRECTORY) {
 			dirs++;
 		} else {
@@ -149,35 +149,35 @@ search_directory_file_get_deep_counts (NautilusFile *file,
 		*total_size = 0;
 	}
 	
-	nautilus_file_list_free (file_list);
+	nemo_file_list_free (file_list);
 	
-	return NAUTILUS_REQUEST_DONE;
+	return NEMO_REQUEST_DONE;
 }
 
 static char *
-search_directory_file_get_where_string (NautilusFile *file)
+search_directory_file_get_where_string (NemoFile *file)
 {
 	return g_strdup (_("Search"));
 }
 
 void
-nautilus_search_directory_file_update_display_name (NautilusSearchDirectoryFile *search_file)
+nemo_search_directory_file_update_display_name (NemoSearchDirectoryFile *search_file)
 {
-	NautilusFile *file;
-	NautilusSearchDirectory *search_dir;
-	NautilusQuery *query;
+	NemoFile *file;
+	NemoSearchDirectory *search_dir;
+	NemoQuery *query;
 	char *display_name;
 	gboolean changed;
 
 	
 	display_name = NULL;
-	file = NAUTILUS_FILE (search_file);
+	file = NEMO_FILE (search_file);
 	if (file->details->directory) {
-		search_dir = NAUTILUS_SEARCH_DIRECTORY (file->details->directory);
-		query = nautilus_search_directory_get_query (search_dir);
+		search_dir = NEMO_SEARCH_DIRECTORY (file->details->directory);
+		query = nemo_search_directory_get_query (search_dir);
 	
 		if (query != NULL) {
-			display_name = nautilus_query_to_readable_string (query);
+			display_name = nemo_query_to_readable_string (query);
 			g_object_unref (query);
 		} 
 	}
@@ -186,18 +186,18 @@ nautilus_search_directory_file_update_display_name (NautilusSearchDirectoryFile 
 		display_name = g_strdup (_("Search"));
 	}
 
-	changed = nautilus_file_set_display_name (file, display_name, NULL, TRUE);
+	changed = nemo_file_set_display_name (file, display_name, NULL, TRUE);
 	if (changed) {
-		nautilus_file_emit_changed (file);
+		nemo_file_emit_changed (file);
 	}
 }
 
 static void
-nautilus_search_directory_file_init (NautilusSearchDirectoryFile *search_file)
+nemo_search_directory_file_init (NemoSearchDirectoryFile *search_file)
 {
-	NautilusFile *file;
+	NemoFile *file;
 
-	file = NAUTILUS_FILE (search_file);
+	file = NEMO_FILE (search_file);
 
 	file->details->got_file_info = TRUE;
 	file->details->mime_type = eel_ref_str_get_unique ("x-directory/normal");
@@ -215,15 +215,15 @@ nautilus_search_directory_file_init (NautilusSearchDirectoryFile *search_file)
 	file->details->got_directory_count = TRUE;
 	file->details->directory_count_is_up_to_date = TRUE;
 
-	nautilus_file_set_display_name (file, _("Search"), NULL, TRUE);
+	nemo_file_set_display_name (file, _("Search"), NULL, TRUE);
 }
 
 static void
-nautilus_search_directory_file_class_init (NautilusSearchDirectoryFileClass *klass)
+nemo_search_directory_file_class_init (NemoSearchDirectoryFileClass *klass)
 {
-	NautilusFileClass *file_class;
+	NemoFileClass *file_class;
 
-	file_class = NAUTILUS_FILE_CLASS (klass);
+	file_class = NEMO_FILE_CLASS (klass);
 
 	file_class->default_file_type = G_FILE_TYPE_DIRECTORY;
 

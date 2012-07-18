@@ -1,8 +1,8 @@
-#include <libnautilus-private/nautilus-search-engine.h>
+#include <libnemo-private/nemo-search-engine.h>
 #include <gtk/gtk.h>
 
 static void
-hits_added_cb (NautilusSearchEngine *engine, GSList *hits)
+hits_added_cb (NemoSearchEngine *engine, GSList *hits)
 {      
 	g_print ("hits added\n");
 	while (hits) {
@@ -12,7 +12,7 @@ hits_added_cb (NautilusSearchEngine *engine, GSList *hits)
 }
 
 static void
-hits_subtracted_cb (NautilusSearchEngine *engine, GSList *hits)
+hits_subtracted_cb (NemoSearchEngine *engine, GSList *hits)
 {
 	g_print ("hits subtracted\n");
 	while (hits) {
@@ -22,7 +22,7 @@ hits_subtracted_cb (NautilusSearchEngine *engine, GSList *hits)
 }
 
 static void
-finished_cb (NautilusSearchEngine *engine)
+finished_cb (NemoSearchEngine *engine)
 {
 	g_print ("finished!\n");
 //	gtk_main_quit ();
@@ -31,12 +31,12 @@ finished_cb (NautilusSearchEngine *engine)
 int 
 main (int argc, char* argv[])
 {
-	NautilusSearchEngine *engine;
-	NautilusQuery *query;
+	NemoSearchEngine *engine;
+	NemoQuery *query;
 	
 	gtk_init (&argc, &argv);
 
-	engine = nautilus_search_engine_new ();
+	engine = nemo_search_engine_new ();
 	g_signal_connect (engine, "hits-added", 
 			  G_CALLBACK (hits_added_cb), NULL);
 	g_signal_connect (engine, "hits-subtracted", 
@@ -44,12 +44,12 @@ main (int argc, char* argv[])
 	g_signal_connect (engine, "finished", 
 			  G_CALLBACK (finished_cb), NULL);
 
-	query = nautilus_query_new ();
-	nautilus_query_set_text (query, "richard hult");
-	nautilus_search_engine_set_query (engine, query);
+	query = nemo_query_new ();
+	nemo_query_set_text (query, "richard hult");
+	nemo_search_engine_set_query (engine, query);
 	g_object_unref (query);
 
-	nautilus_search_engine_start (engine);
+	nemo_search_engine_start (engine);
        
 	gtk_main ();
 	return 0;

@@ -1,6 +1,6 @@
 /*
- * nautilus-window-slot-dnd.c - Handle DnD for widgets acting as
- * NautilusWindowSlot proxies
+ * nemo-window-slot-dnd.c - Handle DnD for widgets acting as
+ * NemoWindowSlot proxies
  *
  * Copyright (C) 2000, 2001 Eazel, Inc.
  * Copyright (C) 2010, Red Hat, Inc.
@@ -24,18 +24,18 @@
  * 	    Ettore Perazzoli <ettore@gnu.org>
  */
 
-#ifndef __NAUTILUS_WINDOW_SLOT_DND_H__
-#define __NAUTILUS_WINDOW_SLOT_DND_H__
+#ifndef __NEMO_WINDOW_SLOT_DND_H__
+#define __NEMO_WINDOW_SLOT_DND_H__
 
 #include <gio/gio.h>
 #include <gtk/gtk.h>
 
-#include <libnautilus-private/nautilus-dnd.h>
+#include <libnemo-private/nemo-dnd.h>
 
-#include "nautilus-window-slot.h"
+#include "nemo-window-slot.h"
 
-void nautilus_drag_slot_proxy_init (GtkWidget *widget,
-                                    NautilusFile *target_file,
-                                    NautilusWindowSlot *target_slot);
+void nemo_drag_slot_proxy_init (GtkWidget *widget,
+                                    NemoFile *target_file,
+                                    NemoWindowSlot *target_slot);
 
-#endif /* __NAUTILUS_WINDOW_SLOT_DND_H__ */
+#endif /* __NEMO_WINDOW_SLOT_DND_H__ */

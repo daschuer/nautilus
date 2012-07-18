@@ -1,7 +1,7 @@
 /* -*- Mode: C; indent-tabs-mode: t; c-basic-offset: 8; tab-width: 8 -*- */
 
 /*
-   nautilus-mime-application-chooser.c: Manages applications for mime types
+   nemo-mime-application-chooser.c: Manages applications for mime types
  
    Copyright (C) 2004 Novell, Inc.
  
@@ -23,32 +23,32 @@
    Authors: Dave Camp <dave@novell.com>
 */
 
-#ifndef NAUTILUS_MIME_APPLICATION_CHOOSER_H
-#define NAUTILUS_MIME_APPLICATION_CHOOSER_H
+#ifndef NEMO_MIME_APPLICATION_CHOOSER_H
+#define NEMO_MIME_APPLICATION_CHOOSER_H
 
 #include <gtk/gtk.h>
 
-#define NAUTILUS_TYPE_MIME_APPLICATION_CHOOSER         (nautilus_mime_application_chooser_get_type ())
-#define NAUTILUS_MIME_APPLICATION_CHOOSER(obj)         (G_TYPE_CHECK_INSTANCE_CAST ((obj), NAUTILUS_TYPE_MIME_APPLICATION_CHOOSER, NautilusMimeApplicationChooser))
-#define NAUTILUS_MIME_APPLICATION_CHOOSER_CLASS(klass) (G_TYPE_CHECK_CLASS_CAST ((klass), NAUTILUS_TYPE_MIME_APPLICATION_CHOOSER, NautilusMimeApplicationChooserClass))
-#define NAUTILUS_IS_MIME_APPLICATION_CHOOSER(obj)      (G_TYPE_CHECK_INSTANCE_TYPE ((obj), NAUTILUS_TYPE_MIME_APPLICATION_CHOOSER)
+#define NEMO_TYPE_MIME_APPLICATION_CHOOSER         (nemo_mime_application_chooser_get_type ())
+#define NEMO_MIME_APPLICATION_CHOOSER(obj)         (G_TYPE_CHECK_INSTANCE_CAST ((obj), NEMO_TYPE_MIME_APPLICATION_CHOOSER, NemoMimeApplicationChooser))
+#define NEMO_MIME_APPLICATION_CHOOSER_CLASS(klass) (G_TYPE_CHECK_CLASS_CAST ((klass), NEMO_TYPE_MIME_APPLICATION_CHOOSER, NemoMimeApplicationChooserClass))
+#define NEMO_IS_MIME_APPLICATION_CHOOSER(obj)      (G_TYPE_CHECK_INSTANCE_TYPE ((obj), NEMO_TYPE_MIME_APPLICATION_CHOOSER)
 
-typedef struct _NautilusMimeApplicationChooser        NautilusMimeApplicationChooser;
-typedef struct _NautilusMimeApplicationChooserClass   NautilusMimeApplicationChooserClass;
-typedef struct _NautilusMimeApplicationChooserDetails NautilusMimeApplicationChooserDetails;
+typedef struct _NemoMimeApplicationChooser        NemoMimeApplicationChooser;
+typedef struct _NemoMimeApplicationChooserClass   NemoMimeApplicationChooserClass;
+typedef struct _NemoMimeApplicationChooserDetails NemoMimeApplicationChooserDetails;
 
-struct _NautilusMimeApplicationChooser {
+struct _NemoMimeApplicationChooser {
 	GtkBox parent;
-	NautilusMimeApplicationChooserDetails *details;
+	NemoMimeApplicationChooserDetails *details;
 };
 
-struct _NautilusMimeApplicationChooserClass {
+struct _NemoMimeApplicationChooserClass {
 	GtkBoxClass parent_class;
 };
 
-GType      nautilus_mime_application_chooser_get_type (void);
-GtkWidget * nautilus_mime_application_chooser_new (const char *uri,
+GType      nemo_mime_application_chooser_get_type (void);
+GtkWidget * nemo_mime_application_chooser_new (const char *uri,
 						   GList *files,
 						   const char *mime_type);
 
-#endif /* NAUTILUS_MIME_APPLICATION_CHOOSER_H */
+#endif /* NEMO_MIME_APPLICATION_CHOOSER_H */

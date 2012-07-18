@@ -1,5 +1,5 @@
 /*
- *  nautilus-info-provider.h - Interface for Nautilus extensions that 
+ *  nemo-info-provider.h - Interface for Nemo extensions that 
  *                             provide info about files.
  *
  *  Copyright (C) 2003 Novell, Inc.
@@ -22,60 +22,60 @@
  *
  */
 
-/* This interface is implemented by Nautilus extensions that want to 
- * provide information about files.  Extensions are called when Nautilus 
- * needs information about a file.  They are passed a NautilusFileInfo 
+/* This interface is implemented by Nemo extensions that want to 
+ * provide information about files.  Extensions are called when Nemo 
+ * needs information about a file.  They are passed a NemoFileInfo 
  * object which should be filled with relevant information */
 
-#ifndef NAUTILUS_INFO_PROVIDER_H
-#define NAUTILUS_INFO_PROVIDER_H
+#ifndef NEMO_INFO_PROVIDER_H
+#define NEMO_INFO_PROVIDER_H
 
 #include <glib-object.h>
-#include "nautilus-extension-types.h"
-#include "nautilus-file-info.h"
+#include "nemo-extension-types.h"
+#include "nemo-file-info.h"
 
 G_BEGIN_DECLS
 
-#define NAUTILUS_TYPE_INFO_PROVIDER           (nautilus_info_provider_get_type ())
-#define NAUTILUS_INFO_PROVIDER(obj)           (G_TYPE_CHECK_INSTANCE_CAST ((obj), NAUTILUS_TYPE_INFO_PROVIDER, NautilusInfoProvider))
-#define NAUTILUS_IS_INFO_PROVIDER(obj)        (G_TYPE_CHECK_INSTANCE_TYPE ((obj), NAUTILUS_TYPE_INFO_PROVIDER))
-#define NAUTILUS_INFO_PROVIDER_GET_IFACE(obj) (G_TYPE_INSTANCE_GET_INTERFACE ((obj), NAUTILUS_TYPE_INFO_PROVIDER, NautilusInfoProviderIface))
+#define NEMO_TYPE_INFO_PROVIDER           (nemo_info_provider_get_type ())
+#define NEMO_INFO_PROVIDER(obj)           (G_TYPE_CHECK_INSTANCE_CAST ((obj), NEMO_TYPE_INFO_PROVIDER, NemoInfoProvider))
+#define NEMO_IS_INFO_PROVIDER(obj)        (G_TYPE_CHECK_INSTANCE_TYPE ((obj), NEMO_TYPE_INFO_PROVIDER))
+#define NEMO_INFO_PROVIDER_GET_IFACE(obj) (G_TYPE_INSTANCE_GET_INTERFACE ((obj), NEMO_TYPE_INFO_PROVIDER, NemoInfoProviderIface))
 
-typedef struct _NautilusInfoProvider       NautilusInfoProvider;
-typedef struct _NautilusInfoProviderIface  NautilusInfoProviderIface;
+typedef struct _NemoInfoProvider       NemoInfoProvider;
+typedef struct _NemoInfoProviderIface  NemoInfoProviderIface;
 
-typedef void (*NautilusInfoProviderUpdateComplete) (NautilusInfoProvider    *provider,
-						    NautilusOperationHandle *handle,
-						    NautilusOperationResult  result,
+typedef void (*NemoInfoProviderUpdateComplete) (NemoInfoProvider    *provider,
+						    NemoOperationHandle *handle,
+						    NemoOperationResult  result,
 						    gpointer                 user_data);
 
-struct _NautilusInfoProviderIface {
+struct _NemoInfoProviderIface {
 	GTypeInterface g_iface;
 
-	NautilusOperationResult (*update_file_info) (NautilusInfoProvider     *provider,
-						     NautilusFileInfo         *file,
+	NemoOperationResult (*update_file_info) (NemoInfoProvider     *provider,
+						     NemoFileInfo         *file,
 						     GClosure                 *update_complete,
-						     NautilusOperationHandle **handle);
-	void                    (*cancel_update)    (NautilusInfoProvider     *provider,
-						     NautilusOperationHandle  *handle);
+						     NemoOperationHandle **handle);
+	void                    (*cancel_update)    (NemoInfoProvider     *provider,
+						     NemoOperationHandle  *handle);
 };
 
 /* Interface Functions */
-GType                   nautilus_info_provider_get_type               (void);
-NautilusOperationResult nautilus_info_provider_update_file_info       (NautilusInfoProvider     *provider,
-								       NautilusFileInfo         *file,
+GType                   nemo_info_provider_get_type               (void);
+NemoOperationResult nemo_info_provider_update_file_info       (NemoInfoProvider     *provider,
+								       NemoFileInfo         *file,
 								       GClosure                 *update_complete,
-								       NautilusOperationHandle **handle);
-void                    nautilus_info_provider_cancel_update          (NautilusInfoProvider     *provider,
-								       NautilusOperationHandle  *handle);
+								       NemoOperationHandle **handle);
+void                    nemo_info_provider_cancel_update          (NemoInfoProvider     *provider,
+								       NemoOperationHandle  *handle);
 
 
 
 /* Helper functions for implementations */
-void                    nautilus_info_provider_update_complete_invoke (GClosure                 *update_complete,
-								       NautilusInfoProvider     *provider,
-								       NautilusOperationHandle  *handle,
-								       NautilusOperationResult   result);
+void                    nemo_info_provider_update_complete_invoke (GClosure                 *update_complete,
+								       NemoInfoProvider     *provider,
+								       NemoOperationHandle  *handle,
+								       NemoOperationResult   result);
 
 G_END_DECLS
 

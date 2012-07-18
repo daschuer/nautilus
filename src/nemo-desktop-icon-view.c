@@ -26,12 +26,12 @@
 
 #include <config.h>
 
-#include "nautilus-desktop-icon-view.h"
+#include "nemo-desktop-icon-view.h"
 
-#include "nautilus-actions.h"
-#include "nautilus-icon-view-container.h"
-#include "nautilus-view-factory.h"
-#include "nautilus-view.h"
+#include "nemo-actions.h"
+#include "nemo-icon-view-container.h"
+#include "nemo-view-factory.h"
+#include "nemo-view.h"
 
 #include <X11/Xatom.h>
 #include <gtk/gtk.h>
@@ -41,19 +41,19 @@
 #include <fcntl.h>
 #include <gdk/gdkx.h>
 #include <glib/gi18n.h>
-#include <libnautilus-private/nautilus-desktop-background.h>
-#include <libnautilus-private/nautilus-desktop-icon-file.h>
-#include <libnautilus-private/nautilus-directory-notify.h>
-#include <libnautilus-private/nautilus-file-changes-queue.h>
-#include <libnautilus-private/nautilus-file-operations.h>
-#include <libnautilus-private/nautilus-file-utilities.h>
-#include <libnautilus-private/nautilus-ui-utilities.h>
-#include <libnautilus-private/nautilus-global-preferences.h>
-#include <libnautilus-private/nautilus-link.h>
-#include <libnautilus-private/nautilus-metadata.h>
-#include <libnautilus-private/nautilus-monitor.h>
-#include <libnautilus-private/nautilus-program-choosing.h>
-#include <libnautilus-private/nautilus-trash-monitor.h>
+#include <libnemo-private/nemo-desktop-background.h>
+#include <libnemo-private/nemo-desktop-icon-file.h>
+#include <libnemo-private/nemo-directory-notify.h>
+#include <libnemo-private/nemo-file-changes-queue.h>
+#include <libnemo-private/nemo-file-operations.h>
+#include <libnemo-private/nemo-file-utilities.h>
+#include <libnemo-private/nemo-ui-utilities.h>
+#include <libnemo-private/nemo-global-preferences.h>
+#include <libnemo-private/nemo-link.h>
+#include <libnemo-private/nemo-metadata.h>
+#include <libnemo-private/nemo-monitor.h>
+#include <libnemo-private/nemo-program-choosing.h>
+#include <libnemo-private/nemo-trash-monitor.h>
 #include <limits.h>
 #include <stddef.h>
 #include <stdio.h>
@@ -65,7 +65,7 @@
 /* Timeout to check the desktop directory for updates */
 #define RESCAN_TIMEOUT 4
 
-struct NautilusDesktopIconViewDetails
+struct NemoDesktopIconViewDetails
 {
 	GdkWindow *root_window;
 	GtkActionGroup *desktop_action_group;
@@ -77,31 +77,31 @@ struct NautilusDesktopIconViewDetails
 	guint reload_desktop_timeout;
 	gboolean pending_rescan;
 
-	NautilusDesktopBackground *background;
+	NemoDesktopBackground *background;
 };
 
 static void     default_zoom_level_changed                        (gpointer                user_data);
-static void     real_merge_menus                                  (NautilusView        *view);
-static void     real_update_menus                                 (NautilusView        *view);
-static void     nautilus_desktop_icon_view_update_icon_container_fonts  (NautilusDesktopIconView      *view);
+static void     real_merge_menus                                  (NemoView        *view);
+static void     real_update_menus                                 (NemoView        *view);
+static void     nemo_desktop_icon_view_update_icon_container_fonts  (NemoDesktopIconView      *view);
 static void     font_changed_callback                             (gpointer                callback_data);
 
-G_DEFINE_TYPE (NautilusDesktopIconView, nautilus_desktop_icon_view, NAUTILUS_TYPE_ICON_VIEW)
+G_DEFINE_TYPE (NemoDesktopIconView, nemo_desktop_icon_view, NEMO_TYPE_ICON_VIEW)
 
 static char *desktop_directory;
 static time_t desktop_dir_modify_time;
 
-#define get_icon_container(w) nautilus_icon_view_get_icon_container(NAUTILUS_ICON_VIEW (w))
+#define get_icon_container(w) nemo_icon_view_get_icon_container(NEMO_ICON_VIEW (w))
 
 static void
 desktop_directory_changed_callback (gpointer callback_data)
 {
 	g_free (desktop_directory);
-	desktop_directory = nautilus_get_desktop_directory ();
+	desktop_directory = nemo_get_desktop_directory ();
 }
 
 static void
-icon_container_set_workarea (NautilusIconContainer *icon_container,
+icon_container_set_workarea (NemoIconContainer *icon_container,
 			     GdkScreen             *screen,
 			     long                  *workareas,
 			     int                    n_items)
@@ -130,12 +130,12 @@ icon_container_set_workarea (NautilusIconContainer *icon_container,
 		bottom = MAX (bottom, screen_height - height - y);
 	}
 
-	nautilus_icon_container_set_margins (icon_container,
+	nemo_icon_container_set_margins (icon_container,
 					     left, right, top, bottom);
 }
 
 static void
-net_workarea_changed (NautilusDesktopIconView *icon_view,
+net_workarea_changed (NemoDesktopIconView *icon_view,
 		      GdkWindow         *window)
 {
 	long *nworkareas = NULL;
@@ -143,10 +143,10 @@ net_workarea_changed (NautilusDesktopIconView *icon_view,
 	GdkAtom type_returned;
 	int format_returned;
 	int length_returned;
-	NautilusIconContainer *icon_container;
+	NemoIconContainer *icon_container;
 	GdkScreen *screen;
 
-	g_return_if_fail (NAUTILUS_IS_DESKTOP_ICON_VIEW (icon_view));
+	g_return_if_fail (NEMO_IS_DESKTOP_ICON_VIEW (icon_view));
 
 	icon_container = get_icon_container (icon_view);
 
@@ -201,7 +201,7 @@ net_workarea_changed (NautilusDesktopIconView *icon_view,
 	    || ((*nworkareas) * 4 * sizeof(long)) != length_returned
 	    || format_returned != 32) {
 		g_warning("Can not determine workarea, guessing at layout");
-		nautilus_icon_container_set_margins (icon_container,
+		nemo_icon_container_set_margins (icon_container,
 						     0, 0, 0, 0);
 	} else {
 		screen = gdk_window_get_screen (window);
@@ -223,9 +223,9 @@ desktop_icon_view_property_filter (GdkXEvent *gdk_xevent,
 				   gpointer data)
 {
 	XEvent *xevent = gdk_xevent;
-	NautilusDesktopIconView *icon_view;
+	NemoDesktopIconView *icon_view;
 
-	icon_view = NAUTILUS_DESKTOP_ICON_VIEW (data);
+	icon_view = NEMO_DESKTOP_ICON_VIEW (data);
   
 	switch (xevent->type) {
 	case PropertyNotify:
@@ -240,34 +240,34 @@ desktop_icon_view_property_filter (GdkXEvent *gdk_xevent,
 }
 
 static void
-real_begin_loading (NautilusView *object)
+real_begin_loading (NemoView *object)
 {
-	NautilusIconContainer *icon_container;
-	NautilusDesktopIconView *view;
+	NemoIconContainer *icon_container;
+	NemoDesktopIconView *view;
 
-	view = NAUTILUS_DESKTOP_ICON_VIEW (object);
+	view = NEMO_DESKTOP_ICON_VIEW (object);
 
 	icon_container = get_icon_container (view);
 	if (view->details->background == NULL) {
-		view->details->background = nautilus_desktop_background_new (icon_container);
+		view->details->background = nemo_desktop_background_new (icon_container);
 	}
 
-	NAUTILUS_VIEW_CLASS (nautilus_desktop_icon_view_parent_class)->begin_loading (object);
+	NEMO_VIEW_CLASS (nemo_desktop_icon_view_parent_class)->begin_loading (object);
 }
 
 static const char *
-real_get_id (NautilusView *view)
+real_get_id (NemoView *view)
 {
-	return NAUTILUS_DESKTOP_ICON_VIEW_ID;
+	return NEMO_DESKTOP_ICON_VIEW_ID;
 }
 
 static void
-nautilus_desktop_icon_view_dispose (GObject *object)
+nemo_desktop_icon_view_dispose (GObject *object)
 {
-	NautilusDesktopIconView *icon_view;
+	NemoDesktopIconView *icon_view;
 	GtkUIManager *ui_manager;
 
-	icon_view = NAUTILUS_DESKTOP_ICON_VIEW (object);
+	icon_view = NEMO_DESKTOP_ICON_VIEW (object);
 
 	/* Remove desktop rescan timeout. */
 	if (icon_view->details->reload_desktop_timeout != 0) {
@@ -275,26 +275,26 @@ nautilus_desktop_icon_view_dispose (GObject *object)
 		icon_view->details->reload_desktop_timeout = 0;
 	}
 
-	ui_manager = nautilus_view_get_ui_manager (NAUTILUS_VIEW (icon_view));
+	ui_manager = nemo_view_get_ui_manager (NEMO_VIEW (icon_view));
 	if (ui_manager != NULL) {
-		nautilus_ui_unmerge_ui (ui_manager,
+		nemo_ui_unmerge_ui (ui_manager,
 					&icon_view->details->desktop_merge_id,
 					&icon_view->details->desktop_action_group);
 	}
 
-	g_signal_handlers_disconnect_by_func (nautilus_icon_view_preferences,
+	g_signal_handlers_disconnect_by_func (nemo_icon_view_preferences,
 					      default_zoom_level_changed,
 					      icon_view);
-	g_signal_handlers_disconnect_by_func (nautilus_preferences,
+	g_signal_handlers_disconnect_by_func (nemo_preferences,
 					      font_changed_callback,
 					      icon_view);
 
-	g_signal_handlers_disconnect_by_func (nautilus_preferences,
+	g_signal_handlers_disconnect_by_func (nemo_preferences,
 					      desktop_directory_changed_callback,
 					      NULL);
 
 	g_signal_handlers_disconnect_by_func (gnome_lockdown_preferences,
-					      nautilus_view_update_menus,
+					      nemo_view_update_menus,
 					      icon_view);
 
 	if (icon_view->details->background != NULL) {
@@ -302,30 +302,30 @@ nautilus_desktop_icon_view_dispose (GObject *object)
 		icon_view->details->background = NULL;
 	}
 
-	G_OBJECT_CLASS (nautilus_desktop_icon_view_parent_class)->dispose (object);
+	G_OBJECT_CLASS (nemo_desktop_icon_view_parent_class)->dispose (object);
 }
 
 static void
-nautilus_desktop_icon_view_class_init (NautilusDesktopIconViewClass *class)
+nemo_desktop_icon_view_class_init (NemoDesktopIconViewClass *class)
 {
-	NautilusViewClass *vclass;
+	NemoViewClass *vclass;
 
-	vclass = NAUTILUS_VIEW_CLASS (class);
+	vclass = NEMO_VIEW_CLASS (class);
 
-	G_OBJECT_CLASS (class)->dispose = nautilus_desktop_icon_view_dispose;
+	G_OBJECT_CLASS (class)->dispose = nemo_desktop_icon_view_dispose;
 
 	vclass->begin_loading = real_begin_loading;
 	vclass->merge_menus = real_merge_menus;
 	vclass->update_menus = real_update_menus;
 	vclass->get_view_id = real_get_id;
 
-	g_type_class_add_private (class, sizeof (NautilusDesktopIconViewDetails));
+	g_type_class_add_private (class, sizeof (NemoDesktopIconViewDetails));
 }
 
 static void
-nautilus_desktop_icon_view_handle_middle_click (NautilusIconContainer *icon_container,
+nemo_desktop_icon_view_handle_middle_click (NemoIconContainer *icon_container,
 						GdkEventButton *event,
-						NautilusDesktopIconView *desktop_icon_view)
+						NemoDesktopIconView *desktop_icon_view)
 {
 	XButtonEvent x_event;
 	GdkDevice *keyboard = NULL, *pointer = NULL, *cur;
@@ -393,7 +393,7 @@ nautilus_desktop_icon_view_handle_middle_click (NautilusIconContainer *icon_cont
 }
 
 static void
-unrealized_callback (GtkWidget *widget, NautilusDesktopIconView *desktop_icon_view)
+unrealized_callback (GtkWidget *widget, NemoDesktopIconView *desktop_icon_view)
 {
 	g_return_if_fail (desktop_icon_view->details->root_window != NULL);
 
@@ -405,7 +405,7 @@ unrealized_callback (GtkWidget *widget, NautilusDesktopIconView *desktop_icon_vi
 }
 
 static void
-realized_callback (GtkWidget *widget, NautilusDesktopIconView *desktop_icon_view)
+realized_callback (GtkWidget *widget, NemoDesktopIconView *desktop_icon_view)
 {
 	GdkWindow *root_window;
 	GdkScreen *screen;
@@ -442,37 +442,37 @@ realized_callback (GtkWidget *widget, NautilusDesktopIconView *desktop_icon_view
 			       desktop_icon_view);
 }
 
-static NautilusZoomLevel
+static NemoZoomLevel
 get_default_zoom_level (void)
 {
-	NautilusZoomLevel default_zoom_level;
+	NemoZoomLevel default_zoom_level;
 
-	default_zoom_level = g_settings_get_enum (nautilus_icon_view_preferences,
-						  NAUTILUS_PREFERENCES_ICON_VIEW_DEFAULT_ZOOM_LEVEL);
+	default_zoom_level = g_settings_get_enum (nemo_icon_view_preferences,
+						  NEMO_PREFERENCES_ICON_VIEW_DEFAULT_ZOOM_LEVEL);
 
-	return CLAMP (default_zoom_level, NAUTILUS_ZOOM_LEVEL_SMALLEST, NAUTILUS_ZOOM_LEVEL_LARGEST);
+	return CLAMP (default_zoom_level, NEMO_ZOOM_LEVEL_SMALLEST, NEMO_ZOOM_LEVEL_LARGEST);
 }
 
 static void
 default_zoom_level_changed (gpointer user_data)
 {
-	NautilusZoomLevel new_level;
-	NautilusDesktopIconView *desktop_icon_view;
+	NemoZoomLevel new_level;
+	NemoDesktopIconView *desktop_icon_view;
 
-	desktop_icon_view = NAUTILUS_DESKTOP_ICON_VIEW (user_data);
+	desktop_icon_view = NEMO_DESKTOP_ICON_VIEW (user_data);
 	new_level = get_default_zoom_level ();
 
-	nautilus_icon_container_set_zoom_level (get_icon_container (desktop_icon_view),
+	nemo_icon_container_set_zoom_level (get_icon_container (desktop_icon_view),
 						new_level);
 }
 
 static gboolean
 do_desktop_rescan (gpointer data)
 {
-	NautilusDesktopIconView *desktop_icon_view;
+	NemoDesktopIconView *desktop_icon_view;
 	struct stat buf;
 
-	desktop_icon_view = NAUTILUS_DESKTOP_ICON_VIEW (data);
+	desktop_icon_view = NEMO_DESKTOP_ICON_VIEW (data);
 	if (desktop_icon_view->details->pending_rescan) {
 		return TRUE;
 	}
@@ -487,15 +487,15 @@ do_desktop_rescan (gpointer data)
 
 	desktop_icon_view->details->pending_rescan = TRUE;
 
-	nautilus_directory_force_reload
-		(nautilus_view_get_model (NAUTILUS_VIEW (desktop_icon_view)));
+	nemo_directory_force_reload
+		(nemo_view_get_model (NEMO_VIEW (desktop_icon_view)));
 
 	return TRUE;
 }
 
 static void
-done_loading (NautilusDirectory *model,
-	      NautilusDesktopIconView *desktop_icon_view)
+done_loading (NemoDirectory *model,
+	      NemoDesktopIconView *desktop_icon_view)
 {
 	struct stat buf;
 
@@ -507,15 +507,15 @@ done_loading (NautilusDirectory *model,
 	desktop_dir_modify_time = buf.st_ctime;
 }
 
-/* This function is used because the NautilusDirectory model does not
+/* This function is used because the NemoDirectory model does not
  * exist always in the desktop_icon_view, so we wait until it has been
  * instantiated.
  */
 static void
-delayed_init (NautilusDesktopIconView *desktop_icon_view)
+delayed_init (NemoDesktopIconView *desktop_icon_view)
 {
 	/* Keep track of the load time. */
-	g_signal_connect_object (nautilus_view_get_model (NAUTILUS_VIEW (desktop_icon_view)),
+	g_signal_connect_object (nemo_view_get_model (NEMO_VIEW (desktop_icon_view)),
 				 "done_loading",
 				 G_CALLBACK (done_loading), desktop_icon_view, 0);
 
@@ -532,63 +532,63 @@ delayed_init (NautilusDesktopIconView *desktop_icon_view)
 static void
 font_changed_callback (gpointer callback_data)
 {
- 	g_return_if_fail (NAUTILUS_IS_DESKTOP_ICON_VIEW (callback_data));
+ 	g_return_if_fail (NEMO_IS_DESKTOP_ICON_VIEW (callback_data));
 	
-	nautilus_desktop_icon_view_update_icon_container_fonts (NAUTILUS_DESKTOP_ICON_VIEW (callback_data));
+	nemo_desktop_icon_view_update_icon_container_fonts (NEMO_DESKTOP_ICON_VIEW (callback_data));
 }
 
 static void
-nautilus_desktop_icon_view_update_icon_container_fonts (NautilusDesktopIconView *icon_view)
+nemo_desktop_icon_view_update_icon_container_fonts (NemoDesktopIconView *icon_view)
 {
-	NautilusIconContainer *icon_container;
+	NemoIconContainer *icon_container;
 	char *font;
 
 	icon_container = get_icon_container (icon_view);
 	g_assert (icon_container != NULL);
 
-	font = g_settings_get_string (nautilus_desktop_preferences,
-				      NAUTILUS_PREFERENCES_DESKTOP_FONT);
+	font = g_settings_get_string (nemo_desktop_preferences,
+				      NEMO_PREFERENCES_DESKTOP_FONT);
 
-	nautilus_icon_container_set_font (icon_container, font);
+	nemo_icon_container_set_font (icon_container, font);
 
 	g_free (font);
 }
 
 static void
-nautilus_desktop_icon_view_init (NautilusDesktopIconView *desktop_icon_view)
+nemo_desktop_icon_view_init (NemoDesktopIconView *desktop_icon_view)
 {
-	NautilusIconContainer *icon_container;
+	NemoIconContainer *icon_container;
 	GtkAllocation allocation;
 	GtkAdjustment *hadj, *vadj;
 
 	desktop_icon_view->details = G_TYPE_INSTANCE_GET_PRIVATE (desktop_icon_view,
-								  NAUTILUS_TYPE_DESKTOP_ICON_VIEW,
-								  NautilusDesktopIconViewDetails);
+								  NEMO_TYPE_DESKTOP_ICON_VIEW,
+								  NemoDesktopIconViewDetails);
 
 	if (desktop_directory == NULL) {
-		g_signal_connect_swapped (nautilus_preferences, "changed::" NAUTILUS_PREFERENCES_DESKTOP_IS_HOME_DIR,
+		g_signal_connect_swapped (nemo_preferences, "changed::" NEMO_PREFERENCES_DESKTOP_IS_HOME_DIR,
 					  G_CALLBACK(desktop_directory_changed_callback),
 					  NULL);
 		desktop_directory_changed_callback (NULL);
 	}
 
-	nautilus_icon_view_filter_by_screen (NAUTILUS_ICON_VIEW (desktop_icon_view), TRUE);
+	nemo_icon_view_filter_by_screen (NEMO_ICON_VIEW (desktop_icon_view), TRUE);
 	icon_container = get_icon_container (desktop_icon_view);
-	nautilus_icon_container_set_use_drop_shadows (icon_container, TRUE);
-	nautilus_icon_view_container_set_sort_desktop (NAUTILUS_ICON_VIEW_CONTAINER (icon_container), TRUE);
+	nemo_icon_container_set_use_drop_shadows (icon_container, TRUE);
+	nemo_icon_view_container_set_sort_desktop (NEMO_ICON_VIEW_CONTAINER (icon_container), TRUE);
 
 	/* Do a reload on the desktop if we don't have FAM, a smarter
 	 * way to keep track of the items on the desktop.
 	 */
-	if (!nautilus_monitor_active ()) {
+	if (!nemo_monitor_active ()) {
 		desktop_icon_view->details->delayed_init_signal = g_signal_connect_object
 			(desktop_icon_view, "begin_loading",
 			 G_CALLBACK (delayed_init), desktop_icon_view, 0);
 	}
 	
-	nautilus_icon_container_set_is_fixed_size (icon_container, TRUE);
-	nautilus_icon_container_set_is_desktop (icon_container, TRUE);
-	nautilus_icon_container_set_store_layout_timestamps (icon_container, TRUE);
+	nemo_icon_container_set_is_fixed_size (icon_container, TRUE);
+	nemo_icon_container_set_is_desktop (icon_container, TRUE);
+	nemo_icon_container_set_store_layout_timestamps (icon_container, TRUE);
 
 	/* Set allocation to be at 0, 0 */
 	gtk_widget_get_allocation (GTK_WIDGET (icon_container), &allocation);
@@ -607,41 +607,41 @@ nautilus_desktop_icon_view_init (NautilusDesktopIconView *desktop_icon_view)
 	gtk_scrolled_window_set_shadow_type (GTK_SCROLLED_WINDOW (desktop_icon_view),
 					     GTK_SHADOW_NONE);
 
-	nautilus_view_ignore_hidden_file_preferences
-		(NAUTILUS_VIEW (desktop_icon_view));
+	nemo_view_ignore_hidden_file_preferences
+		(NEMO_VIEW (desktop_icon_view));
 
-	nautilus_view_set_show_foreign (NAUTILUS_VIEW (desktop_icon_view),
+	nemo_view_set_show_foreign (NEMO_VIEW (desktop_icon_view),
 					FALSE);
 	
 	/* Set our default layout mode */
-	nautilus_icon_container_set_layout_mode (icon_container,
+	nemo_icon_container_set_layout_mode (icon_container,
 						 gtk_widget_get_direction (GTK_WIDGET(icon_container)) == GTK_TEXT_DIR_RTL ?
-						 NAUTILUS_ICON_LAYOUT_T_B_R_L :
-						 NAUTILUS_ICON_LAYOUT_T_B_L_R);
+						 NEMO_ICON_LAYOUT_T_B_R_L :
+						 NEMO_ICON_LAYOUT_T_B_L_R);
 
 	g_signal_connect_object (icon_container, "middle_click",
-				 G_CALLBACK (nautilus_desktop_icon_view_handle_middle_click), desktop_icon_view, 0);
+				 G_CALLBACK (nemo_desktop_icon_view_handle_middle_click), desktop_icon_view, 0);
 	g_signal_connect_object (desktop_icon_view, "realize",
 				 G_CALLBACK (realized_callback), desktop_icon_view, 0);
 	g_signal_connect_object (desktop_icon_view, "unrealize",
 				 G_CALLBACK (unrealized_callback), desktop_icon_view, 0);
 
-	g_signal_connect_swapped (nautilus_icon_view_preferences,
-				  "changed::" NAUTILUS_PREFERENCES_ICON_VIEW_DEFAULT_ZOOM_LEVEL,
+	g_signal_connect_swapped (nemo_icon_view_preferences,
+				  "changed::" NEMO_PREFERENCES_ICON_VIEW_DEFAULT_ZOOM_LEVEL,
 				  G_CALLBACK (default_zoom_level_changed),
 				  desktop_icon_view);
 
-	g_signal_connect_swapped (nautilus_desktop_preferences,
-				  "changed::" NAUTILUS_PREFERENCES_DESKTOP_FONT,
+	g_signal_connect_swapped (nemo_desktop_preferences,
+				  "changed::" NEMO_PREFERENCES_DESKTOP_FONT,
 				  G_CALLBACK (font_changed_callback),
 				  desktop_icon_view);
 
 	default_zoom_level_changed (desktop_icon_view);
-	nautilus_desktop_icon_view_update_icon_container_fonts (desktop_icon_view);
+	nemo_desktop_icon_view_update_icon_container_fonts (desktop_icon_view);
 
 	g_signal_connect_swapped (gnome_lockdown_preferences,
-				  "changed::" NAUTILUS_PREFERENCES_LOCKDOWN_COMMAND_LINE,
-				  G_CALLBACK (nautilus_view_update_menus),
+				  "changed::" NEMO_PREFERENCES_LOCKDOWN_COMMAND_LINE,
+				  G_CALLBACK (nemo_view_update_menus),
 				  desktop_icon_view);
 }
 
@@ -649,9 +649,9 @@ static void
 action_change_background_callback (GtkAction *action, 
 				   gpointer data)
 {
-        g_assert (NAUTILUS_VIEW (data));
+        g_assert (NEMO_VIEW (data));
 
-	nautilus_launch_application_from_command (gtk_widget_get_screen (GTK_WIDGET (data)),
+	nemo_launch_application_from_command (gtk_widget_get_screen (GTK_WIDGET (data)),
 						  "gnome-control-center",
 						  FALSE,
 						  "background", NULL);
@@ -661,28 +661,28 @@ static void
 action_empty_trash_conditional_callback (GtkAction *action,
 					 gpointer data)
 {
-        g_assert (NAUTILUS_IS_VIEW (data));
+        g_assert (NEMO_IS_VIEW (data));
 
-	nautilus_file_operations_empty_trash (GTK_WIDGET (data));
+	nemo_file_operations_empty_trash (GTK_WIDGET (data));
 }
 
 static gboolean
-trash_link_is_selection (NautilusView *view)
+trash_link_is_selection (NemoView *view)
 {
 	GList *selection;
-	NautilusDesktopLink *link;
+	NemoDesktopLink *link;
 	gboolean result;
 
 	result = FALSE;
 	
-	selection = nautilus_view_get_selection (view);
+	selection = nemo_view_get_selection (view);
 
 	if (eel_g_list_exactly_one_item (selection) &&
-	    NAUTILUS_IS_DESKTOP_ICON_FILE (selection->data)) {
-		link = nautilus_desktop_icon_file_get_link (NAUTILUS_DESKTOP_ICON_FILE (selection->data));
+	    NEMO_IS_DESKTOP_ICON_FILE (selection->data)) {
+		link = nemo_desktop_icon_file_get_link (NEMO_DESKTOP_ICON_FILE (selection->data));
 		/* link may be NULL if the link was recently removed (unmounted) */
 		if (link != NULL &&
-		    nautilus_desktop_link_get_link_type (link) == NAUTILUS_DESKTOP_LINK_TRASH) {
+		    nemo_desktop_link_get_link_type (link) == NEMO_DESKTOP_LINK_TRASH) {
 			result = TRUE;
 		}
 		if (link) {
@@ -690,36 +690,36 @@ trash_link_is_selection (NautilusView *view)
 		}
 	}
 	
-	nautilus_file_list_free (selection);
+	nemo_file_list_free (selection);
 
 	return result;
 }
 
 static void
-real_update_menus (NautilusView *view)
+real_update_menus (NemoView *view)
 {
-	NautilusDesktopIconView *desktop_view;
+	NemoDesktopIconView *desktop_view;
 	char *label;
 	gboolean include_empty_trash;
 	GtkAction *action;
 
-	g_assert (NAUTILUS_IS_DESKTOP_ICON_VIEW (view));
+	g_assert (NEMO_IS_DESKTOP_ICON_VIEW (view));
 
-	NAUTILUS_VIEW_CLASS (nautilus_desktop_icon_view_parent_class)->update_menus (view);
+	NEMO_VIEW_CLASS (nemo_desktop_icon_view_parent_class)->update_menus (view);
 
-	desktop_view = NAUTILUS_DESKTOP_ICON_VIEW (view);
+	desktop_view = NEMO_DESKTOP_ICON_VIEW (view);
 
 	/* Empty Trash */
 	include_empty_trash = trash_link_is_selection (view);
 	action = gtk_action_group_get_action (desktop_view->details->desktop_action_group,
-					      NAUTILUS_ACTION_EMPTY_TRASH_CONDITIONAL);
+					      NEMO_ACTION_EMPTY_TRASH_CONDITIONAL);
 	gtk_action_set_visible (action,
 				include_empty_trash);
 	if (include_empty_trash) {
 		label = g_strdup (_("E_mpty Trash"));
 		g_object_set (action , "label", label, NULL);
 		gtk_action_set_sensitive (action,
-					  !nautilus_trash_monitor_is_empty ());
+					  !nemo_trash_monitor_is_empty ());
 		g_free (label);
 	}
 }
@@ -742,17 +742,17 @@ static const GtkActionEntry desktop_view_entries[] = {
 };
 
 static void
-real_merge_menus (NautilusView *view)
+real_merge_menus (NemoView *view)
 {
-	NautilusDesktopIconView *desktop_view;
+	NemoDesktopIconView *desktop_view;
 	GtkUIManager *ui_manager;
 	GtkActionGroup *action_group;
 
-	NAUTILUS_VIEW_CLASS (nautilus_desktop_icon_view_parent_class)->merge_menus (view);
+	NEMO_VIEW_CLASS (nemo_desktop_icon_view_parent_class)->merge_menus (view);
 
-	desktop_view = NAUTILUS_DESKTOP_ICON_VIEW (view);
+	desktop_view = NEMO_DESKTOP_ICON_VIEW (view);
 
-	ui_manager = nautilus_view_get_ui_manager (view);
+	ui_manager = nemo_view_get_ui_manager (view);
 
 	action_group = gtk_action_group_new ("DesktopViewActions");
 	gtk_action_group_set_translation_domain (action_group, GETTEXT_PACKAGE);
@@ -765,15 +765,24 @@ real_merge_menus (NautilusView *view)
 	g_object_unref (action_group); /* owned by ui manager */
 
 	desktop_view->details->desktop_merge_id =
-		gtk_ui_manager_add_ui_from_resource (ui_manager, "/org/gnome/nautilus/nautilus-desktop-icon-view-ui.xml", NULL);
+		gtk_ui_manager_add_ui_from_resource (ui_manager, "/org/gnome/nemo/nemo-desktop-icon-view-ui.xml", NULL);
+
+	GList * agroups = gtk_ui_manager_get_action_groups(ui_manager);
+	while (agroups != NULL) {
+		if (g_strcmp0("DirViewActions", gtk_action_group_get_name(GTK_ACTION_GROUP(agroups->data))) == 0) {
+			GtkAction * defaults = gtk_action_group_get_action(GTK_ACTION_GROUP(agroups->data), "Reset to Defaults");
+			gtk_action_set_visible(defaults, FALSE);
+		}
+		agroups = g_list_next(agroups);
+	}
 }
 
-static NautilusView *
-nautilus_desktop_icon_view_create (NautilusWindowSlot *slot)
+static NemoView *
+nemo_desktop_icon_view_create (NemoWindowSlot *slot)
 {
-	NautilusIconView *view;
+	NemoIconView *view;
 
-	view = g_object_new (NAUTILUS_TYPE_DESKTOP_ICON_VIEW,
+	view = g_object_new (NEMO_TYPE_DESKTOP_ICON_VIEW,
 			     "window-slot", slot,
 			     "supports-zooming", FALSE,
 			     "supports-auto-layout", FALSE,
@@ -781,11 +790,11 @@ nautilus_desktop_icon_view_create (NautilusWindowSlot *slot)
 			     "supports-keep-aligned", TRUE,
 			     "supports-labels-beside-icons", FALSE,
 			     NULL);
-	return NAUTILUS_VIEW (view);
+	return NEMO_VIEW (view);
 }
 
 static gboolean
-nautilus_desktop_icon_view_supports_uri (const char *uri,
+nemo_desktop_icon_view_supports_uri (const char *uri,
 				   GFileType file_type,
 				   const char *mime_type)
 {
@@ -796,22 +805,22 @@ nautilus_desktop_icon_view_supports_uri (const char *uri,
 	return FALSE;
 }
 
-static NautilusViewInfo nautilus_desktop_icon_view = {
-	NAUTILUS_DESKTOP_ICON_VIEW_ID,
+static NemoViewInfo nemo_desktop_icon_view = {
+	NEMO_DESKTOP_ICON_VIEW_ID,
 	"Desktop View",
 	"_Desktop",
 	N_("The desktop view encountered an error."),
 	N_("The desktop view encountered an error while starting up."),
 	"Display this location with the desktop view.",
-	nautilus_desktop_icon_view_create,
-	nautilus_desktop_icon_view_supports_uri
+	nemo_desktop_icon_view_create,
+	nemo_desktop_icon_view_supports_uri
 };
 
 void
-nautilus_desktop_icon_view_register (void)
+nemo_desktop_icon_view_register (void)
 {
-	nautilus_desktop_icon_view.error_label = _(nautilus_desktop_icon_view.error_label);
-	nautilus_desktop_icon_view.startup_error_label = _(nautilus_desktop_icon_view.startup_error_label);
+	nemo_desktop_icon_view.error_label = _(nemo_desktop_icon_view.error_label);
+	nemo_desktop_icon_view.startup_error_label = _(nemo_desktop_icon_view.startup_error_label);
 	
-	nautilus_view_factory_register (&nautilus_desktop_icon_view);
+	nemo_view_factory_register (&nemo_desktop_icon_view);
 }

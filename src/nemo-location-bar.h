@@ -1,16 +1,16 @@
 /* -*- Mode: C; indent-tabs-mode: t; c-basic-offset: 8; tab-width: 8 -*- */
 
 /*
- * Nautilus
+ * Nemo
  *
  * Copyright (C) 2000 Eazel, Inc.
  *
- * Nautilus is free software; you can redistribute it and/or
+ * Nemo is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
  * published by the Free Software Foundation; either version 2 of the
  * License, or (at your option) any later version.
  *
- * Nautilus is distributed in the hope that it will be useful,
+ * Nemo is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
  * General Public License for more details.
@@ -24,47 +24,47 @@
  *         Ettore Perazzoli <ettore@gnu.org>
  */
 
-/* nautilus-location-bar.h - Location bar for Nautilus
+/* nemo-location-bar.h - Location bar for Nemo
  */
 
-#ifndef NAUTILUS_LOCATION_BAR_H
-#define NAUTILUS_LOCATION_BAR_H
+#ifndef NEMO_LOCATION_BAR_H
+#define NEMO_LOCATION_BAR_H
 
-#include <libnautilus-private/nautilus-entry.h>
+#include <libnemo-private/nemo-entry.h>
 #include <gtk/gtk.h>
 
-#define NAUTILUS_TYPE_LOCATION_BAR nautilus_location_bar_get_type()
-#define NAUTILUS_LOCATION_BAR(obj) \
-  (G_TYPE_CHECK_INSTANCE_CAST ((obj), NAUTILUS_TYPE_LOCATION_BAR, NautilusLocationBar))
-#define NAUTILUS_LOCATION_BAR_CLASS(klass) \
-  (G_TYPE_CHECK_CLASS_CAST ((klass), NAUTILUS_TYPE_LOCATION_BAR, NautilusLocationBarClass))
-#define NAUTILUS_IS_LOCATION_BAR(obj) \
-  (G_TYPE_CHECK_INSTANCE_TYPE ((obj), NAUTILUS_TYPE_LOCATION_BAR))
-#define NAUTILUS_IS_LOCATION_BAR_CLASS(klass) \
-  (G_TYPE_CHECK_CLASS_TYPE ((klass), NAUTILUS_TYPE_LOCATION_BAR))
-#define NAUTILUS_LOCATION_BAR_GET_CLASS(obj) \
-  (G_TYPE_INSTANCE_GET_CLASS ((obj), NAUTILUS_TYPE_LOCATION_BAR, NautilusLocationBarClass))
+#define NEMO_TYPE_LOCATION_BAR nemo_location_bar_get_type()
+#define NEMO_LOCATION_BAR(obj) \
+  (G_TYPE_CHECK_INSTANCE_CAST ((obj), NEMO_TYPE_LOCATION_BAR, NemoLocationBar))
+#define NEMO_LOCATION_BAR_CLASS(klass) \
+  (G_TYPE_CHECK_CLASS_CAST ((klass), NEMO_TYPE_LOCATION_BAR, NemoLocationBarClass))
+#define NEMO_IS_LOCATION_BAR(obj) \
+  (G_TYPE_CHECK_INSTANCE_TYPE ((obj), NEMO_TYPE_LOCATION_BAR))
+#define NEMO_IS_LOCATION_BAR_CLASS(klass) \
+  (G_TYPE_CHECK_CLASS_TYPE ((klass), NEMO_TYPE_LOCATION_BAR))
+#define NEMO_LOCATION_BAR_GET_CLASS(obj) \
+  (G_TYPE_INSTANCE_GET_CLASS ((obj), NEMO_TYPE_LOCATION_BAR, NemoLocationBarClass))
 
-typedef struct NautilusLocationBarDetails NautilusLocationBarDetails;
+typedef struct NemoLocationBarDetails NemoLocationBarDetails;
 
-typedef struct NautilusLocationBar {
+typedef struct NemoLocationBar {
 	GtkBox parent;
-	NautilusLocationBarDetails *details;
-} NautilusLocationBar;
+	NemoLocationBarDetails *details;
+} NemoLocationBar;
 
 typedef struct {
 	GtkBoxClass parent_class;
 
 	/* for GtkBindingSet */
-	void         (* cancel)           (NautilusLocationBar *bar);
-} NautilusLocationBarClass;
+	void         (* cancel)           (NemoLocationBar *bar);
+} NemoLocationBarClass;
 
-GType      nautilus_location_bar_get_type     	(void);
-GtkWidget* nautilus_location_bar_new          	(void);
-NautilusEntry * nautilus_location_bar_get_entry (NautilusLocationBar *location_bar);
+GType      nemo_location_bar_get_type     	(void);
+GtkWidget* nemo_location_bar_new          	(void);
+NemoEntry * nemo_location_bar_get_entry (NemoLocationBar *location_bar);
 
-void	nautilus_location_bar_activate	 (NautilusLocationBar *bar);
-void    nautilus_location_bar_set_location     (NautilusLocationBar *bar,
+void	nemo_location_bar_activate	 (NemoLocationBar *bar);
+void    nemo_location_bar_set_location     (NemoLocationBar *bar,
 						const char          *location);
 
-#endif /* NAUTILUS_LOCATION_BAR_H */
+#endif /* NEMO_LOCATION_BAR_H */

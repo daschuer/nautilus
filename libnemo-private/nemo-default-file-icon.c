@@ -23,11 +23,11 @@
 */
 
 #include <config.h>
-#include "nautilus-default-file-icon.h"
+#include "nemo-default-file-icon.h"
 
-const int nautilus_default_file_icon_width = 48;
-const int nautilus_default_file_icon_height = 48;
-const unsigned char nautilus_default_file_icon[] =
+const int nemo_default_file_icon_width = 48;
+const int nemo_default_file_icon_height = 48;
+const unsigned char nemo_default_file_icon[] =
    /* This is from text-x-preview.svg in the gnome icon theme */
   "\377\377\377\0\377\377\377\0\377\377\377\0\377\377\377\0\377\377\377"
   "\0\377\377\377\0\377\377\377\0\377\377\377\0\377\377\377\0\377\377\377"

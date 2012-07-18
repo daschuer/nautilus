@@ -1,6 +1,6 @@
 /* -*- Mode: C; indent-tabs-mode: t; c-basic-offset: 8; tab-width: 8 -*-
 
-   nautilus-view-factory.c: register and create NautilusViews
+   nemo-view-factory.c: register and create NemoViews
  
    Copyright (C) 2004 Red Hat Inc.
   
@@ -22,25 +22,25 @@
    Author: Alexander Larsson <alexl@redhat.com>
 */
 
-#include "nautilus-view-factory.h"
+#include "nemo-view-factory.h"
 
 static GList *registered_views;
 
 void
-nautilus_view_factory_register (NautilusViewInfo *view_info)
+nemo_view_factory_register (NemoViewInfo *view_info)
 {
 	g_return_if_fail (view_info != NULL);
 	g_return_if_fail (view_info->id != NULL);
-	g_return_if_fail (nautilus_view_factory_lookup (view_info->id) == NULL);
+	g_return_if_fail (nemo_view_factory_lookup (view_info->id) == NULL);
 	
 	registered_views = g_list_append (registered_views, view_info);
 }
 
-const NautilusViewInfo *
-nautilus_view_factory_lookup (const char *id)
+const NemoViewInfo *
+nemo_view_factory_lookup (const char *id)
 {
 	GList *l;
-	NautilusViewInfo *view_info;
+	NemoViewInfo *view_info;
 
 	g_return_val_if_fail (id != NULL, NULL);
 
@@ -55,14 +55,14 @@ nautilus_view_factory_lookup (const char *id)
 	return NULL;
 }
 
-NautilusView *
-nautilus_view_factory_create (const char *id,
-			      NautilusWindowSlot *slot)
+NemoView *
+nemo_view_factory_create (const char *id,
+			      NemoWindowSlot *slot)
 {
-	const NautilusViewInfo *view_info;
-	NautilusView *view;
+	const NemoViewInfo *view_info;
+	NemoView *view;
 
-	view_info = nautilus_view_factory_lookup (id);
+	view_info = nemo_view_factory_lookup (id);
 	if (view_info == NULL) {
 		return NULL;
 	}
@@ -75,16 +75,16 @@ nautilus_view_factory_create (const char *id,
 }
 
 gboolean
-nautilus_view_factory_view_supports_uri (const char *id,
+nemo_view_factory_view_supports_uri (const char *id,
 					 GFile *location,
 					 GFileType file_type,
 					 const char *mime_type)
 {
-	const NautilusViewInfo *view_info;
+	const NemoViewInfo *view_info;
 	char *uri;
 	gboolean res;
 
-	view_info = nautilus_view_factory_lookup (id);
+	view_info = nemo_view_factory_lookup (id);
 	if (view_info == NULL) {
 		return FALSE;
 	}
@@ -96,12 +96,12 @@ nautilus_view_factory_view_supports_uri (const char *id,
 }
 
 GList *
-nautilus_view_factory_get_views_for_uri (const char *uri,
+nemo_view_factory_get_views_for_uri (const char *uri,
 					 GFileType file_type,
 					 const char *mime_type)
 {
 	GList *l, *res;
-	const NautilusViewInfo *view_info;
+	const NemoViewInfo *view_info;
 
 	res = NULL;
 	

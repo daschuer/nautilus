@@ -1,6 +1,6 @@
 /* -*- Mode: C; indent-tabs-mode: t; c-basic-offset: 8; tab-width: 8 -*-
 
-   nautilus-thumbnails.h: Thumbnail code for icon factory.
+   nemo-thumbnails.h: Thumbnail code for icon factory.
  
    Copyright (C) 2000, 2001 Eazel, Inc.
    Copyright (C) 2002, 2003 Red Hat, Inc.
@@ -24,13 +24,13 @@
 */
 
 #include <config.h>
-#include "nautilus-thumbnails.h"
+#include "nemo-thumbnails.h"
 
 #define GNOME_DESKTOP_USE_UNSTABLE_API
 
-#include "nautilus-directory-notify.h"
-#include "nautilus-global-preferences.h"
-#include "nautilus-file-utilities.h"
+#include "nemo-directory-notify.h"
+#include "nemo-global-preferences.h"
+#include "nemo-file-utilities.h"
 #include <math.h>
 #include <eel/eel-graphic-effects.h>
 #include <eel/eel-string.h>
@@ -46,7 +46,7 @@
 #include <signal.h>
 #include <libgnome-desktop/gnome-desktop-thumbnail.h>
 
-#include "nautilus-file-private.h"
+#include "nemo-file-private.h"
 
 /* turn this on to see messages about thumbnail creation */
 #if 0
@@ -67,7 +67,7 @@ typedef struct {
 	char *image_uri;
 	char *mime_type;
 	time_t original_file_mtime;
-} NautilusThumbnailInfo;
+} NemoThumbnailInfo;
 
 /*
  * Thumbnail thread state.
@@ -86,7 +86,7 @@ static pthread_mutex_t thumbnails_mutex = PTHREAD_MUTEX_INITIALIZER;
    start more than one. Lock thumbnails_mutex when accessing this. */
 static volatile gboolean thumbnail_thread_is_running = FALSE;
 
-/* The list of NautilusThumbnailInfo structs containing information about the
+/* The list of NemoThumbnailInfo structs containing information about the
    thumbnails we are making. Lock thumbnails_mutex when accessing this. */
 static volatile GQueue thumbnails_to_make = G_QUEUE_INIT;
 
@@ -95,7 +95,7 @@ static GHashTable *thumbnails_to_make_hash = NULL;
 
 /* The currently thumbnailed icon. it also exists in the thumbnails_to_make list
  * to avoid adding it again. Lock thumbnails_mutex when accessing this. */
-static NautilusThumbnailInfo *currently_thumbnailing = NULL;
+static NemoThumbnailInfo *currently_thumbnailing = NULL;
 
 static GnomeDesktopThumbnailFactory *thumbnail_factory = NULL;
 
@@ -125,7 +125,7 @@ get_file_mtime (const char *file_uri, time_t* mtime)
 }
 
 static void
-free_thumbnail_info (NautilusThumbnailInfo *info)
+free_thumbnail_info (NemoThumbnailInfo *info)
 {
 	g_free (info->image_uri);
 	g_free (info->mime_type);
@@ -186,7 +186,7 @@ thumbnail_thread_starter_cb (gpointer data)
 }
 
 void
-nautilus_update_thumbnail_file_copied (const char *source_file_uri,
+nemo_update_thumbnail_file_copied (const char *source_file_uri,
 				       const char *destination_file_uri)
 {
 	char *old_thumbnail_path;
@@ -218,15 +218,15 @@ nautilus_update_thumbnail_file_copied (const char *source_file_uri,
 }
 
 void
-nautilus_update_thumbnail_file_renamed (const char *source_file_uri,
+nemo_update_thumbnail_file_renamed (const char *source_file_uri,
 					const char *destination_file_uri)
 {
-	nautilus_update_thumbnail_file_copied (source_file_uri, destination_file_uri);
-	nautilus_remove_thumbnail_for_file (source_file_uri);
+	nemo_update_thumbnail_file_copied (source_file_uri, destination_file_uri);
+	nemo_remove_thumbnail_for_file (source_file_uri);
 }
 
 void 
-nautilus_remove_thumbnail_for_file (const char *file_uri)
+nemo_remove_thumbnail_for_file (const char *file_uri)
 {
 	char *thumbnail_path;
 	
@@ -238,12 +238,12 @@ nautilus_remove_thumbnail_for_file (const char *file_uri)
 }
 
 static GdkPixbuf *
-nautilus_get_thumbnail_frame (void)
+nemo_get_thumbnail_frame (void)
 {
 	static GdkPixbuf *thumbnail_frame = NULL;
 
 	if (thumbnail_frame == NULL) {
-		GInputStream *stream = g_resources_open_stream ("/org/gnome/nautilus/icons/thumbnail_frame.png", 0, NULL);
+		GInputStream *stream = g_resources_open_stream ("/org/gnome/nemo/icons/thumbnail_frame.png", 0, NULL);
 		if (stream != NULL) {
 			thumbnail_frame = gdk_pixbuf_new_from_stream (stream, NULL, NULL);
 			g_object_unref (stream);
@@ -255,24 +255,24 @@ nautilus_get_thumbnail_frame (void)
 
 
 void
-nautilus_thumbnail_frame_image (GdkPixbuf **pixbuf)
+nemo_thumbnail_frame_image (GdkPixbuf **pixbuf)
 {
 	GdkPixbuf *pixbuf_with_frame, *frame;
 	int left_offset, top_offset, right_offset, bottom_offset;
 		
 	/* The pixbuf isn't already framed (i.e., it was not made by
-	 * an old Nautilus), so we must embed it in a frame.
+	 * an old Nemo), so we must embed it in a frame.
 	 */
 
-	frame = nautilus_get_thumbnail_frame ();
+	frame = nemo_get_thumbnail_frame ();
 	if (frame == NULL) {
 		return;
 	}
 	
-	left_offset = NAUTILUS_THUMBNAIL_FRAME_LEFT;
-	top_offset = NAUTILUS_THUMBNAIL_FRAME_TOP;
-	right_offset = NAUTILUS_THUMBNAIL_FRAME_RIGHT;
-	bottom_offset = NAUTILUS_THUMBNAIL_FRAME_BOTTOM;
+	left_offset = NEMO_THUMBNAIL_FRAME_LEFT;
+	top_offset = NEMO_THUMBNAIL_FRAME_TOP;
+	right_offset = NEMO_THUMBNAIL_FRAME_RIGHT;
+	bottom_offset = NEMO_THUMBNAIL_FRAME_BOTTOM;
 	
 	pixbuf_with_frame = eel_embed_image_in_frame
 		(*pixbuf, frame,
@@ -283,25 +283,25 @@ nautilus_thumbnail_frame_image (GdkPixbuf **pixbuf)
 }
 
 GdkPixbuf *
-nautilus_thumbnail_unframe_image (GdkPixbuf *pixbuf)
+nemo_thumbnail_unframe_image (GdkPixbuf *pixbuf)
 {
 	GdkPixbuf *pixbuf_without_frame, *frame;
 	int left_offset, top_offset, right_offset, bottom_offset;
 	int w, h;
 		
 	/* The pixbuf isn't already framed (i.e., it was not made by
-	 * an old Nautilus), so we must embed it in a frame.
+	 * an old Nemo), so we must embed it in a frame.
 	 */
 
-	frame = nautilus_get_thumbnail_frame ();
+	frame = nemo_get_thumbnail_frame ();
 	if (frame == NULL) {
 		return NULL;
 	}
 	
-	left_offset = NAUTILUS_THUMBNAIL_FRAME_LEFT;
-	top_offset = NAUTILUS_THUMBNAIL_FRAME_TOP;
-	right_offset = NAUTILUS_THUMBNAIL_FRAME_RIGHT;
-	bottom_offset = NAUTILUS_THUMBNAIL_FRAME_BOTTOM;
+	left_offset = NEMO_THUMBNAIL_FRAME_LEFT;
+	top_offset = NEMO_THUMBNAIL_FRAME_TOP;
+	right_offset = NEMO_THUMBNAIL_FRAME_RIGHT;
+	bottom_offset = NEMO_THUMBNAIL_FRAME_BOTTOM;
 
 	w = gdk_pixbuf_get_width (pixbuf) - left_offset - right_offset;
 	h = gdk_pixbuf_get_height (pixbuf) - top_offset - bottom_offset;
@@ -320,7 +320,7 @@ nautilus_thumbnail_unframe_image (GdkPixbuf *pixbuf)
 }
 
 void
-nautilus_thumbnail_remove_from_queue (const char *file_uri)
+nemo_thumbnail_remove_from_queue (const char *file_uri)
 {
 	GList *node;
 	
@@ -354,9 +354,9 @@ nautilus_thumbnail_remove_from_queue (const char *file_uri)
 }
 
 void
-nautilus_thumbnail_remove_all_from_queue (void)
+nemo_thumbnail_remove_all_from_queue (void)
 {
-	NautilusThumbnailInfo *info;
+	NemoThumbnailInfo *info;
 	GList *l, *next;
 	
 #ifdef DEBUG_THUMBNAILS
@@ -393,7 +393,7 @@ nautilus_thumbnail_remove_all_from_queue (void)
 }
 
 void
-nautilus_thumbnail_prioritize (const char *file_uri)
+nemo_thumbnail_prioritize (const char *file_uri)
 {
 	GList *node;
 
@@ -433,26 +433,26 @@ nautilus_thumbnail_prioritize (const char *file_uri)
 
 /* This is a one-shot idle callback called from the main loop to call
    notify_file_changed() for a thumbnail. It frees the uri afterwards.
-   We do this in an idle callback as I don't think nautilus_file_changed() is
+   We do this in an idle callback as I don't think nemo_file_changed() is
    thread-safe. */
 static gboolean
 thumbnail_thread_notify_file_changed (gpointer image_uri)
 {
-	NautilusFile *file;
+	NemoFile *file;
 
 	gdk_threads_enter ();
 
-	file = nautilus_file_get_by_uri ((char *) image_uri);
+	file = nemo_file_get_by_uri ((char *) image_uri);
 #ifdef DEBUG_THUMBNAILS
 	g_message ("(Thumbnail Thread) Notifying file changed file:%p uri: %s\n", file, (char*) image_uri);
 #endif
 
 	if (file != NULL) {
-		nautilus_file_set_is_thumbnailing (file, FALSE);
-		nautilus_file_invalidate_attributes (file,
-						     NAUTILUS_FILE_ATTRIBUTE_THUMBNAIL |
-						     NAUTILUS_FILE_ATTRIBUTE_INFO);
-		nautilus_file_unref (file);
+		nemo_file_set_is_thumbnailing (file, FALSE);
+		nemo_file_invalidate_attributes (file,
+						     NEMO_FILE_ATTRIBUTE_THUMBNAIL |
+						     NEMO_FILE_ATTRIBUTE_INFO);
+		nemo_file_unref (file);
 	}
 	g_free (image_uri);
 
@@ -507,25 +507,25 @@ pixbuf_can_load_type (const char *mime_type)
 }
 
 gboolean
-nautilus_can_thumbnail_internally (NautilusFile *file)
+nemo_can_thumbnail_internally (NemoFile *file)
 {
 	char *mime_type;
 	gboolean res;
 
-	mime_type = nautilus_file_get_mime_type (file);
+	mime_type = nemo_file_get_mime_type (file);
 	res = pixbuf_can_load_type (mime_type);
 	g_free (mime_type);
 	return res;
 }
 
 gboolean
-nautilus_thumbnail_is_mimetype_limited_by_size (const char *mime_type)
+nemo_thumbnail_is_mimetype_limited_by_size (const char *mime_type)
 {
 	return pixbuf_can_load_type (mime_type);
 }
 
 gboolean
-nautilus_can_thumbnail (NautilusFile *file)
+nemo_can_thumbnail (NemoFile *file)
 {
 	GnomeDesktopThumbnailFactory *factory;
 	gboolean res;
@@ -533,9 +533,9 @@ nautilus_can_thumbnail (NautilusFile *file)
 	time_t mtime;
 	char *mime_type;
 		
-	uri = nautilus_file_get_uri (file);
-	mime_type = nautilus_file_get_mime_type (file);
-	mtime = nautilus_file_get_mtime (file);
+	uri = nemo_file_get_uri (file);
+	mime_type = nemo_file_get_mime_type (file);
+	mtime = nemo_file_get_mtime (file);
 	
 	factory = get_thumbnail_factory ();
 	res = gnome_desktop_thumbnail_factory_can_thumbnail (factory,
@@ -549,20 +549,20 @@ nautilus_can_thumbnail (NautilusFile *file)
 }
 
 void
-nautilus_create_thumbnail (NautilusFile *file)
+nemo_create_thumbnail (NemoFile *file)
 {
 	time_t file_mtime = 0;
-	NautilusThumbnailInfo *info;
-	NautilusThumbnailInfo *existing_info;
+	NemoThumbnailInfo *info;
+	NemoThumbnailInfo *existing_info;
 	GList *existing, *node;
 
-	nautilus_file_set_is_thumbnailing (file, TRUE);
+	nemo_file_set_is_thumbnailing (file, TRUE);
 
-	info = g_new0 (NautilusThumbnailInfo, 1);
-	info->image_uri = nautilus_file_get_uri (file);
-	info->mime_type = nautilus_file_get_mime_type (file);
+	info = g_new0 (NemoThumbnailInfo, 1);
+	info->image_uri = nemo_file_get_uri (file);
+	info->mime_type = nemo_file_get_mime_type (file);
 	
-	/* Hopefully the NautilusFile will already have the image file mtime,
+	/* Hopefully the NemoFile will already have the image file mtime,
 	   so we can just use that. Otherwise we have to get it ourselves. */
 	if (file->details->got_file_info &&
 	    file->details->file_info_is_up_to_date &&
@@ -635,7 +635,7 @@ nautilus_create_thumbnail (NautilusFile *file)
 static gpointer
 thumbnail_thread_start (gpointer data)
 {
-	NautilusThumbnailInfo *info = NULL;
+	NemoThumbnailInfo *info = NULL;
 	GdkPixbuf *pixbuf;
 	time_t current_orig_mtime = 0;
 	time_t current_time;
@@ -735,7 +735,7 @@ thumbnail_thread_start (gpointer data)
 										 info->image_uri,
 										 current_orig_mtime);
 		}
-		/* We need to call nautilus_file_changed(), but I don't think that is
+		/* We need to call nemo_file_changed(), but I don't think that is
 		   thread safe. So add an idle handler and do it from the main loop. */
 		g_idle_add_full (G_PRIORITY_HIGH_IDLE,
 				 thumbnail_thread_notify_file_changed,

@@ -1,5 +1,5 @@
 /*
- *  nautilus-extension-private.h - Type definitions for Nautilus extensions
+ *  nemo-extension-private.h - Type definitions for Nemo extensions
  * 
  *  Copyright (C) 2009 Red Hat, Inc.
  *
@@ -21,14 +21,14 @@
  * 
  */
 
-#ifndef NAUTILUS_EXTENSION_PRIVATE_H
-#define NAUTILUS_EXTENSION_PRIVATE_H
+#ifndef NEMO_EXTENSION_PRIVATE_H
+#define NEMO_EXTENSION_PRIVATE_H
 
-#include <libnautilus-extension/nautilus-file-info.h>
+#include <libnemo-extension/nemo-file-info.h>
 
 G_BEGIN_DECLS
 
-extern NautilusFileInfo *(*nautilus_file_info_getter) (GFile *location, gboolean create);
+extern NemoFileInfo *(*nemo_file_info_getter) (GFile *location, gboolean create);
 
 G_END_DECLS
 

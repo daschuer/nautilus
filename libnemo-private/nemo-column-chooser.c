@@ -1,6 +1,6 @@
 /* -*- Mode: C; indent-tabs-mode: t; c-basic-offset: 8; tab-width: 8 -*- */
 
-/* nautilus-column-chooser.h - A column chooser widget
+/* nemo-column-chooser.h - A column chooser widget
 
    Copyright (C) 2004 Novell, Inc.
 
@@ -23,15 +23,15 @@
 */
 
 #include <config.h>
-#include "nautilus-column-chooser.h"
+#include "nemo-column-chooser.h"
 
 #include <string.h>
 #include <gtk/gtk.h>
 #include <glib/gi18n.h>
 
-#include "nautilus-column-utilities.h"
+#include "nemo-column-utilities.h"
 
-struct _NautilusColumnChooserDetails
+struct _NemoColumnChooserDetails
 {
 	GtkTreeView *view;
 	GtkListStore *store;
@@ -40,7 +40,7 @@ struct _NautilusColumnChooserDetails
 	GtkWidget *move_down_button;
 	GtkWidget *use_default_button;
 
-	NautilusFile *file;
+	NemoFile *file;
 };
 
 enum {
@@ -63,19 +63,19 @@ enum {
 static guint signals[LAST_SIGNAL];
 
 
-G_DEFINE_TYPE(NautilusColumnChooser, nautilus_column_chooser, GTK_TYPE_BOX);
+G_DEFINE_TYPE(NemoColumnChooser, nemo_column_chooser, GTK_TYPE_BOX);
 
-static void nautilus_column_chooser_constructed (GObject *object);
+static void nemo_column_chooser_constructed (GObject *object);
 
 static void
-nautilus_column_chooser_set_property (GObject *object,
+nemo_column_chooser_set_property (GObject *object,
 				      guint param_id,
 				      const GValue *value,
 				      GParamSpec *pspec)
 {
-	NautilusColumnChooser *chooser;
+	NemoColumnChooser *chooser;
 
-	chooser = NAUTILUS_COLUMN_CHOOSER (object);
+	chooser = NEMO_COLUMN_CHOOSER (object);
 
 	switch (param_id) {
 		case PROP_FILE:
@@ -88,20 +88,20 @@ nautilus_column_chooser_set_property (GObject *object,
 }
 
 static void
-nautilus_column_chooser_class_init (NautilusColumnChooserClass *chooser_class)
+nemo_column_chooser_class_init (NemoColumnChooserClass *chooser_class)
 {
 	GObjectClass *oclass;
 
 	oclass = G_OBJECT_CLASS (chooser_class);
 
-	oclass->set_property = nautilus_column_chooser_set_property;
-	oclass->constructed = nautilus_column_chooser_constructed;
+	oclass->set_property = nemo_column_chooser_set_property;
+	oclass->constructed = nemo_column_chooser_constructed;
 
 	signals[CHANGED] = g_signal_new
 		("changed",
 		 G_TYPE_FROM_CLASS (chooser_class),
 		 G_SIGNAL_RUN_LAST,
-		 G_STRUCT_OFFSET (NautilusColumnChooserClass,
+		 G_STRUCT_OFFSET (NemoColumnChooserClass,
 				  changed),
 		 NULL, NULL,
 		 g_cclosure_marshal_VOID__VOID,
@@ -111,7 +111,7 @@ nautilus_column_chooser_class_init (NautilusColumnChooserClass *chooser_class)
 		("use_default",
 		 G_TYPE_FROM_CLASS (chooser_class),
 		 G_SIGNAL_RUN_LAST,
-		 G_STRUCT_OFFSET (NautilusColumnChooserClass,
+		 G_STRUCT_OFFSET (NemoColumnChooserClass,
 				  use_default),
 		 NULL, NULL,
 		 g_cclosure_marshal_VOID__VOID,
@@ -122,15 +122,15 @@ nautilus_column_chooser_class_init (NautilusColumnChooserClass *chooser_class)
 	                                 g_param_spec_object ("file",
 	                                                      "File",
 	                                                      "The file this column chooser is for",
-	                                                      NAUTILUS_TYPE_FILE,
+	                                                      NEMO_TYPE_FILE,
 	                                                      G_PARAM_CONSTRUCT_ONLY |
 	                                                      G_PARAM_WRITABLE));
 
-	g_type_class_add_private (chooser_class, sizeof (NautilusColumnChooserDetails));
+	g_type_class_add_private (chooser_class, sizeof (NemoColumnChooserDetails));
 }
 
 static void 
-update_buttons (NautilusColumnChooser *chooser)
+update_buttons (NemoColumnChooser *chooser)
 {
 	GtkTreeSelection *selection;
 	GtkTreeIter iter;
@@ -174,7 +174,7 @@ update_buttons (NautilusColumnChooser *chooser)
 }
 
 static void
-list_changed (NautilusColumnChooser *chooser) 
+list_changed (NemoColumnChooser *chooser) 
 {
 	update_buttons (chooser);
 	g_signal_emit (chooser, signals[CHANGED], 0);
@@ -185,12 +185,12 @@ visible_toggled_callback (GtkCellRendererToggle *cell,
 			  char *path_string,
 			  gpointer user_data)
 {
-	NautilusColumnChooser *chooser;
+	NemoColumnChooser *chooser;
 	GtkTreePath *path;
 	GtkTreeIter iter;
 	gboolean visible;
 	
-	chooser = NAUTILUS_COLUMN_CHOOSER (user_data);
+	chooser = NEMO_COLUMN_CHOOSER (user_data);
 
 	path = gtk_tree_path_new_from_string (path_string);
 	gtk_tree_model_get_iter (GTK_TREE_MODEL (chooser->details->store), 
@@ -206,7 +206,7 @@ visible_toggled_callback (GtkCellRendererToggle *cell,
 static void
 selection_changed_callback (GtkTreeSelection *selection, gpointer user_data)
 {
-	update_buttons (NAUTILUS_COLUMN_CHOOSER (user_data));
+	update_buttons (NEMO_COLUMN_CHOOSER (user_data));
 }
 
 static void
@@ -214,11 +214,11 @@ row_deleted_callback (GtkTreeModel *model,
 		       GtkTreePath *path,
 		       gpointer user_data)
 {
-	list_changed (NAUTILUS_COLUMN_CHOOSER (user_data));
+	list_changed (NEMO_COLUMN_CHOOSER (user_data));
 }
 
 static void
-add_tree_view (NautilusColumnChooser *chooser)
+add_tree_view (NemoColumnChooser *chooser)
 {
 	GtkWidget *scrolled;
 	GtkWidget *view;
@@ -283,11 +283,11 @@ add_tree_view (NautilusColumnChooser *chooser)
 static void
 move_up_clicked_callback (GtkWidget *button, gpointer user_data)
 {
-	NautilusColumnChooser *chooser;
+	NemoColumnChooser *chooser;
 	GtkTreeIter iter;
 	GtkTreeSelection *selection;
 
-	chooser = NAUTILUS_COLUMN_CHOOSER (user_data);
+	chooser = NEMO_COLUMN_CHOOSER (user_data);
 	
 	selection = gtk_tree_view_get_selection (chooser->details->view);
 	
@@ -311,11 +311,11 @@ move_up_clicked_callback (GtkWidget *button, gpointer user_data)
 static void
 move_down_clicked_callback (GtkWidget *button, gpointer user_data)
 {
-	NautilusColumnChooser *chooser;
+	NemoColumnChooser *chooser;
 	GtkTreeIter iter;
 	GtkTreeSelection *selection;
 
-	chooser = NAUTILUS_COLUMN_CHOOSER (user_data);
+	chooser = NEMO_COLUMN_CHOOSER (user_data);
 	
 	selection = gtk_tree_view_get_selection (chooser->details->view);
 	
@@ -337,7 +337,7 @@ move_down_clicked_callback (GtkWidget *button, gpointer user_data)
 static void
 use_default_clicked_callback (GtkWidget *button, gpointer user_data)
 {
-	g_signal_emit (NAUTILUS_COLUMN_CHOOSER (user_data), 
+	g_signal_emit (NEMO_COLUMN_CHOOSER (user_data), 
 		       signals[USE_DEFAULT], 0);
 }
 
@@ -356,7 +356,7 @@ button_new_with_mnemonic (const gchar *stockid, const gchar *str)
 }
 
 static void
-add_buttons (NautilusColumnChooser *chooser)
+add_buttons (NemoColumnChooser *chooser)
 {
 	GtkWidget *box;
 	GtkWidget *separator;
@@ -401,20 +401,20 @@ add_buttons (NautilusColumnChooser *chooser)
 }
 
 static void
-populate_tree (NautilusColumnChooser *chooser)
+populate_tree (NemoColumnChooser *chooser)
 {
 	GList *columns;
 	GList *l;
 
-	columns = nautilus_get_columns_for_file (chooser->details->file);
+	columns = nemo_get_columns_for_file (chooser->details->file);
 
 	for (l = columns; l != NULL; l = l->next) {
 		GtkTreeIter iter;
-		NautilusColumn *column;
+		NemoColumn *column;
 		char *name;
 		char *label;
 		
-		column = NAUTILUS_COLUMN (l->data);
+		column = NEMO_COLUMN (l->data);
 		
 		g_object_get (G_OBJECT (column), 
 			      "name", &name, "label", &label, 
@@ -431,15 +431,15 @@ populate_tree (NautilusColumnChooser *chooser)
 		g_free (label);
 	}
 
-	nautilus_column_list_free (columns);
+	nemo_column_list_free (columns);
 }
 
 static void
-nautilus_column_chooser_constructed (GObject *object)
+nemo_column_chooser_constructed (GObject *object)
 {
-	NautilusColumnChooser *chooser;
+	NemoColumnChooser *chooser;
 
-	chooser = NAUTILUS_COLUMN_CHOOSER (object);
+	chooser = NEMO_COLUMN_CHOOSER (object);
 
 	populate_tree (chooser);
 
@@ -448,9 +448,9 @@ nautilus_column_chooser_constructed (GObject *object)
 }
 
 static void
-nautilus_column_chooser_init (NautilusColumnChooser *chooser)
+nemo_column_chooser_init (NemoColumnChooser *chooser)
 {	
-	chooser->details = G_TYPE_INSTANCE_GET_PRIVATE ((chooser), NAUTILUS_TYPE_COLUMN_CHOOSER, NautilusColumnChooserDetails);
+	chooser->details = G_TYPE_INSTANCE_GET_PRIVATE ((chooser), NEMO_TYPE_COLUMN_CHOOSER, NemoColumnChooserDetails);
 
 	g_object_set (G_OBJECT (chooser), 
 		      "homogeneous", FALSE,
@@ -463,7 +463,7 @@ nautilus_column_chooser_init (NautilusColumnChooser *chooser)
 }
 
 static void 
-set_visible_columns (NautilusColumnChooser *chooser,
+set_visible_columns (NemoColumnChooser *chooser,
 		     char **visible_columns)
 {
 	GHashTable *visible_columns_hash;
@@ -503,7 +503,7 @@ set_visible_columns (NautilusColumnChooser *chooser,
 }
 
 static char **
-get_column_names (NautilusColumnChooser *chooser, gboolean only_visible)
+get_column_names (NemoColumnChooser *chooser, gboolean only_visible)
 {
 	GPtrArray *ret;
 	GtkTreeIter iter;
@@ -532,13 +532,13 @@ get_column_names (NautilusColumnChooser *chooser, gboolean only_visible)
 }
 
 static gboolean
-get_column_iter (NautilusColumnChooser *chooser, 
-		 NautilusColumn *column,
+get_column_iter (NemoColumnChooser *chooser, 
+		 NemoColumn *column,
 		 GtkTreeIter *iter)
 {
 	char *column_name;
 
-	g_object_get (NAUTILUS_COLUMN (column), "name", &column_name, NULL);
+	g_object_get (NEMO_COLUMN (column), "name", &column_name, NULL);
 
 	if (gtk_tree_model_get_iter_first (GTK_TREE_MODEL (chooser->details->store),
 					   iter)) {
@@ -564,7 +564,7 @@ get_column_iter (NautilusColumnChooser *chooser,
 }
 
 static void
-set_column_order (NautilusColumnChooser *chooser,
+set_column_order (NemoColumnChooser *chooser,
 		  char **column_order)
 
 {
@@ -572,8 +572,8 @@ set_column_order (NautilusColumnChooser *chooser,
 	GList *l;
 	GtkTreePath *path;
 
-	columns = nautilus_get_columns_for_file (chooser->details->file);	
-	columns = nautilus_sort_columns (columns, column_order);
+	columns = nemo_get_columns_for_file (chooser->details->file);	
+	columns = nemo_sort_columns (columns, column_order);
 
 	g_signal_handlers_block_by_func (chooser->details->store,
 					 G_CALLBACK (row_deleted_callback), 
@@ -583,7 +583,7 @@ set_column_order (NautilusColumnChooser *chooser,
 	for (l = columns; l != NULL; l = l->next) {
 		GtkTreeIter iter;
 		
-		if (get_column_iter (chooser, NAUTILUS_COLUMN (l->data), &iter)) {
+		if (get_column_iter (chooser, NEMO_COLUMN (l->data), &iter)) {
 			GtkTreeIter before;
 			if (path) {
 				gtk_tree_model_get_iter (GTK_TREE_MODEL (chooser->details->store),
@@ -603,15 +603,15 @@ set_column_order (NautilusColumnChooser *chooser,
 					   G_CALLBACK (row_deleted_callback), 
 					   chooser);
 	
-	nautilus_column_list_free (columns);
+	nemo_column_list_free (columns);
 }
 
 void
-nautilus_column_chooser_set_settings (NautilusColumnChooser *chooser,
+nemo_column_chooser_set_settings (NemoColumnChooser *chooser,
 				      char **visible_columns,
 				      char **column_order)
 {
-	g_return_if_fail (NAUTILUS_IS_COLUMN_CHOOSER (chooser));
+	g_return_if_fail (NEMO_IS_COLUMN_CHOOSER (chooser));
 	g_return_if_fail (visible_columns != NULL);
 	g_return_if_fail (column_order != NULL);
 
@@ -622,11 +622,11 @@ nautilus_column_chooser_set_settings (NautilusColumnChooser *chooser,
 }
 
 void
-nautilus_column_chooser_get_settings (NautilusColumnChooser *chooser,
+nemo_column_chooser_get_settings (NemoColumnChooser *chooser,
 				      char ***visible_columns,
 				      char ***column_order)
 {
-	g_return_if_fail (NAUTILUS_IS_COLUMN_CHOOSER (chooser));
+	g_return_if_fail (NEMO_IS_COLUMN_CHOOSER (chooser));
 	g_return_if_fail (visible_columns != NULL);
 	g_return_if_fail (column_order != NULL);
 
@@ -635,8 +635,8 @@ nautilus_column_chooser_get_settings (NautilusColumnChooser *chooser,
 }
 
 GtkWidget *
-nautilus_column_chooser_new (NautilusFile *file)
+nemo_column_chooser_new (NemoFile *file)
 {
-	return g_object_new (NAUTILUS_TYPE_COLUMN_CHOOSER, "file", file, NULL);
+	return g_object_new (NEMO_TYPE_COLUMN_CHOOSER, "file", file, NULL);
 }
 

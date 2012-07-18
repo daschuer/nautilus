@@ -1,7 +1,7 @@
 /* -*- Mode: C; indent-tabs-mode: t; c-basic-offset: 8; tab-width: 8 -*- */
 
 /*
- *  Nautilus
+ *  Nemo
  *
  *  This library is free software; you can redistribute it and/or
  *  modify it under the terms of the GNU General Public License as
@@ -29,15 +29,15 @@
 #include <glib/gi18n.h>
 #include <gio/gio.h>
 
-#include <libnautilus-private/nautilus-dnd.h>
-#include <libnautilus-private/nautilus-bookmark.h>
-#include <libnautilus-private/nautilus-global-preferences.h>
-#include <libnautilus-private/nautilus-module.h>
-#include <libnautilus-private/nautilus-file.h>
-#include <libnautilus-private/nautilus-file-utilities.h>
-#include <libnautilus-private/nautilus-file-operations.h>
-#include <libnautilus-private/nautilus-trash-monitor.h>
-#include <libnautilus-private/nautilus-icon-names.h>
+#include <libnemo-private/nemo-dnd.h>
+#include <libnemo-private/nemo-bookmark.h>
+#include <libnemo-private/nemo-global-preferences.h>
+#include <libnemo-private/nemo-module.h>
+#include <libnemo-private/nemo-file.h>
+#include <libnemo-private/nemo-file-utilities.h>
+#include <libnemo-private/nemo-file-operations.h>
+#include <libnemo-private/nemo-trash-monitor.h>
+#include <libnemo-private/nemo-icon-names.h>
 
 #include <eel/eel-debug.h>
 #include <eel/eel-gtk-extensions.h>
@@ -46,15 +46,15 @@
 #include <eel/eel-string.h>
 #include <eel/eel-stock-dialogs.h>
 
-#include "nautilus-application.h"
-#include "nautilus-bookmark-list.h"
-#include "nautilus-places-sidebar.h"
-#include "nautilus-properties-window.h"
-#include "nautilus-window.h"
-#include "nautilus-window-slot.h"
+#include "nemo-application.h"
+#include "nemo-bookmark-list.h"
+#include "nemo-places-sidebar.h"
+#include "nemo-properties-window.h"
+#include "nemo-window.h"
+#include "nemo-window-slot.h"
 
-#define DEBUG_FLAG NAUTILUS_DEBUG_PLACES
-#include <libnautilus-private/nautilus-debug.h>
+#define DEBUG_FLAG NEMO_DEBUG_PLACES
+#include <libnemo-private/nemo-debug.h>
 
 #define EJECT_BUTTON_XPAD 6
 #define ICON_CELL_XPAD 6
@@ -65,8 +65,8 @@ typedef struct {
 	GtkCellRenderer    *eject_icon_cell_renderer;
 	char 	           *uri;
 	GtkListStore       *store;
-	NautilusWindow *window;
-	NautilusBookmarkList *bookmarks;
+	NemoWindow *window;
+	NemoBookmarkList *bookmarks;
 	GVolumeMonitor *volume_monitor;
 
 	gboolean devices_header_added;
@@ -96,25 +96,25 @@ typedef struct {
 
 	/* volume mounting - delayed open process */
 	gboolean mounting;
-	NautilusWindowSlot *go_to_after_mount_slot;
-	NautilusWindowOpenFlags go_to_after_mount_flags;
+	NemoWindowSlot *go_to_after_mount_slot;
+	NemoWindowOpenFlags go_to_after_mount_flags;
 
 	GtkTreePath *eject_highlight_path;
 
 	guint bookmarks_changed_id;
-} NautilusPlacesSidebar;
+} NemoPlacesSidebar;
 
 typedef struct {
 	GtkScrolledWindowClass parent;
-} NautilusPlacesSidebarClass;
+} NemoPlacesSidebarClass;
 
 typedef struct {
         GObject parent;
-} NautilusPlacesSidebarProvider;
+} NemoPlacesSidebarProvider;
 
 typedef struct {
         GObjectClass parent;
-} NautilusPlacesSidebarProviderClass;
+} NemoPlacesSidebarProviderClass;
 
 enum {
 	PLACES_SIDEBAR_COLUMN_ROW_TYPE,
@@ -151,22 +151,22 @@ typedef enum {
 	SECTION_NETWORK,
 } SectionType;
 
-static void  open_selected_bookmark                    (NautilusPlacesSidebar        *sidebar,
+static void  open_selected_bookmark                    (NemoPlacesSidebar        *sidebar,
 							GtkTreeModel                 *model,
 							GtkTreeIter                  *iter,
-							NautilusWindowOpenFlags flags);
-static void  nautilus_places_sidebar_style_set         (GtkWidget                    *widget,
+							NemoWindowOpenFlags flags);
+static void  nemo_places_sidebar_style_set         (GtkWidget                    *widget,
 							GtkStyle                     *previous_style);
-static gboolean eject_or_unmount_bookmark              (NautilusPlacesSidebar *sidebar,
+static gboolean eject_or_unmount_bookmark              (NemoPlacesSidebar *sidebar,
 							GtkTreePath *path);
-static gboolean eject_or_unmount_selection             (NautilusPlacesSidebar *sidebar);
+static gboolean eject_or_unmount_selection             (NemoPlacesSidebar *sidebar);
 static void  check_unmount_and_eject                   (GMount *mount,
 							GVolume *volume,
 							GDrive *drive,
 							gboolean *show_unmount,
 							gboolean *show_eject);
 
-static void bookmarks_check_popup_sensitivity          (NautilusPlacesSidebar *sidebar);
+static void bookmarks_check_popup_sensitivity          (NemoPlacesSidebar *sidebar);
 
 /* Identifiers for target types */
 enum {
@@ -175,12 +175,12 @@ enum {
 };
 
 /* Target types for dragging from the shortcuts list */
-static const GtkTargetEntry nautilus_shortcuts_source_targets[] = {
+static const GtkTargetEntry nemo_shortcuts_source_targets[] = {
 	{ "GTK_TREE_MODEL_ROW", GTK_TARGET_SAME_WIDGET, GTK_TREE_MODEL_ROW }
 };
 
 /* Target types for dropping into the shortcuts list */
-static const GtkTargetEntry nautilus_shortcuts_drop_targets [] = {
+static const GtkTargetEntry nemo_shortcuts_drop_targets [] = {
 	{ "GTK_TREE_MODEL_ROW", GTK_TARGET_SAME_WIDGET, GTK_TREE_MODEL_ROW },
 	{ "text/uri-list", 0, TEXT_URI_LIST }
 };
@@ -189,27 +189,27 @@ static const GtkTargetEntry nautilus_shortcuts_drop_targets [] = {
 typedef struct {
   GtkListStore parent;
 
-  NautilusPlacesSidebar *sidebar;
-} NautilusShortcutsModel;
+  NemoPlacesSidebar *sidebar;
+} NemoShortcutsModel;
 
 typedef struct {
   GtkListStoreClass parent_class;
-} NautilusShortcutsModelClass;
+} NemoShortcutsModelClass;
 
-#define NAUTILUS_TYPE_SHORTCUTS_MODEL (_nautilus_shortcuts_model_get_type ())
-#define NAUTILUS_SHORTCUTS_MODEL(obj) (G_TYPE_CHECK_INSTANCE_CAST ((obj), NAUTILUS_SHORTCUTS_MODEL_TYPE, NautilusShortcutsModel))
+#define NEMO_TYPE_SHORTCUTS_MODEL (_nemo_shortcuts_model_get_type ())
+#define NEMO_SHORTCUTS_MODEL(obj) (G_TYPE_CHECK_INSTANCE_CAST ((obj), NEMO_SHORTCUTS_MODEL_TYPE, NemoShortcutsModel))
 
-GType _nautilus_shortcuts_model_get_type (void);
-static void _nautilus_shortcuts_model_drag_source_init (GtkTreeDragSourceIface *iface);
-G_DEFINE_TYPE_WITH_CODE (NautilusShortcutsModel, _nautilus_shortcuts_model, GTK_TYPE_LIST_STORE,
+GType _nemo_shortcuts_model_get_type (void);
+static void _nemo_shortcuts_model_drag_source_init (GtkTreeDragSourceIface *iface);
+G_DEFINE_TYPE_WITH_CODE (NemoShortcutsModel, _nemo_shortcuts_model, GTK_TYPE_LIST_STORE,
 			 G_IMPLEMENT_INTERFACE (GTK_TYPE_TREE_DRAG_SOURCE,
-						_nautilus_shortcuts_model_drag_source_init));
-static GtkListStore *nautilus_shortcuts_model_new (NautilusPlacesSidebar *sidebar);
+						_nemo_shortcuts_model_drag_source_init));
+static GtkListStore *nemo_shortcuts_model_new (NemoPlacesSidebar *sidebar);
 
-G_DEFINE_TYPE (NautilusPlacesSidebar, nautilus_places_sidebar, GTK_TYPE_SCROLLED_WINDOW);
+G_DEFINE_TYPE (NemoPlacesSidebar, nemo_places_sidebar, GTK_TYPE_SCROLLED_WINDOW);
 
 static GdkPixbuf *
-get_eject_icon (NautilusPlacesSidebar *sidebar,
+get_eject_icon (NemoPlacesSidebar *sidebar,
 		gboolean highlighted)
 {
 	GdkPixbuf *eject;
@@ -221,7 +221,7 @@ get_eject_icon (NautilusPlacesSidebar *sidebar,
 	GtkStateFlags state;
 
 	icon_theme = gtk_icon_theme_get_default ();
-	icon_size = nautilus_get_icon_size_for_stock_size (GTK_ICON_SIZE_MENU);
+	icon_size = nemo_get_icon_size_for_stock_size (GTK_ICON_SIZE_MENU);
 	icon = g_themed_icon_new_with_default_fallbacks ("media-eject-symbolic");
 	icon_info = gtk_icon_theme_lookup_by_gicon (icon_theme, icon, icon_size, 0);
 
@@ -261,21 +261,21 @@ get_eject_icon (NautilusPlacesSidebar *sidebar,
 static gboolean
 should_show_desktop (void)
 {
-	return g_settings_get_boolean (gnome_background_preferences, NAUTILUS_PREFERENCES_SHOW_DESKTOP) &&
-	       !g_settings_get_boolean (nautilus_preferences, NAUTILUS_PREFERENCES_DESKTOP_IS_HOME_DIR);
+	return g_settings_get_boolean (gnome_background_preferences, NEMO_PREFERENCES_SHOW_DESKTOP) &&
+	       !g_settings_get_boolean (nemo_preferences, NEMO_PREFERENCES_DESKTOP_IS_HOME_DIR);
 }
 
 static gboolean
-is_built_in_bookmark (NautilusFile *file)
+is_built_in_bookmark (NemoFile *file)
 {
 	gboolean built_in;
 	gint idx;
 
-	if (nautilus_file_is_home (file)) {
+	if (nemo_file_is_home (file)) {
 		return TRUE;
 	}
 
-	if (nautilus_file_is_desktop_directory (file) && !should_show_desktop ()) {
+	if (nemo_file_is_desktop_directory (file) && !should_show_desktop ()) {
 		return FALSE;
 	}
 
@@ -283,7 +283,7 @@ is_built_in_bookmark (NautilusFile *file)
 
 	for (idx = 0; idx < G_USER_N_DIRECTORIES; idx++) {
 		/* PUBLIC_SHARE and TEMPLATES are not in our built-in list */
-		if (nautilus_file_is_user_special_directory (file, idx)) {
+		if (nemo_file_is_user_special_directory (file, idx)) {
 			if (idx != G_USER_DIRECTORY_PUBLIC_SHARE &&  idx != G_USER_DIRECTORY_TEMPLATES) {
 				built_in = TRUE;
 			}
@@ -296,7 +296,7 @@ is_built_in_bookmark (NautilusFile *file)
 }
 
 static GtkTreeIter
-add_heading (NautilusPlacesSidebar *sidebar,
+add_heading (NemoPlacesSidebar *sidebar,
 	     SectionType section_type,
 	     const gchar *title)
 {
@@ -315,7 +315,7 @@ add_heading (NautilusPlacesSidebar *sidebar,
 }
 
 static void
-check_heading_for_section (NautilusPlacesSidebar *sidebar,
+check_heading_for_section (NemoPlacesSidebar *sidebar,
 			   SectionType section_type)
 {
 	switch (section_type) {
@@ -341,7 +341,7 @@ check_heading_for_section (NautilusPlacesSidebar *sidebar,
 }
 
 static void
-add_place (NautilusPlacesSidebar *sidebar,
+add_place (NemoPlacesSidebar *sidebar,
 	   PlaceType place_type,
 	   SectionType section_type,
 	   const char *name,
@@ -356,17 +356,17 @@ add_place (NautilusPlacesSidebar *sidebar,
 	GdkPixbuf            *pixbuf;
 	GtkTreeIter           iter;
 	GdkPixbuf	     *eject;
-	NautilusIconInfo *icon_info;
+	NemoIconInfo *icon_info;
 	int icon_size;
 	gboolean show_eject, show_unmount;
 	gboolean show_eject_button;
 
 	check_heading_for_section (sidebar, section_type);
 
-	icon_size = nautilus_get_icon_size_for_stock_size (GTK_ICON_SIZE_MENU);
-	icon_info = nautilus_icon_info_lookup (icon, icon_size);
+	icon_size = nemo_get_icon_size_for_stock_size (GTK_ICON_SIZE_MENU);
+	icon_info = nemo_icon_info_lookup (icon, icon_size);
 
-	pixbuf = nautilus_icon_info_get_pixbuf_at_size (icon_info, icon_size);
+	pixbuf = nemo_icon_info_get_pixbuf_at_size (icon_info, icon_size);
 	g_object_unref (icon_info);
 
 	check_unmount_and_eject (mount, volume, drive,
@@ -414,7 +414,7 @@ add_place (NautilusPlacesSidebar *sidebar,
 typedef struct {
 	const gchar *location;
 	const gchar *last_uri;
-	NautilusPlacesSidebar *sidebar;
+	NemoPlacesSidebar *sidebar;
 	GtkTreePath *path;
 } RestoreLocationData;
 
@@ -442,7 +442,7 @@ restore_selection_foreach (GtkTreeModel *model,
 }
 
 static void
-sidebar_update_restore_selection (NautilusPlacesSidebar *sidebar,
+sidebar_update_restore_selection (NemoPlacesSidebar *sidebar,
 				  const gchar *location,
 				  const gchar *last_uri)
 {
@@ -465,9 +465,9 @@ sidebar_update_restore_selection (NautilusPlacesSidebar *sidebar,
 }
 
 static void
-update_places (NautilusPlacesSidebar *sidebar)
+update_places (NemoPlacesSidebar *sidebar)
 {
-	NautilusBookmark *bookmark;
+	NemoBookmark *bookmark;
 	GtkTreeSelection *selection;
 	GtkTreeIter last_iter;
 	GtkTreeModel *model;
@@ -483,10 +483,10 @@ update_places (NautilusPlacesSidebar *sidebar)
 	const gchar *path, *bookmark_name;
 	GIcon *icon;
 	GFile *root;
-	NautilusWindowSlot *slot;
+	NemoWindowSlot *slot;
 	char *tooltip;
 	GList *network_mounts, *network_volumes;
-	NautilusFile *file;
+	NemoFile *file;
 
 	DEBUG ("Updating places sidebar");
 
@@ -504,8 +504,8 @@ update_places (NautilusPlacesSidebar *sidebar)
 	sidebar->devices_header_added = FALSE;
 	sidebar->bookmarks_header_added = FALSE;
 
-	slot = nautilus_window_get_active_slot (sidebar->window);
-	location = nautilus_window_slot_get_current_uri (slot);
+	slot = nemo_window_get_active_slot (sidebar->window);
+	location = nemo_window_slot_get_current_uri (slot);
 
 	network_mounts = network_volumes = NULL;
 	volume_monitor = sidebar->volume_monitor;
@@ -652,28 +652,28 @@ update_places (NautilusPlacesSidebar *sidebar)
 	g_list_free (volumes);
 	
 	/* add bookmarks */
-	bookmark_count = nautilus_bookmark_list_length (sidebar->bookmarks);
+	bookmark_count = nemo_bookmark_list_length (sidebar->bookmarks);
 
 	for (index = 0; index < bookmark_count; ++index) {
-		bookmark = nautilus_bookmark_list_item_at (sidebar->bookmarks, index);
+		bookmark = nemo_bookmark_list_item_at (sidebar->bookmarks, index);
 
-		if (nautilus_bookmark_uri_known_not_to_exist (bookmark)) {
+		if (nemo_bookmark_uri_known_not_to_exist (bookmark)) {
 			continue;
 		}
 
-		root = nautilus_bookmark_get_location (bookmark);
-		file = nautilus_file_get (root);
+		root = nemo_bookmark_get_location (bookmark);
+		file = nemo_file_get (root);
 
 		if (is_built_in_bookmark (file)) {
 			g_object_unref (root);
-			nautilus_file_unref (file);
+			nemo_file_unref (file);
 			continue;
 		}
-		nautilus_file_unref (file);
+		nemo_file_unref (file);
 
-		bookmark_name = nautilus_bookmark_get_name (bookmark);
-		icon = nautilus_bookmark_get_icon (bookmark);
-		mount_uri = nautilus_bookmark_get_uri (bookmark);
+		bookmark_name = nemo_bookmark_get_name (bookmark);
+		icon = nemo_bookmark_get_icon (bookmark);
+		mount_uri = nemo_bookmark_get_uri (bookmark);
 		tooltip = g_file_get_parse_name (root);
 
 		add_place (sidebar, PLACES_BOOKMARK,
@@ -693,8 +693,8 @@ update_places (NautilusPlacesSidebar *sidebar)
 	/* add built in bookmarks */
 
 	/* home folder */
-	mount_uri = nautilus_get_home_directory_uri ();
-	icon = g_themed_icon_new (NAUTILUS_ICON_HOME);
+	mount_uri = nemo_get_home_directory_uri ();
+	icon = g_themed_icon_new (NEMO_ICON_HOME);
 	add_place (sidebar, PLACES_BUILT_IN,
 		   SECTION_COMPUTER,
 		   _("Home"), icon,
@@ -705,9 +705,9 @@ update_places (NautilusPlacesSidebar *sidebar)
 
 	if (should_show_desktop ()) {
 		/* desktop */
-		desktop_path = nautilus_get_desktop_directory ();
+		desktop_path = nemo_get_desktop_directory ();
 		mount_uri = g_filename_to_uri (desktop_path, NULL, NULL);
-		icon = g_themed_icon_new (NAUTILUS_ICON_DESKTOP);
+		icon = g_themed_icon_new (NEMO_ICON_DESKTOP);
 		add_place (sidebar, PLACES_BUILT_IN,
 			   SECTION_COMPUTER,
 			   _("Desktop"), icon,
@@ -740,7 +740,7 @@ update_places (NautilusPlacesSidebar *sidebar)
 
 		root = g_file_new_for_path (path);
 		name = g_file_get_basename (root);
-		icon = nautilus_user_special_directory_get_gicon (index);
+		icon = nemo_user_special_directory_get_gicon (index);
 		mount_uri = g_file_get_uri (root);
 		tooltip = g_file_get_parse_name (root);
 
@@ -797,7 +797,7 @@ update_places (NautilusPlacesSidebar *sidebar)
 
 	/* file system root */
  	mount_uri = "file:///"; /* No need to strdup */
-	icon = g_themed_icon_new (NAUTILUS_ICON_FILESYSTEM);
+	icon = g_themed_icon_new (NEMO_ICON_FILESYSTEM);
 	add_place (sidebar, PLACES_BUILT_IN,
 		   SECTION_COMPUTER,
 		   _("File System"), icon,
@@ -806,7 +806,7 @@ update_places (NautilusPlacesSidebar *sidebar)
 	g_object_unref (icon);
 
 	mount_uri = "trash:///"; /* No need to strdup */
-	icon = nautilus_trash_monitor_get_icon ();
+	icon = nemo_trash_monitor_get_icon ();
 	add_place (sidebar, PLACES_BUILT_IN,
 		   SECTION_COMPUTER,
 		   _("Trash"), icon, mount_uri,
@@ -866,7 +866,7 @@ update_places (NautilusPlacesSidebar *sidebar)
 
 	/* network:// */
  	mount_uri = "network:///"; /* No need to strdup */
-	icon = g_themed_icon_new (NAUTILUS_ICON_NETWORK);
+	icon = g_themed_icon_new (NEMO_ICON_NETWORK);
 	add_place (sidebar, PLACES_BUILT_IN,
 		   SECTION_NETWORK,
 		   _("Browse Network"), icon,
@@ -884,7 +884,7 @@ update_places (NautilusPlacesSidebar *sidebar)
 static void
 mount_added_callback (GVolumeMonitor *volume_monitor,
 		      GMount *mount,
-		      NautilusPlacesSidebar *sidebar)
+		      NemoPlacesSidebar *sidebar)
 {
 	update_places (sidebar);
 }
@@ -892,7 +892,7 @@ mount_added_callback (GVolumeMonitor *volume_monitor,
 static void
 mount_removed_callback (GVolumeMonitor *volume_monitor,
 			GMount *mount,
-			NautilusPlacesSidebar *sidebar)
+			NemoPlacesSidebar *sidebar)
 {
 	update_places (sidebar);
 }
@@ -900,7 +900,7 @@ mount_removed_callback (GVolumeMonitor *volume_monitor,
 static void
 mount_changed_callback (GVolumeMonitor *volume_monitor,
 			GMount *mount,
-			NautilusPlacesSidebar *sidebar)
+			NemoPlacesSidebar *sidebar)
 {
 	update_places (sidebar);
 }
@@ -908,7 +908,7 @@ mount_changed_callback (GVolumeMonitor *volume_monitor,
 static void
 volume_added_callback (GVolumeMonitor *volume_monitor,
 		       GVolume *volume,
-		       NautilusPlacesSidebar *sidebar)
+		       NemoPlacesSidebar *sidebar)
 {
 	update_places (sidebar);
 }
@@ -916,7 +916,7 @@ volume_added_callback (GVolumeMonitor *volume_monitor,
 static void
 volume_removed_callback (GVolumeMonitor *volume_monitor,
 			 GVolume *volume,
-			 NautilusPlacesSidebar *sidebar)
+			 NemoPlacesSidebar *sidebar)
 {
 	update_places (sidebar);
 }
@@ -924,7 +924,7 @@ volume_removed_callback (GVolumeMonitor *volume_monitor,
 static void
 volume_changed_callback (GVolumeMonitor *volume_monitor,
 			 GVolume *volume,
-			 NautilusPlacesSidebar *sidebar)
+			 NemoPlacesSidebar *sidebar)
 {
 	update_places (sidebar);
 }
@@ -932,7 +932,7 @@ volume_changed_callback (GVolumeMonitor *volume_monitor,
 static void
 drive_disconnected_callback (GVolumeMonitor *volume_monitor,
 			     GDrive         *drive,
-			     NautilusPlacesSidebar *sidebar)
+			     NemoPlacesSidebar *sidebar)
 {
 	update_places (sidebar);
 }
@@ -940,7 +940,7 @@ drive_disconnected_callback (GVolumeMonitor *volume_monitor,
 static void
 drive_connected_callback (GVolumeMonitor *volume_monitor,
 			  GDrive         *drive,
-			  NautilusPlacesSidebar *sidebar)
+			  NemoPlacesSidebar *sidebar)
 {
 	update_places (sidebar);
 }
@@ -948,13 +948,13 @@ drive_connected_callback (GVolumeMonitor *volume_monitor,
 static void
 drive_changed_callback (GVolumeMonitor *volume_monitor,
 			GDrive         *drive,
-			NautilusPlacesSidebar *sidebar)
+			NemoPlacesSidebar *sidebar)
 {
 	update_places (sidebar);
 }
 
 static gboolean
-over_eject_button (NautilusPlacesSidebar *sidebar,
+over_eject_button (NemoPlacesSidebar *sidebar,
 		   gint x,
 		   gint y,
 		   GtkTreePath **path)
@@ -995,7 +995,7 @@ over_eject_button (NautilusPlacesSidebar *sidebar,
 							sidebar->eject_icon_cell_renderer,
 							&x_offset, &width);
 
-		eject_button_size = nautilus_get_icon_size_for_stock_size (GTK_ICON_SIZE_MENU);
+		eject_button_size = nemo_get_icon_size_for_stock_size (GTK_ICON_SIZE_MENU);
 
 		/* This is kinda weird, but we have to do it to workaround gtk+ expanding
 		 * the eject cell renderer (even thought we told it not to) and we then
@@ -1018,7 +1018,7 @@ over_eject_button (NautilusPlacesSidebar *sidebar,
 }
 
 static gboolean
-clicked_eject_button (NautilusPlacesSidebar *sidebar,
+clicked_eject_button (NemoPlacesSidebar *sidebar,
 		      GtkTreePath **path)
 {
 	GdkEvent *event = gtk_get_current_event ();
@@ -1035,17 +1035,17 @@ clicked_eject_button (NautilusPlacesSidebar *sidebar,
 static void
 desktop_setting_changed_callback (gpointer user_data)
 {
-	NautilusPlacesSidebar *sidebar;
+	NemoPlacesSidebar *sidebar;
 
-	sidebar = NAUTILUS_PLACES_SIDEBAR (user_data);
+	sidebar = NEMO_PLACES_SIDEBAR (user_data);
 
 	update_places (sidebar);
 }
 
 static void
-loading_uri_callback (NautilusWindow *window,
+loading_uri_callback (NemoWindow *window,
 		      char *location,
-		      NautilusPlacesSidebar *sidebar)
+		      NemoPlacesSidebar *sidebar)
 {
 	GtkTreeSelection *selection;
 	GtkTreeIter 	 iter;
@@ -1087,7 +1087,7 @@ compute_drop_position (GtkTreeView *tree_view,
 		       int                      y,
 		       GtkTreePath            **path,
 		       GtkTreeViewDropPosition *pos,
-		       NautilusPlacesSidebar *sidebar)
+		       NemoPlacesSidebar *sidebar)
 {
 	GtkTreeModel *model;
 	GtkTreeIter iter;
@@ -1108,11 +1108,12 @@ compute_drop_position (GtkTreeView *tree_view,
 			    PLACES_SIDEBAR_COLUMN_SECTION_TYPE, &section_type,
 			    -1);
 
-	if (place_type == PLACES_HEADING && section_type != SECTION_BOOKMARKS) {
+	if (section_type != SECTION_BOOKMARKS &&
+	    place_type == PLACES_HEADING) {
 		/* never drop on headings, but special case the bookmarks heading,
-		 * so we can drop bookmarks in between it and the first item.
+		 * so we can drop bookmarks in between it and the first item when
+		 * reordering.
 		 */
-
 		gtk_tree_path_free (*path);
 		*path = NULL;
 		
@@ -1123,25 +1124,18 @@ compute_drop_position (GtkTreeView *tree_view,
 	    sidebar->drag_data_received &&
 	    sidebar->drag_data_info == GTK_TREE_MODEL_ROW) {
 		/* don't allow dropping bookmarks into non-bookmark areas */
-
 		gtk_tree_path_free (*path);
 		*path = NULL;
 
 		return FALSE;
 	}
 
-	if (section_type == SECTION_BOOKMARKS) {
+	if (sidebar->drag_data_received &&
+	    sidebar->drag_data_info == GTK_TREE_MODEL_ROW) {
+		/* bookmark rows can only be reordered */
 		*pos = GTK_TREE_VIEW_DROP_AFTER;
 	} else {
-		/* non-bookmark shortcuts can only be dragged into */
 		*pos = GTK_TREE_VIEW_DROP_INTO_OR_BEFORE;
-	}
-
-	if (*pos != GTK_TREE_VIEW_DROP_BEFORE &&
-	    sidebar->drag_data_received &&
-	    sidebar->drag_data_info == GTK_TREE_MODEL_ROW) {
-		/* bookmark rows are never dragged into other bookmark rows */
-		*pos = GTK_TREE_VIEW_DROP_AFTER;
 	}
 
 	return TRUE;
@@ -1169,44 +1163,14 @@ get_drag_data (GtkTreeView *tree_view,
 }
 
 static void
-free_drag_data (NautilusPlacesSidebar *sidebar)
+free_drag_data (NemoPlacesSidebar *sidebar)
 {
 	sidebar->drag_data_received = FALSE;
 
 	if (sidebar->drag_list) {
-		nautilus_drag_destroy_selection_list (sidebar->drag_list);
+		nemo_drag_destroy_selection_list (sidebar->drag_list);
 		sidebar->drag_list = NULL;
 	}
-}
-
-static gboolean
-can_accept_file_as_bookmark (NautilusFile *file)
-{
-	return (nautilus_file_is_directory (file) &&
-		!is_built_in_bookmark (file));
-}
-
-static gboolean
-can_accept_items_as_bookmarks (const GList *items)
-{
-	int max;
-	char *uri;
-	NautilusFile *file;
-
-	/* Iterate through selection checking if item will get accepted as a bookmark.
-	 * If more than 100 items selected, return an over-optimistic result.
-	 */
-	for (max = 100; items != NULL && max >= 0; items = items->next, max--) {
-		uri = ((NautilusDragSelectionItem *)items->data)->uri;
-		file = nautilus_file_get_by_uri (uri);
-		if (!can_accept_file_as_bookmark (file)) {
-			nautilus_file_unref (file);
-			return FALSE;
-		}
-		nautilus_file_unref (file);
-	}
-	
-	return TRUE;
 }
 
 static gboolean
@@ -1215,7 +1179,7 @@ drag_motion_callback (GtkTreeView *tree_view,
 		      int x,
 		      int y,
 		      unsigned int time,
-		      NautilusPlacesSidebar *sidebar)
+		      NemoPlacesSidebar *sidebar)
 {
 	GtkTreePath *path;
 	GtkTreeViewDropPosition pos;
@@ -1237,13 +1201,10 @@ drag_motion_callback (GtkTreeView *tree_view,
 		goto out;
 	}
 
-	if (pos == GTK_TREE_VIEW_DROP_BEFORE ||
-	    pos == GTK_TREE_VIEW_DROP_AFTER ) {
+	if (pos == GTK_TREE_VIEW_DROP_AFTER ) {
 		if (sidebar->drag_data_received &&
 		    sidebar->drag_data_info == GTK_TREE_MODEL_ROW) {
 			action = GDK_ACTION_MOVE;
-		} else if (can_accept_items_as_bookmarks (sidebar->drag_list)) {
-			action = GDK_ACTION_COPY;
 		} else {
 			action = 0;
 		}
@@ -1257,7 +1218,7 @@ drag_motion_callback (GtkTreeView *tree_view,
 					    &iter,
 					    PLACES_SIDEBAR_COLUMN_URI, &uri,
 					    -1);
-			nautilus_drag_default_drop_action_for_icons (context, uri,
+			nemo_drag_default_drop_action_for_icons (context, uri,
 								     sidebar->drag_list,
 								     &action);
 			g_free (uri);
@@ -1288,61 +1249,17 @@ static void
 drag_leave_callback (GtkTreeView *tree_view,
 		     GdkDragContext *context,
 		     unsigned int time,
-		     NautilusPlacesSidebar *sidebar)
+		     NemoPlacesSidebar *sidebar)
 {
 	free_drag_data (sidebar);
-	gtk_tree_view_set_drag_dest_row (tree_view, NULL, GTK_TREE_VIEW_DROP_BEFORE);
+	gtk_tree_view_set_drag_dest_row (tree_view, NULL, 0);
 	g_signal_stop_emission_by_name (tree_view, "drag-leave");
-}
-
-/* Parses a "text/uri-list" string and inserts its URIs as bookmarks */
-static void
-bookmarks_drop_uris (NautilusPlacesSidebar *sidebar,
-		     GtkSelectionData      *selection_data,
-		     int                    position)
-{
-	NautilusBookmark *bookmark;
-	NautilusFile *file;
-	char *uri;
-	char **uris;
-	int i;
-	GFile *location;
-	
-	uris = gtk_selection_data_get_uris (selection_data);
-	if (!uris)
-		return;
-	
-	for (i = 0; uris[i]; i++) {
-		uri = uris[i];
-		file = nautilus_file_get_by_uri (uri);
-
-		if (!can_accept_file_as_bookmark (file)) {
-			nautilus_file_unref (file);
-			continue;
-		}
-
-		uri = nautilus_file_get_drop_target_uri (file);
-		location = g_file_new_for_uri (uri);
-		nautilus_file_unref (file);
-
-		bookmark = nautilus_bookmark_new (location, NULL, NULL);
-
-		if (!nautilus_bookmark_list_contains (sidebar->bookmarks, bookmark)) {
-			nautilus_bookmark_list_insert_item (sidebar->bookmarks, bookmark, position++);
-		}
-
-		g_object_unref (location);
-		g_object_unref (bookmark);
-		g_free (uri);
-	}
-
-	g_strfreev (uris);
 }
 
 static GList *
 uri_list_from_selection (GList *selection)
 {
-	NautilusDragSelectionItem *item;
+	NemoDragSelectionItem *item;
 	GList *ret;
 	GList *l;
 	
@@ -1358,7 +1275,7 @@ uri_list_from_selection (GList *selection)
 static GList*
 build_selection_list (const char *data)
 {
-	NautilusDragSelectionItem *item;
+	NemoDragSelectionItem *item;
 	GList *result;
 	char **uris;
 	char *uri;
@@ -1369,7 +1286,7 @@ build_selection_list (const char *data)
 	result = NULL;
 	for (i = 0; uris[i]; i++) {
 		uri = uris[i];
-		item = nautilus_drag_selection_item_new ();
+		item = nemo_drag_selection_item_new ();
 		item->uri = g_strdup (uri);
 		item->got_icon_position = FALSE;
 		result = g_list_prepend (result, item);
@@ -1381,7 +1298,7 @@ build_selection_list (const char *data)
 }
 
 static gboolean
-get_selected_iter (NautilusPlacesSidebar *sidebar,
+get_selected_iter (NemoPlacesSidebar *sidebar,
 		   GtkTreeIter *iter)
 {
 	GtkTreeSelection *selection;
@@ -1393,7 +1310,7 @@ get_selected_iter (NautilusPlacesSidebar *sidebar,
 
 /* Reorders the selected bookmark to the specified position */
 static void
-reorder_bookmarks (NautilusPlacesSidebar *sidebar,
+reorder_bookmarks (NemoPlacesSidebar *sidebar,
 		   int                   new_position)
 {
 	GtkTreeIter iter;
@@ -1412,11 +1329,11 @@ reorder_bookmarks (NautilusPlacesSidebar *sidebar,
 
 	if (type != PLACES_BOOKMARK ||
 	    old_position < 0 ||
-	    old_position >= nautilus_bookmark_list_length (sidebar->bookmarks)) {
+	    old_position >= nemo_bookmark_list_length (sidebar->bookmarks)) {
 		return;
 	}
 
-	nautilus_bookmark_list_move_item (sidebar->bookmarks, old_position,
+	nemo_bookmark_list_move_item (sidebar->bookmarks, old_position,
 					  new_position);
 }
 
@@ -1428,7 +1345,7 @@ drag_data_received_callback (GtkWidget *widget,
 			     GtkSelectionData *selection_data,
 			     unsigned int info,
 			     unsigned int time,
-			     NautilusPlacesSidebar *sidebar)
+			     NemoPlacesSidebar *sidebar)
 {
 	GtkTreeView *tree_view;
 	GtkTreePath *tree_path;
@@ -1469,8 +1386,7 @@ drag_data_received_callback (GtkWidget *widget,
 
 	success = FALSE;
 
-	if (tree_pos == GTK_TREE_VIEW_DROP_BEFORE ||
-	    tree_pos == GTK_TREE_VIEW_DROP_AFTER) {
+	if (tree_pos == GTK_TREE_VIEW_DROP_AFTER) {
 		model = gtk_tree_view_get_model (tree_view);
 
 		if (!gtk_tree_model_get_iter (model, &iter, tree_path)) {
@@ -1493,10 +1409,6 @@ drag_data_received_callback (GtkWidget *widget,
 		}
 
 		switch (info) {
-		case TEXT_URI_LIST:
-			bookmarks_drop_uris (sidebar, selection_data, position);
-			success = TRUE;
-			break;
 		case GTK_TREE_MODEL_ROW:
 			reorder_bookmarks (sidebar, position);
 			success = TRUE;
@@ -1513,7 +1425,7 @@ drag_data_received_callback (GtkWidget *widget,
 
 		if (real_action == GDK_ACTION_ASK) {
 			real_action =
-				nautilus_drag_drop_action_ask (GTK_WIDGET (tree_view),
+				nemo_drag_drop_action_ask (GTK_WIDGET (tree_view),
 							       gdk_drag_context_get_actions (context));
 		}
 
@@ -1529,10 +1441,10 @@ drag_data_received_callback (GtkWidget *widget,
 			case TEXT_URI_LIST:
 				selection_list = build_selection_list (gtk_selection_data_get_data (selection_data));
 				uris = uri_list_from_selection (selection_list);
-				nautilus_file_operations_copy_move (uris, NULL, drop_uri,
+				nemo_file_operations_copy_move (uris, NULL, drop_uri,
 								    real_action, GTK_WIDGET (tree_view),
 								    NULL, NULL);
-				nautilus_drag_destroy_selection_list (selection_list);
+				nemo_drag_destroy_selection_list (selection_list);
 				g_list_free (uris);
 				success = TRUE;
 				break;
@@ -1562,7 +1474,7 @@ drag_drop_callback (GtkTreeView *tree_view,
 		    int x,
 		    int y,
 		    unsigned int time,
-		    NautilusPlacesSidebar *sidebar)
+		    NemoPlacesSidebar *sidebar)
 {
 	gboolean retval = FALSE;
 	sidebar->drop_occured = TRUE;
@@ -1576,10 +1488,10 @@ static void
 bookmarks_popup_menu_detach_cb (GtkWidget *attach_widget,
 				GtkMenu   *menu)
 {
-	NautilusPlacesSidebar *sidebar;
+	NemoPlacesSidebar *sidebar;
 	
-	sidebar = NAUTILUS_PLACES_SIDEBAR (attach_widget);
-	g_assert (NAUTILUS_IS_PLACES_SIDEBAR (sidebar));
+	sidebar = NEMO_PLACES_SIDEBAR (attach_widget);
+	g_assert (NEMO_IS_PLACES_SIDEBAR (sidebar));
 	
 	sidebar->popup_menu = NULL;
 	sidebar->popup_menu_add_shortcut_item = NULL;
@@ -1658,7 +1570,7 @@ check_visibility (GMount           *mount,
 }
 
 static void
-bookmarks_check_popup_sensitivity (NautilusPlacesSidebar *sidebar)
+bookmarks_check_popup_sensitivity (NemoPlacesSidebar *sidebar)
 {
 	GtkTreeIter iter;
 	PlaceType type; 
@@ -1666,7 +1578,7 @@ bookmarks_check_popup_sensitivity (NautilusPlacesSidebar *sidebar)
 	GVolume *volume = NULL;
 	GMount *mount = NULL;
 	GFile *location;
-	NautilusDirectory *directory;
+	NemoDirectory *directory;
 	gboolean show_mount;
 	gboolean show_unmount;
 	gboolean show_eject;
@@ -1697,7 +1609,7 @@ bookmarks_check_popup_sensitivity (NautilusPlacesSidebar *sidebar)
 
 	gtk_widget_set_sensitive (sidebar->popup_menu_remove_item, (type == PLACES_BOOKMARK));
 	gtk_widget_set_sensitive (sidebar->popup_menu_rename_item, (type == PLACES_BOOKMARK));
-	gtk_widget_set_sensitive (sidebar->popup_menu_empty_trash_item, !nautilus_trash_monitor_is_empty ());
+	gtk_widget_set_sensitive (sidebar->popup_menu_empty_trash_item, !nemo_trash_monitor_is_empty ());
 
  	check_visibility (mount, volume, drive,
  			  &show_mount, &show_unmount, &show_eject, &show_rescan, &show_start, &show_stop);
@@ -1713,11 +1625,11 @@ bookmarks_check_popup_sensitivity (NautilusPlacesSidebar *sidebar)
 	show_properties = (mount != NULL);
 	if (mount != NULL) {
 		location = g_mount_get_default_location (mount);
-		directory = nautilus_directory_get (location);
+		directory = nemo_directory_get (location);
 
-		show_properties = nautilus_directory_is_local (directory);
+		show_properties = nemo_directory_is_local (directory);
 
-		nautilus_directory_unref (directory);
+		nemo_directory_unref (directory);
 		g_object_unref (location);
 	}
 
@@ -1771,7 +1683,7 @@ bookmarks_check_popup_sensitivity (NautilusPlacesSidebar *sidebar)
 /* Callback used when the selection in the shortcuts tree changes */
 static void
 bookmarks_selection_changed_cb (GtkTreeSelection      *selection,
-				NautilusPlacesSidebar *sidebar)
+				NemoPlacesSidebar *sidebar)
 {
 	bookmarks_check_popup_sensitivity (sidebar);
 }
@@ -1782,10 +1694,10 @@ volume_mounted_cb (GVolume *volume,
 		   GObject *user_data)
 {
 	GMount *mount;
-	NautilusPlacesSidebar *sidebar;
+	NemoPlacesSidebar *sidebar;
 	GFile *location;
 
-	sidebar = NAUTILUS_PLACES_SIDEBAR (user_data);
+	sidebar = NEMO_PLACES_SIDEBAR (user_data);
 
 	sidebar->mounting = FALSE;
 
@@ -1794,16 +1706,16 @@ volume_mounted_cb (GVolume *volume,
 		location = g_mount_get_default_location (mount);
 
 		if (sidebar->go_to_after_mount_slot != NULL) {
-			if ((sidebar->go_to_after_mount_flags & NAUTILUS_WINDOW_OPEN_FLAG_NEW_WINDOW) == 0) {
-				nautilus_window_slot_open_location (sidebar->go_to_after_mount_slot, location,
+			if ((sidebar->go_to_after_mount_flags & NEMO_WINDOW_OPEN_FLAG_NEW_WINDOW) == 0) {
+				nemo_window_slot_open_location (sidebar->go_to_after_mount_slot, location,
 								    sidebar->go_to_after_mount_flags, NULL);
 			} else {
-				NautilusWindow *new, *cur;
+				NemoWindow *new, *cur;
 
-				cur = NAUTILUS_WINDOW (sidebar->window);
-				new = nautilus_application_create_window (nautilus_application_get_singleton (),
+				cur = NEMO_WINDOW (sidebar->window);
+				new = nemo_application_create_window (nemo_application_get_singleton (),
 									  gtk_window_get_screen (GTK_WINDOW (cur)));
-				nautilus_window_go_to (new, location);
+				nemo_window_go_to (new, location);
 			}
 		}
 
@@ -1840,12 +1752,12 @@ drive_start_from_bookmark_cb (GObject      *source_object,
 }
 
 static void
-open_selected_bookmark (NautilusPlacesSidebar *sidebar,
+open_selected_bookmark (NemoPlacesSidebar *sidebar,
 			GtkTreeModel	      *model,
 			GtkTreeIter	      *iter,
-			NautilusWindowOpenFlags	      flags)
+			NemoWindowOpenFlags	      flags)
 {
-	NautilusWindowSlot *slot;
+	NemoWindowSlot *slot;
 	GFile *location;
 	char *uri;
 
@@ -1860,17 +1772,17 @@ open_selected_bookmark (NautilusPlacesSidebar *sidebar,
 
 		location = g_file_new_for_uri (uri);
 		/* Navigate to the clicked location */
-		if ((flags & NAUTILUS_WINDOW_OPEN_FLAG_NEW_WINDOW) == 0) {
-			slot = nautilus_window_get_active_slot (sidebar->window);
-			nautilus_window_slot_open_location (slot, location,
+		if ((flags & NEMO_WINDOW_OPEN_FLAG_NEW_WINDOW) == 0) {
+			slot = nemo_window_get_active_slot (sidebar->window);
+			nemo_window_slot_open_location (slot, location,
 							    flags, NULL);
 		} else {
-			NautilusWindow *cur, *new;
+			NemoWindow *cur, *new;
 			
-			cur = NAUTILUS_WINDOW (sidebar->window);
-			new = nautilus_application_create_window (nautilus_application_get_singleton (),
+			cur = NEMO_WINDOW (sidebar->window);
+			new = nemo_application_create_window (nemo_application_get_singleton (),
 								  gtk_window_get_screen (GTK_WINDOW (cur)));
-			nautilus_window_go_to (new, location);
+			nemo_window_go_to (new, location);
 		}
 		g_object_unref (location);
 		g_free (uri);
@@ -1878,7 +1790,7 @@ open_selected_bookmark (NautilusPlacesSidebar *sidebar,
 	} else {
 		GDrive *drive;
 		GVolume *volume;
-		NautilusWindowSlot *slot;
+		NemoWindowSlot *slot;
 
 		gtk_tree_model_get (model, iter,
 				    PLACES_SIDEBAR_COLUMN_DRIVE, &drive,
@@ -1890,13 +1802,13 @@ open_selected_bookmark (NautilusPlacesSidebar *sidebar,
 
 			g_assert (sidebar->go_to_after_mount_slot == NULL);
 
-			slot = nautilus_window_get_active_slot (sidebar->window);
+			slot = nemo_window_get_active_slot (sidebar->window);
 			sidebar->go_to_after_mount_slot = slot;
 			eel_add_weak_pointer (&(sidebar->go_to_after_mount_slot));
 
 			sidebar->go_to_after_mount_flags = flags;
 
-			nautilus_file_operations_mount_volume_full (NULL, volume,
+			nemo_file_operations_mount_volume_full (NULL, volume,
 								    volume_mounted_cb,
 								    G_OBJECT (sidebar));
 		} else if (volume == NULL && drive != NULL &&
@@ -1916,8 +1828,8 @@ open_selected_bookmark (NautilusPlacesSidebar *sidebar,
 }
 
 static void
-open_shortcut_from_menu (NautilusPlacesSidebar *sidebar,
-			 NautilusWindowOpenFlags	       flags)
+open_shortcut_from_menu (NemoPlacesSidebar *sidebar,
+			 NemoWindowOpenFlags	       flags)
 {
 	GtkTreeModel *model;
 	GtkTreeIter iter;
@@ -1935,34 +1847,34 @@ open_shortcut_from_menu (NautilusPlacesSidebar *sidebar,
 
 static void
 open_shortcut_cb (GtkMenuItem		*item,
-		  NautilusPlacesSidebar	*sidebar)
+		  NemoPlacesSidebar	*sidebar)
 {
 	open_shortcut_from_menu (sidebar, 0);
 }
 
 static void
 open_shortcut_in_new_window_cb (GtkMenuItem	      *item,
-				NautilusPlacesSidebar *sidebar)
+				NemoPlacesSidebar *sidebar)
 {
-	open_shortcut_from_menu (sidebar, NAUTILUS_WINDOW_OPEN_FLAG_NEW_WINDOW);
+	open_shortcut_from_menu (sidebar, NEMO_WINDOW_OPEN_FLAG_NEW_WINDOW);
 }
 
 static void
 open_shortcut_in_new_tab_cb (GtkMenuItem	      *item,
-				NautilusPlacesSidebar *sidebar)
+				NemoPlacesSidebar *sidebar)
 {
-	open_shortcut_from_menu (sidebar, NAUTILUS_WINDOW_OPEN_FLAG_NEW_TAB);
+	open_shortcut_from_menu (sidebar, NEMO_WINDOW_OPEN_FLAG_NEW_TAB);
 }
 
 /* Add bookmark for the selected item */
 static void
-add_bookmark (NautilusPlacesSidebar *sidebar)
+add_bookmark (NemoPlacesSidebar *sidebar)
 {
 	GtkTreeModel *model;
 	GtkTreeIter iter;
 	char *uri;
 	GFile *location;
-	NautilusBookmark *bookmark;
+	NemoBookmark *bookmark;
 
 	model = gtk_tree_view_get_model (sidebar->tree_view);
 
@@ -1974,10 +1886,10 @@ add_bookmark (NautilusPlacesSidebar *sidebar)
 		}
 
 		location = g_file_new_for_uri (uri);
-		bookmark = nautilus_bookmark_new (location, NULL, NULL);
+		bookmark = nemo_bookmark_new (location, NULL, NULL);
 
-		if (!nautilus_bookmark_list_contains (sidebar->bookmarks, bookmark)) {
-			nautilus_bookmark_list_append (sidebar->bookmarks, bookmark);
+		if (!nemo_bookmark_list_contains (sidebar->bookmarks, bookmark)) {
+			nemo_bookmark_list_append (sidebar->bookmarks, bookmark);
 		}
 
 		g_object_unref (location);
@@ -1988,14 +1900,14 @@ add_bookmark (NautilusPlacesSidebar *sidebar)
 
 static void
 add_shortcut_cb (GtkMenuItem           *item,
-		 NautilusPlacesSidebar *sidebar)
+		 NemoPlacesSidebar *sidebar)
 {
 	add_bookmark (sidebar);
 }
 
 /* Rename the selected bookmark */
 static void
-rename_selected_bookmark (NautilusPlacesSidebar *sidebar)
+rename_selected_bookmark (NemoPlacesSidebar *sidebar)
 {
 	GtkTreeIter iter;
 	GtkTreePath *path;
@@ -2027,14 +1939,14 @@ rename_selected_bookmark (NautilusPlacesSidebar *sidebar)
 
 static void
 rename_shortcut_cb (GtkMenuItem           *item,
-		    NautilusPlacesSidebar *sidebar)
+		    NemoPlacesSidebar *sidebar)
 {
 	rename_selected_bookmark (sidebar);
 }
 
 /* Removes the selected bookmarks */
 static void
-remove_selected_bookmarks (NautilusPlacesSidebar *sidebar)
+remove_selected_bookmarks (NemoPlacesSidebar *sidebar)
 {
 	GtkTreeIter iter;
 	PlaceType type; 
@@ -2056,19 +1968,19 @@ remove_selected_bookmarks (NautilusPlacesSidebar *sidebar)
 			    PLACES_SIDEBAR_COLUMN_INDEX, &index,
 			    -1);
 
-	nautilus_bookmark_list_delete_item_at (sidebar->bookmarks, index);
+	nemo_bookmark_list_delete_item_at (sidebar->bookmarks, index);
 }
 
 static void
 remove_shortcut_cb (GtkMenuItem           *item,
-		    NautilusPlacesSidebar *sidebar)
+		    NemoPlacesSidebar *sidebar)
 {
 	remove_selected_bookmarks (sidebar);
 }
 
 static void
 mount_shortcut_cb (GtkMenuItem           *item,
-		   NautilusPlacesSidebar *sidebar)
+		   NemoPlacesSidebar *sidebar)
 {
 	GtkTreeIter iter;
 	GVolume *volume;
@@ -2082,7 +1994,7 @@ mount_shortcut_cb (GtkMenuItem           *item,
 			    -1);
 
 	if (volume != NULL) {
-		nautilus_file_operations_mount_volume (NULL, volume);
+		nemo_file_operations_mount_volume (NULL, volume);
 		g_object_unref (volume);
 	}
 }
@@ -2090,7 +2002,7 @@ mount_shortcut_cb (GtkMenuItem           *item,
 static void
 unmount_done (gpointer data)
 {
-	NautilusWindow *window;
+	NemoWindow *window;
 
 	window = data;
 	g_object_unref (window);
@@ -2098,17 +2010,17 @@ unmount_done (gpointer data)
 
 static void
 do_unmount (GMount *mount,
-	    NautilusPlacesSidebar *sidebar)
+	    NemoPlacesSidebar *sidebar)
 {
 	if (mount != NULL) {
-		nautilus_file_operations_unmount_mount_full (NULL, mount, FALSE, TRUE,
+		nemo_file_operations_unmount_mount_full (NULL, mount, FALSE, TRUE,
 							     unmount_done,
 							     g_object_ref (sidebar->window));
 	}
 }
 
 static void
-do_unmount_selection (NautilusPlacesSidebar *sidebar)
+do_unmount_selection (NemoPlacesSidebar *sidebar)
 {
 	GtkTreeIter iter;
 	GMount *mount;
@@ -2129,7 +2041,7 @@ do_unmount_selection (NautilusPlacesSidebar *sidebar)
 
 static void
 unmount_shortcut_cb (GtkMenuItem           *item,
-		     NautilusPlacesSidebar *sidebar)
+		     NemoPlacesSidebar *sidebar)
 {
 	do_unmount_selection (sidebar);
 }
@@ -2139,7 +2051,7 @@ drive_eject_cb (GObject *source_object,
 		GAsyncResult *res,
 		gpointer user_data)
 {
-	NautilusWindow *window;
+	NemoWindow *window;
 	GError *error;
 	char *primary;
 	char *name;
@@ -2167,7 +2079,7 @@ volume_eject_cb (GObject *source_object,
 		GAsyncResult *res,
 		gpointer user_data)
 {
-	NautilusWindow *window;
+	NemoWindow *window;
 	GError *error;
 	char *primary;
 	char *name;
@@ -2195,7 +2107,7 @@ mount_eject_cb (GObject *source_object,
 		GAsyncResult *res,
 		gpointer user_data)
 {
-	NautilusWindow *window;
+	NemoWindow *window;
 	GError *error;
 	char *primary;
 	char *name;
@@ -2222,7 +2134,7 @@ static void
 do_eject (GMount *mount,
 	  GVolume *volume,
 	  GDrive *drive,
-	  NautilusPlacesSidebar *sidebar)
+	  NemoPlacesSidebar *sidebar)
 {
 	GMountOperation *mount_op;
 
@@ -2242,7 +2154,7 @@ do_eject (GMount *mount,
 
 static void
 eject_shortcut_cb (GtkMenuItem           *item,
-		   NautilusPlacesSidebar *sidebar)
+		   NemoPlacesSidebar *sidebar)
 {
 	GtkTreeIter iter;
 	GMount *mount;
@@ -2263,7 +2175,7 @@ eject_shortcut_cb (GtkMenuItem           *item,
 }
 
 static gboolean
-eject_or_unmount_bookmark (NautilusPlacesSidebar *sidebar,
+eject_or_unmount_bookmark (NemoPlacesSidebar *sidebar,
 			   GtkTreePath *path)
 {
 	GtkTreeModel *model;
@@ -2312,7 +2224,7 @@ eject_or_unmount_bookmark (NautilusPlacesSidebar *sidebar,
 }
 
 static gboolean
-eject_or_unmount_selection (NautilusPlacesSidebar *sidebar)
+eject_or_unmount_selection (NemoPlacesSidebar *sidebar)
 {
 	GtkTreeIter iter;
 	GtkTreePath *path;
@@ -2360,7 +2272,7 @@ drive_poll_for_media_cb (GObject *source_object,
 
 static void
 rescan_shortcut_cb (GtkMenuItem           *item,
-		    NautilusPlacesSidebar *sidebar)
+		    NemoPlacesSidebar *sidebar)
 {
 	GtkTreeIter iter;
 	GDrive  *drive;
@@ -2405,7 +2317,7 @@ drive_start_cb (GObject      *source_object,
 
 static void
 start_shortcut_cb (GtkMenuItem           *item,
-		   NautilusPlacesSidebar *sidebar)
+		   NemoPlacesSidebar *sidebar)
 {
 	GtkTreeIter iter;
 	GDrive  *drive;
@@ -2435,7 +2347,7 @@ drive_stop_cb (GObject *source_object,
 	       GAsyncResult *res,
 	       gpointer user_data)
 {
-	NautilusWindow *window;
+	NemoWindow *window;
 	GError *error;
 	char *primary;
 	char *name;
@@ -2460,7 +2372,7 @@ drive_stop_cb (GObject *source_object,
 
 static void
 stop_shortcut_cb (GtkMenuItem           *item,
-		  NautilusPlacesSidebar *sidebar)
+		  NemoPlacesSidebar *sidebar)
 {
 	GtkTreeIter iter;
 	GDrive  *drive;
@@ -2486,13 +2398,13 @@ stop_shortcut_cb (GtkMenuItem           *item,
 
 static void
 empty_trash_cb (GtkMenuItem           *item,
-		NautilusPlacesSidebar *sidebar)
+		NemoPlacesSidebar *sidebar)
 {
-	nautilus_file_operations_empty_trash (GTK_WIDGET (sidebar->window));
+	nemo_file_operations_empty_trash (GTK_WIDGET (sidebar->window));
 }
 
 static gboolean
-find_prev_or_next_row (NautilusPlacesSidebar *sidebar,
+find_prev_or_next_row (NemoPlacesSidebar *sidebar,
 		       GtkTreeIter *iter,
 		       gboolean go_up)
 {
@@ -2523,26 +2435,26 @@ find_prev_or_next_row (NautilusPlacesSidebar *sidebar,
 }
 
 static gboolean
-find_prev_row (NautilusPlacesSidebar *sidebar, GtkTreeIter *iter)
+find_prev_row (NemoPlacesSidebar *sidebar, GtkTreeIter *iter)
 {
 	return find_prev_or_next_row (sidebar, iter, TRUE);
 }
 
 static gboolean
-find_next_row (NautilusPlacesSidebar *sidebar, GtkTreeIter *iter)
+find_next_row (NemoPlacesSidebar *sidebar, GtkTreeIter *iter)
 {
 	return find_prev_or_next_row (sidebar, iter, FALSE);
 }
 
 static void
 properties_cb (GtkMenuItem           *item,
-	       NautilusPlacesSidebar *sidebar)
+	       NemoPlacesSidebar *sidebar)
 {
 	GtkTreeModel *model;
 	GtkTreePath *path = NULL;
 	GtkTreeIter iter;
 	GList *list;
-	NautilusFile *file;
+	NemoFile *file;
 	char *uri;
 
 	model = gtk_tree_view_get_model (sidebar->tree_view);
@@ -2557,12 +2469,12 @@ properties_cb (GtkMenuItem           *item,
 
 	if (uri != NULL) {
 
-		file = nautilus_file_get_by_uri (uri);
-		list = g_list_prepend (NULL, nautilus_file_ref (file));
+		file = nemo_file_get_by_uri (uri);
+		list = g_list_prepend (NULL, nemo_file_ref (file));
 
-		nautilus_properties_window_present (list, GTK_WIDGET (sidebar), NULL);
+		nemo_properties_window_present (list, GTK_WIDGET (sidebar), NULL);
 
-		nautilus_file_list_free (list);
+		nemo_file_list_free (list);
 		g_free (uri);
 	}
 
@@ -2570,10 +2482,10 @@ properties_cb (GtkMenuItem           *item,
 }
 
 static gboolean
-nautilus_places_sidebar_focus (GtkWidget *widget,
+nemo_places_sidebar_focus (GtkWidget *widget,
 			       GtkDirectionType direction)
 {
-	NautilusPlacesSidebar *sidebar = NAUTILUS_PLACES_SIDEBAR (widget);
+	NemoPlacesSidebar *sidebar = NEMO_PLACES_SIDEBAR (widget);
 	GtkTreePath *path;
 	GtkTreeIter iter;
 	gboolean res;
@@ -2590,14 +2502,14 @@ nautilus_places_sidebar_focus (GtkWidget *widget,
 		}
 	}
 
-	return GTK_WIDGET_CLASS (nautilus_places_sidebar_parent_class)->focus (widget, direction);
+	return GTK_WIDGET_CLASS (nemo_places_sidebar_parent_class)->focus (widget, direction);
 }
 
 /* Handler for GtkWidget::key-press-event on the shortcuts list */
 static gboolean
 bookmarks_key_press_event_cb (GtkWidget             *widget,
 			      GdkEventKey           *event,
-			      NautilusPlacesSidebar *sidebar)
+			      NemoPlacesSidebar *sidebar)
 {
   guint modifiers;
   GtkTreeIter selected_iter;
@@ -2613,12 +2525,12 @@ bookmarks_key_press_event_cb (GtkWidget             *widget,
        event->keyval == GDK_KEY_KP_Enter ||
        event->keyval == GDK_KEY_ISO_Enter ||
        event->keyval == GDK_KEY_space)) {
-      NautilusWindowOpenFlags flags = 0;
+      NemoWindowOpenFlags flags = 0;
 
       if ((event->state & modifiers) == GDK_SHIFT_MASK) {
-          flags = NAUTILUS_WINDOW_OPEN_FLAG_NEW_TAB;
+          flags = NEMO_WINDOW_OPEN_FLAG_NEW_TAB;
       } else if ((event->state & modifiers) == GDK_CONTROL_MASK) {
-          flags = NAUTILUS_WINDOW_OPEN_FLAG_NEW_WINDOW;
+          flags = NEMO_WINDOW_OPEN_FLAG_NEW_WINDOW;
       }
 
       open_selected_bookmark (sidebar, GTK_TREE_MODEL (sidebar->store),
@@ -2667,7 +2579,7 @@ bookmarks_key_press_event_cb (GtkWidget             *widget,
 
 /* Constructs the popup menu for the file list if needed */
 static void
-bookmarks_build_popup_menu (NautilusPlacesSidebar *sidebar)
+bookmarks_build_popup_menu (NemoPlacesSidebar *sidebar)
 {
 	GtkWidget *item;
 	gboolean use_browser;
@@ -2676,8 +2588,8 @@ bookmarks_build_popup_menu (NautilusPlacesSidebar *sidebar)
 		return;
 	}
 
-	use_browser = g_settings_get_boolean (nautilus_preferences,
-					      NAUTILUS_PREFERENCES_ALWAYS_USE_BROWSER);
+	use_browser = g_settings_get_boolean (nemo_preferences,
+					      NEMO_PREFERENCES_ALWAYS_USE_BROWSER);
 
 	sidebar->popup_menu = gtk_menu_new ();
 	gtk_menu_attach_to_widget (GTK_MENU (sidebar->popup_menu),
@@ -2807,13 +2719,13 @@ bookmarks_build_popup_menu (NautilusPlacesSidebar *sidebar)
 }
 
 static void
-bookmarks_update_popup_menu (NautilusPlacesSidebar *sidebar)
+bookmarks_update_popup_menu (NemoPlacesSidebar *sidebar)
 {
 	bookmarks_build_popup_menu (sidebar);  
 }
 
 static void
-bookmarks_popup_menu (NautilusPlacesSidebar *sidebar,
+bookmarks_popup_menu (NemoPlacesSidebar *sidebar,
 		      GdkEventButton        *event)
 {
 	bookmarks_update_popup_menu (sidebar);
@@ -2824,7 +2736,7 @@ bookmarks_popup_menu (NautilusPlacesSidebar *sidebar,
 /* Callback used for the GtkWidget::popup-menu signal of the shortcuts list */
 static gboolean
 bookmarks_popup_menu_cb (GtkWidget *widget,
-			 NautilusPlacesSidebar *sidebar)
+			 NemoPlacesSidebar *sidebar)
 {
 	bookmarks_popup_menu (sidebar, NULL);
 	return TRUE;
@@ -2833,7 +2745,7 @@ bookmarks_popup_menu_cb (GtkWidget *widget,
 static gboolean
 bookmarks_button_release_event_cb (GtkWidget *widget,
 				   GdkEventButton *event,
-				   NautilusPlacesSidebar *sidebar)
+				   NemoPlacesSidebar *sidebar)
 {
 	GtkTreePath *path;
 	GtkTreeIter iter;
@@ -2881,7 +2793,7 @@ bookmarks_button_release_event_cb (GtkWidget *widget,
 }
 
 static void
-update_eject_buttons (NautilusPlacesSidebar *sidebar,
+update_eject_buttons (NemoPlacesSidebar *sidebar,
 		      GtkTreePath 	    *path)
 {
 	GtkTreeIter iter;
@@ -2956,7 +2868,7 @@ update_eject_buttons (NautilusPlacesSidebar *sidebar,
 static gboolean
 bookmarks_motion_event_cb (GtkWidget             *widget,
 			   GdkEventMotion        *event,
-			   NautilusPlacesSidebar *sidebar)
+			   NemoPlacesSidebar *sidebar)
 {
 	GtkTreePath *path;
 
@@ -2981,7 +2893,7 @@ bookmarks_motion_event_cb (GtkWidget             *widget,
 static gboolean
 bookmarks_button_press_event_cb (GtkWidget             *widget,
 				 GdkEventButton        *event,
-				 NautilusPlacesSidebar *sidebar)
+				 NemoPlacesSidebar *sidebar)
 
 {
 	GtkTreeModel *model;
@@ -3014,15 +2926,15 @@ bookmarks_button_press_event_cb (GtkWidget             *widget,
 			bookmarks_popup_menu (sidebar, event);
 		}
 	} else if (event->button == 2) {
-		NautilusWindowOpenFlags flags = 0;
+		NemoWindowOpenFlags flags = 0;
 
-		if (g_settings_get_boolean (nautilus_preferences,
-					    NAUTILUS_PREFERENCES_ALWAYS_USE_BROWSER)) {
+		if (g_settings_get_boolean (nemo_preferences,
+					    NEMO_PREFERENCES_ALWAYS_USE_BROWSER)) {
 			flags = (event->state & GDK_CONTROL_MASK) ?
-				NAUTILUS_WINDOW_OPEN_FLAG_NEW_WINDOW :
-				NAUTILUS_WINDOW_OPEN_FLAG_NEW_TAB;
+				NEMO_WINDOW_OPEN_FLAG_NEW_WINDOW :
+				NEMO_WINDOW_OPEN_FLAG_NEW_TAB;
 		} else {
-			flags = NAUTILUS_WINDOW_OPEN_FLAG_CLOSE_BEHIND;
+			flags = NEMO_WINDOW_OPEN_FLAG_CLOSE_BEHIND;
 		}
 
 		open_selected_bookmark (sidebar, model, &iter, flags);
@@ -3039,11 +2951,11 @@ static void
 bookmarks_edited (GtkCellRenderer       *cell,
 		  gchar                 *path_string,
 		  gchar                 *new_text,
-		  NautilusPlacesSidebar *sidebar)
+		  NemoPlacesSidebar *sidebar)
 {
 	GtkTreePath *path;
 	GtkTreeIter iter;
-	NautilusBookmark *bookmark;
+	NemoBookmark *bookmark;
 	int index;
 
 	g_object_set (cell, "editable", FALSE, NULL);
@@ -3054,28 +2966,28 @@ bookmarks_edited (GtkCellRenderer       *cell,
 		            PLACES_SIDEBAR_COLUMN_INDEX, &index,
 		            -1);
 	gtk_tree_path_free (path);
-	bookmark = nautilus_bookmark_list_item_at (sidebar->bookmarks, index);
+	bookmark = nemo_bookmark_list_item_at (sidebar->bookmarks, index);
 
 	if (bookmark != NULL) {
-		nautilus_bookmark_set_custom_name (bookmark, new_text);
+		nemo_bookmark_set_custom_name (bookmark, new_text);
 	}
 }
 
 static void
 bookmarks_editing_canceled (GtkCellRenderer       *cell,
-			    NautilusPlacesSidebar *sidebar)
+			    NemoPlacesSidebar *sidebar)
 {
 	g_object_set (cell, "editable", FALSE, NULL);
 }
 
 static void
-trash_state_changed_cb (NautilusTrashMonitor *trash_monitor,
+trash_state_changed_cb (NemoTrashMonitor *trash_monitor,
 			gboolean             state,
 			gpointer             data)
 {
-	NautilusPlacesSidebar *sidebar;
+	NemoPlacesSidebar *sidebar;
 
-	sidebar = NAUTILUS_PLACES_SIDEBAR (data);
+	sidebar = NEMO_PLACES_SIDEBAR (data);
 
 	/* The trash icon changed, update the sidebar */
 	update_places (sidebar);
@@ -3226,7 +3138,7 @@ places_sidebar_sort_func (GtkTreeModel *model,
 }
 
 static void
-nautilus_places_sidebar_init (NautilusPlacesSidebar *sidebar)
+nemo_places_sidebar_init (NemoPlacesSidebar *sidebar)
 {
 	GtkTreeView       *tree_view;
 	GtkTreeViewColumn *col;
@@ -3340,10 +3252,10 @@ nautilus_places_sidebar_init (NautilusPlacesSidebar *sidebar)
 			  G_CALLBACK (bookmarks_editing_canceled), sidebar);
 
 	/* this is required to align the eject buttons to the right */
-	gtk_tree_view_column_set_max_width (GTK_TREE_VIEW_COLUMN (col), NAUTILUS_ICON_SIZE_SMALLER);
+	gtk_tree_view_column_set_max_width (GTK_TREE_VIEW_COLUMN (col), NEMO_ICON_SIZE_SMALLER);
 	gtk_tree_view_append_column (tree_view, col);
 
-	sidebar->store = nautilus_shortcuts_model_new (sidebar);
+	sidebar->store = nemo_shortcuts_model_new (sidebar);
 	gtk_tree_view_set_tooltip_column (tree_view, PLACES_SIDEBAR_COLUMN_TOOLTIP);
 	gtk_tree_sortable_set_sort_column_id (GTK_TREE_SORTABLE (sidebar->store),
 					      PLACES_SIDEBAR_COLUMN_NAME,
@@ -3371,12 +3283,12 @@ nautilus_places_sidebar_init (NautilusPlacesSidebar *sidebar)
 
 	gtk_tree_view_enable_model_drag_source (GTK_TREE_VIEW (tree_view),
 						GDK_BUTTON1_MASK,
-						nautilus_shortcuts_source_targets,
-						G_N_ELEMENTS (nautilus_shortcuts_source_targets),
+						nemo_shortcuts_source_targets,
+						G_N_ELEMENTS (nemo_shortcuts_source_targets),
 						GDK_ACTION_MOVE);
 	gtk_drag_dest_set (GTK_WIDGET (tree_view),
 			   0,
-			   nautilus_shortcuts_drop_targets, G_N_ELEMENTS (nautilus_shortcuts_drop_targets),
+			   nemo_shortcuts_drop_targets, G_N_ELEMENTS (nemo_shortcuts_drop_targets),
 			   GDK_ACTION_MOVE | GDK_ACTION_COPY | GDK_ACTION_LINK);
 
 	g_signal_connect (tree_view, "key-press-event",
@@ -3405,26 +3317,26 @@ nautilus_places_sidebar_init (NautilusPlacesSidebar *sidebar)
 	eel_gtk_tree_view_set_activate_on_single_click (sidebar->tree_view,
 							TRUE);
 
-	g_signal_connect_swapped (nautilus_preferences, "changed::" NAUTILUS_PREFERENCES_DESKTOP_IS_HOME_DIR,
+	g_signal_connect_swapped (nemo_preferences, "changed::" NEMO_PREFERENCES_DESKTOP_IS_HOME_DIR,
 				  G_CALLBACK(desktop_setting_changed_callback),
 				  sidebar);
 
-	g_signal_connect_swapped (gnome_background_preferences, "changed::" NAUTILUS_PREFERENCES_SHOW_DESKTOP,
+	g_signal_connect_swapped (gnome_background_preferences, "changed::" NEMO_PREFERENCES_SHOW_DESKTOP,
 				  G_CALLBACK(desktop_setting_changed_callback),
 				  sidebar);
 
-	g_signal_connect_object (nautilus_trash_monitor_get (),
+	g_signal_connect_object (nemo_trash_monitor_get (),
 				 "trash_state_changed",
 				 G_CALLBACK (trash_state_changed_cb),
 				 sidebar, 0);
 }
 
 static void
-nautilus_places_sidebar_dispose (GObject *object)
+nemo_places_sidebar_dispose (GObject *object)
 {
-	NautilusPlacesSidebar *sidebar;
+	NemoPlacesSidebar *sidebar;
 
-	sidebar = NAUTILUS_PLACES_SIDEBAR (object);
+	sidebar = NEMO_PLACES_SIDEBAR (object);
 
 	sidebar->window = NULL;
 	sidebar->tree_view = NULL;
@@ -3450,11 +3362,11 @@ nautilus_places_sidebar_dispose (GObject *object)
 
 	eel_remove_weak_pointer (&(sidebar->go_to_after_mount_slot));
 
-	g_signal_handlers_disconnect_by_func (nautilus_preferences,
+	g_signal_handlers_disconnect_by_func (nemo_preferences,
 					      desktop_setting_changed_callback,
 					      sidebar);
 
-	g_signal_handlers_disconnect_by_func (nautilus_preferences,
+	g_signal_handlers_disconnect_by_func (nemo_preferences,
 					      bookmarks_popup_menu_detach_cb,
 					      sidebar);
 
@@ -3485,30 +3397,30 @@ nautilus_places_sidebar_dispose (GObject *object)
 		g_clear_object (&sidebar->volume_monitor);
 	}
 
-	G_OBJECT_CLASS (nautilus_places_sidebar_parent_class)->dispose (object);
+	G_OBJECT_CLASS (nemo_places_sidebar_parent_class)->dispose (object);
 }
 
 static void
-nautilus_places_sidebar_class_init (NautilusPlacesSidebarClass *class)
+nemo_places_sidebar_class_init (NemoPlacesSidebarClass *class)
 {
-	G_OBJECT_CLASS (class)->dispose = nautilus_places_sidebar_dispose;
+	G_OBJECT_CLASS (class)->dispose = nemo_places_sidebar_dispose;
 
-	GTK_WIDGET_CLASS (class)->style_set = nautilus_places_sidebar_style_set;
-	GTK_WIDGET_CLASS (class)->focus = nautilus_places_sidebar_focus;
+	GTK_WIDGET_CLASS (class)->style_set = nemo_places_sidebar_style_set;
+	GTK_WIDGET_CLASS (class)->focus = nemo_places_sidebar_focus;
 }
 
 static void
-nautilus_places_sidebar_set_parent_window (NautilusPlacesSidebar *sidebar,
-					   NautilusWindow *window)
+nemo_places_sidebar_set_parent_window (NemoPlacesSidebar *sidebar,
+					   NemoWindow *window)
 {
-	NautilusWindowSlot *slot;
+	NemoWindowSlot *slot;
 
 	sidebar->window = window;
 
-	slot = nautilus_window_get_active_slot (window);
+	slot = nemo_window_get_active_slot (window);
 
-	sidebar->bookmarks = nautilus_bookmark_list_new ();
-	sidebar->uri = nautilus_window_slot_get_current_uri (slot);
+	sidebar->bookmarks = nemo_bookmark_list_new ();
+	sidebar->uri = nemo_window_slot_get_current_uri (slot);
 
 	sidebar->bookmarks_changed_id =
 		g_signal_connect_swapped (sidebar->bookmarks, "changed",
@@ -3538,30 +3450,30 @@ nautilus_places_sidebar_set_parent_window (NautilusPlacesSidebar *sidebar,
 	g_signal_connect_object (sidebar->volume_monitor, "drive_changed",
 				 G_CALLBACK (drive_changed_callback), sidebar, 0);
 
-	g_signal_connect_swapped (nautilus_preferences, "changed::" NAUTILUS_PREFERENCES_ALWAYS_USE_BROWSER,
+	g_signal_connect_swapped (nemo_preferences, "changed::" NEMO_PREFERENCES_ALWAYS_USE_BROWSER,
 				  G_CALLBACK (bookmarks_popup_menu_detach_cb), sidebar);
 
 	update_places (sidebar);
 }
 
 static void
-nautilus_places_sidebar_style_set (GtkWidget *widget,
+nemo_places_sidebar_style_set (GtkWidget *widget,
 				   GtkStyle  *previous_style)
 {
-	NautilusPlacesSidebar *sidebar;
+	NemoPlacesSidebar *sidebar;
 
-	sidebar = NAUTILUS_PLACES_SIDEBAR (widget);
+	sidebar = NEMO_PLACES_SIDEBAR (widget);
 
 	update_places (sidebar);
 }
 
 GtkWidget *
-nautilus_places_sidebar_new (NautilusWindow *window)
+nemo_places_sidebar_new (NemoWindow *window)
 {
-	NautilusPlacesSidebar *sidebar;
+	NemoPlacesSidebar *sidebar;
 	
-	sidebar = g_object_new (nautilus_places_sidebar_get_type (), NULL);
-	nautilus_places_sidebar_set_parent_window (sidebar, window);
+	sidebar = g_object_new (nemo_places_sidebar_get_type (), NULL);
+	nemo_places_sidebar_set_parent_window (sidebar, window);
 
 	return GTK_WIDGET (sidebar);
 }
@@ -3572,7 +3484,7 @@ nautilus_places_sidebar_new (NautilusWindow *window)
 /* GtkTreeDragSource::row_draggable implementation for the shortcuts filter model */
 
 static gboolean
-nautilus_shortcuts_model_row_draggable (GtkTreeDragSource *drag_source,
+nemo_shortcuts_model_row_draggable (GtkTreeDragSource *drag_source,
 					GtkTreePath       *path)
 {
 	GtkTreeModel *model;
@@ -3595,27 +3507,27 @@ nautilus_shortcuts_model_row_draggable (GtkTreeDragSource *drag_source,
 }
 
 static void
-_nautilus_shortcuts_model_class_init (NautilusShortcutsModelClass *klass)
+_nemo_shortcuts_model_class_init (NemoShortcutsModelClass *klass)
 {
 
 }
 
 static void
-_nautilus_shortcuts_model_init (NautilusShortcutsModel *model)
+_nemo_shortcuts_model_init (NemoShortcutsModel *model)
 {
 	model->sidebar = NULL;
 }
 
 static void
-_nautilus_shortcuts_model_drag_source_init (GtkTreeDragSourceIface *iface)
+_nemo_shortcuts_model_drag_source_init (GtkTreeDragSourceIface *iface)
 {
-	iface->row_draggable = nautilus_shortcuts_model_row_draggable;
+	iface->row_draggable = nemo_shortcuts_model_row_draggable;
 }
 
 static GtkListStore *
-nautilus_shortcuts_model_new (NautilusPlacesSidebar *sidebar)
+nemo_shortcuts_model_new (NemoPlacesSidebar *sidebar)
 {
-	NautilusShortcutsModel *model;
+	NemoShortcutsModel *model;
 	GType model_types[PLACES_SIDEBAR_COLUMN_COUNT] = {
 		G_TYPE_INT, 
 		G_TYPE_STRING,
@@ -3634,7 +3546,7 @@ nautilus_shortcuts_model_new (NautilusPlacesSidebar *sidebar)
 		G_TYPE_STRING
 	};
 
-	model = g_object_new (NAUTILUS_TYPE_SHORTCUTS_MODEL, NULL);
+	model = g_object_new (NEMO_TYPE_SHORTCUTS_MODEL, NULL);
 	model->sidebar = sidebar;
 
 	gtk_list_store_set_column_types (GTK_LIST_STORE (model),

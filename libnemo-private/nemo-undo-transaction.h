@@ -1,6 +1,6 @@
 /* -*- Mode: C; indent-tabs-mode: t; c-basic-offset: 8; tab-width: 8 -*- */
 
-/* NautilusUndoTransaction - An object for an undoable transaction.
+/* NemoUndoTransaction - An object for an undoable transaction.
  *                           Used internally by undo machinery.
  *                           Not public.
  *
@@ -24,28 +24,28 @@
  * Boston, MA 02111-1307, USA.
  */
 
-#ifndef NAUTILUS_UNDO_TRANSACTION_H
-#define NAUTILUS_UNDO_TRANSACTION_H
+#ifndef NEMO_UNDO_TRANSACTION_H
+#define NEMO_UNDO_TRANSACTION_H
 
-#include <libnautilus-private/nautilus-undo.h>
+#include <libnemo-private/nemo-undo.h>
 
-#define NAUTILUS_TYPE_UNDO_TRANSACTION nautilus_undo_transaction_get_type()
-#define NAUTILUS_UNDO_TRANSACTION(obj) \
-  (G_TYPE_CHECK_INSTANCE_CAST ((obj), NAUTILUS_TYPE_UNDO_TRANSACTION, NautilusUndoTransaction))
-#define NAUTILUS_UNDO_TRANSACTION_CLASS(klass) \
-  (G_TYPE_CHECK_CLASS_CAST ((klass), NAUTILUS_TYPE_UNDO_TRANSACTION, NautilusUndoTransactionClass))
-#define NAUTILUS_IS_UNDO_TRANSACTION(obj) \
-  (G_TYPE_CHECK_INSTANCE_TYPE ((obj), NAUTILUS_TYPE_UNDO_TRANSACTION))
-#define NAUTILUS_IS_UNDO_TRANSACTION_CLASS(klass) \
-  (G_TYPE_CHECK_CLASS_TYPE ((klass), NAUTILUS_TYPE_UNDO_TRANSACTION))
-#define NAUTILUS_UNDO_TRANSACTION_GET_CLASS(obj) \
-  (G_TYPE_INSTANCE_GET_CLASS ((obj), NAUTILUS_TYPE_UNDO_TRANSACTION, NautilusUndoTransactionClass))
+#define NEMO_TYPE_UNDO_TRANSACTION nemo_undo_transaction_get_type()
+#define NEMO_UNDO_TRANSACTION(obj) \
+  (G_TYPE_CHECK_INSTANCE_CAST ((obj), NEMO_TYPE_UNDO_TRANSACTION, NemoUndoTransaction))
+#define NEMO_UNDO_TRANSACTION_CLASS(klass) \
+  (G_TYPE_CHECK_CLASS_CAST ((klass), NEMO_TYPE_UNDO_TRANSACTION, NemoUndoTransactionClass))
+#define NEMO_IS_UNDO_TRANSACTION(obj) \
+  (G_TYPE_CHECK_INSTANCE_TYPE ((obj), NEMO_TYPE_UNDO_TRANSACTION))
+#define NEMO_IS_UNDO_TRANSACTION_CLASS(klass) \
+  (G_TYPE_CHECK_CLASS_TYPE ((klass), NEMO_TYPE_UNDO_TRANSACTION))
+#define NEMO_UNDO_TRANSACTION_GET_CLASS(obj) \
+  (G_TYPE_INSTANCE_GET_CLASS ((obj), NEMO_TYPE_UNDO_TRANSACTION, NemoUndoTransactionClass))
 
-/* The typedef for NautilusUndoTransaction is in nautilus-undo.h
+/* The typedef for NemoUndoTransaction is in nemo-undo.h
    to avoid circular deps */
-typedef struct _NautilusUndoTransactionClass NautilusUndoTransactionClass;
+typedef struct _NemoUndoTransactionClass NemoUndoTransactionClass;
 
-struct _NautilusUndoTransaction {
+struct _NemoUndoTransaction {
 	GObject parent_slot;
 	
 	char *operation_name;
@@ -55,24 +55,24 @@ struct _NautilusUndoTransaction {
 	char *redo_menu_item_hint;
 	GList *atom_list;
 
-	NautilusUndoManager *owner;
+	NemoUndoManager *owner;
 };
 
-struct _NautilusUndoTransactionClass {
+struct _NemoUndoTransactionClass {
 	GObjectClass parent_slot;
 };
 
-GType                    nautilus_undo_transaction_get_type            (void);
-NautilusUndoTransaction *nautilus_undo_transaction_new                 (const char              *operation_name,
+GType                    nemo_undo_transaction_get_type            (void);
+NemoUndoTransaction *nemo_undo_transaction_new                 (const char              *operation_name,
 									const char              *undo_menu_item_label,
 									const char              *undo_menu_item_hint,
 									const char              *redo_menu_item_label,
 									const char              *redo_menu_item_hint);
-void                     nautilus_undo_transaction_add_atom            (NautilusUndoTransaction *transaction,
-									const NautilusUndoAtom  *atom);
-void                     nautilus_undo_transaction_add_to_undo_manager (NautilusUndoTransaction *transaction,
-									NautilusUndoManager     *manager);
-void                     nautilus_undo_transaction_unregister_object   (GObject                 *atom_target);
-void                     nautilus_undo_transaction_undo                (NautilusUndoTransaction *transaction);
+void                     nemo_undo_transaction_add_atom            (NemoUndoTransaction *transaction,
+									const NemoUndoAtom  *atom);
+void                     nemo_undo_transaction_add_to_undo_manager (NemoUndoTransaction *transaction,
+									NemoUndoManager     *manager);
+void                     nemo_undo_transaction_unregister_object   (GObject                 *atom_target);
+void                     nemo_undo_transaction_undo                (NemoUndoTransaction *transaction);
 
-#endif /* NAUTILUS_UNDO_TRANSACTION_H */
+#endif /* NEMO_UNDO_TRANSACTION_H */

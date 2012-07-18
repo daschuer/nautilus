@@ -2,12 +2,12 @@
 /*
  * Copyright (C) 2005 Mr Jamie McCracken
  *
- * Nautilus is free software; you can redistribute it and/or
+ * Nemo is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
  * published by the Free Software Foundation; either version 2 of the
  * License, or (at your option) any later version.
  *
- * Nautilus is distributed in the hope that it will be useful,
+ * Nemo is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
  * General Public License for more details.
@@ -21,31 +21,31 @@
  *
  */
 
-#ifndef NAUTILUS_SEARCH_ENGINE_TRACKER_H
-#define NAUTILUS_SEARCH_ENGINE_TRACKER_H
+#ifndef NEMO_SEARCH_ENGINE_TRACKER_H
+#define NEMO_SEARCH_ENGINE_TRACKER_H
 
-#include <libnautilus-private/nautilus-search-engine.h>
+#include <libnemo-private/nemo-search-engine.h>
 
-#define NAUTILUS_TYPE_SEARCH_ENGINE_TRACKER		(nautilus_search_engine_tracker_get_type ())
-#define NAUTILUS_SEARCH_ENGINE_TRACKER(obj)		(G_TYPE_CHECK_INSTANCE_CAST ((obj), NAUTILUS_TYPE_SEARCH_ENGINE_TRACKER, NautilusSearchEngineTracker))
-#define NAUTILUS_SEARCH_ENGINE_TRACKER_CLASS(klass)	(G_TYPE_CHECK_CLASS_CAST ((klass), NAUTILUS_TYPE_SEARCH_ENGINE_TRACKER, NautilusSearchEngineTrackerClass))
-#define NAUTILUS_IS_SEARCH_ENGINE_TRACKER(obj)		(G_TYPE_CHECK_INSTANCE_TYPE ((obj), NAUTILUS_TYPE_SEARCH_ENGINE_TRACKER))
-#define NAUTILUS_IS_SEARCH_ENGINE_TRACKER_CLASS(klass)	(G_TYPE_CHECK_CLASS_TYPE ((klass), NAUTILUS_TYPE_SEARCH_ENGINE_TRACKER))
-#define NAUTILUS_SEARCH_ENGINE_TRACKER_GET_CLASS(obj)   (G_TYPE_INSTANCE_GET_CLASS ((obj), NAUTILUS_TYPE_SEARCH_ENGINE_TRACKER, NautilusSearchEngineTrackerClass))
+#define NEMO_TYPE_SEARCH_ENGINE_TRACKER		(nemo_search_engine_tracker_get_type ())
+#define NEMO_SEARCH_ENGINE_TRACKER(obj)		(G_TYPE_CHECK_INSTANCE_CAST ((obj), NEMO_TYPE_SEARCH_ENGINE_TRACKER, NemoSearchEngineTracker))
+#define NEMO_SEARCH_ENGINE_TRACKER_CLASS(klass)	(G_TYPE_CHECK_CLASS_CAST ((klass), NEMO_TYPE_SEARCH_ENGINE_TRACKER, NemoSearchEngineTrackerClass))
+#define NEMO_IS_SEARCH_ENGINE_TRACKER(obj)		(G_TYPE_CHECK_INSTANCE_TYPE ((obj), NEMO_TYPE_SEARCH_ENGINE_TRACKER))
+#define NEMO_IS_SEARCH_ENGINE_TRACKER_CLASS(klass)	(G_TYPE_CHECK_CLASS_TYPE ((klass), NEMO_TYPE_SEARCH_ENGINE_TRACKER))
+#define NEMO_SEARCH_ENGINE_TRACKER_GET_CLASS(obj)   (G_TYPE_INSTANCE_GET_CLASS ((obj), NEMO_TYPE_SEARCH_ENGINE_TRACKER, NemoSearchEngineTrackerClass))
 
-typedef struct NautilusSearchEngineTrackerDetails NautilusSearchEngineTrackerDetails;
+typedef struct NemoSearchEngineTrackerDetails NemoSearchEngineTrackerDetails;
 
-typedef struct NautilusSearchEngineTracker {
-	NautilusSearchEngine parent;
-	NautilusSearchEngineTrackerDetails *details;
-} NautilusSearchEngineTracker;
+typedef struct NemoSearchEngineTracker {
+	NemoSearchEngine parent;
+	NemoSearchEngineTrackerDetails *details;
+} NemoSearchEngineTracker;
 
 typedef struct {
-	NautilusSearchEngineClass parent_class;
-} NautilusSearchEngineTrackerClass;
+	NemoSearchEngineClass parent_class;
+} NemoSearchEngineTrackerClass;
 
-GType nautilus_search_engine_tracker_get_type (void);
+GType nemo_search_engine_tracker_get_type (void);
 
-NautilusSearchEngine* nautilus_search_engine_tracker_new (void);
+NemoSearchEngine* nemo_search_engine_tracker_new (void);
 
-#endif /* NAUTILUS_SEARCH_ENGINE_TRACKER_H */
+#endif /* NEMO_SEARCH_ENGINE_TRACKER_H */

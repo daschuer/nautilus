@@ -1,5 +1,5 @@
 /*
- *  nautilus-menu-item.c - Menu items exported by NautilusMenuProvider
+ *  nemo-menu-item.c - Menu items exported by NemoMenuProvider
  *                         objects.
  *
  *  Copyright (C) 2003 Novell, Inc.
@@ -23,8 +23,8 @@
  */
 
 #include <config.h>
-#include "nautilus-menu.h"
-#include "nautilus-extension-i18n.h"
+#include "nemo-menu.h"
+#include "nemo-extension-i18n.h"
 
 enum {
 	ACTIVATE,
@@ -43,12 +43,12 @@ enum {
 	LAST_PROP
 };
 
-struct _NautilusMenuItemDetails {
+struct _NemoMenuItemDetails {
 	char *name;
 	char *label;
 	char *tip;
 	char *icon;
-	NautilusMenu *menu;
+	NemoMenu *menu;
 	gboolean sensitive;
 	gboolean priority;
 };
@@ -58,7 +58,7 @@ static guint signals[LAST_SIGNAL];
 static GObjectClass *parent_class = NULL;
 
 /**
- * nautilus_menu_item_new:
+ * nemo_menu_item_new:
  * @name: the identifier for the menu item
  * @label: the user-visible label of the menu item
  * @tip: the tooltip of the menu item
@@ -66,21 +66,21 @@ static GObjectClass *parent_class = NULL;
  *
  * Creates a new menu item that can be added to the toolbar or to a contextual menu.
  *
- * Returns: a newly create #NautilusMenuItem
+ * Returns: a newly create #NemoMenuItem
  */
-NautilusMenuItem *
-nautilus_menu_item_new (const char *name,
+NemoMenuItem *
+nemo_menu_item_new (const char *name,
 			const char *label,
 			const char *tip,
 			const char *icon)
 {
-	NautilusMenuItem *item;
+	NemoMenuItem *item;
 
 	g_return_val_if_fail (name != NULL, NULL);
 	g_return_val_if_fail (label != NULL, NULL);
 	g_return_val_if_fail (tip != NULL, NULL);
 
-	item = g_object_new (NAUTILUS_TYPE_MENU_ITEM, 
+	item = g_object_new (NEMO_TYPE_MENU_ITEM, 
 			     "name", name,
 			     "label", label,
 			     "tip", tip,
@@ -91,39 +91,39 @@ nautilus_menu_item_new (const char *name,
 }
 
 /**
- * nautilus_menu_item_activate:
- * @item: pointer to a #NautilusMenuItem
+ * nemo_menu_item_activate:
+ * @item: pointer to a #NemoMenuItem
  *
  * emits the activate signal.
  */
 void
-nautilus_menu_item_activate (NautilusMenuItem *item)
+nemo_menu_item_activate (NemoMenuItem *item)
 {
 	g_signal_emit (item, signals[ACTIVATE], 0);
 }
 
 /**
- * nautilus_menu_item_set_submenu:
- * @item: pointer to a #NautilusMenuItem
- * @menu: pointer to a #NautilusMenu to attach to the button
+ * nemo_menu_item_set_submenu:
+ * @item: pointer to a #NemoMenuItem
+ * @menu: pointer to a #NemoMenu to attach to the button
  *
- * Attachs a menu to the given #NautilusMenuItem.
+ * Attachs a menu to the given #NemoMenuItem.
  */
 void
-nautilus_menu_item_set_submenu (NautilusMenuItem *item, NautilusMenu *menu)
+nemo_menu_item_set_submenu (NemoMenuItem *item, NemoMenu *menu)
 {
 	g_object_set (item, "menu", menu, NULL);
 }
 
 static void
-nautilus_menu_item_get_property (GObject *object,
+nemo_menu_item_get_property (GObject *object,
 				 guint param_id,
 				 GValue *value,
 				 GParamSpec *pspec)
 {
-	NautilusMenuItem *item;
+	NemoMenuItem *item;
 	
-	item = NAUTILUS_MENU_ITEM (object);
+	item = NEMO_MENU_ITEM (object);
 	
 	switch (param_id) {
 	case PROP_NAME :
@@ -154,14 +154,14 @@ nautilus_menu_item_get_property (GObject *object,
 }
 
 static void
-nautilus_menu_item_set_property (GObject *object,
+nemo_menu_item_set_property (GObject *object,
 				 guint param_id,
 				 const GValue *value,
 				 GParamSpec *pspec)
 {
-	NautilusMenuItem *item;
+	NemoMenuItem *item;
 	
-	item = NAUTILUS_MENU_ITEM (object);
+	item = NEMO_MENU_ITEM (object);
 
 	switch (param_id) {
 	case PROP_NAME :
@@ -206,11 +206,11 @@ nautilus_menu_item_set_property (GObject *object,
 }
 
 static void
-nautilus_menu_item_finalize (GObject *object)
+nemo_menu_item_finalize (GObject *object)
 {
-	NautilusMenuItem *item;
+	NemoMenuItem *item;
 
-	item = NAUTILUS_MENU_ITEM (object);
+	item = NEMO_MENU_ITEM (object);
 
 	g_free (item->details->name);
 	g_free (item->details->label);
@@ -226,27 +226,27 @@ nautilus_menu_item_finalize (GObject *object)
 }
 
 static void
-nautilus_menu_item_instance_init (NautilusMenuItem *item)
+nemo_menu_item_instance_init (NemoMenuItem *item)
 {
-	item->details = g_new0 (NautilusMenuItemDetails, 1);
+	item->details = g_new0 (NemoMenuItemDetails, 1);
 	item->details->sensitive = TRUE;
 	item->details->menu = NULL;
 }
 
 static void
-nautilus_menu_item_class_init (NautilusMenuItemClass *class)
+nemo_menu_item_class_init (NemoMenuItemClass *class)
 {
 	parent_class = g_type_class_peek_parent (class);
 	
-	G_OBJECT_CLASS (class)->finalize = nautilus_menu_item_finalize;
-	G_OBJECT_CLASS (class)->get_property = nautilus_menu_item_get_property;
-	G_OBJECT_CLASS (class)->set_property = nautilus_menu_item_set_property;
+	G_OBJECT_CLASS (class)->finalize = nemo_menu_item_finalize;
+	G_OBJECT_CLASS (class)->get_property = nemo_menu_item_get_property;
+	G_OBJECT_CLASS (class)->set_property = nemo_menu_item_set_property;
 
         signals[ACTIVATE] =
                 g_signal_new ("activate",
                               G_TYPE_FROM_CLASS (class),
                               G_SIGNAL_RUN_LAST,
-                              G_STRUCT_OFFSET (NautilusMenuItemClass, 
+                              G_STRUCT_OFFSET (NemoMenuItemClass, 
 					       activate),
                               NULL, NULL,
                               g_cclosure_marshal_VOID__VOID,
@@ -300,31 +300,31 @@ nautilus_menu_item_class_init (NautilusMenuItemClass *class)
 					 g_param_spec_object ("menu",
 							       "Menu",
 							       "The menu belonging to this item. May be null.",
-							       NAUTILUS_TYPE_MENU,
+							       NEMO_TYPE_MENU,
 							       G_PARAM_READWRITE));
 }
 
 GType 
-nautilus_menu_item_get_type (void)
+nemo_menu_item_get_type (void)
 {
 	static GType type = 0;
 	
 	if (!type) {
 		const GTypeInfo info = {
-			sizeof (NautilusMenuItemClass),
+			sizeof (NemoMenuItemClass),
 			NULL,
 			NULL,
-			(GClassInitFunc)nautilus_menu_item_class_init,
+			(GClassInitFunc)nemo_menu_item_class_init,
 			NULL,
 			NULL,
-			sizeof (NautilusMenuItem),
+			sizeof (NemoMenuItem),
 			0,
-			(GInstanceInitFunc)nautilus_menu_item_instance_init
+			(GInstanceInitFunc)nemo_menu_item_instance_init
 		};
 		
 		type = g_type_register_static 
 			(G_TYPE_OBJECT, 
-			 "NautilusMenuItem",
+			 "NemoMenuItem",
 			 &info, 0);
 	}
 

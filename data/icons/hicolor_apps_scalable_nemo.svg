@@ -15,8 +15,8 @@
    sodipodi:version="0.32"
    inkscape:version="0.44.1"
    version="1.0"
-   sodipodi:docbase="/home/ulisse/icone/Nautilus/scalable"
-   sodipodi:docname="nautilus.svg">
+   sodipodi:docbase="/home/ulisse/icone/Nemo/scalable"
+   sodipodi:docname="nemo.svg">
   <defs
      id="defs4">
     <linearGradient
@@ -189,10 +189,10 @@
             <dc:title>Ulisse Perusin</dc:title>
           </cc:Agent>
         </dc:creator>
-        <dc:title>Nautilus</dc:title>
+        <dc:title>Nemo</dc:title>
         <dc:subject>
           <rdf:Bag>
-            <rdf:li>Nautilus</rdf:li>
+            <rdf:li>Nemo</rdf:li>
             <rdf:li>file manager</rdf:li>
           </rdf:Bag>
         </dc:subject>

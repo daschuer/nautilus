@@ -1,11 +1,11 @@
 /* -*- Mode: C; indent-tabs-mode: t; c-basic-offset: 8; tab-width: 8 -*- */
 
 /*
- * Nautilus
+ * Nemo
  *
  * Copyright (C) 1999, 2000 Eazel, Inc.
  *
- * Nautilus is free software; you can redistribute it and/or modify
+ * Nemo is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
  * (at your option) any later version.
@@ -22,17 +22,17 @@
  * Author: John Sullivan <sullivan@eazel.com>
  */
 
-/* nautilus-signaller.h: Class to manage nautilus-wide signals that don't
+/* nemo-signaller.h: Class to manage nemo-wide signals that don't
  * correspond to any particular object.
  */
 
-#ifndef NAUTILUS_SIGNALLER_H
-#define NAUTILUS_SIGNALLER_H
+#ifndef NEMO_SIGNALLER_H
+#define NEMO_SIGNALLER_H
 
 #include <glib-object.h>
 
-/* NautilusSignaller is a class that manages signals between
-   disconnected Nautilus code. Nautilus objects connect to these signals
+/* NemoSignaller is a class that manages signals between
+   disconnected Nemo code. Nemo objects connect to these signals
    so that other objects can cause them to be emitted later, without
    the connecting and emit-causing objects needing to know about each
    other. It seems a shame to have to invent a subclass and a special
@@ -40,7 +40,7 @@
    this kind of thing.
 */
 
-/* Get the one and only NautilusSignaller to connect with or emit signals for */
-GObject *nautilus_signaller_get_current (void);
+/* Get the one and only NemoSignaller to connect with or emit signals for */
+GObject *nemo_signaller_get_current (void);
 
-#endif /* NAUTILUS_SIGNALLER_H */
+#endif /* NEMO_SIGNALLER_H */

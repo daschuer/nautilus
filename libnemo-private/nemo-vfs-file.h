@@ -1,6 +1,6 @@
 /* -*- Mode: C; indent-tabs-mode: t; c-basic-offset: 8; tab-width: 8 -*-
 
-   nautilus-vfs-file.h: Subclass of NautilusFile to implement the
+   nemo-vfs-file.h: Subclass of NemoFile to implement the
    the case of a VFS file.
  
    Copyright (C) 1999, 2000 Eazel, Inc.
@@ -23,33 +23,33 @@
    Author: Darin Adler <darin@bentspoon.com>
 */
 
-#ifndef NAUTILUS_VFS_FILE_H
-#define NAUTILUS_VFS_FILE_H
+#ifndef NEMO_VFS_FILE_H
+#define NEMO_VFS_FILE_H
 
-#include <libnautilus-private/nautilus-file.h>
+#include <libnemo-private/nemo-file.h>
 
-#define NAUTILUS_TYPE_VFS_FILE nautilus_vfs_file_get_type()
-#define NAUTILUS_VFS_FILE(obj) \
-  (G_TYPE_CHECK_INSTANCE_CAST ((obj), NAUTILUS_TYPE_VFS_FILE, NautilusVFSFile))
-#define NAUTILUS_VFS_FILE_CLASS(klass) \
-  (G_TYPE_CHECK_CLASS_CAST ((klass), NAUTILUS_TYPE_VFS_FILE, NautilusVFSFileClass))
-#define NAUTILUS_IS_VFS_FILE(obj) \
-  (G_TYPE_CHECK_INSTANCE_TYPE ((obj), NAUTILUS_TYPE_VFS_FILE))
-#define NAUTILUS_IS_VFS_FILE_CLASS(klass) \
-  (G_TYPE_CHECK_CLASS_TYPE ((klass), NAUTILUS_TYPE_VFS_FILE))
-#define NAUTILUS_VFS_FILE_GET_CLASS(obj) \
-  (G_TYPE_INSTANCE_GET_CLASS ((obj), NAUTILUS_TYPE_VFS_FILE, NautilusVFSFileClass))
+#define NEMO_TYPE_VFS_FILE nemo_vfs_file_get_type()
+#define NEMO_VFS_FILE(obj) \
+  (G_TYPE_CHECK_INSTANCE_CAST ((obj), NEMO_TYPE_VFS_FILE, NemoVFSFile))
+#define NEMO_VFS_FILE_CLASS(klass) \
+  (G_TYPE_CHECK_CLASS_CAST ((klass), NEMO_TYPE_VFS_FILE, NemoVFSFileClass))
+#define NEMO_IS_VFS_FILE(obj) \
+  (G_TYPE_CHECK_INSTANCE_TYPE ((obj), NEMO_TYPE_VFS_FILE))
+#define NEMO_IS_VFS_FILE_CLASS(klass) \
+  (G_TYPE_CHECK_CLASS_TYPE ((klass), NEMO_TYPE_VFS_FILE))
+#define NEMO_VFS_FILE_GET_CLASS(obj) \
+  (G_TYPE_INSTANCE_GET_CLASS ((obj), NEMO_TYPE_VFS_FILE, NemoVFSFileClass))
 
-typedef struct NautilusVFSFileDetails NautilusVFSFileDetails;
-
-typedef struct {
-	NautilusFile parent_slot;
-} NautilusVFSFile;
+typedef struct NemoVFSFileDetails NemoVFSFileDetails;
 
 typedef struct {
-	NautilusFileClass parent_slot;
-} NautilusVFSFileClass;
+	NemoFile parent_slot;
+} NemoVFSFile;
 
-GType   nautilus_vfs_file_get_type (void);
+typedef struct {
+	NemoFileClass parent_slot;
+} NemoVFSFileClass;
 
-#endif /* NAUTILUS_VFS_FILE_H */
+GType   nemo_vfs_file_get_type (void);
+
+#endif /* NEMO_VFS_FILE_H */

@@ -1,17 +1,17 @@
 /* -*- Mode: C; tab-width: 8; indent-tabs-mode: 8; c-basic-offset: 8 -*- */
 
 /*
- * Nautilus
+ * Nemo
  *
  * Copyright (C) 1999, 2000 Red Hat, Inc.
  * Copyright (C) 1999, 2000 Eazel, Inc.
  *
- * Nautilus is free software; you can redistribute it and/or
+ * Nemo is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
  * published by the Free Software Foundation; either version 2 of the
  * License, or (at your option) any later version.
  *
- * Nautilus is distributed in the hope that it will be useful,
+ * Nemo is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
  * General Public License for more details.
@@ -26,13 +26,13 @@
  *
  */
 
-/* nautilus-main.c: Implementation of the routines that drive program lifecycle and main window creation/destruction. */
+/* nemo-main.c: Implementation of the routines that drive program lifecycle and main window creation/destruction. */
 
 #include <config.h>
 
-#include "nautilus-application.h"
+#include "nemo-application.h"
 
-#include <libnautilus-private/nautilus-debug.h>
+#include <libnemo-private/nemo-debug.h>
 #include <eel/eel-debug.h>
 
 #include <glib/gi18n.h>
@@ -59,13 +59,13 @@ int
 main (int argc, char *argv[])
 {
 	gint retval;
-	NautilusApplication *application;
+	NemoApplication *application;
 	
 #if defined (HAVE_MALLOPT) && defined(M_MMAP_THRESHOLD)
-	/* Nautilus uses lots and lots of small and medium size allocations,
+	/* Nemo uses lots and lots of small and medium size allocations,
 	 * and then a few large ones for the desktop background. By default
 	 * glibc uses a dynamic treshold for how large allocations should
-	 * be mmaped. Unfortunately this triggers quickly for nautilus when
+	 * be mmaped. Unfortunately this triggers quickly for nemo when
 	 * it does the desktop background allocations, raising the limit
 	 * such that a lot of temporary large allocations end up on the
 	 * heap and are thus not returned to the OS. To fix this we set
@@ -80,7 +80,7 @@ main (int argc, char *argv[])
 	/* This will be done by gtk+ later, but for now, force it to GNOME */
 	g_desktop_app_info_set_desktop_env ("GNOME");
 
-	if (g_getenv ("NAUTILUS_DEBUG") != NULL) {
+	if (g_getenv ("NEMO_DEBUG") != NULL) {
 		eel_make_warnings_and_criticals_stop_in_debugger ();
 	}
 	
@@ -89,14 +89,14 @@ main (int argc, char *argv[])
 	bind_textdomain_codeset (GETTEXT_PACKAGE, "UTF-8");
 	textdomain (GETTEXT_PACKAGE);
 
-	g_set_prgname ("nautilus");
+	g_set_prgname ("nemo");
 
 #ifdef HAVE_EXEMPI
 	xmp_init();
 #endif
 
-	/* Run the nautilus application. */
-	application = nautilus_application_get_singleton ();
+	/* Run the nemo application. */
+	application = nemo_application_get_singleton ();
 
 	retval = g_application_run (G_APPLICATION (application),
 				    argc, argv);

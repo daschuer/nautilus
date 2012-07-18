@@ -9,14 +9,14 @@ INCLUDES=\
 	-DDATADIR=\""$(datadir)"\" \
 	$(NULL)
 
-nautilus_extensiondir = $(libdir)/nautilus/extensions-3.0
-nautilus_extension_LTLIBRARIES = libnautilus-sendto.la
-libnautilus_sendto_la_SOURCES =		\
-	nautilus-nste.c			\
-	nautilus-nste.h			\
-	nautilus-sendto-module.c
+nemo_extensiondir = $(libdir)/nemo/extensions-3.0
+nemo_extension_LTLIBRARIES = libnemo-sendto.la
+libnemo_sendto_la_SOURCES =		\
+	nemo-nste.c			\
+	nemo-nste.h			\
+	nemo-sendto-module.c
 
-libnautilus_sendto_la_LDFLAGS = -module -avoid-version -no-undefined
-libnautilus_sendto_la_LIBADD  = \
-  $(top_builddir)/libnautilus-extension/libnautilus-extension.la \
+libnemo_sendto_la_LDFLAGS = -module -avoid-version -no-undefined
+libnemo_sendto_la_LIBADD  = \
+  $(top_builddir)/libnemo-extension/libnemo-extension.la \
   $(BASE_LIBS)

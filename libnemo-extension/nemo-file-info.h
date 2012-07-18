@@ -1,5 +1,5 @@
 /*
- *  nautilus-file-info.h - Information about a file 
+ *  nemo-file-info.h - Information about a file 
  *
  *  Copyright (C) 2003 Novell, Inc.
  *
@@ -19,117 +19,117 @@
  *
  */
 
-/* NautilusFileInfo is an interface to the NautilusFile object.  It 
- * provides access to the asynchronous data in the NautilusFile.
+/* NemoFileInfo is an interface to the NemoFile object.  It 
+ * provides access to the asynchronous data in the NemoFile.
  * Extensions are passed objects of this type for operations. */
 
-#ifndef NAUTILUS_FILE_INFO_H
-#define NAUTILUS_FILE_INFO_H
+#ifndef NEMO_FILE_INFO_H
+#define NEMO_FILE_INFO_H
 
 #include <glib-object.h>
 #include <gio/gio.h>
 
 G_BEGIN_DECLS
 
-#define NAUTILUS_TYPE_FILE_INFO           (nautilus_file_info_get_type ())
-#define NAUTILUS_FILE_INFO(obj)           (G_TYPE_CHECK_INSTANCE_CAST ((obj), NAUTILUS_TYPE_FILE_INFO, NautilusFileInfo))
-#define NAUTILUS_IS_FILE_INFO(obj)        (G_TYPE_CHECK_INSTANCE_TYPE ((obj), NAUTILUS_TYPE_FILE_INFO))
-#define NAUTILUS_FILE_INFO_GET_IFACE(obj) (G_TYPE_INSTANCE_GET_INTERFACE ((obj), NAUTILUS_TYPE_FILE_INFO, NautilusFileInfoIface))
+#define NEMO_TYPE_FILE_INFO           (nemo_file_info_get_type ())
+#define NEMO_FILE_INFO(obj)           (G_TYPE_CHECK_INSTANCE_CAST ((obj), NEMO_TYPE_FILE_INFO, NemoFileInfo))
+#define NEMO_IS_FILE_INFO(obj)        (G_TYPE_CHECK_INSTANCE_TYPE ((obj), NEMO_TYPE_FILE_INFO))
+#define NEMO_FILE_INFO_GET_IFACE(obj) (G_TYPE_INSTANCE_GET_INTERFACE ((obj), NEMO_TYPE_FILE_INFO, NemoFileInfoIface))
 
 
-#ifndef NAUTILUS_FILE_DEFINED
-#define NAUTILUS_FILE_DEFINED
-/* Using NautilusFile for the vtable to make implementing this in 
- * NautilusFile easier */
-typedef struct NautilusFile          NautilusFile;
+#ifndef NEMO_FILE_DEFINED
+#define NEMO_FILE_DEFINED
+/* Using NemoFile for the vtable to make implementing this in 
+ * NemoFile easier */
+typedef struct NemoFile          NemoFile;
 #endif
 
-typedef NautilusFile                  NautilusFileInfo;
-typedef struct _NautilusFileInfoIface NautilusFileInfoIface;
+typedef NemoFile                  NemoFileInfo;
+typedef struct _NemoFileInfoIface NemoFileInfoIface;
 
 
-struct _NautilusFileInfoIface 
+struct _NemoFileInfoIface 
 {
 	GTypeInterface g_iface;
 
-	gboolean          (*is_gone)              (NautilusFileInfo *file);
+	gboolean          (*is_gone)              (NemoFileInfo *file);
 	
-	char *            (*get_name)             (NautilusFileInfo *file);
-	char *            (*get_uri)              (NautilusFileInfo *file);
-	char *            (*get_parent_uri)       (NautilusFileInfo *file);
-	char *            (*get_uri_scheme)       (NautilusFileInfo *file);
+	char *            (*get_name)             (NemoFileInfo *file);
+	char *            (*get_uri)              (NemoFileInfo *file);
+	char *            (*get_parent_uri)       (NemoFileInfo *file);
+	char *            (*get_uri_scheme)       (NemoFileInfo *file);
 	
-	char *            (*get_mime_type)        (NautilusFileInfo *file);
-	gboolean          (*is_mime_type)         (NautilusFileInfo *file,
+	char *            (*get_mime_type)        (NemoFileInfo *file);
+	gboolean          (*is_mime_type)         (NemoFileInfo *file,
 						   const char       *mime_Type);
-	gboolean          (*is_directory)         (NautilusFileInfo *file);
+	gboolean          (*is_directory)         (NemoFileInfo *file);
 	
-	void              (*add_emblem)           (NautilusFileInfo *file,
+	void              (*add_emblem)           (NemoFileInfo *file,
 						   const char       *emblem_name);
-	char *            (*get_string_attribute) (NautilusFileInfo *file,
+	char *            (*get_string_attribute) (NemoFileInfo *file,
 						   const char       *attribute_name);
-	void              (*add_string_attribute) (NautilusFileInfo *file,
+	void              (*add_string_attribute) (NemoFileInfo *file,
 						   const char       *attribute_name,
 						   const char       *value);
-	void              (*invalidate_extension_info) (NautilusFileInfo *file);
+	void              (*invalidate_extension_info) (NemoFileInfo *file);
 	
-	char *            (*get_activation_uri)   (NautilusFileInfo *file);
+	char *            (*get_activation_uri)   (NemoFileInfo *file);
 
-	GFileType         (*get_file_type)        (NautilusFileInfo *file);
-	GFile *           (*get_location)         (NautilusFileInfo *file);
-	GFile *           (*get_parent_location)  (NautilusFileInfo *file);
-	NautilusFileInfo* (*get_parent_info)      (NautilusFileInfo *file);
-	GMount *          (*get_mount)            (NautilusFileInfo *file);
-	gboolean          (*can_write)            (NautilusFileInfo *file);
+	GFileType         (*get_file_type)        (NemoFileInfo *file);
+	GFile *           (*get_location)         (NemoFileInfo *file);
+	GFile *           (*get_parent_location)  (NemoFileInfo *file);
+	NemoFileInfo* (*get_parent_info)      (NemoFileInfo *file);
+	GMount *          (*get_mount)            (NemoFileInfo *file);
+	gboolean          (*can_write)            (NemoFileInfo *file);
   
 };
 
-GList            *nautilus_file_info_list_copy            (GList            *files);
-void              nautilus_file_info_list_free            (GList            *files);
-GType             nautilus_file_info_get_type             (void);
+GList            *nemo_file_info_list_copy            (GList            *files);
+void              nemo_file_info_list_free            (GList            *files);
+GType             nemo_file_info_get_type             (void);
 
 /* Return true if the file has been deleted */
-gboolean          nautilus_file_info_is_gone              (NautilusFileInfo *file);
+gboolean          nemo_file_info_is_gone              (NemoFileInfo *file);
 
 /* Name and Location */
-GFileType         nautilus_file_info_get_file_type        (NautilusFileInfo *file);
-GFile *           nautilus_file_info_get_location         (NautilusFileInfo *file);
-char *            nautilus_file_info_get_name             (NautilusFileInfo *file);
-char *            nautilus_file_info_get_uri              (NautilusFileInfo *file);
-char *            nautilus_file_info_get_activation_uri   (NautilusFileInfo *file);
-GFile *           nautilus_file_info_get_parent_location  (NautilusFileInfo *file);
-char *            nautilus_file_info_get_parent_uri       (NautilusFileInfo *file);
-GMount *          nautilus_file_info_get_mount            (NautilusFileInfo *file);
-char *            nautilus_file_info_get_uri_scheme       (NautilusFileInfo *file);
+GFileType         nemo_file_info_get_file_type        (NemoFileInfo *file);
+GFile *           nemo_file_info_get_location         (NemoFileInfo *file);
+char *            nemo_file_info_get_name             (NemoFileInfo *file);
+char *            nemo_file_info_get_uri              (NemoFileInfo *file);
+char *            nemo_file_info_get_activation_uri   (NemoFileInfo *file);
+GFile *           nemo_file_info_get_parent_location  (NemoFileInfo *file);
+char *            nemo_file_info_get_parent_uri       (NemoFileInfo *file);
+GMount *          nemo_file_info_get_mount            (NemoFileInfo *file);
+char *            nemo_file_info_get_uri_scheme       (NemoFileInfo *file);
 /* It's not safe to call this recursively multiple times, as it works
- * only for files already cached by Nautilus.
+ * only for files already cached by Nemo.
  */
-NautilusFileInfo* nautilus_file_info_get_parent_info      (NautilusFileInfo *file);
+NemoFileInfo* nemo_file_info_get_parent_info      (NemoFileInfo *file);
 
 /* File Type */
-char *            nautilus_file_info_get_mime_type        (NautilusFileInfo *file);
-gboolean          nautilus_file_info_is_mime_type         (NautilusFileInfo *file,
+char *            nemo_file_info_get_mime_type        (NemoFileInfo *file);
+gboolean          nemo_file_info_is_mime_type         (NemoFileInfo *file,
 							   const char       *mime_type);
-gboolean          nautilus_file_info_is_directory         (NautilusFileInfo *file);
-gboolean          nautilus_file_info_can_write            (NautilusFileInfo *file);
+gboolean          nemo_file_info_is_directory         (NemoFileInfo *file);
+gboolean          nemo_file_info_can_write            (NemoFileInfo *file);
 
 
-/* Modifying the NautilusFileInfo */
-void              nautilus_file_info_add_emblem           (NautilusFileInfo *file,
+/* Modifying the NemoFileInfo */
+void              nemo_file_info_add_emblem           (NemoFileInfo *file,
 							   const char       *emblem_name);
-char *            nautilus_file_info_get_string_attribute (NautilusFileInfo *file,
+char *            nemo_file_info_get_string_attribute (NemoFileInfo *file,
 							   const char       *attribute_name);
-void              nautilus_file_info_add_string_attribute (NautilusFileInfo *file,
+void              nemo_file_info_add_string_attribute (NemoFileInfo *file,
 							   const char       *attribute_name,
 							   const char       *value);
 
 /* Invalidating file info */
-void              nautilus_file_info_invalidate_extension_info (NautilusFileInfo *file);
+void              nemo_file_info_invalidate_extension_info (NemoFileInfo *file);
 
-NautilusFileInfo *nautilus_file_info_lookup                (GFile *location);
-NautilusFileInfo *nautilus_file_info_create                (GFile *location);
-NautilusFileInfo *nautilus_file_info_lookup_for_uri        (const char *uri);
-NautilusFileInfo *nautilus_file_info_create_for_uri        (const char *uri);
+NemoFileInfo *nemo_file_info_lookup                (GFile *location);
+NemoFileInfo *nemo_file_info_create                (GFile *location);
+NemoFileInfo *nemo_file_info_lookup_for_uri        (const char *uri);
+NemoFileInfo *nemo_file_info_create_for_uri        (const char *uri);
 
 G_END_DECLS
 

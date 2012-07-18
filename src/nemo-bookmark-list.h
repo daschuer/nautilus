@@ -1,16 +1,16 @@
 /* -*- Mode: C; indent-tabs-mode: t; c-basic-offset: 8; tab-width: 8 -*- */
 
 /*
- * Nautilus
+ * Nemo
  *
  * Copyright (C) 1999, 2000 Eazel, Inc.
  *
- * Nautilus is free software; you can redistribute it and/or
+ * Nemo is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
  * published by the Free Software Foundation; either version 2 of the
  * License, or (at your option) any later version.
  *
- * Nautilus is distributed in the hope that it will be useful,
+ * Nemo is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
  * General Public License for more details.
@@ -22,31 +22,31 @@
  * Authors: John Sullivan <sullivan@eazel.com>
  */
 
-/* nautilus-bookmark-list.h - interface for centralized list of bookmarks.
+/* nemo-bookmark-list.h - interface for centralized list of bookmarks.
  */
 
-#ifndef NAUTILUS_BOOKMARK_LIST_H
-#define NAUTILUS_BOOKMARK_LIST_H
+#ifndef NEMO_BOOKMARK_LIST_H
+#define NEMO_BOOKMARK_LIST_H
 
-#include <libnautilus-private/nautilus-bookmark.h>
+#include <libnemo-private/nemo-bookmark.h>
 #include <gio/gio.h>
 
-typedef struct NautilusBookmarkList NautilusBookmarkList;
-typedef struct NautilusBookmarkListClass NautilusBookmarkListClass;
+typedef struct NemoBookmarkList NemoBookmarkList;
+typedef struct NemoBookmarkListClass NemoBookmarkListClass;
 
-#define NAUTILUS_TYPE_BOOKMARK_LIST nautilus_bookmark_list_get_type()
-#define NAUTILUS_BOOKMARK_LIST(obj) \
-  (G_TYPE_CHECK_INSTANCE_CAST ((obj), NAUTILUS_TYPE_BOOKMARK_LIST, NautilusBookmarkList))
-#define NAUTILUS_BOOKMARK_LIST_CLASS(klass) \
-  (G_TYPE_CHECK_CLASS_CAST ((klass), NAUTILUS_TYPE_BOOKMARK_LIST, NautilusBookmarkListClass))
-#define NAUTILUS_IS_BOOKMARK_LIST(obj) \
-  (G_TYPE_CHECK_INSTANCE_TYPE ((obj), NAUTILUS_TYPE_BOOKMARK_LIST))
-#define NAUTILUS_IS_BOOKMARK_LIST_CLASS(klass) \
-  (G_TYPE_CHECK_CLASS_TYPE ((klass), NAUTILUS_TYPE_BOOKMARK_LIST))
-#define NAUTILUS_BOOKMARK_LIST_GET_CLASS(obj) \
-  (G_TYPE_INSTANCE_GET_CLASS ((obj), NAUTILUS_TYPE_BOOKMARK_LIST, NautilusBookmarkListClass))
+#define NEMO_TYPE_BOOKMARK_LIST nemo_bookmark_list_get_type()
+#define NEMO_BOOKMARK_LIST(obj) \
+  (G_TYPE_CHECK_INSTANCE_CAST ((obj), NEMO_TYPE_BOOKMARK_LIST, NemoBookmarkList))
+#define NEMO_BOOKMARK_LIST_CLASS(klass) \
+  (G_TYPE_CHECK_CLASS_CAST ((klass), NEMO_TYPE_BOOKMARK_LIST, NemoBookmarkListClass))
+#define NEMO_IS_BOOKMARK_LIST(obj) \
+  (G_TYPE_CHECK_INSTANCE_TYPE ((obj), NEMO_TYPE_BOOKMARK_LIST))
+#define NEMO_IS_BOOKMARK_LIST_CLASS(klass) \
+  (G_TYPE_CHECK_CLASS_TYPE ((klass), NEMO_TYPE_BOOKMARK_LIST))
+#define NEMO_BOOKMARK_LIST_GET_CLASS(obj) \
+  (G_TYPE_INSTANCE_GET_CLASS ((obj), NEMO_TYPE_BOOKMARK_LIST, NemoBookmarkListClass))
 
-struct NautilusBookmarkList {
+struct NemoBookmarkList {
 	GObject object;
 
 	GList *list; 
@@ -54,32 +54,32 @@ struct NautilusBookmarkList {
 	GQueue *pending_ops;
 };
 
-struct NautilusBookmarkListClass {
+struct NemoBookmarkListClass {
 	GObjectClass parent_class;
-	void (* changed) (NautilusBookmarkList *bookmarks);
+	void (* changed) (NemoBookmarkList *bookmarks);
 };
 
-GType                   nautilus_bookmark_list_get_type            (void);
-NautilusBookmarkList *  nautilus_bookmark_list_new                 (void);
-void                    nautilus_bookmark_list_append              (NautilusBookmarkList   *bookmarks,
-								    NautilusBookmark *bookmark);
-gboolean                nautilus_bookmark_list_contains            (NautilusBookmarkList   *bookmarks,
-								    NautilusBookmark *bookmark);
-void                    nautilus_bookmark_list_delete_item_at      (NautilusBookmarkList   *bookmarks,
+GType                   nemo_bookmark_list_get_type            (void);
+NemoBookmarkList *  nemo_bookmark_list_new                 (void);
+void                    nemo_bookmark_list_append              (NemoBookmarkList   *bookmarks,
+								    NemoBookmark *bookmark);
+gboolean                nemo_bookmark_list_contains            (NemoBookmarkList   *bookmarks,
+								    NemoBookmark *bookmark);
+void                    nemo_bookmark_list_delete_item_at      (NemoBookmarkList   *bookmarks,
 								    guint                   index);
-void                    nautilus_bookmark_list_delete_items_with_uri (NautilusBookmarkList *bookmarks,
+void                    nemo_bookmark_list_delete_items_with_uri (NemoBookmarkList *bookmarks,
 								    const char		   *uri);
-void                    nautilus_bookmark_list_insert_item         (NautilusBookmarkList   *bookmarks,
-								    NautilusBookmark *bookmark,
+void                    nemo_bookmark_list_insert_item         (NemoBookmarkList   *bookmarks,
+								    NemoBookmark *bookmark,
 								    guint                   index);
-guint                   nautilus_bookmark_list_length              (NautilusBookmarkList   *bookmarks);
-NautilusBookmark *      nautilus_bookmark_list_item_at             (NautilusBookmarkList   *bookmarks,
+guint                   nemo_bookmark_list_length              (NemoBookmarkList   *bookmarks);
+NemoBookmark *      nemo_bookmark_list_item_at             (NemoBookmarkList   *bookmarks,
 								    guint                   index);
-void                    nautilus_bookmark_list_move_item           (NautilusBookmarkList *bookmarks,
+void                    nemo_bookmark_list_move_item           (NemoBookmarkList *bookmarks,
 								    guint                 index,
 								    guint                 destination);
-void                    nautilus_bookmark_list_set_window_geometry (NautilusBookmarkList   *bookmarks,
+void                    nemo_bookmark_list_set_window_geometry (NemoBookmarkList   *bookmarks,
 								    const char             *geometry);
-const char *            nautilus_bookmark_list_get_window_geometry (NautilusBookmarkList   *bookmarks);
+const char *            nemo_bookmark_list_get_window_geometry (NemoBookmarkList   *bookmarks);
 
-#endif /* NAUTILUS_BOOKMARK_LIST_H */
+#endif /* NEMO_BOOKMARK_LIST_H */

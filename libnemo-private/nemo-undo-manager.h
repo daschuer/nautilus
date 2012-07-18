@@ -1,6 +1,6 @@
 /* -*- Mode: C; indent-tabs-mode: t; c-basic-offset: 8; tab-width: 8 -*- */
 
-/* NautilusUndoManager - Manages undo and redo transactions.
+/* NemoUndoManager - Manages undo and redo transactions.
  *                       This is the public interface used by the application.                      
  *
  * Copyright (C) 2000 Eazel, Inc.
@@ -23,48 +23,48 @@
  * Boston, MA 02111-1307, USA.
  */
 
-#ifndef NAUTILUS_UNDO_MANAGER_H
-#define NAUTILUS_UNDO_MANAGER_H
+#ifndef NEMO_UNDO_MANAGER_H
+#define NEMO_UNDO_MANAGER_H
 
-#include <libnautilus-private/nautilus-undo.h>
+#include <libnemo-private/nemo-undo.h>
 
-#define NAUTILUS_TYPE_UNDO_MANAGER nautilus_undo_manager_get_type()
-#define NAUTILUS_UNDO_MANAGER(obj) \
-  (G_TYPE_CHECK_INSTANCE_CAST ((obj), NAUTILUS_TYPE_UNDO_MANAGER, NautilusUndoManager))
-#define NAUTILUS_UNDO_MANAGER_CLASS(klass) \
-  (G_TYPE_CHECK_CLASS_CAST ((klass), NAUTILUS_TYPE_UNDO_MANAGER, NautilusUndoManagerClass))
-#define NAUTILUS_IS_UNDO_MANAGER(obj) \
-  (G_TYPE_CHECK_INSTANCE_TYPE ((obj), NAUTILUS_TYPE_UNDO_MANAGER))
-#define NAUTILUS_IS_UNDO_MANAGER_CLASS(klass) \
-  (G_TYPE_CHECK_CLASS_TYPE ((klass), NAUTILUS_TYPE_UNDO_MANAGER))
-#define NAUTILUS_UNDO_MANAGER_GET_CLASS(obj) \
-  (G_TYPE_INSTANCE_GET_CLASS ((obj), NAUTILUS_TYPE_UNDO_MANAGER, NautilusUndoManagerClass))
+#define NEMO_TYPE_UNDO_MANAGER nemo_undo_manager_get_type()
+#define NEMO_UNDO_MANAGER(obj) \
+  (G_TYPE_CHECK_INSTANCE_CAST ((obj), NEMO_TYPE_UNDO_MANAGER, NemoUndoManager))
+#define NEMO_UNDO_MANAGER_CLASS(klass) \
+  (G_TYPE_CHECK_CLASS_CAST ((klass), NEMO_TYPE_UNDO_MANAGER, NemoUndoManagerClass))
+#define NEMO_IS_UNDO_MANAGER(obj) \
+  (G_TYPE_CHECK_INSTANCE_TYPE ((obj), NEMO_TYPE_UNDO_MANAGER))
+#define NEMO_IS_UNDO_MANAGER_CLASS(klass) \
+  (G_TYPE_CHECK_CLASS_TYPE ((klass), NEMO_TYPE_UNDO_MANAGER))
+#define NEMO_UNDO_MANAGER_GET_CLASS(obj) \
+  (G_TYPE_INSTANCE_GET_CLASS ((obj), NEMO_TYPE_UNDO_MANAGER, NemoUndoManagerClass))
 	
-typedef struct NautilusUndoManagerDetails NautilusUndoManagerDetails;
+typedef struct NemoUndoManagerDetails NemoUndoManagerDetails;
 
 typedef struct {
 	GObject parent;
-	NautilusUndoManagerDetails *details;
-} NautilusUndoManager;
+	NemoUndoManagerDetails *details;
+} NemoUndoManager;
 
 typedef struct {
 	GObjectClass parent_slot;
 	void (* changed) (GObject *object, gpointer data);
-} NautilusUndoManagerClass;
+} NemoUndoManagerClass;
 
-GType                nautilus_undo_manager_get_type                           (void);
-NautilusUndoManager *nautilus_undo_manager_new                                (void);
+GType                nemo_undo_manager_get_type                           (void);
+NemoUndoManager *nemo_undo_manager_new                                (void);
 
 /* Undo operations. */
-void                 nautilus_undo_manager_undo                               (NautilusUndoManager *undo_manager);
+void                 nemo_undo_manager_undo                               (NemoUndoManager *undo_manager);
 
 /* Attach the undo manager to a Gtk object so that object and the widgets inside it can participate in undo. */
-void                 nautilus_undo_manager_attach                             (NautilusUndoManager *manager,
+void                 nemo_undo_manager_attach                             (NemoUndoManager *manager,
 									       GObject             *object);
 
-void		nautilus_undo_manager_append (NautilusUndoManager *manager,
-					      NautilusUndoTransaction *transaction);
-void            nautilus_undo_manager_forget (NautilusUndoManager *manager,
-					      NautilusUndoTransaction *transaction);
+void		nemo_undo_manager_append (NemoUndoManager *manager,
+					      NemoUndoTransaction *transaction);
+void            nemo_undo_manager_forget (NemoUndoManager *manager,
+					      NemoUndoTransaction *transaction);
 
-#endif /* NAUTILUS_UNDO_MANAGER_H */
+#endif /* NEMO_UNDO_MANAGER_H */
