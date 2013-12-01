@@ -56,7 +56,6 @@ typedef enum {
 static guint path_bar_signals [LAST_SIGNAL] = { 0 };
 
 #define NAUTILUS_PATH_BAR_ICON_SIZE 16
-#define NAUTILUS_PATH_BAR_BUTTON_MAX_WIDTH 250
 
 typedef struct {
         GtkWidget *button;
@@ -446,6 +445,8 @@ nautilus_path_bar_size_allocate (GtkWidget     *widget,
         gboolean need_sliders;
         gint up_slider_offset;
         gint down_slider_offset;
+        gint button_count = 0; 
+
 	GtkRequisition child_requisition;
 	gboolean needs_reorder = FALSE;
 
@@ -480,6 +481,8 @@ nautilus_path_bar_size_allocate (GtkWidget     *widget,
 		gtk_widget_get_preferred_size (child, NULL, &child_requisition);
                 width += child_requisition.width;
         }
+        
+	largest_width = allocation->width;
 
         if (width <= allocation->width) {
 		first_button = g_list_last (path_bar->priv->button_list);
@@ -488,6 +491,7 @@ nautilus_path_bar_size_allocate (GtkWidget     *widget,
                 gint slider_space;
 		reached_end = FALSE;
 		slider_space = 2 * (path_bar->priv->slider_width);
+		largest_width = MAX (largest_width - slider_space, 2);
 
                 if (path_bar->priv->first_scrolled_button) {
 			first_button = path_bar->priv->first_scrolled_button;
@@ -503,6 +507,7 @@ nautilus_path_bar_size_allocate (GtkWidget     *widget,
       		/* Count down the path chain towards the end. */
 		gtk_widget_get_preferred_size (BUTTON_DATA (first_button->data)->button,
 					       NULL, &child_requisition);
+		button_count = 1;
                 width = child_requisition.width;
                 list = first_button->prev;
                 while (list && !reached_end) {
@@ -511,24 +516,44 @@ nautilus_path_bar_size_allocate (GtkWidget     *widget,
 
 	  		if (width + child_requisition.width + slider_space > allocation->width) {
 	    			reached_end = TRUE;
+				if (button_count == 1) {
+					/* Display two Buttons in any case */
+					button_count++;
+					largest_width /= 2;
+					if (child_requisition.width < largest_width) {
+						/* unused space for second button */
+						largest_width += largest_width - child_requisition.width;
+					}
+				}
 	  		} else {
 				width += child_requisition.width;
+				button_count++;
 			}
 
 	  		list = list->prev;
 		}
 
                 /* Finally, we walk up, seeing how many of the previous buttons we can add*/
-
-                while (first_button->next && ! reached_end) {
+                while (first_button->next && !reached_end) {
 	  		child = BUTTON_DATA (first_button->next->data)->button;
 			gtk_widget_get_preferred_size (child, NULL, &child_requisition);
 
 	  		if (width + child_requisition.width + slider_space > allocation->width) {
 	      			reached_end = TRUE;
+				if (button_count == 1) {
+					/* Display two Buttons in any case */                        
+					first_button = first_button->next;
+					button_count++; 
+					largest_width /= 2; 
+					if (width < largest_width) {
+						/* unused space for second button */            
+						largest_width += largest_width - width;
+					}
+				} 
 	    		} else {
 	      			width += child_requisition.width;
 	      			first_button = first_button->next;
+				button_count++; 
 	    		}
 		}
         }
@@ -551,17 +576,16 @@ nautilus_path_bar_size_allocate (GtkWidget     *widget,
 		}
         }
 
-        /* Determine the largest possible allocation size */
-        largest_width = allocation->width;
-        if (need_sliders) {
-		largest_width -= (path_bar->priv->slider_width) * 2;
-        }
-
         for (list = first_button; list; list = list->prev) {
                 child = BUTTON_DATA (list->data)->button;
 		gtk_widget_get_preferred_size (child, NULL, &child_requisition);
 
-                child_allocation.width = MIN (child_requisition.width, largest_width);
+		child_allocation.width = MIN (child_requisition.width, largest_width);
+		if (button_count == 2 && child_requisition.width < largest_width) { 
+			/* unused space for second button */            
+			largest_width += largest_width - child_requisition.width;
+		}                
+
                 if (direction == GTK_TEXT_DIR_RTL) {
 			child_allocation.x -= child_allocation.width;
 		}
