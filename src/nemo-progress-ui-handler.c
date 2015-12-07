@@ -36,8 +36,6 @@
 #include <libnemo-private/nemo-progress-info.h>
 #include <libnemo-private/nemo-progress-info-manager.h>
 
-#include <libnotify/notify.h>
-
 #ifdef HAVE_UNITY
 #include <unity.h>
 #include "unity-quicklist-handler.h"
@@ -479,14 +477,14 @@ progress_ui_handler_add_to_window (NemoProgressUIHandler *self,
 static void
 progress_ui_handler_show_complete_notification (NemoProgressUIHandler *self)
 {
-	NotifyNotification *complete_notification;
+	GNotification *complete_notification;
 
-	complete_notification = notify_notification_new (_("File Operations"),
-							 _("All file operations have been successfully completed"),
-							 NULL);
-	notify_notification_set_hint (complete_notification,
-				      "desktop-entry", g_variant_new_string ("nemo"));
-	notify_notification_show (complete_notification, NULL);
+	complete_notification = g_notification_new (_("File Operations"));
+	g_notification_set_body (complete_notification,
+	                         _("All file operations have been successfully completed"));
+	g_application_send_notification (g_application_get_default (),
+                                         "transfer-complete",
+                                         complete_notification);
 
 	g_object_unref (complete_notification);
 }

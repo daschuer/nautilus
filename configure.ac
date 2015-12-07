@@ -2,7 +2,7 @@ AC_PREREQ(2.54)
 
 dnl ===========================================================================
 
-m4_define(glib_minver,                 2.37.3)
+m4_define(glib_minver,                 2.40.0)
 m4_define(cinnamon_desktop_minver,     2.6.1)
 m4_define(gnome_desktop_minver,        3.0.0)
 m4_define(pango_minver,                1.28.3)
@@ -10,7 +10,6 @@ m4_define(gtk_minver,                  3.10.0)
 m4_define(xml_minver,                  2.7.8)
 m4_define(exif_minver,                 0.6.20)
 m4_define(exempi_minver,               2.2.0)
-m4_define(notify_minver,               0.7.0)
 m4_define(glib_mime_ver,               2.34.0)
 m4_define(schemas_minver,              3.4.0)
 m4_define(unity_minver,                4.0.0)
@@ -356,7 +355,6 @@ PKG_CHECK_MODULES(NEMO, [
 	gio-2.0 >= glib_minver
 	gio-unix-2.0 >= glib_minver
 	gsettings-desktop-schemas >= schemas_minver
-	libnotify >= notify_minver
 ])
 
 dnl Multimedia keys

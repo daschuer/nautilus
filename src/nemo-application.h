@@ -71,14 +71,6 @@ void nemo_application_open_location (NemoApplication *application,
 
 void nemo_application_close_all_windows (NemoApplication *self);
 
-#if GLIB_CHECK_VERSION (2,34,0)
-void nemo_application_notify_unmount_show (NemoApplication *application,
-					       const gchar *message);
-
-void nemo_application_notify_unmount_done (NemoApplication *application,
-					       const gchar *message);
-#endif // GLIB_CHECK_VERSION (2,34,0)
-
 NemoBookmarkList *
      nemo_application_get_bookmarks  (NemoApplication *application);
 void nemo_application_edit_bookmarks (NemoApplication *application,

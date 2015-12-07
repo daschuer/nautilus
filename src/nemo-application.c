@@ -78,7 +78,6 @@
 #include <gio/gio.h>
 #include <eel/eel-gtk-extensions.h>
 #include <eel/eel-stock-dialogs.h>
-#include <libnotify/notify.h>
 #include <gdk/gdkx.h>
 #include <gtk/gtk.h>
 
@@ -115,10 +114,6 @@ struct _NemoApplicationPriv {
     gboolean cache_problem;
     gboolean ignore_cache_problem;
 
-#if GLIB_CHECK_VERSION (2,34,0)
-	NotifyNotification *unmount_notify;
-#endif
-
 	NemoBookmarkList *bookmark_list;
 
 	GtkWidget *connect_server_window;
@@ -145,62 +140,6 @@ nemo_application_edit_bookmarks (NemoApplication *application,
 	bookmarks_window = nemo_bookmarks_window_new (window);
 	gtk_window_present (bookmarks_window);
 }
-
-#if GLIB_CHECK_VERSION (2,34,0)
-void
-nemo_application_notify_unmount_done (NemoApplication *application,
-					  const gchar *message)
-{
-	if (application->priv->unmount_notify) {
-		notify_notification_close (application->priv->unmount_notify, NULL);
-		g_clear_object (&application->priv->unmount_notify);
-	}
-
-	if (message != NULL) {
-		NotifyNotification *unplug;
-		gchar **strings;
-
-		strings = g_strsplit (message, "\n", 0);
-		unplug = notify_notification_new (strings[0], strings[1],
-						  "media-removable");
-		notify_notification_set_hint (unplug,
-					      "desktop-entry", g_variant_new_string ("nemo"));
-
-		notify_notification_show (unplug, NULL);
-		g_object_unref (unplug);
-		g_strfreev (strings);
-	}
-}
-
-void
-nemo_application_notify_unmount_show (NemoApplication *application,
-					  const gchar *message)
-{
-	gchar **strings;
-
-	strings = g_strsplit (message, "\n", 0);
-
-	if (!application->priv->unmount_notify) {
-		application->priv->unmount_notify =
-			notify_notification_new (strings[0], strings[1],
-						 "media-removable");
-
-		notify_notification_set_hint (application->priv->unmount_notify,
-					      "desktop-entry", g_variant_new_string ("nemo"));
-		notify_notification_set_hint (application->priv->unmount_notify,
-					      "transient", g_variant_new_boolean (TRUE));
-		notify_notification_set_urgency (application->priv->unmount_notify,
-						 NOTIFY_URGENCY_CRITICAL);
-	} else {
-		notify_notification_update (application->priv->unmount_notify,
-					    strings[0], strings[1],
-					    "media-removable");
-	}
-
-	notify_notification_show (application->priv->unmount_notify, NULL);
-	g_strfreev (strings);
-}
-#endif // GLIB_CHECK_VERSION (2,34,0)
 
 static gboolean
 check_required_directories (NemoApplication *application)
@@ -641,8 +580,6 @@ nemo_application_finalize (GObject *object)
 	g_clear_object (&application->priv->dbus_manager);
 	g_clear_object (&application->priv->fdb_manager);
 	g_clear_object (&application->priv->search_provider);
-
-	notify_uninit ();
 
         G_OBJECT_CLASS (nemo_application_parent_class)->finalize (object);
 }
@@ -1426,7 +1363,6 @@ nemo_application_startup (GApplication *app)
 	menu_provider_init_callback ();
 	
 	/* Initialize the UI handler singleton for file operations */
-	notify_init (GETTEXT_PACKAGE);
 	self->priv->progress_handler = nemo_progress_ui_handler_new ();
 
         g_signal_connect_swapped (nemo_window_state, "changed::" NEMO_WINDOW_STATE_START_WITH_MENU_BAR,
@@ -1508,10 +1444,6 @@ nemo_application_quit_mainloop (GApplication *app)
 
 	nemo_icon_info_clear_caches ();
  	nemo_application_save_accel_map (NULL);
-
-#if GLIB_CHECK_VERSION (2,34,0)
-	nemo_application_notify_unmount_done (NEMO_APPLICATION (app), NULL);
-#endif
 
 	G_APPLICATION_CLASS (nemo_application_parent_class)->quit_mainloop (app);
 }
