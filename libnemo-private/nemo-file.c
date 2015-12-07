@@ -1751,7 +1751,6 @@ rename_get_info_callback (GObject *source_object,
 	NemoFileOperation *op;
 	NemoDirectory *directory;
 	NemoFile *existing_file;
-	char *old_name;
 	char *old_uri;
 	char *new_uri;
 	const char *new_name;
@@ -1768,20 +1767,18 @@ rename_get_info_callback (GObject *source_object,
 		new_name = g_file_info_get_name (new_info);
 		
 		/* If there was another file by the same name in this
-		 * directory, mark it gone.
+		 * directory and it is not the same file that we are
+		 * renaming, mark it gone.
 		 */
 		existing_file = nemo_directory_find_file_by_name (directory, new_name);
-		if (existing_file != NULL) {
+		if (existing_file != NULL && existing_file != op->file) {
 			nemo_file_mark_gone (existing_file);
 			nemo_file_changed (existing_file);
 		}
 		
 		old_uri = nemo_file_get_uri (op->file);
-		old_name = g_strdup (eel_ref_str_peek (op->file->details->name));
 		
 		update_info_and_name (op->file, new_info);
-		
-		g_free (old_name);
 		
 		new_uri = nemo_file_get_uri (op->file);
 
