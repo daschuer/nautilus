@@ -61,7 +61,6 @@ typedef struct {
 struct NemoQueryEditorDetails {
 	GtkWidget *entry;
 	gboolean change_frozen;
-	guint typing_timeout_id;
 
 	GtkWidget *search_current_button;
 	GtkWidget *search_all_button;
@@ -180,11 +179,6 @@ nemo_query_editor_dispose (GObject *object)
 
 	editor = NEMO_QUERY_EDITOR (object);
 
-	if (editor->details->typing_timeout_id > 0) {
-		g_source_remove (editor->details->typing_timeout_id);
-		editor->details->typing_timeout_id = 0;
-	}
-
 	g_clear_object (&editor->details->query);
 
 	g_list_free_full (editor->details->rows, (GDestroyNotify) row_destroy);
@@ -266,21 +260,6 @@ entry_activate_cb (GtkWidget *entry, NemoQueryEditor *editor)
 	g_signal_emit (editor, signals[ACTIVATED], 0);
 }
 
-static gboolean
-typing_timeout_cb (gpointer user_data)
-{
-	NemoQueryEditor *editor;
-
-	editor = NEMO_QUERY_EDITOR (user_data);
-	editor->details->typing_timeout_id = 0;
-
-	nemo_query_editor_changed (editor);
-
-	return FALSE;
-}
-
-#define TYPING_TIMEOUT 250
-
 static void
 entry_changed_cb (GtkWidget *entry, NemoQueryEditor *editor)
 {
@@ -288,14 +267,7 @@ entry_changed_cb (GtkWidget *entry, NemoQueryEditor *editor)
 		return;
 	}
 
-	if (editor->details->typing_timeout_id > 0) {
-		g_source_remove (editor->details->typing_timeout_id);
-	}
-
-	editor->details->typing_timeout_id =
-		g_timeout_add (TYPING_TIMEOUT,
-			       typing_timeout_cb,
-			       editor);
+	nemo_query_editor_changed (editor);
 }
 
 /* Type */
@@ -944,25 +916,12 @@ setup_widgets (NemoQueryEditor *editor)
 	gtk_container_add (GTK_CONTAINER (item), hbox);
 
 	/* create the search entry */
-#if GTK_CHECK_VERSION(3,6,0)
 	editor->details->entry = gtk_search_entry_new ();
-#else
-	GtkWidget *label = gtk_label_new ("");
-	char *label_markup = g_strconcat ("  <b>", _("_Search for:"), "</b>", NULL);
-	gtk_label_set_markup_with_mnemonic (GTK_LABEL (label), label_markup);
-	g_free (label_markup);
-	gtk_widget_show (label);
-
-	gtk_box_pack_start (GTK_BOX (hbox), label, FALSE, FALSE, 0);
-
-	editor->details->entry = gtk_entry_new ();
-	gtk_label_set_mnemonic_widget (GTK_LABEL (label), editor->details->entry);
-#endif
 	gtk_box_pack_start (GTK_BOX (hbox), editor->details->entry, TRUE, TRUE, 0);
 
 	g_signal_connect (editor->details->entry, "activate",
 			  G_CALLBACK (entry_activate_cb), editor);
-	g_signal_connect (editor->details->entry, "changed",
+	g_signal_connect (editor->details->entry, "search-changed",
 			  G_CALLBACK (entry_changed_cb), editor);
 
 	/* create the Current/All Files selector */
