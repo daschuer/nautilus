@@ -1064,10 +1064,10 @@ init_desktop (NemoApplication *self)
 	GdkScreen *screen;
 	screen = gdk_display_get_default_screen (gdk_display_get_default ());
 	
-	update_desktop_from_gsettings (self);
 	g_signal_connect_swapped (nemo_desktop_preferences, "changed::" NEMO_PREFERENCES_SHOW_DESKTOP,
 				  G_CALLBACK (update_desktop_from_gsettings),
 				  self);
+	update_desktop_from_gsettings (self);
 
 	g_signal_connect (screen, "monitors-changed",
 				  G_CALLBACK (monitors_changed_callback),
