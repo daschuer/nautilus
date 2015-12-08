@@ -1174,17 +1174,12 @@ nemo_canvas_item_invalidate_label (NemoCanvasItem     *item)
 static GdkPixbuf *
 get_knob_pixbuf (void)
 {
-	GdkPixbuf *knob_pixbuf;
+	GdkPixbuf *knob_pixbuf = NULL;
+	GInputStream *stream = g_resources_open_stream ("/org/nemo/icons/knob.png", 0, NULL);
 
-	knob_pixbuf = gtk_icon_theme_load_icon (gtk_icon_theme_get_default (),
-						"stock-nemo-knob",
-						8, 0, NULL);
-	if (!knob_pixbuf) {
-		GInputStream *stream = g_resources_open_stream ("/org/nemo/icons/knob.png", 0, NULL);
-		if (stream != NULL) {
-			knob_pixbuf = gdk_pixbuf_new_from_stream (stream, NULL, NULL);
-			g_object_unref (stream);
-		}
+	if (stream != NULL) {
+		knob_pixbuf = gdk_pixbuf_new_from_stream (stream, NULL, NULL);
+		g_object_unref (stream);
 	}
 
 	return knob_pixbuf;
