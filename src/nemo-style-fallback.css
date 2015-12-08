@@ -19,3 +19,31 @@ NemoPlacesTreeView:hover {
 
 NemoPlacesTreeView:selected:hover {
 }
+
+@define-color disk_space_unknown #888a85;
+@define-color disk_space_used #729fcf;
+@define-color disk_space_free #eeeeec;
+
+.disk-space-display {
+    border-style: solid;
+    border-width: 2px;
+}
+
+.disk-space-display.unknown {
+    color: @disk_space_unknown;
+    background-color: @disk_space_unknown;
+    border-color: shade(@disk_space_unknown, 0.7);
+}
+
+.disk-space-display.used {
+    color: @disk_space_used;
+    background-color: @disk_space_used;
+    border-color: shade(@disk_space_used, 0.7);
+}
+
+.disk-space-display.free {
+    color: @disk_space_free;
+    background-color: @disk_space_free;
+    border-color: shade(@disk_space_free, 0.7);
+}
+
