@@ -14,7 +14,6 @@ AM_CPPFLAGS = 						\
 	$(TRACKER_CFLAGS)				\
 	$(ZEITGEIST_CFLAGS)	\
 	-DDATADIR=\""$(datadir)"\" 			\
-	-DSYSCONFDIR=\""$(sysconfdir)"\" 			\
 	-DNEMO_DATADIR=\""$(datadir)/nemo"\" 	\
 	-DNEMO_EXTENSIONDIR=\""$(libdir)/nemo/extensions-3.0"\" \
 	$(NULL)

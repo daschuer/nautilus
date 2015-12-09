@@ -26,10 +26,7 @@ AM_CPPFLAGS =							\
 	-DLIBDIR=\""$(libdir)"\" 				\
 	-DLIBEXECDIR=\""$(libexecdir)"\" 			\
 	-DNEMO_DATADIR=\""$(datadir)/nemo"\" 		\
-	-DUIDIR=\""$(datadir)/nemo/ui"\" 		\
-	-DNEMO_PIXMAPDIR=\""$(datadir)/pixmaps/nemo"\" 	\
 	-DPREFIX=\""$(prefix)"\" 				\
-	-DSYSCONFDIR=\""$(sysconfdir)"\" 			\
 	-DVERSION="\"$(VERSION)\"" 				\
     -DNEMO_EXTENSIONDIR=\""$(libdir)/nemo/extensions-3.0"\" \
 	$(DISABLE_DEPRECATED) 		                        \
