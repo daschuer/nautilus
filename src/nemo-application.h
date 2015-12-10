@@ -64,6 +64,8 @@ NemoApplication * nemo_application_new (void);
 NemoWindow *     nemo_application_create_window (NemoApplication *application,
 							 GdkScreen           *screen);
 
+GList * nemo_application_get_windows (NemoApplication *application);
+
 void nemo_application_open_location (NemoApplication *application,
 					 GFile *location,
 					 GFile *selection,

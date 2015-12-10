@@ -30,6 +30,7 @@
 #include "nemo-view.h"
 
 #include "nemo-actions.h"
+#include "nemo-application.h"
 #include "nemo-desktop-canvas-view.h"
 #include "nemo-error-reporting.h"
 #include "nemo-list-view.h"
@@ -6984,11 +6985,11 @@ on_app_window_removed (GtkApplication   *application,
 static void
 copy_data_free (CopyCallbackData *data)
 {
-	GtkApplication *application;
+	NemoApplication *application;
 	GList *windows;
 	GList *w;
 
-	application = GTK_APPLICATION (g_application_get_default ());
+	application = NEMO_APPLICATION (g_application_get_default ());
 	g_signal_handlers_disconnect_by_func (application,
 					      G_CALLBACK (on_app_window_added),
 					      data);
@@ -6996,7 +6997,7 @@ copy_data_free (CopyCallbackData *data)
 					      G_CALLBACK (on_app_window_removed),
 					      data);
 
-	windows = gtk_application_get_windows (application);
+	windows = nemo_application_get_windows (application);
 	for (w = windows; w != NULL; w = w->next) {
 		NemoWindow *window = w->data;
 	    GList *s;
@@ -7126,12 +7127,12 @@ get_selected_folders (GList *selection)
 static void
 add_window_location_bookmarks (CopyCallbackData *data)
 {
-	GtkApplication *application;
+	NemoApplication *application;
 	GList *windows;
 	GList *w;
 
-	application = GTK_APPLICATION (g_application_get_default ());
-	windows = gtk_application_get_windows (application);
+	application = NEMO_APPLICATION (g_application_get_default ());
+	windows = nemo_application_get_windows (application);
 	g_signal_connect (application, "window-added", G_CALLBACK (on_app_window_added), data);
 	g_signal_connect (application, "window-removed", G_CALLBACK (on_app_window_removed), data);
 

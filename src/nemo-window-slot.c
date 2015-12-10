@@ -1160,7 +1160,7 @@ got_file_info_for_view_selection_callback (NemoFile *file,
 	GFile *location, *default_location;
 	GMountOperation *mount_op;
 	MountNotMountedData *data;
-	GtkApplication *app;
+	NemoApplication *app;
 	GMount *mount;
 
 	slot = callback_data;
@@ -1323,9 +1323,9 @@ got_file_info_for_view_selection_callback (NemoFile *file,
 			 */
 			/* if this is the only window, we don't want to quit, so we redirect it to home */
 
-			app = GTK_APPLICATION (g_application_get_default ());
+			app = NEMO_APPLICATION (g_application_get_default ());
 
-			if (g_list_length (gtk_application_get_windows (app)) == 1) {
+			if (g_list_length (nemo_application_get_windows (app)) == 1) {
 				/* the user could have typed in a home directory that doesn't exist,
 				   in which case going home would cause an infinite loop, so we
 				   better test for that */

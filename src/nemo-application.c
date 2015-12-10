@@ -119,7 +119,15 @@ struct _NemoApplicationPriv {
 	GtkWidget *connect_server_window;
 
 	NemoShellSearchProvider *search_provider;
+
+	GList *windows;
 };
+
+GList *
+nemo_application_get_windows (NemoApplication *application)
+{
+	return application->priv->windows;
+}
 
 NemoBookmarkList *
 nemo_application_get_bookmarks (NemoApplication *application)
@@ -247,14 +255,13 @@ nemo_application_close_all_windows (NemoApplication *self)
 	GList *l;
 	GList *windows;
 
-	/* nautilus_window_close() doesn't do anything for desktop windows */
-	windows = gtk_application_get_windows (GTK_APPLICATION (self));
+	/* nemo_window_close() doesn't do anything for desktop windows */
+	windows = nemo_application_get_windows (self);
 	/* make a copy, since the original list will be modified when destroying
 	 * a window, making this list invalid */
 	windows = g_list_copy (windows);
 	for (l = windows; l != NULL; l = l->next) {
-		if (NEMO_IS_WINDOW (l->data))
-			nemo_window_close (NEMO_WINDOW (l->data));
+		nemo_window_close (NEMO_WINDOW (l->data));
 	}
 
 	g_list_free (windows);
@@ -285,9 +292,9 @@ nemo_application_create_window (NemoApplication *application,
 		(nemo_window_state, NEMO_WINDOW_STATE_GEOMETRY);
 	if (geometry_string != NULL &&
 	    geometry_string[0] != 0) {
-		/* Ignore saved window position if a window with the same
-		 * location is already showing. That way the two windows
-		 * wont appear at the exact same location on the screen.
+		/* Ignore saved window position if another window is already showing.
+		 * That way the two windows wont appear at the exact same
+		 * location on the screen.
 		 */
 		eel_gtk_window_set_initial_geometry_from_string 
 			(GTK_WINDOW (window), 
@@ -308,6 +315,7 @@ static NemoWindowSlot *
 get_window_slot_for_location (NemoApplication *application, GFile *location)
 {
 	NemoWindowSlot *slot;
+	NemoWindow *window;
 	GList *l, *sl;
 
 	slot = NULL;
@@ -318,12 +326,11 @@ get_window_slot_for_location (NemoApplication *application, GFile *location)
 		g_object_ref (location);
 	}
 
-	for (l = gtk_application_get_windows (GTK_APPLICATION (application)); l; l = l->next) {
-		if (!NEMO_IS_WINDOW (l->data) || NEMO_IS_DESKTOP_WINDOW (l->data))
-			continue;
+	for (l = application->priv->windows; l != NULL; l = l->next) {
+		window = l->data;
 
 		GList *p;
-		GList *panes = nemo_window_get_panes (NEMO_WINDOW (l->data));
+		GList *panes = nemo_window_get_panes (window);
 		for (p = panes; p != NULL; p = p->next) {
 			NemoWindowPane *pane = NEMO_WINDOW_PANE (p->data);
 			for (sl = pane->slots; sl; sl = sl->next) {
@@ -581,7 +588,9 @@ nemo_application_finalize (GObject *object)
 	g_clear_object (&application->priv->fdb_manager);
 	g_clear_object (&application->priv->search_provider);
 
-        G_OBJECT_CLASS (nemo_application_parent_class)->finalize (object);
+	g_list_free (application->priv->windows);
+
+	G_OBJECT_CLASS (nemo_application_parent_class)->finalize (object);
 }
 
 static gboolean
@@ -1455,15 +1464,15 @@ update_dbus_opened_locations (NemoApplication *app)
 	GList *locations = NULL;
 	gsize locations_size = 0;
 	gchar **locations_array;
+	NemoWindow *window;
 
 	g_return_if_fail (NEMO_IS_APPLICATION (app));
 
-	for (l = gtk_application_get_windows (GTK_APPLICATION (app)); l; l = l->next) {
-		if (!NEMO_IS_WINDOW (l->data) || NEMO_IS_DESKTOP_WINDOW (l->data))
-			continue;
+	for (l = app->priv->windows; l != NULL; l = l->next) {
+		window = l->data;
 
 		GList *p;
-		GList *panes = nemo_window_get_panes (NEMO_WINDOW (l->data));
+		GList *panes = nemo_window_get_panes (window);
 		for (p = panes; p != NULL; p = p->next) {
 			NemoWindowPane *pane = NEMO_WINDOW_PANE (p->data);
 			for (sl = pane->slots; sl; sl = sl->next) {
@@ -1535,12 +1544,16 @@ static void
 nemo_application_window_added (GtkApplication *app,
 				   GtkWindow *window)
 {
-	/* chain to parent */
+	NemoApplication *self = NEMO_APPLICATION (app);
+
 	GTK_APPLICATION_CLASS (nemo_application_parent_class)->window_added (app, window);
 
-	if (!NEMO_IS_BOOKMARKS_WINDOW (window)) {
-		g_signal_connect (window, "slot-added", G_CALLBACK (on_slot_added), app);
-		g_signal_connect (window, "slot-removed", G_CALLBACK (on_slot_removed), app);
+	if (NEMO_IS_WINDOW (window)) {
+		self->priv->windows = g_list_prepend (self->priv->windows, window);
+		if (!NEMO_IS_BOOKMARKS_WINDOW (window)) {
+			g_signal_connect (window, "slot-added", G_CALLBACK (on_slot_added), app);
+			g_signal_connect (window, "slot-removed", G_CALLBACK (on_slot_removed), app);
+		}
 	}
 }
 
@@ -1548,19 +1561,22 @@ static void
 nemo_application_window_removed (GtkApplication *app,
 				     GtkWindow *window)
 {
-	GList *l;
+	NemoApplication *self = NEMO_APPLICATION (app);
 
-	/* chain to parent */
 	GTK_APPLICATION_CLASS (nemo_application_parent_class)->window_removed (app, window);
 
-	/* if this was the last window, close the previewer */
-	for (l = gtk_application_get_windows (GTK_APPLICATION (app)); l && !NEMO_IS_WINDOW (l->data); l = l->next);
-	if (!l) {
-		nemo_previewer_call_close ();
+	if (NEMO_IS_WINDOW (window)) {
+		self->priv->windows = g_list_remove_all (self->priv->windows, window);
+		if (!NEMO_IS_BOOKMARKS_WINDOW (window)) {		
+			g_signal_handlers_disconnect_by_func (window, on_slot_added, app);
+			g_signal_handlers_disconnect_by_func (window, on_slot_removed, app);
+		}	
 	}
 
-	g_signal_handlers_disconnect_by_func (window, on_slot_added, app);
-	g_signal_handlers_disconnect_by_func (window, on_slot_removed, app);
+	/* if this was the last window, close the previewer */
+	if (g_list_length (self->priv->windows) == 0) {
+		nemo_previewer_call_close ();
+	}
 }
 
 static void
