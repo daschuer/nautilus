@@ -756,16 +756,9 @@ nemo_connect_server_dialog_class_init (NemoConnectServerDialogClass *class)
 GtkWidget *
 nemo_connect_server_dialog_new (NemoWindow *window)
 {
-	GtkWidget *dialog;
-
-	dialog = gtk_widget_new (NEMO_TYPE_CONNECT_SERVER_DIALOG, NULL);
-
-	if (window) {
-		gtk_window_set_screen (GTK_WINDOW (dialog),
-				       gtk_window_get_screen (GTK_WINDOW (window)));
-	}
-
-	return dialog;
+	return g_object_new (NEMO_TYPE_CONNECT_SERVER_DIALOG,
+			     "transient-for", window,
+			     NULL);
 }
 
 void

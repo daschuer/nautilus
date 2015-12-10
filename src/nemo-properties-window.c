@@ -2317,6 +2317,10 @@ create_page_with_hbox (GtkNotebook *notebook,
 	gtk_container_set_border_width (GTK_CONTAINER (hbox), 12);
 	gtk_box_set_spacing (GTK_BOX (hbox), 12);
 	gtk_notebook_append_page (notebook, hbox, gtk_label_new (title));
+	gtk_container_child_set (GTK_CONTAINER (notebook),
+	                         hbox,
+	                         "tab-expand", TRUE,
+	                         NULL);
 	g_object_set_data_full (G_OBJECT (hbox), "help-uri", g_strdup (help_uri), g_free);
 
 	return hbox;
@@ -2336,6 +2340,10 @@ create_page_with_vbox (GtkNotebook *notebook,
 	gtk_widget_show (vbox);
 	gtk_container_set_border_width (GTK_CONTAINER (vbox), 12);
 	gtk_notebook_append_page (notebook, vbox, gtk_label_new (title));
+	gtk_container_child_set (GTK_CONTAINER (notebook),
+	                         vbox,
+	                         "tab-expand", TRUE,
+	                         NULL);
 	g_object_set_data_full (G_OBJECT (vbox), "help-uri", g_strdup (help_uri), g_free);
 
 	return vbox;
@@ -4638,6 +4646,10 @@ append_extension_pages (NemoPropertiesWindow *window)
 			
 			gtk_notebook_append_page (window->details->notebook, 
 						  page_widget, label);
+			gtk_container_child_set (GTK_CONTAINER (window->details->notebook),
+			                         page_widget,
+			                         "tab-expand", TRUE,
+			                         NULL);
 
 			g_object_set_data (G_OBJECT (page_widget), 
 					   "is-extension-page",
@@ -4847,6 +4859,10 @@ create_open_with_page (NemoPropertiesWindow *window)
 		g_object_set_data_full (G_OBJECT (vbox), "help-uri", g_strdup ("help:gnome-help/files-open"), g_free);
 	gtk_notebook_append_page (window->details->notebook, 
 				  vbox, gtk_label_new (_("Open With")));
+	gtk_container_child_set (GTK_CONTAINER (window->details->notebook),
+	                         vbox,
+	                         "tab-expand", TRUE,
+	                         NULL);
 }
 
 
