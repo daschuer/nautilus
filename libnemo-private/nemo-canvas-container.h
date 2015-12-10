@@ -344,9 +344,6 @@ void              nemo_canvas_container_set_margins                   (NemoCanva
 									   int                     bottom_margin);
 char*             nemo_canvas_container_get_icon_description          (NemoCanvasContainer  *container,
 									     NemoCanvasIconData       *data);
-gboolean          nemo_canvas_container_get_allow_moves               (NemoCanvasContainer  *container);
-void              nemo_canvas_container_set_allow_moves               (NemoCanvasContainer  *container,
-									   gboolean                allow_moves);
 void         nemo_canvas_container_set_forced_icon_size      (NemoCanvasContainer  *container,
                                     int                     forced_icon_size);
 void         nemo_canvas_container_set_all_columns_same_width    (NemoCanvasContainer  *container,

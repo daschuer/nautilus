@@ -952,9 +952,6 @@ nemo_canvas_view_begin_loading (NemoView *view)
 
 	nemo_canvas_container_begin_loading (NEMO_CANVAS_CONTAINER (canvas_container));
 
-	nemo_canvas_container_set_allow_moves (NEMO_CANVAS_CONTAINER (canvas_container),
-						 !eel_uri_is_search (uri));
-
 	g_free (uri);
 
 	/* Set up the zoom level from the metadata. */

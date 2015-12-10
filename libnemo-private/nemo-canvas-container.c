@@ -4901,12 +4901,9 @@ motion_notify_event (GtkWidget *widget,
 						&canvas_y);
 
 				actions = GDK_ACTION_COPY
+					| GDK_ACTION_MOVE
 					| GDK_ACTION_LINK
 					| GDK_ACTION_ASK;
-
-				if (container->details->drag_allow_moves) {
-					actions |= GDK_ACTION_MOVE;
-				}
 
 				nemo_canvas_dnd_begin_drag (container,
 							      actions,
@@ -8781,23 +8778,6 @@ nemo_canvas_container_get_icon_description (NemoCanvasContainer *container,
 	} else {
 		return NULL;
 	}
-}
-
-gboolean
-nemo_canvas_container_get_allow_moves (NemoCanvasContainer *container)
-{
-	g_return_val_if_fail (NEMO_IS_CANVAS_CONTAINER (container), FALSE);
-
-	return container->details->drag_allow_moves;
-}
-
-void
-nemo_canvas_container_set_allow_moves	(NemoCanvasContainer *container,
-						 gboolean               allow_moves)
-{
-	g_return_if_fail (NEMO_IS_CANVAS_CONTAINER (container));
-
-	container->details->drag_allow_moves = allow_moves;
 }
 
 void
