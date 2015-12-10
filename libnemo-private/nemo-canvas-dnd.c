@@ -226,6 +226,7 @@ icon_get_data_binder (NemoCanvasIcon *icon, gpointer data)
 	EelIRect widget_rect;
 	char *uri;
 	NemoCanvasContainer *container;
+	NemoFile *file;
 
 	context = (CanvasGetDataBinderContext *)data;
 
@@ -238,13 +239,15 @@ icon_get_data_binder (NemoCanvasIcon *icon, gpointer data)
 	canvas_rect_world_to_widget (EEL_CANVAS (container), &world_rect, &widget_rect);
 
 	uri = nemo_canvas_container_get_icon_uri (container, icon);
-	if (!eel_uri_is_desktop (uri)) {
+	file = nemo_file_get_by_uri (uri);
+	if (!eel_uri_is_desktop (uri) && !nemo_file_is_nemo_link (file)) {
 		g_free (uri);
 		uri = nemo_canvas_container_get_icon_activation_uri (container, icon);
 	}
 
 	if (uri == NULL) {
 		g_warning ("no URI for one of the iterated icons");
+		nemo_file_unref (file);
 		return TRUE;
 	}
 
@@ -264,6 +267,7 @@ icon_get_data_binder (NemoCanvasIcon *icon, gpointer data)
 			   context->iteratee_data);
 
 	g_free (uri);
+	nemo_file_unref (file);
 
 	return TRUE;
 }

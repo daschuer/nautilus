@@ -531,13 +531,18 @@ nemo_view_handle_hover (NemoView *view,
 	NemoWindowSlot *slot;
 	GFile *location;
 	GFile *current_location;
+	NemoFile *target_file;
+	gboolean target_is_dir;
 
 	slot = nemo_view_get_nemo_window_slot (view);
 
 	location = g_file_new_for_uri (target_uri);
+	target_file = nemo_file_get_existing (location);
+	target_is_dir = nemo_file_get_file_type (target_file) == G_FILE_TYPE_DIRECTORY;
 	current_location = nemo_window_slot_get_location (slot);
-	if (! (current_location != NULL && g_file_equal(location, current_location))) {
+	if (target_is_dir && ! (current_location != NULL && g_file_equal(location, current_location))) {
 		nemo_window_slot_open_location (slot, location, 0);
 	}
 	g_object_unref (location);
+	nemo_file_unref (target_file);
 }
