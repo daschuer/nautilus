@@ -59,5 +59,6 @@ GtkWidget * nemo_connect_server_dialog_new             (NemoWindow *window);
 GFile *     nemo_connect_server_dialog_get_location    (NemoConnectServerDialog *dialog);
 void        nemo_connect_server_dialog_set_show_browse (NemoConnectServerDialog *dialog,
 							    gboolean                     show);
+void        nemo_connect_server_dialog_add_server      (NemoFile                *file);
 
 #endif /* NEMO_CONNECT_SERVER_DIALOG_H */

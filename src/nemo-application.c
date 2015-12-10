@@ -475,51 +475,12 @@ go_to_server_cb (NemoWindow *window,
 		 gpointer        user_data)
 {
 	gboolean retval;
+	NemoFile *file;
 
 	if (error == NULL) {
-		GBookmarkFile *bookmarks;
-		GError *error = NULL;
-		char *datadir;
-		char *filename;
-		char *uri;
-		char *title;
-		NemoFile *file;
-		gboolean safe_to_save = TRUE;
-
 		file = nemo_file_get_existing (location);
-
-		bookmarks = g_bookmark_file_new ();
-		datadir = nemo_get_user_directory ();
-		filename = g_build_filename (datadir, "servers", NULL);
-		g_mkdir_with_parents (datadir, 0700);
-		g_free (datadir);
-		g_bookmark_file_load_from_file (bookmarks,
-						filename,
-						&error);
-		if (error != NULL) {
-			if (! g_error_matches (error, G_FILE_ERROR, G_FILE_ERROR_NOENT)) {
-				/* only warn if the file exists */
-				g_warning ("Unable to open server bookmarks: %s", error->message);
-				safe_to_save = FALSE;
-			}
-			g_error_free (error);
-		}
-
-		if (safe_to_save) {
-			uri = nemo_file_get_uri (file);
-			title = nemo_file_get_display_name (file);
-			g_bookmark_file_set_title (bookmarks, uri, title);
-			g_bookmark_file_set_visited (bookmarks, uri, -1);
-			g_bookmark_file_add_application (bookmarks, uri, NULL, NULL);
-			g_free (uri);
-			g_free (title);
-
-			g_bookmark_file_to_file (bookmarks, filename, NULL);
-		}
-
+		nemo_connect_server_dialog_add_server (file);
 		nemo_file_unref (file);
-		g_free (filename);
-		g_bookmark_file_free (bookmarks);
 
 		retval = TRUE;
 	} else {
