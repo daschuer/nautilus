@@ -317,7 +317,6 @@ static void     nemo_view_create_links_for_files           (NemoView      *view,
 							        GArray               *item_locations);
 static void     trash_or_delete_files                          (GtkWindow            *parent_window,
 								const GList          *files,
-								gboolean              delete_if_all_already_in_trash,
 								NemoView      *view);
 static void     load_directory                                 (NemoView      *view,
 								NemoDirectory    *directory);
@@ -1357,7 +1356,7 @@ trash_or_delete_selected_files (NemoView *view)
 	if (!view->details->selection_was_removed) {
 		selection = nemo_view_get_selection_for_file_transfer (view);
 		trash_or_delete_files (nemo_view_get_containing_window (view),
-				       selection, TRUE,
+				       selection,
 				       view);
 		nemo_file_list_free (selection);
 		view->details->selection_was_removed = TRUE;
@@ -4458,7 +4457,6 @@ trash_or_delete_done_cb (GHashTable *debuting_uris,
 static void
 trash_or_delete_files (GtkWindow *parent_window,
 		       const GList *files,
-		       gboolean delete_if_all_already_in_trash,
 		       NemoView *view)
 {
 	GList *locations;
@@ -8418,7 +8416,7 @@ action_location_trash_callback (GtkAction *action,
 
 	files = g_list_append (NULL, file);
 	trash_or_delete_files (nemo_view_get_containing_window (view),
-			       files, TRUE,
+			       files,
 			       view);
 	g_list_free (files);
 }
@@ -10357,8 +10355,6 @@ real_update_menus (NemoView *view)
  * @view: NemoView of interest.
  * @event: The event that triggered this context menu.
  * 
- * Return value: NemoDirectory for this view.
- * 
  **/
 void 
 nemo_view_pop_up_selection_context_menu  (NemoView *view, 
@@ -10383,9 +10379,7 @@ nemo_view_pop_up_selection_context_menu  (NemoView *view,
  *
  * Pop up a context menu appropriate to the view globally at the last right click location.
  * @view: NemoView of interest.
- * 
- * Return value: NemoDirectory for this view.
- * 
+ *
  **/
 void 
 nemo_view_pop_up_background_context_menu (NemoView *view, 
