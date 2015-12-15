@@ -401,7 +401,7 @@ void              nemo_view_restore_default_zoom_level (NemoView      *view);
 gboolean          nemo_view_can_zoom_in                (NemoView      *view);
 gboolean          nemo_view_can_zoom_out               (NemoView      *view);
 NemoZoomLevel nemo_view_get_zoom_level             (NemoView      *view);
-void              nemo_view_pop_up_location_context_menu (NemoView    *view,
+void              nemo_view_pop_up_pathbar_context_menu (NemoView    *view,
 							      GdkEventButton  *event,
 							      const char      *location);
 void              nemo_view_grab_focus                 (NemoView      *view);

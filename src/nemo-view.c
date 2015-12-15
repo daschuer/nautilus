@@ -187,10 +187,10 @@ struct NemoViewDetails
 	NemoWindowSlot *slot;
 	NemoDirectory *model;
 	NemoFile *directory_as_file;
-	NemoFile *location_popup_directory_as_file;
 	NemoBookmarkList *bookmarks;
-	GdkEventButton *location_popup_event;
 	GtkActionGroup *dir_action_group;
+	NemoFile *pathbar_popup_directory_as_file;
+	GdkEventButton *pathbar_popup_event;
 	guint dir_merge_id;
 
     GtkWidget *expander_menu_widget;
@@ -349,10 +349,10 @@ static void     nemo_view_select_file                      (NemoView      *view,
 static void     update_templates_directory                     (NemoView *view);
 
 static gboolean file_list_all_are_folders                      (GList *file_list);
-
-static void unschedule_pop_up_location_context_menu (NemoView *view);
+static void unschedule_pop_up_pathbar_context_menu (NemoView *view);
 static void disconnect_bookmark_signals (NemoView *view);
 static void run_action_callback (NemoAction *action, gpointer callback_data);
+static void pathbar_popup_file_attributes_ready (NemoFile *file, gpointer data);
 
 G_DEFINE_TYPE (NemoView, nemo_view, GTK_TYPE_SCROLLED_WINDOW);
 
@@ -2264,9 +2264,9 @@ action_location_properties_callback (GtkAction *action,
 	g_assert (NEMO_IS_VIEW (callback_data));
 
 	view = NEMO_VIEW (callback_data);
-	g_assert (NEMO_IS_FILE (view->details->location_popup_directory_as_file));
+	g_assert (NEMO_IS_FILE (view->details->pathbar_popup_directory_as_file));
 
-	files = g_list_append (NULL, nemo_file_ref (view->details->location_popup_directory_as_file));
+	files = g_list_append (NULL, nemo_file_ref (view->details->pathbar_popup_directory_as_file));
 
 	nemo_properties_window_present (files, GTK_WIDGET (view), NULL);
 
@@ -3059,9 +3059,9 @@ nemo_view_finalize (GObject *object)
     g_signal_handlers_disconnect_by_func (nemo_preferences,
                           nemo_to_menu_preferences_changed_callback, view);
 
-	unschedule_pop_up_location_context_menu (view);
-	if (view->details->location_popup_event != NULL) {
-		gdk_event_free ((GdkEvent *) view->details->location_popup_event);
+	unschedule_pop_up_pathbar_context_menu (view);
+	if (view->details->pathbar_popup_event != NULL) {
+		gdk_event_free ((GdkEvent *) view->details->pathbar_popup_event);
 	}
 
 	g_hash_table_destroy (view->details->non_ready_files);
@@ -8192,7 +8192,7 @@ action_location_mount_volume_callback (GtkAction *action,
 
 	view = NEMO_VIEW (data);
 
-	file = view->details->location_popup_directory_as_file;
+	file = view->details->pathbar_popup_directory_as_file;
 	if (file == NULL) {
 		return;
 	}
@@ -8213,7 +8213,7 @@ action_location_unmount_volume_callback (GtkAction *action,
 
 	view = NEMO_VIEW (data);
 
-	file = view->details->location_popup_directory_as_file;
+	file = view->details->pathbar_popup_directory_as_file;
 	if (file == NULL) {
 		return;
 	}
@@ -8234,7 +8234,7 @@ action_location_eject_volume_callback (GtkAction *action,
 
 	view = NEMO_VIEW (data);
 
-	file = view->details->location_popup_directory_as_file;
+	file = view->details->pathbar_popup_directory_as_file;
 	if (file == NULL) {
 		return;
 	}
@@ -8255,7 +8255,7 @@ action_location_start_volume_callback (GtkAction *action,
 
 	view = NEMO_VIEW (data);
 
-	file = view->details->location_popup_directory_as_file;
+	file = view->details->pathbar_popup_directory_as_file;
 	if (file == NULL) {
 		return;
 	}
@@ -8275,7 +8275,7 @@ action_location_stop_volume_callback (GtkAction *action,
 
 	view = NEMO_VIEW (data);
 
-	file = view->details->location_popup_directory_as_file;
+	file = view->details->pathbar_popup_directory_as_file;
 	if (file == NULL) {
 		return;
 	}
@@ -8295,7 +8295,7 @@ action_location_detect_media_callback (GtkAction *action,
 
 	view = NEMO_VIEW (data);
 
-	file = view->details->location_popup_directory_as_file;
+	file = view->details->pathbar_popup_directory_as_file;
 	if (file == NULL) {
 		return;
 	}
@@ -8312,7 +8312,7 @@ action_location_open_alternate_callback (GtkAction *action,
 
 	view = NEMO_VIEW (callback_data);
 
-	file = view->details->location_popup_directory_as_file;
+	file = view->details->pathbar_popup_directory_as_file;
 	if (file == NULL) {
 		return;
 	}
@@ -8330,7 +8330,7 @@ action_location_open_in_new_tab_callback (GtkAction *action,
 
 	view = NEMO_VIEW (callback_data);
 
-	file = view->details->location_popup_directory_as_file;
+	file = view->details->pathbar_popup_directory_as_file;
 	if (file == NULL) {
 		return;
 	}
@@ -8350,7 +8350,7 @@ action_location_cut_callback (GtkAction *action,
 
 	view = NEMO_VIEW (callback_data);
 
-	file = view->details->location_popup_directory_as_file;
+	file = view->details->pathbar_popup_directory_as_file;
 	g_return_if_fail (file != NULL);
 
 	files = g_list_append (NULL, file);
@@ -8368,7 +8368,7 @@ action_location_copy_callback (GtkAction *action,
 
 	view = NEMO_VIEW (callback_data);
 
-	file = view->details->location_popup_directory_as_file;
+	file = view->details->pathbar_popup_directory_as_file;
 	g_return_if_fail (file != NULL);
 
 	files = g_list_append (NULL, file);
@@ -8385,7 +8385,7 @@ action_location_paste_files_into_callback (GtkAction *action,
 
 	view = NEMO_VIEW (callback_data);
 
-	file = view->details->location_popup_directory_as_file;
+	file = view->details->pathbar_popup_directory_as_file;
 	g_return_if_fail (file != NULL);
 
 	paste_into (view, file);
@@ -8401,7 +8401,7 @@ action_location_trash_callback (GtkAction *action,
 
 	view = NEMO_VIEW (callback_data);
 
-	file = view->details->location_popup_directory_as_file;
+	file = view->details->pathbar_popup_directory_as_file;
 	g_return_if_fail (file != NULL);
 
 	files = g_list_append (NULL, file);
@@ -8422,7 +8422,7 @@ action_location_delete_callback (GtkAction *action,
 
 	view = NEMO_VIEW (callback_data);
 
-	file = view->details->location_popup_directory_as_file;
+	file = view->details->pathbar_popup_directory_as_file;
 	g_return_if_fail (file != NULL);
 
 	location = nemo_file_get_location (file);
@@ -8443,7 +8443,7 @@ action_location_restore_from_trash_callback (GtkAction *action,
 	GList l;
 
 	view = NEMO_VIEW (callback_data);
-	file = view->details->location_popup_directory_as_file;
+	file = view->details->pathbar_popup_directory_as_file;
 
 	l.prev = NULL;
 	l.next = NULL;
@@ -9513,9 +9513,9 @@ real_update_location_menu_volumes (NemoView *view)
 	GDriveStartStopType start_stop_type;
 
 	g_assert (NEMO_IS_VIEW (view));
-	g_assert (NEMO_IS_FILE (view->details->location_popup_directory_as_file));
+	g_assert (NEMO_IS_FILE (view->details->pathbar_popup_directory_as_file));
 
-	file = NEMO_FILE (view->details->location_popup_directory_as_file);
+	file = NEMO_FILE (view->details->pathbar_popup_directory_as_file);
 	file_should_show_foreach (file,
 				  &show_mount,
 				  &show_unmount,
@@ -9673,7 +9673,7 @@ real_update_location_menu (NemoView *view)
 		      "label", label,
 		      NULL);
 
-	file = view->details->location_popup_directory_as_file;
+	file = view->details->pathbar_popup_directory_as_file;
 	g_assert (NEMO_IS_FILE (file));
 	g_assert (nemo_file_check_if_ready (file, NEMO_FILE_ATTRIBUTE_INFO |
 						NEMO_FILE_ATTRIBUTE_MOUNT |
@@ -10373,20 +10373,20 @@ nemo_view_pop_up_background_context_menu (NemoView *view,
 }
 
 static void
-real_pop_up_location_context_menu (NemoView *view)
+real_pop_up_pathbar_context_menu (NemoView *view)
 {
 	/* always update the menu before showing it. Shouldn't be too expensive. */
 	real_update_location_menu (view);
 
-	update_context_menu_position_from_event (view, view->details->location_popup_event);
+	update_context_menu_position_from_event (view, view->details->pathbar_popup_event);
 
 	eel_pop_up_context_menu (create_popup_menu 
 				 (view, NEMO_VIEW_POPUP_PATH_LOCATION),
-				 view->details->location_popup_event);
+				 view->details->pathbar_popup_event);
 }
 
 static void
-location_popup_file_attributes_ready (NemoFile *file,
+pathbar_popup_file_attributes_ready (NemoFile *file,
 				      gpointer      data)
 {
 	NemoView *view;
@@ -10394,57 +10394,57 @@ location_popup_file_attributes_ready (NemoFile *file,
 	view = NEMO_VIEW (data);
 	g_assert (NEMO_IS_VIEW (view));
 
-	g_assert (file == view->details->location_popup_directory_as_file);
+	g_assert (file == view->details->pathbar_popup_directory_as_file);
 
-	real_pop_up_location_context_menu (view);
+	real_pop_up_pathbar_context_menu (view);
 }
 
 static void
-unschedule_pop_up_location_context_menu (NemoView *view)
+unschedule_pop_up_pathbar_context_menu (NemoView *view)
 {
-	if (view->details->location_popup_directory_as_file != NULL) {
-		g_assert (NEMO_IS_FILE (view->details->location_popup_directory_as_file));
-		nemo_file_cancel_call_when_ready (view->details->location_popup_directory_as_file,
-						      location_popup_file_attributes_ready,
+	if (view->details->pathbar_popup_directory_as_file != NULL) {
+		g_assert (NEMO_IS_FILE (view->details->pathbar_popup_directory_as_file));
+		nemo_file_cancel_call_when_ready (view->details->pathbar_popup_directory_as_file,
+						      pathbar_popup_file_attributes_ready,
 						      view);
-		nemo_file_unref (view->details->location_popup_directory_as_file);
-		view->details->location_popup_directory_as_file = NULL;
+		nemo_file_unref (view->details->pathbar_popup_directory_as_file);
+		view->details->pathbar_popup_directory_as_file = NULL;
 	}
 }
 
 static void
-schedule_pop_up_location_context_menu (NemoView *view,
+schedule_pop_up_pathbar_context_menu (NemoView *view,
 				       GdkEventButton  *event,
 				       NemoFile    *file)
 {
 	g_assert (NEMO_IS_FILE (file));
 
-	if (view->details->location_popup_event != NULL) {
-		gdk_event_free ((GdkEvent *) view->details->location_popup_event);
+	if (view->details->pathbar_popup_event != NULL) {
+		gdk_event_free ((GdkEvent *) view->details->pathbar_popup_event);
 	}
-	view->details->location_popup_event = (GdkEventButton *) gdk_event_copy ((GdkEvent *)event);
+	view->details->pathbar_popup_event = (GdkEventButton *) gdk_event_copy ((GdkEvent *)event);
 
-	if (file == view->details->location_popup_directory_as_file) {
+	if (file == view->details->pathbar_popup_directory_as_file) {
 		if (nemo_file_check_if_ready (file, NEMO_FILE_ATTRIBUTE_INFO |
 						  NEMO_FILE_ATTRIBUTE_MOUNT |
 						  NEMO_FILE_ATTRIBUTE_FILESYSTEM_INFO)) {
-			real_pop_up_location_context_menu (view);
+			real_pop_up_pathbar_context_menu (view);
 		}
 	} else {
-		unschedule_pop_up_location_context_menu (view);
+		unschedule_pop_up_pathbar_context_menu (view);
 
-		view->details->location_popup_directory_as_file = nemo_file_ref (file);
-		nemo_file_call_when_ready (view->details->location_popup_directory_as_file,
+		view->details->pathbar_popup_directory_as_file = nemo_file_ref (file);
+		nemo_file_call_when_ready (view->details->pathbar_popup_directory_as_file,
 					       NEMO_FILE_ATTRIBUTE_INFO |
 					       NEMO_FILE_ATTRIBUTE_MOUNT |
 					       NEMO_FILE_ATTRIBUTE_FILESYSTEM_INFO,
-					       location_popup_file_attributes_ready,
+					       pathbar_popup_file_attributes_ready,
 					       view);
 	}
 }
 
 /**
- * nemo_view_pop_up_location_context_menu
+ * nemo_view_pop_up_pathbar_context_menu
  *
  * Pop up a context menu appropriate to the view globally.
  * @view: NemoView of interest.
@@ -10454,7 +10454,7 @@ schedule_pop_up_location_context_menu (NemoView *view,
  *
  **/
 void 
-nemo_view_pop_up_location_context_menu (NemoView *view, 
+nemo_view_pop_up_pathbar_context_menu (NemoView *view, 
 					    GdkEventButton  *event,
 					    const char      *location)
 {
@@ -10469,7 +10469,7 @@ nemo_view_pop_up_location_context_menu (NemoView *view,
 	}
 
 	if (file != NULL) {
-		schedule_pop_up_location_context_menu (view, event, file);
+		schedule_pop_up_pathbar_context_menu (view, event, file);
 		nemo_file_unref (file);
 	}
 }

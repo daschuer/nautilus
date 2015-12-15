@@ -302,7 +302,7 @@ path_bar_path_event_callback (NemoPathBar *path_bar,
 		view = nemo_window_slot_get_view(slot);
 		if (view != NULL) {
 			uri = g_file_get_uri (location);
-			nemo_view_pop_up_location_context_menu (view, event, uri);
+			nemo_view_pop_up_pathbar_context_menu (view, event, uri);
 			g_free (uri);
 		}
 		return TRUE;
