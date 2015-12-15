@@ -1798,16 +1798,6 @@ action_save_search_as_callback (GtkAction *action,
 	}
 }
 
-
-static void
-action_empty_trash_callback (GtkAction *action,
-			     gpointer callback_data)
-{                
-        g_assert (NEMO_IS_VIEW (callback_data));
-
-	nemo_file_operations_empty_trash (GTK_WIDGET (callback_data));
-}
-
 typedef struct {
 	NemoView *view;
 	NemoFile *new_file;
@@ -8555,10 +8545,6 @@ static const GtkActionEntry directory_view_entries[] = {
   /* label, accelerator */       N_("Open With Other _Application…"), NULL,
   /* tooltip */                  N_("Choose another application with which to open the selected item"),
 				 G_CALLBACK (action_other_application_callback) },
-  /* name, stock id */         { "Empty Trash", NULL,
-  /* label, accelerator */       N_("E_mpty Trash"), NULL,
-  /* tooltip */                  N_("Delete all items in the Trash"),
-				 G_CALLBACK (action_empty_trash_callback) },
   /* name, stock id */         { NEMO_ACTION_CUT, GTK_STOCK_CUT,
   /* label, accelerator */       NULL, NULL,
   /* tooltip */                  N_("Prepare the selected files to be moved with a Paste command"),
@@ -8984,12 +8970,6 @@ clipboard_targets_received (GtkClipboard     *clipboard,
 	nemo_file_list_free (selection);
 	
 	g_object_unref (view);
-}
-
-static gboolean
-should_show_empty_trash (NemoView *view)
-{
-	return (showing_trash_directory (view));
 }
 
 static gboolean
@@ -10198,14 +10178,6 @@ real_update_menus (NemoView *view)
 
 	gtk_action_set_sensitive (action, show_properties);
 	gtk_action_set_visible (action, show_properties);
-
-	action = gtk_action_group_get_action (view->details->dir_action_group,
-					      NEMO_ACTION_EMPTY_TRASH);
-	g_object_set (action,
-		      "label", _("E_mpty Trash"),
-		      NULL);
-	gtk_action_set_sensitive (action, !nemo_trash_monitor_is_empty ());
-	gtk_action_set_visible (action, should_show_empty_trash (view));
 
     showing_search = view->details->model && NEMO_IS_SEARCH_DIRECTORY (view->details->model);
 

@@ -46,7 +46,6 @@
 			<menuitem name="Properties" action="Properties"/>
 		</placeholder>
 		<placeholder name="Global File Items Placeholder">
-			<menuitem name="Empty Trash" action="Empty Trash"/>
 			<menuitem name="Save Search" action="Save Search"/>
 			<menuitem name="Save Search As" action="Save Search As"/>
 		</placeholder>
