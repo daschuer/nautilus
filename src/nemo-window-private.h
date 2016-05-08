@@ -47,6 +47,8 @@ struct NemoWindowDetails
         GtkActionGroup *main_action_group; /* owned by ui_manager */
         guint help_message_cid;
 
+        GtkBuilder *builder;
+
         /* Menus. */
         guint extensions_menu_merge_id;
         GtkActionGroup *extensions_menu_action_group;

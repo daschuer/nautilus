@@ -551,7 +551,7 @@ nemo_window_constructed (GObject *self)
 {
 	NemoWindow *window;
 	GtkWidget *grid;
-	GtkWidget *menu;
+//	GtkWidget *menu;
 	GtkWidget *hpaned;
 	GtkWidget *vbox;
 	GtkWidget *toolbar_holder;
@@ -587,6 +587,10 @@ nemo_window_constructed (GObject *self)
 
 	nemo_window_initialize_actions (window);
 
+    gtk_application_set_menubar (GTK_APPLICATION (application),
+                                 G_MENU_MODEL (gtk_builder_get_object (window->details->builder, "menubar")));
+
+/*
 	menu = gtk_ui_manager_get_widget (window->details->ui_manager, "/MenuBar");
 	window->details->menubar = menu;
 	gtk_widget_set_hexpand (menu, TRUE);
@@ -605,7 +609,7 @@ nemo_window_constructed (GObject *self)
                       window, NULL);
 
 	gtk_container_add (GTK_CONTAINER (grid), menu);
-
+*/
 	/* Set up the toolbar place holder */
 	toolbar_holder = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 0);
 	gtk_container_add (GTK_CONTAINER (grid), toolbar_holder);

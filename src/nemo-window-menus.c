@@ -1563,6 +1563,7 @@ nemo_window_initialize_menus (NemoWindow *window)
 {
 	GtkActionGroup *action_group;
 	GtkUIManager *ui_manager;
+	GtkBuilder *builder;
 	GtkAction *action;
 	gint i;
 
@@ -1570,6 +1571,11 @@ nemo_window_initialize_menus (NemoWindow *window)
         window->details->ui_manager = gtk_ui_manager_new ();
     }
 	ui_manager = window->details->ui_manager;
+
+	if (window->details->builder == NULL){
+        window->details->builder = gtk_builder_new ();
+    }
+	builder = window->details->builder;
 
 	/* shell actions */
 	action_group = gtk_action_group_new ("ShellActions");
@@ -1639,7 +1645,9 @@ nemo_window_initialize_menus (NemoWindow *window)
 			  G_CALLBACK (disconnect_proxy_cb), window);
 
 	/* add the UI */
-	gtk_ui_manager_add_ui_from_resource (ui_manager, "/org/nemo/nemo-shell-ui.xml", NULL);
+	GError  *error = NULL;
+	gtk_builder_add_from_resource (builder, "/org/nemo/nemo-shell-ui.xml", &error);
+	g_assert_no_error (error);
 
 	nemo_window_initialize_trash_icon_monitor (window);
 	nemo_window_initialize_go_menu (window);
