@@ -64,6 +64,14 @@ NemoApplication * nemo_application_new (void);
 NemoWindow *     nemo_application_create_window (NemoApplication *application,
 							 GdkScreen           *screen);
 
+void nemo_application_set_accelerator (NemoApplication *app,
+                                       const gchar  *action_name,
+                                       const gchar  *accel);
+
+void nemo_application_set_accelerators (NemoApplication *app,
+                                        const gchar  *action_name,
+                                        const gchar  *accel1, const gchar  *accel2);
+
 GList * nemo_application_get_windows (NemoApplication *application);
 
 void nemo_application_open_location (NemoApplication *application,

@@ -1040,8 +1040,9 @@ action_tabs_move_right_callback (GtkAction *action,
 }
 
 static void
-action_tab_change_action_activate_callback (GtkAction *action, 
-					    gpointer user_data)
+action_tab_change_action_activate (GSimpleAction *action,
+                                   GVariant *state,
+                                   gpointer  user_data)
 {
 	NemoWindowPane *pane;
 	NemoWindow *window = user_data;
@@ -1561,10 +1562,13 @@ nemo_window_initialize_actions (NemoWindow *window)
 void 
 nemo_window_initialize_menus (NemoWindow *window)
 {
-	GtkActionGroup *action_group;
+	GtkActionGroup *action_group_;
 	GtkUIManager *ui_manager;
+	GtkAction *action_;	
+
+	GActionGroup *action_group;
 	GtkBuilder *builder;
-	GtkAction *action;
+	GAction *action;
 	gint i;
 
 	if (window->details->ui_manager == NULL){
@@ -1578,63 +1582,67 @@ nemo_window_initialize_menus (NemoWindow *window)
 	builder = window->details->builder;
 
 	/* shell actions */
-	action_group = gtk_action_group_new ("ShellActions");
-	gtk_action_group_set_translation_domain (action_group, GETTEXT_PACKAGE);
-	window->details->main_action_group = action_group;
-	gtk_action_group_add_actions (action_group, 
+	action_group = G_ACTION_GROUP (g_simple_action_group_new ());
+	gtk_widget_insert_action_group (GTK_WIDGET (window), "shell", action_group);
+
+	action_group_ = gtk_action_group_new ("ShellActions");
+	gtk_action_group_set_translation_domain (action_group_, GETTEXT_PACKAGE);
+	window->details->main_action_group = action_group_;
+	gtk_action_group_add_actions (action_group_, 
 				      main_entries, G_N_ELEMENTS (main_entries),
 				      window);
-	gtk_action_group_add_toggle_actions (action_group, 
+	gtk_action_group_add_toggle_actions (action_group_, 
 					     main_toggle_entries, G_N_ELEMENTS (main_toggle_entries),
 					     window);
-	gtk_action_group_add_radio_actions (action_group,
+	gtk_action_group_add_radio_actions (action_group_,
 					    main_radio_entries, G_N_ELEMENTS (main_radio_entries),
 					    0, G_CALLBACK (sidebar_radio_entry_changed_cb),
 					    window);
 
-	action = gtk_action_group_get_action (action_group, NEMO_ACTION_UP);
-	g_object_set (action, "short_label", _("_Up"), NULL);
+	action_ = gtk_action_group_get_action (action_group_, NEMO_ACTION_UP);
+	g_object_set (action_, "short_label", _("_Up"), NULL);
 
-	action = gtk_action_group_get_action (action_group, NEMO_ACTION_HOME);
-	g_object_set (action, "short_label", _("_Home"), NULL);
+	action_ = gtk_action_group_get_action (action_group_, NEMO_ACTION_HOME);
+	g_object_set (action_, "short_label", _("_Home"), NULL);
 
-  	action = gtk_action_group_get_action (action_group, NEMO_ACTION_EDIT_LOCATION);
-  	g_object_set (action, "short_label", _("_Location"), NULL);
+  	action_ = gtk_action_group_get_action (action_group_, NEMO_ACTION_EDIT_LOCATION);
+  	g_object_set (action_, "short_label", _("_Location"), NULL);
 
-	action = gtk_action_group_get_action (action_group, NEMO_ACTION_SHOW_HIDDEN_FILES);
-	g_signal_handlers_block_by_func (action, action_show_hidden_files_callback, window);
-	gtk_toggle_action_set_active (GTK_TOGGLE_ACTION (action),
+	action_ = gtk_action_group_get_action (action_group_, NEMO_ACTION_SHOW_HIDDEN_FILES);
+	g_signal_handlers_block_by_func (action_, action_show_hidden_files_callback, window);
+	gtk_toggle_action_set_active (GTK_TOGGLE_ACTION (action_),
 				      g_settings_get_boolean (gtk_filechooser_preferences, NEMO_PREFERENCES_SHOW_HIDDEN));
-	g_signal_handlers_unblock_by_func (action, action_show_hidden_files_callback, window);
+	g_signal_handlers_unblock_by_func (action_, action_show_hidden_files_callback, window);
 
     g_signal_connect_object ( NEMO_WINDOW (window), "notify::sidebar-view-id",
                              G_CALLBACK (update_side_bar_radio_buttons), window, 0);
+
+    NemoApplication *app = NEMO_APPLICATION (g_application_get_default ());
 
 	/* Alt+N for the first 10 tabs */
 	for (i = 0; i < 10; ++i) {
 		gchar action_name[80];
 		gchar accelerator[80];
+		gchar detailed_action_name[80];	
 
-		snprintf(action_name, sizeof (action_name), "Tab%d", i);
-		action = gtk_action_new (action_name, NULL, NULL, NULL);
+		snprintf(action_name, sizeof (action_name), "tab%d", i);
+		action = G_ACTION (g_simple_action_new (action_name, NULL));
 		g_object_set_data (G_OBJECT (action), "num", GINT_TO_POINTER (i));
 		g_signal_connect (action, "activate",
-				G_CALLBACK (action_tab_change_action_activate_callback), window);
-		snprintf(accelerator, sizeof (accelerator), "<alt>%d", (i+1)%10);
-		gtk_action_group_add_action_with_accel (action_group, action, accelerator);
-		g_object_unref (action);
-		gtk_ui_manager_add_ui (ui_manager,
-				gtk_ui_manager_new_merge_id (ui_manager),
-				"/",
-				action_name,
-				action_name,
-				GTK_UI_MANAGER_ACCELERATOR,
-				FALSE);
+				G_CALLBACK (action_tab_change_action_activate), window);
 
+		g_action_map_add_action (G_ACTION_MAP (action_group), action);
+
+		snprintf(accelerator, sizeof (accelerator), "<alt>%d", (i+1)%10);
+		snprintf(detailed_action_name, sizeof (detailed_action_name), "shell.%s", action_name);
+		nemo_application_set_accelerator (app, detailed_action_name, accelerator);
+
+		g_simple_action_set_enabled (G_SIMPLE_ACTION (action), TRUE);
+		g_object_unref(action);
 	}
 
-	gtk_ui_manager_insert_action_group (ui_manager, action_group, 0);
-	g_object_unref (action_group); /* owned by ui_manager */
+	gtk_ui_manager_insert_action_group (ui_manager, action_group_, 0);
+	g_object_unref (action_group_); /* owned by ui_manager */
 
 	gtk_window_add_accel_group (GTK_WINDOW (window),
 				    gtk_ui_manager_get_accel_group (ui_manager));

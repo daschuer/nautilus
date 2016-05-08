@@ -123,6 +123,42 @@ struct _NemoApplicationPriv {
 	GList *windows;
 };
 
+void
+nemo_application_set_accelerator (NemoApplication *app,
+                                  const gchar  *action_name,
+                                  const gchar  *accel)
+{
+#if GTK_CHECK_VERSION(3, 12, 0)
+	const gchar *vaccels[] = {
+		accel,
+		NULL
+	};
+
+	gtk_application_set_accels_for_action (GTK_APPLICATION (app), action_name, vaccels);
+#else
+	gtk_application_add_accelerator (GTK_APPLICATION (app), accel, action_name, NULL);
+#endif
+}
+
+void
+nemo_application_set_accelerators (NemoApplication *app,
+                                   const gchar  *action_name,
+                                   const gchar  *accel1, const gchar  *accel2)
+{
+#if GTK_CHECK_VERSION(3, 12, 0)
+	const gchar *vaccels[] = {
+		accel1,
+		accel2,
+		NULL
+	};
+
+	gtk_application_set_accels_for_action (GTK_APPLICATION (app), action_name, vaccels);
+#else
+	gtk_application_add_accelerator (GTK_APPLICATION (app), accel1, action_name, NULL);
+	gtk_application_add_accelerator (GTK_APPLICATION (app), accel2, action_name, NULL);
+#endif
+}
+
 GList *
 nemo_application_get_windows (NemoApplication *application)
 {
