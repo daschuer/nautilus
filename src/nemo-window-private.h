@@ -39,7 +39,6 @@
 struct NemoWindowDetails
 {
         GtkWidget *statusbar;
-        GtkWidget *menubar;
 
         GtkWidget *nemo_status_bar;
 

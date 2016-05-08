@@ -175,7 +175,6 @@ nemo_desktop_window_constructed (GObject *obj)
 
 	NemoWindow *nwindow = NEMO_WINDOW (obj);
 	gtk_widget_hide (nwindow->details->statusbar);
-	gtk_widget_hide (nwindow->details->menubar);
 
 	/* Initialize the desktop link monitor singleton */
 	nemo_desktop_link_monitor_get ();

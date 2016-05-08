@@ -551,7 +551,6 @@ nemo_window_constructed (GObject *self)
 {
 	NemoWindow *window;
 	GtkWidget *grid;
-//	GtkWidget *menu;
 	GtkWidget *hpaned;
 	GtkWidget *vbox;
 	GtkWidget *toolbar_holder;
@@ -569,11 +568,6 @@ nemo_window_constructed (GObject *self)
 	application = NEMO_APPLICATION (g_application_get_default ());
 	gtk_window_set_application (GTK_WINDOW (window), GTK_APPLICATION (application));
 
-	/* disable automatic menubar handling, since we show our regular
-	 * menubar together with the app menu.
-	 */
-	gtk_application_window_set_show_menubar (GTK_APPLICATION_WINDOW (self), FALSE);
-
 	grid = gtk_grid_new ();
 	gtk_orientable_set_orientation (GTK_ORIENTABLE (grid), GTK_ORIENTATION_VERTICAL);
 	gtk_widget_show (grid);
@@ -582,34 +576,16 @@ nemo_window_constructed (GObject *self)
 	/* Statusbar is packed in the subclasses */
 
 	nemo_window_initialize_menus (window);
-
-    window->details->temporary_menu_bar = FALSE;
-
 	nemo_window_initialize_actions (window);
 
-    gtk_application_set_menubar (GTK_APPLICATION (application),
-                                 G_MENU_MODEL (gtk_builder_get_object (window->details->builder, "menubar")));
+	gtk_application_set_menubar (GTK_APPLICATION (application),
+	                             G_MENU_MODEL (gtk_builder_get_object (window->details->builder, "menubar")));
 
-/*
-	menu = gtk_ui_manager_get_widget (window->details->ui_manager, "/MenuBar");
-	window->details->menubar = menu;
-	gtk_widget_set_hexpand (menu, TRUE);
-	if (g_settings_get_boolean (nemo_window_state, NEMO_WINDOW_STATE_START_WITH_MENU_BAR)){
-		gtk_widget_show (menu);
-	} else {
-		gtk_widget_hide (menu);
-	}
+	g_signal_connect_swapped (nemo_window_state, "changed::" NEMO_WINDOW_STATE_START_WITH_MENU_BAR,
+	                          G_CALLBACK (nemo_window_sync_menu_bar),
+	                          self);
+	nemo_window_sync_menu_bar (window);
 
-    g_settings_bind_with_mapping (nemo_window_state,
-                      NEMO_WINDOW_STATE_START_WITH_MENU_BAR,
-                      window->details->menubar,
-                      "visible",
-                      G_SETTINGS_BIND_GET,
-                      nemo_window_disable_chrome_mapping, NULL,
-                      window, NULL);
-
-	gtk_container_add (GTK_CONTAINER (grid), menu);
-*/
 	/* Set up the toolbar place holder */
 	toolbar_holder = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 0);
 	gtk_container_add (GTK_CONTAINER (grid), toolbar_holder);
@@ -1116,24 +1092,21 @@ static void
 handle_alt_menu_key (NemoWindow *window,
                      gboolean on_release)
 {
-    GtkWidget *menu = window->details->menubar;
-
     gboolean default_visible = g_settings_get_boolean (nemo_window_state,
                                                       NEMO_WINDOW_STATE_START_WITH_MENU_BAR);
-
     if (default_visible || window->details->disable_chrome)
         return;
 
-    gboolean visible = gtk_widget_get_visible (menu);
+    gboolean visible = gtk_application_window_get_show_menubar (GTK_APPLICATION_WINDOW (window));
 
     if (!visible) {
-        gtk_widget_show (menu);
+     	gtk_application_window_set_show_menubar (GTK_APPLICATION_WINDOW (window), TRUE);
         window->details->temporary_menu_bar = FALSE;
     } else if (visible && on_release) {
-        if (!window->details->temporary_menu_bar)
+        if (!window->details->temporary_menu_bar) {
             window->details->temporary_menu_bar = TRUE;
-        else {
-            gtk_widget_hide (menu);
+        } else {
+        	gtk_application_window_set_show_menubar (GTK_APPLICATION_WINDOW (window), FALSE);
             window->details->temporary_menu_bar = FALSE;
         }
     }
@@ -1485,14 +1458,10 @@ nemo_window_load_view_as_menus (NemoWindow *window)
 void
 nemo_window_sync_menu_bar (NemoWindow *window)
 {
-    GtkWidget *menu = window->details->menubar;
-
-    if (g_settings_get_boolean (nemo_window_state, NEMO_WINDOW_STATE_START_WITH_MENU_BAR) &&
-                                !window->details->disable_chrome) {
-        gtk_widget_show (menu);
-    } else {
-        gtk_widget_hide (menu);
-    }
+    gboolean show_menu =
+    		g_settings_get_boolean (nemo_window_state, NEMO_WINDOW_STATE_START_WITH_MENU_BAR) &&
+			!window->details->disable_chrome;
+ 	gtk_application_window_set_show_menubar (GTK_APPLICATION_WINDOW (window), show_menu);
 
     window->details->temporary_menu_bar = FALSE;
 }
