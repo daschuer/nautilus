@@ -7,12 +7,12 @@
         <attribute name="id">new-items-placeholder</attribute> 
         <item>
           <attribute name="label" translatable="yes">New _Tab</attribute>
-          <attribute name="action">win.open</attribute>
+          <attribute name="action">win.new-tab</attribute>
           <attribute name="accel">&lt;Ctrl&gt;T</attribute>
         </item>
         <item>
           <attribute name="label" translatable="yes">New _Window</attribute>
-          <attribute name="action">win.open</attribute>
+          <attribute name="action">win.new-window</attribute>
           <attribute name="accel">&lt;Ctrl&gt;N</attribute>
         </item>
       </section>
@@ -23,7 +23,7 @@
         <attribute name="id">location-placeholder</attribute> 
         <item>
           <attribute name="label" translatable="yes">Connect to _Server…</attribute>
-          <attribute name="action">win.open</attribute>
+          <attribute name="action">win.connect-to-server</attribute>
         </item>
       </section>
       <section>
@@ -39,13 +39,13 @@
         <attribute name="id">close-items-placeholder</attribute> 
         <item>
           <attribute name="label" translatable="yes">Close _All Windows</attribute>
-          <attribute name="action">win.open</attribute>
+          <attribute name="action">win.close-all-windows</attribute>
           <attribute name="accel">&lt;Ctrl&gt;Q</attribute>
         </item>
       </section>
       <item>
         <attribute name="label" translatable="yes">_Close</attribute>
-        <attribute name="action">win.open</attribute>
+        <attribute name="action">win.close-current-view</attribute>
         <attribute name="accel">&lt;Ctrl&gt;W</attribute>
       </item>
     </submenu>
@@ -80,24 +80,24 @@
       </section>
       <item>
         <attribute name="label" translatable="yes">Plugins</attribute>
-        <attribute name="action">win.open</attribute>
+        <attribute name="action">win.plugins</attribute>
         <attribute name="accel">&lt;Alt&gt;p</attribute>
       </item>
       <item>
         <attribute name="label" translatable="yes">Prefere_nces</attribute>
-        <attribute name="action">win.open</attribute>
+        <attribute name="action">win.preferences</attribute>
       </item>
     </submenu>
     <submenu>
       <attribute name="label" translatable="yes">_View</attribute>
       <item>
         <attribute name="label" translatable="yes">_Stop</attribute>
-        <attribute name="action">win.open</attribute>
+        <attribute name="action">win.stop</attribute>
         <attribute name="accel">&lt;Ctrl&gt;O</attribute>
       </item>
       <item>
         <attribute name="label" translatable="yes">_Reload</attribute>
-        <attribute name="action">win.open</attribute>
+        <attribute name="action">win.reload</attribute>
         <attribute name="accel">&lt;Ctrl&gt;R</attribute>
       </item>
       <section>
@@ -140,7 +140,7 @@
           </item>
           <item>
             <attribute name="label" translatable="yes">Toggle _Location Entry</attribute>
-            <attribute name="action">win.open</attribute>
+            <attribute name="action">win.edit-location</attribute>
             <attribute name="accel">&lt;Ctrl&gt;L</attribute>
           </item>
         </section>
@@ -155,17 +155,17 @@
         <attribute name="id">zoom-items-placeholder</attribute> 
         <item>
           <attribute name="label" translatable="yes">Zoom _In</attribute>
-          <attribute name="action">win.open</attribute>
+          <attribute name="action">win.zoom-in</attribute>
           <attribute name="accel">&lt;Ctrl&gt;plus</attribute>
         </item>
         <item>
           <attribute name="label" translatable="yes">Zoom _Out</attribute>
-          <attribute name="action">win.open</attribute>
+          <attribute name="action">win.zoom-out</attribute>
           <attribute name="accel">&lt;Ctrl&gt;minus</attribute>
         </item>
         <item>
           <attribute name="label" translatable="yes">Normal Si_ze</attribute>
-          <attribute name="action">win.open</attribute>
+          <attribute name="action">win.zoom-normal</attribute>
           <attribute name="accel">&lt;Ctrl&gt;0</attribute>
         </item>
       </section>
@@ -184,49 +184,49 @@
           <attribute name="id">navigation-items-placeholder</attribute> 
           <item>
             <attribute name="label" translatable="yes">Open _Parent</attribute>
-            <attribute name="action">win.open</attribute>
+            <attribute name="action">win.up</attribute>
             <attribute name="accel">&lt;Alt&gt;Up</attribute>
           </item>
           <item>
             <attribute name="label" translatable="yes">_Back</attribute>
-            <attribute name="action">win.open</attribute>
+            <attribute name="action">win.back</attribute>
             <attribute name="accel">&lt;Alt&gt;Left</attribute>
           </item>
           <item>
             <attribute name="label" translatable="yes">_Forward</attribute>
-            <attribute name="action">win.open</attribute>
+            <attribute name="action">win.forward</attribute>
             <attribute name="accel">&lt;Alt&gt;Right</attribute>
           </item>
           <item>
             <attribute name="label" translatable="yes">Sa_me Location as Other Pane</attribute>
-            <attribute name="action">win.open</attribute>
+            <attribute name="action">win.split-view-same-location</attribute>
           </item>
         </section>
           <section>
           <item>
             <attribute name="label" translatable="yes">_Home</attribute>
-            <attribute name="action">win.open</attribute>
+            <attribute name="action">win.go-home</attribute>
             <attribute name="accel">&lt;Alt&gt;Home</attribute>
           </item>
           <item>
             <attribute name="label" translatable="yes">_Computer</attribute>
-             <attribute name="action">win.open</attribute>
+             <attribute name="action">win.go-to-computer</attribute>
           </item>
           <item>
             <attribute name="label" translatable="yes">T_emplates</attribute>
-            <attribute name="action">win.open</attribute>
+            <attribute name="action">win.go-to-templates</attribute>
           </item>
           <item>
             <attribute name="label" translatable="yes">_Trash</attribute>
-            <attribute name="action">win.open</attribute>
+            <attribute name="action">win.go-to-trash</attribute>
           </item>
           <item>
             <attribute name="label" translatable="yes">_Network</attribute>
-            <attribute name="action">win.open</attribute>
+            <attribute name="action">win.go-to-network</attribute>
           </item>
           <item>
             <attribute name="label" translatable="yes">_Search for Files…</attribute>
-            <attribute name="action">win.open</attribute>
+            <attribute name="action">pane.toggle-search</attribute>
             <attribute name="accel">&lt;Ctrl&gt;F</attribute>
           </item>
         </section>
@@ -236,12 +236,12 @@
         <section>
           <item>
             <attribute name="label" translatable="yes">_Add Bookmark</attribute>
-            <attribute name="action">win.open</attribute>
+            <attribute name="action">win.add-bookmark</attribute>
             <attribute name="accel">&lt;Ctrl&gt;D</attribute>
           </item>
           <item>
             <attribute name="label" translatable="yes">_Edit Bookmarks</attribute>
-             <attribute name="action">win.open</attribute>
+             <attribute name="action">win.edit-bookmarks</attribute>
              <attribute name="accel">&lt;Ctrl&gt;B</attribute>
           </item>
         </section>
@@ -255,14 +255,14 @@
       <section>
         <item>
           <attribute name="label" translatable="yes">_All Topics</attribute>
-          <attribute name="action">win.open</attribute>
+          <attribute name="action">win.nemo-manual</attribute>
           <attribute name="accel">F1</attribute>
         </item>
       </section>
       <section>
         <item>
           <attribute name="label" translatable="yes">_About</attribute>
-          <attribute name="action">win.open</attribute>
+          <attribute name="action">win.about-nemo</attribute>
         </item>
       </section>
     </submenu>
