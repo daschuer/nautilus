@@ -1796,23 +1796,6 @@ nemo_window_get_panes (NemoWindow *window)
 	return window->details->panes;
 }
 
-static void
-window_set_search_action_text (NemoWindow *window,
-			       gboolean setting)
-{
-	GtkAction *action;
-	NemoWindowPane *pane;
-	GList *l;
-
-	for (l = window->details->panes; l != NULL; l = l->next) {
-		pane = l->data;
-		action = gtk_action_group_get_action (pane->action_group,
-						      NEMO_ACTION_SEARCH);
-
-		gtk_action_set_is_important (action, setting);
-	}
-}
-
 static NemoWindowSlot *
 create_extra_pane (NemoWindow *window)
 {
@@ -2164,8 +2147,6 @@ nemo_window_split_view_on (NemoWindow *window)
 
 	nemo_window_slot_open_location (slot, location, 0);
 	g_object_unref (location);
-
-	window_set_search_action_text (window, FALSE);
 }
 
 void

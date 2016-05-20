@@ -226,7 +226,7 @@
           </item>
           <item>
             <attribute name="label" translatable="yes">_Search for Files…</attribute>
-            <attribute name="action">pane.toggle-search</attribute>
+            <attribute name="action">win.toggle-search</attribute>
             <attribute name="accel">&lt;Ctrl&gt;F</attribute>
           </item>
         </section>

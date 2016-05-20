@@ -91,9 +91,9 @@ nemo_desktop_window_init_actions (NemoDesktopWindow *window)
 	gtk_action_set_sensitive (action, FALSE);
 
 	/* Don't allow search on desktop */
-	action = gtk_action_group_get_action (action_group,
-					      NEMO_ACTION_SEARCH);
-	gtk_action_set_sensitive (action, FALSE);
+ 	GAction* gaction = g_action_map_lookup_action (G_ACTION_MAP (window),
+ 					     "toggle-search");
+ 	g_simple_action_set_enabled (G_SIMPLE_ACTION (gaction), FALSE);
 }
 
 static void

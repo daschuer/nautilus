@@ -1080,6 +1080,19 @@ action_go_to_tab (GSimpleAction *action,
 	}
 }
 
+static void
+action_toggle_search (GSimpleAction *action,
+                      GVariant *state,
+                      gpointer user_data)
+{
+	NemoWindowSlot *slot;
+
+	slot = nemo_window_get_active_slot (NEMO_WINDOW (user_data));
+	nemo_window_slot_set_search_visible (slot, g_variant_get_boolean (state));
+
+	g_simple_action_set_state (action, state);
+}
+
 /*
 static void
 action_new_folder_callback (GtkAction *action,
@@ -1141,6 +1154,7 @@ const GActionEntry win_entries[] = {
 	{ "go-to-network", action_go_to_network },
 	{ "go-to-templates", action_go_to_templates },
 	{ "go-to-trash", action_go_to_trash },
+	{ "toggle-search", NULL, NULL, "false", action_toggle_search },
 	{ "new-window", action_new_window },
 	{ "close-all-windows", action_close_all_windows },
 	{ "back", action_back },
