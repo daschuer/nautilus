@@ -244,28 +244,20 @@ setup_root_info_bar (NemoToolbar *self) {
 }
 
 static GtkWidget *
-toolbar_create_toolbutton (NemoToolbar *self,
-                gboolean create_toggle,
-                const gchar *name)
+toolbar_create_toolbutton (const gchar *action_name,
+                           gboolean create_toggle,
+                           const gchar *icon_name,
+						   const gchar *tooltip)
 {
     GtkWidget *button;
     GtkWidget *image;
-    GtkAction *action;
 
-    if (create_toggle)
-    {
-        button = gtk_toggle_button_new ();
-    } else {
-        button = gtk_button_new ();
-    }
-
-    image = gtk_image_new ();
-
-    gtk_button_set_image (GTK_BUTTON (button), image);
-    action = gtk_action_group_get_action (self->priv->action_group, name);
-    gtk_activatable_set_related_action (GTK_ACTIVATABLE (button), action);
-    gtk_button_set_label (GTK_BUTTON (button), NULL);
-    gtk_widget_set_tooltip_text (button, gtk_action_get_tooltip (action));
+    image = gtk_image_new_from_icon_name (icon_name, GTK_ICON_SIZE_BUTTON);
+    button =  g_object_new (create_toggle ? GTK_TYPE_TOGGLE_BUTTON : GTK_TYPE_BUTTON,
+  			  "image", image,
+			  "action_name", action_name,
+			  "tooltip_text", tooltip,
+  			  NULL);
 
     return button;
 }
@@ -302,13 +294,16 @@ nemo_toolbar_constructed (GObject *obj)
     self->priv->navigation_box = gtk_tool_item_new ();
     box = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 0);
 
-    self->priv->previous_button = toolbar_create_toolbutton (self, FALSE, NEMO_ACTION_BACK);
+    self->priv->previous_button = toolbar_create_toolbutton ("win.back", FALSE, "go-previous-symbolic",
+    		_("Go to the previous visited location"));
     gtk_container_add (GTK_CONTAINER (box), self->priv->previous_button);
 
-    self->priv->next_button = toolbar_create_toolbutton (self, FALSE, NEMO_ACTION_FORWARD);
+    self->priv->next_button = toolbar_create_toolbutton ("win.forward", FALSE, "go-next-symbolic",
+    		_("Go to the next visited location"));
     gtk_container_add (GTK_CONTAINER (box), self->priv->next_button);
 
-    self->priv->up_button = toolbar_create_toolbutton (self, FALSE, NEMO_ACTION_UP);
+    self->priv->up_button = toolbar_create_toolbutton ("win.up", FALSE, "go-up-symbolic",
+    		_("Open the parent folder"));
     gtk_container_add (GTK_CONTAINER (box), self->priv->up_button);
 
     gtk_style_context_add_class (gtk_widget_get_style_context (box), GTK_STYLE_CLASS_RAISED);
@@ -324,7 +319,8 @@ nemo_toolbar_constructed (GObject *obj)
     self->priv->refresh_box = gtk_tool_item_new ();
     box = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 0);
 
-    self->priv->refresh_button = toolbar_create_toolbutton (self, FALSE, NEMO_ACTION_RELOAD);
+    self->priv->refresh_button = toolbar_create_toolbutton ("win.reload", FALSE, "view-refresh-symbolic",
+    		_("Reload the current location"));
     gtk_container_add (GTK_CONTAINER (box), self->priv->refresh_button);
     gtk_style_context_add_class (gtk_widget_get_style_context (box), GTK_STYLE_CLASS_RAISED);
 
@@ -338,10 +334,12 @@ nemo_toolbar_constructed (GObject *obj)
     self->priv->location_box = gtk_tool_item_new ();
     box = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 0);
 
-    self->priv->home_button = toolbar_create_toolbutton (self, FALSE, NEMO_ACTION_HOME);
+    self->priv->home_button = toolbar_create_toolbutton ("win.go-home", FALSE,
+    		"go-home-symbolic", _("Go to home directory"));
     gtk_container_add (GTK_CONTAINER (box), self->priv->home_button);
 
-    self->priv->computer_button = toolbar_create_toolbutton (self, FALSE, NEMO_ACTION_COMPUTER);
+    self->priv->computer_button = toolbar_create_toolbutton ("win.go-to-computer", FALSE,
+    		"computer-symbolic", _("Go to Computer"));
     gtk_container_add (GTK_CONTAINER (box), self->priv->computer_button);
 
     gtk_style_context_add_class (gtk_widget_get_style_context (box), GTK_STYLE_CLASS_RAISED);
@@ -383,16 +381,20 @@ nemo_toolbar_constructed (GObject *obj)
     self->priv->tools_box = gtk_tool_item_new ();
     box = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 0);
 
-    self->priv->toggle_location_button = toolbar_create_toolbutton (self, FALSE, NEMO_ACTION_TOGGLE_LOCATION);
+    self->priv->toggle_location_button = toolbar_create_toolbutton ("win.edit-location", FALSE,
+    		"location-symbolic", _("Toggle Location Entry"));
     gtk_container_add (GTK_CONTAINER (box), self->priv->toggle_location_button);
 
-    self->priv->open_terminal_button = toolbar_create_toolbutton (self, FALSE, NEMO_ACTION_OPEN_IN_TERMINAL);
+    self->priv->open_terminal_button = toolbar_create_toolbutton ("win.open-in-terminal", FALSE,
+    		"utilities-terminal-symbolic", _("Open a terminal in the active folder"));
     gtk_container_add (GTK_CONTAINER (box), self->priv->open_terminal_button);
 
-    self->priv->new_folder_button = toolbar_create_toolbutton (self, FALSE, NEMO_ACTION_NEW_FOLDER);
+    self->priv->new_folder_button = toolbar_create_toolbutton ("win.new-folder", FALSE,
+    		"folder-symbolic", _("Create a new folder"));
     gtk_container_add (GTK_CONTAINER (box), self->priv->new_folder_button);
 
-    self->priv->search_button = toolbar_create_toolbutton (self, TRUE, NEMO_ACTION_SEARCH);
+    self->priv->search_button = toolbar_create_toolbutton ("win.toggle-search", TRUE,
+    		"edit-find-symbolic", _("Search documents and folders by name"));
     gtk_container_add (GTK_CONTAINER (box), self->priv->search_button);
 
     gtk_style_context_add_class (gtk_widget_get_style_context (box), GTK_STYLE_CLASS_RAISED);
@@ -410,13 +412,13 @@ nemo_toolbar_constructed (GObject *obj)
     self->priv->view_box = gtk_tool_item_new ();
     box = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 0);
 
-    self->priv->icon_view_button = toolbar_create_toolbutton (self, TRUE, NEMO_ACTION_ICON_VIEW);
+    self->priv->icon_view_button = toolbar_create_toolbutton (NEMO_ACTION_ICON_VIEW, TRUE, NULL, NULL);
     gtk_container_add (GTK_CONTAINER (box), self->priv->icon_view_button);
 
-    self->priv->list_view_button = toolbar_create_toolbutton (self, TRUE, NEMO_ACTION_LIST_VIEW);
+    self->priv->list_view_button = toolbar_create_toolbutton (NEMO_ACTION_LIST_VIEW, TRUE, NULL, NULL);
     gtk_container_add (GTK_CONTAINER (box), self->priv->list_view_button);
 
-    self->priv->compact_view_button = toolbar_create_toolbutton (self, TRUE, NEMO_ACTION_COMPACT_VIEW);
+    self->priv->compact_view_button = toolbar_create_toolbutton (NEMO_ACTION_COMPACT_VIEW, TRUE, NULL, NULL);
     gtk_container_add (GTK_CONTAINER (box), self->priv->compact_view_button);
 
     gtk_style_context_add_class (gtk_widget_get_style_context (box), GTK_STYLE_CLASS_RAISED);
