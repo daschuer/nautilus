@@ -518,18 +518,20 @@ action_split_view_same_location (GSimpleAction *action,
 }
 
 static void
-action_show_hide_sidebar_callback (GtkAction *action, 
-				   gpointer user_data)
+action_show_sidebar (GSimpleAction *action,
+                     GVariant *state,
+                     gpointer user_data)
 {
 	NemoWindow *window;
 
 	window = NEMO_WINDOW (user_data);
 
-	if (gtk_toggle_action_get_active (GTK_TOGGLE_ACTION (action))) {
+	if (g_variant_get_boolean (state)) {
 		nemo_window_show_sidebar (window);
 	} else {
 		nemo_window_hide_sidebar (window);
 	}
+	g_simple_action_set_state (action, state);
 }
 
 static void
@@ -833,8 +835,8 @@ void nemo_window_show_location_entry (NemoWindow *window) {
 
 static void
 action_edit_location (GSimpleAction *action,
-                           GVariant *state,
-                           gpointer user_data)
+                      GVariant *state,
+                      gpointer user_data)
 {
 	NemoWindow *window = user_data;
 	NemoWindowPane *pane;
@@ -1153,6 +1155,10 @@ const GActionEntry win_entries[] = {
  	{ "go-to-tab", NULL, "i", "0", action_go_to_tab },
 
 	{ "show-hidden-files", NULL, NULL, "false" },
+	{ "show-toolbar", NULL, NULL, "true" },
+	{ "show-sidebar", NULL, NULL, "true", action_show_sidebar },
+	{ "show-statusbar", NULL, NULL, "true" },
+	{ "show-menubar", NULL, NULL, "true" },
 	{ "show-extra-pane", NULL, NULL, "false", action_split_view }
 };
 
@@ -1273,14 +1279,14 @@ static const GtkToggleActionEntry main_toggle_entries[] = {
   /* name, stock id */     { "Show Hide Sidebar", NULL,
   /* label, accelerator */   N_("_Show Sidebar"), "F9",
   /* tooltip */              N_("Change the visibility of this window's side pane"),
-                             G_CALLBACK (action_show_hide_sidebar_callback),
+                             NULL,
   /* is_active */            TRUE }, 
   /* name, stock id */     { "Show Hide Statusbar", NULL,
   /* label, accelerator */   N_("St_atusbar"), NULL,
   /* tooltip */              N_("Change the visibility of this window's statusbar"),
                              NULL,
   /* is_active */            TRUE },
-  /* name, stock id */     { NEMO_ACTION_SHOW_HIDE_MENUBAR, NULL,
+  /* name, stock id */     { "Show Hide Menubar", NULL,
   /* label, accelerator */   N_("M_enubar"), NULL,
   /* tooltip */              N_("Change the default visibility of the menubar"),
                              NULL,
@@ -1493,7 +1499,7 @@ nemo_window_create_toolbar_action_group (NemoWindow *window)
 }
 
 static gboolean
-_settings_map_get_bool_variant (GValue   *value,
+settings_map_get_bool_variant (GValue   *value,
                                GVariant *variant,
                                gpointer  user_data)
 {
@@ -1507,13 +1513,42 @@ _settings_map_get_bool_variant (GValue   *value,
 }
 
 static GVariant*
-_settings_map_set_variant (const GValue       *value,
+settings_map_set_variant (const GValue       *value,
                            const GVariantType *expected_type,
                            gpointer            user_data)
 {
 	g_return_val_if_fail (g_variant_is_of_type (g_value_get_variant (value), expected_type), NULL);
 
 	return g_value_dup_variant (value);
+}
+
+static gboolean
+transform_bool_to_variant (GBinding *binding,
+                           const GValue *from_value,
+                           GValue *to_value,
+                           gpointer user_data) {
+	gboolean from_bool;
+	GVariant *to_variant;
+
+	from_bool = g_value_get_boolean (from_value);
+	to_variant = g_variant_new_boolean(from_bool);
+	g_value_take_variant (to_value, to_variant);
+	return TRUE;
+}
+
+static gboolean
+transform_bool_from_variant (GBinding *binding,
+                             const GValue *from_value,
+                             GValue *to_value,
+                             gpointer user_data) {
+	GVariant *from_variant;
+	gboolean to_bool;
+
+
+	from_variant = g_value_get_variant (from_value);
+	to_bool = g_variant_get_boolean(from_variant);
+	g_value_set_boolean (to_value, to_bool);
+	return TRUE;
 }
 
 static void
@@ -1531,50 +1566,49 @@ window_menus_set_bindings (NemoWindow *window)
 			 action,
 			 "state",
 			 G_SETTINGS_BIND_DEFAULT,
-             _settings_map_get_bool_variant,
-             _settings_map_set_variant,
+             settings_map_get_bool_variant,
+             settings_map_set_variant,
              NULL, NULL);
 
-	GtkActionGroup *action_group;
-	GtkAction *action_;
-
-	action_group = nemo_window_get_main_action_group (window);
-
-	action_ = gtk_action_group_get_action (action_group,
-					      NEMO_ACTION_SHOW_HIDE_TOOLBAR);
-
-	g_settings_bind (nemo_window_state,
+	action = g_action_map_lookup_action (action_map, "show-toolbar");
+	g_settings_bind_with_mapping (nemo_window_state,
 			 NEMO_WINDOW_STATE_START_WITH_TOOLBAR,
-			 action_,
-			 "active",
-			 G_SETTINGS_BIND_DEFAULT);
+			 action,
+			 "state",
+			 G_SETTINGS_BIND_DEFAULT,
+             settings_map_get_bool_variant,
+             settings_map_set_variant,
+             NULL, NULL);
 
-	action_ = gtk_action_group_get_action (action_group,
-					      NEMO_ACTION_SHOW_HIDE_STATUSBAR);
-
-	g_settings_bind (nemo_window_state,
+	action = g_action_map_lookup_action (action_map, "show-statusbar");
+	g_settings_bind_with_mapping (nemo_window_state,
 			 NEMO_WINDOW_STATE_START_WITH_STATUS_BAR,
-			 action_,
-			 "active",
-			 G_SETTINGS_BIND_DEFAULT);
+			 action,
+			 "state",
+			 G_SETTINGS_BIND_DEFAULT,
+             settings_map_get_bool_variant,
+             settings_map_set_variant,
+             NULL, NULL);
 
-    action_ = gtk_action_group_get_action (action_group,
-                          NEMO_ACTION_SHOW_HIDE_MENUBAR);
-
-    g_settings_bind (nemo_window_state,
+	action = g_action_map_lookup_action (action_map, "show-menubar");
+    g_settings_bind_with_mapping (nemo_window_state,
              NEMO_WINDOW_STATE_START_WITH_MENU_BAR,
-             action_,
-             "active",
-             G_SETTINGS_BIND_DEFAULT);
+             action,
+             "state",
+             G_SETTINGS_BIND_DEFAULT,
+             settings_map_get_bool_variant,
+             settings_map_set_variant,
+             NULL, NULL);
 
-	action_ = gtk_action_group_get_action (action_group,
-					      NEMO_ACTION_SHOW_HIDE_SIDEBAR);
-
-    g_object_bind_property (window,
-                            "show-sidebar",
-                            action_,
-                            "active",
-                            G_BINDING_BIDIRECTIONAL | G_BINDING_SYNC_CREATE);
+	action = g_action_map_lookup_action (action_map, "show-sidebar");
+    g_object_bind_property_full (window,
+             "show-sidebar",
+             action,
+             "state",
+             G_BINDING_BIDIRECTIONAL | G_BINDING_SYNC_CREATE,
+			 transform_bool_to_variant,
+			 transform_bool_from_variant,
+             NULL, NULL);
 }
 
 void 

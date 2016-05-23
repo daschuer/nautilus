@@ -116,21 +116,21 @@
           </section>
           <item>
             <attribute name="label" translatable="yes">_Show Sidebar</attribute>
-            <attribute name="action">win.open</attribute>
+            <attribute name="action">win.show-sidebar</attribute>
             <attribute name="accel">F9</attribute>
           </item>
         </submenu>
         <item>
           <attribute name="label" translatable="yes">_Main Toolbar</attribute>
-          <attribute name="action">win.open</attribute>
+          <attribute name="action">win.show-toolbar</attribute>
         </item>
         <item>
           <attribute name="label" translatable="yes">M_enubar</attribute>
-          <attribute name="action">win.open</attribute>
+          <attribute name="action">win.show-menubar</attribute>
         </item>
         <item>
           <attribute name="label" translatable="yes">St_atusbar</attribute>
-          <attribute name="action">win.open</attribute>
+          <attribute name="action">win.show-statusbar</attribute>
         </item>
         <section>
           <item>
