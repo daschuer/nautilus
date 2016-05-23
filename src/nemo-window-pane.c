@@ -625,35 +625,6 @@ notebook_create_window_cb (GtkNotebook *notebook,
 }
 
 static void
-action_show_hide_search_callback (GtkAction *action,
-				  gpointer user_data)
-{
-	NemoWindowPane *pane = user_data;
-	NemoWindowSlot *slot;
-
-	slot = pane->active_slot;
-
-	if (gtk_toggle_action_get_active (GTK_TOGGLE_ACTION (action))) {
-	    remember_focus_widget (pane);
-	    nemo_window_slot_set_search_visible(slot, TRUE);
-	} else {
-		restore_focus_widget (pane);
-		nemo_window_slot_set_search_visible (slot, FALSE);
-	}
-}
-
-static void
-setup_search_action (NemoWindowPane *pane)
-{
-	GtkActionGroup *group = pane->action_group;
-	GtkAction *action;
-
-	action = gtk_action_group_get_action (group, NEMO_ACTION_SEARCH);
-	g_signal_connect (action, "activate",
-			  G_CALLBACK (action_show_hide_search_callback), pane);
-}
-
-static void
 toolbar_action_group_activated_callback (GtkActionGroup *action_group,
 					 GtkAction *action,
 					 gpointer user_data)
@@ -736,9 +707,6 @@ create_toolbar (NemoWindowPane *pane)
                              pane, 0);
 
 	pane->action_group = action_group;
-
-    if (!NEMO_IS_DESKTOP_WINDOW (window))
-        setup_search_action (pane);
 
 	g_signal_connect (pane->action_group, "pre-activate",
 			  G_CALLBACK (toolbar_action_group_activated_callback), pane);
