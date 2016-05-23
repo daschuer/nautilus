@@ -135,7 +135,7 @@
         <section>
           <item>
             <attribute name="label" translatable="yes">E_xtra Pane</attribute>
-            <attribute name="action">win.open</attribute>
+            <attribute name="action">win.show-extra-pane</attribute>
             <attribute name="accel">F3</attribute>
           </item>
           <item>

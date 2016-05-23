@@ -551,15 +551,16 @@ action_show_hide_sidebar_callback (GtkAction *action,
 }
 
 static void
-action_split_view_callback (GtkAction *action,
-			    gpointer user_data)
+action_split_view (GSimpleAction *action,
+                   GVariant *state,
+                   gpointer user_data)
 {
 	NemoWindow *window;
 	gboolean is_active;
 
 	window = NEMO_WINDOW (user_data);
 
-	is_active = gtk_toggle_action_get_active (GTK_TOGGLE_ACTION (action));
+	is_active = g_variant_get_boolean (state);
 	if (is_active != nemo_window_split_view_showing (window)) {
 		NemoWindowSlot *slot;
 
@@ -574,6 +575,7 @@ action_split_view_callback (GtkAction *action,
 			nemo_view_update_menus (nemo_window_slot_get_view(slot));
 		}
 	}
+	g_simple_action_set_state (action, state);
 }
 
 static void
@@ -668,17 +670,11 @@ update_side_bar_radio_buttons (NemoWindow *window)
 void
 nemo_window_update_show_hide_menu_items (NemoWindow *window) 
 {
-	GtkActionGroup *action_group;
-	GtkAction *action;
+	g_action_group_change_action_state (G_ACTION_GROUP (window),
+	                                    "show-extra-pane",
+	                                    g_variant_new_boolean (nemo_window_split_view_showing (window)));
 
-	action_group = nemo_window_get_main_action_group (window);
-
-	action = gtk_action_group_get_action (action_group,
-					      NEMO_ACTION_SHOW_HIDE_EXTRA_PANE);
-	gtk_toggle_action_set_active (GTK_TOGGLE_ACTION (action),
-				      nemo_window_split_view_showing (window));
 	nemo_window_update_split_view_actions_sensitivity (window);
-
     update_side_bar_radio_buttons (window);
 }
 
@@ -1136,7 +1132,7 @@ action_open_terminal_callback(GtkAction *action, gpointer callback_data)
 */
 
 const GActionEntry win_entries[] = {
-	/* { name, activate_callback} */
+	/* { name, activate_callback, parameter_type, state, change_state_callback} */
 	{ "close-current-view", action_close_window_slot },
 	{ "preferences", action_preferences },
 	{ "plugins", action_plugins },
@@ -1172,7 +1168,9 @@ const GActionEntry win_entries[] = {
 	{ "tab-next", action_tab_next },
 	{ "tab-move-left", action_tab_move_left },
 	{ "tab_move_right", action_tab_move_right },
- 	{ "go-to-tab", NULL, "i", "0", action_go_to_tab }
+ 	{ "go-to-tab", NULL, "i", "0", action_go_to_tab },
+
+	{ "show-extra-pane", NULL, NULL, "false", action_split_view }
 };
 
 static const GtkActionEntry main_entries[] = {
@@ -1309,10 +1307,10 @@ static const GtkToggleActionEntry main_toggle_entries[] = {
   /* tooltip */              N_("Search documents and folders by name"),
 			     NULL,
   /* is_active */            FALSE },
-  /* name, stock id */     { NEMO_ACTION_SHOW_HIDE_EXTRA_PANE, NULL,
+  /* name, stock id */     { "Show Hide Extra Pane", NULL,
   /* label, accelerator */   N_("E_xtra Pane"), "F3",
   /* tooltip */              N_("Open an extra folder view side-by-side"),
-                             G_CALLBACK (action_split_view_callback),
+                             NULL,
   /* is_active */            FALSE },
 };
 
