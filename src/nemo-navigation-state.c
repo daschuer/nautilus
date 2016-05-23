@@ -214,40 +214,6 @@ nemo_navigation_state_add_group (NemoNavigationState *self,
 }
 
 void
-nemo_navigation_state_sync_all (NemoNavigationState *self)
-{
-	GList *l;
-	gint length, idx;
-	const gchar *action_name;
-	GtkAction *action;
-	gboolean master_value;
-	GtkActionGroup *group;
-
-	length = g_strv_length (self->priv->action_names);
-
-	for (idx = 0; idx < length; idx++) {
-		action_name = self->priv->action_names[idx];
-		action = gtk_action_group_get_action (self->priv->master,
-						      action_name);
-
-		master_value = gtk_action_get_sensitive (action);
-
-		for (l = self->priv->groups; l != NULL; l = l->next) {
-			group = l->data;
-
-			action = gtk_action_group_get_action (group, action_name);
-			gtk_action_set_sensitive (action, master_value);
-		}
-	}
-}
-
-GtkActionGroup *
-nemo_navigation_state_get_master (NemoNavigationState *self)
-{
-	return self->priv->master;
-}
-
-void
 nemo_navigation_state_set_boolean (NemoNavigationState *self,
 				       const gchar *action_name,
 				       gboolean value)

@@ -1562,7 +1562,7 @@ nemo_window_initialize_actions (NemoWindow *window)
 	GtkActionGroup *action_group;
 	const gchar *nav_state_actions[] = {
 		NEMO_ACTION_BACK, NEMO_ACTION_FORWARD, NEMO_ACTION_UP, NEMO_ACTION_RELOAD, NEMO_ACTION_COMPUTER, NEMO_ACTION_HOME, NEMO_ACTION_EDIT_LOCATION,
-		NEMO_ACTION_TOGGLE_LOCATION, NEMO_ACTION_SEARCH, NULL
+		NEMO_ACTION_TOGGLE_LOCATION, NULL
 	};
 
 	action_group = nemo_window_get_main_action_group (window);
