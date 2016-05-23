@@ -181,26 +181,9 @@ bookmark_list_get_uri_index (GList *list, GFile *location)
 static void
 nemo_window_pane_hide_temporary_bars (NemoWindowPane *pane)
 {
-	NemoWindowSlot *slot;
-	NemoDirectory *directory;
-
-	slot = pane->active_slot;
-
 	if (pane->temporary_navigation_bar) {
-		directory = nemo_directory_get (nemo_window_slot_get_location(slot));
-
 		pane->temporary_navigation_bar = FALSE;
-
-		/* if we're in a search directory, hide the main bar, and show the search
-		 * bar again; otherwise, just hide the whole toolbar.
-		 */
-		if (NEMO_IS_SEARCH_DIRECTORY (directory)) {
-			nemo_toolbar_set_show_main_bar (NEMO_TOOLBAR (pane->tool_bar), FALSE);
-		} else {
-			gtk_widget_hide (pane->tool_bar);
-		}
-
-		nemo_directory_unref (directory);
+		gtk_widget_hide (pane->tool_bar);
 	}
 }
 

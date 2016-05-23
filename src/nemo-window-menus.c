@@ -787,28 +787,28 @@ toggle_location_entry_setting (NemoWindow     *window,
                                NemoWindowPane *pane,
                                gboolean        from_accel_or_menu)
 {
-    gboolean current_view, temp_toolbar_visible, default_toolbar_visible, grab_focus_only, already_has_focus;
+    gboolean current_show, temp_toolbar_visible, default_toolbar_visible, grab_focus_only, already_has_focus;
     GtkToggleAction *button_action;
     GtkActionGroup *action_group;
 
 
-    current_view = nemo_toolbar_get_show_location_entry (NEMO_TOOLBAR (pane->tool_bar));
+    current_show = nemo_toolbar_get_show_location_entry (NEMO_TOOLBAR (pane->tool_bar));
     temp_toolbar_visible = pane->temporary_navigation_bar;
     default_toolbar_visible = g_settings_get_boolean (nemo_window_state,
                                                       NEMO_WINDOW_STATE_START_WITH_TOOLBAR);
     already_has_focus = gtk_widget_has_focus (GTK_WIDGET (pane->location_entry));
 
-    grab_focus_only = from_accel_or_menu && (pane->last_focus_widget == NULL || !already_has_focus) && current_view;
+    grab_focus_only = from_accel_or_menu && (pane->last_focus_widget == NULL || !already_has_focus) && current_show;
 
     if ((temp_toolbar_visible || default_toolbar_visible) && !grab_focus_only) {
-        nemo_toolbar_set_show_location_entry (NEMO_TOOLBAR (pane->tool_bar), !current_view);
-        g_settings_set_boolean (nemo_preferences, NEMO_PREFERENCES_SHOW_LOCATION_ENTRY, !current_view);
+        nemo_toolbar_set_show_location_entry (NEMO_TOOLBAR (pane->tool_bar), !current_show);
+        g_settings_set_boolean (nemo_preferences, NEMO_PREFERENCES_SHOW_LOCATION_ENTRY, !current_show);
 
         action_group = pane->toolbar_action_group;
         button_action = GTK_TOGGLE_ACTION (gtk_action_group_get_action (action_group, NEMO_ACTION_TOGGLE_LOCATION));
 
         g_signal_handlers_block_by_func (button_action, action_toggle_location_entry_callback, window);
-        gtk_toggle_action_set_active (GTK_TOGGLE_ACTION (button_action), !current_view);
+        gtk_toggle_action_set_active (GTK_TOGGLE_ACTION (button_action), !current_show);
         g_signal_handlers_unblock_by_func (button_action, action_toggle_location_entry_callback, window);
     } else {
         nemo_window_pane_ensure_location_entry (pane);
@@ -1325,93 +1325,7 @@ nemo_window_create_toolbar_action_group (NemoWindow *window)
 	gtk_action_group_set_translation_domain (action_group, GETTEXT_PACKAGE);
 
 	/*
-	action = g_object_new (NEMO_TYPE_NAVIGATION_ACTION,
-			       "name", NEMO_ACTION_BACK,
-			       "label", _("_Back"),
-			       "icon_name", "go-previous-symbolic",
-			       "tooltip", _("Go to the previous visited location"),
-			       "arrow-tooltip", _("Back history"),
-			       "window", window,
-			       "direction", NEMO_NAVIGATION_DIRECTION_BACK,
-			       "sensitive", FALSE,
-			       NULL);
-	g_signal_connect (action, "activate",
-			  G_CALLBACK (action_back_callback), window);
-	gtk_action_group_add_action (action_group, action);
 
-	g_object_unref (action);
-
-	action = g_object_new (NEMO_TYPE_NAVIGATION_ACTION,
-			       "name", NEMO_ACTION_FORWARD,
-			       "label", _("_Forward"),
-			       "icon_name", "go-next-symbolic",
-			       "tooltip", _("Go to the next visited location"),
-			       "arrow-tooltip", _("Forward history"),
-			       "window", window,
-			       "direction", NEMO_NAVIGATION_DIRECTION_FORWARD,
-			       "sensitive", FALSE,
-			       NULL);
-	g_signal_connect (action, "activate",
-			  G_CALLBACK (action_forward_callback), window);
-	gtk_action_group_add_action (action_group, action);
-
-	g_object_unref (action);
-
-   	action = g_object_new (NEMO_TYPE_NAVIGATION_ACTION,
-   			       "name", NEMO_ACTION_UP,
-   			       "label", _("_Up"),
-   			       "icon_name", "go-up-symbolic",
-   			       "tooltip", _("Go to parent folder"),
-   			       "arrow-tooltip", _("Forward history"),
-   			       "window", window,
-   			       "direction", NEMO_NAVIGATION_DIRECTION_UP,
-   			       NULL);
-   	g_signal_connect (action, "activate",
-   			  G_CALLBACK (action_up_callback), window);
-   	gtk_action_group_add_action (action_group, action);
-   
-   	g_object_unref (action);
-  
-   	action = g_object_new (NEMO_TYPE_NAVIGATION_ACTION,
-   			       "name", NEMO_ACTION_RELOAD,
-   			       "label", _("_Reload"),
-   			       "icon_name", "view-refresh-symbolic",
-   			       "tooltip", _("Reload the current location"),
-   			       "window", window,
-   			       "direction", NEMO_NAVIGATION_DIRECTION_RELOAD,
-   			       NULL);
-   	g_signal_connect (action, "activate",
-   			  G_CALLBACK (action_reload_callback), window);
-   	gtk_action_group_add_action (action_group, action);
-   	
-   	g_object_unref (action);
-   
-   	action = g_object_new (NEMO_TYPE_NAVIGATION_ACTION,
-   			       "name", NEMO_ACTION_HOME,
-   			       "label", _("_Home"),
-   			       "icon_name", "go-home-symbolic",
-   			       "tooltip", _("Go to home directory"),
-   			       "window", window,
-   			       "direction", NEMO_NAVIGATION_DIRECTION_HOME,
-   			       NULL);
-   	g_signal_connect (action, "activate",
-   			  G_CALLBACK (action_home_callback), window);
-   	gtk_action_group_add_action (action_group, action);
-   
-   	g_object_unref (action);
-   
-   	action = g_object_new (NEMO_TYPE_NAVIGATION_ACTION,
-   			       "name", NEMO_ACTION_COMPUTER,
-   			       "label", _("_Computer"),
-   			       "icon_name", "computer-symbolic",
-   			       "tooltip", _("Go to Computer"),
-   			       "window", window,
-   			       "direction", NEMO_NAVIGATION_DIRECTION_COMPUTER,
-   			       NULL);
-   	g_signal_connect (action, "activate",
-   			  G_CALLBACK (action_go_to_computer_callback), window);
-   	gtk_action_group_add_action (action_group, action);
-   
    	g_object_unref (action);
 
     action = GTK_ACTION (gtk_toggle_action_new (NEMO_ACTION_TOGGLE_LOCATION,
@@ -1425,26 +1339,6 @@ nemo_window_create_toolbar_action_group (NemoWindow *window)
                       G_CALLBACK (action_toggle_location_entry_callback), window);
     gtk_action_set_icon_name (GTK_ACTION (action), "location-symbolic");
 
-    g_object_unref (action);
-
-    action = GTK_ACTION (gtk_action_new (NEMO_ACTION_NEW_FOLDER,
-                                                _("New folder"),
-                                                _("Create a new folder"),
-                                                NULL));
-    gtk_action_group_add_action (action_group, GTK_ACTION (action));
-    g_signal_connect (action, "activate",
-                      G_CALLBACK (action_new_folder_callback), window);
-    gtk_action_set_icon_name (GTK_ACTION (action), "folder-symbolic");
-    g_object_unref (action);
-    
-    action = GTK_ACTION (gtk_action_new (NEMO_ACTION_OPEN_IN_TERMINAL,
-                                                _("Open in Terminal"),
-                                                _("Open a terminal in the active folder"),
-                                                NULL));
-    gtk_action_group_add_action (action_group, GTK_ACTION (action));
-    g_signal_connect (action, "activate",
-                      G_CALLBACK (action_open_terminal_callback), window);
-    gtk_action_set_icon_name (GTK_ACTION (action), "utilities-terminal-symbolic");
     g_object_unref (action);
 
 

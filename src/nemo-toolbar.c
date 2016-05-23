@@ -66,7 +66,6 @@ struct _NemoToolbarPriv {
     GtkWidget *root_bar;
     GtkWidget *stack;
 
-	gboolean show_main_bar;
 	gboolean show_location_entry;
     gboolean show_root_bar;
 };
@@ -74,7 +73,6 @@ struct _NemoToolbarPriv {
 enum {
 	PROP_ACTION_GROUP = 1,
 	PROP_SHOW_LOCATION_ENTRY,
-	PROP_SHOW_MAIN_BAR,
 	NUM_PROPERTIES
 };
 
@@ -105,8 +103,7 @@ toolbar_update_appearance (NemoToolbar *self)
 
 	show_location_entry = self->priv->show_location_entry;
 
-	gtk_widget_set_visible (GTK_WIDGET(self->priv->toolbar),
-				self->priv->show_main_bar);
+	gtk_widget_set_visible (GTK_WIDGET(self->priv->toolbar), TRUE);
 
     if (show_location_entry) {
         gtk_stack_set_visible_child_name (GTK_STACK (self->priv->stack), "location_entry");
@@ -479,7 +476,6 @@ nemo_toolbar_init (NemoToolbar *self)
 {
 	self->priv = G_TYPE_INSTANCE_GET_PRIVATE (self, NEMO_TYPE_TOOLBAR,
 						  NemoToolbarPriv);
-	self->priv->show_main_bar = TRUE;	
 }
 
 static void
@@ -493,9 +489,6 @@ nemo_toolbar_get_property (GObject *object,
 	switch (property_id) {
 	case PROP_SHOW_LOCATION_ENTRY:
 		g_value_set_boolean (value, self->priv->show_location_entry);
-		break;
-	case PROP_SHOW_MAIN_BAR:
-		g_value_set_boolean (value, self->priv->show_main_bar);
 		break;
 	default:
 		G_OBJECT_WARN_INVALID_PROPERTY_ID (object, property_id, pspec);
@@ -517,9 +510,6 @@ nemo_toolbar_set_property (GObject *object,
 		break;
 	case PROP_SHOW_LOCATION_ENTRY:
 		nemo_toolbar_set_show_location_entry (self, g_value_get_boolean (value));
-		break;
-	case PROP_SHOW_MAIN_BAR:
-		nemo_toolbar_set_show_main_bar (self, g_value_get_boolean (value));
 		break;
 	default:
 		G_OBJECT_WARN_INVALID_PROPERTY_ID (object, property_id, pspec);
@@ -564,12 +554,6 @@ nemo_toolbar_class_init (NemoToolbarClass *klass)
 				      "Whether to show the location entry instead of the pathbar",
 				      FALSE,
 				      G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS);
-	properties[PROP_SHOW_MAIN_BAR] =
-		g_param_spec_boolean ("show-main-bar",
-				      "Whether to show the main bar",
-				      "Whether to show the main toolbar",
-				      TRUE,
-				      G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS);
 	
 	g_type_class_add_private (klass, sizeof (NemoToolbarClass));
 	g_object_class_install_properties (oclass, NUM_PROPERTIES, properties);
@@ -600,18 +584,6 @@ gboolean
 nemo_toolbar_get_show_location_entry (NemoToolbar *self)
 {
 	return self->priv->show_location_entry;
-}
-
-void
-nemo_toolbar_set_show_main_bar (NemoToolbar *self,
-				    gboolean show_main_bar)
-{
-	if (show_main_bar != self->priv->show_main_bar) {
-		self->priv->show_main_bar = show_main_bar;
-		toolbar_update_appearance (self);
-
-		g_object_notify_by_pspec (G_OBJECT (self), properties[PROP_SHOW_MAIN_BAR]);
-	}
 }
 
 void
