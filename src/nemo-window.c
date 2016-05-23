@@ -130,20 +130,20 @@ static const struct {
 	const char *action;
 } extra_window_keybindings [] = {
 #ifdef HAVE_X11_XF86KEYSYM_H
-	{ XF86XK_AddFavorite,	NEMO_ACTION_ADD_BOOKMARK },
-	{ XF86XK_Favorites,	NEMO_ACTION_EDIT_BOOKMARKS },
-	{ XF86XK_Go,		NEMO_ACTION_EDIT_LOCATION },
-	{ XF86XK_HomePage,      NEMO_ACTION_GO_HOME },
-	{ XF86XK_OpenURL,	NEMO_ACTION_EDIT_LOCATION },
-	{ XF86XK_Refresh,	NEMO_ACTION_RELOAD },
-	{ XF86XK_Reload,	NEMO_ACTION_RELOAD },
-	{ XF86XK_Search,	NEMO_ACTION_SEARCH },
-	{ XF86XK_Start,		NEMO_ACTION_GO_HOME },
-	{ XF86XK_Stop,		NEMO_ACTION_STOP },
-	{ XF86XK_ZoomIn,	NEMO_ACTION_ZOOM_IN },
-	{ XF86XK_ZoomOut,	NEMO_ACTION_ZOOM_OUT },
-	{ XF86XK_Back,		NEMO_ACTION_BACK },
-	{ XF86XK_Forward,	NEMO_ACTION_FORWARD }
+	{ XF86XK_AddFavorite, "add-bookmark" },
+	{ XF86XK_Favorites,	"edit-bookmarks" },
+	{ XF86XK_Go, "edit-location" },
+	{ XF86XK_HomePage, "go-home" },
+	{ XF86XK_OpenURL, "edit-location" },
+	{ XF86XK_Refresh, "reload" },
+	{ XF86XK_Reload, "reload" },
+	{ XF86XK_Search, "toggle-search" },
+	{ XF86XK_Start,	"go-home" },
+	{ XF86XK_Stop, "stop" },
+	{ XF86XK_ZoomIn, "zoom-in" },
+	{ XF86XK_ZoomOut, "zoom-out" },
+	{ XF86XK_Back, "back" },
+	{ XF86XK_Forward, "forward" }
 
 #endif
 };
@@ -1151,23 +1151,12 @@ nemo_window_key_press_event (GtkWidget *widget,
 
 	for (i = 0; i < G_N_ELEMENTS (extra_window_keybindings); i++) {
 		if (extra_window_keybindings[i].keyval == event->keyval) {
-			const GList *action_groups;
-			GtkAction *action;
-
-			action = NULL;
-
-			action_groups = gtk_ui_manager_get_action_groups (window->details->ui_manager);
-			while (action_groups != NULL && action == NULL) {
-				action = gtk_action_group_get_action (action_groups->data, extra_window_keybindings[i].action);
-				action_groups = action_groups->next;
-			}
-
-			g_assert (action != NULL);
-			if (gtk_action_is_sensitive (action)) {
-				gtk_action_activate (action);
+			GAction	*action = g_action_map_lookup_action (G_ACTION_MAP (window),
+			                                              extra_window_keybindings[i].action);
+			if (g_action_get_enabled (action)) {
+				g_action_activate(action, NULL);
 				return TRUE;
 			}
-
 			break;
 		}
 	}
