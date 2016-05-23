@@ -147,6 +147,11 @@
       </section>
       <section>
         <attribute name="id">view-preferences-placeholder</attribute> 
+        <item>
+          <attribute name="label" translatable="yes">Show _Hidden Files</attribute>
+          <attribute name="action">win.show-hidden-files</attribute>
+          <attribute name="accel">&lt;Ctrl&gt;H</attribute>
+        </item>
       </section>
       <section>
         <attribute name="id">view-items-placeholder</attribute> 

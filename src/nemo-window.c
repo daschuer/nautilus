@@ -547,6 +547,19 @@ on_button_press_callback (GtkWidget *widget, GdkEventButton *event, gpointer use
 }
 
 static void
+show_hidden_files_changed_callback (gpointer callback_data)
+{
+	NemoWindow *window = NEMO_WINDOW (callback_data);
+
+	gboolean show_hidden =
+	    g_settings_get_boolean (gtk_filechooser_preferences, NEMO_PREFERENCES_SHOW_HIDDEN);
+
+	nemo_window_set_hidden_files_mode(window, show_hidden ?
+	    NEMO_WINDOW_SHOW_HIDDEN_FILES_ENABLE :
+        NEMO_WINDOW_SHOW_HIDDEN_FILES_DISABLE);
+}
+
+static void
 nemo_window_constructed (GObject *self)
 {
 	NemoWindow *window;
@@ -812,6 +825,9 @@ nemo_window_finalize (GObject *object)
 		g_source_remove (window->details->sidebar_width_handler_id);
 		window->details->sidebar_width_handler_id = 0;
 	}
+
+	g_signal_handlers_disconnect_by_func (gtk_filechooser_preferences,
+					      show_hidden_files_changed_callback, window);
 
 	nemo_window_finalize_menus (window);
 
@@ -1929,6 +1945,11 @@ nemo_window_init (NemoWindow *window)
 
     window->details->show_hidden_files_mode = show_hidden ? NEMO_WINDOW_SHOW_HIDDEN_FILES_ENABLE :
                                                             NEMO_WINDOW_SHOW_HIDDEN_FILES_DISABLE;
+
+	g_signal_connect_swapped (gtk_filechooser_preferences,
+				  "changed::" NEMO_PREFERENCES_SHOW_HIDDEN,
+				  G_CALLBACK (show_hidden_files_changed_callback),
+				  window);
 
     window->details->show_sidebar = g_settings_get_boolean (nemo_window_state,
                                                             NEMO_WINDOW_STATE_START_WITH_SIDEBAR);

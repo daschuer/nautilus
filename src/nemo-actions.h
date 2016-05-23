@@ -103,7 +103,6 @@
 #define NEMO_ACTION_UNDO "Undo"
 #define NEMO_ACTION_REDO "Redo"
 #define NEMO_ACTION_RESET_TO_DEFAULTS "Reset to Defaults"
-#define NEMO_ACTION_SHOW_HIDDEN_FILES "Show Hidden Files"
 #define NEMO_ACTION_MOUNT_VOLUME "Mount Volume"
 #define NEMO_ACTION_UNMOUNT_VOLUME "Unmount Volume"
 #define NEMO_ACTION_EJECT_VOLUME "Eject Volume"

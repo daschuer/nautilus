@@ -259,24 +259,6 @@ action_zoom_normal (GSimpleAction *action,
 }
 
 static void
-action_show_hidden_files_callback (GtkAction *action, 
-				   gpointer callback_data)
-{
-	NemoWindow *window;
-	NemoWindowShowHiddenFilesMode mode;
-
-	window = NEMO_WINDOW (callback_data);
-
-	if (gtk_toggle_action_get_active (GTK_TOGGLE_ACTION (action))) {
-		mode = NEMO_WINDOW_SHOW_HIDDEN_FILES_ENABLE;
-	} else {
-		mode = NEMO_WINDOW_SHOW_HIDDEN_FILES_DISABLE;
-	}
-
-	nemo_window_set_hidden_files_mode (window, mode);
-}
-
-static void
 action_preferences (GSimpleAction *action,
                     GVariant *state,
                     gpointer user_data)
@@ -1170,6 +1152,7 @@ const GActionEntry win_entries[] = {
 	{ "tab_move_right", action_tab_move_right },
  	{ "go-to-tab", NULL, "i", "0", action_go_to_tab },
 
+	{ "show-hidden-files", NULL, NULL, "false" },
 	{ "show-extra-pane", NULL, NULL, "false", action_split_view }
 };
 
@@ -1277,10 +1260,10 @@ static const GtkActionEntry main_entries[] = {
 };
 
 static const GtkToggleActionEntry main_toggle_entries[] = {
-  /* name, stock id */         { NEMO_ACTION_SHOW_HIDDEN_FILES, NULL,
+  /* name, stock id */         { "Show Hidden Files", NULL,
   /* label, accelerator */       N_("Show _Hidden Files"), "<control>H",
   /* tooltip */                  N_("Toggle the display of hidden files in the current window"),
-                                 G_CALLBACK (action_show_hidden_files_callback),
+                                 NULL,
                                  TRUE },
   /* name, stock id */     { "Show Hide Toolbar", NULL,
   /* label, accelerator */   N_("_Main Toolbar"), NULL,
@@ -1509,47 +1492,87 @@ nemo_window_create_toolbar_action_group (NemoWindow *window)
 	return action_group;
 }
 
+static gboolean
+_settings_map_get_bool_variant (GValue   *value,
+                               GVariant *variant,
+                               gpointer  user_data)
+{
+	g_return_val_if_fail (g_variant_is_of_type (variant,
+	                                            G_VARIANT_TYPE_BOOLEAN),
+	                      FALSE);
+
+	g_value_set_variant (value, variant);
+
+	return TRUE;
+}
+
+static GVariant*
+_settings_map_set_variant (const GValue       *value,
+                           const GVariantType *expected_type,
+                           gpointer            user_data)
+{
+	g_return_val_if_fail (g_variant_is_of_type (g_value_get_variant (value), expected_type), NULL);
+
+	return g_value_dup_variant (value);
+}
+
 static void
 window_menus_set_bindings (NemoWindow *window)
 {
+
+	GActionMap *action_map;
+	GAction *action;
+
+	action_map = G_ACTION_MAP (window);
+
+	action = g_action_map_lookup_action (action_map, "show-hidden-files");
+	g_settings_bind_with_mapping (gtk_filechooser_preferences,
+			 NEMO_PREFERENCES_SHOW_HIDDEN,
+			 action,
+			 "state",
+			 G_SETTINGS_BIND_DEFAULT,
+             _settings_map_get_bool_variant,
+             _settings_map_set_variant,
+             NULL, NULL);
+
 	GtkActionGroup *action_group;
-	GtkAction *action;
+	GtkAction *action_;
 
 	action_group = nemo_window_get_main_action_group (window);
 
-	action = gtk_action_group_get_action (action_group,
+	action_ = gtk_action_group_get_action (action_group,
 					      NEMO_ACTION_SHOW_HIDE_TOOLBAR);
 
 	g_settings_bind (nemo_window_state,
 			 NEMO_WINDOW_STATE_START_WITH_TOOLBAR,
-			 action,
+			 action_,
 			 "active",
 			 G_SETTINGS_BIND_DEFAULT);
 
-	action = gtk_action_group_get_action (action_group,
+	action_ = gtk_action_group_get_action (action_group,
 					      NEMO_ACTION_SHOW_HIDE_STATUSBAR);
 
 	g_settings_bind (nemo_window_state,
 			 NEMO_WINDOW_STATE_START_WITH_STATUS_BAR,
-			 action,
+			 action_,
 			 "active",
 			 G_SETTINGS_BIND_DEFAULT);
 
-    action = gtk_action_group_get_action (action_group,
+    action_ = gtk_action_group_get_action (action_group,
                           NEMO_ACTION_SHOW_HIDE_MENUBAR);
 
     g_settings_bind (nemo_window_state,
              NEMO_WINDOW_STATE_START_WITH_MENU_BAR,
-             action,
+             action_,
              "active",
              G_SETTINGS_BIND_DEFAULT);
 
-	action = gtk_action_group_get_action (action_group,
+	action_ = gtk_action_group_get_action (action_group,
 					      NEMO_ACTION_SHOW_HIDE_SIDEBAR);
 
     g_object_bind_property (window,
                             "show-sidebar",
-                            action,
+                            action_,
                             "active",
                             G_BINDING_BIDIRECTIONAL | G_BINDING_SYNC_CREATE);
 }
@@ -1586,7 +1609,6 @@ nemo_window_initialize_menus (NemoWindow *window)
 {
 	GtkActionGroup *action_group_;
 	GtkUIManager *ui_manager;
-	GtkAction *action_;	
 
 	GtkBuilder *builder;
 	gint i;
@@ -1621,23 +1643,9 @@ nemo_window_initialize_menus (NemoWindow *window)
 					    0, G_CALLBACK (sidebar_radio_entry_changed_cb),
 					    window);
 
-	action_ = gtk_action_group_get_action (action_group_, NEMO_ACTION_UP);
-	g_object_set (action_, "short_label", _("_Up"), NULL);
-
-	action_ = gtk_action_group_get_action (action_group_, NEMO_ACTION_HOME);
-	g_object_set (action_, "short_label", _("_Home"), NULL);
-
-  	action_ = gtk_action_group_get_action (action_group_, NEMO_ACTION_EDIT_LOCATION);
-  	g_object_set (action_, "short_label", _("_Location"), NULL);
-
-	action_ = gtk_action_group_get_action (action_group_, NEMO_ACTION_SHOW_HIDDEN_FILES);
-	g_signal_handlers_block_by_func (action_, action_show_hidden_files_callback, window);
-	gtk_toggle_action_set_active (GTK_TOGGLE_ACTION (action_),
-				      g_settings_get_boolean (gtk_filechooser_preferences, NEMO_PREFERENCES_SHOW_HIDDEN));
-	g_signal_handlers_unblock_by_func (action_, action_show_hidden_files_callback, window);
-
-    g_signal_connect_object ( NEMO_WINDOW (window), "notify::sidebar-view-id",
+	g_signal_connect_object (NEMO_WINDOW (window), "notify::sidebar-view-id",
                              G_CALLBACK (update_side_bar_radio_buttons), window, 0);
+
 
     NemoApplication *app = NEMO_APPLICATION (g_application_get_default ());
 

@@ -299,6 +299,8 @@ struct NemoViewDetails
     gboolean showing_places_in_to_menus;
 
     GVolumeMonitor *volume_monitor;
+
+    GActionGroup *view_action_group;
 };
 
 typedef struct {
@@ -2388,20 +2390,6 @@ swap_delete_keybinding_changed_callback (gpointer callback_data)
     }
 }
 
-static void
-show_hidden_files_changed_callback (gpointer callback_data)
-{
-	NemoView *view = NEMO_VIEW (callback_data);
-
-	gboolean show_hidden =
-	    g_settings_get_boolean (gtk_filechooser_preferences, NEMO_PREFERENCES_SHOW_HIDDEN);
-
-	NemoWindow *window = nemo_view_get_window (view);
-	nemo_window_set_hidden_files_mode(window, show_hidden ?
-	    NEMO_WINDOW_SHOW_HIDDEN_FILES_ENABLE :
-        NEMO_WINDOW_SHOW_HIDDEN_FILES_DISABLE);
-}
-
 static gboolean
 set_up_scripts_directory_global (void)
 {
@@ -2756,143 +2744,6 @@ have_bulk_rename_tool ()
 }
 
 static void
-nemo_view_init (NemoView *view)
-{
-	AtkObject *atk_object;
-	NemoDirectory *scripts_directory;
-	NemoDirectory *templates_directory;
-	char *templates_uri;
-
-	nemo_profile_start (NULL);
-
-	view->details = G_TYPE_INSTANCE_GET_PRIVATE (view, NEMO_TYPE_VIEW,
-						     NemoViewDetails);
-
-	/* Default to true; desktop-icon-view sets to false */
-	view->details->show_foreign_files = TRUE;
-
-    view->details->expander_menu_widget = NULL;
-    view->details->menu_widget_ref = NULL;
-    view->details->expander_label_widget = NULL;
-    view->details->menu_expander_click_handler_id = 0;
-    view->details->expander_tooltip_text = NULL;
-
-	view->details->non_ready_files =
-		g_hash_table_new_full (file_and_directory_hash,
-				       file_and_directory_equal,
-				       (GDestroyNotify)file_and_directory_free,
-				       NULL);
-
-	gtk_scrolled_window_set_policy (GTK_SCROLLED_WINDOW (view),
-					GTK_POLICY_AUTOMATIC,
-					GTK_POLICY_AUTOMATIC);
-	gtk_scrolled_window_set_hadjustment (GTK_SCROLLED_WINDOW (view), NULL);
-	gtk_scrolled_window_set_vadjustment (GTK_SCROLLED_WINDOW (view), NULL);
-
-	gtk_style_context_set_junction_sides (gtk_widget_get_style_context (GTK_WIDGET (view)),
-					      GTK_JUNCTION_TOP | GTK_JUNCTION_LEFT);
-
-	if (set_up_scripts_directory_global ()) {
-		scripts_directory = nemo_directory_get_by_uri (scripts_directory_uri);
-		add_directory_to_scripts_directory_list (view, scripts_directory);
-		nemo_directory_unref (scripts_directory);
-	} else {
-		g_warning ("Ignoring scripts directory, it may be a broken link\n");
-	}
-
-	if (nemo_should_use_templates_directory ()) {
-		templates_uri = nemo_get_templates_directory_uri ();
-		templates_directory = nemo_directory_get_by_uri (templates_uri);
-		g_free (templates_uri);
-		add_directory_to_templates_directory_list (view, templates_directory);
-		nemo_directory_unref (templates_directory);
-	}
-	update_templates_directory (view);
-
-	view->details->sort_directories_first =
-		g_settings_get_boolean (nemo_preferences, NEMO_PREFERENCES_SORT_DIRECTORIES_FIRST);
-
-	g_signal_connect_object (nemo_trash_monitor_get (), "trash-state-changed",
-				 G_CALLBACK (nemo_view_trash_state_changed_callback), view, 0);
-
-	/* React to clipboard changes */
-	g_signal_connect_object (nemo_clipboard_monitor_get (), "clipboard-changed",
-				 G_CALLBACK (clipboard_changed_callback), view, 0);
-
-	/* Register to menu provider extension signal managing menu updates */
-	g_signal_connect_object (nemo_signaller_get_current (), "popup-menu-changed",
-				 G_CALLBACK (nemo_view_update_menus), view, G_CONNECT_SWAPPED);
-
-	gtk_widget_show (GTK_WIDGET (view));
-
-	g_signal_connect_swapped (nemo_preferences,
-				  "changed::" NEMO_PREFERENCES_ENABLE_DELETE,
-				  G_CALLBACK (schedule_update_menus), view);
-    g_signal_connect_swapped (nemo_preferences,
-                  "changed::" NEMO_PREFERENCES_SWAP_TRASH_DELETE,
-                  G_CALLBACK (swap_delete_keybinding_changed_callback), view);
-	g_signal_connect_swapped (nemo_preferences,
-				  "changed::" NEMO_PREFERENCES_CLICK_POLICY,
-				  G_CALLBACK (click_policy_changed_callback),
-				  view);
-    g_signal_connect_swapped (nemo_preferences,
-                  "changed::" NEMO_PREFERENCES_CLICK_TO_RENAME,
-                  G_CALLBACK(click_to_rename_changed_callback),
-                  view);
-	g_signal_connect_swapped (nemo_preferences,
-				  "changed::" NEMO_PREFERENCES_SORT_DIRECTORIES_FIRST, 
-				  G_CALLBACK (sort_directories_first_changed_callback), view);
-	g_signal_connect_swapped (gtk_filechooser_preferences,
-				  "changed::" NEMO_PREFERENCES_SHOW_HIDDEN,
-				  G_CALLBACK (show_hidden_files_changed_callback), view);
-	g_signal_connect_swapped (gnome_lockdown_preferences,
-				  "changed::" NEMO_PREFERENCES_LOCKDOWN_COMMAND_LINE,
-				  G_CALLBACK (schedule_update_menus), view);
-
-	g_signal_connect_swapped (nemo_window_state,
-				  "changed::" NEMO_WINDOW_STATE_START_WITH_STATUS_BAR,
-				  G_CALLBACK (nemo_view_display_selection_info), view);
-
-    g_signal_connect_swapped (nemo_preferences,
-                  "changed::" NEMO_PREFERENCES_SHOW_BOOKMARKS_IN_TO_MENUS,
-                  G_CALLBACK (nemo_to_menu_preferences_changed_callback), view);
-    g_signal_connect_swapped (nemo_preferences,
-                  "changed::" NEMO_PREFERENCES_SHOW_PLACES_IN_TO_MENUS,
-                  G_CALLBACK (nemo_to_menu_preferences_changed_callback), view);
-
-    nemo_to_menu_preferences_changed_callback (view);
-
-	g_signal_connect_object (nemo_file_undo_manager_get (), "undo-changed",
-				 G_CALLBACK (undo_manager_changed_cb), view, 0);				  
-
-    g_signal_connect (nemo_plugin_preferences,
-                      "changed::" NEMO_PLUGIN_PREFERENCES_DISABLED_SCRIPTS,
-                      G_CALLBACK (plugin_prefs_changed), view);
-
-	/* Accessibility */
-	atk_object = gtk_widget_get_accessible (GTK_WIDGET (view));
-	atk_object_set_name (atk_object, _("Content View"));
-	atk_object_set_description (atk_object, _("View of the current folder"));
-
-    view->details->action_manager = nemo_action_manager_new ();
-
-    view->details->action_manager_changed_id =
-        g_signal_connect_swapped (view->details->action_manager, "changed",
-                      G_CALLBACK (actions_added_or_changed_callback),
-                                  view);
-
-
-	NemoApplication *app = NEMO_APPLICATION (g_application_get_default ());
-    view->details->bookmarks = nemo_application_get_bookmarks (app);
-
-    view->details->bookmarks_changed_id =
-        g_signal_connect_swapped (view->details->bookmarks, "changed",
-                      G_CALLBACK (schedule_update_menus),
-                      view);
-	nemo_profile_end (NULL);
-}
-
-static void
 disconnect_action_activate (NemoAction *action, NemoView *view)
 {
     g_signal_handlers_disconnect_by_func (action, run_action_callback, view);
@@ -3048,8 +2899,6 @@ nemo_view_finalize (GObject *object)
                           click_to_rename_changed_callback, view);
 	g_signal_handlers_disconnect_by_func (nemo_preferences,
 					      sort_directories_first_changed_callback, view);
-	g_signal_handlers_disconnect_by_func (gtk_filechooser_preferences,
-					      show_hidden_files_changed_callback, view);
 	g_signal_handlers_disconnect_by_func (nemo_window_state,
 					      nemo_view_display_selection_info, view);
 
@@ -8879,6 +8728,9 @@ real_merge_menus (NemoView *view)
     view->details->actions_invalid = TRUE;
 }
 
+const GActionEntry view_entries[] = {
+};
+
 static gboolean
 can_paste_into_file (NemoFile *file)
 {
@@ -11460,4 +11312,148 @@ nemo_view_class_init (NemoViewClass *klass)
         gtk_binding_entry_add_signal (binding_set, GDK_KEY_Delete, GDK_SHIFT_MASK,
                           "delete", 0);
     }
+}
+
+static void
+nemo_view_init (NemoView *view)
+{
+	AtkObject *atk_object;
+	NemoDirectory *scripts_directory;
+	NemoDirectory *templates_directory;
+	char *templates_uri;
+
+	nemo_profile_start (NULL);
+
+	view->details = G_TYPE_INSTANCE_GET_PRIVATE (view, NEMO_TYPE_VIEW,
+						     NemoViewDetails);
+
+	/* Default to true; desktop-icon-view sets to false */
+	view->details->show_foreign_files = TRUE;
+
+    view->details->expander_menu_widget = NULL;
+    view->details->menu_widget_ref = NULL;
+    view->details->expander_label_widget = NULL;
+    view->details->menu_expander_click_handler_id = 0;
+    view->details->expander_tooltip_text = NULL;
+
+	view->details->non_ready_files =
+		g_hash_table_new_full (file_and_directory_hash,
+				       file_and_directory_equal,
+				       (GDestroyNotify)file_and_directory_free,
+				       NULL);
+
+	gtk_scrolled_window_set_policy (GTK_SCROLLED_WINDOW (view),
+					GTK_POLICY_AUTOMATIC,
+					GTK_POLICY_AUTOMATIC);
+	gtk_scrolled_window_set_hadjustment (GTK_SCROLLED_WINDOW (view), NULL);
+	gtk_scrolled_window_set_vadjustment (GTK_SCROLLED_WINDOW (view), NULL);
+
+	gtk_style_context_set_junction_sides (gtk_widget_get_style_context (GTK_WIDGET (view)),
+					      GTK_JUNCTION_TOP | GTK_JUNCTION_LEFT);
+
+	if (set_up_scripts_directory_global ()) {
+		scripts_directory = nemo_directory_get_by_uri (scripts_directory_uri);
+		add_directory_to_scripts_directory_list (view, scripts_directory);
+		nemo_directory_unref (scripts_directory);
+	} else {
+		g_warning ("Ignoring scripts directory, it may be a broken link\n");
+	}
+
+	if (nemo_should_use_templates_directory ()) {
+		templates_uri = nemo_get_templates_directory_uri ();
+		templates_directory = nemo_directory_get_by_uri (templates_uri);
+		g_free (templates_uri);
+		add_directory_to_templates_directory_list (view, templates_directory);
+		nemo_directory_unref (templates_directory);
+	}
+	update_templates_directory (view);
+
+	view->details->sort_directories_first =
+		g_settings_get_boolean (nemo_preferences, NEMO_PREFERENCES_SORT_DIRECTORIES_FIRST);
+
+	g_signal_connect_object (nemo_trash_monitor_get (), "trash-state-changed",
+				 G_CALLBACK (nemo_view_trash_state_changed_callback), view, 0);
+
+	/* React to clipboard changes */
+	g_signal_connect_object (nemo_clipboard_monitor_get (), "clipboard-changed",
+				 G_CALLBACK (clipboard_changed_callback), view, 0);
+
+	/* Register to menu provider extension signal managing menu updates */
+	g_signal_connect_object (nemo_signaller_get_current (), "popup-menu-changed",
+				 G_CALLBACK (nemo_view_update_menus), view, G_CONNECT_SWAPPED);
+
+	gtk_widget_show (GTK_WIDGET (view));
+
+	g_signal_connect_swapped (nemo_preferences,
+				  "changed::" NEMO_PREFERENCES_ENABLE_DELETE,
+				  G_CALLBACK (schedule_update_menus), view);
+    g_signal_connect_swapped (nemo_preferences,
+                  "changed::" NEMO_PREFERENCES_SWAP_TRASH_DELETE,
+                  G_CALLBACK (swap_delete_keybinding_changed_callback), view);
+	g_signal_connect_swapped (nemo_preferences,
+				  "changed::" NEMO_PREFERENCES_CLICK_POLICY,
+				  G_CALLBACK (click_policy_changed_callback),
+				  view);
+    g_signal_connect_swapped (nemo_preferences,
+                  "changed::" NEMO_PREFERENCES_CLICK_TO_RENAME,
+                  G_CALLBACK(click_to_rename_changed_callback),
+                  view);
+	g_signal_connect_swapped (nemo_preferences,
+				  "changed::" NEMO_PREFERENCES_SORT_DIRECTORIES_FIRST, 
+				  G_CALLBACK (sort_directories_first_changed_callback), view);
+	g_signal_connect_swapped (gnome_lockdown_preferences,
+				  "changed::" NEMO_PREFERENCES_LOCKDOWN_COMMAND_LINE,
+				  G_CALLBACK (schedule_update_menus), view);
+
+	g_signal_connect_swapped (nemo_window_state,
+				  "changed::" NEMO_WINDOW_STATE_START_WITH_STATUS_BAR,
+				  G_CALLBACK (nemo_view_display_selection_info), view);
+
+    g_signal_connect_swapped (nemo_preferences,
+                  "changed::" NEMO_PREFERENCES_SHOW_BOOKMARKS_IN_TO_MENUS,
+                  G_CALLBACK (nemo_to_menu_preferences_changed_callback), view);
+    g_signal_connect_swapped (nemo_preferences,
+                  "changed::" NEMO_PREFERENCES_SHOW_PLACES_IN_TO_MENUS,
+                  G_CALLBACK (nemo_to_menu_preferences_changed_callback), view);
+
+    nemo_to_menu_preferences_changed_callback (view);
+
+	g_signal_connect_object (nemo_file_undo_manager_get (), "undo-changed",
+				 G_CALLBACK (undo_manager_changed_cb), view, 0);				  
+
+    g_signal_connect (nemo_plugin_preferences,
+                      "changed::" NEMO_PLUGIN_PREFERENCES_DISABLED_SCRIPTS,
+                      G_CALLBACK (plugin_prefs_changed), view);
+
+	/* Accessibility */
+	atk_object = gtk_widget_get_accessible (GTK_WIDGET (view));
+	atk_object_set_name (atk_object, _("Content View"));
+	atk_object_set_description (atk_object, _("View of the current folder"));
+
+	view->details->view_action_group = G_ACTION_GROUP (g_simple_action_group_new ());
+	g_action_map_add_action_entries (G_ACTION_MAP (view->details->view_action_group),
+					view_entries,
+					G_N_ELEMENTS (view_entries),
+					view);
+	gtk_widget_insert_action_group (GTK_WIDGET (view),
+					"view",
+					G_ACTION_GROUP (view->details->view_action_group));
+
+
+    view->details->action_manager = nemo_action_manager_new ();
+
+    view->details->action_manager_changed_id =
+        g_signal_connect_swapped (view->details->action_manager, "changed",
+                      G_CALLBACK (actions_added_or_changed_callback),
+                                  view);
+
+
+	NemoApplication *app = NEMO_APPLICATION (g_application_get_default ());
+    view->details->bookmarks = nemo_application_get_bookmarks (app);
+
+    view->details->bookmarks_changed_id =
+        g_signal_connect_swapped (view->details->bookmarks, "changed",
+                      G_CALLBACK (schedule_update_menus),
+                      view);
+	nemo_profile_end (NULL);
 }
