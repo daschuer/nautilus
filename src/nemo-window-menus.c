@@ -1073,10 +1073,10 @@ action_toggle_search (GSimpleAction *action,
 	g_simple_action_set_state (action, state);
 }
 
-/*
 static void
-action_new_folder_callback (GtkAction *action,
-                            gpointer user_data)
+action_new_folder  (GSimpleAction *action,
+                    GVariant *state,
+                    gpointer user_data)
 {
     g_assert (NEMO_IS_WINDOW (user_data));
     NemoWindow *window = user_data;
@@ -1095,12 +1095,14 @@ open_in_terminal_other (const gchar *path)
 }
 
 static void
-action_open_terminal_callback(GtkAction *action, gpointer callback_data)
+action_open_terminal  (GSimpleAction *action,
+                       GVariant *state,
+                       gpointer user_data)
 {  
     NemoWindow *window;
     NemoView *view;
     
-    window = NEMO_WINDOW(callback_data);
+    window = NEMO_WINDOW(user_data);
 
     view = get_current_view (window);
 
@@ -1113,7 +1115,6 @@ action_open_terminal_callback(GtkAction *action, gpointer callback_data)
     g_free (path);
     g_object_unref (gfile);
 }
-*/
 
 const GActionEntry win_entries[] = {
 	/* { name, activate_callback, parameter_type, state, change_state_callback} */
@@ -1153,7 +1154,8 @@ const GActionEntry win_entries[] = {
 	{ "tab-move-left", action_tab_move_left },
 	{ "tab_move_right", action_tab_move_right },
  	{ "go-to-tab", NULL, "i", "0", action_go_to_tab },
-
+	{ "open-in-terminal", action_open_terminal },
+	{ "new-folder", action_new_folder },
 	{ "show-hidden-files", NULL, NULL, "false" },
 	{ "show-toolbar", NULL, NULL, "true" },
 	{ "show-sidebar", NULL, NULL, "true", action_show_sidebar },
