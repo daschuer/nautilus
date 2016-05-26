@@ -75,25 +75,22 @@ nemo_desktop_window_finalize (GObject *obj)
 static void
 nemo_desktop_window_init_actions (NemoDesktopWindow *window)
 {
-	GtkAction *action;
-	GtkActionGroup *action_group;
+ 	GAction *action;
 
-	action_group = nemo_window_get_main_action_group (NEMO_WINDOW (window));
+ 	/* Don't allow close action on desktop */
+ 	action = g_action_map_lookup_action (G_ACTION_MAP (window),
+ 					     "close-current-view");
+ 	g_simple_action_set_enabled (G_SIMPLE_ACTION (action), FALSE);
 
-	/* Don't allow close action on desktop */
-	action = gtk_action_group_get_action (action_group,
-					      NEMO_ACTION_CLOSE);
-	gtk_action_set_sensitive (action, FALSE);
+ 	/* Don't allow new tab on desktop */
+ 	action = g_action_map_lookup_action (G_ACTION_MAP (window),
+ 					     "new-tab");
+ 	g_simple_action_set_enabled (G_SIMPLE_ACTION (action), FALSE);
 
-	/* Don't allow new tab on desktop */
-	action = gtk_action_group_get_action (action_group,
-					      NEMO_ACTION_NEW_TAB);
-	gtk_action_set_sensitive (action, FALSE);
-
-	/* Don't allow search on desktop */
- 	GAction* gaction = g_action_map_lookup_action (G_ACTION_MAP (window),
+ 	/* Don't allow search on desktop */
+ 	action = g_action_map_lookup_action (G_ACTION_MAP (window),
  					     "toggle-search");
- 	g_simple_action_set_enabled (G_SIMPLE_ACTION (gaction), FALSE);
+ 	g_simple_action_set_enabled (G_SIMPLE_ACTION (action), FALSE);
 }
 
 static void
