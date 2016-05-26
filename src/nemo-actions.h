@@ -38,10 +38,6 @@
 #define NEMO_ACTION_ICON_VIEW "IconView"
 #define NEMO_ACTION_LIST_VIEW "ListView"
 #define NEMO_ACTION_HOME "Home"
-#define NEMO_ACTION_ZOOM_IN "Zoom In"
-#define NEMO_ACTION_ZOOM_OUT "Zoom Out"
-#define NEMO_ACTION_ZOOM_NORMAL "Zoom Normal"
-#define NEMO_ACTION_SHOW_HIDDEN_FILES "Show Hidden Files"
 #define NEMO_ACTION_SEARCH "Search"
 #define NEMO_ACTION_FOLDER_WINDOW "Folder Window"
 

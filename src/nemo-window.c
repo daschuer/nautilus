@@ -1540,8 +1540,7 @@ nemo_window_sync_zoom_widgets (NemoWindow *window)
 {
 	NemoWindowSlot *slot;
 	NemoView *view;
-	GtkActionGroup *action_group;
-	GtkAction *action;
+	GAction *action;
 	gboolean supports_zooming;
 	gboolean can_zoom, can_zoom_in, can_zoom_out;
 	NemoZoomLevel zoom_level;
@@ -1564,22 +1563,14 @@ nemo_window_sync_zoom_widgets (NemoWindow *window)
 		can_zoom_out = FALSE;
 	}
 
-	action_group = nemo_window_get_main_action_group (window);
+	action = g_action_map_lookup_action (G_ACTION_MAP (window), "zoom-in");
+	g_simple_action_set_enabled (G_SIMPLE_ACTION (action), can_zoom_in && supports_zooming);
 
-	action = gtk_action_group_get_action (action_group,
-					      NEMO_ACTION_ZOOM_IN);
-	gtk_action_set_visible (action, supports_zooming);
-	gtk_action_set_sensitive (action, can_zoom_in);
-	
-	action = gtk_action_group_get_action (action_group,
-					      NEMO_ACTION_ZOOM_OUT);
-	gtk_action_set_visible (action, supports_zooming);
-	gtk_action_set_sensitive (action, can_zoom_out);
+	action = g_action_map_lookup_action (G_ACTION_MAP (window), "zoom-out");
+	g_simple_action_set_enabled (G_SIMPLE_ACTION (action), can_zoom_out && supports_zooming);
 
-	action = gtk_action_group_get_action (action_group,
-					      NEMO_ACTION_ZOOM_NORMAL);
-	gtk_action_set_visible (action, supports_zooming);
-	gtk_action_set_sensitive (action, can_zoom);
+	action = g_action_map_lookup_action (G_ACTION_MAP (window), "zoom-normal");
+	g_simple_action_set_enabled (G_SIMPLE_ACTION (action), can_zoom && supports_zooming);
 
     nemo_status_bar_sync_zoom_widgets (NEMO_STATUS_BAR (window->details->nemo_status_bar));
 }
