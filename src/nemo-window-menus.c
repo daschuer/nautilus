@@ -565,8 +565,7 @@ action_split_view (GSimpleAction *action,
 static void
 nemo_window_update_split_view_actions_sensitivity (NemoWindow *window)
 {
-	GtkActionGroup *action_group;
-	GtkAction *action;
+	GAction *action;
 	gboolean have_multiple_panes;
 	gboolean next_pane_is_in_same_location;
 	GFile *active_pane_location;
@@ -575,7 +574,6 @@ nemo_window_update_split_view_actions_sensitivity (NemoWindow *window)
 	NemoWindowSlot *active_slot;
 
 	active_slot = nemo_window_get_active_slot (window);
-	action_group = nemo_window_get_main_action_group (window);
 
 	/* collect information */
 	have_multiple_panes = nemo_window_split_view_showing (window);
@@ -596,12 +594,14 @@ nemo_window_update_split_view_actions_sensitivity (NemoWindow *window)
 	}
 
 	/* switch to next pane */
-	action = gtk_action_group_get_action (action_group, "SplitViewNextPane");
-	gtk_action_set_sensitive (action, have_multiple_panes);
+ 	action = g_action_map_lookup_action (G_ACTION_MAP (window),
+ 					     "split-view-switch-next_pane");
+ 	g_simple_action_set_enabled (G_SIMPLE_ACTION (action), have_multiple_panes);
 
 	/* same location */
-	action = gtk_action_group_get_action (action_group, "SplitViewSameLocation");
-	gtk_action_set_sensitive (action, have_multiple_panes && !next_pane_is_in_same_location);
+ 	action = g_action_map_lookup_action (G_ACTION_MAP (window),
+ 					     "split-view-same-location");
+ 	g_simple_action_set_enabled (G_SIMPLE_ACTION (action), have_multiple_panes && !next_pane_is_in_same_location);
 }
 
 static void
@@ -1127,7 +1127,9 @@ const GActionEntry win_entries[] = {
 	{ "nemo-manual", action_nemo_manual },
 	{ "about-nemo", action_about_nemo },
 	{ "zoom-in", action_zoom_in },
+	{ "zoom-in-accel", action_zoom_in },
    	{ "zoom-out", action_zoom_out },
+   	{ "zoom-out-accel", action_zoom_out },
 	{ "zoom-normal", action_zoom_normal },
 	{ "connect-to-server", action_connect_to_server },
 	{ "go-home", action_go_home },
@@ -1165,24 +1167,6 @@ const GActionEntry win_entries[] = {
 };
 
 static const GtkActionEntry main_entries[] = {
-  /* name, stock id, label */  { "File", NULL, N_("_File") },
-  /* name, stock id, label */  { "Edit", NULL, N_("_Edit") },
-  /* name, stock id, label */  { "View", NULL, N_("_View") },
-  /* name, stock id, label */  { "Help", NULL, N_("_Help") },
-  /* name, stock id */         { NEMO_ACTION_CLOSE, GTK_STOCK_CLOSE,
-  /* label, accelerator */       N_("_Close"), "<control>W",
-  /* tooltip */                  N_("Close this folder") },
-                               { "Preferences", GTK_STOCK_PREFERENCES,
-                                 N_("Prefere_nces"),               
-                                 NULL, N_("Edit Nemo preferences")},
-                               { NEMO_ACTION_PLUGIN_MANAGER, NULL,
-                                 N_("Plugins"),               
-                                 "<alt>p", N_("Manage extensions, actions and scripts") },
-#ifdef TEXT_CHANGE_UNDO
-  /* name, stock id, label */  { "Undo", NULL, N_("_Undo"),
-                                 "<control>Z", N_("Undo the last text change"),
-                                 G_CALLBACK (action_undo_callback) },
-#endif
   /* name, stock id, label */  { NEMO_ACTION_UP, GTK_STOCK_GO_UP, N_("Open _Parent"),
                                  "<alt>Up", N_("Open the parent folder")},
   /* name, stock id */         { NEMO_ACTION_STOP, GTK_STOCK_STOP,
@@ -1191,118 +1175,15 @@ static const GtkActionEntry main_entries[] = {
   /* name, stock id */         { NEMO_ACTION_RELOAD, GTK_STOCK_REFRESH,
   /* label, accelerator */       N_("_Reload"), "<control>R",
   /* tooltip */                  N_("Reload the current location") },
-  /* name, stock id */         { "NemoHelp", GTK_STOCK_HELP,
-  /* label, accelerator */       N_("_All Topics"), "F1",
-  /* tooltip */                  N_("Display Nemo help") },
-  /* name, stock id */         { "About Nemo", GTK_STOCK_ABOUT,
-  /* label, accelerator */       N_("_About"), NULL,
-  /* tooltip */                  N_("Display credits for the creators of Nemo") },
-  /* name, stock id */         { NEMO_ACTION_ZOOM_IN, GTK_STOCK_ZOOM_IN,
-  /* label, accelerator */       N_("Zoom _In"), "<control>plus",
-  /* tooltip */                  N_("Increase the view size") },
-  /* name, stock id */         { "ZoomInAccel", NULL,
-  /* label, accelerator */       "ZoomInAccel", "<control>equal",
-  /* tooltip */                  NULL },
-  /* name, stock id */         { "ZoomInAccel2", NULL,
-  /* label, accelerator */       "ZoomInAccel2", "<control>KP_Add",
-  /* tooltip */                  NULL },
-  /* name, stock id */         { NEMO_ACTION_ZOOM_OUT, GTK_STOCK_ZOOM_OUT,
-  /* label, accelerator */       N_("Zoom _Out"), "<control>minus",
-  /* tooltip */                  N_("Decrease the view size") },
-  /* name, stock id */         { "ZoomOutAccel", NULL,
-  /* label, accelerator */       "ZoomOutAccel", "<control>KP_Subtract",
-  /* tooltip */                  NULL },
-  /* name, stock id */         { NEMO_ACTION_ZOOM_NORMAL, GTK_STOCK_ZOOM_100,
-  /* label, accelerator */       N_("Normal Si_ze"), "<control>0",
-  /* tooltip */                  N_("Use the normal view size") },
-  /* name, stock id */         { "Connect to Server", NULL, 
-  /* label, accelerator */       N_("Connect to _Server…"), NULL,
-  /* tooltip */                  N_("Connect to a remote computer or shared disk") },
-  /* name, stock id */         { "Home", NEMO_ICON_HOME,
+  /* name, stock id */         { NEMO_ACTION_HOME, NEMO_ICON_HOME,
   /* label, accelerator */       N_("_Home"), "<alt>Home",
   /* tooltip */                  N_("Open your personal folder") },
-  /* name, stock id */         { "Go to Computer", NEMO_ICON_COMPUTER,
-  /* label, accelerator */       N_("_Computer"), NULL,
-  /* tooltip */                  N_("Browse all local and remote disks and folders accessible from this computer") },
-  /* name, stock id */         { "Go to Network", NEMO_ICON_NETWORK,
-  /* label, accelerator */       N_("_Network"), NULL,
-  /* tooltip */                  N_("Browse bookmarked and local network locations")},
-  /* name, stock id */         { "Go to Templates", NEMO_ICON_TEMPLATE,
-  /* label, accelerator */       N_("T_emplates"), NULL,
-  /* tooltip */                  N_("Open your personal templates folder")},
-  /* name, stock id */         { "Go to Trash", NEMO_ICON_TRASH,
-  /* label, accelerator */       N_("_Trash"), NULL,
-  /* tooltip */                  N_("Open your personal trash folder") },
-  /* name, stock id, label */  { "Go", NULL, N_("_Go") },
-  /* name, stock id, label */  { "Bookmarks", NULL, N_("_Bookmarks") },
-  /* name, stock id, label */  { "Tabs", NULL, N_("_Tabs") },
-  /* name, stock id, label */  { "New Window", "window-new", N_("New _Window"),
-                                 "<control>N", N_("Open another Nemo window for the displayed location") },
-  /* name, stock id, label */  { NEMO_ACTION_NEW_TAB, "tab-new", N_("New _Tab"),
-                                 "<control>T", N_("Open another tab for the displayed location") },
-  /* name, stock id, label */  { NEMO_ACTION_CLOSE_ALL_WINDOWS, NULL, N_("Close _All Windows"),
-                                 "<control>Q", N_("Close all Navigation windows") },
   /* name, stock id, label */  { NEMO_ACTION_BACK, GTK_STOCK_GO_BACK, N_("_Back"),
 				 "<alt>Left", N_("Go to the previous visited location") },
   /* name, stock id, label */  { NEMO_ACTION_FORWARD, GTK_STOCK_GO_FORWARD, N_("_Forward"),
 				 "<alt>Right", N_("Go to the next visited location") },
   /* name, stock id, label */  { NEMO_ACTION_EDIT_LOCATION, NULL, N_("Toggle _Location Entry"),
                                  "<control>L", N_("Switch between location entry and breadcrumbs") },
-  /* name, stock id, label */  { "SplitViewNextPane", NULL, N_("S_witch to Other Pane"),
-				 "F6", N_("Move focus to the other pane in a split view window") },
-  /* name, stock id, label */  { "SplitViewSameLocation", NULL, N_("Sa_me Location as Other Pane"),
-				 NULL, N_("Go to the same location as in the extra pane") },
-  /* name, stock id, label */  { NEMO_ACTION_ADD_BOOKMARK, GTK_STOCK_ADD, N_("_Add Bookmark"),
-                                 "<control>d", N_("Add a bookmark for the current location to this menu") },
-  /* name, stock id, label */  { NEMO_ACTION_EDIT_BOOKMARKS, NULL, N_("_Edit Bookmarks…"),
-                                 "<control>b", N_("Display a window that allows editing the bookmarks in this menu") },
-  { "TabsPrevious", NULL, N_("_Previous Tab"), "<control>Page_Up",
-    N_("Activate previous tab") },
-  { "TabsNext", NULL, N_("_Next Tab"), "<control>Page_Down",
-    N_("Activate next tab") },
-  { "TabsMoveLeft", NULL, N_("Move Tab _Left"), "<shift><control>Page_Up",
-    N_("Move current tab to left") },
-  { "TabsMoveRight", NULL, N_("Move Tab _Right"), "<shift><control>Page_Down",
-    N_("Move current tab to right") },
-  { "Sidebar List", NULL, N_("Sidebar") }
-};
-
-static const GtkToggleActionEntry main_toggle_entries[] = {
-  /* name, stock id */         { "Show Hidden Files", NULL,
-  /* label, accelerator */       N_("Show _Hidden Files"), "<control>H",
-  /* tooltip */                  N_("Toggle the display of hidden files in the current window"),
-                                 NULL,
-                                 TRUE },
-  /* name, stock id */     { "Show Hide Toolbar", NULL,
-  /* label, accelerator */   N_("_Main Toolbar"), NULL,
-  /* tooltip */              N_("Change the visibility of this window's main toolbar"),
-			     NULL,
-  /* is_active */            TRUE }, 
-  /* name, stock id */     { "Show Hide Sidebar", NULL,
-  /* label, accelerator */   N_("_Show Sidebar"), "F9",
-  /* tooltip */              N_("Change the visibility of this window's side pane"),
-                             NULL,
-  /* is_active */            TRUE }, 
-  /* name, stock id */     { "Show Hide Statusbar", NULL,
-  /* label, accelerator */   N_("St_atusbar"), NULL,
-  /* tooltip */              N_("Change the visibility of this window's statusbar"),
-                             NULL,
-  /* is_active */            TRUE },
-  /* name, stock id */     { "Show Hide Menubar", NULL,
-  /* label, accelerator */   N_("M_enubar"), NULL,
-  /* tooltip */              N_("Change the default visibility of the menubar"),
-                             NULL,
-  /* is_active */            TRUE },
-  /* name, stock id */     { "Search", "edit-find",
-  /* label, accelerator */   N_("_Search for Files…"), "<control>f",
-  /* tooltip */              N_("Search documents and folders by name"),
-			     NULL,
-  /* is_active */            FALSE },
-  /* name, stock id */     { "Show Hide Extra Pane", NULL,
-  /* label, accelerator */   N_("E_xtra Pane"), "F3",
-  /* tooltip */              N_("Open an extra folder view side-by-side"),
-                             NULL,
-  /* is_active */            FALSE },
 };
 
 static const GtkRadioActionEntry main_radio_entries[] = {
@@ -1565,9 +1446,7 @@ nemo_window_initialize_menus (NemoWindow *window)
 	gtk_action_group_add_actions (action_group_, 
 				      main_entries, G_N_ELEMENTS (main_entries),
 				      window);
-	gtk_action_group_add_toggle_actions (action_group_, 
-					     main_toggle_entries, G_N_ELEMENTS (main_toggle_entries),
-					     window);
+
 	gtk_action_group_add_radio_actions (action_group_,
 					    main_radio_entries, G_N_ELEMENTS (main_radio_entries),
 					    0, G_CALLBACK (sidebar_radio_entry_changed_cb),
@@ -1588,6 +1467,14 @@ nemo_window_initialize_menus (NemoWindow *window)
 		snprintf(accelerator, sizeof (accelerator), "<alt>%d", (i+1)%10);
 		nemo_application_set_accelerator (app, detailed_action_name, accelerator);
 	}
+
+	nemo_application_set_accelerators (app, "win.zoom-in-accel", "<control>equal", "<control>KP_Add");
+	nemo_application_set_accelerator (app, "win.zoom-out-accel", "<control>KP_Subtract");
+	nemo_application_set_accelerator (app, "win.split-view-switch-next_pane", "F6");
+	nemo_application_set_accelerator (app, "win.tab-previous", "<control>Page_Up");
+	nemo_application_set_accelerator (app, "win.tab-next", "<control>Page_Down");
+	nemo_application_set_accelerator (app, "win.tab-move-left", "<shift><control>Page_Up");
+	nemo_application_set_accelerator (app, "win.tab_move_right", "<shift><control>Page_Down");
 
 	gtk_ui_manager_insert_action_group (ui_manager, action_group_, 0);
 	g_object_unref (action_group_); /* owned by ui_manager */

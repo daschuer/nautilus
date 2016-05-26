@@ -917,7 +917,7 @@ nemo_window_pane_sync_bookmarks (NemoWindowPane *pane)
 	gboolean can_bookmark = FALSE;
 	NemoWindowSlot *slot;
 	NemoBookmarkList *bookmarks;
-	GtkAction *action;
+	GAction *action;
 
 	slot = pane->active_slot;
 
@@ -928,10 +928,9 @@ nemo_window_pane_sync_bookmarks (NemoWindowPane *pane)
 		can_bookmark = nemo_bookmark_list_can_bookmark_location (bookmarks, location);
 	}
 
-	action = gtk_action_group_get_action (nemo_window_get_main_action_group (pane->window),
-					      NEMO_ACTION_ADD_BOOKMARK);
-
-	gtk_action_set_sensitive (action, can_bookmark);
+ 	action = g_action_map_lookup_action (G_ACTION_MAP (pane->window),
+ 					     "add-bookmark");
+ 	g_simple_action_set_enabled (G_SIMPLE_ACTION (action), can_bookmark);
 }
 
 void

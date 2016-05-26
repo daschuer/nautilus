@@ -37,19 +37,13 @@
 #define NEMO_ACTION_COMPACT_VIEW "CompactView"
 #define NEMO_ACTION_ICON_VIEW "IconView"
 #define NEMO_ACTION_LIST_VIEW "ListView"
-#define NEMO_ACTION_GO_HOME "Home"
-#define NEMO_ACTION_ADD_BOOKMARK "Add Bookmark"
-#define NEMO_ACTION_EDIT_BOOKMARKS "Edit Bookmarks"
 #define NEMO_ACTION_HOME "Home"
 #define NEMO_ACTION_ZOOM_IN "Zoom In"
 #define NEMO_ACTION_ZOOM_OUT "Zoom Out"
 #define NEMO_ACTION_ZOOM_NORMAL "Zoom Normal"
 #define NEMO_ACTION_SHOW_HIDDEN_FILES "Show Hidden Files"
-#define NEMO_ACTION_CLOSE "Close"
-#define NEMO_ACTION_CLOSE_ALL_WINDOWS "Close All Windows"
 #define NEMO_ACTION_SEARCH "Search"
 #define NEMO_ACTION_FOLDER_WINDOW "Folder Window"
-#define NEMO_ACTION_NEW_TAB "New Tab"
 
 #define NEMO_ACTION_OPEN "Open"
 #define NEMO_ACTION_OPEN_WITH "Open With"
@@ -142,7 +136,5 @@
 #define NEMO_ACTION_OPEN_IN_TERMINAL "OpenInTerminal"
 #define NEMO_ACTION_FOLLOW_SYMLINK "FollowSymbolicLink"
 #define NEMO_ACTION_OPEN_CONTAINING_FOLDER "OpenContainingFolder"
-
-#define NEMO_ACTION_PLUGIN_MANAGER "NemoPluginManager"
 
 #endif /* NEMO_ACTIONS_H */
