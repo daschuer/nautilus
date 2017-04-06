@@ -6249,7 +6249,7 @@ add_template_to_templates_menus (NemoView *view,
 {
 	char *tmp, *uri, *name;
 	char *escaped_label;
-	GdkPixbuf *mimetype_icon;
+	GIcon *mimetype_icon;
 	char *action_name, *detailed_action_name;
 	CreateTemplateParameters *parameters;
 	GAction *action;
@@ -6284,9 +6284,12 @@ add_template_to_templates_menus (NemoView *view,
 	detailed_action_name =  g_strconcat ("win.", action_name, NULL);
 	menu_item = g_menu_item_new (name, detailed_action_name);
 
-	mimetype_icon = get_menu_icon_for_file (file, GTK_WIDGET (view));
+	mimetype_icon = G_ICON (get_menu_icon_for_file (file, GTK_WIDGET (view)));
+	if (mimetype_icon == NULL) {
+		mimetype_icon = g_themed_icon_new ("text-x-generic");
+	}
 	if (mimetype_icon != NULL) {
-		g_menu_item_set_icon (menu_item, G_ICON (mimetype_icon));
+		g_menu_item_set_icon (menu_item, mimetype_icon);
 		g_object_unref (mimetype_icon);
 	}
 
@@ -8730,6 +8733,11 @@ real_merge_menus (NemoView *view)
 
 	    /* translators: this is used to indicate that a document doesn't contain anything */
 		item = g_menu_item_new (_("_Empty Document"), "win.new-empty-document");
+	    GIcon *icon = g_themed_icon_new ("text-x-generic");
+	    if (icon != NULL) {
+			g_menu_item_set_icon (item, icon);
+			g_object_unref (icon);
+		}
 		g_menu_append_item(new_documet_menu, item);
 	}
 
