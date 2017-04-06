@@ -507,7 +507,7 @@ nemo_icon_info_get_pixbuf_nodefault (NemoIconInfo  *icon)
 {
 	GdkPixbuf *res;
 
-	if (icon->pixbuf == NULL) {
+	if (icon == NULL || icon->pixbuf == NULL) {
 		res = NULL;
 	} else {
 		res = g_object_ref (icon->pixbuf);

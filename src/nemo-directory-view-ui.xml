@@ -9,7 +9,7 @@
 			<menuitem name="New Folder" action="New Folder"/>
 			<menuitem name="New Folder with Selection" action="New Folder with Selection"/>
 			<menu action="New Documents">
-			         <menuitem name="No Templates" action="No Templates"/>
+			     <menuitem name="No Templates" action="No Templates"/>
 				 <placeholder name="New Documents Placeholder"/>
 				 <separator name="After New Documents"/>
 				 <menuitem name="New Empty Document" action="New Empty Document"/>

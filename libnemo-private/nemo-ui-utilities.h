@@ -26,6 +26,27 @@
 #include <gtk/gtk.h>
 #include <libnemo-extension/nemo-menu-item.h>
 
+void nemo_gmenu_add_item_in_submodel 	   (GMenu             *menu,
+						    GMenuItem         *item,
+						    const gchar       *section_name,
+						    gboolean           prepend);
+void nemo_gmenu_merge      (GMenu             *original,
+						    GMenu             *gmenu_to_merge,
+						    gboolean           prepend);
+void nemo_gmenu_merge_to_submodel          (GMenu             *original,
+						    GMenu             *gmenu_to_merge,
+						    const gchar       *submodel_name,
+						    gboolean           prepend);
+GMenuModel * nemo_gmenu_find_menu_model_by_id (GMenuModel *model,
+                       		const gchar *find_id);
+void nemo_gmenu_remove_menu_item_by_id      (GMenu *menu, 
+                            const gchar *find_id);
+
+void nemo_pop_up_context_menu                  (GtkWidget         *parent,
+						    GMenu             *menu,
+						    GdkEventButton    *event);
+
+
 void        nemo_ui_unmerge_ui                 (GtkUIManager      *ui_manager,
 						    guint             *merge_id,
 						    GtkActionGroup   **action_group);

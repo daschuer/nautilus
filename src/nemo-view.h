@@ -375,6 +375,9 @@ void              nemo_view_new_file_with_initial_contents (NemoView *view,
 								const char *initial_contents,
 								int length,
 								GdkPoint *pos);
+void              nemo_view_new_file (NemoView *view,
+                    		    const char *parent_uri,
+                                NemoFile *source);
 
 /* selection handling */
 void              nemo_view_activate_selection         (NemoView      *view);

@@ -1086,6 +1086,30 @@ action_new_folder  (GSimpleAction *action,
 }
 
 static void
+action_new_folder_with_selection (GSimpleAction *action,
+                                  GVariant      *state,
+                                  gpointer       user_data)
+{
+    g_assert (NEMO_IS_WINDOW (user_data));
+    NemoWindow *window = user_data;
+    NemoView *view = get_current_view (window);
+
+	nemo_view_new_folder (view, TRUE);
+}
+
+static void
+action_new_empty_file (GSimpleAction *action,
+                       GVariant      *state,
+                       gpointer       user_data)
+{
+    g_assert (NEMO_IS_WINDOW (user_data));
+    NemoWindow *window = user_data;
+    NemoView *view = get_current_view (window);
+
+	nemo_view_new_file (view, NULL, NULL);
+}
+
+static void
 open_in_terminal_other (const gchar *path)
 {
     gchar *argv[2];
@@ -1163,7 +1187,9 @@ const GActionEntry win_entries[] = {
 	{ "show-sidebar", NULL, NULL, "true", action_show_sidebar },
 	{ "show-statusbar", NULL, NULL, "true" },
 	{ "show-menubar", NULL, NULL, "true" },
-	{ "show-extra-pane", NULL, NULL, "false", action_split_view }
+	{ "show-extra-pane", NULL, NULL, "false", action_split_view },
+	{ "new-folder-with-selection", action_new_folder_with_selection },
+	{ "new-empty-document", action_new_empty_file }
 };
 
 static const GtkActionEntry main_entries[] = {

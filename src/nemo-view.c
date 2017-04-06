@@ -40,6 +40,7 @@
 #include "nemo-bookmark-list.h"
 #include "nemo-window-pane.h"
 #include "nemo-application.h"
+#include "nemo-desktop-window.h"
 
 #include <sys/stat.h>
 #include <fcntl.h>
@@ -192,6 +193,9 @@ struct NemoViewDetails
 	NemoFile *pathbar_popup_directory_as_file;
 	GdkEventButton *pathbar_popup_event;
 	guint dir_merge_id;
+
+	GMenu *menu_new_items;
+	GMenu *menu_new_documents;
 
     GtkWidget *expander_menu_widget;
     GtkWidget *menu_widget_ref;
@@ -2091,7 +2095,7 @@ context_menu_to_file_operation_position (NemoView *view)
 
 void
 nemo_view_new_folder (NemoView *view,
-			  gboolean      with_selection)
+                      gboolean  with_selection)
 {
 	char *parent_uri;
 	NewFolderData *data;
@@ -2157,10 +2161,10 @@ nemo_view_new_file_with_initial_contents (NemoView *view,
 					   new_folder_done, data);
 }
 
-static void
+void
 nemo_view_new_file (NemoView *directory_view,
-			const char *parent_uri,
-			NemoFile *source)
+                    const char *parent_uri,
+                    NemoFile *source)
 {
 	GdkPoint *pos;
 	NewFolderData *data;
@@ -2204,30 +2208,33 @@ nemo_view_new_file (NemoView *directory_view,
 }
 
 static void
-action_new_folder_callback (GtkAction *action,
-			    gpointer callback_data)
+action_new_folder (GSimpleAction *action,
+                   GVariant      *state,
+                   gpointer       user_data)
 {                
-        g_assert (NEMO_IS_VIEW (callback_data));
+	g_assert (NEMO_IS_VIEW (user_data));
 
-	nemo_view_new_folder (NEMO_VIEW (callback_data), FALSE);
+	nemo_view_new_folder (NEMO_VIEW (user_data), FALSE);
 }
 
 static void
-action_new_folder_with_selection_callback (GtkAction *action,
-					   gpointer callback_data)
+action_new_folder_with_selection (GSimpleAction *action,
+                                  GVariant      *state,
+                                  gpointer       user_data)
 {                
-        g_assert (NEMO_IS_VIEW (callback_data));
+	g_assert (NEMO_IS_VIEW (user_data));
 
-	nemo_view_new_folder (NEMO_VIEW (callback_data), TRUE);
+	nemo_view_new_folder (NEMO_VIEW (user_data), TRUE);
 }
 
 static void
-action_new_empty_file_callback (GtkAction *action,
-				gpointer callback_data)
+action_new_empty_file (GSimpleAction *action,
+                       GVariant      *state,
+                       gpointer       user_data)
 {                
-        g_assert (NEMO_IS_VIEW (callback_data));
+	g_assert (NEMO_IS_VIEW (user_data));
 
-	nemo_view_new_file (NEMO_VIEW (callback_data), NULL, NULL);
+	nemo_view_new_file (NEMO_VIEW (user_data), NULL, NULL);
 }
 
 static void
@@ -2761,6 +2768,13 @@ real_unmerge_menus (NemoView *view)
     if (GTK_IS_ACTION_GROUP (view->details->copy_move_action_groups[0])) {
         disconnect_bookmark_signals (view);
     }
+
+	if (view->details->menu_new_items) {
+		nemo_gmenu_remove_menu_item_by_id(view->details->menu_new_items, "new-folder");
+		nemo_gmenu_remove_menu_item_by_id(view->details->menu_new_items, "new-folder-with-selection");
+		nemo_gmenu_remove_menu_item_by_id(view->details->menu_new_items, "new-documents");
+		view->details->menu_new_items = NULL;
+	}
 
 	nemo_ui_unmerge_ui (ui_manager,
 				&view->details->dir_merge_id,
@@ -5919,7 +5933,7 @@ add_script_to_scripts_menus (NemoView *directory_view,
 }
 
 static void
-add_submenu_to_directory_menus (NemoView *directory_view,
+add_submenu_to_directory_menus (NemoView *view,
 				GtkActionGroup *action_group,
 				guint merge_id,
 				NemoFile *file,
@@ -5932,10 +5946,16 @@ add_submenu_to_directory_menus (NemoView *directory_view,
 	char *uri;
 	GtkUIManager *ui_manager;
 
-	ui_manager = nemo_view_get_ui_manager (directory_view);
+	//NemoApplication *app = NEMO_APPLICATION (g_application_get_default ());
+	//GMenuModel *menu = gtk_application_get_menubar(GTK_APPLICATION (app));
+
+
+	/*GMenuModel *section =  nemo_gmenu_find_menu_model_by_id(menu, " ");*/
+
+	ui_manager = nemo_view_get_ui_manager (view);
 	uri = nemo_file_get_uri (file);
 	name = nemo_file_get_display_name (file);
-	pixbuf = get_menu_icon_for_file (file, GTK_WIDGET (directory_view));
+	pixbuf = get_menu_icon_for_file (file, GTK_WIDGET (view));
 	add_submenu (ui_manager, action_group, merge_id, menu_path, uri, name, pixbuf, TRUE);
 	add_submenu (ui_manager, action_group, merge_id, popup_path, uri, name, pixbuf, FALSE);
 	add_submenu (ui_manager, action_group, merge_id, popup_bg_path, uri, name, pixbuf, FALSE);
@@ -6211,87 +6231,72 @@ update_actions_menu (NemoView *view)
 }
 
 static void
-create_template_callback (GtkAction *action, gpointer callback_data)
+create_template (GSimpleAction *action,
+                 GVariant      *state,
+                 gpointer       user_data)
 {
 	CreateTemplateParameters *parameters;
 
-	parameters = callback_data;
+	parameters = user_data;
 	
 	nemo_view_new_file (parameters->directory_view, NULL, parameters->file);
 }
 
 static void
-add_template_to_templates_menus (NemoView *directory_view,
-				 NemoFile *file,
-				 const char *menu_path,
-				 const char *popup_bg_path)
+add_template_to_templates_menus (NemoView *view,
+                                 NemoFile *file,
+                                 GMenu *menu)
 {
-	char *tmp, *tip, *uri, *name;
+	char *tmp, *uri, *name;
 	char *escaped_label;
-	GdkPixbuf *pixbuf;
-	char *action_name;
+	GdkPixbuf *mimetype_icon;
+	char *action_name, *detailed_action_name;
 	CreateTemplateParameters *parameters;
-	GtkUIManager *ui_manager;
-	GtkAction *action;
+	GAction *action;
+	GMenuItem *menu_item;
 
 	tmp = nemo_file_get_display_name (file);
 	name = eel_filename_strip_extension (tmp);
 	g_free (tmp);
 
 	uri = nemo_file_get_uri (file);
-	tip = g_strdup_printf (_("Create a new document from template “%s”"), name);
 
 	action_name = nemo_escape_action_name (uri, "template_");
 	escaped_label = eel_str_double_underscores (name);
-	
-	parameters = create_template_parameters_new (file, directory_view);
 
-	action = gtk_action_new (action_name,
-				 escaped_label,
-				 tip,
-				 NULL);
-	
-	pixbuf = get_menu_icon_for_file (file, GTK_WIDGET (directory_view));
-	if (pixbuf != NULL) {
-		gtk_action_set_gicon (action, G_ICON (pixbuf));
-		g_object_unref (pixbuf);
-	}
+	parameters = create_template_parameters_new (file, view);
+
+	action = G_ACTION (g_simple_action_new (action_name, NULL));
 
 	g_signal_connect_data (action, "activate",
-			       G_CALLBACK (create_template_callback),
-			       parameters, 
+			       G_CALLBACK (create_template),
+			       parameters,
 			       (GClosureNotify)create_templates_parameters_free, 0);
-	
-	gtk_action_group_add_action (directory_view->details->templates_action_group,
-				     action);
+
+	NemoWindow *window = nemo_view_get_window(view);
+
+	g_action_map_add_action (G_ACTION_MAP (window), action);
+
+	//g_action_map_add_action (G_ACTION_MAP (view->details->view_action_group), action);
+
 	g_object_unref (action);
 
-	ui_manager = nemo_view_get_ui_manager (directory_view);
+	detailed_action_name =  g_strconcat ("win.", action_name, NULL);
+	menu_item = g_menu_item_new (name, detailed_action_name);
 
-	gtk_ui_manager_add_ui (ui_manager,
-			       directory_view->details->templates_merge_id,
-			       menu_path,
-			       action_name,
-			       action_name,
-			       GTK_UI_MANAGER_MENUITEM,
-			       FALSE);
-	
-	gtk_ui_manager_add_ui (ui_manager,
-			       directory_view->details->templates_merge_id,
-			       popup_bg_path,
-			       action_name,
-			       action_name,
-			       GTK_UI_MANAGER_MENUITEM,
-			       FALSE);
+	mimetype_icon = get_menu_icon_for_file (file, GTK_WIDGET (view));
+	if (mimetype_icon != NULL) {
+		g_menu_item_set_icon (menu_item, G_ICON (mimetype_icon));
+		g_object_unref (mimetype_icon);
+	}
 
-	menu_item_show_image (ui_manager, menu_path, action_name, TRUE);
-	menu_item_show_image (ui_manager, popup_bg_path, action_name, TRUE);
+	g_menu_append_item (menu, menu_item);
 
 	g_free (escaped_label);
 	g_free (name);
-	g_free (tip);
 	g_free (uri);
 	g_free (action_name);
+	g_free (detailed_action_name);
 }
 
 static void
@@ -6344,37 +6349,28 @@ directory_belongs_in_templates_menu (const char *templates_directory_uri,
 	return TRUE;
 }
 
-static gboolean
+static GMenu *
 update_directory_in_templates_menu (NemoView *view,
-				    const char *templates_directory_uri,
 				    NemoDirectory *directory)
 {
-	char *menu_path, *popup_bg_path;
 	GList *file_list, *filtered, *node;
+	GMenu *menu, *children_menu;
+	GMenuItem *menu_item;
 	gboolean any_templates;
 	NemoFile *file;
 	NemoDirectory *dir;
-	char *escaped_path;
 	char *uri;
+	char *templates_directory_uri;
 	int num;
 
-	/* We know this directory belongs to the template dir, so it must exist */
-	g_assert (templates_directory_uri);
-	
-	uri = nemo_directory_get_uri (directory);
-	escaped_path = escape_action_path (uri + strlen (templates_directory_uri));
-	g_free (uri);
-	menu_path = g_strconcat (NEMO_VIEW_MENU_PATH_NEW_DOCUMENTS_PLACEHOLDER,
-				 escaped_path,
-				 NULL);
-	popup_bg_path = g_strconcat (NEMO_VIEW_POPUP_PATH_BACKGROUND_NEW_DOCUMENTS_PLACEHOLDER,
-				     escaped_path,
-				     NULL);
-	g_free (escaped_path);
+	g_return_if_fail (NEMO_IS_VIEW (view));
+	g_return_if_fail (NEMO_IS_DIRECTORY (directory));
 
 	file_list = nemo_directory_get_file_list (directory);
 	filtered = nemo_file_list_filter_hidden (file_list, FALSE);
 	nemo_file_list_free (file_list);
+	templates_directory_uri = nemo_get_templates_directory_uri ();
+	menu = g_menu_new ();
 
 	file_list = nemo_file_list_sort_by_display_name (filtered);
 
@@ -6382,92 +6378,87 @@ update_directory_in_templates_menu (NemoView *view,
 	any_templates = FALSE;
 	for (node = file_list; num < TEMPLATE_LIMIT && node != NULL; node = node->next, num++) {
 		file = node->data;
-
 		if (nemo_file_is_directory (file)) {
 			uri = nemo_file_get_uri (file);
 			if (directory_belongs_in_templates_menu (templates_directory_uri, uri)) {
 				dir = nemo_directory_get_by_uri (uri);
 				add_directory_to_templates_directory_list (view, dir);
+
+				// recursive call
+				children_menu = update_directory_in_templates_menu (view, dir);
+
+				if (children_menu != NULL) {
+					menu_item = g_menu_item_new_submenu (nemo_file_get_display_name (file),
+									     G_MENU_MODEL (children_menu));
+					g_menu_append_item (menu, menu_item);
+					any_templates = TRUE;
+					g_object_unref (menu_item);
+					g_object_unref (children_menu);
+				}
+
 				nemo_directory_unref (dir);
-
-				add_submenu_to_directory_menus (view,
-								view->details->templates_action_group,
-								view->details->templates_merge_id,
-								file, menu_path, NULL, popup_bg_path);
-
-				any_templates = TRUE;
 			}
 			g_free (uri);
 		} else if (nemo_file_can_read (file)) {
-			add_template_to_templates_menus (view, file, menu_path, popup_bg_path);
+			add_template_to_templates_menus (view, file, menu);
 			any_templates = TRUE;
 		}
 	}
 
 	nemo_file_list_free (file_list);
+	g_free (templates_directory_uri);
 
-	g_free (popup_bg_path);
-	g_free (menu_path);
+	if (!any_templates) {
+		g_object_unref (menu);
+		menu = NULL;
+	}
 
-	return any_templates;
+	return menu;
 }
-
-
 
 static void
 update_templates_menu (NemoView *view)
 {
-	gboolean any_templates;
 	GList *sorted_copy, *node;
 	NemoDirectory *directory;
-	GtkUIManager *ui_manager;
+	GMenu *submenu;
 	char *uri;
-	GtkAction *action;
 	char *templates_directory_uri;
 
 	if (nemo_should_use_templates_directory ()) {
 		templates_directory_uri = nemo_get_templates_directory_uri ();
 	} else {
-		templates_directory_uri = NULL;
+		view->details->templates_present = FALSE;
+		return;
 	}
 
-	/* There is a race condition here.  If we don't mark the scripts menu as
-	   valid before we begin our task then we can lose template menu updates that
-	   occur before we finish. */
-	view->details->templates_invalid = FALSE;
 
-	ui_manager = nemo_view_get_ui_manager (view);
-	nemo_ui_unmerge_ui (ui_manager,
-				&view->details->templates_merge_id,
-				&view->details->templates_action_group);
+	sorted_copy = nemo_directory_list_sort_by_uri (
+			nemo_directory_list_copy (view->details->templates_directory_list));
 
-	nemo_ui_prepare_merge_ui (ui_manager,
-				      "TemplatesGroup",
-				      &view->details->templates_merge_id,
-				      &view->details->templates_action_group);
-
-	/* As we walk through the directories, remove any that no longer belong. */
-	any_templates = FALSE;
-	sorted_copy = nemo_directory_list_sort_by_uri
-		(nemo_directory_list_copy (view->details->templates_directory_list));
 	for (node = sorted_copy; node != NULL; node = node->next) {
 		directory = node->data;
 
 		uri = nemo_directory_get_uri (directory);
 		if (!directory_belongs_in_templates_menu (templates_directory_uri, uri)) {
 			remove_directory_from_templates_directory_list (view, directory);
-		} else if (update_directory_in_templates_menu (view,
-							       templates_directory_uri,
-							       directory)) {
-			any_templates = TRUE;
 		}
 		g_free (uri);
 	}
 	nemo_directory_list_free (sorted_copy);
 
-	action = gtk_action_group_get_action (view->details->dir_action_group, NEMO_ACTION_NO_TEMPLATES);
-	gtk_action_set_visible (action, !any_templates);
-        view->details->templates_present = any_templates;
+	directory = nemo_directory_get_by_uri (templates_directory_uri);
+	submenu = update_directory_in_templates_menu (view, directory);
+	g_menu_remove_all (view->details->menu_new_documents);
+	if (submenu != NULL) {
+		nemo_gmenu_merge (view->details->menu_new_documents, submenu, FALSE);
+	} else {
+		GMenuItem *item = g_menu_item_new (_("No templates installed"), NULL);
+		g_menu_item_set_attribute(item, "id", "s", "no-templates");
+		g_menu_append_item(view->details->menu_new_documents, item);
+	}
+
+	view->details->templates_present = submenu != NULL;
 
 	g_free (templates_directory_uri);
 }
@@ -8339,20 +8330,6 @@ static const GtkActionEntry directory_view_entries[] = {
   /* label, accelerator */       "PropertiesAccel", "<control>I",
   /* tooltip */                  NULL,
 				 G_CALLBACK (action_properties_callback) },
-  /* name, stock id */         { NEMO_ACTION_NEW_FOLDER, "folder-new",
-  /* label, accelerator */       N_("New _Folder"), "<control><shift>N",
-  /* tooltip */                  N_("Create a new empty folder inside this folder"),
-				 G_CALLBACK (action_new_folder_callback) },
-  /* name, stock id */         { NEMO_ACTION_NEW_FOLDER_WITH_SELECTION, NULL,
-  /* label, accelerator */       N_("New Folder with Selection"), NULL,
-  /* tooltip */                  N_("Create a new folder containing the selected items"),
-				 G_CALLBACK (action_new_folder_with_selection_callback) },
-  /* name, stock id, label */  { "No Templates", NULL, N_("No templates installed") },
-  /* name, stock id */         { NEMO_ACTION_NEW_EMPTY_DOCUMENT, NULL,
-    /* translators: this is used to indicate that a document doesn't contain anything */
-  /* label, accelerator */       N_("_Empty Document"), NULL,
-  /* tooltip */                  N_("Create a new empty document inside this folder"),
-				 G_CALLBACK (action_new_empty_file_callback) },
   /* name, stock id */         { NEMO_ACTION_OPEN, NULL,
   /* label, accelerator */       N_("_Open"), "<control>o",
   /* tooltip */                  N_("Open the selected item in this window"),
@@ -8721,6 +8698,41 @@ real_merge_menus (NemoView *view)
 	gtk_ui_manager_insert_action_group (ui_manager, action_group, -1);
 	g_object_unref (action_group); /* owned by ui manager */
 
+
+	NemoWindow *window = nemo_view_get_window(view);
+	gboolean is_desktop = NEMO_IS_DESKTOP_WINDOW (window);
+
+	if (!is_desktop) {
+		NemoApplication *app = NEMO_APPLICATION (g_application_get_default ());
+		GMenuModel *menu = gtk_application_get_menubar(GTK_APPLICATION (app));
+		view->details->menu_new_items = G_MENU (nemo_gmenu_find_menu_model_by_id (menu, "new-items-placeholder"));
+
+		GMenuItem *item;
+
+		item = g_menu_item_new (_("New _Folder"), "win.new-folder");
+		g_menu_item_set_attribute(item, "accel", "s", "<control><shift>N");
+		g_menu_item_set_attribute(item, "id", "s", "new-folder");
+		g_menu_append_item(view->details->menu_new_items, item);
+
+		item = g_menu_item_new (_("New Folder with Selection"), "win.new-folder-with-selection");
+		g_menu_item_set_attribute(item, "id", "s", "new-folder-with-selection");
+		g_menu_append_item(view->details->menu_new_items, item);
+
+		GMenu *new_documet_menu = g_menu_new();
+		item = g_menu_item_new_submenu(_("New _Document"), G_MENU_MODEL (new_documet_menu));
+		g_menu_item_set_attribute(item, "id", "s", "new-documents");
+		g_menu_append_item(view->details->menu_new_items, item);
+
+		view->details->menu_new_documents = g_menu_new();
+		item = g_menu_item_new_section(NULL, G_MENU_MODEL (view->details->menu_new_documents));
+		g_menu_item_set_attribute(item, "id", "s", "new-documents-placeholder");
+		g_menu_append_item(new_documet_menu, item);
+
+	    /* translators: this is used to indicate that a document doesn't contain anything */
+		item = g_menu_item_new (_("_Empty Document"), "win.new-empty-document");
+		g_menu_append_item(new_documet_menu, item);
+	}
+
     view->details->dir_merge_id = gtk_ui_manager_add_ui_from_resource (ui_manager, "/org/nemo/nemo-directory-view-ui.xml", NULL);
 
 	view->details->scripts_invalid = TRUE;
@@ -8729,6 +8741,10 @@ real_merge_menus (NemoView *view)
 }
 
 const GActionEntry view_entries[] = {
+	/* { name, activate_callback, parameter_type, state, change_state_callback} */
+	{"new-folder", action_new_folder},
+	{"new-folder-with-selection", action_new_folder_with_selection},
+	{"new-empty-document", action_new_empty_file,}
 };
 
 static gboolean
@@ -10092,18 +10108,6 @@ real_update_menus (NemoView *view)
 	    && view->details->templates_invalid) {
 		update_templates_menu (view);
 	}
-	action = gtk_action_group_get_action (view->details->dir_action_group,
-					      NEMO_ACTION_NEW_DOCUMENTS);
-	gtk_action_set_sensitive (action, can_create_files);
-	
-	if (g_strcmp0 (g_getenv ("XDG_CURRENT_DESKTOP"), "Unity") == 0)
-		gtk_action_set_visible (action, TRUE);
-	else
-		gtk_action_set_visible (action, !selection_contains_recent);
-
-	if (can_create_files && view->details->templates_invalid) {
-		update_templates_menu (view);
-	}
 
     if (view->details->actions_invalid) {
         update_actions_menu (view);
@@ -11335,6 +11339,7 @@ nemo_view_init (NemoView *view)
     view->details->expander_label_widget = NULL;
     view->details->menu_expander_click_handler_id = 0;
     view->details->expander_tooltip_text = NULL;
+    view->details->menu_new_items = NULL;
 
 	view->details->non_ready_files =
 		g_hash_table_new_full (file_and_directory_hash,
