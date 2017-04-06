@@ -206,33 +206,38 @@
             <attribute name="label" translatable="yes">Sa_me Location as Other Pane</attribute>
             <attribute name="action">win.split-view-same-location</attribute>
           </item>
+          <item>
+            <attribute name="label" translatable="yes">_Search for Files…</attribute>
+            <attribute name="action">win.toggle-search</attribute>
+            <attribute name="accel">&lt;Ctrl&gt;F</attribute>
+          </item>
         </section>
           <section>
           <item>
             <attribute name="label" translatable="yes">_Home</attribute>
             <attribute name="action">win.go-home</attribute>
             <attribute name="accel">&lt;Alt&gt;Home</attribute>
+            <attribute name="icon">user-home</attribute>
           </item>
           <item>
             <attribute name="label" translatable="yes">_Computer</attribute>
-             <attribute name="action">win.go-to-computer</attribute>
+            <attribute name="action">win.go-to-computer</attribute>
+            <attribute name="icon">computer</attribute>
           </item>
           <item>
             <attribute name="label" translatable="yes">T_emplates</attribute>
             <attribute name="action">win.go-to-templates</attribute>
+            <attribute name="icon">folder-templates</attribute>
           </item>
           <item>
             <attribute name="label" translatable="yes">_Trash</attribute>
             <attribute name="action">win.go-to-trash</attribute>
+            <attribute name="icon">user-trash</attribute>
           </item>
           <item>
             <attribute name="label" translatable="yes">_Network</attribute>
             <attribute name="action">win.go-to-network</attribute>
-          </item>
-          <item>
-            <attribute name="label" translatable="yes">_Search for Files…</attribute>
-            <attribute name="action">win.toggle-search</attribute>
-            <attribute name="accel">&lt;Ctrl&gt;F</attribute>
+            <attribute name="icon">network-workgroup</attribute>
           </item>
         </section>
       </submenu>
